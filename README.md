@@ -101,3 +101,82 @@
 
 - Mail: cat@dianping.com，
 - [**Issues**](https://github.com/dianping/cat/issues)
+
+
+
+### 编译指南
+- 1.依赖问题
+切换到mvn-repo分支，将本地maven仓库settings文件中的本地仓库路径改为
+```xml
+<localRepository>D:/Tools/cat</localRepository>
+```
+- 2.编译
+先修改以下maven插件版本
+```xml
+<plugin>
+	<groupId>org.unidal.maven.plugins</groupId>
+	<artifactId>codegen-maven-plugin</artifactId>
+	<version>2.4.2</version>
+</plugin>
+<plugin>
+	<groupId>org.unidal.maven.plugins</groupId>
+	<artifactId>plexus-maven-plugin</artifactId>
+	<version>2.4.2</version>
+</plugin>
+```
+然后执行maven编译
+mvn clean install -DskipTests
+
+
+- 3.用tomcat启动
+在Host标签下加上Context标签
+```xml
+<Host name="localhost"  appBase="webapps"
+    unpackWARs="true" autoDeploy="true">
+	<Context path="/cat" docBase="D:/workspace/cat/cat-home/target/cat-home-3.0.0" debug="0" reloadable="true"/>
+</Host>
+```
+在Connector标签上添加URIEncoding配置
+```xml
+<Connector port="8080" protocol="HTTP/1.1"
+URIEncoding="utf-8"
+connectionTimeout="20000"
+redirectPort="8443" />
+```
+然后启动tomcat
+
+- 4.初始化数据库
+数据库名称自己指定，如cat
+执行SQL脚本
+\cat\script\CatApplication.sql
+
+修改D:\data\appdatas\cat/datasources.xml配置
+
+- 5.改cat配置，登录用户名密码都是admin
+配置客户端路由
+http://localhost:8080/cat/s/config?op=routerConfigUpdate
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<router-config backup-server="192.168.11.115" backup-server-port="2280">
+   <default-server id="192.168.11.115" weight="1.0" port="2280" enable="true"/>
+   <network-policy id="default" title="默认" block="false" server-group="default_group">
+   </network-policy>
+   <server-group id="default_group" title="default-group">
+      <group-server id="192.168.11.115"/>
+   </server-group>
+   <domain id="cat">
+      <group id="default">
+         <server id="192.168.11.115" port="2280" weight="1.0"/>
+      </group>
+   </domain>
+</router-config>
+```
+配置服务端路由
+
+http://localhost:8080/cat/s/config?op=serverConfigUpdate
+将server的id改为服务端IP
+```xml
+<server id="192.168.11.115">
+```
+6.清理缓存配置
+删除D:\data\appdatas\cat\client_cache.xml
