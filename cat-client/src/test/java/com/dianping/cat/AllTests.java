@@ -28,7 +28,7 @@ import com.dianping.cat.message.TransactionTest;
 import com.dianping.cat.message.internal.MessageIdFactoryTest;
 import com.dianping.cat.message.internal.MockMessageBuilderTest;
 import com.dianping.cat.message.internal.MultiThreadingTest;
-import com.dianping.cat.servlet.CatFilterTest;
+//import com.dianping.cat.servlet.CatFilterTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -44,7 +44,7 @@ import com.dianping.cat.servlet.CatFilterTest;
 						MockMessageBuilderTest.class,
 
 /* .servlet */
-						CatFilterTest.class,
+//						CatFilterTest.class,
 
 /* .tool */
 						ToolsTest.class,
