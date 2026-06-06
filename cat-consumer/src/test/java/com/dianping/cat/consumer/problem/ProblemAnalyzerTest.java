@@ -134,6 +134,8 @@ public class ProblemAnalyzerTest extends ComponentTestCase {
 			DefaultTransaction transaction = new DefaultTransaction("Transaction", "Transaction");
 
 			transaction.setStatus(Transaction.SUCCESS);
+			transaction.setCompleted();
+			t.setCompleted();
 			t.addChild(transaction);
 			t.addChild(error);
 			t.addChild(exception);

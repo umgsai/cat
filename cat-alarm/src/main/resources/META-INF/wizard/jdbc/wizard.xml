@@ -2,7 +2,7 @@
 <wizard package="com.dianping.cat">
    <jdbc package="com.dianping.cat.home.dal" name="cat">
       <datasource>
-         <driver>com.mysql.jdbc.Driver</driver>
+         <driver>com.mysql.cj.jdbc.Driver</driver>
          <url>jdbc:mysql://127.0.0.1:3306/cat</url>
          <user>root</user>
          <password></password>

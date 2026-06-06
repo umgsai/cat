@@ -97,7 +97,7 @@ public class EventAnalyzerTest extends ComponentTestCase {
 		event1.setTimestamp(m_timestamp + 5 * 60 * 1000);
 
 		t2.addChild(event1);
-		t2.complete();
+		t2.setCompleted();
 		t2.setDurationInMillis(i);
 
 		t.addChild(t2);
@@ -113,7 +113,7 @@ public class EventAnalyzerTest extends ComponentTestCase {
 		event.setStatus(Message.SUCCESS);
 		t.addChild(event);
 
-		t.complete();
+		t.setCompleted();
 		t.setDurationInMillis(i * 2);
 		t.setTimestamp(m_timestamp + 1000);
 		t2.setTimestamp(m_timestamp + 2000);

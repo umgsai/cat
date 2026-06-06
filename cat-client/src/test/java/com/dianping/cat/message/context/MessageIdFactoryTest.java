@@ -53,9 +53,7 @@ public class MessageIdFactoryTest extends ComponentTestCase {
 
 	@Test
 	public void testDefaultDomain() throws IOException {
-		File baseDir = new File("target/mark");
-
-		new File(baseDir, "default-domain.mark").delete();
+		File baseDir = newMarkDir("default-domain");
 
 		MessageIdFactory factory = new MockMessageIdFactory(baseDir, "default-domain");
 
@@ -66,9 +64,7 @@ public class MessageIdFactoryTest extends ComponentTestCase {
 
 	@Test
 	public void testGivenDomain() throws IOException {
-		File baseDir = new File("target/mark");
-
-		new File(baseDir, "given-domain.mark").delete();
+		File baseDir = newMarkDir("given-domain");
 
 		MessageIdFactory factory = new MockMessageIdFactory(baseDir, "default-domain");
 
@@ -79,9 +75,7 @@ public class MessageIdFactoryTest extends ComponentTestCase {
 
 	@Test
 	public void testDefaultDomainInParallel() throws Exception {
-		File baseDir = new File("target/mark");
-
-		new File(baseDir, "default-parallel.mark").delete();
+		File baseDir = newMarkDir("default-parallel");
 
 		final MessageIdFactory factory = new MockMessageIdFactory(baseDir, "default-parallel");
 		final Set<String> ids = Collections.synchronizedSet(new HashSet<String>());
@@ -101,10 +95,11 @@ public class MessageIdFactoryTest extends ComponentTestCase {
 		}
 
 		pool.shutdown();
-		pool.awaitTermination(2000, TimeUnit.MILLISECONDS);
+		boolean completed = pool.awaitTermination(30, TimeUnit.SECONDS);
 
 		int total = threads * messagesPerThread;
 
+		Assert.assertTrue("Not all threads completed in time.", completed);
 		Assert.assertEquals("Not all threads completed in time.", total, ids.size());
 		Assert.assertEquals(true, ids.contains(String.format("default-parallel-c0a81f9e-403215-%s", total - 1)));
 		Assert.assertEquals(String.format("default-parallel-c0a81f9e-403215-%s", total), factory.getNextId());
@@ -112,9 +107,7 @@ public class MessageIdFactoryTest extends ComponentTestCase {
 
 	@Test
 	public void testGivenDomainInParallel() throws Exception {
-		File baseDir = new File("target/mark");
-
-		new File(baseDir, "given-parallel.mark").delete();
+		File baseDir = newMarkDir("given-parallel");
 
 		final MessageIdFactory factory = new MockMessageIdFactory(baseDir, "default-parallel");
 		final Set<String> ids = Collections.synchronizedSet(new HashSet<String>());
@@ -134,10 +127,11 @@ public class MessageIdFactoryTest extends ComponentTestCase {
 		}
 
 		pool.shutdown();
-		pool.awaitTermination(2000, TimeUnit.MILLISECONDS);
+		boolean completed = pool.awaitTermination(30, TimeUnit.SECONDS);
 
 		int total = threads * messagesPerThread;
 
+		Assert.assertTrue("Not all threads completed in time.", completed);
 		Assert.assertEquals("Not all threads completed in time.", total, ids.size());
 		Assert.assertEquals(true, ids.contains(String.format("given-parallel-c0a81f9e-403215-%s", total - 1)));
 		Assert.assertEquals(String.format("given-parallel-c0a81f9e-403215-%s", total),
@@ -146,9 +140,7 @@ public class MessageIdFactoryTest extends ComponentTestCase {
 
 	@Test
 	public void testDefaultDomainResume() throws IOException {
-		File baseDir = new File("target/mark");
-
-		new File(baseDir, "default-resume.mark").delete();
+		File baseDir = newMarkDir("default-resume");
 
 		// first round
 		MessageIdFactory factory = new MockMessageIdFactory(baseDir, "default-resume");
@@ -169,9 +161,7 @@ public class MessageIdFactoryTest extends ComponentTestCase {
 
 	@Test
 	public void testGivenDomainResume() throws IOException {
-		File baseDir = new File("target/mark");
-
-		new File(baseDir, "given-resume.mark").delete();
+		File baseDir = newMarkDir("given-resume");
 
 		// first round
 		MessageIdFactory factory = new MockMessageIdFactory(baseDir, "default-resume");
@@ -302,5 +292,13 @@ public class MessageIdFactoryTest extends ComponentTestCase {
 		protected String getIpAddress() {
 			return "c0a81f9e";
 		}
+	}
+
+	private File newMarkDir(String name) {
+		File baseDir = new File("target/mark/" + name);
+
+		Files.forDir().delete(baseDir, true);
+
+		return baseDir;
 	}
 }

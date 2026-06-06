@@ -25,12 +25,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
 public class TaskHelperTest {
 	@Before
 	public void setUp() throws Exception {
@@ -74,12 +69,10 @@ public class TaskHelperTest {
 		Assert.assertEquals(cal.getTimeInMillis(), todayZero.getTime() + 1L);
 	}
 
-	@PrepareForTest({TaskHelper.class})
 	@Test
-	public void testTodayZero2() throws Exception {
+	public void testTodayZero2() {
 		Date date = new Date(1562774400000L);
-		PowerMockito.whenNew(Date.class).withAnyArguments().thenReturn(date);
-		Assert.assertEquals(date, TaskHelper.todayZero(null));
+		Assert.assertEquals(date, TaskHelper.todayZero(date));
 	}
 
 	@Test
@@ -137,13 +130,11 @@ public class TaskHelperTest {
 		Assert.assertEquals(new Date(1562767200000L), TaskHelper.thisHour(new Date(1562767504000L)));
 	}
 
-	@PrepareForTest({TaskHelper.class})
 	@Test
-	public void testTomorrowZero1() throws Exception {
+	public void testTomorrowZero1() {
 		Date date = new Date(1562671353000L);
 		Date date2 = new Date(1562688000000L);
-		PowerMockito.whenNew(Date.class).withAnyArguments().thenReturn(date);
-		Assert.assertEquals(date2, TaskHelper.tomorrowZero(null));
+		Assert.assertEquals(date2, TaskHelper.tomorrowZero(date));
 	}
 
 	@Test

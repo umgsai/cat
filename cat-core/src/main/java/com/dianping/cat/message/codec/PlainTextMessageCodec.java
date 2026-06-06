@@ -168,6 +168,7 @@ public class PlainTextMessageCodec implements MessageCodec {
 			tran.setTimestamp(m_dateHelper.parse(timestamp));
 			tran.setStatus(status);
 			tran.addData(data);
+			tran.setCompleted();
 
 			long d = Long.parseLong(duration.substring(0, duration.length() - 2));
 			tran.setDurationInMicros(d);
@@ -186,6 +187,7 @@ public class PlainTextMessageCodec implements MessageCodec {
 			helper.read(ctx, LF); // get rid of line feed
 			parent.setStatus(transactionStatus);
 			parent.addData(transactionData);
+			parent.setCompleted();
 
 			long transactionD = Long.parseLong(transactionDuration.substring(0, transactionDuration.length() - 2));
 
@@ -201,6 +203,7 @@ public class PlainTextMessageCodec implements MessageCodec {
 			event.setTimestamp(m_dateHelper.parse(timestamp));
 			event.setStatus(eventStatus);
 			event.addData(eventData);
+			event.setCompleted();
 
 			tree.findOrCreateEvents().add(event);
 
@@ -238,6 +241,7 @@ public class PlainTextMessageCodec implements MessageCodec {
 			trace.setTimestamp(m_dateHelper.parse(timestamp));
 			trace.setStatus(traceStatus);
 			trace.addData(traceData);
+			trace.setCompleted();
 
 			if (parent != null) {
 				parent.addChild(trace);
@@ -257,6 +261,7 @@ public class PlainTextMessageCodec implements MessageCodec {
 			heartbeat.setTimestamp(m_dateHelper.parse(timestamp));
 			heartbeat.setStatus(heartbeatStatus);
 			heartbeat.addData(heartbeatData);
+			heartbeat.setCompleted();
 
 			if (parent != null) {
 				parent.addChild(heartbeat);

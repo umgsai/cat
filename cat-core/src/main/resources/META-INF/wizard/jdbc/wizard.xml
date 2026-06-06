@@ -2,7 +2,7 @@
 <wizard package="com.dianping.cat">
    <jdbc package="com.dianping.cat.core" name="cat">
       <datasource>
-         <driver>com.mysql.jdbc.Driver</driver>
+         <driver>com.mysql.cj.jdbc.Driver</driver>
          <url>jdbc:mysql://127.0.0.1:3306/cat</url>
          <user>root</user>
          <password></password>
@@ -30,7 +30,7 @@
    </jdbc>
    <jdbc package="com.dianping.cat.app" name="app">
       <datasource>
-         <driver>com.mysql.jdbc.Driver</driver>
+         <driver>com.mysql.cj.jdbc.Driver</driver>
          <url>jdbc:mysql://127.0.0.1:3306/cat</url>
          <user>root</user>
          <password></password>
@@ -47,7 +47,7 @@
    </jdbc>
    <jdbc package="com.dianping.cat.crash" name="app_crash">
       <datasource>
-         <driver>com.mysql.jdbc.Driver</driver>
+         <driver>com.mysql.cj.jdbc.Driver</driver>
          <url>jdbc:mysql://127.0.0.1:3306/cat</url>
          <user>root</user>
          <password></password>
@@ -64,7 +64,7 @@
    </jdbc>
    <jdbc package="com.dianping.cat.web" name="web">
       <datasource>
-         <driver>com.mysql.jdbc.Driver</driver>
+         <driver>com.mysql.cj.jdbc.Driver</driver>
          <url>jdbc:mysql://127.0.0.1:3306/cat</url>
          <user>root</user>
          <password></password>

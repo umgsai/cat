@@ -102,7 +102,7 @@ public class TransactionAnalyzerTest extends ComponentTestCase {
 			t2.setStatus(Message.SUCCESS);
 		}
 
-		t2.complete();
+		t2.setCompleted();
 		t2.setDurationInMillis(i);
 
 		t.addChild(t2);
@@ -113,7 +113,7 @@ public class TransactionAnalyzerTest extends ComponentTestCase {
 			t.setStatus(Message.SUCCESS);
 		}
 
-		t.complete();
+		t.setCompleted();
 		t.setDurationInMillis(i * 2);
 		t.setTimestamp(m_timestamp + 1000);
 		t2.setTimestamp(m_timestamp + 2000);

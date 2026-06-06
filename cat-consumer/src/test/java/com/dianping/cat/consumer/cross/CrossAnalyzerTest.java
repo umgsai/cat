@@ -116,7 +116,7 @@ public class CrossAnalyzerTest extends ComponentTestCase {
 			t.addChild(eventApp);
 		}
 
-		t.complete();
+		t.setCompleted();
 		t.setDurationInMillis(i * 2);
 		t.setTimestamp(m_timestamp + 1000);
 		tree.setMessage(t);

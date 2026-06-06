@@ -14,7 +14,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.42.Final</version>
+            <version>4.1.128.Final</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.7</version>
+            <version>1.5.32</version>
             <optional>true</optional>
             <scope>provided</scope>
         </dependency>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

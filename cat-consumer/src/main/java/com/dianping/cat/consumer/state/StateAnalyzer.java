@@ -221,6 +221,10 @@ public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> implemen
 		return heartbeats.size() > 0;
 	}
 
+	public void setMIp(String ip) {
+		m_ip = ip;
+	}
+
 	@Override
 	protected void loadReports() {
 		// do nothing

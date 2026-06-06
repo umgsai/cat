@@ -6,30 +6,26 @@ networks:
 
 services:
   cat:
-    image: meituaninc/cat:3.0.1
+    image: cat:4.0-RC1-jdk21
     container_name: cat
-
-    ######## build from Dockerfile ###########
-    # build:
-    #  context: ../
-    #  dockerfile: ./docker/Dockerfile
-    ######## End -> build from Dockerfile ###########
-
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
     environment:
-      # if you have your own mysql, config it here, and disable the 'mysql' config blow
-      - MYSQL_URL=cat-mysql # links will maintain /etc/hosts, just use 'container_name'
+      # If you have your own MySQL, configure it here and disable the mysql service below.
+      - MYSQL_URL=cat-mysql
       - MYSQL_PORT=3306
       - MYSQL_USERNAME=root
       - MYSQL_PASSWD=
       - MYSQL_SCHEMA=cat
-      # 必须设置成你的机器IP地址
+      # 必须设置成你的机器 IP 地址
       # - SERVER_IP=YOUR IP
     volumes:
-      # 默认127.0.0.1，可以修改为自己真实的服务器集群地址
+      # 默认 127.0.0.1，可以修改为真实的服务器集群地址
       - "./client.xml:/data/appdatas/cat/client.xml"
-      # 默认使用环境变量设置。可以启用本注解，并修改为自己的配置
+      # 默认使用环境变量设置。也可以启用本注释，并修改为自己的配置
 #      - "./datasources.xml:/data/appdatas/cat/datasources.xml"
-    command: /bin/sh -c 'ln -s /lib/libc.musl-x86_64.so.1 /lib/ld-linux-x86-64.so.2 && ./datasources.sh && catalina.sh run'
+    command: /bin/sh -c './datasources.sh && java -Dcat.home=/data/appdatas/cat -Dserver.port=8080 -jar /app/cat-boot.jar'
     links:
       - mysql
     depends_on:
@@ -37,18 +33,18 @@ services:
     ports:
       - "8080:8080"
       - "2280:2280"
-    networks: 
+    networks:
       - cat
 
-  # disable this if you have your own mysql
+  # Disable this if you have your own MySQL.
   mysql:
     container_name: cat-mysql
     image: mysql:5.7.37
-    # expose 3306 to client (navicat)
+    # Expose 3306 to clients such as Navicat.
     ports:
-       - 3306:3306
+      - 3306:3306
     volumes:
-      # change './docker/mysql/volume' to your own path
+      # Change './docker/mysql/volume' to your own path.
       # WARNING: without this line, your data will be lost.
       - "./mysql/volume:/var/lib/mysql"
       - "../script/:/docker-entrypoint-initdb.d/"
@@ -57,5 +53,5 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
       MYSQL_DATABASE: "cat"
       MYSQL_PASSWORD: ""
-    networks: 
+    networks:
       - cat

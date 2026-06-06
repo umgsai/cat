@@ -1,4 +1,4 @@
-FROM maven:3.8.4-openjdk-8 as mavenrepo
+FROM maven:3.9.12-eclipse-temurin-21 AS mavenrepo
 
 WORKDIR /app
 COPY cat-alarm cat-alarm
@@ -7,16 +7,16 @@ COPY cat-hadoop cat-hadoop
 COPY cat-client cat-client
 COPY cat-core cat-core
 COPY cat-home cat-home
+COPY cat-boot cat-boot
 COPY pom.xml pom.xml
 RUN mvn clean package -DskipTests
 
-FROM tomcat:8.5.41-jre8-alpine
+FROM eclipse-temurin:21-jre
 ENV TZ=Asia/Shanghai
-COPY --from=mavenrepo /app/cat-home/target/cat-home.war /usr/local/tomcat/webapps/cat.war
+WORKDIR /app
+COPY --from=mavenrepo /app/cat-boot/target/cat-boot-4.0-RC1.jar /app/cat-boot.jar
 COPY docker/datasources.xml /data/appdatas/cat/datasources.xml
 COPY docker/datasources.sh datasources.sh
-RUN sed -i "s/port=\"8080\"/port=\"8080\"\ URIEncoding=\"utf-8\"/g" $CATALINA_HOME/conf/server.xml && chmod +x datasources.sh
-RUN ln -s /lib /lib64 \
-    && apk add --no-cache bash tini libc6-compat linux-pam krb5 krb5-libs
+RUN chmod +x datasources.sh
     
-CMD ["/bin/sh", "-c", "./datasources.sh && catalina.sh run"]
+CMD ["/bin/sh", "-c", "./datasources.sh && java -Dcat.home=/data/appdatas/cat -Dserver.port=8080 -jar /app/cat-boot.jar"]

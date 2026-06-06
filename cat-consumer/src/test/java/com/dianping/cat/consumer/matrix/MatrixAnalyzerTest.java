@@ -103,9 +103,10 @@ public class MatrixAnalyzerTest extends ComponentTestCase {
 		event.setTimestamp(m_timestamp + 5 * 60 * 1000);
 		event.setDurationInMillis(i);
 		event.setStatus(Message.SUCCESS);
+		event.setCompleted();
 		t.addChild(event);
 
-		t.complete();
+		t.setCompleted();
 		t.setDurationInMillis(i * 2);
 		t.setTimestamp(m_timestamp + 1000);
 		tree.setMessage(t);
