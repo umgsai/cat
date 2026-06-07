@@ -112,6 +112,14 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 		m_logger = logger;
 	}
 
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
+
 	public ServerConfig getConfig() {
 		return m_config;
 	}

@@ -47,6 +47,7 @@ import com.dianping.cat.report.page.cross.service.CrossReportService;
 import com.dianping.cat.report.page.statistics.service.ServiceReportService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = ServiceReportBuilder.ID)
 public class ServiceReportBuilder implements TaskBuilder {
@@ -66,6 +67,8 @@ public class ServiceReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		ServiceReport serviceReport = queryHourlyReportsByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
 		DailyReport report = new DailyReport();
 
@@ -82,6 +85,8 @@ public class ServiceReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date start) {
+		refreshSpringBeans();
+
 		ServiceReport serviceReport = new ServiceReport(Constants.CAT);
 		Date end = new Date(start.getTime() + TimeHelper.ONE_HOUR);
 		Set<String> domains = m_reportService.queryAllDomainNames(start, end, CrossAnalyzer.ID);
@@ -131,6 +136,8 @@ public class ServiceReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		ServiceReport serviceReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
 		WeeklyReport report = new WeeklyReport();
@@ -157,6 +164,8 @@ public class ServiceReportBuilder implements TaskBuilder {
 	}
 
 	private ServiceReport queryDailyReportsByDuration(String domain, Date start, Date end) {
+		refreshSpringBeans();
+
 		long startTime = start.getTime();
 		long endTime = end.getTime();
 		ServiceReportMerger merger = new ServiceReportMerger(new ServiceReport(domain));
@@ -178,6 +187,8 @@ public class ServiceReportBuilder implements TaskBuilder {
 	}
 
 	private ServiceReport queryHourlyReportsByDuration(String name, String domain, Date start, Date end) {
+		refreshSpringBeans();
+
 		long startTime = start.getTime();
 		long endTime = end.getTime();
 		ServiceReportMerger merger = new ServiceReportMerger(new ServiceReport(domain));
@@ -200,6 +211,14 @@ public class ServiceReportBuilder implements TaskBuilder {
 	private boolean validataService(TypeDetailInfo typeInfo) {
 		return typeInfo.getProjectName().equalsIgnoreCase(ProjectInfo.ALL_SERVER)	|| typeInfo.getProjectName()
 								.equalsIgnoreCase("UnknownProject");
+	}
+
+	private void refreshSpringBeans() {
+		ServerFilterConfigManager configManger = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
+
+		if (configManger != null) {
+			m_configManger = configManger;
+		}
 	}
 
 }

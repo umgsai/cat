@@ -25,6 +25,7 @@ import org.unidal.lookup.annotation.Inject;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
+import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalSupport
 						implements ModelService<T>,	Initializable {
@@ -49,6 +50,11 @@ public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalS
 
 	@Override
 	public void initialize() throws InitializationException {
+		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
 		m_localMode = m_configManager.isLocalMode();
 	}
 

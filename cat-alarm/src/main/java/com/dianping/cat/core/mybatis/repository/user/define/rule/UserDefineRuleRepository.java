@@ -1,29 +1,26 @@
 package com.dianping.cat.core.mybatis.repository.user.define.rule;
 
 import com.dianping.cat.alarm.UserDefineRule;
-import com.dianping.cat.core.mybatis.MyBatisRepositorySupport;
 import com.dianping.cat.core.mybatis.generated.user.define.rule.dao.UserDefineRuleMapper;
 import com.dianping.cat.core.mybatis.generated.user.define.rule.dao.data.UserDefineRuleDO;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
 
-public class UserDefineRuleRepository extends MyBatisRepositorySupport {
+public class UserDefineRuleRepository extends SpringBackedRepositorySupport<UserDefineRuleMapper> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserDefineRuleRepository.class);
+
 	private static final String MAPPER_RESOURCE = "mybatis/mapper/UserDefineRuleMapper.xml";
 
-	@Override
-	protected Class<?> getMapperClass() {
-		return UserDefineRuleMapper.class;
-	}
-
-	@Override
-	protected String getMapperResource() {
-		return MAPPER_RESOURCE;
+	public UserDefineRuleRepository() {
+		super(UserDefineRuleMapper.class, MAPPER_RESOURCE,
+				"UserDefineRuleRepository is using Spring managed UserDefineRuleMapper.");
 	}
 
 	public UserDefineRule createLocal() {
@@ -31,9 +28,14 @@ public class UserDefineRuleRepository extends MyBatisRepositorySupport {
 	}
 
 	public int deleteByPK(UserDefineRule proto) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
+		}
+
 		try (SqlSession session = openSession()) {
-			UserDefineRuleMapper mapper = session.getMapper(UserDefineRuleMapper.class);
-			int count = mapper.deleteByPrimaryKey(proto.getKeyId());
+			int count = session.getMapper(UserDefineRuleMapper.class).deleteByPrimaryKey(proto.getKeyId());
 			session.commit();
 			return count;
 		} catch (Exception e) {
@@ -42,9 +44,14 @@ public class UserDefineRuleRepository extends MyBatisRepositorySupport {
 	}
 
 	public UserDefineRule findByPK(int keyId, Readset<UserDefineRule> readset) throws DalException {
+		UserDefineRuleMapper mapper = springMapper(LOGGER);
+
+		if (mapper != null) {
+			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
+		}
+
 		try (SqlSession session = openSession()) {
-			UserDefineRuleMapper mapper = session.getMapper(UserDefineRuleMapper.class);
-			UserDefineRuleDO record = mapper.findByPrimaryKey(keyId);
+			UserDefineRuleDO record = session.getMapper(UserDefineRuleMapper.class).findByPrimaryKey(keyId);
 			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -54,10 +61,19 @@ public class UserDefineRuleRepository extends MyBatisRepositorySupport {
 	}
 
 	public UserDefineRule findMaxId(Readset<UserDefineRule> readset) throws DalException {
-		try (SqlSession session = openSession()) {
-			UserDefineRuleMapper mapper = session.getMapper(UserDefineRuleMapper.class);
-			UserDefineRuleDO record = new UserDefineRuleDO();
+		UserDefineRuleMapper mapper = springMapper(LOGGER);
+		UserDefineRuleDO record = new UserDefineRuleDO();
+
+		if (mapper != null) {
 			UserDefineRuleDO result = mapper.findMaxId(record).stream().findFirst().orElse(null);
+
+			return requireFound(result, "findMaxId", record.toString());
+		}
+
+		try (SqlSession session = openSession()) {
+			UserDefineRuleDO result = session.getMapper(UserDefineRuleMapper.class).findMaxId(record).stream()
+					.findFirst()
+					.orElse(null);
 			return requireFound(result, "findMaxId", record.toString());
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -67,10 +83,20 @@ public class UserDefineRuleRepository extends MyBatisRepositorySupport {
 	}
 
 	public int insert(UserDefineRule proto) throws DalException {
-		try (SqlSession session = openSession()) {
-			UserDefineRuleMapper mapper = session.getMapper(UserDefineRuleMapper.class);
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
 			UserDefineRuleDO record = toRecord(proto);
-			int count = mapper.insert(record);
+			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
+
+			proto.setId(record.getId());
+			proto.setKeyId(record.getId());
+			return count;
+		}
+
+		try (SqlSession session = openSession()) {
+			UserDefineRuleDO record = toRecord(proto);
+			int count = session.getMapper(UserDefineRuleMapper.class).insert(record);
 			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
@@ -81,9 +107,14 @@ public class UserDefineRuleRepository extends MyBatisRepositorySupport {
 	}
 
 	public int updateByPK(UserDefineRule proto, Updateset<UserDefineRule> updateset) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
+		}
+
 		try (SqlSession session = openSession()) {
-			UserDefineRuleMapper mapper = session.getMapper(UserDefineRuleMapper.class);
-			int count = mapper.updateByPrimaryKey(toRecord(proto));
+			int count = session.getMapper(UserDefineRuleMapper.class).updateByPrimaryKey(toRecord(proto));
 			session.commit();
 			return count;
 		} catch (Exception e) {

@@ -45,6 +45,7 @@ import com.dianping.cat.home.jar.transform.DefaultNativeBuilder;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.page.statistics.service.JarReportService;
 import com.dianping.cat.report.task.TaskBuilder;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = JarReportBuilder.ID)
 public class JarReportBuilder implements TaskBuilder {
@@ -72,6 +73,8 @@ public class JarReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		Date end = new Date(period.getTime() + TimeHelper.ONE_HOUR);
 		Set<String> domains = m_reportService.queryAllDomainNames(period, end, HeartbeatAnalyzer.ID);
 		JarReport jarReport = new JarReport();
@@ -107,6 +110,14 @@ public class JarReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		throw new RuntimeException(ID + " don't support weekly update");
+	}
+
+	private void refreshSpringBeans() {
+		ServerFilterConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
 	}
 
 	public class HeartbeatReportVisitor extends BaseVisitor {

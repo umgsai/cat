@@ -62,18 +62,18 @@
 	</update>
 
 	<select id="queryAlertsByTimeDomain" resultMap="BaseResultMap">
-		SELECT id, domain, alert_time, category, type, content, metric, creation_date FROM alert WHERE alert_time >= #{record.startTime} AND alert_time <= #{record.endTime} <if test="record.domain != null"> AND domain = #{record.domain} </if> ORDER BY alert_time desc
+		SELECT id, domain, alert_time, category, type, content, metric, creation_date FROM alert WHERE alert_time >= #{record.startTime} AND alert_time &lt;= #{record.endTime} <if test="record.domain != null"> AND domain = #{record.domain} </if> ORDER BY alert_time desc
 	</select>
 
 	<select id="queryAlertsByTimeDomainCategories" resultMap="BaseResultMap">
-		SELECT id, domain, alert_time, category, type, content, metric, creation_date FROM alert WHERE alert_time >= #{record.startTime} AND alert_time <= #{record.endTime} <if test="record.domain != null"> AND domain = #{record.domain} </if> AND category in <foreach collection="record.categories" item="item" open="(" close=")" separator=",">#{item}</foreach> ORDER BY alert_time desc
+		SELECT id, domain, alert_time, category, type, content, metric, creation_date FROM alert WHERE alert_time >= #{record.startTime} AND alert_time &lt;= #{record.endTime} <if test="record.domain != null"> AND domain = #{record.domain} </if> AND category in <foreach collection="record.categories" item="item" open="(" close=")" separator=",">#{item}</foreach> ORDER BY alert_time desc
 	</select>
 
 	<select id="queryAlertsByTimeCategoryDomain" resultMap="BaseResultMap">
-		SELECT id, domain, alert_time, category, type, content, metric, creation_date FROM alert WHERE alert_time >= #{record.startTime} AND alert_time <= #{record.endTime} <if test="record.category != null"> AND category = #{record.category} </if> <if test="record.domain != null"> AND domain = #{record.domain} </if> ORDER BY alert_time asc
+		SELECT id, domain, alert_time, category, type, content, metric, creation_date FROM alert WHERE alert_time >= #{record.startTime} AND alert_time &lt;= #{record.endTime} <if test="record.category != null"> AND category = #{record.category} </if> <if test="record.domain != null"> AND domain = #{record.domain} </if> ORDER BY alert_time asc
 	</select>
 
 	<select id="queryAlertsByTimeCategory" resultMap="BaseResultMap">
-		SELECT id, domain, alert_time, category, type, content, metric, creation_date FROM alert WHERE alert_time >= #{record.startTime} AND alert_time <= #{record.endTime} <if test="record.category != null"> AND category = #{record.category} </if> ORDER BY alert_time asc
+		SELECT id, domain, alert_time, category, type, content, metric, creation_date FROM alert WHERE alert_time >= #{record.startTime} AND alert_time &lt;= #{record.endTime} <if test="record.category != null"> AND category = #{record.category} </if> ORDER BY alert_time asc
 	</select>
 </mapper>

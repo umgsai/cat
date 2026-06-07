@@ -43,6 +43,7 @@ import com.dianping.cat.core.dal.Hostinfo;
 import com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository;
 import com.dianping.cat.core.dal.HostinfoEntity;
 import com.dianping.cat.helper.TimeHelper;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = HostinfoService.class)
 public class HostinfoService implements Initializable, LogEnabled {
@@ -99,6 +100,15 @@ public class HostinfoService implements Initializable, LogEnabled {
 
 	@Override
 	public void initialize() throws InitializationException {
+		HostinfoRepository hostinfoDao = CatSpringContext.getBeanIfAvailable(HostinfoRepository.class);
+		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (hostinfoDao != null) {
+			m_hostinfoDao = hostinfoDao;
+		}
+		if (manager != null) {
+			m_manager = manager;
+		}
 		Threads.forGroup("Cat").start(new RefreshHost());
 	}
 

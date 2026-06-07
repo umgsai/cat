@@ -61,6 +61,7 @@ import com.dianping.cat.report.page.statistics.task.heavy.HeavyReportMerger.Serv
 import com.dianping.cat.report.page.statistics.task.heavy.HeavyReportMerger.UrlComparator;
 import com.dianping.cat.report.page.statistics.task.jar.JarReportBuilder;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	@Inject
@@ -174,6 +175,8 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "statistics")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
+
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 
@@ -212,6 +215,14 @@ public class Handler implements PageHandler<Context> {
 		}
 		model.setPage(ReportPage.STATISTICS);
 		m_jspViewer.view(ctx, model);
+	}
+
+	private void refreshSpringBeans() {
+		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+
+		if (projectService != null) {
+			m_projectService = projectService;
+		}
 	}
 
 	private void buildClientReport(Model model, Payload payload) {

@@ -44,6 +44,7 @@ import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 import com.dianping.cat.home.dal.report.OverloadEntity;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class TableCapacityService extends ContainerHolder {
@@ -103,6 +104,8 @@ public class TableCapacityService extends ContainerHolder {
 	}
 
 	public List<OverloadReport> queryOverloadReports(Date startTime, Date endTime) {
+		refreshSpringBeans();
+
 		List<OverloadReport> reports = new ArrayList<OverloadReport>();
 
 		try {
@@ -141,6 +144,30 @@ public class TableCapacityService extends ContainerHolder {
 		}
 
 		return reports;
+	}
+
+	private void refreshSpringBeans() {
+		OverloadRepository overloadDao = CatSpringContext.getBeanIfAvailable(OverloadRepository.class);
+		HourlyReportRepository hourlyReportDao = CatSpringContext.getBeanIfAvailable(HourlyReportRepository.class);
+		DailyReportRepository dailyReportDao = CatSpringContext.getBeanIfAvailable(DailyReportRepository.class);
+		WeeklyReportRepository weeklyReportDao = CatSpringContext.getBeanIfAvailable(WeeklyReportRepository.class);
+		MonthlyReportRepository monthlyReportDao = CatSpringContext.getBeanIfAvailable(MonthlyReportRepository.class);
+
+		if (overloadDao != null) {
+			m_overloadDao = overloadDao;
+		}
+		if (hourlyReportDao != null) {
+			m_hourlyReportDao = hourlyReportDao;
+		}
+		if (dailyReportDao != null) {
+			m_dailyReportDao = dailyReportDao;
+		}
+		if (weeklyReportDao != null) {
+			m_weeklyReportDao = weeklyReportDao;
+		}
+		if (monthlyReportDao != null) {
+			m_monthlyReportDao = monthlyReportDao;
+		}
 	}
 
 }

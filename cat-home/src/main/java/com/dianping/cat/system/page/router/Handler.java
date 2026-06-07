@@ -45,6 +45,7 @@ import com.dianping.cat.system.page.router.config.RouterConfigHandler;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 import com.dianping.cat.system.page.router.service.CachedRouterConfigService;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 
@@ -127,6 +128,8 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "router")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
+
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
@@ -158,6 +161,18 @@ public class Handler implements PageHandler<Context> {
 		}
 
 		ctx.getHttpServletResponse().getWriter().write(model.getContent());
+	}
+
+	private void refreshSpringBeans() {
+		SampleConfigManager sampleConfigManager = CatSpringContext.getBeanIfAvailable(SampleConfigManager.class);
+		ServerFilterConfigManager filterManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
+
+		if (sampleConfigManager != null) {
+			m_sampleConfigManager = sampleConfigManager;
+		}
+		if (filterManager != null) {
+			m_filterManager = filterManager;
+		}
 	}
 
 	private Map<String, String> buildKvs(RouterConfig report, String domain, String ip) {

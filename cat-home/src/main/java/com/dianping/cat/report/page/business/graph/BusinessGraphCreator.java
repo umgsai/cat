@@ -53,6 +53,7 @@ import com.dianping.cat.report.graph.metric.AbstractGraphCreator;
 import com.dianping.cat.report.page.business.service.CachedBusinessReportService;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
 public class BusinessGraphCreator extends AbstractGraphCreator {
@@ -162,6 +163,8 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 	}
 
 	public Map<String, LineChart> buildGraphByDomain(Date start, Date end, String domain) {
+		refreshSpringBeans();
+
 		BusinessReportConfig config = m_configManager.queryConfigByDomain(domain);
 		HashMap<String, LineChart> result = new LinkedHashMap<String, LineChart>();
 
@@ -184,6 +187,8 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 	}
 
 	public Map<String, LineChart> buildGraphByTag(Date start, Date end, String tag) {
+		refreshSpringBeans();
+
 		Tag tagConfig = m_tagManager.findTag(tag);
 
 		if (tagConfig != null) {
@@ -423,5 +428,17 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 			}
 		}
 		return customDatas;
+	}
+
+	private void refreshSpringBeans() {
+		BusinessConfigManager configManager = CatSpringContext.getBeanIfAvailable(BusinessConfigManager.class);
+		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
+		if (projectService != null) {
+			m_projectService = projectService;
+		}
 	}
 }

@@ -49,4 +49,8 @@ public class LocalResourceContentFetcher implements ContentFetcher, LogEnabled {
 	public void enableLogging(Logger logger) {
 		m_logger = logger;
 	}
+
+	public void setLogger(Logger logger) {
+		m_logger = logger;
+	}
 }

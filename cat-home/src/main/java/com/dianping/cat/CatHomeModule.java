@@ -32,6 +32,7 @@ import com.dianping.cat.hadoop.CatHadoopModule;
 import com.dianping.cat.report.alert.AlarmManager;
 import com.dianping.cat.report.task.DefaultTaskConsumer;
 import com.dianping.cat.report.task.reload.ReportReloadTask;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = Module.class, value = CatHomeModule.ID)
 public class CatHomeModule extends AbstractModule {
@@ -39,7 +40,11 @@ public class CatHomeModule extends AbstractModule {
 
 	@Override
 	protected void execute(ModuleContext ctx) throws Exception {
-		ServerConfigManager serverConfigManager = ctx.lookup(ServerConfigManager.class);
+		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (serverConfigManager == null) {
+			serverConfigManager = ctx.lookup(ServerConfigManager.class);
+		}
 		ReportReloadTask reportReloadTask = ctx.lookup(ReportReloadTask.class);
 
 		Threads.forGroup("Cat").start(reportReloadTask);

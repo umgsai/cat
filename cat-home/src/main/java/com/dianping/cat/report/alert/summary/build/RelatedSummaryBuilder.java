@@ -29,6 +29,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.home.alert.summary.entity.AlertSummary;
 import com.dianping.cat.report.alert.summary.AlertSummaryService;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = SummaryBuilder.class, value = RelatedSummaryBuilder.ID)
 public class RelatedSummaryBuilder extends SummaryBuilder {
@@ -71,6 +72,7 @@ public class RelatedSummaryBuilder extends SummaryBuilder {
 
 	@Override
 	public Map<Object, Object> generateModel(String domain, Date date) {
+		refreshSpringBeans();
 		AlertSummary alertSummary = m_alertSummaryManager.generateAlertSummary(domain, date);
 		AlertSummaryVisitor visitor = new AlertSummaryVisitor(alertSummary.getDomain());
 
@@ -87,6 +89,14 @@ public class RelatedSummaryBuilder extends SummaryBuilder {
 	@Override
 	protected String getTemplateAddress() {
 		return "summary.ftl";
+	}
+
+	private void refreshSpringBeans() {
+		AlertSummaryService alertSummaryService = CatSpringContext.getBeanIfAvailable(AlertSummaryService.class);
+
+		if (alertSummaryService != null) {
+			m_alertSummaryService = alertSummaryService;
+		}
 	}
 
 }

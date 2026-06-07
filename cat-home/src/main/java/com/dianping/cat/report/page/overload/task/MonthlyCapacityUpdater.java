@@ -34,6 +34,7 @@ import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportReposit
 import com.dianping.cat.core.dal.MonthlyReportEntity;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = CapacityUpdater.class, value = MonthlyCapacityUpdater.ID)
 public class MonthlyCapacityUpdater implements CapacityUpdater {
@@ -59,6 +60,8 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 
 	@Override
 	public void updateDBCapacity() throws DalException {
+		refreshSpringBeans();
+
 		int maxId = m_manager.getMonthlyStatus();
 
 		while (true) {
@@ -99,6 +102,23 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 			}
 		}
 		m_manager.updateMonthlyStatus(maxId);
+	}
+
+	private void refreshSpringBeans() {
+		MonthlyReportRepository monthlyReportDao = CatSpringContext.getBeanIfAvailable(MonthlyReportRepository.class);
+		MonthlyReportContentRepository monthlyReportContentDao = CatSpringContext
+		      .getBeanIfAvailable(MonthlyReportContentRepository.class);
+		OverloadRepository overloadDao = CatSpringContext.getBeanIfAvailable(OverloadRepository.class);
+
+		if (monthlyReportDao != null) {
+			m_monthlyReportDao = monthlyReportDao;
+		}
+		if (monthlyReportContentDao != null) {
+			m_monthlyReportContentDao = monthlyReportContentDao;
+		}
+		if (overloadDao != null) {
+			m_overloadDao = overloadDao;
+		}
 	}
 
 }

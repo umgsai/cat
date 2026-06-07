@@ -77,18 +77,18 @@
 	</update>
 
 	<select id="findByTypeDruation" resultMap="BaseResultMap">
-		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date <= #{record.endTime} <if test="record.type != null"> AND type = #{record.type} </if> ORDER BY date desc
+		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date &lt;= #{record.endTime} <if test="record.type != null"> AND type = #{record.type} </if> ORDER BY date desc
 	</select>
 
 	<select id="findByDtdh" resultMap="BaseResultMap">
-		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date <= #{record.endTime} <if test="record.type != null"> AND type = #{record.type} </if> <if test="record.domain != null"> AND domain = #{record.domain} </if> <if test="record.hostname != null"> AND hostname = #{record.hostname} </if> ORDER BY date desc
+		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date &lt;= #{record.endTime} <if test="record.type != null"> AND type = #{record.type} </if> <if test="record.domain != null"> AND domain = #{record.domain} </if> <if test="record.hostname != null"> AND hostname = #{record.hostname} </if> ORDER BY date desc
 	</select>
 
 	<select id="findByDtdhTypes" resultMap="BaseResultMap">
-		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date <= #{record.endTime} <if test="record.type != null"> AND type = #{record.type} </if> <if test="record.domain != null"> AND domain = #{record.domain} </if> <if test="record.hostname != null"> AND hostname = #{record.hostname} </if> AND type in <foreach collection="record.types" item="item" open="(" close=")" separator=",">#{item}</foreach> ORDER BY date desc
+		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date &lt;= #{record.endTime} <if test="record.type != null"> AND type = #{record.type} </if> <if test="record.domain != null"> AND domain = #{record.domain} </if> <if test="record.hostname != null"> AND hostname = #{record.hostname} </if> AND type in <foreach collection="record.types" item="item" open="(" close=")" separator=",">#{item}</foreach> ORDER BY date desc
 	</select>
 
 	<select id="findByDomainAndTime" resultMap="BaseResultMap">
-		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date <= #{record.endTime} <if test="record.domain != null"> AND domain = #{record.domain} </if> ORDER BY date desc
+		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date &lt;= #{record.endTime} <if test="record.domain != null"> AND domain = #{record.domain} </if> ORDER BY date desc
 	</select>
 </mapper>

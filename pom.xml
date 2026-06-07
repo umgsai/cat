@@ -189,6 +189,26 @@
 				<version>${mybatis.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.mybatis</groupId>
+				<artifactId>mybatis-spring</artifactId>
+				<version>${mybatis-spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${spring-framework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jdbc</artifactId>
+				<version>${spring-framework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-tx</artifactId>
+				<version>${spring-framework.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
 				<version>1.19.0</version>
@@ -512,8 +532,10 @@ org.eclipse.jdt.core.compiler.compliance=21
 		<logback.version>1.5.34</logback.version>
 		<fastjson2.version>2.0.62</fastjson2.version>
 		<mybatis.version>3.5.19</mybatis.version>
+		<mybatis-spring.version>4.0.0</mybatis-spring.version>
 		<lombok.version>1.18.46</lombok.version>
 		<spring-boot.version>4.0.2</spring-boot.version>
+		<spring-framework.version>7.0.3</spring-framework.version>
 		<tomcat9.version>9.0.112</tomcat9.version>
 		<deploy.autoRelease>false</deploy.autoRelease>
 	</properties>

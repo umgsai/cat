@@ -29,6 +29,7 @@ import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
+import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class AbstractReportReloader implements ReportReloader {
 
@@ -42,10 +43,13 @@ public abstract class AbstractReportReloader implements ReportReloader {
 	protected ServerConfigManager m_serverConfigManager;
 
 	protected int getAnalyzerCount() {
+		refreshSpringBeans();
 		return m_serverConfigManager.getThreadsOfRealtimeAnalyzer(getId());
 	}
 
 	public boolean insertHourlyReport(ReportReloadEntity entity) {
+		refreshSpringBeans();
+
 		try {
 			HourlyReport report = entity.getReport();
 			m_hourlyReportDao.insert(report);
@@ -66,6 +70,8 @@ public abstract class AbstractReportReloader implements ReportReloader {
 
 	@Override
 	public boolean reload(long time) {
+		refreshSpringBeans();
+
 		try {
 			List<ReportReloadEntity> reports = loadReport(time);
 
@@ -76,6 +82,23 @@ public abstract class AbstractReportReloader implements ReportReloader {
 			Cat.logError(e);
 		}
 		return true;
+	}
+
+	private void refreshSpringBeans() {
+		HourlyReportRepository hourlyReportDao = CatSpringContext.getBeanIfAvailable(HourlyReportRepository.class);
+		HourlyReportContentRepository hourlyReportContentDao = CatSpringContext
+		      .getBeanIfAvailable(HourlyReportContentRepository.class);
+		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (hourlyReportDao != null) {
+			m_hourlyReportDao = hourlyReportDao;
+		}
+		if (hourlyReportContentDao != null) {
+			m_hourlyReportContentDao = hourlyReportContentDao;
+		}
+		if (serverConfigManager != null) {
+			m_serverConfigManager = serverConfigManager;
+		}
 	}
 
 }

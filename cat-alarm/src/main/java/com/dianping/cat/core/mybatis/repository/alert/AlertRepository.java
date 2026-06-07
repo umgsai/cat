@@ -1,29 +1,27 @@
 package com.dianping.cat.core.mybatis.repository.alert;
 
 import com.dianping.cat.alarm.Alert;
-import com.dianping.cat.core.mybatis.MyBatisRepositorySupport;
 import com.dianping.cat.core.mybatis.generated.alert.dao.AlertMapper;
 import com.dianping.cat.core.mybatis.generated.alert.dao.data.AlertDO;
-import java.util.Date;
+import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
 
-public class AlertRepository extends MyBatisRepositorySupport {
+public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlertRepository.class);
+
 	private static final String MAPPER_RESOURCE = "mybatis/mapper/AlertMapper.xml";
 
-	@Override
-	protected Class<?> getMapperClass() {
-		return AlertMapper.class;
-	}
-
-	@Override
-	protected String getMapperResource() {
-		return MAPPER_RESOURCE;
+	public AlertRepository() {
+		super(AlertMapper.class, MAPPER_RESOURCE, "AlertRepository is using Spring managed AlertMapper.");
 	}
 
 	public Alert createLocal() {
@@ -31,9 +29,14 @@ public class AlertRepository extends MyBatisRepositorySupport {
 	}
 
 	public int deleteByPK(Alert proto) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
+		}
+
 		try (SqlSession session = openSession()) {
-			AlertMapper mapper = session.getMapper(AlertMapper.class);
-			int count = mapper.deleteByPrimaryKey(proto.getKeyId());
+			int count = session.getMapper(AlertMapper.class).deleteByPrimaryKey(proto.getKeyId());
 			session.commit();
 			return count;
 		} catch (Exception e) {
@@ -42,63 +45,98 @@ public class AlertRepository extends MyBatisRepositorySupport {
 	}
 
 	public List<Alert> queryAlertsByTimeDomain(java.util.Date startTime, java.util.Date endTime, String domain, Readset<Alert> readset) throws DalException {
-		try (SqlSession session = openSession()) {
-			AlertMapper mapper = session.getMapper(AlertMapper.class);
-			AlertDO record = new AlertDO();
-			record.setStartTime(startTime);
-			record.setEndTime(endTime);
-			record.setDomain(domain);
+		AlertMapper mapper = springMapper(LOGGER);
+		AlertDO record = new AlertDO();
+
+		record.setStartTime(startTime);
+		record.setEndTime(endTime);
+		record.setDomain(domain);
+		if (mapper != null) {
 			return mapper.queryAlertsByTimeDomain(record).stream().map(this::toModel).collect(Collectors.toList());
+		}
+
+		try (SqlSession session = openSession()) {
+			return session.getMapper(AlertMapper.class).queryAlertsByTimeDomain(record).stream()
+					.map(this::toModel)
+					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing queryAlertsByTimeDomain for Alert.", e);
 		}
 	}
 
 	public List<Alert> queryAlertsByTimeDomainCategories(java.util.Date startTime, java.util.Date endTime, String domain, String[] categories, Readset<Alert> readset) throws DalException {
+		AlertMapper mapper = springMapper(LOGGER);
+		AlertDO record = new AlertDO();
+
+		record.setStartTime(startTime);
+		record.setEndTime(endTime);
+		record.setDomain(domain);
+		record.setCategories(categories);
+		if (mapper != null) {
+			return mapper.queryAlertsByTimeDomainCategories(record).stream().map(this::toModel)
+					.collect(Collectors.toList());
+		}
+
 		try (SqlSession session = openSession()) {
-			AlertMapper mapper = session.getMapper(AlertMapper.class);
-			AlertDO record = new AlertDO();
-			record.setStartTime(startTime);
-			record.setEndTime(endTime);
-			record.setDomain(domain);
-			record.setCategories(categories);
-			return mapper.queryAlertsByTimeDomainCategories(record).stream().map(this::toModel).collect(Collectors.toList());
+			return session.getMapper(AlertMapper.class).queryAlertsByTimeDomainCategories(record).stream()
+					.map(this::toModel)
+					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing queryAlertsByTimeDomainCategories for Alert.", e);
 		}
 	}
 
 	public List<Alert> queryAlertsByTimeCategoryDomain(java.util.Date startTime, java.util.Date endTime, String category, String domain, Readset<Alert> readset) throws DalException {
+		AlertMapper mapper = springMapper(LOGGER);
+		AlertDO record = new AlertDO();
+
+		record.setStartTime(startTime);
+		record.setEndTime(endTime);
+		record.setCategory(category);
+		record.setDomain(domain);
+		if (mapper != null) {
+			return mapper.queryAlertsByTimeCategoryDomain(record).stream().map(this::toModel)
+					.collect(Collectors.toList());
+		}
+
 		try (SqlSession session = openSession()) {
-			AlertMapper mapper = session.getMapper(AlertMapper.class);
-			AlertDO record = new AlertDO();
-			record.setStartTime(startTime);
-			record.setEndTime(endTime);
-			record.setCategory(category);
-			record.setDomain(domain);
-			return mapper.queryAlertsByTimeCategoryDomain(record).stream().map(this::toModel).collect(Collectors.toList());
+			return session.getMapper(AlertMapper.class).queryAlertsByTimeCategoryDomain(record).stream()
+					.map(this::toModel)
+					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing queryAlertsByTimeCategoryDomain for Alert.", e);
 		}
 	}
 
 	public List<Alert> queryAlertsByTimeCategory(java.util.Date startTime, java.util.Date endTime, String category, Readset<Alert> readset) throws DalException {
-		try (SqlSession session = openSession()) {
-			AlertMapper mapper = session.getMapper(AlertMapper.class);
-			AlertDO record = new AlertDO();
-			record.setStartTime(startTime);
-			record.setEndTime(endTime);
-			record.setCategory(category);
+		AlertMapper mapper = springMapper(LOGGER);
+		AlertDO record = new AlertDO();
+
+		record.setStartTime(startTime);
+		record.setEndTime(endTime);
+		record.setCategory(category);
+		if (mapper != null) {
 			return mapper.queryAlertsByTimeCategory(record).stream().map(this::toModel).collect(Collectors.toList());
+		}
+
+		try (SqlSession session = openSession()) {
+			return session.getMapper(AlertMapper.class).queryAlertsByTimeCategory(record).stream()
+					.map(this::toModel)
+					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing queryAlertsByTimeCategory for Alert.", e);
 		}
 	}
 
 	public Alert findByPK(int keyId, Readset<Alert> readset) throws DalException {
+		AlertMapper mapper = springMapper(LOGGER);
+
+		if (mapper != null) {
+			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
+		}
+
 		try (SqlSession session = openSession()) {
-			AlertMapper mapper = session.getMapper(AlertMapper.class);
-			AlertDO record = mapper.findByPrimaryKey(keyId);
+			AlertDO record = session.getMapper(AlertMapper.class).findByPrimaryKey(keyId);
 			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -108,10 +146,20 @@ public class AlertRepository extends MyBatisRepositorySupport {
 	}
 
 	public int insert(Alert proto) throws DalException {
-		try (SqlSession session = openSession()) {
-			AlertMapper mapper = session.getMapper(AlertMapper.class);
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
 			AlertDO record = toRecord(proto);
-			int count = mapper.insert(record);
+			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
+
+			proto.setId(record.getId());
+			proto.setKeyId(record.getId());
+			return count;
+		}
+
+		try (SqlSession session = openSession()) {
+			AlertDO record = toRecord(proto);
+			int count = session.getMapper(AlertMapper.class).insert(record);
 			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
@@ -122,9 +170,14 @@ public class AlertRepository extends MyBatisRepositorySupport {
 	}
 
 	public int updateByPK(Alert proto, Updateset<Alert> updateset) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
+		}
+
 		try (SqlSession session = openSession()) {
-			AlertMapper mapper = session.getMapper(AlertMapper.class);
-			int count = mapper.updateByPrimaryKey(toRecord(proto));
+			int count = session.getMapper(AlertMapper.class).updateByPrimaryKey(toRecord(proto));
 			session.commit();
 			return count;
 		} catch (Exception e) {

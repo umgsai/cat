@@ -35,6 +35,7 @@ import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.home.resource.entity.Resource;
 import com.dianping.cat.home.resource.entity.ResourceConfig;
 import com.dianping.cat.home.resource.transform.DefaultSaxParser;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -89,6 +90,8 @@ public class ResourceConfigManager implements Initializable {
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
+
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -144,6 +147,8 @@ public class ResourceConfigManager implements Initializable {
 	}
 
 	private void refreshConfig() throws Exception {
+		refreshSpringBeans();
+
 		Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 		long modifyTime = config.getModifyDate().getTime();
 
@@ -179,6 +184,8 @@ public class ResourceConfigManager implements Initializable {
 
 	private boolean storeConfig() {
 		synchronized (this) {
+			refreshSpringBeans();
+
 			try {
 				Config config = m_configDao.createLocal();
 
@@ -195,6 +202,18 @@ public class ResourceConfigManager implements Initializable {
 			}
 		}
 		return true;
+	}
+
+	private void refreshSpringBeans() {
+		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
+		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
+
+		if (configDao != null) {
+			m_configDao = configDao;
+		}
+		if (fetcher != null) {
+			m_fetcher = fetcher;
+		}
 	}
 
 }

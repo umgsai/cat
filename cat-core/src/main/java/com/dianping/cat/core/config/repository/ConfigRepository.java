@@ -4,18 +4,23 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.Connection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
@@ -26,14 +31,23 @@ import org.unidal.lookup.annotation.Inject;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.dao.ConfigMapper;
 import com.dianping.cat.core.config.dao.data.ConfigDO;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class ConfigRepository {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigRepository.class);
+
 	private static final String DATA_SOURCE_NAME = "cat";
 
 	private static final String MAPPER_RESOURCE = "mybatis/mapper/ConfigMapper.xml";
 
+	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
+
 	@Inject
 	private DataSourceManager m_dataSourceManager;
+
+	private SqlSessionTemplate m_sqlSessionTemplate;
+
+	private TransactionTemplate m_transactionTemplate;
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;
 
@@ -42,6 +56,12 @@ public class ConfigRepository {
 	}
 
 	public int deleteByPK(Config proto) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper().deleteById(proto.getKeyId()));
+		}
+
 		try (SqlSession session = openSession()) {
 			int count = session.getMapper(ConfigMapper.class).deleteById(proto.getKeyId());
 
@@ -53,6 +73,12 @@ public class ConfigRepository {
 	}
 
 	public List<Config> findAllConfig(Readset<Config> readset) throws DalException {
+		ConfigMapper mapper = springMapper();
+
+		if (mapper != null) {
+			return mapper.queryAll().stream().map(this::toConfig).collect(Collectors.toList());
+		}
+
 		try (SqlSession session = openSession()) {
 			return session.getMapper(ConfigMapper.class).queryAll().stream()
 					.map(this::toConfig)
@@ -63,6 +89,12 @@ public class ConfigRepository {
 	}
 
 	public Config findByName(String name, Readset<Config> readset) throws DalException {
+		ConfigMapper mapper = springMapper();
+
+		if (mapper != null) {
+			return requireFound(mapper.findByName(name), "name", name);
+		}
+
 		try (SqlSession session = openSession()) {
 			ConfigDO config = session.getMapper(ConfigMapper.class).findByName(name);
 
@@ -75,6 +107,12 @@ public class ConfigRepository {
 	}
 
 	public Config findByPK(int keyId, Readset<Config> readset) throws DalException {
+		ConfigMapper mapper = springMapper();
+
+		if (mapper != null) {
+			return requireFound(mapper.findById(keyId), "id", String.valueOf(keyId));
+		}
+
 		try (SqlSession session = openSession()) {
 			ConfigDO config = session.getMapper(ConfigMapper.class).findById(keyId);
 
@@ -87,6 +125,17 @@ public class ConfigRepository {
 	}
 
 	public int insert(Config proto) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			ConfigDO config = toConfigDO(proto);
+			int count = transactionTemplate.execute(status -> springMapper().insert(config));
+
+			proto.setId(config.getId());
+			proto.setKeyId(config.getId());
+			return count;
+		}
+
 		try (SqlSession session = openSession()) {
 			ConfigDO config = toConfigDO(proto);
 			int count = session.getMapper(ConfigMapper.class).insert(config);
@@ -101,6 +150,12 @@ public class ConfigRepository {
 	}
 
 	public int updateByPK(Config proto, Updateset<Config> updateset) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper().updateById(toConfigDO(proto)));
+		}
+
 		try (SqlSession session = openSession()) {
 			int count = session.getMapper(ConfigMapper.class).updateById(toConfigDO(proto));
 
@@ -130,6 +185,40 @@ public class ConfigRepository {
 
 	private SqlSession openSession() {
 		return getSqlSessionFactory().openSession(false);
+	}
+
+	private ConfigMapper springMapper() {
+		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
+
+		if (sqlSessionTemplate == null) {
+			sqlSessionTemplate = CatSpringContext.getBean(SqlSessionTemplate.class);
+		}
+
+		if (sqlSessionTemplate == null) {
+			return null;
+		}
+
+		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
+			LOGGER.info("ConfigRepository is using Spring managed ConfigMapper.");
+		}
+
+		return sqlSessionTemplate.getMapper(ConfigMapper.class);
+	}
+
+	private TransactionTemplate springTransactionTemplate() {
+		if (m_transactionTemplate != null) {
+			return m_transactionTemplate;
+		}
+
+		return CatSpringContext.getBean(TransactionTemplate.class);
+	}
+
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		m_sqlSessionTemplate = sqlSessionTemplate;
+	}
+
+	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+		m_transactionTemplate = transactionTemplate;
 	}
 
 	private Config requireFound(ConfigDO config, String field, String value) throws DalNotFoundException {

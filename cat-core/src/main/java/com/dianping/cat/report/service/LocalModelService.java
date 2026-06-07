@@ -32,6 +32,7 @@ import com.dianping.cat.analysis.MessageAnalyzer;
 import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.mvc.ApiPayload;
+import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class LocalModelService<T> implements Initializable {
 
@@ -100,6 +101,11 @@ public abstract class LocalModelService<T> implements Initializable {
 
 	@Override
 	public void initialize() throws InitializationException {
+		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
 		m_defaultDomain = m_configManager.getConsoleDefaultDomain();
 		m_analyzerCount = m_configManager.getThreadsOfRealtimeAnalyzer(m_name);
 	}

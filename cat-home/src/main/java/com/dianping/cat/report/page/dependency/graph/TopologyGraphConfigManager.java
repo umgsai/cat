@@ -46,6 +46,7 @@ import com.dianping.cat.home.dependency.config.entity.EdgeConfig;
 import com.dianping.cat.home.dependency.config.entity.NodeConfig;
 import com.dianping.cat.home.dependency.config.entity.TopologyGraphConfig;
 import com.dianping.cat.home.dependency.config.transform.DefaultSaxParser;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class TopologyGraphConfigManager implements Initializable {
@@ -240,6 +241,8 @@ public class TopologyGraphConfigManager implements Initializable {
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
+
 		if (m_fileName != null) {
 			try {
 				String content = Files.forIO().readFrom(new File(m_fileName), "utf-8");
@@ -351,6 +354,8 @@ public class TopologyGraphConfigManager implements Initializable {
 				return false;
 			}
 		} else {
+			refreshSpringBeans();
+
 			try {
 				Config config = m_configDao.createLocal();
 				config.setId(m_configId);
@@ -365,6 +370,18 @@ public class TopologyGraphConfigManager implements Initializable {
 		}
 
 		return true;
+	}
+
+	private void refreshSpringBeans() {
+		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
+		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
+
+		if (configDao != null) {
+			m_configDao = configDao;
+		}
+		if (fetcher != null) {
+			m_fetcher = fetcher;
+		}
 	}
 
 }

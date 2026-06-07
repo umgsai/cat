@@ -38,6 +38,7 @@ import com.dianping.cat.home.business.entity.BusinessItem;
 import com.dianping.cat.home.business.entity.BusinessTagConfig;
 import com.dianping.cat.home.business.entity.Tag;
 import com.dianping.cat.home.business.transform.DefaultSaxParser;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class BusinessTagConfigManager implements Initializable {
 
@@ -88,6 +89,8 @@ public class BusinessTagConfigManager implements Initializable {
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
+
 		try {
 			List<BusinessConfig> result = m_configDao.findByName(TAG_CONFIG, BusinessConfigEntity.READSET_FULL);
 
@@ -127,6 +130,8 @@ public class BusinessTagConfigManager implements Initializable {
 
 	private boolean storeConfig() {
 		synchronized (this) {
+			refreshSpringBeans();
+
 			try {
 				BusinessConfig config = m_configDao.createLocal();
 
@@ -142,6 +147,14 @@ public class BusinessTagConfigManager implements Initializable {
 			}
 		}
 		return true;
+	}
+
+	private void refreshSpringBeans() {
+		BusinessConfigRepository configDao = CatSpringContext.getBeanIfAvailable(BusinessConfigRepository.class);
+
+		if (configDao != null) {
+			m_configDao = configDao;
+		}
 	}
 
 }

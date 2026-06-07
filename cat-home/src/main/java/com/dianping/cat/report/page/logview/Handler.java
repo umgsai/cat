@@ -36,6 +36,7 @@ import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	@Inject
@@ -48,6 +49,8 @@ public class Handler implements PageHandler<Context> {
 	private ServerConfigManager m_configManager;
 
 	private boolean checkStorageTime(MessageId msg) {
+		refreshSpringBeans();
+
 		long time = msg.getTimestamp();
 		long current = TimeHelper.getCurrentDay().getTime();
 
@@ -105,6 +108,8 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "m")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
+
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 
@@ -136,5 +141,13 @@ public class Handler implements PageHandler<Context> {
 		}
 
 		m_jspViewer.view(ctx, model);
+	}
+
+	private void refreshSpringBeans() {
+		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
 	}
 }

@@ -39,6 +39,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = ReportBucketManager.class)
 public class DefaultReportBucketManager extends ContainerHolder implements ReportBucketManager, Initializable {
@@ -50,6 +51,8 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 
 	@Override
 	public void clearOldReports() {
+		refreshSpringBeans();
+
 		Transaction t = Cat.newTransaction("System", "DeleteReport");
 		try {
 			final List<String> toRemovePaths = new ArrayList<String>();
@@ -112,6 +115,7 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
 		m_reportBaseDir = new File(Cat.getCatHome(), "bucket/report");
 	}
 
@@ -151,6 +155,14 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 				} catch (Exception e) {
 				}
 			}
+		}
+	}
+
+	private void refreshSpringBeans() {
+		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
 		}
 	}
 

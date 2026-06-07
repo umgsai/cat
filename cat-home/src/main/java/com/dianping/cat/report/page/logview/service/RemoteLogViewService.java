@@ -35,6 +35,7 @@ import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class RemoteLogViewService extends BaseRemoteModelService<String> {
 
@@ -83,6 +84,8 @@ public class RemoteLogViewService extends BaseRemoteModelService<String> {
 
 	@Override
 	public boolean isEligable(ModelRequest request) {
+		refreshSpringBeans();
+
 		if (m_manager.isHdfsOn()) {
 			ModelPeriod period = request.getPeriod();
 
@@ -105,6 +108,14 @@ public class RemoteLogViewService extends BaseRemoteModelService<String> {
 
 	public void setManager(ServerConfigManager manager) {
 		m_manager = manager;
+	}
+
+	private void refreshSpringBeans() {
+		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (manager != null) {
+			m_manager = manager;
+		}
 	}
 
 	@Override

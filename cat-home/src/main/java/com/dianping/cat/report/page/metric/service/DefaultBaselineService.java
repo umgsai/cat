@@ -39,6 +39,7 @@ import com.dianping.cat.core.mybatis.repository.baseline.BaselineRepository;
 import com.dianping.cat.home.dal.report.BaselineEntity;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.task.TaskHelper;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = BaselineService.class)
 public class DefaultBaselineService implements BaselineService {
@@ -98,6 +99,7 @@ public class DefaultBaselineService implements BaselineService {
 
 	@Override
 	public boolean hasDailyBaseline(String reportName, String key, Date reportPeriod) {
+		refreshSpringBeans();
 		String baselineKey = reportName + ":" + key + ":" + reportPeriod;
 		Baseline baseline = m_baselines.get(baselineKey);
 		boolean has = false;
@@ -118,6 +120,7 @@ public class DefaultBaselineService implements BaselineService {
 
 	@Override
 	public void insertBaseline(Baseline baseline) {
+		refreshSpringBeans();
 		try {
 			baseline.setData(encodeBaselines(baseline.getDataInDoubleArray()));
 			m_baselineDao.insert(baseline);
@@ -190,6 +193,7 @@ public class DefaultBaselineService implements BaselineService {
 
 	@Override
 	public double[] queryDailyBaseline(String reportName, String key, Date reportPeriod) {
+		refreshSpringBeans();
 		String baselineKey = reportName + ":" + key + ":" + reportPeriod;
 		Baseline baseline = m_baselines.get(baselineKey);
 
@@ -233,5 +237,13 @@ public class DefaultBaselineService implements BaselineService {
 			}
 		}
 		return result;
+	}
+
+	private void refreshSpringBeans() {
+		BaselineRepository baselineDao = CatSpringContext.getBeanIfAvailable(BaselineRepository.class);
+
+		if (baselineDao != null) {
+			m_baselineDao = baselineDao;
+		}
 	}
 }

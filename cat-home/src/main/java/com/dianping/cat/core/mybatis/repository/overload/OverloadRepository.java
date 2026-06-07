@@ -1,29 +1,27 @@
 package com.dianping.cat.core.mybatis.repository.overload;
 
-import com.dianping.cat.core.mybatis.MyBatisRepositorySupport;
+import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.generated.overload.dao.OverloadMapper;
 import com.dianping.cat.core.mybatis.generated.overload.dao.data.OverloadDO;
 import com.dianping.cat.home.dal.report.Overload;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
 
-public class OverloadRepository extends MyBatisRepositorySupport {
+public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMapper> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(OverloadRepository.class);
+
 	private static final String MAPPER_RESOURCE = "mybatis/mapper/OverloadMapper.xml";
 
-	@Override
-	protected Class<?> getMapperClass() {
-		return OverloadMapper.class;
-	}
-
-	@Override
-	protected String getMapperResource() {
-		return MAPPER_RESOURCE;
+	public OverloadRepository() {
+		super(OverloadMapper.class, MAPPER_RESOURCE, "OverloadRepository is using Spring managed OverloadMapper.");
 	}
 
 	public Overload createLocal() {
@@ -31,9 +29,14 @@ public class OverloadRepository extends MyBatisRepositorySupport {
 	}
 
 	public int deleteByPK(Overload proto) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
+		}
+
 		try (SqlSession session = openSession()) {
-			OverloadMapper mapper = session.getMapper(OverloadMapper.class);
-			int count = mapper.deleteByPrimaryKey(proto.getKeyId());
+			int count = session.getMapper(OverloadMapper.class).deleteByPrimaryKey(proto.getKeyId());
 			session.commit();
 			return count;
 		} catch (Exception e) {
@@ -42,21 +45,33 @@ public class OverloadRepository extends MyBatisRepositorySupport {
 	}
 
 	public List<Overload> findIdAndSizeByDuration(java.util.Date startTime, java.util.Date endTime, Readset<Overload> readset) throws DalException {
-		try (SqlSession session = openSession()) {
-			OverloadMapper mapper = session.getMapper(OverloadMapper.class);
-			OverloadDO record = new OverloadDO();
-			record.setStartTime(startTime);
-			record.setEndTime(endTime);
+		OverloadMapper mapper = springMapper(LOGGER);
+		OverloadDO record = new OverloadDO();
+
+		record.setStartTime(startTime);
+		record.setEndTime(endTime);
+		if (mapper != null) {
 			return mapper.findIdAndSizeByDuration(record).stream().map(this::toModel).collect(Collectors.toList());
+		}
+
+		try (SqlSession session = openSession()) {
+			return session.getMapper(OverloadMapper.class).findIdAndSizeByDuration(record).stream()
+					.map(this::toModel)
+					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findIdAndSizeByDuration for Overload.", e);
 		}
 	}
 
 	public Overload findByPK(int keyId, Readset<Overload> readset) throws DalException {
+		OverloadMapper mapper = springMapper(LOGGER);
+
+		if (mapper != null) {
+			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
+		}
+
 		try (SqlSession session = openSession()) {
-			OverloadMapper mapper = session.getMapper(OverloadMapper.class);
-			OverloadDO record = mapper.findByPrimaryKey(keyId);
+			OverloadDO record = session.getMapper(OverloadMapper.class).findByPrimaryKey(keyId);
 			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -66,11 +81,20 @@ public class OverloadRepository extends MyBatisRepositorySupport {
 	}
 
 	public Overload findMaxIdByType(int type, Readset<Overload> readset) throws DalException {
-		try (SqlSession session = openSession()) {
-			OverloadMapper mapper = session.getMapper(OverloadMapper.class);
-			OverloadDO record = new OverloadDO();
-			record.setType(type);
+		OverloadMapper mapper = springMapper(LOGGER);
+		OverloadDO record = new OverloadDO();
+
+		record.setType(type);
+		if (mapper != null) {
 			OverloadDO result = mapper.findMaxIdByType(record).stream().findFirst().orElse(null);
+
+			return requireFound(result, "findMaxIdByType", record.toString());
+		}
+
+		try (SqlSession session = openSession()) {
+			OverloadDO result = session.getMapper(OverloadMapper.class).findMaxIdByType(record).stream()
+					.findFirst()
+					.orElse(null);
 			return requireFound(result, "findMaxIdByType", record.toString());
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -80,10 +104,18 @@ public class OverloadRepository extends MyBatisRepositorySupport {
 	}
 
 	public Overload findCount(Readset<Overload> readset) throws DalException {
-		try (SqlSession session = openSession()) {
-			OverloadMapper mapper = session.getMapper(OverloadMapper.class);
-			OverloadDO record = new OverloadDO();
+		OverloadMapper mapper = springMapper(LOGGER);
+		OverloadDO record = new OverloadDO();
+
+		if (mapper != null) {
 			OverloadDO result = mapper.findCount(record).stream().findFirst().orElse(null);
+
+			return requireFound(result, "findCount", record.toString());
+		}
+
+		try (SqlSession session = openSession()) {
+			OverloadDO result = session.getMapper(OverloadMapper.class).findCount(record).stream().findFirst()
+					.orElse(null);
 			return requireFound(result, "findCount", record.toString());
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -93,10 +125,20 @@ public class OverloadRepository extends MyBatisRepositorySupport {
 	}
 
 	public int insert(Overload proto) throws DalException {
-		try (SqlSession session = openSession()) {
-			OverloadMapper mapper = session.getMapper(OverloadMapper.class);
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
 			OverloadDO record = toRecord(proto);
-			int count = mapper.insert(record);
+			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
+
+			proto.setId(record.getId());
+			proto.setKeyId(record.getId());
+			return count;
+		}
+
+		try (SqlSession session = openSession()) {
+			OverloadDO record = toRecord(proto);
+			int count = session.getMapper(OverloadMapper.class).insert(record);
 			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
@@ -107,9 +149,14 @@ public class OverloadRepository extends MyBatisRepositorySupport {
 	}
 
 	public int updateByPK(Overload proto, Updateset<Overload> updateset) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
+		}
+
 		try (SqlSession session = openSession()) {
-			OverloadMapper mapper = session.getMapper(OverloadMapper.class);
-			int count = mapper.updateByPrimaryKey(toRecord(proto));
+			int count = session.getMapper(OverloadMapper.class).updateByPrimaryKey(toRecord(proto));
 			session.commit();
 			return count;
 		} catch (Exception e) {

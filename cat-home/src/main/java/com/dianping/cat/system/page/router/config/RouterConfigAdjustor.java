@@ -50,6 +50,7 @@ import com.dianping.cat.home.router.entity.Server;
 import com.dianping.cat.home.router.transform.DefaultNativeBuilder;
 import com.dianping.cat.report.page.state.StateBuilder;
 import com.dianping.cat.report.page.state.service.StateReportService;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.router.service.RouterConfigService;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
@@ -72,6 +73,8 @@ public class RouterConfigAdjustor {
 	private DailyReportRepository m_dailyReportDao;
 
 	public void Adjust(Date period) {
+		refreshSpringBeans();
+
 		Date end = new Date(period.getTime() + TimeHelper.ONE_HOUR);
 		RouterConfig routerConfig = m_routerService.queryLastReport(Constants.CAT);
 		StateReport report = m_stateReportService.queryHourlyReport(Constants.CAT, period, end);
@@ -275,6 +278,8 @@ public class RouterConfigAdjustor {
 	}
 
 	public boolean updateRouterConfigToDB(RouterConfig config) {
+		refreshSpringBeans();
+
 		try {
 			String name = RouterConfigBuilder.ID;
 			String domain = Constants.CAT;
@@ -298,6 +303,14 @@ public class RouterConfigAdjustor {
 		} catch (DalException e) {
 			Cat.logError(e);
 			return false;
+		}
+	}
+
+	private void refreshSpringBeans() {
+		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (serverConfigManager != null) {
+			m_serverConfigManager = serverConfigManager;
 		}
 	}
 }

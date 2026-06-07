@@ -54,6 +54,7 @@ import com.dianping.cat.report.page.business.graph.CustomInfo;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
 @Named
@@ -245,6 +246,8 @@ public class BusinessAlert implements Task {
 	}
 
 	private void processDomain(String domain) {
+		refreshSpringBeans();
+
 		BusinessReportConfig businessReportConfig = m_configManager.queryConfigByDomain(domain);
 		AlarmRule monitorConfigs = buildMonitorConfigs(domain, businessReportConfig);
 		int minute = calAlreadyMinute();
@@ -301,9 +304,13 @@ public class BusinessAlert implements Task {
 
 	@Override
 	public void run() {
+		refreshSpringBeans();
+
 		boolean active = TimeHelper.sleepToNextMinute();
 
 		while (active) {
+			refreshSpringBeans();
+
 			Transaction t = Cat.newTransaction("AlertBusiness", TimeHelper.getMinuteStr());
 			long current = System.currentTimeMillis();
 
@@ -351,6 +358,18 @@ public class BusinessAlert implements Task {
 
 	@Override
 	public void shutdown() {
+	}
+
+	private void refreshSpringBeans() {
+		BusinessConfigManager configManager = CatSpringContext.getBeanIfAvailable(BusinessConfigManager.class);
+		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
+		if (projectService != null) {
+			m_projectService = projectService;
+		}
 	}
 
 }

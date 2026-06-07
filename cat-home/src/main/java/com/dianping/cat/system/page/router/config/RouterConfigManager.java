@@ -31,6 +31,7 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.router.entity.*;
 import com.dianping.cat.home.router.transform.DefaultNativeParser;
 import com.dianping.cat.home.router.transform.DefaultSaxParser;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
@@ -115,6 +116,8 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
+
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -300,6 +303,8 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 	}
 
 	private void refreshConfigInfo() throws DalException, SAXException, IOException {
+		refreshSpringBeans();
+
 		Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 		long modifyTime = config.getModifyDate().getTime();
 
@@ -340,6 +345,8 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 	}
 
 	private void refreshReportInfo() throws Exception {
+		refreshSpringBeans();
+
 		Date period = TimeHelper.getCurrentDay(-1);
 		long time = period.getTime();
 
@@ -379,6 +386,8 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 
 	private boolean storeConfig() {
 		synchronized (this) {
+			refreshSpringBeans();
+
 			try {
 				Config config = m_configDao.createLocal();
 
@@ -418,5 +427,26 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 		// }
 
 		return true;
+	}
+
+	private void refreshSpringBeans() {
+		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
+		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
+		DailyReportRepository dailyReportDao = CatSpringContext.getBeanIfAvailable(DailyReportRepository.class);
+		DailyReportContentRepository dailyReportContentDao = CatSpringContext
+		      .getBeanIfAvailable(DailyReportContentRepository.class);
+
+		if (configDao != null) {
+			m_configDao = configDao;
+		}
+		if (fetcher != null) {
+			m_fetcher = fetcher;
+		}
+		if (dailyReportDao != null) {
+			m_dailyReportDao = dailyReportDao;
+		}
+		if (dailyReportContentDao != null) {
+			m_dailyReportContentDao = dailyReportContentDao;
+		}
 	}
 }

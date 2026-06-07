@@ -40,6 +40,7 @@ import com.dianping.cat.sample.entity.Domain;
 import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
+import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class AbstractReportModel<A extends Action, P extends Page, M extends ActionContext<?>>
 						extends	ViewModel<P, A, M> {
@@ -71,9 +72,15 @@ public abstract class AbstractReportModel<A extends Action, P extends Page, M ex
 	public AbstractReportModel(M ctx) {
 		super(ctx);
 		try {
-			m_projectService = ContainerLoader.getDefaultContainer().lookup(ProjectService.class);
+			m_projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+			m_sampleConfigManager = CatSpringContext.getBeanIfAvailable(SampleConfigManager.class);
+			if (m_projectService == null) {
+				m_projectService = ContainerLoader.getDefaultContainer().lookup(ProjectService.class);
+			}
+			if (m_sampleConfigManager == null) {
+				m_sampleConfigManager = ContainerLoader.getDefaultContainer().lookup(SampleConfigManager.class);
+			}
 			m_hostInfoService = ContainerLoader.getDefaultContainer().lookup(HostinfoService.class);
-			m_sampleConfigManager = ContainerLoader.getDefaultContainer().lookup(SampleConfigManager.class);
 		} catch (Exception e) {
 			Cat.logError(e);
 		}

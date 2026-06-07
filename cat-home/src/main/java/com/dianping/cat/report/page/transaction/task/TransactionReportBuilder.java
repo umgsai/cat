@@ -45,6 +45,7 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = TransactionReportBuilder.ID)
 public class TransactionReportBuilder implements Initializable, TaskBuilder, LogEnabled {
@@ -64,6 +65,8 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		try {
 			Date end = TaskHelper.tomorrowZero(period);
 			TransactionReport transactionReport = queryHourlyReportsByDuration(name, domain, period, end);
@@ -92,6 +95,8 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		Date end = null;
 
 		if (period.equals(TimeHelper.getCurrentMonth())) {
@@ -114,6 +119,8 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		Date end = null;
 
 		if (period.equals(TimeHelper.getCurrentWeek())) {
@@ -143,6 +150,8 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
+
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
 			@Override
@@ -226,6 +235,19 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 								.visitTransactionReport(dailyreport);
 
 		return dailyreport;
+	}
+
+	private void refreshSpringBeans() {
+		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+		AtomicMessageConfigManager atomicMessageConfigManager = CatSpringContext
+		      .getBeanIfAvailable(AtomicMessageConfigManager.class);
+
+		if (serverConfigManager != null) {
+			m_serverConfigManager = serverConfigManager;
+		}
+		if (atomicMessageConfigManager != null) {
+			m_atomicMessageConfigManager = atomicMessageConfigManager;
+		}
 	}
 
 }

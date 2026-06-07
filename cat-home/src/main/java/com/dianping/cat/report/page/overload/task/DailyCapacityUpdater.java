@@ -34,6 +34,7 @@ import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = CapacityUpdater.class, value = DailyCapacityUpdater.ID)
 public class DailyCapacityUpdater implements CapacityUpdater {
@@ -59,6 +60,8 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 
 	@Override
 	public void updateDBCapacity() throws DalException {
+		refreshSpringBeans();
+
 		int maxId = m_manager.getDailyStatus();
 
 		while (true) {
@@ -99,6 +102,23 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 			}
 		}
 		m_manager.updateDailyStatus(maxId);
+	}
+
+	private void refreshSpringBeans() {
+		DailyReportContentRepository dailyReportContentDao = CatSpringContext
+		      .getBeanIfAvailable(DailyReportContentRepository.class);
+		DailyReportRepository dailyReportDao = CatSpringContext.getBeanIfAvailable(DailyReportRepository.class);
+		OverloadRepository overloadDao = CatSpringContext.getBeanIfAvailable(OverloadRepository.class);
+
+		if (dailyReportContentDao != null) {
+			m_dailyReportContentDao = dailyReportContentDao;
+		}
+		if (dailyReportDao != null) {
+			m_dailyReportDao = dailyReportDao;
+		}
+		if (overloadDao != null) {
+			m_overloadDao = overloadDao;
+		}
 	}
 
 }

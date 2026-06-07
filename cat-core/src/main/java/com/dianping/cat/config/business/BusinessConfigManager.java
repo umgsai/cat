@@ -41,6 +41,7 @@ import com.dianping.cat.configuration.business.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.BusinessConfig;
 import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
 import com.dianping.cat.core.config.BusinessConfigEntity;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -51,6 +52,8 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 
 	@Inject
 	private BusinessConfigRepository m_configDao;
+
+	private ServerConfigManager m_serverConfigManager;
 
 	private Map<String, Set<String>> m_domains = new ConcurrentHashMap<String, Set<String>>();
 
@@ -112,7 +115,15 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 
 	@Override
 	public void initialize() throws InitializationException {
-		ServerConfigManager serverConfigManager = lookup(ServerConfigManager.class);
+		ServerConfigManager serverConfigManager = m_serverConfigManager;
+
+		if (serverConfigManager == null) {
+			serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+		}
+		if (serverConfigManager == null) {
+			serverConfigManager = lookup(ServerConfigManager.class);
+		}
+
 		m_alertMachine = serverConfigManager.isAlertMachine();
 
 		loadData();
@@ -129,6 +140,14 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 				return BASE_CONFIG;
 			}
 		});
+	}
+
+	public void setConfigDao(BusinessConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
 	}
 
 	private void loadData() {

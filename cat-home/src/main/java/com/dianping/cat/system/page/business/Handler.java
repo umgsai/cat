@@ -45,6 +45,7 @@ import com.dianping.cat.configuration.business.entity.BusinessReportConfig;
 import com.dianping.cat.configuration.business.entity.CustomConfig;
 import com.dianping.cat.report.alert.business.BusinessRuleConfigManager;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.SystemPage;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
@@ -84,6 +85,8 @@ public class Handler implements PageHandler<Context> {
 	@PreInboundActionMeta("login")
 	@OutboundActionMeta(name = "business")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
+
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
@@ -157,6 +160,18 @@ public class Handler implements PageHandler<Context> {
 
 		if (!ctx.isProcessStopped()) {
 			m_jspViewer.view(ctx, model);
+		}
+	}
+
+	private void refreshSpringBeans() {
+		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		BusinessConfigManager configManager = CatSpringContext.getBeanIfAvailable(BusinessConfigManager.class);
+
+		if (projectService != null) {
+			m_projectService = projectService;
+		}
+		if (configManager != null) {
+			m_configManager = configManager;
 		}
 	}
 

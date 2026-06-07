@@ -158,6 +158,14 @@ public class AtomicMessageConfigManager implements Initializable {
 		return "10000";
 	}
 
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
+
 	public int getPropertyValue(String domain, String propertyName, int defaultValue) {
 		int result = defaultValue;
 		Domain d = m_config.findDomain(domain);

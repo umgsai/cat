@@ -77,7 +77,9 @@
 	</select>
 
 	<insert id="insertOrUpdateByNameGraph">
-		INSERT INTO metric_screen(id, name, graph_name, view, endPoints, measurements, content, creation_date, updatetime) VALUES(<VALUES/>) ON DUPLICATE KEY UPDATE view = #{record.view}, endPoints = #{record.endPoints}, measurements = #{record.measurements}, content = #{record.content}
+		INSERT INTO metric_screen(id, name, graph_name, view, endPoints, measurements, content, creation_date, updatetime)
+		VALUES(#{record.id}, #{record.name}, #{record.graphName}, #{record.view}, #{record.endPoints}, #{record.measurements}, #{record.content}, #{record.creationDate}, #{record.updatetime})
+		ON DUPLICATE KEY UPDATE view = #{record.view}, endPoints = #{record.endPoints}, measurements = #{record.measurements}, content = #{record.content}
 	</insert>
 
 	<delete id="deleteByName">

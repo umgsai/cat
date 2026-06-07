@@ -38,6 +38,7 @@ import com.dianping.cat.report.page.transaction.service.TransactionReportService
 import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = ClientReportBuilder.ID)
 public class ClientReportBuilder implements TaskBuilder {
@@ -61,6 +62,8 @@ public class ClientReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		ClientReport clientReport = buildClientReport(period);
 		DailyReport report = new DailyReport();
 
@@ -76,6 +79,8 @@ public class ClientReportBuilder implements TaskBuilder {
 	}
 
 	private ClientReport buildClientReport(Date startTime) {
+		refreshSpringBeans();
+
 		Date endTime = TimeHelper.addDays(startTime, 1);
 		Set<String> domains = m_projectService.findAllDomains();
 		ClientReportStatistics statistics = new ClientReportStatistics();
@@ -110,6 +115,18 @@ public class ClientReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		throw new RuntimeException("Service client report don't support weekly report!");
+	}
+
+	private void refreshSpringBeans() {
+		ServerFilterConfigManager configManger = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
+		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+
+		if (configManger != null) {
+			m_configManger = configManger;
+		}
+		if (projectService != null) {
+			m_projectService = projectService;
+		}
 	}
 
 }

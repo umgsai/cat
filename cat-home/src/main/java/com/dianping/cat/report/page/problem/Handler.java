@@ -55,6 +55,7 @@ import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 
@@ -84,6 +85,8 @@ public class Handler implements PageHandler<Context> {
 	private JsonBuilder m_jsonBuilder;
 
 	private void buildDefaultThreshold(Model model, Payload payload) {
+		refreshSpringBeans();
+
 		Map<String, Domain> domains = m_manager.getLongConfigDomains();
 		Domain d = domains.get(payload.getDomain());
 
@@ -189,6 +192,8 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "p")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
+
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		normalize(model, payload);
@@ -393,5 +398,13 @@ public class Handler implements PageHandler<Context> {
 		TYPE,
 		TOTAL_COUNT,
 		DETAIL
+	}
+
+	private void refreshSpringBeans() {
+		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (manager != null) {
+			m_manager = manager;
+		}
 	}
 }

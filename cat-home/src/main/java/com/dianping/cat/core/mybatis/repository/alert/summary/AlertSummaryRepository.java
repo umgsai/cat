@@ -1,29 +1,26 @@
 package com.dianping.cat.core.mybatis.repository.alert.summary;
 
-import com.dianping.cat.core.mybatis.MyBatisRepositorySupport;
+import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.generated.alert.summary.dao.AlertSummaryMapper;
 import com.dianping.cat.core.mybatis.generated.alert.summary.dao.data.AlertSummaryDO;
 import com.dianping.cat.home.dal.report.AlertSummary;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
 
-public class AlertSummaryRepository extends MyBatisRepositorySupport {
+public class AlertSummaryRepository extends SpringBackedRepositorySupport<AlertSummaryMapper> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryRepository.class);
+
 	private static final String MAPPER_RESOURCE = "mybatis/mapper/AlertSummaryMapper.xml";
 
-	@Override
-	protected Class<?> getMapperClass() {
-		return AlertSummaryMapper.class;
-	}
-
-	@Override
-	protected String getMapperResource() {
-		return MAPPER_RESOURCE;
+	public AlertSummaryRepository() {
+		super(AlertSummaryMapper.class, MAPPER_RESOURCE,
+				"AlertSummaryRepository is using Spring managed AlertSummaryMapper.");
 	}
 
 	public AlertSummary createLocal() {
@@ -31,9 +28,14 @@ public class AlertSummaryRepository extends MyBatisRepositorySupport {
 	}
 
 	public int deleteByPK(AlertSummary proto) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
+		}
+
 		try (SqlSession session = openSession()) {
-			AlertSummaryMapper mapper = session.getMapper(AlertSummaryMapper.class);
-			int count = mapper.deleteByPrimaryKey(proto.getKeyId());
+			int count = session.getMapper(AlertSummaryMapper.class).deleteByPrimaryKey(proto.getKeyId());
 			session.commit();
 			return count;
 		} catch (Exception e) {
@@ -42,9 +44,14 @@ public class AlertSummaryRepository extends MyBatisRepositorySupport {
 	}
 
 	public AlertSummary findByPK(int keyId, Readset<AlertSummary> readset) throws DalException {
+		AlertSummaryMapper mapper = springMapper(LOGGER);
+
+		if (mapper != null) {
+			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
+		}
+
 		try (SqlSession session = openSession()) {
-			AlertSummaryMapper mapper = session.getMapper(AlertSummaryMapper.class);
-			AlertSummaryDO record = mapper.findByPrimaryKey(keyId);
+			AlertSummaryDO record = session.getMapper(AlertSummaryMapper.class).findByPrimaryKey(keyId);
 			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -54,10 +61,20 @@ public class AlertSummaryRepository extends MyBatisRepositorySupport {
 	}
 
 	public int insert(AlertSummary proto) throws DalException {
-		try (SqlSession session = openSession()) {
-			AlertSummaryMapper mapper = session.getMapper(AlertSummaryMapper.class);
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
 			AlertSummaryDO record = toRecord(proto);
-			int count = mapper.insert(record);
+			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
+
+			proto.setId(record.getId());
+			proto.setKeyId(record.getId());
+			return count;
+		}
+
+		try (SqlSession session = openSession()) {
+			AlertSummaryDO record = toRecord(proto);
+			int count = session.getMapper(AlertSummaryMapper.class).insert(record);
 			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
@@ -68,9 +85,14 @@ public class AlertSummaryRepository extends MyBatisRepositorySupport {
 	}
 
 	public int updateByPK(AlertSummary proto, Updateset<AlertSummary> updateset) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
+		}
+
 		try (SqlSession session = openSession()) {
-			AlertSummaryMapper mapper = session.getMapper(AlertSummaryMapper.class);
-			int count = mapper.updateByPrimaryKey(toRecord(proto));
+			int count = session.getMapper(AlertSummaryMapper.class).updateByPrimaryKey(toRecord(proto));
 			session.commit();
 			return count;
 		} catch (Exception e) {

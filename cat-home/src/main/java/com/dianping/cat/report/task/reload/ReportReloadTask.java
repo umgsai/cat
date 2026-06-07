@@ -33,6 +33,7 @@ import org.unidal.lookup.annotation.Named;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.helper.TimeHelper;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class ReportReloadTask extends ContainerHolder implements Initializable, Task {
@@ -51,6 +52,11 @@ public class ReportReloadTask extends ContainerHolder implements Initializable, 
 
 	@Override
 	public void initialize() throws InitializationException {
+		ReportReloadConfigManager configManager = CatSpringContext.getBeanIfAvailable(ReportReloadConfigManager.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
 		m_reloaders = lookupMap(ReportReloader.class);
 	}
 

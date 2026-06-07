@@ -1,29 +1,26 @@
 package com.dianping.cat.core.mybatis.repository.config.modification;
 
-import com.dianping.cat.core.mybatis.MyBatisRepositorySupport;
+import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.generated.config.modification.dao.ConfigModificationMapper;
 import com.dianping.cat.core.mybatis.generated.config.modification.dao.data.ConfigModificationDO;
 import com.dianping.cat.home.dal.report.ConfigModification;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
 
-public class ConfigModificationRepository extends MyBatisRepositorySupport {
+public class ConfigModificationRepository extends SpringBackedRepositorySupport<ConfigModificationMapper> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigModificationRepository.class);
+
 	private static final String MAPPER_RESOURCE = "mybatis/mapper/ConfigModificationMapper.xml";
 
-	@Override
-	protected Class<?> getMapperClass() {
-		return ConfigModificationMapper.class;
-	}
-
-	@Override
-	protected String getMapperResource() {
-		return MAPPER_RESOURCE;
+	public ConfigModificationRepository() {
+		super(ConfigModificationMapper.class, MAPPER_RESOURCE,
+				"ConfigModificationRepository is using Spring managed ConfigModificationMapper.");
 	}
 
 	public ConfigModification createLocal() {
@@ -31,9 +28,14 @@ public class ConfigModificationRepository extends MyBatisRepositorySupport {
 	}
 
 	public int deleteByPK(ConfigModification proto) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
+		}
+
 		try (SqlSession session = openSession()) {
-			ConfigModificationMapper mapper = session.getMapper(ConfigModificationMapper.class);
-			int count = mapper.deleteByPrimaryKey(proto.getKeyId());
+			int count = session.getMapper(ConfigModificationMapper.class).deleteByPrimaryKey(proto.getKeyId());
 			session.commit();
 			return count;
 		} catch (Exception e) {
@@ -42,9 +44,14 @@ public class ConfigModificationRepository extends MyBatisRepositorySupport {
 	}
 
 	public ConfigModification findByPK(int keyId, Readset<ConfigModification> readset) throws DalException {
+		ConfigModificationMapper mapper = springMapper(LOGGER);
+
+		if (mapper != null) {
+			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
+		}
+
 		try (SqlSession session = openSession()) {
-			ConfigModificationMapper mapper = session.getMapper(ConfigModificationMapper.class);
-			ConfigModificationDO record = mapper.findByPrimaryKey(keyId);
+			ConfigModificationDO record = session.getMapper(ConfigModificationMapper.class).findByPrimaryKey(keyId);
 			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -54,10 +61,20 @@ public class ConfigModificationRepository extends MyBatisRepositorySupport {
 	}
 
 	public int insert(ConfigModification proto) throws DalException {
-		try (SqlSession session = openSession()) {
-			ConfigModificationMapper mapper = session.getMapper(ConfigModificationMapper.class);
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
 			ConfigModificationDO record = toRecord(proto);
-			int count = mapper.insert(record);
+			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
+
+			proto.setId(record.getId());
+			proto.setKeyId(record.getId());
+			return count;
+		}
+
+		try (SqlSession session = openSession()) {
+			ConfigModificationDO record = toRecord(proto);
+			int count = session.getMapper(ConfigModificationMapper.class).insert(record);
 			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
@@ -68,9 +85,14 @@ public class ConfigModificationRepository extends MyBatisRepositorySupport {
 	}
 
 	public int updateByPK(ConfigModification proto, Updateset<ConfigModification> updateset) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
+		}
+
 		try (SqlSession session = openSession()) {
-			ConfigModificationMapper mapper = session.getMapper(ConfigModificationMapper.class);
-			int count = mapper.updateByPrimaryKey(toRecord(proto));
+			int count = session.getMapper(ConfigModificationMapper.class).updateByPrimaryKey(toRecord(proto));
 			session.commit();
 			return count;
 		} catch (Exception e) {

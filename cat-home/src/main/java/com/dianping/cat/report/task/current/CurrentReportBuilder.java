@@ -33,6 +33,7 @@ import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = CurrentReportBuilder.ID)
 public class CurrentReportBuilder implements TaskBuilder {
@@ -47,6 +48,8 @@ public class CurrentReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		CurrentWeeklyMonthlyReportTask reportTask = CurrentWeeklyMonthlyReportTask.getInstance();
 
 		try {
@@ -82,4 +85,16 @@ public class CurrentReportBuilder implements TaskBuilder {
 		throw new RuntimeException("current weekly monthly report builder don't support weekly task");
 	}
 
+	private void refreshSpringBeans() {
+		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
+		      .getBeanIfAvailable(ServerFilterConfigManager.class);
+
+		if (projectService != null) {
+			m_projectService = projectService;
+		}
+		if (serverFilterConfigManager != null) {
+			m_serverFilterConfigManager = serverFilterConfigManager;
+		}
+	}
 }

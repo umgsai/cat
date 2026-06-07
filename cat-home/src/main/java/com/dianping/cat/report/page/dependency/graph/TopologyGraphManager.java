@@ -58,6 +58,7 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class TopologyGraphManager implements Initializable, LogEnabled {
@@ -211,12 +212,16 @@ public class TopologyGraphManager implements Initializable, LogEnabled {
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
+
 		if (m_manager.isJobMachine()) {
 			Threads.forGroup("cat").start(new DependencyReloadTask());
 		}
 	}
 
 	public TopologyGraph queryGraphFromDB(long time) {
+		refreshSpringBeans();
+
 		try {
 			com.dianping.cat.home.dal.report.TopologyGraph topologyGraph = m_topologyGraphDao
 									.findByPeriod(new Date(time),	TopologyGraphEntity.READSET_FULL);
@@ -286,6 +291,8 @@ public class TopologyGraphManager implements Initializable, LogEnabled {
 			boolean active = TimeHelper.sleepToNextMinute();
 
 			while (active) {
+				refreshSpringBeans();
+
 				Transaction t = Cat.newTransaction("ReloadTask", "Dependency");
 				long current = System.currentTimeMillis();
 				try {
@@ -329,6 +336,23 @@ public class TopologyGraphManager implements Initializable, LogEnabled {
 
 		@Override
 		public void shutdown() {
+		}
+	}
+
+	private void refreshSpringBeans() {
+		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
+		      .getBeanIfAvailable(ServerFilterConfigManager.class);
+		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+
+		if (manager != null) {
+			m_manager = manager;
+		}
+		if (serverFilterConfigManager != null) {
+			m_serverFilterConfigManager = serverFilterConfigManager;
+		}
+		if (projectService != null) {
+			m_projectService = projectService;
 		}
 	}
 

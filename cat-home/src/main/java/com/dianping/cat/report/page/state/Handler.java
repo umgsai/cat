@@ -43,6 +43,7 @@ import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	@Inject
@@ -67,6 +68,8 @@ public class Handler implements PageHandler<Context> {
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
 	private void buildDisplayInfo(Model model, Payload payload, StateReport report) {
+		refreshSpringBeans();
+
 		StateDisplay display = new StateDisplay(payload.getIpAddress(), m_serverFilterConfigManager.getUnusedDomains());
 
 		display.setSortType(payload.getSort());
@@ -108,6 +111,8 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = StateAnalyzer.ID)
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
+
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
@@ -155,6 +160,15 @@ public class Handler implements PageHandler<Context> {
 			payload.setIpAddress(Constants.ALL);
 		}
 		m_normalizePayload.normalize(model, payload);
+	}
+
+	private void refreshSpringBeans() {
+		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
+		      .getBeanIfAvailable(ServerFilterConfigManager.class);
+
+		if (serverFilterConfigManager != null) {
+			m_serverFilterConfigManager = serverFilterConfigManager;
+		}
 	}
 
 }

@@ -34,6 +34,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = MessageAnalyzerManager.class)
 public class DefaultMessageAnalyzerManager extends ContainerHolder
@@ -147,7 +148,11 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 			}
 		});
 
-		ServerConfigManager manager = lookup(ServerConfigManager.class);
+		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (manager == null) {
+			manager = lookup(ServerConfigManager.class);
+		}
 		List<String> disables = new ArrayList<String>();
 
 		for (String name : m_analyzerNames) {

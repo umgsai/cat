@@ -41,6 +41,7 @@ import com.dianping.cat.report.page.matrix.service.MatrixReportService;
 import com.dianping.cat.report.page.statistics.service.HeavyReportService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = HeavyReportBuilder.ID)
 public class HeavyReportBuilder implements TaskBuilder {
@@ -58,6 +59,8 @@ public class HeavyReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		HeavyReport heavyReport = queryHourlyReportsByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
 		DailyReport report = new DailyReport();
 
@@ -73,6 +76,8 @@ public class HeavyReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date start) {
+		refreshSpringBeans();
+
 		HeavyReport heavyReport = new HeavyReport(Constants.CAT);
 		MatrixReportVisitor visitor = new MatrixReportVisitor().setReport(heavyReport);
 		Date end = new Date(start.getTime() + TimeHelper.ONE_HOUR);
@@ -102,6 +107,8 @@ public class HeavyReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		HeavyReport heavyReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
 
@@ -117,6 +124,8 @@ public class HeavyReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		HeavyReport heavyReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
 		WeeklyReport report = new WeeklyReport();
@@ -132,6 +141,8 @@ public class HeavyReportBuilder implements TaskBuilder {
 	}
 
 	private HeavyReport queryDailyReportsByDuration(String domain, Date start, Date end) {
+		refreshSpringBeans();
+
 		long startTime = start.getTime();
 		long endTime = end.getTime();
 		HeavyReportMerger merger = new HeavyReportMerger(new HeavyReport(domain));
@@ -152,6 +163,8 @@ public class HeavyReportBuilder implements TaskBuilder {
 	}
 
 	private HeavyReport queryHourlyReportsByDuration(String name, String domain, Date period, Date endDate) {
+		refreshSpringBeans();
+
 		long startTime = period.getTime();
 		long endTime = endDate.getTime();
 		HeavyReportMerger merger = new HeavyReportMerger(new HeavyReport(domain));
@@ -165,6 +178,14 @@ public class HeavyReportBuilder implements TaskBuilder {
 		com.dianping.cat.home.heavy.entity.HeavyReport heavyReport = merger.getHeavyReport();
 
 		return heavyReport;
+	}
+
+	private void refreshSpringBeans() {
+		ServerFilterConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
 	}
 
 }

@@ -98,6 +98,14 @@ public class SampleConfigManager implements Initializable {
 		});
 	}
 
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
+
 	public boolean insert(String xml) {
 		try {
 			m_config = DefaultSaxParser.parse(xml);

@@ -44,6 +44,7 @@ import com.dianping.cat.system.page.config.processor.GlobalConfigProcessor;
 import com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor;
 import com.dianping.cat.system.page.config.processor.StorageConfigProcessor;
 import com.dianping.cat.system.page.config.processor.TransactionConfigProcessor;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	@Inject
@@ -88,6 +89,7 @@ public class Handler implements PageHandler<Context> {
 	@PreInboundActionMeta("login")
 	@OutboundActionMeta(name = "config")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 
@@ -177,6 +179,7 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	public void store(String userName, String accountName, Payload payload) {
+		refreshSpringBeans();
 		ConfigModification modification = m_configModificationDao.createLocal();
 
 		modification.setUserName(userName);
@@ -189,6 +192,15 @@ public class Handler implements PageHandler<Context> {
 			m_configModificationDao.insert(modification);
 		} catch (Exception ex) {
 			Cat.logError(ex);
+		}
+	}
+
+	private void refreshSpringBeans() {
+		ConfigModificationRepository configModificationDao = CatSpringContext
+								.getBeanIfAvailable(ConfigModificationRepository.class);
+
+		if (configModificationDao != null) {
+			m_configModificationDao = configModificationDao;
 		}
 	}
 

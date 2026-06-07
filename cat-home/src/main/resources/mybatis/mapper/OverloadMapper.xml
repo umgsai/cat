@@ -66,6 +66,6 @@
 	</select>
 
 	<select id="findIdAndSizeByDuration" resultMap="BaseResultMap">
-		SELECT id, report_id, report_type, report_size, period, creation_date, max(report_id) AS max_id, count(*) AS count FROM overload WHERE period >= #{record.startTime} AND period <= #{record.endTime} ORDER BY period DESC, report_type ASC
+		SELECT id, report_id, report_type, report_size, period, creation_date, max(report_id) AS max_id, count(*) AS count FROM overload WHERE period >= #{record.startTime} AND period &lt;= #{record.endTime} ORDER BY period DESC, report_type ASC
 	</select>
 </mapper>

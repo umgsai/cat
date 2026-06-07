@@ -1,39 +1,52 @@
 package com.dianping.cat.core.mybatis.repository.monthly.report.content;
 
-import com.dianping.cat.core.dal.MonthlyReportContent;
-import com.dianping.cat.core.mybatis.MyBatisRepositorySupport;
-import com.dianping.cat.core.mybatis.generated.monthly.report.content.dao.MonthlyReportContentMapper;
-import com.dianping.cat.core.mybatis.generated.monthly.report.content.dao.data.MonthlyReportContentDO;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
+import org.unidal.dal.jdbc.datasource.DataSourceManager;
+import org.unidal.lookup.annotation.Inject;
 
-public class MonthlyReportContentRepository extends MyBatisRepositorySupport {
+import com.dianping.cat.core.dal.MonthlyReportContent;
+import com.dianping.cat.core.mybatis.generated.monthly.report.content.dao.MonthlyReportContentMapper;
+import com.dianping.cat.core.mybatis.generated.monthly.report.content.dao.data.MonthlyReportContentDO;
+import com.dianping.cat.core.mybatis.repository.SupportingMyBatisRepository;
+
+public class MonthlyReportContentRepository {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MonthlyReportContentRepository.class);
+
 	private static final String MAPPER_RESOURCE = "mybatis/mapper/MonthlyReportContentMapper.xml";
 
-	@Override
-	protected Class<?> getMapperClass() {
-		return MonthlyReportContentMapper.class;
-	}
+	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 
-	@Override
-	protected String getMapperResource() {
-		return MAPPER_RESOURCE;
-	}
+	@Inject
+	private DataSourceManager m_dataSourceManager;
+
+	private volatile SqlSessionFactory m_sqlSessionFactory;
 
 	public MonthlyReportContent createLocal() {
 		return new MonthlyReportContent();
 	}
 
 	public int deleteByPK(MonthlyReportContent proto) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
+		}
+
 		try (SqlSession session = openSession()) {
-			MonthlyReportContentMapper mapper = session.getMapper(MonthlyReportContentMapper.class);
-			int count = mapper.deleteByPrimaryKey(proto.getKeyReportId());
+			int count = session.getMapper(MonthlyReportContentMapper.class).deleteByPrimaryKey(proto.getKeyReportId());
+
 			session.commit();
 			return count;
 		} catch (Exception e) {
@@ -41,21 +54,36 @@ public class MonthlyReportContentRepository extends MyBatisRepositorySupport {
 		}
 	}
 
-	public List<MonthlyReportContent> findOverloadReport(int startId, Readset<MonthlyReportContent> readset) throws DalException {
-		try (SqlSession session = openSession()) {
-			MonthlyReportContentMapper mapper = session.getMapper(MonthlyReportContentMapper.class);
-			MonthlyReportContentDO record = new MonthlyReportContentDO();
-			record.setStartId(startId);
+	public List<MonthlyReportContent> findOverloadReport(int startId, Readset<MonthlyReportContent> readset)
+			throws DalException {
+		MonthlyReportContentMapper mapper = springMapper();
+		MonthlyReportContentDO record = new MonthlyReportContentDO();
+
+		record.setStartId(startId);
+		if (mapper != null) {
 			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
+		}
+
+		try (SqlSession session = openSession()) {
+			return session.getMapper(MonthlyReportContentMapper.class).findOverloadReport(record).stream()
+					.map(this::toModel)
+					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findOverloadReport for MonthlyReportContent.", e);
 		}
 	}
 
 	public MonthlyReportContent findByPK(int keyReportId, Readset<MonthlyReportContent> readset) throws DalException {
+		MonthlyReportContentMapper mapper = springMapper();
+
+		if (mapper != null) {
+			return requireFound(mapper.findByPrimaryKey(keyReportId), "primary key", String.valueOf(keyReportId));
+		}
+
 		try (SqlSession session = openSession()) {
-			MonthlyReportContentMapper mapper = session.getMapper(MonthlyReportContentMapper.class);
-			MonthlyReportContentDO record = mapper.findByPrimaryKey(keyReportId);
+			MonthlyReportContentDO record = session.getMapper(MonthlyReportContentMapper.class)
+					.findByPrimaryKey(keyReportId);
+
 			return requireFound(record, "primary key", String.valueOf(keyReportId));
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -65,10 +93,16 @@ public class MonthlyReportContentRepository extends MyBatisRepositorySupport {
 	}
 
 	public int insert(MonthlyReportContent proto) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
+		}
+
 		try (SqlSession session = openSession()) {
-			MonthlyReportContentMapper mapper = session.getMapper(MonthlyReportContentMapper.class);
 			MonthlyReportContentDO record = toRecord(proto);
-			int count = mapper.insert(record);
+			int count = session.getMapper(MonthlyReportContentMapper.class).insert(record);
+
 			session.commit();
 			return count;
 		} catch (Exception e) {
@@ -77,9 +111,15 @@ public class MonthlyReportContentRepository extends MyBatisRepositorySupport {
 	}
 
 	public int updateByPK(MonthlyReportContent proto, Updateset<MonthlyReportContent> updateset) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
+		}
+
 		try (SqlSession session = openSession()) {
-			MonthlyReportContentMapper mapper = session.getMapper(MonthlyReportContentMapper.class);
-			int count = mapper.updateByPrimaryKey(toRecord(proto));
+			int count = session.getMapper(MonthlyReportContentMapper.class).updateByPrimaryKey(toRecord(proto));
+
 			session.commit();
 			return count;
 		} catch (Exception e) {
@@ -87,7 +127,39 @@ public class MonthlyReportContentRepository extends MyBatisRepositorySupport {
 		}
 	}
 
-	private MonthlyReportContent requireFound(MonthlyReportContentDO record, String field, String value) throws DalNotFoundException {
+	private SqlSessionFactory getSqlSessionFactory() {
+		SqlSessionFactory sqlSessionFactory = m_sqlSessionFactory;
+
+		if (sqlSessionFactory == null) {
+			synchronized (this) {
+				sqlSessionFactory = m_sqlSessionFactory;
+
+				if (sqlSessionFactory == null) {
+					sqlSessionFactory = SupportingMyBatisRepository.newSqlSessionFactory(m_dataSourceManager,
+							MonthlyReportContentMapper.class, MAPPER_RESOURCE);
+					m_sqlSessionFactory = sqlSessionFactory;
+				}
+			}
+		}
+
+		return sqlSessionFactory;
+	}
+
+	private SqlSession openSession() {
+		return getSqlSessionFactory().openSession(false);
+	}
+
+	private MonthlyReportContentMapper springMapper() {
+		return SupportingMyBatisRepository.springMapper(MonthlyReportContentMapper.class, LOGGER, SPRING_MAPPER_LOGGED,
+				"MonthlyReportContentRepository is using Spring managed MonthlyReportContentMapper.");
+	}
+
+	private TransactionTemplate springTransactionTemplate() {
+		return SupportingMyBatisRepository.springTransactionTemplate();
+	}
+
+	private MonthlyReportContent requireFound(MonthlyReportContentDO record, String field, String value)
+			throws DalNotFoundException {
 		if (record == null) {
 			throw new DalNotFoundException("No MonthlyReportContent found by " + field + "(" + value + ").");
 		}

@@ -64,6 +64,6 @@
 	</select>
 
 	<delete id="deleteBeforeDate">
-		DELETE FROM metric_graph WHERE creation_date < #{record.creationDate}
+		DELETE FROM metric_graph WHERE creation_date &lt; #{record.creationDate}
 	</delete>
 </mapper>

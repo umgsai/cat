@@ -36,6 +36,7 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSupport
 						implements ModelService<T>,	Initializable {
@@ -66,6 +67,15 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 
 	@Override
 	public void initialize() throws InitializationException {
+		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+		RemoteServersManager serverManager = CatSpringContext.getBeanIfAvailable(RemoteServersManager.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
+		if (serverManager != null) {
+			m_serverManager = serverManager;
+		}
 		m_allServices.addAll(m_services);
 
 		String remoteServers = m_configManager.getConsoleRemoteServers();

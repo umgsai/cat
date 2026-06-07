@@ -1,29 +1,26 @@
 package com.dianping.cat.core.mybatis.repository.topologygraph;
 
-import com.dianping.cat.core.mybatis.MyBatisRepositorySupport;
+import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.generated.topologygraph.dao.TopologyGraphMapper;
 import com.dianping.cat.core.mybatis.generated.topologygraph.dao.data.TopologyGraphDO;
 import com.dianping.cat.home.dal.report.TopologyGraph;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
 
-public class TopologyGraphRepository extends MyBatisRepositorySupport {
+public class TopologyGraphRepository extends SpringBackedRepositorySupport<TopologyGraphMapper> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TopologyGraphRepository.class);
+
 	private static final String MAPPER_RESOURCE = "mybatis/mapper/TopologyGraphMapper.xml";
 
-	@Override
-	protected Class<?> getMapperClass() {
-		return TopologyGraphMapper.class;
-	}
-
-	@Override
-	protected String getMapperResource() {
-		return MAPPER_RESOURCE;
+	public TopologyGraphRepository() {
+		super(TopologyGraphMapper.class, MAPPER_RESOURCE,
+				"TopologyGraphRepository is using Spring managed TopologyGraphMapper.");
 	}
 
 	public TopologyGraph createLocal() {
@@ -31,9 +28,14 @@ public class TopologyGraphRepository extends MyBatisRepositorySupport {
 	}
 
 	public int deleteByPK(TopologyGraph proto) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
+		}
+
 		try (SqlSession session = openSession()) {
-			TopologyGraphMapper mapper = session.getMapper(TopologyGraphMapper.class);
-			int count = mapper.deleteByPrimaryKey(proto.getKeyId());
+			int count = session.getMapper(TopologyGraphMapper.class).deleteByPrimaryKey(proto.getKeyId());
 			session.commit();
 			return count;
 		} catch (Exception e) {
@@ -42,9 +44,14 @@ public class TopologyGraphRepository extends MyBatisRepositorySupport {
 	}
 
 	public TopologyGraph findByPK(int keyId, Readset<TopologyGraph> readset) throws DalException {
+		TopologyGraphMapper mapper = springMapper(LOGGER);
+
+		if (mapper != null) {
+			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
+		}
+
 		try (SqlSession session = openSession()) {
-			TopologyGraphMapper mapper = session.getMapper(TopologyGraphMapper.class);
-			TopologyGraphDO record = mapper.findByPrimaryKey(keyId);
+			TopologyGraphDO record = session.getMapper(TopologyGraphMapper.class).findByPrimaryKey(keyId);
 			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -54,11 +61,20 @@ public class TopologyGraphRepository extends MyBatisRepositorySupport {
 	}
 
 	public TopologyGraph findByPeriod(java.util.Date period, Readset<TopologyGraph> readset) throws DalException {
-		try (SqlSession session = openSession()) {
-			TopologyGraphMapper mapper = session.getMapper(TopologyGraphMapper.class);
-			TopologyGraphDO record = new TopologyGraphDO();
-			record.setPeriod(period);
+		TopologyGraphMapper mapper = springMapper(LOGGER);
+		TopologyGraphDO record = new TopologyGraphDO();
+
+		record.setPeriod(period);
+		if (mapper != null) {
 			TopologyGraphDO result = mapper.findByPeriod(record).stream().findFirst().orElse(null);
+
+			return requireFound(result, "findByPeriod", record.toString());
+		}
+
+		try (SqlSession session = openSession()) {
+			TopologyGraphDO result = session.getMapper(TopologyGraphMapper.class).findByPeriod(record).stream()
+					.findFirst()
+					.orElse(null);
 			return requireFound(result, "findByPeriod", record.toString());
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -68,10 +84,20 @@ public class TopologyGraphRepository extends MyBatisRepositorySupport {
 	}
 
 	public int insert(TopologyGraph proto) throws DalException {
-		try (SqlSession session = openSession()) {
-			TopologyGraphMapper mapper = session.getMapper(TopologyGraphMapper.class);
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
 			TopologyGraphDO record = toRecord(proto);
-			int count = mapper.insert(record);
+			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
+
+			proto.setId(record.getId());
+			proto.setKeyId(record.getId());
+			return count;
+		}
+
+		try (SqlSession session = openSession()) {
+			TopologyGraphDO record = toRecord(proto);
+			int count = session.getMapper(TopologyGraphMapper.class).insert(record);
 			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
@@ -82,9 +108,14 @@ public class TopologyGraphRepository extends MyBatisRepositorySupport {
 	}
 
 	public int updateByPK(TopologyGraph proto, Updateset<TopologyGraph> updateset) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
+		}
+
 		try (SqlSession session = openSession()) {
-			TopologyGraphMapper mapper = session.getMapper(TopologyGraphMapper.class);
-			int count = mapper.updateByPrimaryKey(toRecord(proto));
+			int count = session.getMapper(TopologyGraphMapper.class).updateByPrimaryKey(toRecord(proto));
 			session.commit();
 			return count;
 		} catch (Exception e) {

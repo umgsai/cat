@@ -162,6 +162,14 @@ public class ProjectService implements Initializable {
 		}
 	}
 
+	public void setProjectDao(ProjectRepository projectDao) {
+		m_projectDao = projectDao;
+	}
+
+	public void setServerConfigManager(ServerConfigManager manager) {
+		m_manager = manager;
+	}
+
 	public boolean insert(Project project) {
 		m_domainToProjects.put(project.getDomain(), project);
 

@@ -33,6 +33,7 @@ import com.dianping.cat.report.page.dependency.service.DependencyReportService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class ExternalInfoBuilder {
 
@@ -48,6 +49,8 @@ public class ExternalInfoBuilder {
 	private SimpleDateFormat m_dateFormat = new SimpleDateFormat("yyyyMMddHH");
 
 	public void buildExceptionInfoOnGraph(Payload payload, Model model, TopologyGraph graph) {
+		refreshSpringBeans();
+
 		if (graph.getStatus() != GraphConstrant.OK) {
 			String problemInfo = buildProblemInfo(graph.getId(), payload);
 
@@ -67,6 +70,8 @@ public class ExternalInfoBuilder {
 	}
 
 	public void buildNodeExceptionInfo(TopologyNode node, Model model, Payload payload) {
+		refreshSpringBeans();
+
 		String domain = node.getId();
 		if (node.getStatus() != GraphConstrant.OK) {
 			String exceptionInfo = buildProblemInfo(domain, payload);
@@ -98,6 +103,14 @@ public class ExternalInfoBuilder {
 			return response.getModel();
 		} else {
 			throw new RuntimeException("Internal error: no eligible problem service registered for " + request + "!");
+		}
+	}
+
+	private void refreshSpringBeans() {
+		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (serverConfigManager != null) {
+			m_serverConfigManager = serverConfigManager;
 		}
 	}
 

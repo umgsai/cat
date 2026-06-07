@@ -51,6 +51,7 @@ import com.dianping.cat.report.page.transaction.service.TransactionReportService
 import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = UtilizationReportBuilder.ID)
 public class UtilizationReportBuilder implements TaskBuilder {
@@ -77,6 +78,8 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		UtilizationReport utilizationReport = queryHourlyReportsByDuration(name, domain, period,
 								TaskHelper.tomorrowZero(period));
 		DailyReport report = new DailyReport();
@@ -94,6 +97,8 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date start) {
+		refreshSpringBeans();
+
 		UtilizationReport utilizationReport = new UtilizationReport(Constants.CAT);
 		Date end = new Date(start.getTime() + TimeHelper.ONE_HOUR);
 		Set<String> domains = m_reportService.queryAllDomainNames(start, end, TransactionAnalyzer.ID);
@@ -167,6 +172,8 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		UtilizationReport utilizationReport = queryDailyReportsByDuration(domain, period,	TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
 
@@ -183,6 +190,8 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
+
 		UtilizationReport utilizationReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
 		WeeklyReport report = new WeeklyReport();
@@ -199,6 +208,8 @@ public class UtilizationReportBuilder implements TaskBuilder {
 	}
 
 	private UtilizationReport queryDailyReportsByDuration(String domain, Date start, Date end) {
+		refreshSpringBeans();
+
 		long startTime = start.getTime();
 		long endTime = end.getTime();
 		UtilizationReportMerger merger = new UtilizationReportMerger(new UtilizationReport(domain));
@@ -220,6 +231,8 @@ public class UtilizationReportBuilder implements TaskBuilder {
 	}
 
 	private UtilizationReport queryHourlyReportsByDuration(String name, String domain, Date start, Date end) {
+		refreshSpringBeans();
+
 		long startTime = start.getTime();
 		long endTime = end.getTime();
 		UtilizationReportMerger merger = new UtilizationReportMerger(new UtilizationReport(domain));
@@ -240,6 +253,14 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 	private boolean validataService(String projectName) {
 		return projectName.equalsIgnoreCase(ProjectInfo.ALL_SERVER) || projectName.equalsIgnoreCase("UnknownProject");
+	}
+
+	private void refreshSpringBeans() {
+		ServerFilterConfigManager configManger = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
+
+		if (configManger != null) {
+			m_configManger = configManger;
+		}
 	}
 
 }

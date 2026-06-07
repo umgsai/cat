@@ -25,6 +25,7 @@ import org.unidal.lookup.annotation.Named;
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.dal.report.AlertSummary;
 import com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class AlertSummaryService {
@@ -33,6 +34,7 @@ public class AlertSummaryService {
 	private AlertSummaryRepository m_alertSummaryDao;
 
 	public void insert(com.dianping.cat.home.alert.summary.entity.AlertSummary alertSummary) {
+		refreshSpringBeans();
 		AlertSummary summary = new AlertSummary();
 		String content = alertSummary.toString();
 
@@ -44,6 +46,14 @@ public class AlertSummaryService {
 			m_alertSummaryDao.insert(summary);
 		} catch (DalException e) {
 			Cat.logError("insert alert summary error: " + content, e);
+		}
+	}
+
+	private void refreshSpringBeans() {
+		AlertSummaryRepository alertSummaryDao = CatSpringContext.getBeanIfAvailable(AlertSummaryRepository.class);
+
+		if (alertSummaryDao != null) {
+			m_alertSummaryDao = alertSummaryDao;
 		}
 	}
 

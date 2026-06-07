@@ -6,7 +6,11 @@ import java.nio.file.Paths;
 
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.context.annotation.ComponentScan;
 
+@SpringBootConfiguration
+@ComponentScan(basePackages = "com.dianping.cat.boot")
 public class CatBootApplication {
 
 	public static void main(String[] args) throws Exception {

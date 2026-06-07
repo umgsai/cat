@@ -25,6 +25,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.helper.TimeHelper;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class PayloadNormalizer {
@@ -34,6 +35,11 @@ public class PayloadNormalizer {
 
 	@SuppressWarnings("rawtypes")
 	public void normalize(AbstractReportModel model, AbstractReportPayload payload) {
+		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (manager != null) {
+			m_manager = manager;
+		}
 		long date = payload.getDate();
 		long current = System.currentTimeMillis();
 

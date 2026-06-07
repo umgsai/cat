@@ -1,29 +1,28 @@
 package com.dianping.cat.core.mybatis.repository.server.alarm.rule;
 
 import com.dianping.cat.alarm.ServerAlarmRule;
-import com.dianping.cat.core.mybatis.MyBatisRepositorySupport;
 import com.dianping.cat.core.mybatis.generated.server.alarm.rule.dao.ServerAlarmRuleMapper;
 import com.dianping.cat.core.mybatis.generated.server.alarm.rule.dao.data.ServerAlarmRuleDO;
-import java.util.Date;
+import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
 
-public class ServerAlarmRuleRepository extends MyBatisRepositorySupport {
+public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<ServerAlarmRuleMapper> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServerAlarmRuleRepository.class);
+
 	private static final String MAPPER_RESOURCE = "mybatis/mapper/ServerAlarmRuleMapper.xml";
 
-	@Override
-	protected Class<?> getMapperClass() {
-		return ServerAlarmRuleMapper.class;
-	}
-
-	@Override
-	protected String getMapperResource() {
-		return MAPPER_RESOURCE;
+	public ServerAlarmRuleRepository() {
+		super(ServerAlarmRuleMapper.class, MAPPER_RESOURCE,
+				"ServerAlarmRuleRepository is using Spring managed ServerAlarmRuleMapper.");
 	}
 
 	public ServerAlarmRule createLocal() {
@@ -31,9 +30,14 @@ public class ServerAlarmRuleRepository extends MyBatisRepositorySupport {
 	}
 
 	public int deleteByPK(ServerAlarmRule proto) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
+		}
+
 		try (SqlSession session = openSession()) {
-			ServerAlarmRuleMapper mapper = session.getMapper(ServerAlarmRuleMapper.class);
-			int count = mapper.deleteByPrimaryKey(proto.getKeyId());
+			int count = session.getMapper(ServerAlarmRuleMapper.class).deleteByPrimaryKey(proto.getKeyId());
 			session.commit();
 			return count;
 		} catch (Exception e) {
@@ -42,19 +46,31 @@ public class ServerAlarmRuleRepository extends MyBatisRepositorySupport {
 	}
 
 	public List<ServerAlarmRule> findAll(Readset<ServerAlarmRule> readset) throws DalException {
-		try (SqlSession session = openSession()) {
-			ServerAlarmRuleMapper mapper = session.getMapper(ServerAlarmRuleMapper.class);
-			ServerAlarmRuleDO record = new ServerAlarmRuleDO();
+		ServerAlarmRuleMapper mapper = springMapper(LOGGER);
+		ServerAlarmRuleDO record = new ServerAlarmRuleDO();
+
+		if (mapper != null) {
 			return mapper.findAll(record).stream().map(this::toModel).collect(Collectors.toList());
+		}
+
+		try (SqlSession session = openSession()) {
+			return session.getMapper(ServerAlarmRuleMapper.class).findAll(record).stream()
+					.map(this::toModel)
+					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findAll for ServerAlarmRule.", e);
 		}
 	}
 
 	public ServerAlarmRule findByPK(int keyId, Readset<ServerAlarmRule> readset) throws DalException {
+		ServerAlarmRuleMapper mapper = springMapper(LOGGER);
+
+		if (mapper != null) {
+			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
+		}
+
 		try (SqlSession session = openSession()) {
-			ServerAlarmRuleMapper mapper = session.getMapper(ServerAlarmRuleMapper.class);
-			ServerAlarmRuleDO record = mapper.findByPrimaryKey(keyId);
+			ServerAlarmRuleDO record = session.getMapper(ServerAlarmRuleMapper.class).findByPrimaryKey(keyId);
 			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -64,10 +80,20 @@ public class ServerAlarmRuleRepository extends MyBatisRepositorySupport {
 	}
 
 	public int insert(ServerAlarmRule proto) throws DalException {
-		try (SqlSession session = openSession()) {
-			ServerAlarmRuleMapper mapper = session.getMapper(ServerAlarmRuleMapper.class);
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
 			ServerAlarmRuleDO record = toRecord(proto);
-			int count = mapper.insert(record);
+			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
+
+			proto.setId(record.getId());
+			proto.setKeyId(record.getId());
+			return count;
+		}
+
+		try (SqlSession session = openSession()) {
+			ServerAlarmRuleDO record = toRecord(proto);
+			int count = session.getMapper(ServerAlarmRuleMapper.class).insert(record);
 			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
@@ -78,9 +104,14 @@ public class ServerAlarmRuleRepository extends MyBatisRepositorySupport {
 	}
 
 	public int updateByPK(ServerAlarmRule proto, Updateset<ServerAlarmRule> updateset) throws DalException {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		if (transactionTemplate != null) {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
+		}
+
 		try (SqlSession session = openSession()) {
-			ServerAlarmRuleMapper mapper = session.getMapper(ServerAlarmRuleMapper.class);
-			int count = mapper.updateByPrimaryKey(toRecord(proto));
+			int count = session.getMapper(ServerAlarmRuleMapper.class).updateByPrimaryKey(toRecord(proto));
 			session.commit();
 			return count;
 		} catch (Exception e) {

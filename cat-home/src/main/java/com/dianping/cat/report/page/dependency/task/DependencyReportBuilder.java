@@ -37,6 +37,7 @@ import com.dianping.cat.home.dependency.graph.transform.DefaultNativeBuilder;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder;
 import com.dianping.cat.report.page.dependency.service.DependencyReportService;
 import com.dianping.cat.report.task.TaskBuilder;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = DependencyReportBuilder.ID)
 public class DependencyReportBuilder implements TaskBuilder {
@@ -59,6 +60,7 @@ public class DependencyReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String reportDomain, Date reportPeriod) {
+		refreshSpringBeans();
 		Date end = new Date(reportPeriod.getTime() + TimeHelper.ONE_HOUR);
 		Set<String> domains = m_reportService.queryAllDomainNames(reportPeriod, end, DependencyAnalyzer.ID);
 		boolean result = true;
@@ -102,6 +104,14 @@ public class DependencyReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String reportDomain, Date reportPeriod) {
 		throw new UnsupportedOperationException("no week report builder for dependency!");
+	}
+
+	private void refreshSpringBeans() {
+		TopologyGraphRepository topologyGraphDao = CatSpringContext.getBeanIfAvailable(TopologyGraphRepository.class);
+
+		if (topologyGraphDao != null) {
+			m_topologyGraphDao = topologyGraphDao;
+		}
 	}
 
 }

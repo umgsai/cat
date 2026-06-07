@@ -34,6 +34,7 @@ import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportReposit
 import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = CapacityUpdater.class, value = HourlyCapacityUpdater.ID)
 public class HourlyCapacityUpdater implements CapacityUpdater {
@@ -59,6 +60,8 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 
 	@Override
 	public void updateDBCapacity() throws DalException {
+		refreshSpringBeans();
+
 		int maxId = m_manager.getHourlyStatus();
 
 		while (true) {
@@ -101,6 +104,23 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 			}
 		}
 		m_manager.updateHourlyStatus(maxId);
+	}
+
+	private void refreshSpringBeans() {
+		HourlyReportContentRepository hourlyReportContentDao = CatSpringContext
+		      .getBeanIfAvailable(HourlyReportContentRepository.class);
+		HourlyReportRepository hourlyReportDao = CatSpringContext.getBeanIfAvailable(HourlyReportRepository.class);
+		OverloadRepository overloadDao = CatSpringContext.getBeanIfAvailable(OverloadRepository.class);
+
+		if (hourlyReportContentDao != null) {
+			m_hourlyReportContentDao = hourlyReportContentDao;
+		}
+		if (hourlyReportDao != null) {
+			m_hourlyReportDao = hourlyReportDao;
+		}
+		if (overloadDao != null) {
+			m_overloadDao = overloadDao;
+		}
 	}
 
 }

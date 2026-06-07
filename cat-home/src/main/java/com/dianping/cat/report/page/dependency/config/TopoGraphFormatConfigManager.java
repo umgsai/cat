@@ -37,6 +37,7 @@ import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.home.dependency.format.entity.ProductLine;
 import com.dianping.cat.home.dependency.format.entity.TopoGraphFormatConfig;
 import com.dianping.cat.home.dependency.format.transform.DefaultSaxParser;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class TopoGraphFormatConfigManager implements Initializable {
@@ -71,6 +72,8 @@ public class TopoGraphFormatConfigManager implements Initializable {
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
+
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -115,6 +118,8 @@ public class TopoGraphFormatConfigManager implements Initializable {
 
 	private boolean storeConfig() {
 		synchronized (this) {
+			refreshSpringBeans();
+
 			try {
 				Config config = m_configDao.createLocal();
 
@@ -129,5 +134,17 @@ public class TopoGraphFormatConfigManager implements Initializable {
 			}
 		}
 		return true;
+	}
+
+	private void refreshSpringBeans() {
+		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
+		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
+
+		if (configDao != null) {
+			m_configDao = configDao;
+		}
+		if (fetcher != null) {
+			m_fetcher = fetcher;
+		}
 	}
 }

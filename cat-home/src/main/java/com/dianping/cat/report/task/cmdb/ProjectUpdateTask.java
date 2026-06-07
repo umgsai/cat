@@ -50,6 +50,7 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.report.page.transaction.service.TransactionReportService;
 import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class ProjectUpdateTask implements Task, LogEnabled {
@@ -99,6 +100,8 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 	}
 
 	public void deleteUnusedDomainInfo() {
+		refreshSpringBeans();
+
 		try {
 			List<Project> all = m_projectService.findAll();
 			Date start = TimeHelper.getCurrentDay(-30);
@@ -321,6 +324,8 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 
 	@Override
 	public void run() {
+		refreshSpringBeans();
+
 		// TODO
 		// Transaction t1 = Cat.newTransaction("CMDB", "DeleteUnusedDomain");
 		// try {
@@ -463,6 +468,18 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 			}
 		} catch (Throwable e) {
 			Cat.logError(e);
+		}
+	}
+
+	private void refreshSpringBeans() {
+		HostinfoService hostinfoService = CatSpringContext.getBeanIfAvailable(HostinfoService.class);
+		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+
+		if (hostinfoService != null) {
+			m_hostInfoService = hostinfoService;
+		}
+		if (projectService != null) {
+			m_projectService = projectService;
 		}
 	}
 
