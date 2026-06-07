@@ -28,12 +28,12 @@ import org.unidal.lookup.annotation.Named;
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentDao;
+import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
 import com.dianping.cat.core.dal.HourlyReportContentEntity;
-import com.dianping.cat.core.dal.HourlyReportDao;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
 import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.home.dal.report.Overload;
-import com.dianping.cat.home.dal.report.OverloadDao;
+import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 
 @Named(type = CapacityUpdater.class, value = HourlyCapacityUpdater.ID)
 public class HourlyCapacityUpdater implements CapacityUpdater {
@@ -41,13 +41,13 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 	public static final String ID = "hourly_capacity_updater";
 
 	@Inject
-	private HourlyReportContentDao m_hourlyReportContentDao;
+	private HourlyReportContentRepository m_hourlyReportContentDao;
 
 	@Inject
-	private HourlyReportDao m_hourlyReportDao;
+	private HourlyReportRepository m_hourlyReportDao;
 
 	@Inject
-	private OverloadDao m_overloadDao;
+	private OverloadRepository m_overloadDao;
 
 	@Inject
 	private CapacityUpdateStatusManager m_manager;

@@ -21,7 +21,7 @@ package com.dianping.cat.service;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.dal.Project;
-import com.dianping.cat.core.dal.ProjectDao;
+import com.dianping.cat.core.mybatis.repository.project.ProjectRepository;
 import com.dianping.cat.core.dal.ProjectEntity;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
@@ -39,7 +39,7 @@ public class ProjectService implements Initializable {
 	public static final String DEFAULT = "Default";
 
 	@Inject
-	private ProjectDao m_projectDao;
+	private ProjectRepository m_projectDao;
 
 	@Inject
 	private ServerConfigManager m_manager;

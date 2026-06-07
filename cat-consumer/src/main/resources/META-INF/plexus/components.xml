@@ -64,10 +64,10 @@
 					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.DomainValidator</role>
@@ -131,10 +131,10 @@
 					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.DomainValidator</role>
@@ -204,10 +204,10 @@
 					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.DomainValidator</role>
@@ -275,10 +275,10 @@
 					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.DomainValidator</role>
@@ -328,10 +328,10 @@
 					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.DomainValidator</role>
@@ -416,7 +416,7 @@
 			<implementation>com.dianping.cat.service.ProjectService</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.dal.ProjectDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.project.ProjectRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -440,10 +440,10 @@
 					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.DomainValidator</role>
@@ -502,10 +502,10 @@
 					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.DomainValidator</role>
@@ -557,10 +557,10 @@
 					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.DomainValidator</role>
@@ -619,10 +619,10 @@
 					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.DomainValidator</role>
@@ -711,10 +711,10 @@
 					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.DomainValidator</role>
@@ -766,10 +766,10 @@
 					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.DomainValidator</role>

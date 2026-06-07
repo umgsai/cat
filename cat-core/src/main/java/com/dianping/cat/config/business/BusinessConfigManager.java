@@ -39,7 +39,7 @@ import com.dianping.cat.configuration.business.entity.BusinessItemConfig;
 import com.dianping.cat.configuration.business.entity.BusinessReportConfig;
 import com.dianping.cat.configuration.business.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.BusinessConfig;
-import com.dianping.cat.core.config.BusinessConfigDao;
+import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
 import com.dianping.cat.core.config.BusinessConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
@@ -50,7 +50,7 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 	public final static String BASE_CONFIG = "base";
 
 	@Inject
-	private BusinessConfigDao m_configDao;
+	private BusinessConfigRepository m_configDao;
 
 	private Map<String, Set<String>> m_domains = new ConcurrentHashMap<String, Set<String>>();
 

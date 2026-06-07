@@ -32,7 +32,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
-import com.dianping.cat.alarm.AlertDao;
+import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.alarm.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.home.alert.summary.entity.AlertSummary;
@@ -50,7 +50,7 @@ public class AlertInfoBuilder {
 	public static final String PREFIX = "dependency_";
 
 	@Inject
-	private AlertDao m_alertDao;
+	private AlertRepository m_alertDao;
 
 	@Inject
 	private TopologyGraphManager m_topologyManager;

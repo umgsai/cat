@@ -28,12 +28,12 @@ import org.unidal.lookup.annotation.Named;
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.dal.WeeklyReportContent;
-import com.dianping.cat.core.dal.WeeklyReportContentDao;
+import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
 import com.dianping.cat.core.dal.WeeklyReportContentEntity;
-import com.dianping.cat.core.dal.WeeklyReportDao;
+import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
 import com.dianping.cat.core.dal.WeeklyReportEntity;
 import com.dianping.cat.home.dal.report.Overload;
-import com.dianping.cat.home.dal.report.OverloadDao;
+import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 
 @Named(type = CapacityUpdater.class, value = WeeklyCapacityUpdater.ID)
 public class WeeklyCapacityUpdater implements CapacityUpdater {
@@ -41,13 +41,13 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 	public static final String ID = "weekly_capacity_updater";
 
 	@Inject
-	private WeeklyReportDao m_weeklyReportDao;
+	private WeeklyReportRepository m_weeklyReportDao;
 
 	@Inject
-	private WeeklyReportContentDao m_weeklyReportContentDao;
+	private WeeklyReportContentRepository m_weeklyReportContentDao;
 
 	@Inject
-	private OverloadDao m_overloadDao;
+	private OverloadRepository m_overloadDao;
 
 	@Inject
 	private CapacityUpdateStatusManager m_manager;

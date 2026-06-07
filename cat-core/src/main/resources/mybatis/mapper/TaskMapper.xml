@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.task.dao.TaskMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.task.dao.data.TaskDO">
+		<id column="id" property="id"/>
+		<result column="producer" property="producer"/>
+		<result column="consumer" property="consumer"/>
+		<result column="failure_count" property="failureCount"/>
+		<result column="report_name" property="reportName"/>
+		<result column="report_domain" property="reportDomain"/>
+		<result column="report_period" property="reportPeriod"/>
+		<result column="status" property="status"/>
+		<result column="task_type" property="taskType"/>
+		<result column="creation_date" property="creationDate"/>
+		<result column="start_date" property="startDate"/>
+		<result column="end_date" property="endDate"/>
+		<result column="count" property="count"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		producer,
+		consumer,
+		failure_count,
+		report_name,
+		report_domain,
+		report_period,
+		status,
+		task_type,
+		creation_date,
+		start_date,
+		end_date
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.task.dao.data.TaskDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO task
+			(producer, consumer, failure_count, report_name, report_domain, report_period, status, task_type, creation_date, start_date, end_date)
+		VALUES
+			(#{producer}, #{consumer}, #{failureCount}, #{reportName}, #{reportDomain}, #{reportPeriod}, #{status}, #{taskType}, #{creationDate}, #{startDate}, #{endDate})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM task
+		WHERE id = #{id}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM task
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM task
+		WHERE id = #{id}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.task.dao.data.TaskDO">
+		UPDATE task
+		SET producer = #{producer},
+			consumer = #{consumer},
+			failure_count = #{failureCount},
+			report_name = #{reportName},
+			report_domain = #{reportDomain},
+			report_period = #{reportPeriod},
+			status = #{status},
+			task_type = #{taskType},
+			creation_date = #{creationDate},
+			start_date = #{startDate},
+			end_date = #{endDate}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findByStatusConsumer" resultMap="BaseResultMap">
+		SELECT id, producer, consumer, failure_count, report_name, report_domain, report_period, status, task_type, creation_date, start_date, end_date, COUNT(*) AS count FROM task WHERE status = #{record.status} <if test="record.consumer != null"> AND consumer = #{record.consumer} </if> limit 1
+	</select>
+
+	<update id="updateTodoToDoing">
+		UPDATE task SET consumer=#{record.consumer}, status=2, start_date=#{record.startDate} WHERE status = 1 AND id = #{record.id};
+	</update>
+
+	<update id="updateDoingToDone">
+		UPDATE task SET status=3, end_date=#{record.endDate} WHERE status = 2 AND id = #{record.id};
+	</update>
+
+	<update id="updateFailureToDone">
+		UPDATE task SET status=3, end_date=#{record.endDate} WHERE status =4 AND id = #{record.id};
+	</update>
+
+	<update id="updateStatusToTodo">
+		UPDATE task SET status=1, WHERE id = #{record.id};
+	</update>
+
+	<update id="updateDoingToFail">
+		UPDATE task SET status=4, end_date=#{record.endDate}, failure_count = failure_count + 1 WHERE status = 2 AND id = #{record.id};
+	</update>
+</mapper>

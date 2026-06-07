@@ -19,12 +19,20 @@
 package com.dianping.cat.build;
 
 import org.unidal.dal.jdbc.configuration.AbstractJdbcResourceConfigurator;
+import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import org.unidal.lookup.configuration.Component;
+
+import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
+import com.dianping.cat.core.mybatis.repository.server.alarm.rule.ServerAlarmRuleRepository;
+import com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 
 final class CatDatabaseConfigurator extends AbstractJdbcResourceConfigurator {
+	private static final String[] REPLACED_DAO_ROLES = { "com.dianping.cat.alarm.AlertDao",
+			"com.dianping.cat.alarm.ServerAlarmRuleDao", "com.dianping.cat.alarm.UserDefineRuleDao" };
+
 	@Override
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
@@ -33,7 +41,28 @@ final class CatDatabaseConfigurator extends AbstractJdbcResourceConfigurator {
 
 		defineSimpleTableProviderComponents(all, "cat", com.dianping.cat.alarm._INDEX.getEntityClasses());
 		defineDaoComponents(all, com.dianping.cat.alarm._INDEX.getDaoClasses());
+		removeReplacedDaoComponents(all);
+		addRepositoryComponents(all);
 
 		return all;
+	}
+
+	private void addRepositoryComponents(List<Component> components) {
+		components.add(C(AlertRepository.class).req(DataSourceManager.class));
+		components.add(C(ServerAlarmRuleRepository.class).req(DataSourceManager.class));
+		components.add(C(UserDefineRuleRepository.class).req(DataSourceManager.class));
+	}
+
+	private boolean isReplacedDaoRole(String role) {
+		for (String replacedDaoRole : REPLACED_DAO_ROLES) {
+			if (replacedDaoRole.equals(role)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void removeReplacedDaoComponents(List<Component> components) {
+		components.removeIf(component -> isReplacedDaoRole(component.getModel().getRole()));
 	}
 }

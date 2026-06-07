@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.topologygraph.dao.TopologyGraphMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.topologygraph.dao.data.TopologyGraphDO">
+		<id column="id" property="id"/>
+		<result column="ip" property="ip"/>
+		<result column="period" property="period"/>
+		<result column="type" property="type"/>
+		<result column="content" property="content"/>
+		<result column="creation_date" property="creationDate"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		ip,
+		period,
+		type,
+		content,
+		creation_date
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.topologygraph.dao.data.TopologyGraphDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO topologyGraph
+			(ip, period, type, content, creation_date)
+		VALUES
+			(#{ip}, #{period}, #{type}, #{content}, #{creationDate})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM topologyGraph
+		WHERE id = #{id}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM topologyGraph
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM topologyGraph
+		WHERE id = #{id}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.topologygraph.dao.data.TopologyGraphDO">
+		UPDATE topologyGraph
+		SET ip = #{ip},
+			period = #{period},
+			type = #{type},
+			content = #{content},
+			creation_date = #{creationDate}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findByPeriod" resultMap="BaseResultMap">
+		SELECT id, ip, period, type, content, creation_date FROM topologyGraph WHERE period = #{record.period}
+	</select>
+</mapper>

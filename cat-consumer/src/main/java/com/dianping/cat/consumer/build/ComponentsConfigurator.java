@@ -66,8 +66,8 @@ import com.dianping.cat.consumer.top.TopAnalyzer;
 import com.dianping.cat.consumer.top.TopDelegate;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionDelegate;
-import com.dianping.cat.core.dal.HourlyReportContentDao;
-import com.dianping.cat.core.dal.HourlyReportDao;
+import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
 import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.report.DefaultReportManager;
@@ -119,7 +119,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(IpConvertManager.class));
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
-								.req(ReportBucketManager.class, HourlyReportDao.class, HourlyReportContentDao.class, DomainValidator.class) //
+								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 
 		return all;
@@ -135,7 +135,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(DatabaseParser.class));
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
-								.req(ReportBucketManager.class, HourlyReportDao.class, HourlyReportContentDao.class, DomainValidator.class) //
+								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 
 		return all;
@@ -160,7 +160,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
-								.req(ReportBucketManager.class, HourlyReportDao.class, HourlyReportContentDao.class, DomainValidator.class) //
+								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 
 		return all;
@@ -175,7 +175,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
-								.req(ReportBucketManager.class, HourlyReportDao.class, HourlyReportContentDao.class, DomainValidator.class) //
+								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 
 		return all;
@@ -190,7 +190,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
-								.req(ReportBucketManager.class, HourlyReportDao.class, HourlyReportContentDao.class, DomainValidator.class) //
+								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 
 		return all;
@@ -205,7 +205,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
-								.req(ReportBucketManager.class, HourlyReportDao.class, HourlyReportContentDao.class, DomainValidator.class) //
+								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 		return all;
 	}
@@ -226,7 +226,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 														new String[] { DefaultProblemHandler.ID, LongExecutionProblemHandler.ID }, "m_handlers"));
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
-								.req(ReportBucketManager.class, HourlyReportDao.class, HourlyReportContentDao.class, DomainValidator.class) //
+								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 
 		all.add(A(ProblemDelegate.class));
@@ -244,7 +244,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(A(ProjectService.class));
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
-								.req(ReportBucketManager.class, HourlyReportDao.class, HourlyReportContentDao.class, DomainValidator.class) //
+								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 
 		return all;
@@ -259,7 +259,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
-								.req(ReportBucketManager.class, HourlyReportDao.class, HourlyReportContentDao.class, DomainValidator.class) //
+								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 
 		return all;
@@ -274,7 +274,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
-								.req(ReportBucketManager.class, HourlyReportDao.class, HourlyReportContentDao.class, DomainValidator.class) //
+								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 
 		return all;
@@ -295,7 +295,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
-								.req(ReportBucketManager.class, HourlyReportDao.class, HourlyReportContentDao.class, DomainValidator.class) //
+								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 
 		return all;

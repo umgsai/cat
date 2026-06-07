@@ -22,9 +22,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.unidal.dal.jdbc.configuration.AbstractJdbcResourceConfigurator;
+import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import org.unidal.lookup.configuration.Component;
 
+import com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository;
+import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
+import com.dianping.cat.core.mybatis.repository.baseline.BaselineRepository;
+import com.dianping.cat.core.mybatis.repository.config.modification.ConfigModificationRepository;
+import com.dianping.cat.core.mybatis.repository.metric.graph.MetricGraphRepository;
+import com.dianping.cat.core.mybatis.repository.metric.screen.MetricScreenRepository;
+import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
+import com.dianping.cat.core.mybatis.repository.topologygraph.TopologyGraphRepository;
+
 final class CatDatabaseConfigurator extends AbstractJdbcResourceConfigurator {
+	private static final String[] REPLACED_DAO_ROLES = { "com.dianping.cat.home.dal.report.AlertSummaryDao",
+			"com.dianping.cat.home.dal.report.AlterationDao", "com.dianping.cat.home.dal.report.BaselineDao",
+			"com.dianping.cat.home.dal.report.ConfigModificationDao",
+			"com.dianping.cat.home.dal.report.MetricGraphDao", "com.dianping.cat.home.dal.report.MetricScreenDao",
+			"com.dianping.cat.home.dal.report.OverloadDao", "com.dianping.cat.home.dal.report.TopologyGraphDao" };
+
 	@Override
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
@@ -33,7 +49,33 @@ final class CatDatabaseConfigurator extends AbstractJdbcResourceConfigurator {
 
 		defineSimpleTableProviderComponents(all, "cat", com.dianping.cat.home.dal.report._INDEX.getEntityClasses());
 		defineDaoComponents(all, com.dianping.cat.home.dal.report._INDEX.getDaoClasses());
+		removeReplacedDaoComponents(all);
+		addRepositoryComponents(all);
 
 		return all;
+	}
+
+	private void addRepositoryComponents(List<Component> components) {
+		components.add(C(AlertSummaryRepository.class).req(DataSourceManager.class));
+		components.add(C(AlterationRepository.class).req(DataSourceManager.class));
+		components.add(C(BaselineRepository.class).req(DataSourceManager.class));
+		components.add(C(ConfigModificationRepository.class).req(DataSourceManager.class));
+		components.add(C(MetricGraphRepository.class).req(DataSourceManager.class));
+		components.add(C(MetricScreenRepository.class).req(DataSourceManager.class));
+		components.add(C(OverloadRepository.class).req(DataSourceManager.class));
+		components.add(C(TopologyGraphRepository.class).req(DataSourceManager.class));
+	}
+
+	private boolean isReplacedDaoRole(String role) {
+		for (String replacedDaoRole : REPLACED_DAO_ROLES) {
+			if (replacedDaoRole.equals(role)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void removeReplacedDaoComponents(List<Component> components) {
+		components.removeIf(component -> isReplacedDaoRole(component.getModel().getRole()));
 	}
 }

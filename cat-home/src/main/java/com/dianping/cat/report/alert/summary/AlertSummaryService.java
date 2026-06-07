@@ -24,13 +24,13 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.dal.report.AlertSummary;
-import com.dianping.cat.home.dal.report.AlertSummaryDao;
+import com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository;
 
 @Named
 public class AlertSummaryService {
 
 	@Inject
-	private AlertSummaryDao m_alertSummaryDao;
+	private AlertSummaryRepository m_alertSummaryDao;
 
 	public void insert(com.dianping.cat.home.alert.summary.entity.AlertSummary alertSummary) {
 		AlertSummary summary = new AlertSummary();

@@ -31,7 +31,7 @@ import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.dependency.DependencyAnalyzer;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
 import com.dianping.cat.helper.TimeHelper;
-import com.dianping.cat.home.dal.report.TopologyGraphDao;
+import com.dianping.cat.core.mybatis.repository.topologygraph.TopologyGraphRepository;
 import com.dianping.cat.home.dependency.graph.entity.TopologyGraph;
 import com.dianping.cat.home.dependency.graph.transform.DefaultNativeBuilder;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder;
@@ -50,7 +50,7 @@ public class DependencyReportBuilder implements TaskBuilder {
 	private TopologyGraphBuilder m_graphBuilder;
 
 	@Inject
-	private TopologyGraphDao m_topologyGraphDao;
+	private TopologyGraphRepository m_topologyGraphDao;
 
 	@Override
 	public boolean buildDailyTask(String name, String reportDomain, Date reportPeriod) {

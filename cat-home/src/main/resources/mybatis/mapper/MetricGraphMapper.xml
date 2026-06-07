@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.metric.graph.dao.MetricGraphMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.metric.graph.dao.data.MetricGraphDO">
+		<id column="id" property="id"/>
+		<result column="graph_id" property="graphId"/>
+		<result column="name" property="name"/>
+		<result column="content" property="content"/>
+		<result column="creation_date" property="creationDate"/>
+		<result column="updatetime" property="updatetime"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		graph_id,
+		name,
+		content,
+		creation_date,
+		updatetime
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.metric.graph.dao.data.MetricGraphDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO metric_graph
+			(graph_id, name, content, creation_date, updatetime)
+		VALUES
+			(#{graphId}, #{name}, #{content}, #{creationDate}, #{updatetime})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM metric_graph
+		WHERE id = #{id}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM metric_graph
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM metric_graph
+		WHERE id = #{id}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.metric.graph.dao.data.MetricGraphDO">
+		UPDATE metric_graph
+		SET graph_id = #{graphId},
+			name = #{name},
+			content = #{content},
+			creation_date = #{creationDate},
+			updatetime = #{updatetime}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findByGrapId" resultMap="BaseResultMap">
+		SELECT id, graph_id, name, content, creation_date, updatetime FROM metric_graph WHERE graph_id = #{record.graphId}
+	</select>
+
+	<select id="findLast" resultMap="BaseResultMap">
+		SELECT id, graph_id, name, content, creation_date, updatetime FROM metric_graph ORDER BY creation_date DESC LIMIT #{record.number}
+	</select>
+
+	<delete id="deleteBeforeDate">
+		DELETE FROM metric_graph WHERE creation_date < #{record.creationDate}
+	</delete>
+</mapper>

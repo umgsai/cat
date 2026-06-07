@@ -41,7 +41,7 @@ import com.dianping.cat.alarm.rule.transform.DefaultJsonParser;
 import com.dianping.cat.alarm.rule.transform.DefaultSaxParser;
 import com.dianping.cat.configuration.business.entity.BusinessItemConfig;
 import com.dianping.cat.core.config.BusinessConfig;
-import com.dianping.cat.core.config.BusinessConfigDao;
+import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
 import com.dianping.cat.core.config.BusinessConfigEntity;
 import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.task.TimerSyncTask;
@@ -59,7 +59,7 @@ public class BusinessRuleConfigManager implements Initializable {
 	Map<String, MonitorRules> m_rules = new ConcurrentHashMap<String, MonitorRules>();
 
 	@Inject
-	private BusinessConfigDao m_configDao;
+	private BusinessConfigRepository m_configDao;
 
 	private List<Config> buildDefaultConfigs() {
 		List<Config> configs = new ArrayList<Config>();

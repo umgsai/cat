@@ -28,7 +28,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
-import com.dianping.cat.home.dal.report.OverloadDao;
+import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 import com.dianping.cat.home.dal.report.OverloadEntity;
 
 @Named
@@ -40,7 +40,7 @@ public class CapacityUpdateStatusManager implements Initializable {
 	private ConfigRepository m_configDao;
 
 	@Inject
-	private OverloadDao m_overloadDao;
+	private OverloadRepository m_overloadDao;
 
 	private int m_hourlyStatus;
 

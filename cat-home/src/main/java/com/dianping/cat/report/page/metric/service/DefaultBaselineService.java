@@ -35,7 +35,7 @@ import org.unidal.lookup.annotation.Named;
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.dal.report.Baseline;
-import com.dianping.cat.home.dal.report.BaselineDao;
+import com.dianping.cat.core.mybatis.repository.baseline.BaselineRepository;
 import com.dianping.cat.home.dal.report.BaselineEntity;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.task.TaskHelper;
@@ -44,7 +44,7 @@ import com.dianping.cat.report.task.TaskHelper;
 public class DefaultBaselineService implements BaselineService {
 
 	@Inject
-	private BaselineDao m_baselineDao;
+	private BaselineRepository m_baselineDao;
 
 	private Map<String, Baseline> m_baselines = new LinkedHashMap<String, Baseline>() {
 

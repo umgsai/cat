@@ -43,7 +43,7 @@ import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.dependency.DependencyAnalyzer;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
 import com.dianping.cat.helper.TimeHelper;
-import com.dianping.cat.home.dal.report.TopologyGraphDao;
+import com.dianping.cat.core.mybatis.repository.topologygraph.TopologyGraphRepository;
 import com.dianping.cat.home.dal.report.TopologyGraphEntity;
 import com.dianping.cat.home.dependency.format.entity.Domain;
 import com.dianping.cat.home.dependency.format.entity.ProductLine;
@@ -81,7 +81,7 @@ public class TopologyGraphManager implements Initializable, LogEnabled {
 	private ProjectService m_projectService;
 
 	@Inject
-	private TopologyGraphDao m_topologyGraphDao;
+	private TopologyGraphRepository m_topologyGraphDao;
 
 	private TopologyGraphBuilder m_currentBuilder;
 

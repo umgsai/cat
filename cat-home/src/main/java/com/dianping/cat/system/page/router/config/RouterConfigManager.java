@@ -25,6 +25,8 @@ import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.core.dal.*;
+import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
+import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.router.entity.*;
 import com.dianping.cat.home.router.transform.DefaultNativeParser;
@@ -63,10 +65,10 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 	private ContentFetcher m_fetcher;
 
 	@Inject
-	private DailyReportDao m_dailyReportDao;
+	private DailyReportRepository m_dailyReportDao;
 
 	@Inject
-	private DailyReportContentDao m_dailyReportContentDao;
+	private DailyReportContentRepository m_dailyReportContentDao;
 
 	private int m_configId;
 

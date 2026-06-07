@@ -25,13 +25,13 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.DailyReportDao;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportDao;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportDao;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.dal.WeeklyReportDao;
+import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 
 public class ReportDaoTest extends ComponentTestCase {
 
@@ -52,7 +52,7 @@ public class ReportDaoTest extends ComponentTestCase {
 
 	@Test
 	public void testDaily() throws DalException {
-		DailyReportDao dao = lookup(DailyReportDao.class);
+		DailyReportRepository dao = lookup(DailyReportRepository.class);
 		DailyReport proto = new DailyReport();
 
 		proto.setCreationDate(new Date());

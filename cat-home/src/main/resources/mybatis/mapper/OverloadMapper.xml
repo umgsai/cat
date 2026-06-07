@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.overload.dao.OverloadMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.overload.dao.data.OverloadDO">
+		<id column="id" property="id"/>
+		<result column="report_id" property="reportId"/>
+		<result column="report_type" property="reportType"/>
+		<result column="report_size" property="reportSize"/>
+		<result column="period" property="period"/>
+		<result column="creation_date" property="creationDate"/>
+		<result column="max_id" property="maxId"/>
+		<result column="count" property="count"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		report_id,
+		report_type,
+		report_size,
+		period,
+		creation_date
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.overload.dao.data.OverloadDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO overload
+			(report_id, report_type, report_size, period, creation_date)
+		VALUES
+			(#{reportId}, #{reportType}, #{reportSize}, #{period}, #{creationDate})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM overload
+		WHERE id = #{id}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM overload
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM overload
+		WHERE id = #{id}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.overload.dao.data.OverloadDO">
+		UPDATE overload
+		SET report_id = #{reportId},
+			report_type = #{reportType},
+			report_size = #{reportSize},
+			period = #{period},
+			creation_date = #{creationDate}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findMaxIdByType" resultMap="BaseResultMap">
+		SELECT id, report_id, report_type, report_size, period, creation_date, max(report_id) AS max_id, count(*) AS count FROM overload WHERE report_type = #{record.type}
+	</select>
+
+	<select id="findCount" resultMap="BaseResultMap">
+		SELECT id, report_id, report_type, report_size, period, creation_date, max(report_id) AS max_id, count(*) AS count FROM overload
+	</select>
+
+	<select id="findIdAndSizeByDuration" resultMap="BaseResultMap">
+		SELECT id, report_id, report_type, report_size, period, creation_date, max(report_id) AS max_id, count(*) AS count FROM overload WHERE period >= #{record.startTime} AND period <= #{record.endTime} ORDER BY period DESC, report_type ASC
+	</select>
+</mapper>

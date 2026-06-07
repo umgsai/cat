@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.weekly.report.content.dao.WeeklyReportContentMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.weekly.report.content.dao.data.WeeklyReportContentDO">
+		<id column="report_id" property="reportId"/>
+		<result column="content" property="content"/>
+		<result column="period" property="period"/>
+		<result column="creation_date" property="creationDate"/>
+		<result column="content_length" property="contentLength"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		report_id,
+		content,
+		period,
+		creation_date
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.weekly.report.content.dao.data.WeeklyReportContentDO">
+		INSERT INTO weekly_report_content
+			(report_id, content, period, creation_date)
+		VALUES
+			(#{reportId}, #{content}, #{period}, #{creationDate})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM weekly_report_content
+		WHERE report_id = #{reportId}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM weekly_report_content
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM weekly_report_content
+		WHERE report_id = #{reportId}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.weekly.report.content.dao.data.WeeklyReportContentDO">
+		UPDATE weekly_report_content
+		SET content = #{content},
+			period = #{period},
+			creation_date = #{creationDate}
+		WHERE report_id = #{reportId}
+	</update>
+
+	<select id="findOverloadReport" resultMap="BaseResultMap">
+		SELECT report_id, content, period, creation_date, length(content)/1024/1024 AS content_length FROM weekly_report_content WHERE report_id > #{record.startId} ORDER BY report_id asc limit 1000
+	</select>
+</mapper>

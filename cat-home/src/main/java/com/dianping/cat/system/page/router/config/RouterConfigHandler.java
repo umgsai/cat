@@ -36,7 +36,7 @@ import com.dianping.cat.Constants;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.DailyReportDao;
+import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.router.entity.Domain;
 import com.dianping.cat.home.router.entity.Group;
@@ -66,7 +66,7 @@ public class RouterConfigHandler implements LogEnabled {
 	private RouterConfigService m_reportService;
 
 	@Inject
-	private DailyReportDao m_dailyReportDao;
+	private DailyReportRepository m_dailyReportDao;
 
 	private void addServerList(List<Server> servers, Server server) {
 		for (Server s : servers) {

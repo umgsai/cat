@@ -31,7 +31,7 @@ import org.unidal.lookup.annotation.Named;
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.Task;
-import com.dianping.cat.core.dal.TaskDao;
+import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
 import com.dianping.cat.core.dal.TaskEntity;
 import com.dianping.cat.message.Transaction;
 
@@ -42,7 +42,7 @@ public class DefaultTaskConsumer extends TaskConsumer {
 	private ReportFacade m_reportFacade;
 
 	@Inject
-	private TaskDao m_taskDao;
+	private TaskRepository m_taskDao;
 
 	@Override
 	protected Task findDoingTask(String ip) {

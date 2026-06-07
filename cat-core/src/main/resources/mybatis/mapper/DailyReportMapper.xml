@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.report.daily.dao.DailyReportMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.report.daily.dao.data.DailyReportDO">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="ip" property="ip"/>
+		<result column="domain" property="domain"/>
+		<result column="period" property="period"/>
+		<result column="type" property="type"/>
+		<result column="creation_date" property="creationDate"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		name,
+		ip,
+		domain,
+		period,
+		type,
+		creation_date
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.report.daily.dao.data.DailyReportDO"
+			useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO dailyreport
+			(name, ip, domain, period, type, creation_date)
+		VALUES
+			(#{name}, #{ip}, #{domain}, #{period}, #{type}, #{creationDate})
+	</insert>
+
+	<select id="findById" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM dailyreport
+		WHERE id = #{id}
+	</select>
+
+	<select id="findByDomainNamePeriod" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM dailyreport
+		WHERE period = #{period}
+			AND domain = #{domain}
+			AND name = #{name}
+			AND BINARY(domain) = BINARY(#{domain})
+	</select>
+
+	<select id="queryLatestReportsByDomainName" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM dailyreport
+		WHERE domain = #{domain}
+			AND name = #{name}
+			AND BINARY(domain) = BINARY(#{domain})
+		ORDER BY id DESC
+		LIMIT #{limits}
+	</select>
+
+	<delete id="deleteById">
+		DELETE FROM dailyreport
+		WHERE id = #{id}
+	</delete>
+
+	<delete id="deleteByDomainNamePeriod">
+		DELETE FROM dailyreport
+		WHERE period = #{period}
+			AND domain = #{domain}
+			AND name = #{name}
+			AND BINARY(domain) = BINARY(#{domain})
+	</delete>
+
+	<update id="updateById" parameterType="com.dianping.cat.core.report.daily.dao.data.DailyReportDO">
+		UPDATE dailyreport
+		SET name = #{name},
+			ip = #{ip},
+			domain = #{domain},
+			period = #{period},
+			type = #{type},
+			creation_date = #{creationDate}
+		WHERE id = #{id}
+	</update>
+
+</mapper>

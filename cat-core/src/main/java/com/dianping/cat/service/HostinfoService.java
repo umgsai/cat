@@ -40,7 +40,7 @@ import org.unidal.lookup.util.StringUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.dal.Hostinfo;
-import com.dianping.cat.core.dal.HostinfoDao;
+import com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository;
 import com.dianping.cat.core.dal.HostinfoEntity;
 import com.dianping.cat.helper.TimeHelper;
 
@@ -52,7 +52,7 @@ public class HostinfoService implements Initializable, LogEnabled {
 	protected Logger m_logger;
 
 	@Inject
-	private HostinfoDao m_hostinfoDao;
+	private HostinfoRepository m_hostinfoDao;
 
 	@Inject
 	private ServerConfigManager m_manager;

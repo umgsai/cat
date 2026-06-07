@@ -23,14 +23,14 @@ import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.alarm.UserDefineRule;
-import com.dianping.cat.alarm.UserDefineRuleDao;
+import com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleRepository;
 import com.dianping.cat.alarm.UserDefineRuleEntity;
 
 @Named
 public class UserDefinedRuleManager {
 
 	@Inject
-	private UserDefineRuleDao m_dao;
+	private UserDefineRuleRepository m_dao;
 
 	public String addUserDefineText(String userDefinedText) throws DalException {
 		UserDefineRule item = m_dao.findMaxId(UserDefineRuleEntity.READSET_MAXID);

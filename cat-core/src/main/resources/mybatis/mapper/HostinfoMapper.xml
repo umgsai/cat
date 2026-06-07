@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.hostinfo.dao.HostinfoMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.hostinfo.dao.data.HostinfoDO">
+		<id column="id" property="id"/>
+		<result column="ip" property="ip"/>
+		<result column="domain" property="domain"/>
+		<result column="hostname" property="hostname"/>
+		<result column="creation_date" property="creationDate"/>
+		<result column="last_modified_date" property="lastModifiedDate"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		ip,
+		domain,
+		hostname,
+		creation_date,
+		last_modified_date
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.hostinfo.dao.data.HostinfoDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO hostinfo
+			(ip, domain, hostname, creation_date, last_modified_date)
+		VALUES
+			(#{ip}, #{domain}, #{hostname}, #{creationDate}, #{lastModifiedDate})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hostinfo
+		WHERE id = #{id}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hostinfo
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM hostinfo
+		WHERE id = #{id}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.hostinfo.dao.data.HostinfoDO">
+		UPDATE hostinfo
+		SET ip = #{ip},
+			domain = #{domain},
+			hostname = #{hostname},
+			creation_date = #{creationDate},
+			last_modified_date = #{lastModifiedDate}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findByIp" resultMap="BaseResultMap">
+		SELECT id, ip, domain, hostname, creation_date, last_modified_date FROM hostinfo WHERE ip = #{record.ip}
+	</select>
+
+	<select id="findAllIp" resultMap="BaseResultMap">
+		SELECT id, ip, domain, hostname, creation_date, last_modified_date FROM hostinfo
+	</select>
+</mapper>

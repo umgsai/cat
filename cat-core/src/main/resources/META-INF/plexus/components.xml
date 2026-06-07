@@ -30,7 +30,7 @@
 			<implementation>com.dianping.cat.service.HostinfoService</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.dal.HostinfoDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -50,7 +50,7 @@
 			<implementation>com.dianping.cat.task.TaskManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.dal.TaskDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.task.TaskRepository</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -127,7 +127,7 @@
 			<implementation>com.dianping.cat.config.business.BusinessConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.BusinessConfigDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -247,17 +247,116 @@
 			</configuration>
 		</component>
 		<component>
-			<role>com.dianping.cat.core.config.BusinessConfigDao</role>
-			<implementation>com.dianping.cat.core.config.BusinessConfigDao</implementation>
+			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+			<implementation>com.dianping.cat.core.config.repository.ConfigRepository</implementation>
 			<requirements>
 				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-			<implementation>com.dianping.cat.core.config.repository.ConfigRepository</implementation>
+			<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+			<implementation>com.dianping.cat.core.report.daily.repository.DailyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.project.ProjectRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.project.ProjectRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.task.TaskRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.task.TaskRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
@@ -364,105 +463,6 @@
 			</configuration>
 		</component>
 		<component>
-			<role>com.dianping.cat.core.dal.DailyReportContentDao</role>
-			<implementation>com.dianping.cat.core.dal.DailyReportContentDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.DailyReportDao</role>
-			<implementation>com.dianping.cat.core.dal.DailyReportDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.HostinfoDao</role>
-			<implementation>com.dianping.cat.core.dal.HostinfoDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.MonthlyReportContentDao</role>
-			<implementation>com.dianping.cat.core.dal.MonthlyReportContentDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.MonthlyReportDao</role>
-			<implementation>com.dianping.cat.core.dal.MonthlyReportDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.ProjectDao</role>
-			<implementation>com.dianping.cat.core.dal.ProjectDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.HourlyReportDao</role>
-			<implementation>com.dianping.cat.core.dal.HourlyReportDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
-			<implementation>com.dianping.cat.core.dal.HourlyReportContentDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.TaskDao</role>
-			<implementation>com.dianping.cat.core.dal.TaskDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.WeeklyReportContentDao</role>
-			<implementation>com.dianping.cat.core.dal.WeeklyReportContentDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.WeeklyReportDao</role>
-			<implementation>com.dianping.cat.core.dal.WeeklyReportDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
 			<role-hint>daily-report-content</role-hint>
 			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
@@ -562,105 +562,6 @@
 			</configuration>
 		</component>
 		<component>
-			<role>com.dianping.cat.core.dal.DailyReportContentDao</role>
-			<implementation>com.dianping.cat.core.dal.DailyReportContentDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.DailyReportDao</role>
-			<implementation>com.dianping.cat.core.dal.DailyReportDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.HostinfoDao</role>
-			<implementation>com.dianping.cat.core.dal.HostinfoDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.MonthlyReportContentDao</role>
-			<implementation>com.dianping.cat.core.dal.MonthlyReportContentDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.MonthlyReportDao</role>
-			<implementation>com.dianping.cat.core.dal.MonthlyReportDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.ProjectDao</role>
-			<implementation>com.dianping.cat.core.dal.ProjectDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.HourlyReportDao</role>
-			<implementation>com.dianping.cat.core.dal.HourlyReportDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.HourlyReportContentDao</role>
-			<implementation>com.dianping.cat.core.dal.HourlyReportContentDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.TaskDao</role>
-			<implementation>com.dianping.cat.core.dal.TaskDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.WeeklyReportContentDao</role>
-			<implementation>com.dianping.cat.core.dal.WeeklyReportContentDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.dal.WeeklyReportDao</role>
-			<implementation>com.dianping.cat.core.dal.WeeklyReportDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
 			<role-hint>business-config</role-hint>
 			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
@@ -679,17 +580,116 @@
 			</configuration>
 		</component>
 		<component>
-			<role>com.dianping.cat.core.config.BusinessConfigDao</role>
-			<implementation>com.dianping.cat.core.config.BusinessConfigDao</implementation>
+			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+			<implementation>com.dianping.cat.core.config.repository.ConfigRepository</implementation>
 			<requirements>
 				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-			<implementation>com.dianping.cat.core.config.repository.ConfigRepository</implementation>
+			<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+			<implementation>com.dianping.cat.core.report.daily.repository.DailyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.project.ProjectRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.project.ProjectRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.task.TaskRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.task.TaskRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>

@@ -30,38 +30,38 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.DailyReportDao;
 import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportDao;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
 import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.dal.MonthlyReportDao;
+import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
 import com.dianping.cat.core.dal.MonthlyReportEntity;
 import com.dianping.cat.core.dal.WeeklyReport;
-import com.dianping.cat.core.dal.WeeklyReportDao;
+import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
 import com.dianping.cat.core.dal.WeeklyReportEntity;
+import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
-import com.dianping.cat.home.dal.report.OverloadDao;
+import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 import com.dianping.cat.home.dal.report.OverloadEntity;
 
 @Named
 public class TableCapacityService extends ContainerHolder {
 
 	@Inject
-	private OverloadDao m_overloadDao;
+	private OverloadRepository m_overloadDao;
 
 	@Inject
-	private HourlyReportDao m_hourlyReportDao;
+	private HourlyReportRepository m_hourlyReportDao;
 
 	@Inject
-	private DailyReportDao m_dailyReportDao;
+	private DailyReportRepository m_dailyReportDao;
 
 	@Inject
-	private WeeklyReportDao m_weeklyReportDao;
+	private WeeklyReportRepository m_weeklyReportDao;
 
 	@Inject
-	private MonthlyReportDao m_monthlyReportDao;
+	private MonthlyReportRepository m_monthlyReportDao;
 
 	private OverloadReport generateOverloadReport(Object object, double reportSize, int reportType) {
 		OverloadReport overloadReport = new OverloadReport();

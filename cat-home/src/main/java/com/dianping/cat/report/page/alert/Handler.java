@@ -42,7 +42,7 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
-import com.dianping.cat.alarm.AlertDao;
+import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.alarm.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
@@ -57,7 +57,7 @@ public class Handler implements PageHandler<Context> {
 	private SenderManager m_senderManager;
 
 	@Inject
-	private AlertDao m_alertDao;
+	private AlertRepository m_alertDao;
 
 	private Alert buildAlertEntity(Payload payload) {
 		Alert alertEntity = new Alert();

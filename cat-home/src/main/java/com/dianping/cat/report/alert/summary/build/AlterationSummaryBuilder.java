@@ -29,7 +29,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.dal.report.Alteration;
-import com.dianping.cat.home.dal.report.AlterationDao;
+import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
 import com.dianping.cat.home.dal.report.AlterationEntity;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 
@@ -39,7 +39,7 @@ public class AlterationSummaryBuilder extends SummaryBuilder {
 	public static final String ID = "AlterationSummaryContentGenerator";
 
 	@Inject
-	private AlterationDao m_alterationDao;
+	private AlterationRepository m_alterationDao;
 
 	@Override
 	public Map<Object, Object> generateModel(String domain, Date date) {

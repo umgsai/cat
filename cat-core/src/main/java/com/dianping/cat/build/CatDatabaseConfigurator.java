@@ -26,9 +26,27 @@ import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import org.unidal.lookup.configuration.Component;
 
 import com.dianping.cat.core.config.repository.ConfigRepository;
+import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
+import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository;
+import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.project.ProjectRepository;
+import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
+import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
+import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 
 public final class CatDatabaseConfigurator extends AbstractJdbcResourceConfigurator {
-	private static final String CONFIG_DAO_ROLE = "com.dianping.cat.core.config.ConfigDao";
+	private static final String[] REPLACED_DAO_ROLES = { "com.dianping.cat.core.config.ConfigDao",
+			"com.dianping.cat.core.config.BusinessConfigDao", "com.dianping.cat.core.dal.DailyReportDao",
+			"com.dianping.cat.core.dal.DailyReportContentDao", "com.dianping.cat.core.dal.HostinfoDao",
+			"com.dianping.cat.core.dal.HourlyReportDao", "com.dianping.cat.core.dal.HourlyReportContentDao",
+			"com.dianping.cat.core.dal.MonthlyReportDao", "com.dianping.cat.core.dal.MonthlyReportContentDao",
+			"com.dianping.cat.core.dal.ProjectDao", "com.dianping.cat.core.dal.TaskDao",
+			"com.dianping.cat.core.dal.WeeklyReportDao", "com.dianping.cat.core.dal.WeeklyReportContentDao" };
 
 	@Override
 	public List<Component> defineComponents() {
@@ -41,13 +59,38 @@ public final class CatDatabaseConfigurator extends AbstractJdbcResourceConfigura
 
 		defineSimpleTableProviderComponents(all, "cat", com.dianping.cat.core.config._INDEX.getEntityClasses());
 		defineDaoComponents(all, com.dianping.cat.core.config._INDEX.getDaoClasses());
-		removeConfigDaoComponent(all);
-		all.add(C(ConfigRepository.class).req(DataSourceManager.class));
+		removeReplacedDaoComponents(all);
+		addRepositoryComponents(all);
 
 		return all;
 	}
 
-	private void removeConfigDaoComponent(List<Component> components) {
-		components.removeIf(component -> CONFIG_DAO_ROLE.equals(component.getModel().getRole()));
+	private void addRepositoryComponents(List<Component> components) {
+		components.add(C(ConfigRepository.class).req(DataSourceManager.class));
+		components.add(C(DailyReportRepository.class).req(DataSourceManager.class));
+		components.add(C(BusinessConfigRepository.class).req(DataSourceManager.class));
+		components.add(C(DailyReportContentRepository.class).req(DataSourceManager.class));
+		components.add(C(HostinfoRepository.class).req(DataSourceManager.class));
+		components.add(C(HourlyReportRepository.class).req(DataSourceManager.class));
+		components.add(C(HourlyReportContentRepository.class).req(DataSourceManager.class));
+		components.add(C(MonthlyReportRepository.class).req(DataSourceManager.class));
+		components.add(C(MonthlyReportContentRepository.class).req(DataSourceManager.class));
+		components.add(C(ProjectRepository.class).req(DataSourceManager.class));
+		components.add(C(TaskRepository.class).req(DataSourceManager.class));
+		components.add(C(WeeklyReportRepository.class).req(DataSourceManager.class));
+		components.add(C(WeeklyReportContentRepository.class).req(DataSourceManager.class));
+	}
+
+	private boolean isReplacedDaoRole(String role) {
+		for (String replacedDaoRole : REPLACED_DAO_ROLES) {
+			if (replacedDaoRole.equals(role)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void removeReplacedDaoComponents(List<Component> components) {
+		components.removeIf(component -> isReplacedDaoRole(component.getModel().getRole()));
 	}
 }

@@ -38,8 +38,8 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentDao;
-import com.dianping.cat.core.dal.HourlyReportDao;
+import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
@@ -57,10 +57,10 @@ public class DefaultReportManager<T> extends ContainerHolder implements ReportMa
 	private ReportBucketManager m_bucketManager;
 
 	@Inject
-	private HourlyReportDao m_reportDao;
+	private HourlyReportRepository m_reportDao;
 
 	@Inject
-	private HourlyReportContentDao m_reportContentDao;
+	private HourlyReportContentRepository m_reportContentDao;
 
 	@Inject
 	private DomainValidator m_validator;
@@ -238,11 +238,11 @@ public class DefaultReportManager<T> extends ContainerHolder implements ReportMa
 		m_name = name;
 	}
 
-	public void setReportContentDao(HourlyReportContentDao reportContentDao) {
+	public void setReportContentDao(HourlyReportContentRepository reportContentDao) {
 		m_reportContentDao = reportContentDao;
 	}
 
-	public void setReportDao(HourlyReportDao reportDao) {
+	public void setReportDao(HourlyReportRepository reportDao) {
 		m_reportDao = reportDao;
 	}
 

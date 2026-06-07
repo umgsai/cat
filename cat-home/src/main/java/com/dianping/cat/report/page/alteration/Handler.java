@@ -44,7 +44,7 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.storage.builder.StorageSQLBuilder;
 import com.dianping.cat.home.dal.report.Alteration;
-import com.dianping.cat.home.dal.report.AlterationDao;
+import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
 import com.dianping.cat.home.dal.report.AlterationEntity;
 import com.dianping.cat.report.ReportPage;
 
@@ -56,7 +56,7 @@ public class Handler implements PageHandler<Context> {
 	private JspViewer m_jspViewer;
 
 	@Inject
-	private AlterationDao m_alterationDao;
+	private AlterationRepository m_alterationDao;
 
 	private SimpleDateFormat m_sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

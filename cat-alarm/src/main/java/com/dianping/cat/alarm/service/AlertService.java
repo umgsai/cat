@@ -29,7 +29,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
-import com.dianping.cat.alarm.AlertDao;
+import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 
@@ -37,7 +37,7 @@ import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 public class AlertService {
 
 	@Inject
-	private AlertDao m_alertDao;
+	private AlertRepository m_alertDao;
 
 	private Alert buildAlert(AlertEntity alertEntity, SendMessageEntity message) {
 		Alert alert = new Alert();

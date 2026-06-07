@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.user.define.rule.dao.UserDefineRuleMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.user.define.rule.dao.data.UserDefineRuleDO">
+		<id column="id" property="id"/>
+		<result column="content" property="content"/>
+		<result column="creation_date" property="creationDate"/>
+		<result column="max_id" property="maxId"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		content,
+		creation_date
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.user.define.rule.dao.data.UserDefineRuleDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO user_define_rule
+			(content, creation_date)
+		VALUES
+			(#{content}, #{creationDate})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM user_define_rule
+		WHERE id = #{id}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM user_define_rule
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM user_define_rule
+		WHERE id = #{id}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.user.define.rule.dao.data.UserDefineRuleDO">
+		UPDATE user_define_rule
+		SET content = #{content},
+			creation_date = #{creationDate}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findMaxId" resultMap="BaseResultMap">
+		SELECT id, content, creation_date, max(id) AS max_id FROM user_define_rule
+	</select>
+</mapper>

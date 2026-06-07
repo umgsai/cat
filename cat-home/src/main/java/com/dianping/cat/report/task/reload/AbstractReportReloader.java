@@ -27,16 +27,16 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentDao;
-import com.dianping.cat.core.dal.HourlyReportDao;
+import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
 
 public abstract class AbstractReportReloader implements ReportReloader {
 
 	@Inject
-	protected HourlyReportDao m_hourlyReportDao;
+	protected HourlyReportRepository m_hourlyReportDao;
 
 	@Inject
-	protected HourlyReportContentDao m_hourlyReportContentDao;
+	protected HourlyReportContentRepository m_hourlyReportContentDao;
 
 	@Inject
 	protected ServerConfigManager m_serverConfigManager;

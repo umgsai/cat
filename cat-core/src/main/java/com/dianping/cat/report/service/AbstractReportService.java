@@ -37,23 +37,23 @@ import org.unidal.lookup.annotation.Inject;
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.dal.DailyReportContentDao;
-import com.dianping.cat.core.dal.DailyReportDao;
+import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentDao;
-import com.dianping.cat.core.dal.HourlyReportDao;
+import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
 import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
-import com.dianping.cat.core.dal.MonthlyReportContentDao;
-import com.dianping.cat.core.dal.MonthlyReportDao;
+import com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
 import com.dianping.cat.core.dal.MonthlyReportEntity;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.dal.WeeklyReportContent;
-import com.dianping.cat.core.dal.WeeklyReportContentDao;
-import com.dianping.cat.core.dal.WeeklyReportDao;
+import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
 import com.dianping.cat.core.dal.WeeklyReportEntity;
+import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
 
@@ -70,28 +70,28 @@ public abstract class AbstractReportService<T> implements LogEnabled, ReportServ
 	public static final int s_customer = 5;
 
 	@Inject
-	protected HourlyReportDao m_hourlyReportDao;
+	protected HourlyReportRepository m_hourlyReportDao;
 
 	@Inject
-	protected HourlyReportContentDao m_hourlyReportContentDao;
+	protected HourlyReportContentRepository m_hourlyReportContentDao;
 
 	@Inject
-	protected DailyReportDao m_dailyReportDao;
+	protected DailyReportRepository m_dailyReportDao;
 
 	@Inject
-	protected DailyReportContentDao m_dailyReportContentDao;
+	protected DailyReportContentRepository m_dailyReportContentDao;
 
 	@Inject
-	protected WeeklyReportDao m_weeklyReportDao;
+	protected WeeklyReportRepository m_weeklyReportDao;
 
 	@Inject
-	protected WeeklyReportContentDao m_weeklyReportContentDao;
+	protected WeeklyReportContentRepository m_weeklyReportContentDao;
 
 	@Inject
-	protected MonthlyReportDao m_monthlyReportDao;
+	protected MonthlyReportRepository m_monthlyReportDao;
 
 	@Inject
-	protected MonthlyReportContentDao m_monthlyReportContentDao;
+	protected MonthlyReportContentRepository m_monthlyReportContentDao;
 
 	protected Logger m_logger;
 

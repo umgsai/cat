@@ -29,29 +29,29 @@
 			</configuration>
 		</component>
 		<component>
-			<role>com.dianping.cat.alarm.AlertDao</role>
-			<implementation>com.dianping.cat.alarm.AlertDao</implementation>
+			<role>com.dianping.cat.core.mybatis.repository.alert.AlertRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.alert.AlertRepository</implementation>
 			<requirements>
 				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.alarm.ServerAlarmRuleDao</role>
-			<implementation>com.dianping.cat.alarm.ServerAlarmRuleDao</implementation>
+			<role>com.dianping.cat.core.mybatis.repository.server.alarm.rule.ServerAlarmRuleRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.server.alarm.rule.ServerAlarmRuleRepository</implementation>
 			<requirements>
 				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.alarm.UserDefineRuleDao</role>
-			<implementation>com.dianping.cat.alarm.UserDefineRuleDao</implementation>
+			<role>com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleRepository</implementation>
 			<requirements>
 				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -186,7 +186,7 @@
 			<implementation>com.dianping.cat.alarm.service.AlertService</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.alarm.AlertDao</role>
+					<role>com.dianping.cat.core.mybatis.repository.alert.AlertRepository</role>
 				</requirement>
 			</requirements>
 		</component>

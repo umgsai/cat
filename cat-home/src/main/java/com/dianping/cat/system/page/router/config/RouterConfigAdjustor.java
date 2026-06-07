@@ -38,8 +38,8 @@ import com.dianping.cat.consumer.state.model.entity.Machine;
 import com.dianping.cat.consumer.state.model.entity.ProcessDomain;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.DailyReportDao;
 import com.dianping.cat.core.dal.DailyReportEntity;
+import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.router.entity.DefaultServer;
@@ -69,7 +69,7 @@ public class RouterConfigAdjustor {
 	private ServerConfigManager m_serverConfigManager;
 
 	@Inject
-	private DailyReportDao m_dailyReportDao;
+	private DailyReportRepository m_dailyReportDao;
 
 	public void Adjust(Date period) {
 		Date end = new Date(period.getTime() + TimeHelper.ONE_HOUR);

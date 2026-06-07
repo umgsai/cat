@@ -32,7 +32,7 @@ import org.unidal.lookup.annotation.Inject;
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.core.config.BusinessConfig;
-import com.dianping.cat.core.config.BusinessConfigDao;
+import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
 import com.dianping.cat.core.config.BusinessConfigEntity;
 import com.dianping.cat.home.business.entity.BusinessItem;
 import com.dianping.cat.home.business.entity.BusinessTagConfig;
@@ -44,7 +44,7 @@ public class BusinessTagConfigManager implements Initializable {
 	public final static String TAG_CONFIG = "tag";
 
 	@Inject
-	private BusinessConfigDao m_configDao;
+	private BusinessConfigRepository m_configDao;
 
 	private int m_configId;
 

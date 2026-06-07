@@ -34,8 +34,8 @@ import org.unidal.dal.jdbc.DalException;
 
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentDao;
-import com.dianping.cat.core.dal.HourlyReportDao;
+import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
 import com.dianping.cat.report.DefaultReportManager;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.DomainValidator;
@@ -155,7 +155,7 @@ public class DefaultReportManagerTest {
 
 	}
 
-	public class MockHourlyReportDao extends HourlyReportDao {
+	public class MockHourlyReportDao extends HourlyReportRepository {
 
 		public int count;
 
@@ -166,7 +166,7 @@ public class DefaultReportManagerTest {
 
 	}
 
-	public class MockReportContentDao extends HourlyReportContentDao {
+	public class MockReportContentDao extends HourlyReportContentRepository {
 
 		public int count;
 

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.business.config.dao.BusinessConfigMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.business.config.dao.data.BusinessConfigDO">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="domain" property="domain"/>
+		<result column="content" property="content"/>
+		<result column="updatetime" property="updatetime"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		name,
+		domain,
+		content,
+		updatetime
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.business.config.dao.data.BusinessConfigDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO business_config
+			(name, domain, content, updatetime)
+		VALUES
+			(#{name}, #{domain}, #{content}, #{updatetime})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM business_config
+		WHERE id = #{id}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM business_config
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM business_config
+		WHERE id = #{id}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.business.config.dao.data.BusinessConfigDO">
+		UPDATE business_config
+		SET name = #{name},
+			domain = #{domain},
+			content = #{content},
+			updatetime = #{updatetime}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findByNameDomain" resultMap="BaseResultMap">
+		SELECT id, name, domain, content, updatetime FROM business_config WHERE name = #{record.name} AND domain = #{record.domain}
+	</select>
+
+	<select id="findByName" resultMap="BaseResultMap">
+		SELECT id, name, domain, content, updatetime FROM business_config WHERE name = #{record.name}
+	</select>
+
+	<update id="updateBaseConfigByDomain">
+		UPDATE business_config SET content=#{record.content}, updatetime=NOW() WHERE domain = #{record.domain} AND name = #{record.name};
+	</update>
+</mapper>

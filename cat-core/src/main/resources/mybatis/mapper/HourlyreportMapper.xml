@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.hourlyreport.dao.HourlyreportMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.hourlyreport.dao.data.HourlyreportDO">
+		<id column="id" property="id"/>
+		<result column="type" property="type"/>
+		<result column="name" property="name"/>
+		<result column="ip" property="ip"/>
+		<result column="domain" property="domain"/>
+		<result column="period" property="period"/>
+		<result column="creation_date" property="creationDate"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		type,
+		name,
+		ip,
+		domain,
+		period,
+		creation_date
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.hourlyreport.dao.data.HourlyreportDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO hourlyreport
+			(type, name, ip, domain, period, creation_date)
+		VALUES
+			(#{type}, #{name}, #{ip}, #{domain}, #{period}, #{creationDate})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hourlyreport
+		WHERE id = #{id}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hourlyreport
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM hourlyreport
+		WHERE id = #{id}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.hourlyreport.dao.data.HourlyreportDO">
+		UPDATE hourlyreport
+		SET type = #{type},
+			name = #{name},
+			ip = #{ip},
+			domain = #{domain},
+			period = #{period},
+			creation_date = #{creationDate}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findAllByDomainNamePeriod" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hourlyreport
+		WHERE period = #{record.period}
+			AND domain = #{record.domain}
+			AND name = #{record.name}
+			AND binary(domain) = binary(#{record.domain})
+	</select>
+
+	<select id="findAllByPeriodName" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM hourlyreport
+		WHERE period = #{record.period}
+			AND name = #{record.name}
+	</select>
+</mapper>

@@ -21,7 +21,7 @@ package com.dianping.cat.task;
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.Task;
-import com.dianping.cat.core.dal.TaskDao;
+import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -47,7 +47,7 @@ public class TaskManager {
 	private static final int STATUS_TODO = 1;
 
 	@Inject
-	private TaskDao m_taskDao;
+	private TaskRepository m_taskDao;
 
 	public boolean createTask(Date period, String domain, String name, TaskCreationPolicy prolicy) {
 		try {

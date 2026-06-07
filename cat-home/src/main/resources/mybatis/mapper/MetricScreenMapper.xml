@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.metric.screen.dao.MetricScreenMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.metric.screen.dao.data.MetricScreenDO">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="graph_name" property="graphName"/>
+		<result column="view" property="view"/>
+		<result column="endPoints" property="endPoints"/>
+		<result column="measurements" property="measurements"/>
+		<result column="content" property="content"/>
+		<result column="creation_date" property="creationDate"/>
+		<result column="updatetime" property="updatetime"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		name,
+		graph_name,
+		view,
+		endPoints,
+		measurements,
+		content,
+		creation_date,
+		updatetime
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.metric.screen.dao.data.MetricScreenDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO metric_screen
+			(name, graph_name, view, endPoints, measurements, content, creation_date, updatetime)
+		VALUES
+			(#{name}, #{graphName}, #{view}, #{endPoints}, #{measurements}, #{content}, #{creationDate}, #{updatetime})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM metric_screen
+		WHERE id = #{id}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM metric_screen
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM metric_screen
+		WHERE id = #{id}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.metric.screen.dao.data.MetricScreenDO">
+		UPDATE metric_screen
+		SET name = #{name},
+			graph_name = #{graphName},
+			view = #{view},
+			endPoints = #{endPoints},
+			measurements = #{measurements},
+			content = #{content},
+			creation_date = #{creationDate},
+			updatetime = #{updatetime}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findAll" resultMap="BaseResultMap">
+		SELECT id, name, graph_name, view, endPoints, measurements, content, creation_date, updatetime FROM metric_screen
+	</select>
+
+	<select id="findByNameGraph" resultMap="BaseResultMap">
+		SELECT id, name, graph_name, view, endPoints, measurements, content, creation_date, updatetime FROM metric_screen WHERE name = #{record.name} AND graph_name = #{record.graphName}
+	</select>
+
+	<select id="findByName" resultMap="BaseResultMap">
+		SELECT id, name, graph_name, view, endPoints, measurements, content, creation_date, updatetime FROM metric_screen WHERE name = #{record.name}
+	</select>
+
+	<insert id="insertOrUpdateByNameGraph">
+		INSERT INTO metric_screen(id, name, graph_name, view, endPoints, measurements, content, creation_date, updatetime) VALUES(<VALUES/>) ON DUPLICATE KEY UPDATE view = #{record.view}, endPoints = #{record.endPoints}, measurements = #{record.measurements}, content = #{record.content}
+	</insert>
+
+	<delete id="deleteByName">
+		DELETE FROM metric_screen WHERE name = #{record.name}
+	</delete>
+
+	<delete id="deleteByNameGraph">
+		DELETE FROM metric_screen WHERE name = #{record.name} AND graph_name = #{record.graphName}
+	</delete>
+</mapper>

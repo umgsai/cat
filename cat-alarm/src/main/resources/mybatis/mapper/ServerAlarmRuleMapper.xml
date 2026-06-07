@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.server.alarm.rule.dao.ServerAlarmRuleMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.server.alarm.rule.dao.data.ServerAlarmRuleDO">
+		<id column="id" property="id"/>
+		<result column="category" property="category"/>
+		<result column="endPoint" property="endPoint"/>
+		<result column="measurement" property="measurement"/>
+		<result column="tags" property="tags"/>
+		<result column="content" property="content"/>
+		<result column="type" property="type"/>
+		<result column="creator" property="creator"/>
+		<result column="creation_date" property="creationDate"/>
+		<result column="updatetime" property="updatetime"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		category,
+		endPoint,
+		measurement,
+		tags,
+		content,
+		type,
+		creator,
+		creation_date,
+		updatetime
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.server.alarm.rule.dao.data.ServerAlarmRuleDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO server_alarm_rule
+			(category, endPoint, measurement, tags, content, type, creator, creation_date, updatetime)
+		VALUES
+			(#{category}, #{endPoint}, #{measurement}, #{tags}, #{content}, #{type}, #{creator}, #{creationDate}, #{updatetime})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM server_alarm_rule
+		WHERE id = #{id}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM server_alarm_rule
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM server_alarm_rule
+		WHERE id = #{id}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.server.alarm.rule.dao.data.ServerAlarmRuleDO">
+		UPDATE server_alarm_rule
+		SET category = #{category},
+			endPoint = #{endPoint},
+			measurement = #{measurement},
+			tags = #{tags},
+			content = #{content},
+			type = #{type},
+			creator = #{creator},
+			creation_date = #{creationDate},
+			updatetime = #{updatetime}
+		WHERE id = #{id}
+	</update>
+
+	<select id="findAll" resultMap="BaseResultMap">
+		SELECT id, category, endPoint, measurement, tags, content, type, creator, creation_date, updatetime FROM server_alarm_rule
+	</select>
+</mapper>

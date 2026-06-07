@@ -52,7 +52,7 @@ import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.dal.report.Alteration;
-import com.dianping.cat.home.dal.report.AlterationDao;
+import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
 import com.dianping.cat.home.dal.report.AlterationEntity;
 import com.dianping.cat.home.storage.alert.entity.Storage;
 import com.dianping.cat.home.storage.alert.entity.StorageAlertInfo;
@@ -95,7 +95,7 @@ public class Handler implements PageHandler<Context> {
 	private JsonBuilder m_jsonBuilder;
 
 	@Inject
-	private AlterationDao m_alterationDao;
+	private AlterationRepository m_alterationDao;
 
 	@Inject
 	private AlertService m_alertService;

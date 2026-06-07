@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dianping.cat.core.mybatis.generated.alert.summary.dao.AlertSummaryMapper">
+
+	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.alert.summary.dao.data.AlertSummaryDO">
+		<id column="id" property="id"/>
+		<result column="domain" property="domain"/>
+		<result column="alert_time" property="alertTime"/>
+		<result column="content" property="content"/>
+		<result column="creation_date" property="creationDate"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,
+		domain,
+		alert_time,
+		content,
+		creation_date
+	</sql>
+
+	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.alert.summary.dao.data.AlertSummaryDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		INSERT INTO alert_summary
+			(domain, alert_time, content, creation_date)
+		VALUES
+			(#{domain}, #{alertTime}, #{content}, #{creationDate})
+	</insert>
+
+	<select id="findByPrimaryKey" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM alert_summary
+		WHERE id = #{id}
+	</select>
+
+	<select id="queryAll" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM alert_summary
+	</select>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM alert_summary
+		WHERE id = #{id}
+	</delete>
+
+	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.alert.summary.dao.data.AlertSummaryDO">
+		UPDATE alert_summary
+		SET domain = #{domain},
+			alert_time = #{alertTime},
+			content = #{content},
+			creation_date = #{creationDate}
+		WHERE id = #{id}
+	</update>
+</mapper>
