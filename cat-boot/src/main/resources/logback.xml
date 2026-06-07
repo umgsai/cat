@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+   <contextName>cat-boot</contextName>
+
+   <property name="CAT_HOME" value="${cat.home:-${user.home}/.cat}"/>
+   <property name="LOG_HOME" value="${cat.log.path:-${CAT_HOME}/logs}"/>
+   <property name="CONSOLE_LOG_PATTERN"
+             value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%thread] [%logger{40}] %msg%n"/>
+   <property name="FILE_LOG_PATTERN"
+             value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%thread] [%logger{60}] %msg%n"/>
+
+   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+      <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+         <level>${CAT_CONSOLE_LEVEL:-INFO}</level>
+      </filter>
+      <encoder>
+         <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+         <charset>UTF-8</charset>
+      </encoder>
+   </appender>
+
+   <appender name="DEBUG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+      <file>${LOG_HOME}/debug.log</file>
+      <encoder>
+         <pattern>${FILE_LOG_PATTERN}</pattern>
+         <charset>UTF-8</charset>
+      </encoder>
+      <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+         <fileNamePattern>${LOG_HOME}/debug-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+         <maxFileSize>200MB</maxFileSize>
+         <maxHistory>7</maxHistory>
+         <totalSizeCap>20GB</totalSizeCap>
+         <cleanHistoryOnStart>true</cleanHistoryOnStart>
+      </rollingPolicy>
+      <filter class="ch.qos.logback.classic.filter.LevelFilter">
+         <level>DEBUG</level>
+         <onMatch>ACCEPT</onMatch>
+         <onMismatch>DENY</onMismatch>
+      </filter>
+   </appender>
+
+   <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+      <file>${LOG_HOME}/info.log</file>
+      <encoder>
+         <pattern>${FILE_LOG_PATTERN}</pattern>
+         <charset>UTF-8</charset>
+      </encoder>
+      <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+         <fileNamePattern>${LOG_HOME}/info-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+         <maxFileSize>200MB</maxFileSize>
+         <maxHistory>30</maxHistory>
+         <totalSizeCap>20GB</totalSizeCap>
+         <cleanHistoryOnStart>true</cleanHistoryOnStart>
+      </rollingPolicy>
+      <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+         <level>INFO</level>
+      </filter>
+   </appender>
+
+   <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+      <file>${LOG_HOME}/warn.log</file>
+      <immediateFlush>true</immediateFlush>
+      <encoder>
+         <pattern>${FILE_LOG_PATTERN}</pattern>
+         <charset>UTF-8</charset>
+      </encoder>
+      <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+         <fileNamePattern>${LOG_HOME}/warn-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+         <maxFileSize>200MB</maxFileSize>
+         <maxHistory>30</maxHistory>
+         <totalSizeCap>10GB</totalSizeCap>
+         <cleanHistoryOnStart>true</cleanHistoryOnStart>
+      </rollingPolicy>
+      <filter class="ch.qos.logback.classic.filter.LevelFilter">
+         <level>WARN</level>
+         <onMatch>ACCEPT</onMatch>
+         <onMismatch>DENY</onMismatch>
+      </filter>
+   </appender>
+
+   <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+      <file>${LOG_HOME}/error.log</file>
+      <immediateFlush>true</immediateFlush>
+      <encoder>
+         <pattern>${FILE_LOG_PATTERN}</pattern>
+         <charset>UTF-8</charset>
+      </encoder>
+      <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+         <fileNamePattern>${LOG_HOME}/error-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+         <maxFileSize>200MB</maxFileSize>
+         <maxHistory>30</maxHistory>
+         <totalSizeCap>10GB</totalSizeCap>
+         <cleanHistoryOnStart>true</cleanHistoryOnStart>
+      </rollingPolicy>
+      <filter class="ch.qos.logback.classic.filter.LevelFilter">
+         <level>ERROR</level>
+         <onMatch>ACCEPT</onMatch>
+         <onMismatch>DENY</onMismatch>
+      </filter>
+   </appender>
+
+   <appender name="ASYNC_DEBUG_FILE" class="ch.qos.logback.classic.AsyncAppender">
+      <includeCallerData>false</includeCallerData>
+      <queueSize>8192</queueSize>
+      <discardingThreshold>20</discardingThreshold>
+      <neverBlock>true</neverBlock>
+      <appender-ref ref="DEBUG_FILE"/>
+   </appender>
+
+   <appender name="ASYNC_INFO_FILE" class="ch.qos.logback.classic.AsyncAppender">
+      <includeCallerData>false</includeCallerData>
+      <queueSize>8192</queueSize>
+      <discardingThreshold>0</discardingThreshold>
+      <neverBlock>false</neverBlock>
+      <appender-ref ref="INFO_FILE"/>
+   </appender>
+
+   <appender name="ASYNC_WARN_FILE" class="ch.qos.logback.classic.AsyncAppender">
+      <includeCallerData>false</includeCallerData>
+      <queueSize>4096</queueSize>
+      <discardingThreshold>0</discardingThreshold>
+      <neverBlock>true</neverBlock>
+      <appender-ref ref="WARN_FILE"/>
+   </appender>
+
+   <appender name="ASYNC_ERROR_FILE" class="ch.qos.logback.classic.AsyncAppender">
+      <includeCallerData>true</includeCallerData>
+      <queueSize>4096</queueSize>
+      <discardingThreshold>0</discardingThreshold>
+      <neverBlock>true</neverBlock>
+      <appender-ref ref="ERROR_FILE"/>
+   </appender>
+
+   <logger name="org.apache.catalina" level="INFO"/>
+   <logger name="org.apache.jasper" level="INFO"/>
+   <logger name="org.springframework" level="INFO"/>
+
+   <root level="${CAT_LOG_LEVEL:-INFO}">
+      <appender-ref ref="CONSOLE"/>
+      <appender-ref ref="ASYNC_DEBUG_FILE"/>
+      <appender-ref ref="ASYNC_INFO_FILE"/>
+      <appender-ref ref="ASYNC_WARN_FILE"/>
+      <appender-ref ref="ASYNC_ERROR_FILE"/>
+   </root>
+</configuration>

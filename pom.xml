@@ -214,6 +214,11 @@
 				<version>${slf4j.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jul-to-slf4j</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-core</artifactId>
 				<version>${logback.version}</version>
@@ -229,9 +234,15 @@
 				<version>2.3.34</version>
 			</dependency>
 			<dependency>
-				<groupId>com.mchange.v2</groupId>
+				<groupId>com.mchange</groupId>
 				<artifactId>c3p0</artifactId>
 				<version>0.11.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+				<scope>provided</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -391,6 +402,13 @@ org.eclipse.jdt.core.compiler.compliance=21
 					<version>${maven-compiler-plugin.version}</version>
 					<configuration>
 						<release>${maven.compiler.release}</release>
+						<annotationProcessorPaths>
+							<path>
+								<groupId>org.projectlombok</groupId>
+								<artifactId>lombok</artifactId>
+								<version>${lombok.version}</version>
+							</path>
+						</annotationProcessorPaths>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -482,6 +500,7 @@ org.eclipse.jdt.core.compiler.compliance=21
 		<slf4j.version>2.0.17</slf4j.version>
 		<logback.version>1.5.34</logback.version>
 		<fastjson2.version>2.0.62</fastjson2.version>
+		<lombok.version>1.18.46</lombok.version>
 		<spring-boot.version>4.0.2</spring-boot.version>
 		<tomcat9.version>9.0.112</tomcat9.version>
 		<deploy.autoRelease>false</deploy.autoRelease>

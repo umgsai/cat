@@ -407,11 +407,11 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
 			} catch (Exception ex) {
-				m_logger.error(e.getMessage());
+				m_logger.error("Failed to initialize server config from database fallback.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
-			m_logger.error(e.getMessage());
+			m_logger.error("Failed to load server config from database.", e);
 			Cat.logError(e);
 		}
 
@@ -422,7 +422,7 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 				m_logger.info("init cat server with cat server xml " + localServerFile);
 				initialize(localServerFile);
 			} catch (Exception e) {
-				m_logger.error(e.getMessage());
+				m_logger.error("Failed to initialize server config from local server.xml.", e);
 				Cat.logError(e);
 			}
 		}
@@ -436,7 +436,7 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 		try {
 			refreshServer();
 		} catch (Exception e) {
-			m_logger.error(e.getMessage());
+			m_logger.error("Failed to refresh server config.", e);
 			Cat.logError(e);
 		}
 
