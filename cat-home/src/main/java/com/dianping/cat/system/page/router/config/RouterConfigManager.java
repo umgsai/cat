@@ -22,7 +22,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.core.dal.*;
 import com.dianping.cat.helper.TimeHelper;
@@ -57,7 +57,7 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 	private static final String CONFIG_NAME = "routerConfig";
 
 	@Inject
-	private ConfigDao m_configDao;
+	private ConfigRepository m_configDao;
 
 	@Inject
 	private ContentFetcher m_fetcher;

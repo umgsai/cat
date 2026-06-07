@@ -22,9 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.unidal.dal.jdbc.configuration.AbstractJdbcResourceConfigurator;
+import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import org.unidal.lookup.configuration.Component;
 
+import com.dianping.cat.core.config.repository.ConfigRepository;
+
 public final class CatDatabaseConfigurator extends AbstractJdbcResourceConfigurator {
+	private static final String CONFIG_DAO_ROLE = "com.dianping.cat.core.config.ConfigDao";
+
 	@Override
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
@@ -36,7 +41,13 @@ public final class CatDatabaseConfigurator extends AbstractJdbcResourceConfigura
 
 		defineSimpleTableProviderComponents(all, "cat", com.dianping.cat.core.config._INDEX.getEntityClasses());
 		defineDaoComponents(all, com.dianping.cat.core.config._INDEX.getDaoClasses());
+		removeConfigDaoComponent(all);
+		all.add(C(ConfigRepository.class).req(DataSourceManager.class));
 
 		return all;
+	}
+
+	private void removeConfigDaoComponent(List<Component> components) {
+		components.removeIf(component -> CONFIG_DAO_ROLE.equals(component.getModel().getRole()));
 	}
 }

@@ -57,7 +57,7 @@ import com.dianping.cat.configuration.server.entity.ServerConfig;
 import com.dianping.cat.configuration.server.entity.StorageConfig;
 import com.dianping.cat.configuration.server.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
@@ -90,7 +90,7 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 	public ExecutorService m_threadPool;
 
 	@Inject
-	protected ConfigDao m_configDao;
+	protected ConfigRepository m_configDao;
 
 	@Inject
 	protected ContentFetcher m_fetcher;

@@ -31,7 +31,7 @@ import com.dianping.cat.alarm.receiver.entity.Receiver;
 import com.dianping.cat.alarm.receiver.transform.DefaultSaxParser;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 
 @Named
@@ -40,7 +40,7 @@ public class AlertConfigManager implements Initializable {
 	private static final String CONFIG_NAME = "alertConfig";
 
 	@Inject
-	private ConfigDao m_configDao;
+	private ConfigRepository m_configDao;
 
 	@Inject
 	private ContentFetcher m_fetcher;

@@ -30,7 +30,7 @@ import org.unidal.lookup.annotation.Named;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.home.resource.entity.Resource;
 import com.dianping.cat.home.resource.entity.ResourceConfig;
@@ -48,7 +48,7 @@ public class ResourceConfigManager implements Initializable {
 	private static final String ALL = "*";
 
 	@Inject
-	protected ConfigDao m_configDao;
+	protected ConfigRepository m_configDao;
 
 	@Inject
 	protected ContentFetcher m_fetcher;

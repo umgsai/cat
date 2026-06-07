@@ -47,7 +47,7 @@ import com.dianping.cat.alarm.rule.transform.DefaultJsonParser;
 import com.dianping.cat.alarm.rule.transform.DefaultSaxParser;
 import com.dianping.cat.alarm.spi.rule.RuleType;
 import com.dianping.cat.config.content.ContentFetcher;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.message.Event;
@@ -59,7 +59,7 @@ import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 public abstract class BaseRuleConfigManager {
 
 	@Inject
-	protected ConfigDao m_configDao;
+	protected ConfigRepository m_configDao;
 
 	@Inject
 	protected UserDefinedRuleManager m_manager;

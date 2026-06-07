@@ -34,7 +34,7 @@ import org.unidal.lookup.util.StringUtils;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.home.storage.entity.Link;
 import com.dianping.cat.home.storage.entity.Storage;
@@ -54,7 +54,7 @@ public class StorageGroupConfigManager implements Initializable {
 	private static final String CONFIG_NAME = "storageGroup";
 
 	@Inject
-	private ConfigDao m_configDao;
+	private ConfigRepository m_configDao;
 
 	@Inject
 	private ContentFetcher m_fetcher;

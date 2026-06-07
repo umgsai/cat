@@ -37,7 +37,7 @@ import com.dianping.cat.configuration.reload.entity.ReportReloadConfig;
 import com.dianping.cat.configuration.reload.entity.ReportType;
 import com.dianping.cat.configuration.reload.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
@@ -50,7 +50,7 @@ public class ReportReloadConfigManager implements Initializable {
 	private static final String DEFAULT = "default";
 
 	@Inject
-	protected ConfigDao m_configDao;
+	protected ConfigRepository m_configDao;
 
 	@Inject
 	protected ContentFetcher m_fetcher;

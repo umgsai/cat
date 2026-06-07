@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.unidal.dal.jdbc.configuration.AbstractJdbcResourceConfigurator;
+import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import org.unidal.initialization.DefaultModuleManager;
 import org.unidal.initialization.ModuleManager;
 import org.unidal.lookup.configuration.Component;
@@ -37,6 +38,7 @@ import com.dianping.cat.build.report.ProblemComponentConfigurator;
 import com.dianping.cat.build.report.ReportComponentConfigurator;
 import com.dianping.cat.build.report.StorageComponentConfigurator;
 import com.dianping.cat.build.report.TransactionComponentConfigurator;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.mvc.PayloadNormalizer;
 import com.dianping.cat.report.HourlyReportContentTableProvider;
@@ -65,6 +67,8 @@ import com.dianping.cat.system.page.permission.ResourceConfigManager;
 import com.dianping.cat.system.page.permission.UserConfigManager;
 
 public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
+	private static final String CONFIG_DAO_ROLE = "com.dianping.cat.core.config.ConfigDao";
+
 	public static void main(String[] args) {
 		generatePlexusComponentsXmlFile(new ComponentsConfigurator());
 	}
@@ -143,6 +147,9 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		// web, please keep it last
 		all.addAll(new WebComponentConfigurator().defineComponents());
 
+		removeConfigDaoComponent(all);
+		all.add(C(ConfigRepository.class).req(DataSourceManager.class));
+
 		return all;
 	}
 
@@ -174,5 +181,9 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(A(HourlyReportContentTableProvider.class));
 
 		return all;
+	}
+
+	private void removeConfigDaoComponent(List<Component> components) {
+		components.removeIf(component -> CONFIG_DAO_ROLE.equals(component.getModel().getRole()));
 	}
 }

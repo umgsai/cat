@@ -29,14 +29,14 @@ import org.unidal.helper.Files;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 
 public class ConfigsBackupTest extends ComponentTestCase {
 
 	@Test
 	public void backupConfigsTest() {
-		ConfigDao dao = lookup(ConfigDao.class);
+		ConfigRepository dao = lookup(ConfigRepository.class);
 		ConfigBackupTask task = new ConfigBackupTask(dao);
 
 		Assert.assertTrue(task.backupConfigs());
@@ -46,9 +46,9 @@ public class ConfigsBackupTest extends ComponentTestCase {
 
 		private static final String BASE_DIR_PATH = "src/main/resources/config/";
 
-		private ConfigDao m_dao;
+		private ConfigRepository m_dao;
 
-		public ConfigBackupTask(ConfigDao dao) {
+		public ConfigBackupTask(ConfigRepository dao) {
 			m_dao = dao;
 		}
 

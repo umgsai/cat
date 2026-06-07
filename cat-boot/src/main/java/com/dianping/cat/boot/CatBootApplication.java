@@ -18,10 +18,17 @@ public class CatBootApplication {
 
 	private static void applyDefaultCatProperties() throws Exception {
 		String catHome = System.getProperty("cat.home");
+		String legacyCatHome = System.getProperty("CAT_HOME");
 
 		if (catHome == null || catHome.isBlank()) {
-			catHome = Paths.get(System.getProperty("user.home"), ".cat").toString();
+			catHome = legacyCatHome == null || legacyCatHome.isBlank()
+					? Paths.get(System.getProperty("user.home"), ".cat").toString()
+					: legacyCatHome;
 			System.setProperty("cat.home", catHome);
+		}
+
+		if (legacyCatHome == null || legacyCatHome.isBlank()) {
+			System.setProperty("CAT_HOME", catHome);
 		}
 
 		if (System.getProperty("cat.log.path") == null || System.getProperty("cat.log.path").isBlank()) {

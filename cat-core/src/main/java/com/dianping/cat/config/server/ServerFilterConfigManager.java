@@ -36,7 +36,7 @@ import com.dianping.cat.configuration.server.filter.entity.AtomicTreeConfig;
 import com.dianping.cat.configuration.server.filter.entity.ServerFilterConfig;
 import com.dianping.cat.configuration.server.filter.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
@@ -47,7 +47,7 @@ public class ServerFilterConfigManager implements Initializable {
 	private static final String CONFIG_NAME = "serverFilter";
 
 	@Inject
-	protected ConfigDao m_configDao;
+	protected ConfigRepository m_configDao;
 
 	@Inject
 	protected ContentFetcher m_fetcher;

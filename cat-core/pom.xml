@@ -32,6 +32,14 @@
 			<artifactId>dal-jdbc</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<scope>provided</scope>
@@ -112,6 +120,30 @@
 						</goals>
 						<configuration>
 							<className>com.dianping.cat.build.ComponentsConfigurator</className>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-generated-plexus-descriptor</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.outputDirectory}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/src/main/resources</directory>
+									<includes>
+										<include>META-INF/plexus/components.xml</include>
+									</includes>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>

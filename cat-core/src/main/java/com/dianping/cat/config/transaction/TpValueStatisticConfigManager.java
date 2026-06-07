@@ -34,7 +34,7 @@ import com.dianping.cat.configuration.tp.entity.Domain;
 import com.dianping.cat.configuration.tp.entity.TpValueStatisticConfig;
 import com.dianping.cat.configuration.tp.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 
@@ -46,7 +46,7 @@ public class TpValueStatisticConfigManager implements Initializable {
 	private static final String CONFIG_NAME = "tp-value-statistic-config";
 
 	@Inject
-	protected ConfigDao m_configDao;
+	protected ConfigRepository m_configDao;
 
 	@Inject
 	protected ContentFetcher m_fetcher;

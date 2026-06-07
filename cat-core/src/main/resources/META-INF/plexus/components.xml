@@ -18,7 +18,7 @@
 			<implementation>com.dianping.cat.config.server.ServerConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -71,7 +71,7 @@
 			<implementation>com.dianping.cat.config.server.ServerFilterConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -115,7 +115,7 @@
 			<implementation>com.dianping.cat.config.sample.SampleConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -136,7 +136,7 @@
 			<implementation>com.dianping.cat.config.ReportReloadConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -197,7 +197,7 @@
 			<implementation>com.dianping.cat.config.transaction.TpValueStatisticConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -212,7 +212,7 @@
 			<implementation>com.dianping.cat.config.AtomicMessageConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -256,11 +256,11 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.core.config.ConfigDao</role>
-			<implementation>com.dianping.cat.core.config.ConfigDao</implementation>
+			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+			<implementation>com.dianping.cat.core.config.repository.ConfigRepository</implementation>
 			<requirements>
 				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -688,11 +688,11 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.core.config.ConfigDao</role>
-			<implementation>com.dianping.cat.core.config.ConfigDao</implementation>
+			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+			<implementation>com.dianping.cat.core.config.repository.ConfigRepository</implementation>
 			<requirements>
 				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>

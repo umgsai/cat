@@ -31,7 +31,7 @@ import com.dianping.cat.configuration.message.entity.Domain;
 import com.dianping.cat.configuration.message.entity.Property;
 import com.dianping.cat.configuration.message.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 
@@ -43,7 +43,7 @@ public class AtomicMessageConfigManager implements Initializable {
 	private static final String DEFAULT_DOMAIN = "default";
 
 	@Inject
-	protected ConfigDao m_configDao;
+	protected ConfigRepository m_configDao;
 
 	@Inject
 	protected ContentFetcher m_fetcher;

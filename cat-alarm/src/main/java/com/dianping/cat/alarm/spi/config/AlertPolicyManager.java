@@ -36,7 +36,7 @@ import com.dianping.cat.alarm.policy.transform.DefaultSaxParser;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 
 @Named
@@ -49,7 +49,7 @@ public class AlertPolicyManager implements Initializable {
 	private static final String DEFAULT_GROUP = "default";
 
 	@Inject
-	private ConfigDao m_configDao;
+	private ConfigRepository m_configDao;
 
 	@Inject
 	private ContentFetcher m_fetcher;

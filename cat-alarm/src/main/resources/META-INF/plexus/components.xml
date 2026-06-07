@@ -60,7 +60,7 @@
 			<implementation>com.dianping.cat.alarm.spi.config.SenderConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -84,7 +84,7 @@
 			<implementation>com.dianping.cat.alarm.spi.config.AlertPolicyManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -195,7 +195,7 @@
 			<implementation>com.dianping.cat.alarm.spi.config.AlertConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>

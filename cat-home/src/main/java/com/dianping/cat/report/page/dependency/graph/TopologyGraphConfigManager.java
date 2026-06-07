@@ -38,7 +38,7 @@ import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.consumer.dependency.model.entity.Dependency;
 import com.dianping.cat.consumer.dependency.model.entity.Index;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.helper.Chinese;
 import com.dianping.cat.home.dependency.config.entity.DomainConfig;
@@ -66,7 +66,7 @@ public class TopologyGraphConfigManager implements Initializable {
 	private static final String CONFIG_NAME = "topologyConfig";
 
 	@Inject
-	private ConfigDao m_configDao;
+	private ConfigRepository m_configDao;
 
 	@Inject
 	private ContentFetcher m_fetcher;

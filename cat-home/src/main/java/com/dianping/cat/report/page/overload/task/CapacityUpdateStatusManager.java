@@ -26,7 +26,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.ConfigDao;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.home.dal.report.OverloadDao;
 import com.dianping.cat.home.dal.report.OverloadEntity;
@@ -37,7 +37,7 @@ public class CapacityUpdateStatusManager implements Initializable {
 	private static final String CONFIG_NAME = "capacityUpdateStatus";
 
 	@Inject
-	private ConfigDao m_configDao;
+	private ConfigRepository m_configDao;
 
 	@Inject
 	private OverloadDao m_overloadDao;

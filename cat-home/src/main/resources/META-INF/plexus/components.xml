@@ -77,7 +77,7 @@
 			<implementation>com.dianping.cat.report.page.DomainGroupConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -333,7 +333,7 @@
 			<implementation>com.dianping.cat.system.page.permission.UserConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -345,7 +345,7 @@
 			<implementation>com.dianping.cat.system.page.permission.ResourceConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -398,7 +398,7 @@
 			<implementation>com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager</role>
@@ -521,7 +521,7 @@
 			<implementation>com.dianping.cat.report.alert.event.EventRuleConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager</role>
@@ -894,7 +894,7 @@
 			<implementation>com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager</role>
@@ -1047,7 +1047,7 @@
 			<implementation>com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -1281,7 +1281,7 @@
 			<implementation>com.dianping.cat.report.page.storage.config.StorageGroupConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -1440,7 +1440,7 @@
 			<implementation>com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -1452,7 +1452,7 @@
 			<implementation>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -1706,7 +1706,7 @@
 			<implementation>com.dianping.cat.system.page.router.config.RouterConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -2353,7 +2353,7 @@
 			<implementation>com.dianping.cat.report.page.overload.task.CapacityUpdateStatusManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.home.dal.report.OverloadDao</role>
@@ -2669,7 +2669,7 @@
 			<implementation>com.dianping.cat.alarm.spi.config.AlertConfigManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -2892,7 +2892,7 @@
 			<implementation>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.core.config.ConfigDao</role>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
@@ -2900,8 +2900,13 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.core.config.ConfigDao</role>
-			<implementation>com.dianping.cat.core.config.ConfigDao</implementation>
+			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+			<implementation>com.dianping.cat.core.config.repository.ConfigRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.heartbeat.JspViewer</role>
@@ -3857,6 +3862,15 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+			<implementation>com.dianping.cat.core.config.repository.ConfigRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>
