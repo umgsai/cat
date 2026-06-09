@@ -39,6 +39,7 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = LocalModelService.class, value = LocalStorageService.ID)
 public class LocalStorageService extends LocalModelService<StorageReport> {
@@ -70,6 +71,11 @@ public class LocalStorageService extends LocalModelService<StorageReport> {
 			long startTime = request.getStartTime();
 			report = getReportFromLocalDisk(startTime, id);
 		}
+		if (report == null) {
+			report = new StorageReport(id);
+			report.setStartTime(new Date(request.getStartTime()));
+			report.setEndTime(new Date(request.getStartTime() + TimeHelper.ONE_HOUR - 1));
+		}
 
 		String ipAddress = payload.getIpAddress();
 
@@ -79,14 +85,18 @@ public class LocalStorageService extends LocalModelService<StorageReport> {
 	private StorageReport getReportFromLocalDisk(long timestamp, String id) throws Exception {
 		StorageReport report = new StorageReport(id);
 		StorageReportMerger merger = new StorageReportMerger(report);
+		ReportBucketManager bucketManager = getBucketManager();
 
 		report.setStartTime(new Date(timestamp));
 		report.setEndTime(new Date(timestamp + TimeHelper.ONE_HOUR - 1));
 
+		if (bucketManager == null) {
+			return report;
+		}
 		for (int i = 0; i < getAnalyzerCount(); i++) {
 			ReportBucket bucket = null;
 			try {
-				bucket = m_bucketManager.getReportBucket(timestamp, StorageAnalyzer.ID, i);
+				bucket = bucketManager.getReportBucket(timestamp, StorageAnalyzer.ID, i);
 				String xml = bucket.findById(id);
 
 				if (xml != null) {
@@ -108,11 +118,22 @@ public class LocalStorageService extends LocalModelService<StorageReport> {
 				}
 			} finally {
 				if (bucket != null) {
-					m_bucketManager.closeBucket(bucket);
+					bucketManager.closeBucket(bucket);
 				}
 			}
 		}
 		return report;
+	}
+
+	private ReportBucketManager getBucketManager() {
+		if (m_bucketManager == null) {
+			m_bucketManager = CatSpringContext.getBeanIfAvailable(ReportBucketManager.class);
+		}
+		return m_bucketManager;
+	}
+
+	public void setBucketManager(ReportBucketManager bucketManager) {
+		m_bucketManager = bucketManager;
 	}
 
 	public static class StorageReportFilter extends com.dianping.cat.consumer.storage.model.transform.DefaultXmlBuilder {

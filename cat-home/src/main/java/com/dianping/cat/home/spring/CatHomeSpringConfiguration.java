@@ -37,6 +37,9 @@ import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
+import com.dianping.cat.consumer.state.model.entity.StateReport;
+import com.dianping.cat.consumer.storage.model.entity.StorageReport;
+import com.dianping.cat.consumer.top.model.entity.TopReport;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
@@ -130,9 +133,12 @@ import com.dianping.cat.report.page.problem.service.HistoricalProblemService;
 import com.dianping.cat.report.page.problem.service.LocalProblemService;
 import com.dianping.cat.report.page.problem.service.ProblemReportService;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
+import com.dianping.cat.report.page.storage.service.LocalStorageService;
 import com.dianping.cat.report.server.RemoteServersManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.report.page.state.service.LocalStateService;
+import com.dianping.cat.report.page.top.service.LocalTopService;
 import com.dianping.cat.report.page.transaction.service.LocalTransactionService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.statistic.ServerStatisticManager;
@@ -472,6 +478,30 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize")
+	public LocalModelService<TopReport> localTopService(ServerConfigManager serverConfigManager) {
+		LocalTopService service = new LocalTopService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public LocalModelService<StateReport> localStateService(ServerConfigManager serverConfigManager) {
+		LocalStateService service = new LocalStateService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public LocalModelService<StorageReport> localStorageService(ServerConfigManager serverConfigManager) {
+		LocalStorageService service = new LocalStorageService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
 	@Bean
 	public Map<String, LocalModelService> localModelServices(
 			@Qualifier("localProblemService") LocalModelService<ProblemReport> localProblemService,
@@ -480,7 +510,10 @@ public class CatHomeSpringConfiguration {
 			@Qualifier("localHeartbeatService") LocalModelService<HeartbeatReport> localHeartbeatService,
 			@Qualifier("localCrossService") LocalModelService<CrossReport> localCrossService,
 			@Qualifier("localMatrixService") LocalModelService<MatrixReport> localMatrixService,
-			@Qualifier("localDependencyService") LocalModelService<DependencyReport> localDependencyService) {
+			@Qualifier("localDependencyService") LocalModelService<DependencyReport> localDependencyService,
+			@Qualifier("localTopService") LocalModelService<TopReport> localTopService,
+			@Qualifier("localStateService") LocalModelService<StateReport> localStateService,
+			@Qualifier("localStorageService") LocalModelService<StorageReport> localStorageService) {
 		Map<String, LocalModelService> services = new LinkedHashMap<String, LocalModelService>();
 
 		services.put(LocalProblemService.ID, localProblemService);
@@ -490,6 +523,9 @@ public class CatHomeSpringConfiguration {
 		services.put(LocalCrossService.ID, localCrossService);
 		services.put(LocalMatrixService.ID, localMatrixService);
 		services.put(LocalDependencyService.ID, localDependencyService);
+		services.put(LocalTopService.ID, localTopService);
+		services.put(LocalStateService.ID, localStateService);
+		services.put(LocalStorageService.ID, localStorageService);
 		return services;
 	}
 
