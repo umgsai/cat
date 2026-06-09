@@ -36,6 +36,7 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = LocalModelService.class, value = LocalBusinessService.ID)
 public class LocalBusinessService extends LocalModelService<BusinessReport> {
@@ -74,6 +75,11 @@ public class LocalBusinessService extends LocalModelService<BusinessReport> {
 				report.setEndTime(new Date(startTime + TimeHelper.ONE_HOUR - 1));
 			}
 		}
+		if (report == null) {
+			report = new BusinessReport(domain);
+			report.setStartTime(new Date(request.getStartTime()));
+			report.setEndTime(new Date(request.getStartTime() + TimeHelper.ONE_HOUR - 1));
+		}
 		BusinessReportFilter filter = new BusinessReportFilter(payload.getMin(), payload.getMax());
 		return filter.buildXml(report);
 	}
@@ -81,14 +87,18 @@ public class LocalBusinessService extends LocalModelService<BusinessReport> {
 	private BusinessReport getReportFromLocalDisk(long timestamp, String domain) throws Exception {
 		BusinessReport report = new BusinessReport(domain);
 		BusinessReportMerger merger = new BusinessReportMerger(report);
+		ReportBucketManager bucketManager = getBucketManager();
 
 		report.setStartTime(new Date(timestamp));
 		report.setEndTime(new Date(timestamp + TimeHelper.ONE_HOUR - 1));
 
+		if (bucketManager == null) {
+			return report;
+		}
 		for (int i = 0; i < getAnalyzerCount(); i++) {
 			ReportBucket bucket = null;
 			try {
-				bucket = m_bucketManager.getReportBucket(timestamp, BusinessAnalyzer.ID, i);
+				bucket = bucketManager.getReportBucket(timestamp, BusinessAnalyzer.ID, i);
 				String xml = bucket.findById(domain);
 
 				if (xml != null) {
@@ -98,11 +108,22 @@ public class LocalBusinessService extends LocalModelService<BusinessReport> {
 				}
 			} finally {
 				if (bucket != null) {
-					m_bucketManager.closeBucket(bucket);
+					bucketManager.closeBucket(bucket);
 				}
 			}
 		}
 		return report;
+	}
+
+	private ReportBucketManager getBucketManager() {
+		if (m_bucketManager == null) {
+			m_bucketManager = CatSpringContext.getBeanIfAvailable(ReportBucketManager.class);
+		}
+		return m_bucketManager;
+	}
+
+	public void setBucketManager(ReportBucketManager bucketManager) {
+		m_bucketManager = bucketManager;
 	}
 
 	public static class BusinessReportFilter extends	com.dianping.cat.consumer.business.model.transform.DefaultXmlBuilder {

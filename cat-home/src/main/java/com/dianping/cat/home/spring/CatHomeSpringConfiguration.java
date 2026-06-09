@@ -30,6 +30,7 @@ import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
+import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.consumer.cross.model.entity.CrossReport;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
 import com.dianping.cat.consumer.event.model.entity.EventReport;
@@ -114,6 +115,7 @@ import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManag
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager;
 import com.dianping.cat.report.page.business.graph.BusinessDataFetcher;
 import com.dianping.cat.report.page.business.graph.CustomDataCalculator;
+import com.dianping.cat.report.page.business.service.LocalBusinessService;
 import com.dianping.cat.report.page.business.service.BusinessReportService;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.business.task.BusinessPointParser;
@@ -502,6 +504,14 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize")
+	public LocalModelService<BusinessReport> localBusinessService(ServerConfigManager serverConfigManager) {
+		LocalBusinessService service = new LocalBusinessService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
 	@Bean
 	public Map<String, LocalModelService> localModelServices(
 			@Qualifier("localProblemService") LocalModelService<ProblemReport> localProblemService,
@@ -513,7 +523,8 @@ public class CatHomeSpringConfiguration {
 			@Qualifier("localDependencyService") LocalModelService<DependencyReport> localDependencyService,
 			@Qualifier("localTopService") LocalModelService<TopReport> localTopService,
 			@Qualifier("localStateService") LocalModelService<StateReport> localStateService,
-			@Qualifier("localStorageService") LocalModelService<StorageReport> localStorageService) {
+			@Qualifier("localStorageService") LocalModelService<StorageReport> localStorageService,
+			@Qualifier("localBusinessService") LocalModelService<BusinessReport> localBusinessService) {
 		Map<String, LocalModelService> services = new LinkedHashMap<String, LocalModelService>();
 
 		services.put(LocalProblemService.ID, localProblemService);
@@ -526,6 +537,7 @@ public class CatHomeSpringConfiguration {
 		services.put(LocalTopService.ID, localTopService);
 		services.put(LocalStateService.ID, localStateService);
 		services.put(LocalStorageService.ID, localStorageService);
+		services.put(LocalBusinessService.ID, localBusinessService);
 		return services;
 	}
 
