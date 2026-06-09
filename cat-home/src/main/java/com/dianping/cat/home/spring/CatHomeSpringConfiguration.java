@@ -30,8 +30,11 @@ import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
+import com.dianping.cat.consumer.cross.model.entity.CrossReport;
+import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
 import com.dianping.cat.consumer.event.model.entity.EventReport;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
+import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
@@ -111,8 +114,11 @@ import com.dianping.cat.report.page.business.graph.CustomDataCalculator;
 import com.dianping.cat.report.page.business.service.BusinessReportService;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.business.task.BusinessPointParser;
+import com.dianping.cat.report.page.cross.service.LocalCrossService;
+import com.dianping.cat.report.page.dependency.service.LocalDependencyService;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.heartbeat.service.LocalHeartbeatService;
+import com.dianping.cat.report.page.matrix.service.LocalMatrixService;
 import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.report.page.metric.service.DefaultBaselineService;
 import com.dianping.cat.report.page.metric.task.BaselineConfigManager;
@@ -442,18 +448,48 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize")
+	public LocalModelService<CrossReport> localCrossService(ServerConfigManager serverConfigManager) {
+		LocalCrossService service = new LocalCrossService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public LocalModelService<MatrixReport> localMatrixService(ServerConfigManager serverConfigManager) {
+		LocalMatrixService service = new LocalMatrixService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public LocalModelService<DependencyReport> localDependencyService(ServerConfigManager serverConfigManager) {
+		LocalDependencyService service = new LocalDependencyService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
 	@Bean
 	public Map<String, LocalModelService> localModelServices(
 			@Qualifier("localProblemService") LocalModelService<ProblemReport> localProblemService,
 			@Qualifier("localEventService") LocalModelService<EventReport> localEventService,
 			@Qualifier("localTransactionService") LocalModelService<TransactionReport> localTransactionService,
-			@Qualifier("localHeartbeatService") LocalModelService<HeartbeatReport> localHeartbeatService) {
+			@Qualifier("localHeartbeatService") LocalModelService<HeartbeatReport> localHeartbeatService,
+			@Qualifier("localCrossService") LocalModelService<CrossReport> localCrossService,
+			@Qualifier("localMatrixService") LocalModelService<MatrixReport> localMatrixService,
+			@Qualifier("localDependencyService") LocalModelService<DependencyReport> localDependencyService) {
 		Map<String, LocalModelService> services = new LinkedHashMap<String, LocalModelService>();
 
 		services.put(LocalProblemService.ID, localProblemService);
 		services.put(LocalEventService.ID, localEventService);
 		services.put(LocalTransactionService.ID, localTransactionService);
 		services.put(LocalHeartbeatService.ID, localHeartbeatService);
+		services.put(LocalCrossService.ID, localCrossService);
+		services.put(LocalMatrixService.ID, localMatrixService);
+		services.put(LocalDependencyService.ID, localDependencyService);
 		return services;
 	}
 

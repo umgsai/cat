@@ -35,6 +35,7 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = LocalModelService.class, value = LocalCrossService.ID)
 public class LocalCrossService extends LocalModelService<CrossReport> {
@@ -68,20 +69,29 @@ public class LocalCrossService extends LocalModelService<CrossReport> {
 			report = getReportFromLocalDisk(startTime, domain);
 
 		}
+		if (report == null) {
+			report = new CrossReport(domain);
+			report.setStartTime(new Date(request.getStartTime()));
+			report.setEndTime(new Date(request.getStartTime() + TimeHelper.ONE_HOUR - 1));
+		}
 		return new CrossReportFilter().buildXml(report);
 	}
 
 	private CrossReport getReportFromLocalDisk(long timestamp, String domain) throws Exception {
 		CrossReport report = new CrossReport(domain);
 		CrossReportMerger merger = new CrossReportMerger(report);
+		ReportBucketManager bucketManager = getBucketManager();
 
 		report.setStartTime(new Date(timestamp));
 		report.setEndTime(new Date(timestamp + TimeHelper.ONE_HOUR - 1));
 
+		if (bucketManager == null) {
+			return report;
+		}
 		for (int i = 0; i < getAnalyzerCount(); i++) {
 			ReportBucket bucket = null;
 			try {
-				bucket = m_bucketManager.getReportBucket(timestamp, CrossAnalyzer.ID, i);
+				bucket = bucketManager.getReportBucket(timestamp, CrossAnalyzer.ID, i);
 				String xml = bucket.findById(domain);
 
 				if (xml != null) {
@@ -91,11 +101,22 @@ public class LocalCrossService extends LocalModelService<CrossReport> {
 				}
 			} finally {
 				if (bucket != null) {
-					m_bucketManager.closeBucket(bucket);
+					bucketManager.closeBucket(bucket);
 				}
 			}
 		}
 		return report;
+	}
+
+	private ReportBucketManager getBucketManager() {
+		if (m_bucketManager == null) {
+			m_bucketManager = CatSpringContext.getBeanIfAvailable(ReportBucketManager.class);
+		}
+		return m_bucketManager;
+	}
+
+	public void setBucketManager(ReportBucketManager bucketManager) {
+		m_bucketManager = bucketManager;
 	}
 
 	public static class CrossReportFilter extends com.dianping.cat.consumer.cross.model.transform.DefaultXmlBuilder {

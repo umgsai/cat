@@ -35,6 +35,7 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = LocalModelService.class, value = LocalMatrixService.ID)
 public class LocalMatrixService extends LocalModelService<MatrixReport> {
@@ -67,20 +68,29 @@ public class LocalMatrixService extends LocalModelService<MatrixReport> {
 			long startTime = request.getStartTime();
 			report = getReportFromLocalDisk(startTime, domain);
 		}
+		if (report == null) {
+			report = new MatrixReport(domain);
+			report.setStartTime(new Date(request.getStartTime()));
+			report.setEndTime(new Date(request.getStartTime() + TimeHelper.ONE_HOUR - 1));
+		}
 		return new MatrixReportFilter().buildXml(report);
 	}
 
 	private MatrixReport getReportFromLocalDisk(long timestamp, String domain) throws Exception {
 		MatrixReport report = new MatrixReport(domain);
 		MatrixReportMerger merger = new MatrixReportMerger(report);
+		ReportBucketManager bucketManager = getBucketManager();
 
 		report.setStartTime(new Date(timestamp));
 		report.setEndTime(new Date(timestamp + TimeHelper.ONE_HOUR - 1));
 
+		if (bucketManager == null) {
+			return report;
+		}
 		for (int i = 0; i < getAnalyzerCount(); i++) {
 			ReportBucket bucket = null;
 			try {
-				bucket = m_bucketManager.getReportBucket(timestamp, MatrixAnalyzer.ID, i);
+				bucket = bucketManager.getReportBucket(timestamp, MatrixAnalyzer.ID, i);
 				String xml = bucket.findById(domain);
 
 				if (xml != null) {
@@ -90,11 +100,22 @@ public class LocalMatrixService extends LocalModelService<MatrixReport> {
 				}
 			} finally {
 				if (bucket != null) {
-					m_bucketManager.closeBucket(bucket);
+					bucketManager.closeBucket(bucket);
 				}
 			}
 		}
 		return report;
+	}
+
+	private ReportBucketManager getBucketManager() {
+		if (m_bucketManager == null) {
+			m_bucketManager = CatSpringContext.getBeanIfAvailable(ReportBucketManager.class);
+		}
+		return m_bucketManager;
+	}
+
+	public void setBucketManager(ReportBucketManager bucketManager) {
+		m_bucketManager = bucketManager;
 	}
 
 	public static class MatrixReportFilter extends com.dianping.cat.consumer.matrix.model.transform.DefaultXmlBuilder {
