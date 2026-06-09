@@ -20,6 +20,8 @@ package com.dianping.cat.system.page.permission;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -38,6 +40,7 @@ import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
 @Named
 public class UserConfigManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserConfigManager.class);
 
 	public static final int DEFAULT_ROLE = 1;
 
@@ -54,6 +57,14 @@ public class UserConfigManager implements Initializable {
 	private long m_modifyTime;
 
 	private UserConfig m_config;
+
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
 
 	public UserConfig getConfig() {
 		return m_config;
@@ -80,7 +91,10 @@ public class UserConfigManager implements Initializable {
 			m_configId = config.getId();
 			m_modifyTime = config.getModifyDate().getTime();
 			m_config = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded user config from repository, configId={}, modifyTime={}.", m_configId, m_modifyTime);
 		} catch (DalNotFoundException e) {
+			LOGGER.warn("User config is missing in repository, loading default content from fetcher.", e);
+
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -90,14 +104,18 @@ public class UserConfigManager implements Initializable {
 				m_configDao.insert(config);
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized user config from default content, configId={}.", m_configId);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to initialize user config from default content.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to load user config from repository.", e);
 			Cat.logError(e);
 		}
 		if (m_config == null) {
 			m_config = new UserConfig();
+			LOGGER.warn("User config is empty after initialization, using a new empty config.");
 		}
 
 		TimerSyncTask.getInstance().register(new SyncHandler() {
@@ -127,6 +145,8 @@ public class UserConfigManager implements Initializable {
 				UserConfig userConfig = DefaultSaxParser.parse(content);
 				m_config = userConfig;
 				m_modifyTime = modifyTime;
+				LOGGER.info("Refreshed user config, configId={}, modifyTime={}, userCount={}.", m_configId,
+						m_modifyTime, m_config.getUsers().size());
 			}
 		}
 	}
@@ -137,6 +157,7 @@ public class UserConfigManager implements Initializable {
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse user config xml for insert. xmlLength={}.", xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -154,7 +175,9 @@ public class UserConfigManager implements Initializable {
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				LOGGER.info("Stored user config, configId={}, userCount={}.", m_configId, m_config.getUsers().size());
 			} catch (Exception e) {
+				LOGGER.error("Unable to store user config, configId={}.", m_configId, e);
 				Cat.logError(e);
 				return false;
 			}
@@ -168,9 +191,11 @@ public class UserConfigManager implements Initializable {
 
 		if (configDao != null) {
 			m_configDao = configDao;
+			LOGGER.info("UserConfigManager refreshed Spring ConfigRepository dependency.");
 		}
 		if (fetcher != null) {
 			m_fetcher = fetcher;
+			LOGGER.info("UserConfigManager refreshed Spring ContentFetcher dependency.");
 		}
 	}
 

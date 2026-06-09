@@ -20,6 +20,8 @@ package com.dianping.cat.alarm.spi.config;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -36,6 +38,7 @@ import com.dianping.cat.core.config.ConfigEntity;
 
 @Named
 public class AlertConfigManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlertConfigManager.class);
 
 	private static final String CONFIG_NAME = "alertConfig";
 
@@ -48,6 +51,14 @@ public class AlertConfigManager implements Initializable {
 	private int m_configId;
 
 	private AlertConfig m_config;
+
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
 
 	public String buildReceiverContentByOnOff(String originXml, String allOnOrOff) {
 		try {
@@ -65,6 +76,7 @@ public class AlertConfigManager implements Initializable {
 
 			return tmpConfig.toString();
 		} catch (Exception e) {
+			LOGGER.error("Unable to build alert receiver config by onOff={}.", allOnOrOff, e);
 			Cat.logError(e);
 			return null;
 		}
@@ -82,7 +94,10 @@ public class AlertConfigManager implements Initializable {
 
 			m_configId = config.getId();
 			m_config = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded alert config from repository, configId={}.", m_configId);
 		} catch (DalNotFoundException e) {
+			LOGGER.warn("Alert config is missing in repository, loading default content from fetcher.", e);
+
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -93,14 +108,18 @@ public class AlertConfigManager implements Initializable {
 
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized alert config from default content, configId={}.", m_configId);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to initialize alert config from default content.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to load alert config from repository.", e);
 			Cat.logError(e);
 		}
 		if (m_config == null) {
 			m_config = new AlertConfig();
+			LOGGER.warn("Alert config is empty after initialization, using a new empty config.");
 		}
 	}
 
@@ -110,6 +129,7 @@ public class AlertConfigManager implements Initializable {
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse alert config xml for insert. xmlLength={}.", xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -129,7 +149,10 @@ public class AlertConfigManager implements Initializable {
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				LOGGER.info("Stored alert config, configId={}, receiverCount={}.", m_configId,
+						m_config.getReceivers().size());
 			} catch (Exception e) {
+				LOGGER.error("Unable to store alert config, configId={}.", m_configId, e);
 				Cat.logError(e);
 				return false;
 			}

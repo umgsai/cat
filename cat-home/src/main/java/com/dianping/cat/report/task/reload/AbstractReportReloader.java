@@ -20,6 +20,8 @@ package com.dianping.cat.report.task.reload;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 
@@ -32,6 +34,7 @@ import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportReposit
 import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class AbstractReportReloader implements ReportReloader {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractReportReloader.class);
 
 	@Inject
 	protected HourlyReportRepository m_hourlyReportDao;
@@ -63,6 +66,10 @@ public abstract class AbstractReportReloader implements ReportReloader {
 			m_hourlyReportContentDao.insert(proto);
 			return true;
 		} catch (DalException e) {
+			HourlyReport report = entity == null ? null : entity.getReport();
+			LOGGER.error("Unable to insert reloaded hourly report, reloader={}, reportName={}, domain={}, period={}.",
+					getId(), report == null ? null : report.getName(), report == null ? null : report.getDomain(),
+					report == null ? null : report.getPeriod(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -73,12 +80,16 @@ public abstract class AbstractReportReloader implements ReportReloader {
 		refreshSpringBeans();
 
 		try {
+			LOGGER.info("Reloading hourly reports, reloader={}, time={}.", getId(), time);
 			List<ReportReloadEntity> reports = loadReport(time);
 
+			LOGGER.info("Loaded reports for reload, reloader={}, time={}, reportCount={}.", getId(), time,
+					reports == null ? 0 : reports.size());
 			for (ReportReloadEntity entity : reports) {
 				insertHourlyReport(entity);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to reload hourly reports, reloader={}, time={}.", getId(), time, e);
 			Cat.logError(e);
 		}
 		return true;

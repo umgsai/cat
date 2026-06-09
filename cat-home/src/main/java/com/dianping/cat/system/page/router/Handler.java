@@ -27,6 +27,8 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -48,6 +50,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
 	@Inject
 	private CachedRouterConfigService m_cachedReportService;
@@ -80,6 +83,7 @@ public class Handler implements PageHandler<Context> {
 					servers = d.findGroup(group).getServers();
 
 					if (servers.isEmpty()) {
+						LOGGER.warn("Router report has empty servers for domain={}, group={}, ip={}.", domain, group, ip);
 						Cat.logError(new RuntimeException("Error when build router config, domain: " + domain));
 					}
 				}

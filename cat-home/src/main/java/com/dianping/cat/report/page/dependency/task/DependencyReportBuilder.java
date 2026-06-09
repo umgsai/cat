@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -41,6 +43,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = DependencyReportBuilder.ID)
 public class DependencyReportBuilder implements TaskBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DependencyReportBuilder.class);
 
 	public static final String ID = DependencyAnalyzer.ID;
 
@@ -61,10 +64,14 @@ public class DependencyReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildHourlyTask(String name, String reportDomain, Date reportPeriod) {
 		refreshSpringBeans();
+		LOGGER.info("Building dependency hourly topology graph, name={}, reportDomain={}, period={}.", name, reportDomain,
+				reportPeriod);
+
 		Date end = new Date(reportPeriod.getTime() + TimeHelper.ONE_HOUR);
 		Set<String> domains = m_reportService.queryAllDomainNames(reportPeriod, end, DependencyAnalyzer.ID);
 		boolean result = true;
 
+		LOGGER.info("Preparing dependency topology graph, period={}, domainCount={}.", reportPeriod, domains.size());
 		m_graphBuilder.getGraphs().clear();
 		for (String domain : domains) {
 			DependencyReport report = m_reportService.queryReport(domain, reportPeriod, end);
@@ -90,6 +97,8 @@ public class DependencyReportBuilder implements TaskBuilder {
 				m_topologyGraphDao.insert(proto);
 			} catch (Exception e) {
 				result = false;
+				LOGGER.error("Unable to insert dependency topology graph, reportDomain={}, period={}, graphPeriod={}.",
+						reportDomain, reportPeriod, new Date(entry.getKey()), e);
 				Cat.logError(e);
 			}
 		}

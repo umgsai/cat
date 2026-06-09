@@ -21,6 +21,8 @@ package com.dianping.cat.report.page.statistics.service;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Named;
 
@@ -37,6 +39,7 @@ import com.dianping.cat.report.service.AbstractReportService;
 
 @Named
 public class JarReportService extends AbstractReportService<JarReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(JarReportService.class);
 
 	@Override
 	public JarReport makeReport(String domain, Date start, Date end) {
@@ -70,6 +73,8 @@ public class JarReportService extends AbstractReportService<JarReport> {
 			try {
 				reports = m_hourlyReportDao.findAllByDomainNamePeriod(start, domain, name, HourlyReportEntity.READSET_FULL);
 			} catch (DalException e) {
+				LOGGER.error("Unable to query jar hourly report list, domain={}, period={}.", domain, new Date(startTime),
+						e);
 				Cat.logError(e);
 			}
 			if (reports != null) {
@@ -77,6 +82,8 @@ public class JarReportService extends AbstractReportService<JarReport> {
 					try {
 						return queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 					} catch (DalException e) {
+						LOGGER.error("Unable to parse jar hourly report, domain={}, reportId={}, period={}.", domain,
+								report.getId(), report.getPeriod(), e);
 						Cat.logError(e);
 					}
 				}

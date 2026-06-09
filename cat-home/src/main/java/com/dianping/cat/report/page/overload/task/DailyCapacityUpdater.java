@@ -24,6 +24,8 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
@@ -38,6 +40,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = CapacityUpdater.class, value = DailyCapacityUpdater.ID)
 public class DailyCapacityUpdater implements CapacityUpdater {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DailyCapacityUpdater.class);
 
 	public static final String ID = "daily_capacity_updater";
 
@@ -63,6 +66,7 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 		refreshSpringBeans();
 
 		int maxId = m_manager.getDailyStatus();
+		LOGGER.info("Starting daily report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
 			List<DailyReportContent> reports = m_dailyReportContentDao
@@ -85,11 +89,15 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 							overload.setPeriod(report.getPeriod());
 							m_overloadDao.insert(overload);
 						} catch (DalNotFoundException e) {
+							LOGGER.warn("Daily report not found while recording overload report, reportId={}.", reportId);
 						} catch (Exception e) {
+							LOGGER.error("Unable to record daily overload report, reportId={}, contentLength={}.",
+							      reportId, contentLength, e);
 							Cat.logError(e);
 						}
 					}
 				} catch (Exception ex) {
+					LOGGER.error("Unable to process daily report capacity item, content={}.", content, ex);
 					Cat.logError(ex);
 				}
 			}
@@ -102,6 +110,7 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 			}
 		}
 		m_manager.updateDailyStatus(maxId);
+		LOGGER.info("Finished daily report capacity scan, finalMaxId={}.", maxId);
 	}
 
 	private void refreshSpringBeans() {

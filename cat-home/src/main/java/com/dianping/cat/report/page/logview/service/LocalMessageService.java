@@ -22,6 +22,8 @@ import java.nio.charset.Charset;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.Bucket;
 import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.MessageFinderManager;
@@ -49,6 +51,8 @@ import com.dianping.cat.report.service.ModelService;
 
 @Named(type = LocalModelService.class, value = "logview")
 public class LocalMessageService extends LocalModelService<String> implements ModelService<String> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(LocalMessageService.class);
+
 	public static final String ID = DumpAnalyzer.ID;
 
 	@Inject
@@ -119,7 +123,8 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 				content.readInt(); // get rid of length
 				return content.toString(Charset.forName("utf-8"));
 			} catch (Exception e) {
-				// ignore it
+				LOGGER.error("Unable to render new local logview message, messageId={}, waterfall={}.", messageId,
+						waterfall, e);
 			}
 		}
 
@@ -156,7 +161,8 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 				buf.readInt(); // get rid of length
 				return buf.toString(Charset.forName("utf-8"));
 			} catch (Exception e) {
-				// ignore it
+				LOGGER.error("Unable to render old local logview message, messageId={}, waterfall={}.", messageId,
+						waterfall, e);
 			}
 		}
 		return null;
@@ -183,7 +189,7 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 			t.addData("domain", domain);
 			t.setStatus(Message.SUCCESS);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("Unable to invoke local logview service, request={}, domain={}.", request, request.getDomain(), e);
 			Cat.logError(e);
 			t.setStatus(e);
 			response.setException(e);

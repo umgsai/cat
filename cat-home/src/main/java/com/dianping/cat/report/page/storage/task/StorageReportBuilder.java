@@ -23,6 +23,8 @@ import java.util.Set;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -46,6 +48,7 @@ import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.Curre
 
 @Named(type = TaskBuilder.class, value = StorageReportBuilder.ID)
 public class StorageReportBuilder implements TaskBuilder, Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(StorageReportBuilder.class);
 
 	public static final String ID = StorageAnalyzer.ID;
 
@@ -57,6 +60,7 @@ public class StorageReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildDailyTask(String name, String reportId, Date period) {
+		LOGGER.info("Building storage daily report, name={}, reportId={}, period={}.", name, reportId, period);
 		try {
 			StorageReport storageReport = queryHourlyReportsByDuration(reportId, period, TaskHelper.tomorrowZero(period));
 
@@ -71,6 +75,8 @@ public class StorageReportBuilder implements TaskBuilder, Initializable {
 			byte[] binaryContent = DefaultNativeBuilder.build(storageReport);
 			return m_reportService.insertDailyReport(report, binaryContent);
 		} catch (Exception e) {
+			LOGGER.error("Unable to build storage daily report, name={}, reportId={}, period={}.", name, reportId, period,
+					e);
 			Cat.logError(e);
 			return false;
 		}
@@ -83,6 +89,7 @@ public class StorageReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String reportId, Date period) {
+		LOGGER.info("Building storage monthly report, name={}, reportId={}, period={}.", name, reportId, period);
 		Date end = null;
 
 		if (period.equals(TimeHelper.getCurrentMonth())) {
@@ -106,6 +113,7 @@ public class StorageReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String reportId, Date period) {
+		LOGGER.info("Building storage weekly report, name={}, reportId={}, period={}.", name, reportId, period);
 		Date end = null;
 
 		if (period.equals(TimeHelper.getCurrentWeek())) {
@@ -142,6 +150,8 @@ public class StorageReportBuilder implements TaskBuilder, Initializable {
 										.queryReport(reportId, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 				reportModel.accept(merger);
 			} catch (Exception e) {
+				LOGGER.error("Unable to merge storage daily report into duration report, reportId={}, period={}.",
+						reportId, new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}

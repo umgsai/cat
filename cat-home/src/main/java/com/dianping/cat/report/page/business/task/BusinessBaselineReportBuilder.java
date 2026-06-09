@@ -168,12 +168,32 @@ public class BusinessBaselineReportBuilder implements TaskBuilder {
 	private void refreshSpringBeans() {
 		BusinessConfigManager configManager = CatSpringContext.getBeanIfAvailable(BusinessConfigManager.class);
 		BaselineService baselineService = CatSpringContext.getBeanIfAvailable(BaselineService.class);
+		BusinessKeyHelper keyHelper = CatSpringContext.getBeanIfAvailable(BusinessKeyHelper.class);
+		BaselineConfigManager baselineConfigManager = CatSpringContext.getBeanIfAvailable(BaselineConfigManager.class);
+		BusinessPointParser parser = CatSpringContext.getBeanIfAvailable(BusinessPointParser.class);
+		BaselineCreator baselineCreator = CatSpringContext.getBeanIfAvailable(BaselineCreator.class);
+		BusinessReportService reportService = CatSpringContext.getBeanIfAvailable(BusinessReportService.class);
 
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
 		if (baselineService != null) {
 			m_baselineService = baselineService;
+		}
+		if (keyHelper != null) {
+			m_keyHelper = keyHelper;
+		}
+		if (baselineConfigManager != null) {
+			m_baselineConfigManager = baselineConfigManager;
+		}
+		if (parser != null) {
+			m_parser = parser;
+		}
+		if (baselineCreator != null) {
+			m_baselineCreator = baselineCreator;
+		}
+		if (reportService != null) {
+			m_reportService = reportService;
 		}
 	}
 

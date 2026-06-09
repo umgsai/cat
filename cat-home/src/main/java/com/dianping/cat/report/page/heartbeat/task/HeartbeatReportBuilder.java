@@ -20,6 +20,8 @@ package com.dianping.cat.report.page.heartbeat.task;
 
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -36,6 +38,7 @@ import com.dianping.cat.report.task.TaskHelper;
 
 @Named(type = TaskBuilder.class, value = HeartbeatReportBuilder.ID)
 public class HeartbeatReportBuilder implements TaskBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatReportBuilder.class);
 
 	public static final String ID = HeartbeatAnalyzer.ID;
 
@@ -59,6 +62,8 @@ public class HeartbeatReportBuilder implements TaskBuilder {
 
 			return m_reportService.insertDailyReport(report, binaryContent);
 		} catch (Exception e) {
+			LOGGER.error("Unable to build heartbeat daily report, name={}, domain={}, period={}.", name, domain, period,
+					e);
 			Cat.logError(e);
 			return false;
 		}
@@ -85,6 +90,8 @@ public class HeartbeatReportBuilder implements TaskBuilder {
 		long endTime = end.getTime();
 
 		for (; startTime < endTime; startTime += TimeHelper.ONE_HOUR) {
+			LOGGER.info("Merging heartbeat hourly report into daily report, name={}, domain={}, period={}.", name,
+					domain, new Date(startTime));
 			HeartbeatReport report = m_reportService
 									.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_HOUR));
 

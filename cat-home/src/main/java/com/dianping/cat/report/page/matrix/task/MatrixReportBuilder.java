@@ -22,6 +22,8 @@ import java.util.Date;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -44,6 +46,7 @@ import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.Curre
 
 @Named(type = TaskBuilder.class, value = MatrixReportBuilder.ID)
 public class MatrixReportBuilder implements TaskBuilder, Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MatrixReportBuilder.class);
 
 	public static final String ID = MatrixAnalyzer.ID;
 
@@ -52,6 +55,7 @@ public class MatrixReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
+		LOGGER.info("Building matrix daily report, name={}, domain={}, period={}.", name, domain, period);
 		MatrixReport matrixReport = queryHourlyReportByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
 		DailyReport report = new DailyReport();
 
@@ -72,6 +76,7 @@ public class MatrixReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
+		LOGGER.info("Building matrix monthly report, name={}, domain={}, period={}.", name, domain, period);
 		MatrixReport matrixReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
 
@@ -87,6 +92,7 @@ public class MatrixReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
+		LOGGER.info("Building matrix weekly report, name={}, domain={}, period={}.", name, domain, period);
 		MatrixReport matrixReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
 		WeeklyReport report = new WeeklyReport();
@@ -134,6 +140,8 @@ public class MatrixReportBuilder implements TaskBuilder, Initializable {
 
 				reportModel.accept(merger);
 			} catch (Exception e) {
+				LOGGER.error("Unable to merge matrix daily report into duration report, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}

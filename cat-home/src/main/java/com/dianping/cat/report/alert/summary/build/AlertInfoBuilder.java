@@ -26,6 +26,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -44,6 +46,7 @@ import com.dianping.cat.report.page.dependency.graph.TopologyGraphManager;
 
 @Named
 public class AlertInfoBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlertInfoBuilder.class);
 
 	public static final String LONG_CALL = "long_call";
 
@@ -141,8 +144,12 @@ public class AlertInfoBuilder {
 		try {
 			List<Alert> dbAlerts = m_alertDao
 									.queryAlertsByTimeCategoryDomain(startTime, date, dbCategoryName, domain, AlertEntity.READSET_FULL);
+			LOGGER.info("Loaded alert summary category alerts, category={}, domain={}, start={}, end={}, alertCount={}.",
+					cate, domain, startTime, date, dbAlerts.size());
 			setDBAlertsToCategory(category, dbAlerts);
 		} catch (DalException e) {
+			LOGGER.error("Unable to load alert summary category alerts, category={}, domain={}, start={}, end={}.", cate,
+					domain, startTime, date, e);
 			Cat.logError("find alerts error for category:" + cate + " domain:" + domain + " date:" + date, e);
 		}
 
@@ -160,8 +167,12 @@ public class AlertInfoBuilder {
 				List<Alert> dbAlerts = m_alertDao
 										.queryAlertsByTimeCategoryDomain(startTime, date, dbCategoryName, domain, AlertEntity.READSET_FULL);
 
+				LOGGER.info("Loaded dependency alert summary alerts, category={}, domain={}, start={}, end={}, alertCount={}.",
+						cate, domain, startTime, date, dbAlerts.size());
 				setDBAlertsToCategory(category, dbAlerts);
 			} catch (DalException e) {
+				LOGGER.error("Unable to load dependency alert summary alerts, category={}, domain={}, start={}, end={}.",
+						cate, domain, startTime, date, e);
 				Cat.logError("find dependency alerts error for category:" + cate + " domain:" + domain + " date:" + date, e);
 			}
 		}

@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -48,6 +50,7 @@ import com.dianping.cat.report.service.ModelService;
 
 @Named
 public class ExceptionAlert implements Task {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionAlert.class);
 
 	protected static final long DURATION = TimeHelper.ONE_MINUTE;
 
@@ -99,7 +102,9 @@ public class ExceptionAlert implements Task {
 					entity.setMetric(metricName).setType(getName()).setGroup(domain);
 					m_sendManager.addAlert(entity);
 				}
+				LOGGER.info("Exception alerts queued, domain={}, alertCount={}.", domain, exceptions.size());
 			} catch (Exception e) {
+				LOGGER.error("Unable to handle exception alerts, domain={}.", entry.getKey(), e);
 				Cat.logError(e);
 			}
 		}
@@ -144,11 +149,15 @@ public class ExceptionAlert implements Task {
 						items.add(item);
 					}
 				}
+				LOGGER.info("Exception alert cycle started, itemCount={}, filteredItemCount={}.", itemList.size(),
+						items.size());
 				handleExceptions(items);
 
 				t.setStatus(Transaction.SUCCESS);
 			} catch (Exception e) {
 				t.setStatus(e);
+				LOGGER.error("Exception alert cycle failed.", e);
+				Cat.logError(e);
 			} finally {
 				t.complete();
 			}
@@ -159,6 +168,7 @@ public class ExceptionAlert implements Task {
 					Thread.sleep(DURATION - duration);
 				}
 			} catch (InterruptedException e) {
+				LOGGER.warn("Exception alert task interrupted.");
 				active = false;
 			}
 		}

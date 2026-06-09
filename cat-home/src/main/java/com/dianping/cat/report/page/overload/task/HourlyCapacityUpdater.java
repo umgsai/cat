@@ -24,6 +24,8 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.HourlyReport;
@@ -38,6 +40,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = CapacityUpdater.class, value = HourlyCapacityUpdater.ID)
 public class HourlyCapacityUpdater implements CapacityUpdater {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HourlyCapacityUpdater.class);
 
 	public static final String ID = "hourly_capacity_updater";
 
@@ -63,6 +66,7 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 		refreshSpringBeans();
 
 		int maxId = m_manager.getHourlyStatus();
+		LOGGER.info("Starting hourly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
 			List<HourlyReportContent> reports = m_hourlyReportContentDao
@@ -87,11 +91,15 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 							m_overloadDao.insert(overload);
 
 						} catch (DalNotFoundException e) {
+							LOGGER.warn("Hourly report not found while recording overload report, reportId={}.", reportId);
 						} catch (Exception e) {
+							LOGGER.error("Unable to record hourly overload report, reportId={}, contentLength={}.",
+							      reportId, contentLength, e);
 							Cat.logError(e);
 						}
 					}
 				} catch (Exception ex) {
+					LOGGER.error("Unable to process hourly report capacity item, content={}.", content, ex);
 					Cat.logError(ex);
 				}
 			}
@@ -104,6 +112,7 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 			}
 		}
 		m_manager.updateHourlyStatus(maxId);
+		LOGGER.info("Finished hourly report capacity scan, finalMaxId={}.", maxId);
 	}
 
 	private void refreshSpringBeans() {

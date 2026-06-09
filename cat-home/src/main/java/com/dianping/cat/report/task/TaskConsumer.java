@@ -20,11 +20,15 @@ package com.dianping.cat.report.task;
 
 import java.util.Calendar;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.Task;
 
 public abstract class TaskConsumer implements org.unidal.helper.Threads.Task {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TaskConsumer.class);
 
 	public static final int STATUS_TODO = 1;
 
@@ -74,6 +78,7 @@ public abstract class TaskConsumer implements org.unidal.helper.Threads.Task {
 	@Override
 	public void run() {
 		String localIp = getLoaclIp();
+		LOGGER.info("Task consumer started, name={}, localIp={}.", getName(), localIp);
 		while (m_running) {
 			try {
 				if (checkTime()) {
@@ -86,22 +91,35 @@ public abstract class TaskConsumer implements org.unidal.helper.Threads.Task {
 						try {
 							task.setConsumer(localIp);
 							if (task.getStatus() == TaskConsumer.STATUS_DOING || updateTodoToDoing(task)) {
+								LOGGER.info("Task claimed for processing, name={}, reportName={}, domain={}, type={}, period={}, taskId={}.",
+										getName(), task.getReportName(), task.getReportDomain(), task.getTaskType(),
+										task.getReportPeriod(), task.getId());
 								int retryTimes = 0;
 								while (!processTask(task)) {
 									retryTimes++;
 									if (retryTimes < MAX_TODO_RETRY_TIMES) {
+										LOGGER.warn("Task processing failed, retrying, name={}, reportName={}, domain={}, type={}, period={}, taskId={}, retryTimes={}.",
+												getName(), task.getReportName(), task.getReportDomain(), task.getTaskType(),
+												task.getReportPeriod(), task.getId(), retryTimes);
 										taskRetryDuration();
 									} else {
+										LOGGER.error("Task processing failed after retries, name={}, reportName={}, domain={}, type={}, period={}, taskId={}, retryTimes={}.",
+												getName(), task.getReportName(), task.getReportDomain(), task.getTaskType(),
+												task.getReportPeriod(), task.getId(), retryTimes);
 										updateDoingToFailure(task);
 										again = true;
 										break;
 									}
 								}
 								if (!again) {
+									LOGGER.info("Task processing succeeded, name={}, reportName={}, domain={}, type={}, period={}, taskId={}.",
+											getName(), task.getReportName(), task.getReportDomain(), task.getTaskType(),
+											task.getReportPeriod(), task.getId());
 									updateDoingToDone(task);
 								}
 							}
 						} catch (Throwable e) {
+							LOGGER.error("Unexpected error while processing task, task={}.", task, e);
 							Cat.logError(task.toString(), e);
 						}
 					} else {
@@ -111,14 +129,16 @@ public abstract class TaskConsumer implements org.unidal.helper.Threads.Task {
 					try {
 						Thread.sleep(60 * 1000);
 					} catch (InterruptedException e) {
-						// Ignore
+						LOGGER.warn("Task consumer sleep interrupted before active window, name={}.", getName(), e);
 					}
 				}
 			} catch (Throwable e) {
+				LOGGER.error("Task consumer loop failed, name={}.", getName(), e);
 				Cat.logError(e);
 			}
 		}
 		m_stopped = true;
+		LOGGER.info("Task consumer stopped, name={}, localIp={}.", getName(), localIp);
 	}
 
 	public void stop() {

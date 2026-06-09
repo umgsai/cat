@@ -22,6 +22,8 @@ import java.util.Date;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -43,6 +45,7 @@ import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.Curre
 
 @Named(type = TaskBuilder.class, value = CrossReportBuilder.ID)
 public class CrossReportBuilder implements TaskBuilder, Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CrossReportBuilder.class);
 
 	public static final String ID = CrossAnalyzer.ID;
 
@@ -51,6 +54,7 @@ public class CrossReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
+		LOGGER.info("Building cross daily report, name={}, domain={}, period={}.", name, domain, period);
 		CrossReport crossReport = queryHourlyReportsByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
 		DailyReport report = new DailyReport();
 
@@ -71,6 +75,7 @@ public class CrossReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
+		LOGGER.info("Building cross monthly report, name={}, domain={}, period={}.", name, domain, period);
 		CrossReport crossReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
 
@@ -86,6 +91,7 @@ public class CrossReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
+		LOGGER.info("Building cross weekly report, name={}, domain={}, period={}.", name, domain, period);
 		CrossReport crossReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
 		WeeklyReport report = new WeeklyReport();
@@ -132,6 +138,8 @@ public class CrossReportBuilder implements TaskBuilder, Initializable {
 										.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 				reportModel.accept(merger);
 			} catch (Exception e) {
+				LOGGER.error("Unable to merge cross daily report into duration report, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}

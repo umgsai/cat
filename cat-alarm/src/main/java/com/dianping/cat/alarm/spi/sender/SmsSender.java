@@ -21,11 +21,15 @@ package com.dianping.cat.alarm.spi.sender;
 import java.net.URLEncoder;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.sender.entity.Sender;
 import com.dianping.cat.alarm.spi.AlertChannel;
 
 public class SmsSender extends AbstractSender {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SmsSender.class);
 
 	public static final String ID = AlertChannel.SMS.getName();
 
@@ -65,6 +69,8 @@ public class SmsSender extends AbstractSender {
 			urlPars = urlPars.replace("${receiver}", URLEncoder.encode(receiver, "utf-8"))
 									.replace("${content}",	URLEncoder.encode(content, "utf-8"));
 		} catch (Exception e) {
+			LOGGER.error("Unable to encode SMS alert request parameters, receiver={}, title={}.", receiver,
+			      message.getTitle(), e);
 			Cat.logError(e);
 		}
 

@@ -25,6 +25,8 @@ import java.util.Map.Entry;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
@@ -37,6 +39,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class ReportReloadTask extends ContainerHolder implements Initializable, Task {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReportReloadTask.class);
 
 	private static final long DURATION = TimeHelper.ONE_HOUR;
 
@@ -58,6 +61,8 @@ public class ReportReloadTask extends ContainerHolder implements Initializable, 
 			m_configManager = configManager;
 		}
 		m_reloaders = lookupMap(ReportReloader.class);
+		LOGGER.info("Initialized report reload task, reloaderCount={}, reloaders={}.", m_reloaders.size(),
+				m_reloaders.keySet());
 	}
 
 	@Override
@@ -72,13 +77,17 @@ public class ReportReloadTask extends ContainerHolder implements Initializable, 
 					String type = entry.getKey();
 					List<Date> dates = m_configManager.queryByReportType(type);
 
+					LOGGER.info("Report reload cycle found configured dates, type={}, dateCount={}.", type,
+							dates == null ? 0 : dates.size());
 					for (Date date : dates) {
 						ReportReloader reloader = entry.getValue();
 
+						LOGGER.info("Running report reloader, type={}, date={}.", type, date);
 						reloader.reload(date.getTime());
 					}
 				}
 			} catch (Exception e) {
+				LOGGER.error("Report reload cycle failed.", e);
 				Cat.logError(e);
 			}
 			long duration = System.currentTimeMillis() - current;
@@ -88,6 +97,7 @@ public class ReportReloadTask extends ContainerHolder implements Initializable, 
 					Thread.sleep(DURATION - duration);
 				}
 			} catch (InterruptedException e) {
+				LOGGER.warn("Report reload task interrupted.");
 				active = false;
 			}
 		}

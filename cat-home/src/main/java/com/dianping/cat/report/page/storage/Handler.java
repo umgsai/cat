@@ -36,6 +36,8 @@ import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -73,6 +75,8 @@ import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
 public class Handler implements PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
+
 	@Inject
 	private JspViewer m_jspViewer;
 
@@ -153,6 +157,7 @@ public class Handler implements PageHandler<Context> {
 		} catch (DalNotFoundException e) {
 			// ignore it
 		} catch (Exception e) {
+			LOGGER.error("Unable to query storage alterations, start={}, end={}, type={}.", start, end, type, e);
 			Cat.logError(e);
 		}
 		return results;
@@ -372,6 +377,7 @@ public class Handler implements PageHandler<Context> {
 
 			return report;
 		} else {
+			LOGGER.error("No eligible storage model service registered, request={}.", request);
 			throw new RuntimeException("Internal error: no eligable transaction service registered for " + request + "!");
 		}
 	}

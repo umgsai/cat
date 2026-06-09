@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -39,6 +41,8 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
 public class Handler implements PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
+
 	@Inject
 	private JspViewer m_jspViewer;
 
@@ -77,6 +81,8 @@ public class Handler implements PageHandler<Context> {
 
 		model.setStartTime(startDate);
 		model.setEndTime(endDate);
+		LOGGER.info("Handling business report outbound, action={}, type={}, name={}, start={}, end={}.", action,
+				payload.getType(), payload.getName(), startDate, endDate);
 
 		switch (action) {
 		case VIEW:
@@ -98,14 +104,19 @@ public class Handler implements PageHandler<Context> {
 
 	private void refreshSpringBeans() {
 		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		BusinessTagConfigManager tagConfigManager = CatSpringContext.getBeanIfAvailable(BusinessTagConfigManager.class);
 
 		if (projectService != null) {
 			m_projectService = projectService;
+		}
+		if (tagConfigManager != null) {
+			m_tagConfigManager = tagConfigManager;
 		}
 	}
 
 	private Map<String, LineChart> buildLineCharts(Type type, String name, Date start, Date end) {
 		Map<String, LineChart> allCharts = null;
+		LOGGER.info("Building business line charts, type={}, name={}, start={}, end={}.", type, name, start, end);
 
 		if (type == Type.Tag) {
 			allCharts = m_graphCreator.buildGraphByTag(start, end, name);

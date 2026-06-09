@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -59,6 +61,7 @@ import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
 @Named
 public class BusinessAlert implements Task {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessAlert.class);
 
 	public static final String DEFAULT_TAG = "业务大盘";
 
@@ -240,6 +243,8 @@ public class BusinessAlert implements Task {
 				return m_dataChecker.checkData(currentData, currentBaseLine, conditions);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to process custom business alert item, key={}, minute={}, maxDuration={}, pattern={}.",
+					key, minute, maxDuration, customConfig == null ? null : customConfig.getPattern(), e);
 			Cat.logError(e);
 		}
 		return new ArrayList<DataCheckEntity>();
@@ -254,6 +259,8 @@ public class BusinessAlert implements Task {
 		int maxDuration = monitorConfigs.calMaxRuleMinute();
 
 		if (maxDuration > 0) {
+			LOGGER.info("Processing business alert domain, domain={}, minute={}, maxDuration={}.", domain, minute,
+					maxDuration);
 			BusinessReportGroup reportGroup = m_service.prepareDatas(domain, minute, maxDuration);
 
 			if (reportGroup.isDataReady()) {
@@ -317,16 +324,19 @@ public class BusinessAlert implements Task {
 			try {
 				Set<String> domains = m_projectService.findAllDomains();
 
+				LOGGER.info("Business alert cycle started, domainCount={}.", domains.size());
 				for (String domain : domains) {
 					try {
 						processDomain(domain);
 					} catch (Exception e) {
+						LOGGER.error("Unable to process business alert domain, domain={}.", domain, e);
 						Cat.logError(e);
 					}
 				}
 				t.setStatus(Transaction.SUCCESS);
 			} catch (Exception e) {
 				t.setStatus(e);
+				LOGGER.error("Business alert cycle failed.", e);
 				Cat.logError(e);
 			} finally {
 				t.complete();
@@ -339,6 +349,7 @@ public class BusinessAlert implements Task {
 					Thread.sleep(DURATION - duration);
 				}
 			} catch (InterruptedException e) {
+				LOGGER.warn("Business alert task interrupted.");
 				active = false;
 			}
 		}
@@ -354,6 +365,10 @@ public class BusinessAlert implements Task {
 			entity.setContactGroup(domain);
 			m_sendManager.addAlert(entity);
 		}
+		if (!alertResults.isEmpty()) {
+			LOGGER.info("Business alerts queued, domain={}, metric={}, alertCount={}.", domain, metricName,
+					alertResults.size());
+		}
 	}
 
 	@Override
@@ -363,12 +378,32 @@ public class BusinessAlert implements Task {
 	private void refreshSpringBeans() {
 		BusinessConfigManager configManager = CatSpringContext.getBeanIfAvailable(BusinessConfigManager.class);
 		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		BusinessRuleConfigManager alertConfigManager = CatSpringContext.getBeanIfAvailable(BusinessRuleConfigManager.class);
+		BusinessTagConfigManager tagConfigManager = CatSpringContext.getBeanIfAvailable(BusinessTagConfigManager.class);
+		BaseRuleHelper baseRuleHelper = CatSpringContext.getBeanIfAvailable(BaseRuleHelper.class);
+		BusinessKeyHelper keyHelper = CatSpringContext.getBeanIfAvailable(BusinessKeyHelper.class);
+		CustomDataCalculator customDataCalculator = CatSpringContext.getBeanIfAvailable(CustomDataCalculator.class);
 
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
 		if (projectService != null) {
 			m_projectService = projectService;
+		}
+		if (alertConfigManager != null) {
+			m_alertConfigManager = alertConfigManager;
+		}
+		if (tagConfigManager != null) {
+			m_tagConfigManager = tagConfigManager;
+		}
+		if (baseRuleHelper != null) {
+			m_baseRuleHelper = baseRuleHelper;
+		}
+		if (keyHelper != null) {
+			m_keyHelper = keyHelper;
+		}
+		if (customDataCalculator != null) {
+			m_customDataCalculator = customDataCalculator;
 		}
 	}
 

@@ -21,6 +21,8 @@ package com.dianping.cat.report.page.statistics.task.service;
 import java.util.Date;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -42,6 +44,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = ClientReportBuilder.ID)
 public class ClientReportBuilder implements TaskBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ClientReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_CLIENT;
 
@@ -63,6 +66,7 @@ public class ClientReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building client daily report, name={}, domain={}, period={}.", name, domain, period);
 
 		ClientReport clientReport = buildClientReport(period);
 		DailyReport report = new DailyReport();
@@ -96,6 +100,8 @@ public class ClientReportBuilder implements TaskBuilder {
 					}
 				}
 			} catch (Exception e) {
+				LOGGER.error("Unable to visit transaction report for client report, domain={}, start={}, end={}.", domain,
+						startTime, endTime, e);
 				Cat.logError(domain + " client report visitor error", e);
 			}
 		}

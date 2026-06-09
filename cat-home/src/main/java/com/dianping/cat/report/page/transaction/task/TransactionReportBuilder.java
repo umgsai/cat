@@ -24,6 +24,7 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -49,6 +50,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = TransactionReportBuilder.ID)
 public class TransactionReportBuilder implements Initializable, TaskBuilder, LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TransactionReportBuilder.class);
 
 	public static final String ID = TransactionAnalyzer.ID;
 
@@ -82,6 +84,8 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 			byte[] binaryContent = DefaultNativeBuilder.build(transactionReport);
 			return m_reportService.insertDailyReport(report, binaryContent);
 		} catch (Exception e) {
+			SLF4J_LOGGER.error("Unable to build transaction daily report, name={}, domain={}, period={}.", name, domain,
+					period, e);
 			m_logger.error(e.getMessage(), e);
 			Cat.logError(e);
 			return false;
@@ -96,6 +100,7 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		SLF4J_LOGGER.info("Building transaction monthly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date end = null;
 
@@ -120,6 +125,7 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		SLF4J_LOGGER.info("Building transaction weekly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date end = null;
 
@@ -191,6 +197,8 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 				creator.createGraph(reportModel);
 				reportModel.accept(merger);
 			} catch (Exception e) {
+				SLF4J_LOGGER.error("Unable to merge transaction daily report into duration report, domain={}, period={}.",
+						domain, new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}

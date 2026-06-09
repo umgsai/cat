@@ -28,6 +28,8 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
@@ -37,6 +39,7 @@ import com.dianping.cat.alarm.spi.decorator.ProjectDecorator;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 
 public class ExceptionDecorator extends ProjectDecorator implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionDecorator.class);
 
 	public static final String ID = AlertType.Exception.getName();
 
@@ -56,6 +59,8 @@ public class ExceptionDecorator extends ProjectDecorator implements Initializabl
 			Template t = m_configuration.getTemplate("exceptionAlert.ftl");
 			t.process(dataMap, sw);
 		} catch (Exception e) {
+			LOGGER.error("Unable to build exception alert content, group={}, date={}, content={}.", alert.getGroup(),
+					alert.getDate(), alert.getContent(), e);
 			Cat.logError("build exception content error:" + alert.toString(), e);
 		}
 
@@ -65,6 +70,8 @@ public class ExceptionDecorator extends ProjectDecorator implements Initializabl
 		try {
 			summaryContext = m_executor.execute(alert.getGroup(), alert.getDate());
 		} catch (Exception e) {
+			LOGGER.error("Unable to append exception alert summary, group={}, date={}.", alert.getGroup(),
+					alert.getDate(), e);
 			Cat.logError(alert.toString(), e);
 		}
 
@@ -108,6 +115,7 @@ public class ExceptionDecorator extends ProjectDecorator implements Initializabl
 		try {
 			m_configuration.setClassForTemplateLoading(this.getClass(), "/freemaker");
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize exception alert decorator template loading.", e);
 			Cat.logError(e);
 		}
 	}

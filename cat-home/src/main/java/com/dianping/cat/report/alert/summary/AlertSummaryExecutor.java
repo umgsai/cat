@@ -24,6 +24,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Splitters;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -41,6 +43,7 @@ import com.dianping.cat.report.alert.summary.build.SummaryBuilder;
 
 @Named
 public class AlertSummaryExecutor {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryExecutor.class);
 
 	public static final long SUMMARY_DURATION = 5 * TimeHelper.ONE_MINUTE;
 
@@ -82,6 +85,7 @@ public class AlertSummaryExecutor {
 
 		date = normalizeDate(date);
 		try {
+			LOGGER.info("Generating alert summary, domain={}, date={}.", domain, date);
 			StringBuilder builder = new StringBuilder();
 
 			builder.append(m_relatedBuilder.generateHtml(domain, date));
@@ -92,6 +96,7 @@ public class AlertSummaryExecutor {
 			return builder.toString();
 		} catch (Exception e) {
 			t.setStatus(e);
+			LOGGER.error("Unable to generate alert summary, domain={}, date={}.", domain, date, e);
 			Cat.logError("generate alert summary fail:" + domain + " " + date, e);
 		} finally {
 			t.complete();
@@ -110,6 +115,8 @@ public class AlertSummaryExecutor {
 			SendMessageEntity message = new SendMessageEntity(domain, title, "alertSummary", content, receivers);
 
 			if (receivers.size() > 0) {
+				LOGGER.info("Sending alert summary mail, domain={}, date={}, receiverCount={}.", domain, date,
+						receivers.size());
 				m_sendManager.sendAlert(AlertChannel.MAIL, message);
 			}
 		}

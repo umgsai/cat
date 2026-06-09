@@ -215,16 +215,34 @@ public class GlobalConfigProcessor {
 		}
 	}
 
-	private void refreshSpringBeans() {
+	public void refreshSpringBeans() {
 		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		RouterConfigManager routerConfigManager = CatSpringContext.getBeanIfAvailable(RouterConfigManager.class);
+		DomainGroupConfigManager domainGroupConfigManager = CatSpringContext.getBeanIfAvailable(DomainGroupConfigManager.class);
+		StorageGroupConfigManager storageGroupConfigManager = CatSpringContext
+		      .getBeanIfAvailable(StorageGroupConfigManager.class);
+		ConfigHtmlParser configHtmlParser = CatSpringContext.getBeanIfAvailable(ConfigHtmlParser.class);
 		SampleConfigManager sampleConfigManager = CatSpringContext.getBeanIfAvailable(SampleConfigManager.class);
 		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
 		      .getBeanIfAvailable(ServerFilterConfigManager.class);
 		ReportReloadConfigManager reloadConfigManager = CatSpringContext.getBeanIfAvailable(ReportReloadConfigManager.class);
+		SenderConfigManager senderConfigManager = CatSpringContext.getBeanIfAvailable(SenderConfigManager.class);
 
 		if (projectService != null) {
 			m_projectService = projectService;
+		}
+		if (routerConfigManager != null) {
+			m_routerConfigManager = routerConfigManager;
+		}
+		if (domainGroupConfigManager != null) {
+			m_domainGroupConfigManger = domainGroupConfigManager;
+		}
+		if (storageGroupConfigManager != null) {
+			m_groupConfigManager = storageGroupConfigManager;
+		}
+		if (configHtmlParser != null) {
+			m_configHtmlParser = configHtmlParser;
 		}
 		if (sampleConfigManager != null) {
 			m_sampleConfigManager = sampleConfigManager;
@@ -237,6 +255,9 @@ public class GlobalConfigProcessor {
 		}
 		if (reloadConfigManager != null) {
 			m_reloadConfigManager = reloadConfigManager;
+		}
+		if (senderConfigManager != null) {
+			m_senderConfigManager = senderConfigManager;
 		}
 	}
 

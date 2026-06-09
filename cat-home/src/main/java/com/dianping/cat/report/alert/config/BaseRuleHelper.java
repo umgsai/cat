@@ -23,6 +23,8 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
@@ -32,6 +34,7 @@ import com.dianping.cat.alarm.rule.entity.Config;
 
 @Named
 public class BaseRuleHelper {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BaseRuleHelper.class);
 
 	public Pair<Integer, List<Condition>> convertConditions(List<Config> configs) {
 		int maxMinute = 0;
@@ -70,6 +73,7 @@ public class BaseRuleHelper {
 				return false;
 			}
 		} catch (Exception ex) {
+			LOGGER.warn("Unable to validate alert rule time window, config={}.", config, ex);
 			Cat.logError("throw exception when judge time: " + config.toString(), ex);
 			return false;
 		}

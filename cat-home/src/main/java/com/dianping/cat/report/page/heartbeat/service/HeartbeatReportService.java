@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
@@ -47,6 +49,7 @@ import com.dianping.cat.report.service.AbstractReportService;
 
 @Named
 public class HeartbeatReportService extends AbstractReportService<HeartbeatReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatReportService.class);
 
 	@Override
 	public HeartbeatReport makeReport(String domain, Date start, Date end) {
@@ -72,8 +75,10 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 
 				reportModel.accept(merger);
 			} catch (DalNotFoundException e) {
-				// ignore
+				LOGGER.warn("Heartbeat daily report is missing, domain={}, period={}.", domain, new Date(startTime), e);
 			} catch (Exception e) {
+				LOGGER.error("Unable to query heartbeat daily report, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}
@@ -120,6 +125,8 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 				reports = m_hourlyReportDao
 										.findAllByDomainNamePeriod(new Date(startTime), domain, name,	HourlyReportEntity.READSET_FULL);
 			} catch (DalException e) {
+				LOGGER.error("Unable to query heartbeat hourly report list, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 			if (reports != null) {
@@ -128,8 +135,11 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 						HeartbeatReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 						reportModel.accept(merger);
 					} catch (DalNotFoundException e) {
-						// ignore
+						LOGGER.warn("Heartbeat hourly report content is missing, domain={}, reportId={}, period={}.",
+								domain, report.getId(), report.getPeriod(), e);
 					} catch (Exception e) {
+						LOGGER.error("Unable to parse heartbeat hourly report, domain={}, reportId={}, period={}.",
+								domain, report.getId(), report.getPeriod(), e);
 						Cat.logError(e);
 					}
 				}

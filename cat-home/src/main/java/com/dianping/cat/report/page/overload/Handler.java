@@ -21,6 +21,8 @@ package com.dianping.cat.report.page.overload;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -32,6 +34,8 @@ import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.report.page.overload.task.TableCapacityService;
 
 public class Handler implements PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
+
 	@Inject
 	private JspViewer m_jspViewer;
 
@@ -57,6 +61,8 @@ public class Handler implements PageHandler<Context> {
 			try {
 				model.setReports(m_tableCapacityService.queryOverloadReports(payload.getStartTime(), payload.getEndTime()));
 			} catch (Exception e) {
+				LOGGER.error("Unable to query overload reports, startTime={}, endTime={}.", payload.getStartTime(),
+				      payload.getEndTime(), e);
 				Cat.logError(e);
 			}
 			break;

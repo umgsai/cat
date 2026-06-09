@@ -22,6 +22,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.ActionContext;
 import org.unidal.web.mvc.ActionPayload;
 import org.unidal.web.mvc.payload.annotation.FieldMeta;
@@ -30,6 +32,8 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.ReportPage;
 
 public class Payload implements ActionPayload<ReportPage, Action> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Payload.class);
+
 	private ReportPage m_page;
 
 	@FieldMeta("op")
@@ -74,6 +78,7 @@ public class Payload implements ActionPayload<ReportPage, Action> {
 		try {
 			return m_format.parse(m_endTime);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to parse overload endTime, value={}. Use current time.", m_endTime);
 			return new Date();
 		}
 	}
@@ -104,6 +109,7 @@ public class Payload implements ActionPayload<ReportPage, Action> {
 		try {
 			return m_format.parse(m_startTime);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to parse overload startTime, value={}. Use one day ago.", m_startTime);
 			return new Date(System.currentTimeMillis() - TimeHelper.ONE_DAY);
 		}
 	}

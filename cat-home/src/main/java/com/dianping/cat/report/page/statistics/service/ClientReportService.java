@@ -20,6 +20,8 @@ package com.dianping.cat.report.page.statistics.service;
 
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Named;
@@ -36,6 +38,7 @@ import com.dianping.cat.report.service.AbstractReportService;
 
 @Named
 public class ClientReportService extends AbstractReportService<ClientReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ClientReportService.class);
 
 	@Override
 	public ClientReport makeReport(String domain, Date start, Date end) {
@@ -56,8 +59,9 @@ public class ClientReportService extends AbstractReportService<ClientReport> {
 									.findByDomainNamePeriod(domain, name, new Date(startTime),	DailyReportEntity.READSET_FULL);
 			return queryFromDailyBinary(report.getId(), domain);
 		} catch (DalNotFoundException e) {
-			// ignore
+			LOGGER.warn("Client daily report is missing, domain={}, period={}.", domain, new Date(startTime), e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query client daily report, domain={}, period={}.", domain, new Date(startTime), e);
 			Cat.logError(e);
 		}
 		ClientReport report = new ClientReport(Constants.CAT);

@@ -27,6 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.ContainerHolder;
@@ -47,6 +49,7 @@ import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
 @Named
 public class BusinessConfigManager extends ContainerHolder implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessConfigManager.class);
 
 	public final static String BASE_CONFIG = "base";
 
@@ -88,6 +91,7 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 			itemIds.remove(key);
 			cacheConfigs(businessReportConfig, domain);
 		} catch (Exception e) {
+			LOGGER.error("Unable to delete business item config, domain={}, key={}.", domain, key, e);
 			Cat.logError(e);
 			return false;
 		}
@@ -106,6 +110,7 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 			m_configDao.updateByPK(config, BusinessConfigEntity.UPDATESET_FULL);
 			cacheConfigs(businessReportConfig, domain);
 		} catch (Exception e) {
+			LOGGER.error("Unable to delete business custom config, domain={}, key={}.", domain, key, e);
 			Cat.logError(e);
 			return false;
 		}
@@ -125,6 +130,7 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 		}
 
 		m_alertMachine = serverConfigManager.isAlertMachine();
+		LOGGER.info("Initializing business config manager, alertMachine={}.", m_alertMachine);
 
 		loadData();
 
@@ -164,12 +170,16 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 					domains.put(domain, itemIds);
 					cacheConfigs(businessReportConfig, domain);
 				} catch (Exception e) {
+					LOGGER.error("Unable to parse business config, configId={}, domain={}.", config.getId(),
+							config.getDomain(), e);
 					Cat.logError(e);
 				}
 			}
 
 			m_domains = domains;
+			LOGGER.info("Loaded business configs, configCount={}, domainCount={}.", configs.size(), m_domains.size());
 		} catch (Exception e) {
+			LOGGER.error("Unable to load business configs.", e);
 			Cat.logError(e);
 		}
 	}
@@ -200,6 +210,7 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 				itemIds.add(key);
 				m_domains.put(domain, itemIds);
 				cacheConfigs(config, domain);
+				LOGGER.info("Inserted new business config, domain={}, key={}.", domain, key);
 			} else {
 				Set<String> itemIds = m_domains.get(domain);
 
@@ -215,11 +226,13 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 
 					itemIds.add(key);
 					cacheConfigs(config, domain);
+					LOGGER.info("Inserted business item config, domain={}, key={}.", domain, key);
 				}
 			}
 
 			return true;
 		} catch (Exception e) {
+			LOGGER.error("Unable to insert business config if not exists, domain={}, key={}.", domain, key, e);
 			Cat.logError(e);
 		}
 		return false;
@@ -237,8 +250,9 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 				businessReportConfig = DefaultSaxParser.parse(config.getContent());
 			}
 		} catch (DalNotFoundException notFound) {
-			// Ignore
+			LOGGER.warn("Business config is missing, domain={}; returning empty config.", domain, notFound);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query business config by domain={}.", domain, e);
 			Cat.logError(e);
 		}
 
@@ -259,8 +273,10 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 		try {
 			m_configDao.updateBaseConfigByDomain(proto, BusinessConfigEntity.UPDATESET_FULL);
 			cacheConfigs(config, domain);
+			LOGGER.info("Updated business config, domain={}.", domain);
 			return true;
 		} catch (DalException e) {
+			LOGGER.error("Unable to update business config, domain={}.", domain, e);
 			Cat.logError(e);
 		}
 
@@ -279,8 +295,10 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 		try {
 			m_configDao.insert(proto);
 			cacheConfigs(config, domain);
+			LOGGER.info("Inserted business config, domain={}.", domain);
 			return true;
 		} catch (DalException e) {
+			LOGGER.error("Unable to insert business config, domain={}.", domain, e);
 			Cat.logError(e);
 		}
 

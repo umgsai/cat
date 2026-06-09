@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.StringUtils;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Splitters;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.annotation.Inject;
@@ -59,6 +60,7 @@ import com.dianping.cat.report.service.ModelService;
 
 @Named
 public class EventAlert implements Task, LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(EventAlert.class);
 
 	protected static final long DURATION = TimeHelper.ONE_MINUTE;
 
@@ -246,6 +248,10 @@ public class EventAlert implements Task, LogEnabled {
 		String monitor = fields.get(3);
 
 		List<DataCheckEntity> alertResults = computeAlertForRule(domain, type, name, monitor, rule.getConfigs());
+		if (!alertResults.isEmpty()) {
+			SLF4J_LOGGER.info("Event alerts queued, ruleId={}, domain={}, metric={}, alertCount={}.", rule.getId(),
+					domain, type + "-" + name + "-" + monitor, alertResults.size());
+		}
 		for (DataCheckEntity alertResult : alertResults) {
 			AlertEntity entity = new AlertEntity();
 
@@ -268,6 +274,7 @@ public class EventAlert implements Task, LogEnabled {
 				MonitorRules monitorRules = m_ruleConfigManager.getMonitorRules();
 				Map<String, Rule> rules = monitorRules.getRules();
 
+				SLF4J_LOGGER.info("Event alert cycle started, ruleCount={}.", rules.size());
 				for (Entry<String, Rule> entry : rules.entrySet()) {
 					//Event告警开关
 					if (null != entry.getValue().getAvailable() && !entry.getValue().getAvailable()) {
@@ -276,12 +283,14 @@ public class EventAlert implements Task, LogEnabled {
 					try {
 						processRule(entry.getValue());
 					} catch (Exception e) {
+						SLF4J_LOGGER.error("Unable to process event alert rule, ruleId={}.", entry.getKey(), e);
 						Cat.logError(e);
 					}
 				}
 				t.setStatus(Transaction.SUCCESS);
 			} catch (Exception e) {
 				t.setStatus(e);
+				SLF4J_LOGGER.error("Event alert cycle failed.", e);
 				Cat.logError(e);
 			} finally {
 				t.complete();
@@ -293,6 +302,7 @@ public class EventAlert implements Task, LogEnabled {
 					Thread.sleep(DURATION - duration);
 				}
 			} catch (InterruptedException e) {
+				SLF4J_LOGGER.warn("Event alert task interrupted.");
 				active = false;
 			}
 		}

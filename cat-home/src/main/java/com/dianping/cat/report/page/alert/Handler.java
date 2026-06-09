@@ -35,6 +35,8 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.helper.Splitters;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -51,6 +53,8 @@ import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
+
 	@Inject
 	private JspViewer m_jspViewer;
 
@@ -110,6 +114,8 @@ public class Handler implements PageHandler<Context> {
 		case ALERT:
 			List<String> receivers = Splitters.by(",").noEmptyItem().split(payload.getReceivers());
 			if (receivers == null || receivers.size() == 0) {
+				LOGGER.warn("Manual alert send request lacks receivers, channel={}, type={}, group={}.",
+				      payload.getChannel(), payload.getType(), payload.getGroup());
 				setAlertResult(model, 0);
 			} else {
 				SendMessageEntity message = new SendMessageEntity(payload.getGroup(), payload.getTitle(),	payload.getType(),
@@ -120,9 +126,13 @@ public class Handler implements PageHandler<Context> {
 					if (result) {
 						setAlertResult(model, 1);
 					} else {
+						LOGGER.warn("Manual alert send failed, channel={}, type={}, group={}, receiverCount={}.",
+						      payload.getChannel(), payload.getType(), payload.getGroup(), receivers.size());
 						setAlertResult(model, 2);
 					}
 				} catch (NullPointerException ex) {
+					LOGGER.error("Manual alert send failed because channel is invalid, channel={}, type={}, group={}.",
+					      payload.getChannel(), payload.getType(), payload.getGroup(), ex);
 					setAlertResult(model, 3);
 				}
 			}
@@ -137,12 +147,16 @@ public class Handler implements PageHandler<Context> {
 					int count = m_alertDao.insert(alertEntity);
 
 					if (count == 0) {
+						LOGGER.warn("Manual alert insert returned zero, domain={}, category={}, metric={}.",
+						      alertEntity.getDomain(), alertEntity.getCategory(), alertEntity.getMetric());
 						setAlertResult(model, 5);
 					} else {
 						setAlertResult(model, 1);
 					}
 				} catch (DalException e) {
 					setAlertResult(model, 5);
+					LOGGER.error("Unable to insert manual alert, domain={}, category={}, metric={}.",
+					      alertEntity.getDomain(), alertEntity.getCategory(), alertEntity.getMetric(), e);
 					Cat.logError(e);
 				}
 			}
@@ -162,6 +176,8 @@ public class Handler implements PageHandler<Context> {
 				}
 			} catch (DalException e) {
 				alerts = new ArrayList<Alert>();
+				LOGGER.error("Unable to query alerts, startTime={}, endTime={}, domain={}, alertTypes={}.", startTime,
+				      endTime, domain, alertTypeStr, e);
 				Cat.logError(e);
 			}
 			model.setAlertMinutes(generateAlertMinutes(alerts));

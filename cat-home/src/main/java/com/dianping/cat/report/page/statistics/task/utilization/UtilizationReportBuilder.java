@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -55,6 +57,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = UtilizationReportBuilder.ID)
 public class UtilizationReportBuilder implements TaskBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(UtilizationReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_UTILIZATION;
 
@@ -79,6 +82,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building utilization daily report, name={}, domain={}, period={}.", name, domain, period);
 
 		UtilizationReport utilizationReport = queryHourlyReportsByDuration(name, domain, period,
 								TaskHelper.tomorrowZero(period));
@@ -98,6 +102,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date start) {
 		refreshSpringBeans();
+		LOGGER.info("Building utilization hourly report, name={}, domain={}, period={}.", name, domain, start);
 
 		UtilizationReport utilizationReport = new UtilizationReport(Constants.CAT);
 		Date end = new Date(start.getTime() + TimeHelper.ONE_HOUR);
@@ -173,6 +178,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building utilization monthly report, name={}, domain={}, period={}.", name, domain, period);
 
 		UtilizationReport utilizationReport = queryDailyReportsByDuration(domain, period,	TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
@@ -191,6 +197,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building utilization weekly report, name={}, domain={}, period={}.", name, domain, period);
 
 		UtilizationReport utilizationReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
@@ -220,6 +227,8 @@ public class UtilizationReportBuilder implements TaskBuilder {
 										.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 				reportModel.accept(merger);
 			} catch (Exception e) {
+				LOGGER.error("Unable to merge utilization daily report into duration report, domain={}, period={}.",
+						domain, new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}

@@ -21,6 +21,8 @@ package com.dianping.cat.report.page.statistics.service;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Named;
@@ -51,6 +53,7 @@ import com.dianping.cat.report.service.AbstractReportService;
 
 @Named
 public class UtilizationReportService extends AbstractReportService<UtilizationReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(UtilizationReportService.class);
 
 	@Override
 	public UtilizationReport makeReport(String domain, Date start, Date end) {
@@ -75,8 +78,10 @@ public class UtilizationReportService extends AbstractReportService<UtilizationR
 				UtilizationReport reportModel = queryFromDailyBinary(report.getId(), domain);
 				reportModel.accept(merger);
 			} catch (DalNotFoundException e) {
-				// ignore
+				LOGGER.warn("Utilization daily report is missing, domain={}, period={}.", domain, new Date(startTime), e);
 			} catch (Exception e) {
+				LOGGER.error("Unable to query utilization daily report, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}
@@ -141,6 +146,8 @@ public class UtilizationReportService extends AbstractReportService<UtilizationR
 				reports = m_hourlyReportDao
 										.findAllByDomainNamePeriod(new Date(startTime), domain, name,	HourlyReportEntity.READSET_FULL);
 			} catch (DalException e) {
+				LOGGER.error("Unable to query utilization hourly report list, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 			if (reports != null) {
@@ -149,8 +156,11 @@ public class UtilizationReportService extends AbstractReportService<UtilizationR
 						UtilizationReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 						reportModel.accept(merger);
 					} catch (DalNotFoundException e) {
-						// ignore
+						LOGGER.warn("Utilization hourly report content is missing, domain={}, reportId={}, period={}.",
+								domain, report.getId(), report.getPeriod(), e);
 					} catch (Exception e) {
+						LOGGER.error("Unable to parse utilization hourly report, domain={}, reportId={}, period={}.",
+								domain, report.getId(), report.getPeriod(), e);
 						Cat.logError(e);
 					}
 				}
@@ -171,8 +181,9 @@ public class UtilizationReportService extends AbstractReportService<UtilizationR
 									.findReportByDomainNamePeriod(start, domain,	Constants.REPORT_UTILIZATION, MonthlyReportEntity.READSET_FULL);
 			return queryFromMonthlyBinary(entity.getId(), domain);
 		} catch (DalNotFoundException e) {
-			// ignore
+			LOGGER.warn("Utilization monthly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query utilization monthly report, domain={}, period={}.", domain, start, e);
 			Cat.logError(e);
 		}
 		return new UtilizationReport(domain);
@@ -185,8 +196,9 @@ public class UtilizationReportService extends AbstractReportService<UtilizationR
 									.findReportByDomainNamePeriod(start, domain,	Constants.REPORT_UTILIZATION, WeeklyReportEntity.READSET_FULL);
 			return queryFromWeeklyBinary(entity.getId(), domain);
 		} catch (DalNotFoundException e) {
-			// ignore
+			LOGGER.warn("Utilization weekly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query utilization weekly report, domain={}, period={}.", domain, start, e);
 			Cat.logError(e);
 		}
 		return new UtilizationReport(domain);

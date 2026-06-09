@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -41,6 +43,7 @@ import com.dianping.cat.core.config.ConfigEntity;
 
 @Named
 public class AlertPolicyManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlertPolicyManager.class);
 
 	private static final String CONFIG_NAME = "alertPolicy";
 
@@ -58,6 +61,14 @@ public class AlertPolicyManager implements Initializable {
 
 	private AlertPolicy m_config;
 
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
+
 	public AlertPolicy getAlertPolicy() {
 		return m_config;
 	}
@@ -70,7 +81,10 @@ public class AlertPolicyManager implements Initializable {
 
 			m_configId = config.getId();
 			m_config = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded alert policy from repository, configId={}.", m_configId);
 		} catch (DalNotFoundException e) {
+			LOGGER.warn("Alert policy is missing in repository, loading default content from fetcher.", e);
+
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -81,14 +95,18 @@ public class AlertPolicyManager implements Initializable {
 
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized alert policy from default content, configId={}.", m_configId);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to initialize alert policy from default content.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to load alert policy from repository.", e);
 			Cat.logError(e);
 		}
 		if (m_config == null) {
 			m_config = new AlertPolicy();
+			LOGGER.warn("Alert policy is empty after initialization, using a new empty policy.");
 		}
 	}
 
@@ -98,6 +116,7 @@ public class AlertPolicyManager implements Initializable {
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse alert policy xml for insert. xmlLength={}.", xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -121,12 +140,14 @@ public class AlertPolicyManager implements Initializable {
 					}
 				}
 
-				return channels;
-			}
-		} catch (Exception ex) {
-			return new ArrayList<AlertChannel>();
+			return channels;
 		}
+	} catch (Exception ex) {
+		LOGGER.warn("Unable to query alert channels, type={}, group={}, level={}; returning empty channels.", typeName,
+				groupName, levelName, ex);
+		return new ArrayList<AlertChannel>();
 	}
+}
 
 	private Level queryLevel(String typeName, String groupName, String levelName) {
 		Type type = m_config.findType(typeName);
@@ -151,12 +172,14 @@ public class AlertPolicyManager implements Initializable {
 			if (level == null) {
 				return 1;
 			} else {
-				return level.getRecoverMinute();
-			}
-		} catch (Exception ex) {
-			return 1;
+			return level.getRecoverMinute();
 		}
+	} catch (Exception ex) {
+		LOGGER.warn("Unable to query alert recover minute, type={}, group={}, level={}; returning default value 1.",
+				typeName, groupName, levelName, ex);
+		return 1;
 	}
+}
 
 	public int querySuspendMinute(String typeName, String groupName, String levelName) {
 		try {
@@ -165,12 +188,14 @@ public class AlertPolicyManager implements Initializable {
 			if (level == null) {
 				return 0;
 			} else {
-				return level.getSuspendMinute();
-			}
-		} catch (Exception ex) {
-			return 0;
+			return level.getSuspendMinute();
 		}
+	} catch (Exception ex) {
+		LOGGER.warn("Unable to query alert suspend minute, type={}, group={}, level={}; returning default value 0.",
+				typeName, groupName, levelName, ex);
+		return 0;
 	}
+}
 
 	private boolean storeConfig() {
 		synchronized (this) {
@@ -182,7 +207,9 @@ public class AlertPolicyManager implements Initializable {
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				LOGGER.info("Stored alert policy, configId={}, typeCount={}.", m_configId, m_config.getTypes().size());
 			} catch (Exception e) {
+				LOGGER.error("Unable to store alert policy, configId={}.", m_configId, e);
 				Cat.logError(e);
 				return false;
 			}

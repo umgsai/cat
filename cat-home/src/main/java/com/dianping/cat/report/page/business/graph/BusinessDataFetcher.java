@@ -21,6 +21,8 @@ package com.dianping.cat.report.page.business.graph;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.consumer.business.model.entity.BusinessItem;
@@ -31,13 +33,21 @@ import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 
 public class BusinessDataFetcher {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessDataFetcher.class);
 
 	@Inject
 	private BusinessKeyHelper m_keyHelper;
 
+	public void setKeyHelper(BusinessKeyHelper keyHelper) {
+		m_keyHelper = keyHelper;
+	}
+
 	public Map<String, double[]> buildGraphData(BusinessReport businessReport) {
 		BusinessDataBuilder builder = new BusinessDataBuilder();
 
+		if (businessReport == null) {
+			LOGGER.error("Business report is null while building graph data.");
+		}
 		builder.visitBusinessReport(businessReport);
 		return builder.getDatas();
 	}
@@ -50,6 +60,10 @@ public class BusinessDataFetcher {
 
 		@Override
 		public void visitBusinessReport(BusinessReport report) {
+			if (report == null) {
+				LOGGER.error("Cannot visit null business report.");
+			}
+
 			m_domain = report.getDomain();
 			super.visitBusinessReport(report);
 		}

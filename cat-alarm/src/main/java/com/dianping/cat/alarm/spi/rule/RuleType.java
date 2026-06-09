@@ -19,6 +19,8 @@
 package com.dianping.cat.alarm.spi.rule;
 
 import com.dianping.cat.Cat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.tuple.Pair;
 
 import javax.tools.JavaCompiler;
@@ -491,6 +493,8 @@ public enum RuleType {
 
 					m_rules.put(rawValue, instance);
 				} catch (Exception e) {
+					LOGGER.error("Unable to generate user defined alert rule, rawValueLength={}.",
+					      rawValue == null ? 0 : rawValue.length(), e);
 					Cat.logError("generate user defined rule error: " + rawValue, e);
 					return new Pair<Boolean, String>(false, "");
 				}
@@ -523,6 +527,8 @@ public enum RuleType {
 			return "UserDefine";
 		}
 	};
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(RuleType.class);
 
 	protected static final long MbS = 60 * 1024 * 1024;
 

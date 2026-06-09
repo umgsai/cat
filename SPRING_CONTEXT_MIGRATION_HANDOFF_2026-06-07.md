@@ -26,6 +26,46 @@ D:\workspace\cat
 
 ## 2. 当前可运行状态
 
+### 2.1 最新进度快照（本节优先）
+
+截至 2026-06-07 最近一轮迁移，配置页 Processor 的 Spring 依赖刷新和一批配置 Manager 的 Spring 注册已经完成，并通过编译、打包、临时启动和多条配置页 URL 验证。
+
+本节是最新状态摘要；如果后文旧计划与本节冲突，以本节为准。
+
+已完成的最新迁移点：
+
+1. `CatHomeSpringConfiguration` 继续扩展，新增注册了 `ConfigHtmlParser`、`RouterConfigManager`、`DomainGroupConfigManager`、`StorageGroupConfigManager`、`TopologyGraphConfigManager`、`TopoGraphFormatConfigManager`、`HeartbeatDisplayPolicyManager`、`ExceptionRuleConfigManager`、`AlertConfigManager`、`AlertPolicyManager`、`BaseRuleHelper`、`TransactionRuleConfigManager`、`EventRuleConfigManager`、`HeartbeatRuleConfigManager`。
+2. 多个配置 Manager 已补 setter，使 Spring 初始化不再依赖 `CatSpringContext` 在 `context.refresh()` 过程中已经可用。
+3. 配置页 Processor 已增加执行前刷新 Spring 依赖的逻辑，但 Processor 本体仍由 Plexus 创建。
+4. `TimerSyncTask.register` 已按 handler name 去重，避免 Plexus 和 Spring 双实例初始化时重复注册同名同步 handler。
+5. 最新一次启动日志显示 Spring Home 侧 `beanCount=90`。
+
+当前工作树中，本轮迁移相关 Java 文件仍处于未提交修改状态。不要回滚这些改动，下一次继续前先用 `git status --short` 确认：
+
+```text
+cat-alarm/src/main/java/com/dianping/cat/alarm/spi/config/AlertConfigManager.java
+cat-alarm/src/main/java/com/dianping/cat/alarm/spi/config/AlertPolicyManager.java
+cat-core/src/main/java/com/dianping/cat/task/TimerSyncTask.java
+cat-home/src/main/java/com/dianping/cat/home/spring/CatHomeSpringConfiguration.java
+cat-home/src/main/java/com/dianping/cat/report/alert/exception/ExceptionRuleConfigManager.java
+cat-home/src/main/java/com/dianping/cat/report/alert/spi/config/BaseRuleConfigManager.java
+cat-home/src/main/java/com/dianping/cat/report/page/DomainGroupConfigManager.java
+cat-home/src/main/java/com/dianping/cat/report/page/dependency/config/TopoGraphFormatConfigManager.java
+cat-home/src/main/java/com/dianping/cat/report/page/dependency/graph/TopologyGraphConfigManager.java
+cat-home/src/main/java/com/dianping/cat/report/page/heartbeat/config/HeartbeatDisplayPolicyManager.java
+cat-home/src/main/java/com/dianping/cat/report/page/storage/config/StorageGroupConfigManager.java
+cat-home/src/main/java/com/dianping/cat/system/page/config/processor/AlertConfigProcessor.java
+cat-home/src/main/java/com/dianping/cat/system/page/config/processor/BaseProcesser.java
+cat-home/src/main/java/com/dianping/cat/system/page/config/processor/DependencyConfigProcessor.java
+cat-home/src/main/java/com/dianping/cat/system/page/config/processor/EventConfigProcessor.java
+cat-home/src/main/java/com/dianping/cat/system/page/config/processor/ExceptionConfigProcessor.java
+cat-home/src/main/java/com/dianping/cat/system/page/config/processor/GlobalConfigProcessor.java
+cat-home/src/main/java/com/dianping/cat/system/page/config/processor/HeartbeatConfigProcessor.java
+cat-home/src/main/java/com/dianping/cat/system/page/config/processor/StorageConfigProcessor.java
+cat-home/src/main/java/com/dianping/cat/system/page/config/processor/TransactionConfigProcessor.java
+cat-home/src/main/java/com/dianping/cat/system/page/router/config/RouterConfigManager.java
+```
+
 截至本交接文档编写时，用户已经多次确认项目可以正常启动和访问，最近一次用户反馈是：
 
 ```text
@@ -196,12 +236,26 @@ BaselineService
 RemoteServersManager
 DomainValidator
 ServerStatisticManager
+ConfigHtmlParser
+RouterConfigManager
+DomainGroupConfigManager
+StorageGroupConfigManager
+TopologyGraphConfigManager
+TopoGraphFormatConfigManager
+HeartbeatDisplayPolicyManager
+ExceptionRuleConfigManager
+AlertConfigManager
+AlertPolicyManager
+BaseRuleHelper
+TransactionRuleConfigManager
+EventRuleConfigManager
+HeartbeatRuleConfigManager
 ```
 
 最近一次启动验证看到 Spring Home 侧 Bean 数量约为：
 
 ```text
-beanCount=76
+beanCount=90
 ```
 
 ### 3.6 Repository 和 Service 桥接
@@ -277,6 +331,27 @@ http://127.0.0.1:18080/cat/s/config
 http://127.0.0.1:18080/cat/s/router?op=json&domain=cat&ip=127.0.0.1
 ```
 
+最近一轮已经额外验证过的配置页和路由入口：
+
+```text
+http://127.0.0.1:18080/cat/s/config?op=routerConfigUpdate
+http://127.0.0.1:18080/cat/s/config?op=domainGroupConfigs
+http://127.0.0.1:18080/cat/s/config?op=storageGroupConfigUpdate
+http://127.0.0.1:18080/cat/s/config?op=serverConfigUpdate
+http://127.0.0.1:18080/cat/s/config?op=sampleConfigUpdate
+http://127.0.0.1:18080/cat/s/config?op=topologyGraphNodeConfigList
+http://127.0.0.1:18080/cat/s/config?op=topologyGraphEdgeConfigList
+http://127.0.0.1:18080/cat/s/config?op=topoGraphFormatConfigUpdate
+http://127.0.0.1:18080/cat/s/config?op=heartbeatDisplayPolicy
+http://127.0.0.1:18080/cat/s/config?op=heartbeatRuleConfigList
+http://127.0.0.1:18080/cat/s/config?op=exception
+http://127.0.0.1:18080/cat/s/config?op=alertPolicy
+http://127.0.0.1:18080/cat/s/config?op=alertDefaultReceivers
+http://127.0.0.1:18080/cat/s/config?op=transactionRule
+http://127.0.0.1:18080/cat/s/config?op=eventRule
+http://127.0.0.1:18080/cat/s/router?op=json&domain=cat&ip=127.0.0.1
+```
+
 可暂时忽略的日志：
 
 ```text
@@ -292,6 +367,14 @@ Logback Missing watchable .xml...
 3. 临时验证用 `-Dcat.tcp.port=12280` 可以绕开默认端口冲突。
 
 ## 5. 当前正在推进但尚未完成的工作
+
+最新状态：
+
+```text
+配置页 Processor Spring 依赖刷新已经完成并验证。
+```
+
+本节下面保留的是迁移背景和当时的推进思路。下一次继续时不要再把“补 ConfigHtmlParser Spring Bean”或“给 Processor 增加 refreshSpringBeans()”当作未完成任务；这些已经完成。真正的下一步见文末“最新下一步计划”。
 
 当前最近一轮准备推进的是：
 
@@ -392,6 +475,8 @@ RuleFTLDecorator（来自 BaseProcesser）
 9. `StorageConfigProcessor` 当前基本是空操作，风险较低。
 
 ## 6. 配置 Processor 迁移的推荐下一步
+
+注意：本节是配置 Processor 迁移前写下的推荐顺序，其中 6.2 和 6.3 已经执行完成。下一次继续请以文末“最新下一步计划”为准。
 
 下一次建议按下面顺序执行。
 
@@ -644,4 +729,77 @@ rg -n "DataSourceManager|MyBatisRepositorySupport" cat-core/src/main/java cat-ho
 rg -n "refreshSpringBeans|class .*ConfigProcessor|class BaseProcesser" cat-home/src/main/java/com/dianping/cat/system/page/config/processor cat-home/src/main/java/com/dianping/cat/system/page/config/Handler.java
 ```
 
-然后继续执行第 6 节的配置 Processor Spring 桥接计划。
+然后以第 11 节的最新下一步计划为准继续推进。
+
+## 11. 最新下一步计划（2026-06-07 更新）
+
+最终目标仍然是：
+
+```text
+移除 Plexus / Unidal Lookup，使用 Spring 管理所有 Bean。
+```
+
+当前已经完成到“配置页 Processor 执行前刷新 Spring 依赖 + 多个配置 Manager 注册为 Spring Bean”这一阶段。下一步不要急着删除 Plexus，也不要直接把 Handler 或 Processor 本体整体切到 Spring；应该继续扩大低风险 Bean 的 Spring 管理范围，并持续验证。
+
+推荐下一步顺序：
+
+1. 先检查当前未提交改动和编译状态：
+
+```powershell
+git status --short
+mvn -pl cat-home -am compile -DskipTests
+mvn -pl cat-boot -am package -DskipTests "-Dmaven.javadoc.skip=true"
+```
+
+2. 继续挑选低风险 Manager 注册到 Spring，优先看业务规则和业务告警相关对象，例如：
+
+```text
+BusinessRuleConfigManager
+业务告警相关 ConfigManager / PolicyManager
+只依赖 ConfigRepository、ContentFetcher、BaseRuleHelper、UserDefinedRuleManager 的 Manager
+```
+
+迁移方式沿用本轮做法：
+
+```text
+先补 setter -> 在 CatHomeSpringConfiguration 注册 Bean -> Plexus 旧对象执行前 refreshSpringBeans() -> 编译/打包/启动/HTTP 验证。
+```
+
+3. 暂缓把 `RuleFTLDecorator` 和配置 Processor 本体 Spring 化。`RuleFTLDecorator` 涉及模板装饰器和旧 components 注入，建议等更多 Manager 都稳定由 Spring 管理后再处理。
+
+4. 后台任务迁移前先继续观察 `TimerSyncTask`。本轮已经给 `TimerSyncTask.register` 增加同名 handler 去重，但任务类后续 Spring 化时仍必须确认没有双容器重复启动。
+
+5. 当配置 Manager 和后台任务基本稳定后，再迁移 Web 层：
+
+```text
+Unidal Handler 暂时保留请求分发。
+等依赖都可从 Spring 获取后，再逐步用 Spring MVC Controller 替换低风险页面。
+```
+
+最近一轮已通过的验证结果：
+
+```text
+mvn -pl cat-home -am compile -DskipTests                         BUILD SUCCESS
+mvn -pl cat-boot -am package -DskipTests "-Dmaven.javadoc.skip=true" BUILD SUCCESS
+临时启动 cat-boot，端口 18080 / TCP 12280                       OK
+Spring Home beanCount                                             90
+多条 /cat/s/config 和 /cat/s/router URL                           HTTP 200
+```
+
+可接受的已知日志：
+
+```text
+Logback Missing watchable .xml
+Maven shade overlap warnings
+deprecated API warnings
+```
+
+不可忽略的日志：
+
+```text
+NullPointerException
+UnsatisfiedDependencyException
+NoSuchBeanDefinitionException
+Address already in use
+同一个任务或 SyncHandler 重复启动导致的重复执行
+```

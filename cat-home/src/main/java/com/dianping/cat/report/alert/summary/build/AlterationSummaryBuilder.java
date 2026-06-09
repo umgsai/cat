@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -35,6 +37,7 @@ import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 
 @Named(type = SummaryBuilder.class, value = AlterationSummaryBuilder.ID)
 public class AlterationSummaryBuilder extends SummaryBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlterationSummaryBuilder.class);
 
 	public static final String ID = "AlterationSummaryContentGenerator";
 
@@ -52,6 +55,7 @@ public class AlterationSummaryBuilder extends SummaryBuilder {
 			dataMap.put("count", alterations.size());
 			dataMap.put("items", alterations);
 		} catch (DalException e) {
+			LOGGER.error("Unable to query alteration summary data, domain={}, date={}.", domain, date, e);
 			Cat.logError(e);
 		}
 		return dataMap;

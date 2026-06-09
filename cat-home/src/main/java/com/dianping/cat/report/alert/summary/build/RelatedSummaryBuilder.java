@@ -24,15 +24,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
+import com.dianping.cat.Cat;
 import com.dianping.cat.home.alert.summary.entity.AlertSummary;
 import com.dianping.cat.report.alert.summary.AlertSummaryService;
 import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = SummaryBuilder.class, value = RelatedSummaryBuilder.ID)
 public class RelatedSummaryBuilder extends SummaryBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(RelatedSummaryBuilder.class);
 
 	public static final String ID = "AlertSummaryContentGenerator";
 
@@ -64,7 +68,8 @@ public class RelatedSummaryBuilder extends SummaryBuilder {
 			categories.put(AlertInfoBuilder.LONG_CALL, longCallMap);
 			map.put(AlertInfoBuilder.LONG_CALL + "_length", alerts.size());
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			LOGGER.error("Unable to gather dependent business domains for alert summary, keys={}.", map.keySet(), ex);
+			Cat.logError("gather dependent business domains for alert summary error", ex);
 		}
 
 		return map;
@@ -73,6 +78,7 @@ public class RelatedSummaryBuilder extends SummaryBuilder {
 	@Override
 	public Map<Object, Object> generateModel(String domain, Date date) {
 		refreshSpringBeans();
+		LOGGER.info("Generating related alert summary model, domain={}, date={}.", domain, date);
 		AlertSummary alertSummary = m_alertSummaryManager.generateAlertSummary(domain, date);
 		AlertSummaryVisitor visitor = new AlertSummaryVisitor(alertSummary.getDomain());
 

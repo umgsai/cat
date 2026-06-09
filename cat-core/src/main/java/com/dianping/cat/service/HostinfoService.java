@@ -29,6 +29,7 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.helper.Threads;
@@ -47,6 +48,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = HostinfoService.class)
 public class HostinfoService implements Initializable, LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(HostinfoService.class);
 
 	public static final String UNKNOWN_PROJECT = "UnknownProject";
 
@@ -91,7 +93,9 @@ public class HostinfoService implements Initializable, LogEnabled {
 					return null;
 				}
 			} catch (DalNotFoundException e) {
+				SLF4J_LOGGER.warn("Hostinfo is missing by ip={}.", ip, e);
 			} catch (Exception e) {
+				SLF4J_LOGGER.error("Unable to find hostinfo by ip={}.", ip, e);
 				Cat.logError(e);
 			}
 			return null;
@@ -105,11 +109,14 @@ public class HostinfoService implements Initializable, LogEnabled {
 
 		if (hostinfoDao != null) {
 			m_hostinfoDao = hostinfoDao;
+			SLF4J_LOGGER.info("HostinfoService refreshed Spring HostinfoRepository dependency.");
 		}
 		if (manager != null) {
 			m_manager = manager;
+			SLF4J_LOGGER.info("HostinfoService refreshed Spring ServerConfigManager dependency.");
 		}
 		Threads.forGroup("Cat").start(new RefreshHost());
+		SLF4J_LOGGER.info("HostinfoService started refresh task.");
 	}
 
 	private boolean insert(Hostinfo hostinfo) throws DalException {
@@ -131,8 +138,10 @@ public class HostinfoService implements Initializable, LogEnabled {
 			info.setIp(ip);
 			insert(info);
 			m_hostinfos.put(ip, info);
+			SLF4J_LOGGER.info("Inserted hostinfo, domain={}, ip={}.", domain, ip);
 			return true;
 		} catch (DalException e) {
+			SLF4J_LOGGER.error("Unable to insert hostinfo, domain={}, ip={}.", domain, ip, e);
 			Cat.logError(e);
 		}
 		return false;
@@ -171,6 +180,7 @@ public class HostinfoService implements Initializable, LogEnabled {
 				return null;
 			}
 		} catch (Exception e) {
+			SLF4J_LOGGER.error("Unable to query hostname by ip={}.", ip, e);
 			Cat.logError(e);
 		}
 
@@ -208,7 +218,9 @@ public class HostinfoService implements Initializable, LogEnabled {
 			}
 			m_hostinfos = tmpHostInfos;
 			m_ipDomains = tmpIpDomains;
+			SLF4J_LOGGER.info("Refreshed hostinfo cache, hostCount={}.", hostinfos.size());
 		} catch (DalException e) {
+			SLF4J_LOGGER.error("Unable to refresh hostinfo cache.", e);
 			Cat.logError("initialize HostService error", e);
 		}
 	}
@@ -230,8 +242,12 @@ public class HostinfoService implements Initializable, LogEnabled {
 
 		try {
 			m_hostinfoDao.updateByPK(hostinfo, HostinfoEntity.UPDATESET_FULL);
+			SLF4J_LOGGER.info("Updated hostinfo, id={}, domain={}, ip={}.", hostinfo.getId(), hostinfo.getDomain(),
+					hostinfo.getIp());
 			return true;
 		} catch (DalException e) {
+			SLF4J_LOGGER.error("Unable to update hostinfo, id={}, domain={}, ip={}.", hostinfo.getId(),
+					hostinfo.getDomain(), hostinfo.getIp(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -257,6 +273,7 @@ public class HostinfoService implements Initializable, LogEnabled {
 				try {
 					Thread.sleep(TimeHelper.ONE_MINUTE);
 				} catch (InterruptedException e) {
+					SLF4J_LOGGER.warn("Hostinfo refresh task interrupted.", e);
 					Cat.logError(e);
 				}
 			}

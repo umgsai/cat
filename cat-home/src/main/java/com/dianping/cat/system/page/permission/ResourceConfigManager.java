@@ -23,6 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -41,6 +43,7 @@ import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
 @Named
 public class ResourceConfigManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceConfigManager.class);
 
 	public static final int DEFAULT_RESOURCE_ROLE = 1;
 
@@ -61,6 +64,14 @@ public class ResourceConfigManager implements Initializable {
 	private ResourceConfig m_config;
 
 	private volatile Map<String, Map<String, Integer>> m_permissions = new ConcurrentHashMap<String, Map<String, Integer>>();
+
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
 
 	public ResourceConfig getConfig() {
 		return m_config;
@@ -99,7 +110,11 @@ public class ResourceConfigManager implements Initializable {
 			m_configId = config.getId();
 			m_modifyTime = config.getModifyDate().getTime();
 			m_config = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded resource config from repository, configId={}, modifyTime={}.", m_configId,
+					m_modifyTime);
 		} catch (DalNotFoundException e) {
+			LOGGER.warn("Resource config is missing in repository, loading default content from fetcher.", e);
+
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -109,14 +124,18 @@ public class ResourceConfigManager implements Initializable {
 				m_configDao.insert(config);
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized resource config from default content, configId={}.", m_configId);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to initialize resource config from default content.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to load resource config from repository.", e);
 			Cat.logError(e);
 		}
 		if (m_config == null) {
 			m_config = new ResourceConfig();
+			LOGGER.warn("Resource config is empty after initialization, using a new empty config.");
 		}
 		refreshData();
 
@@ -141,6 +160,8 @@ public class ResourceConfigManager implements Initializable {
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse resource config xml for insert. xmlLength={}.",
+					xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -160,6 +181,8 @@ public class ResourceConfigManager implements Initializable {
 				m_modifyTime = modifyTime;
 
 				refreshData();
+				LOGGER.info("Refreshed resource config, configId={}, modifyTime={}, resourceCount={}.", m_configId,
+						m_modifyTime, m_config.getResources().size());
 			}
 		}
 	}
@@ -180,6 +203,7 @@ public class ResourceConfigManager implements Initializable {
 		}
 
 		m_permissions = permissions;
+		LOGGER.info("Rebuilt resource permissions cache, pathCount={}.", permissions.size());
 	}
 
 	private boolean storeConfig() {
@@ -196,7 +220,10 @@ public class ResourceConfigManager implements Initializable {
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
 
 				refreshData();
+				LOGGER.info("Stored resource config, configId={}, resourceCount={}.", m_configId,
+						m_config.getResources().size());
 			} catch (Exception e) {
+				LOGGER.error("Unable to store resource config, configId={}.", m_configId, e);
 				Cat.logError(e);
 				return false;
 			}
@@ -210,9 +237,11 @@ public class ResourceConfigManager implements Initializable {
 
 		if (configDao != null) {
 			m_configDao = configDao;
+			LOGGER.info("ResourceConfigManager refreshed Spring ConfigRepository dependency.");
 		}
 		if (fetcher != null) {
 			m_fetcher = fetcher;
+			LOGGER.info("ResourceConfigManager refreshed Spring ContentFetcher dependency.");
 		}
 	}
 

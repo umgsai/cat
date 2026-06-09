@@ -26,6 +26,7 @@ public class StorageConfigProcessor extends BaseProcesser {
 
 
 	public void process(Action action, Payload payload, Model model) {
+		refreshSpringBeans();
 
 		switch (action) {
 		case STORAGE_RULE:

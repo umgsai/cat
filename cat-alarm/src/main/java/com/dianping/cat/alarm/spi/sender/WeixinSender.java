@@ -21,11 +21,15 @@ package com.dianping.cat.alarm.spi.sender;
 import java.net.URLEncoder;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.sender.entity.Sender;
 import com.dianping.cat.alarm.spi.AlertChannel;
 
 public class WeixinSender extends AbstractSender {
+	private static final Logger LOGGER = LoggerFactory.getLogger(WeixinSender.class);
 
 	public static final String ID = AlertChannel.WEIXIN.getName();
 
@@ -69,6 +73,8 @@ public class WeixinSender extends AbstractSender {
 									.replace("${content}", URLEncoder.encode(content, "utf-8"))
 									.replace("${type}", URLEncoder.encode(message.getType(), "utf-8"));
 		} catch (Exception e) {
+			LOGGER.error("Unable to encode Weixin alert request parameters, domain={}, receiver={}, title={}.", domain,
+			      receiver, message.getTitle(), e);
 			Cat.logError(e);
 		}
 

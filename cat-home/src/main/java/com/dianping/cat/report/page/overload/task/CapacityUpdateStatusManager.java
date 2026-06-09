@@ -20,6 +20,8 @@ package com.dianping.cat.report.page.overload.task;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -34,6 +36,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class CapacityUpdateStatusManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CapacityUpdateStatusManager.class);
 
 	private static final String CONFIG_NAME = "capacityUpdateStatus";
 
@@ -52,6 +55,14 @@ public class CapacityUpdateStatusManager implements Initializable {
 	private int m_monthlyStatus;
 
 	private int m_configId;
+
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setOverloadDao(OverloadRepository overloadDao) {
+		m_overloadDao = overloadDao;
+	}
 
 	private String buildConfigContent() {
 		StringBuilder builder = new StringBuilder();
@@ -97,6 +108,8 @@ public class CapacityUpdateStatusManager implements Initializable {
 
 			extractStatus(content);
 		} catch (DalException e) {
+			LOGGER.warn("Unable to load capacity update status config, will initialize it from overload table.", e);
+
 			try {
 				m_hourlyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.HOURLY_TYPE, OverloadEntity.READSET_MAXID)
 										.getMaxId();
@@ -114,6 +127,7 @@ public class CapacityUpdateStatusManager implements Initializable {
 
 				m_configId = config.getId();
 			} catch (DalException ex) {
+				LOGGER.error("Unable to initialize capacity update status config from overload table.", ex);
 				Cat.logError(ex);
 			}
 		}
@@ -132,6 +146,7 @@ public class CapacityUpdateStatusManager implements Initializable {
 				config.setContent(buildConfigContent());
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
 			} catch (Exception e) {
+				LOGGER.error("Unable to store capacity update status config. content={}", buildConfigContent(), e);
 				Cat.logError(e);
 				return false;
 			}

@@ -20,6 +20,8 @@ package com.dianping.cat.config;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -37,6 +39,7 @@ import com.dianping.cat.task.TimerSyncTask;
 
 @Named
 public class AtomicMessageConfigManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AtomicMessageConfigManager.class);
 
 	private static final String CONFIG_NAME = "atomic-message-config";
 
@@ -67,7 +70,11 @@ public class AtomicMessageConfigManager implements Initializable {
 			m_configId = config.getId();
 			m_modifyTime = config.getModifyDate().getTime();
 			m_config = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded atomic message config from repository, configId={}, modifyTime={}.", m_configId,
+					m_modifyTime);
 		} catch (DalNotFoundException e) {
+			LOGGER.warn("Atomic message config is missing in repository, loading default content from fetcher.", e);
+
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -77,14 +84,18 @@ public class AtomicMessageConfigManager implements Initializable {
 				m_configDao.insert(config);
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized atomic message config from default content, configId={}.", m_configId);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to initialize atomic message config from default content.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to load atomic message config from repository.", e);
 			Cat.logError(e);
 		}
 		if (m_config == null) {
 			m_config = new AtomicMessageConfig();
+			LOGGER.warn("Atomic message config is empty after initialization, using a new empty config.");
 		}
 
 		TimerSyncTask.getInstance().register(new TimerSyncTask.SyncHandler() {
@@ -107,6 +118,8 @@ public class AtomicMessageConfigManager implements Initializable {
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse atomic message config xml for insert. xmlLength={}.",
+					xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -181,7 +194,8 @@ public class AtomicMessageConfigManager implements Initializable {
 				try {
 					result = Integer.parseInt(property.getValue());
 				} catch (Exception e) {
-					//ignore
+					LOGGER.warn("Unable to parse atomic message property, domain={}, propertyName={}, value={}; "
+							+ "using defaultValue={}.", domain, propertyName, property.getValue(), defaultValue, e);
 				}
 			}
 		}
@@ -211,6 +225,7 @@ public class AtomicMessageConfigManager implements Initializable {
 
 				m_config = messageConfig;
 				m_modifyTime = modifyTime;
+				LOGGER.info("Refreshed atomic message config, configId={}, modifyTime={}.", m_configId, m_modifyTime);
 			}
 		}
 	}
@@ -225,7 +240,9 @@ public class AtomicMessageConfigManager implements Initializable {
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				LOGGER.info("Stored atomic message config, configId={}.", m_configId);
 			} catch (Exception e) {
+				LOGGER.error("Unable to store atomic message config, configId={}.", m_configId, e);
 				Cat.logError(e);
 				return false;
 			}

@@ -36,6 +36,8 @@ import java.util.Map;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -50,6 +52,7 @@ import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
 	private final static String EMPTY = "N/A";
 
@@ -89,6 +92,7 @@ public class Handler implements PageHandler<Context> {
 		try {
 			alt.setUrl(URLDecoder.decode(url, "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
+			LOGGER.warn("Unable to decode alteration url, domain={}, type={}, title={}.", domain, type, title, e);
 			Cat.logError(e);
 			alt.setUrl("");
 		}
@@ -134,6 +138,8 @@ public class Handler implements PageHandler<Context> {
 		switch (action) {
 		case INSERT:
 			if (isIllegalArgs(payload)) {
+				LOGGER.warn("Illegal alteration insert request, type={}, domain={}, hostname={}, title={}.",
+				      payload.getType(), payload.getDomain(), payload.getHostname(), payload.getTitle());
 				setInsertResult(model, 2);
 			} else {
 				Alteration alt = buildAlteration(payload);
@@ -141,12 +147,16 @@ public class Handler implements PageHandler<Context> {
 					int count = m_alterationDao.insert(alt);
 
 					if (count == 0) {
+						LOGGER.warn("Alteration insert returned zero, type={}, domain={}, title={}.", alt.getType(),
+						      alt.getDomain(), alt.getTitle());
 						setInsertResult(model, 1);
 						break;
 					} else {
 						setInsertResult(model, 0);
 					}
 				} catch (Exception e) {
+					LOGGER.error("Unable to insert alteration, type={}, domain={}, title={}.", alt.getType(),
+					      alt.getDomain(), alt.getTitle(), e);
 					Cat.logError(e);
 					setInsertResult(model, 1);
 				}
@@ -171,6 +181,8 @@ public class Handler implements PageHandler<Context> {
 			} catch (DalNotFoundException e) {
 				// ignore it
 			} catch (Exception e) {
+				LOGGER.error("Unable to query alterations, startTime={}, endTime={}, type={}, domain={}, hostname={}.",
+				      startTime, endTime, type, domain, hostname, e);
 				Cat.logError(e);
 			}
 			model.setAlterationMinuites(generateAlterationMinutes(alts));

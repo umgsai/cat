@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -59,6 +61,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class HeartbeatAlert implements Task {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatAlert.class);
 
 	protected static final long DURATION = TimeHelper.ONE_MINUTE;
 
@@ -108,6 +111,8 @@ public class HeartbeatAlert implements Task {
 
 					array[index] = detail.getValue() / unit;
 				} catch (Exception e) {
+					LOGGER.warn("Unable to calculate heartbeat extension metric, periodMinute={}, metric={}:{}.",
+							period.getMinute(), metric.getKey(), metric.getValue(), e);
 					array[index] = 0;
 				}
 			}
@@ -363,6 +368,8 @@ public class HeartbeatAlert implements Task {
 				}
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to process heartbeat alert metric, domain={}, ip={}, metric={}, maxMinute={}.", domain,
+					ip, metric, maxMinute, e);
 			Cat.logError(e);
 		}
 	}
@@ -382,11 +389,13 @@ public class HeartbeatAlert implements Task {
 			try {
 				Set<String> domains = m_projectService.findAllDomains();
 
+				LOGGER.info("Heartbeat alert cycle started, domainCount={}.", domains.size());
 				for (String domain : domains) {
 					if (m_serverFilterConfigManager.validateDomain(domain) && StringUtils.isNotEmpty(domain)) {
 						try {
 							processDomain(domain);
 						} catch (Exception e) {
+							LOGGER.error("Unable to process heartbeat alert domain, domain={}.", domain, e);
 							Cat.logError(e);
 						}
 					}
@@ -394,6 +403,7 @@ public class HeartbeatAlert implements Task {
 				t.setStatus(Transaction.SUCCESS);
 			} catch (Exception e) {
 				t.setStatus(e);
+				LOGGER.error("Heartbeat alert cycle failed.", e);
 			} finally {
 				t.complete();
 			}
@@ -404,6 +414,7 @@ public class HeartbeatAlert implements Task {
 					Thread.sleep(DURATION - duration);
 				}
 			} catch (InterruptedException e) {
+				LOGGER.warn("Heartbeat alert task interrupted.");
 				active = false;
 			}
 		}

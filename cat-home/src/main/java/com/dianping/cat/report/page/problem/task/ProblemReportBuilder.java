@@ -22,6 +22,8 @@ import java.util.Date;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -45,6 +47,7 @@ import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.Curre
 
 @Named(type = TaskBuilder.class, value = ProblemReportBuilder.ID)
 public class ProblemReportBuilder implements TaskBuilder, Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProblemReportBuilder.class);
 
 	public static final String ID = ProblemAnalyzer.ID;
 
@@ -68,6 +71,7 @@ public class ProblemReportBuilder implements TaskBuilder, Initializable {
 
 			return m_reportService.insertDailyReport(report, binaryContent);
 		} catch (DalException e) {
+			LOGGER.error("Unable to build problem daily report, name={}, domain={}, period={}.", name, domain, period, e);
 			Cat.logError(e);
 			return false;
 		}
@@ -80,6 +84,7 @@ public class ProblemReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
+		LOGGER.info("Building problem monthly report, name={}, domain={}, period={}.", name, domain, period);
 		ProblemReport problemReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 
 		new ProblemReportFilter().visitProblemReport(problemReport);
@@ -98,6 +103,7 @@ public class ProblemReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
+		LOGGER.info("Building problem weekly report, name={}, domain={}, period={}.", name, domain, period);
 		ProblemReport problemReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
 		WeeklyReport report = new WeeklyReport();
@@ -151,6 +157,8 @@ public class ProblemReportBuilder implements TaskBuilder, Initializable {
 				creator.createGraph(reportModel);
 				reportModel.accept(merger);
 			} catch (Exception e) {
+				LOGGER.error("Unable to merge problem daily report into duration report, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}

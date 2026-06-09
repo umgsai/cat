@@ -5,11 +5,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import org.unidal.lookup.annotation.Inject;
 
 public abstract class SpringBackedRepositorySupport<T> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SpringBackedRepositorySupport.class);
+
 	@Inject
 	private DataSourceManager m_dataSourceManager;
 
@@ -51,6 +54,12 @@ public abstract class SpringBackedRepositorySupport<T> {
 				sqlSessionFactory = m_sqlSessionFactory;
 
 				if (sqlSessionFactory == null) {
+					if (m_dataSourceManager == null) {
+						LOGGER.error("Cannot create fallback MyBatis SqlSessionFactory for mapper {} because "
+								+ "DataSourceManager is not injected. Spring mapper is unavailable and legacy "
+								+ "Unidal datasource fallback cannot be used.", m_mapperClass.getName());
+					}
+
 					sqlSessionFactory = SupportingMyBatisRepository.newSqlSessionFactory(m_dataSourceManager,
 							m_mapperClass, m_mapperResource);
 					m_sqlSessionFactory = sqlSessionFactory;

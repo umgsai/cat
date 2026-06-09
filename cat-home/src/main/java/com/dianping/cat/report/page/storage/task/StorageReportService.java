@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Named;
@@ -53,6 +55,7 @@ import com.dianping.cat.report.service.AbstractReportService;
 
 @Named
 public class StorageReportService extends AbstractReportService<StorageReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(StorageReportService.class);
 
 	@Override
 	public StorageReport makeReport(String id, Date start, Date end) {
@@ -104,8 +107,9 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 
 				reportModel.accept(merger);
 			} catch (DalNotFoundException e) {
-				// ignore
+				LOGGER.warn("Storage daily report is missing, reportId={}, period={}.", id, new Date(startTime), e);
 			} catch (Exception e) {
+				LOGGER.error("Unable to query storage daily report, reportId={}, period={}.", id, new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}
@@ -170,6 +174,8 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 				reports = m_hourlyReportDao
 										.findAllByDomainNamePeriod(new Date(startTime), reportId, name,	HourlyReportEntity.READSET_FULL);
 			} catch (DalException e) {
+				LOGGER.error("Unable to query storage hourly report list, reportId={}, period={}.", reportId,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 			if (reports != null) {
@@ -178,8 +184,11 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 						StorageReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), reportId);
 						reportModel.accept(merger);
 					} catch (DalNotFoundException e) {
-						// ignore
+						LOGGER.warn("Storage hourly report content is missing, reportId={}, reportDbId={}, period={}.",
+								reportId, report.getId(), report.getPeriod(), e);
 					} catch (Exception e) {
+						LOGGER.error("Unable to parse storage hourly report, reportId={}, reportDbId={}, period={}.",
+								reportId, report.getId(), report.getPeriod(), e);
 						Cat.logError(e);
 					}
 				}
@@ -203,8 +212,9 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 
 			return queryFromMonthlyBinary(entity.getId(), reportId);
 		} catch (DalNotFoundException e) {
-			// ignore
+			LOGGER.warn("Storage monthly report is missing, reportId={}, period={}.", reportId, start, e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query storage monthly report, reportId={}, period={}.", reportId, start, e);
 			Cat.logError(e);
 		}
 		return new StorageReport(reportId);
@@ -218,8 +228,9 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 
 			return queryFromWeeklyBinary(entity.getId(), reportId);
 		} catch (DalNotFoundException e) {
-			// ignore
+			LOGGER.warn("Storage weekly report is missing, reportId={}, period={}.", reportId, start, e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query storage weekly report, reportId={}, period={}.", reportId, start, e);
 			Cat.logError(e);
 		}
 		return new StorageReport(reportId);

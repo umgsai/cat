@@ -24,6 +24,8 @@ import java.util.Map;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
@@ -59,6 +61,7 @@ import com.dianping.cat.report.service.AbstractReportService;
 
 @Named
 public class TransactionReportService extends AbstractReportService<TransactionReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TransactionReportService.class);
 
 	private TransactionReport convert(TransactionReport report) {
 		Date start = report.getStartTime();
@@ -71,6 +74,8 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 				report.accept(statistics);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to convert transaction report, domain={}, start={}, end={}.", report.getDomain(), start,
+					end, e);
 			Cat.logError(e);
 		}
 
@@ -108,8 +113,10 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 
 				reportModel.accept(merger);
 			} catch (DalNotFoundException e) {
-				// ignore
+				LOGGER.warn("Transaction daily report is missing, domain={}, period={}.", domain, new Date(startTime), e);
 			} catch (Exception e) {
+				LOGGER.error("Unable to query transaction daily report, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}
@@ -174,6 +181,8 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 				reports = m_hourlyReportDao
 										.findAllByDomainNamePeriod(new Date(startTime), domain, name,	HourlyReportEntity.READSET_FULL);
 			} catch (DalException e) {
+				LOGGER.error("Unable to query transaction hourly report list, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 			if (reports != null) {
@@ -183,8 +192,11 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 
 						reportModel.accept(merger);
 					} catch (DalNotFoundException e) {
-						// ignore
+						LOGGER.warn("Transaction hourly report content is missing, domain={}, reportId={}, period={}.",
+								domain, report.getId(), report.getPeriod(), e);
 					} catch (Exception e) {
+						LOGGER.error("Unable to parse transaction hourly report, domain={}, reportId={}, period={}.",
+								domain, report.getId(), report.getPeriod(), e);
 						Cat.logError(e);
 					}
 				}
@@ -207,8 +219,9 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 									.findReportByDomainNamePeriod(start, domain, TransactionAnalyzer.ID,	MonthlyReportEntity.READSET_FULL);
 			transactionReport = queryFromMonthlyBinary(entity.getId(), domain);
 		} catch (DalNotFoundException e) {
-			// ignore
+			LOGGER.warn("Transaction monthly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query transaction monthly report, domain={}, period={}.", domain, start, e);
 			Cat.logError(e);
 		}
 		return convert(transactionReport);
@@ -223,8 +236,9 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 									.findReportByDomainNamePeriod(start, domain, TransactionAnalyzer.ID,	WeeklyReportEntity.READSET_FULL);
 			transactionReport = queryFromWeeklyBinary(entity.getId(), domain);
 		} catch (DalNotFoundException e) {
-			// ignore
+			LOGGER.warn("Transaction weekly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query transaction weekly report, domain={}, period={}.", domain, start, e);
 			Cat.logError(e);
 		}
 		return convert(transactionReport);

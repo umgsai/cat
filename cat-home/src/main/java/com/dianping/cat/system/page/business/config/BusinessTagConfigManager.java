@@ -27,6 +27,8 @@ import java.util.Set;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
@@ -41,6 +43,7 @@ import com.dianping.cat.home.business.transform.DefaultSaxParser;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class BusinessTagConfigManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessTagConfigManager.class);
 
 	public final static String TAG_CONFIG = "tag";
 
@@ -50,6 +53,10 @@ public class BusinessTagConfigManager implements Initializable {
 	private int m_configId;
 
 	private BusinessTagConfig m_tagConfig = new BusinessTagConfig();
+
+	public void setConfigDao(BusinessConfigRepository configDao) {
+		m_configDao = configDao;
+	}
 
 	public Set<String> findAllTags() {
 		return m_tagConfig.getTags().keySet();
@@ -98,6 +105,8 @@ public class BusinessTagConfigManager implements Initializable {
 				BusinessConfig config = result.get(0);
 				m_configId = config.getId();
 				m_tagConfig = DefaultSaxParser.parse(config.getContent());
+				LOGGER.info("Loaded business tag config from repository, configId={}, tagCount={}.", m_configId,
+						m_tagConfig.getTags().size());
 			} else {
 				m_tagConfig = new BusinessTagConfig();
 
@@ -110,9 +119,11 @@ public class BusinessTagConfigManager implements Initializable {
 
 				m_configDao.insert(config);
 				m_configId = config.getId();
+				LOGGER.info("Initialized empty business tag config, configId={}.", m_configId);
 			}
 
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize business tag config.", e);
 			Cat.logError(e);
 		}
 	}
@@ -123,6 +134,8 @@ public class BusinessTagConfigManager implements Initializable {
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse business tag config xml for store. xmlLength={}.",
+					xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -141,7 +154,10 @@ public class BusinessTagConfigManager implements Initializable {
 				config.setContent(m_tagConfig.toString());
 				config.setUpdatetime(new Date());
 				m_configDao.updateByPK(config, BusinessConfigEntity.UPDATESET_FULL);
+				LOGGER.info("Stored business tag config, configId={}, tagCount={}.", m_configId,
+						m_tagConfig.getTags().size());
 			} catch (Exception e) {
+				LOGGER.error("Unable to store business tag config, configId={}.", m_configId, e);
 				Cat.logError(e);
 				return false;
 			}
@@ -154,6 +170,7 @@ public class BusinessTagConfigManager implements Initializable {
 
 		if (configDao != null) {
 			m_configDao = configDao;
+			LOGGER.info("BusinessTagConfigManager refreshed Spring BusinessConfigRepository dependency.");
 		}
 	}
 

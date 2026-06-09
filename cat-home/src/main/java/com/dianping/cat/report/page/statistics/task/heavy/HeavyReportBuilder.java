@@ -21,6 +21,8 @@ package com.dianping.cat.report.page.statistics.task.heavy;
 import java.util.Date;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -45,6 +47,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = HeavyReportBuilder.ID)
 public class HeavyReportBuilder implements TaskBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HeavyReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_HEAVY;
 
@@ -60,6 +63,7 @@ public class HeavyReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building heavy daily report, name={}, domain={}, period={}.", name, domain, period);
 
 		HeavyReport heavyReport = queryHourlyReportsByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
 		DailyReport report = new DailyReport();
@@ -77,6 +81,7 @@ public class HeavyReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date start) {
 		refreshSpringBeans();
+		LOGGER.info("Building heavy hourly report, name={}, domain={}, period={}.", name, domain, start);
 
 		HeavyReport heavyReport = new HeavyReport(Constants.CAT);
 		MatrixReportVisitor visitor = new MatrixReportVisitor().setReport(heavyReport);
@@ -108,6 +113,7 @@ public class HeavyReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building heavy monthly report, name={}, domain={}, period={}.", name, domain, period);
 
 		HeavyReport heavyReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
@@ -125,6 +131,7 @@ public class HeavyReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building heavy weekly report, name={}, domain={}, period={}.", name, domain, period);
 
 		HeavyReport heavyReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
@@ -153,6 +160,8 @@ public class HeavyReportBuilder implements TaskBuilder {
 										.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 				reportModel.accept(merger);
 			} catch (Exception e) {
+				LOGGER.error("Unable to merge heavy daily report into duration report, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}

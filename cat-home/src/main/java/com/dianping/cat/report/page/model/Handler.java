@@ -29,6 +29,8 @@ import java.util.zip.GZIPOutputStream;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -44,6 +46,7 @@ import com.dianping.cat.report.service.ModelRequest;
 
 @SuppressWarnings("rawtypes")
 public class Handler extends ContainerHolder implements Initializable, PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
 	public Map<String, LocalModelService> m_localServices;
 
@@ -101,6 +104,8 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 				outputStream.write(compress);
 			}
 		} catch (Throwable e) {
+			LOGGER.error("Unable to render model report, report={}, domain={}, period={}, messageId={}.",
+			      payload.getReport(), payload.getDomain(), payload.getPeriod(), payload.getMessageId(), e);
 			Cat.logError(e);
 		}
 	}
@@ -108,6 +113,7 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 	@Override
 	public void initialize() throws InitializationException {
 		m_localServices = lookupMap(LocalModelService.class);
+		LOGGER.info("Initialized model page handler, localServiceCount={}.", m_localServices.size());
 	}
 
 }

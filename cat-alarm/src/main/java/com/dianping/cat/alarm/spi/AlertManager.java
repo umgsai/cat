@@ -31,6 +31,8 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.annotation.Inject;
@@ -49,6 +51,7 @@ import java.util.regex.Pattern;
 
 @Named
 public class AlertManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlertManager.class);
 
 	private static final int MILLIS1MINUTE = 60 * 1000;
 
@@ -88,14 +91,23 @@ public class AlertManager implements Initializable {
 		Cat.logEvent("Alert:" + entity.getType().getName(), group, Event.SUCCESS, entity.toString());
 
 		if (m_configManager.isAlertMachine()) {
-			return m_alerts.offer(entity);
+			boolean offered = m_alerts.offer(entity);
+
+			if (!offered) {
+				LOGGER.warn("Alert queue is full, alert is dropped, type={}, group={}, metric={}, key={}.",
+				      entity.getType().getName(), group, entity.getMetric(), entity.getKey());
+			}
+			return offered;
 		} else {
+			LOGGER.info("Current machine is not configured as alert machine, skip queueing alert, type={}, group={}, key={}.",
+			      entity.getType().getName(), group, entity.getKey());
 			return true;
 		}
 	}
 
 	@Override
 	public void initialize() throws InitializationException {
+		LOGGER.info("Initializing alert manager executors.");
 		Threads.forGroup("Cat").start(new SendExecutor());
 		Threads.forGroup("Cat").start(new RecoveryAnnouncer());
 	}
@@ -107,6 +119,8 @@ public class AlertManager implements Initializable {
 			long duration = System.currentTimeMillis() - sendedAlert.getDate().getTime();
 
 			if (duration / MILLIS1MINUTE < suspendMinute) {
+				LOGGER.info("Alert is suspended, key={}, suspendMinute={}, elapsedMinute={}.", alertKey, suspendMinute,
+				      duration / MILLIS1MINUTE);
 				Cat.logEvent("SuspendAlert", alertKey, Event.SUCCESS, null);
 				return true;
 			}
@@ -178,8 +192,15 @@ public class AlertManager implements Initializable {
 
 				if (m_senderManager.sendAlert(channel, message)) {
 					result = true;
+					LOGGER.info("Sent alert message, type={}, group={}, level={}, channel={}, receivers={}.", type,
+					      group, level, channel, receivers.size());
+				} else {
+					LOGGER.warn("Alert sender returned false, type={}, group={}, level={}, channel={}, receivers={}.",
+					      type, group, level, channel, receivers.size());
 				}
 			} else {
+				LOGGER.warn("No alert receiver found, type={}, group={}, contactGroup={}, channel={}.", type, group,
+				      contactGroup, channel);
 				Cat.logEvent("NoneReceiver:" + channel, type + ":" + contactGroup, Event.SUCCESS, null);
 			}
 		}
@@ -212,8 +233,16 @@ public class AlertManager implements Initializable {
 				SendMessageEntity message = new SendMessageEntity(group, title, type, content, receivers);
 
 				if (m_senderManager.sendAlert(channel, message)) {
+					LOGGER.info("Sent alert recovery message, type={}, group={}, level={}, channel={}, receivers={}.",
+					      type, group, level, channel, receivers.size());
 					return true;
+				} else {
+					LOGGER.warn("Alert recovery sender returned false, type={}, group={}, level={}, channel={}, receivers={}.",
+					      type, group, level, channel, receivers.size());
 				}
+			} else {
+				LOGGER.warn("No alert recovery receiver found, type={}, group={}, contactGroup={}, channel={}.", type,
+				      group, alert.getContactGroup(), channel);
 			}
 		}
 
@@ -257,6 +286,7 @@ public class AlertManager implements Initializable {
 							sendRecoveryMessage(alert, currentStr);
 						}
 					} catch (Exception e) {
+						LOGGER.error("Unable to announce alert recovery, key={}.", entry.getKey(), e);
 						Cat.logError(e);
 					}
 				}
@@ -272,7 +302,10 @@ public class AlertManager implements Initializable {
 					try {
 						TimeUnit.MILLISECONDS.sleep(lackMills);
 					} catch (InterruptedException e) {
+						LOGGER.warn("Alert recovery announcer interrupted.");
+						Thread.currentThread().interrupt();
 						Cat.logError(e);
+						break;
 					}
 				}
 			}
@@ -299,8 +332,8 @@ public class AlertManager implements Initializable {
 						send(alert);
 					}
 				} catch (Exception e) {
+					LOGGER.error("Unable to process alert from queue.", e);
 					Cat.logError(e);
-					e.printStackTrace();
 				}
 			}
 		}

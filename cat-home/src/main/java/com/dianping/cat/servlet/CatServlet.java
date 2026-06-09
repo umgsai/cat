@@ -26,6 +26,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.initialization.DefaultModuleContext;
 import org.unidal.initialization.ModuleContext;
 import org.unidal.initialization.ModuleInitializer;
@@ -35,6 +37,8 @@ import com.dianping.cat.Cat;
 
 public class CatServlet extends AbstractContainerServlet {
 	private static final long serialVersionUID = 1L;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CatServlet.class);
 
 	private Exception m_exception;
 
@@ -65,7 +69,7 @@ public class CatServlet extends AbstractContainerServlet {
 			initializer.execute(ctx);
 		} catch (Exception e) {
 			m_exception = e;
-			System.err.println(e);
+			LOGGER.error("Unable to initialize CAT servlet components.", e);
 			throw new ServletException(e);
 		}
 	}

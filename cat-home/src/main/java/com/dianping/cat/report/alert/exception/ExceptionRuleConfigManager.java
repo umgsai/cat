@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -40,6 +42,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class ExceptionRuleConfigManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionRuleConfigManager.class);
 
 	private static final String CONFIG_NAME = "exceptionRuleConfig";
 
@@ -57,6 +60,14 @@ public class ExceptionRuleConfigManager implements Initializable {
 
 	private ExceptionRuleConfig m_exceptionRuleConfig;
 
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
+
 	public boolean deleteExceptionExclude(String domain, String exceptionName) {
 		m_exceptionRuleConfig.removeExceptionExclude(domain + ":" + exceptionName);
 
@@ -73,12 +84,15 @@ public class ExceptionRuleConfigManager implements Initializable {
 	public void initialize() throws InitializationException {
 		refreshSpringBeans();
 
+		LOGGER.info("Initializing exception rule config manager, configName={}.", CONFIG_NAME);
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
 			m_configId = config.getId();
 			m_exceptionRuleConfig = DefaultSaxParser.parse(content);
 		} catch (DalNotFoundException e) {
+			LOGGER.warn("Exception rule config not found in repository, loading default content, configName={}.",
+			      CONFIG_NAME);
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -90,12 +104,15 @@ public class ExceptionRuleConfigManager implements Initializable {
 				m_configId = config.getId();
 				m_exceptionRuleConfig = DefaultSaxParser.parse(content);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to create default exception rule config, configName={}.", CONFIG_NAME, ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize exception rule config, configName={}.", CONFIG_NAME, e);
 			Cat.logError(e);
 		}
 		if (m_exceptionRuleConfig == null) {
+			LOGGER.warn("Exception rule config is empty after initialization, using an empty config.");
 			m_exceptionRuleConfig = new ExceptionRuleConfig();
 		}
 	}
@@ -163,6 +180,8 @@ public class ExceptionRuleConfigManager implements Initializable {
 				config.setContent(m_exceptionRuleConfig.toString());
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
 			} catch (Exception e) {
+				LOGGER.error("Unable to store exception rule config, configName={}, configId={}.", CONFIG_NAME,
+				      m_configId, e);
 				Cat.logError(e);
 				return false;
 			}

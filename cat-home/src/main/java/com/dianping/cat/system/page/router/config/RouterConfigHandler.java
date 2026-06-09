@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -53,6 +54,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
 @Named
 public class RouterConfigHandler implements LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RouterConfigHandler.class);
 
 	protected Logger m_logger;
 
@@ -217,6 +219,8 @@ public class RouterConfigHandler implements LogEnabled {
 					}
 				}
 			} catch (Exception e) {
+				SLF4J_LOGGER.error("Unable to process router backup server, domain={}, group={}.", domain.getId(),
+				      group, e);
 				Cat.logError(e);
 			}
 		}
@@ -255,6 +259,8 @@ public class RouterConfigHandler implements LogEnabled {
 					}
 				}
 			} catch (Exception e) {
+				SLF4J_LOGGER.error("Unable to process router main server, domain={}, group={}, value={}.",
+				      entry.getKey(), group, entry.getValue(), e);
 				Cat.logError(e);
 			}
 		}
@@ -262,6 +268,7 @@ public class RouterConfigHandler implements LogEnabled {
 
 	public boolean updateRouterConfig(Date period) {
 		try {
+			SLF4J_LOGGER.info("Updating router config report, period={}.", period);
 			String name = RouterConfigBuilder.ID;
 			String domain = Constants.CAT;
 			RouterConfig routerConfig = buildRouterConfig(domain, period);
@@ -278,8 +285,10 @@ public class RouterConfigHandler implements LogEnabled {
 			byte[] binaryContent = DefaultNativeBuilder.build(routerConfig);
 
 			m_reportService.insertDailyReport(dailyReport, binaryContent);
+			SLF4J_LOGGER.info("Updated router config report, period={}, binarySize={}.", period, binaryContent.length);
 			return true;
 		} catch (Exception e) {
+			SLF4J_LOGGER.error("Unable to update router config report, period={}.", period, e);
 			Cat.logError(e);
 			return false;
 		}

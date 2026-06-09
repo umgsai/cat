@@ -22,9 +22,14 @@ import com.dianping.cat.util.HttpUtils;
 import java.io.UnsupportedEncodingException;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.system.page.login.spi.ITokenBuilder;
 
 public class TokenBuilder implements ITokenBuilder<SigninContext, Token> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TokenBuilder.class);
+
 	private static final String SP = "|";
 
 	private static final long ONE_DAY = 24 * 60 * 60 * 1000L;
@@ -38,6 +43,7 @@ public class TokenBuilder implements ITokenBuilder<SigninContext, Token> {
 		try {
 			userNameValue = java.net.URLEncoder.encode(userName, "utf-8");
 		} catch (UnsupportedEncodingException e) {
+			LOGGER.warn("Unable to encode login token user name.");
 		}
 
 		String realName = token.getRealName();
@@ -45,6 +51,7 @@ public class TokenBuilder implements ITokenBuilder<SigninContext, Token> {
 		try {
 			value = java.net.URLEncoder.encode(realName, "utf-8");
 		} catch (UnsupportedEncodingException e) {
+			LOGGER.warn("Unable to encode login token real name.");
 		}
 		sb.append(value).append(SP);
 		sb.append(userNameValue).append(SP);
@@ -80,10 +87,12 @@ public class TokenBuilder implements ITokenBuilder<SigninContext, Token> {
 						try {
 							realNameValue = java.net.URLDecoder.decode(realName, "utf-8");
 						} catch (UnsupportedEncodingException e) {
+							LOGGER.warn("Unable to decode login token real name.");
 						}
 						try {
 							userNameVaule = java.net.URLDecoder.decode(userName, "utf-8");
 						} catch (UnsupportedEncodingException e) {
+							LOGGER.warn("Unable to decode login token user name.");
 						}
 						return new Token(realNameValue, userNameVaule);
 					}

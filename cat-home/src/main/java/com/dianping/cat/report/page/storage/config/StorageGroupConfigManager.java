@@ -77,6 +77,14 @@ public class StorageGroupConfigManager implements Initializable {
 		return m_config;
 	}
 
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
+
 	@Override
 	public void initialize() throws InitializationException {
 		refreshSpringBeans();

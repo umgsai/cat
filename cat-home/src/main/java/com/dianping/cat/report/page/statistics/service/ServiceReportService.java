@@ -21,6 +21,8 @@ package com.dianping.cat.report.page.statistics.service;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Named;
@@ -51,6 +53,7 @@ import com.dianping.cat.report.service.AbstractReportService;
 
 @Named
 public class ServiceReportService extends AbstractReportService<ServiceReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceReportService.class);
 
 	@Override
 	public ServiceReport makeReport(String domain, Date start, Date end) {
@@ -76,8 +79,10 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 
 				reportModel.accept(merger);
 			} catch (DalNotFoundException e) {
-				// ignore
+				LOGGER.warn("Service daily report is missing, domain={}, period={}.", domain, new Date(startTime), e);
 			} catch (Exception e) {
+				LOGGER.error("Unable to query service daily report, domain={}, period={}.", domain, new Date(startTime),
+						e);
 				Cat.logError(e);
 			}
 		}
@@ -142,6 +147,8 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 				reports = m_hourlyReportDao
 										.findAllByDomainNamePeriod(new Date(startTime), domain, name,	HourlyReportEntity.READSET_FULL);
 			} catch (DalException e) {
+				LOGGER.error("Unable to query service hourly report list, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 			if (reports != null) {
@@ -150,8 +157,11 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 						ServiceReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 						reportModel.accept(merger);
 					} catch (DalNotFoundException e) {
-						// ignore
+						LOGGER.warn("Service hourly report content is missing, domain={}, reportId={}, period={}.", domain,
+								report.getId(), report.getPeriod(), e);
 					} catch (Exception e) {
+						LOGGER.error("Unable to parse service hourly report, domain={}, reportId={}, period={}.", domain,
+								report.getId(), report.getPeriod(), e);
 						Cat.logError(e);
 					}
 				}
@@ -172,8 +182,9 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 									.findReportByDomainNamePeriod(start, domain,	Constants.REPORT_SERVICE, MonthlyReportEntity.READSET_FULL);
 			return queryFromMonthlyBinary(entity.getId(), domain);
 		} catch (DalNotFoundException e) {
-			// ignore
+			LOGGER.warn("Service monthly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query service monthly report, domain={}, period={}.", domain, start, e);
 			Cat.logError(e);
 		}
 		return new ServiceReport(domain);
@@ -187,8 +198,9 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 
 			return queryFromWeeklyBinary(entity.getId(), domain);
 		} catch (DalNotFoundException e) {
-			// ignore
+			LOGGER.warn("Service weekly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query service weekly report, domain={}, period={}.", domain, start, e);
 			Cat.logError(e);
 		}
 		return new ServiceReport(domain);

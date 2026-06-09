@@ -30,6 +30,7 @@ import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.system.page.config.Action;
 import com.dianping.cat.system.page.config.Model;
 import com.dianping.cat.system.page.config.Payload;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class ExceptionConfigProcessor {
 
@@ -38,6 +39,22 @@ public class ExceptionConfigProcessor {
 
 	@Inject
 	private ExceptionRuleConfigManager m_exceptionRuleConfigManager;
+
+	public void refreshSpringBeans() {
+		GlobalConfigProcessor globalConfigProcessor = CatSpringContext.getBeanIfAvailable(GlobalConfigProcessor.class);
+		ExceptionRuleConfigManager exceptionRuleConfigManager = CatSpringContext
+		      .getBeanIfAvailable(ExceptionRuleConfigManager.class);
+
+		if (globalConfigProcessor != null) {
+			m_globalConfigProcessor = globalConfigProcessor;
+		}
+		if (m_globalConfigProcessor != null) {
+			m_globalConfigProcessor.refreshSpringBeans();
+		}
+		if (exceptionRuleConfigManager != null) {
+			m_exceptionRuleConfigManager = exceptionRuleConfigManager;
+		}
+	}
 
 	private void deleteExceptionExclude(Payload payload) {
 		m_exceptionRuleConfigManager.deleteExceptionExclude(payload.getDomain(), payload.getException());
@@ -69,6 +86,8 @@ public class ExceptionConfigProcessor {
 	}
 
 	public void process(Action action, Payload payload, Model model) {
+		refreshSpringBeans();
+
 		switch (action) {
 		case EXCEPTION:
 			loadExceptionConfig(model);

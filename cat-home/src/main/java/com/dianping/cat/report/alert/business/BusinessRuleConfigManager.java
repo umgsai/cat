@@ -27,6 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -50,6 +52,7 @@ import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
 @Named
 public class BusinessRuleConfigManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessRuleConfigManager.class);
 
 	private static final String ALERT_CONFIG = "alert";
 
@@ -61,6 +64,10 @@ public class BusinessRuleConfigManager implements Initializable {
 
 	@Inject
 	private BusinessConfigRepository m_configDao;
+
+	public void setConfigDao(BusinessConfigRepository configDao) {
+		m_configDao = configDao;
+	}
 
 	private List<Config> buildDefaultConfigs() {
 		List<Config> configs = new ArrayList<Config>();
@@ -117,6 +124,7 @@ public class BusinessRuleConfigManager implements Initializable {
 	public void initialize() throws InitializationException {
 		refreshSpringBeans();
 
+		LOGGER.info("Initializing business alert rule config manager.");
 		loadData();
 
 		TimerSyncTask.getInstance().register(new SyncHandler() {
@@ -146,11 +154,15 @@ public class BusinessRuleConfigManager implements Initializable {
 					MonitorRules rule = DefaultSaxParser.parse(config.getContent());
 					rules.put(doamin, rule);
 				} catch (Exception e) {
+					LOGGER.error("Unable to parse business alert rule config, domain={}, id={}.", config.getDomain(),
+					      config.getId(), e);
 					Cat.logError(e);
 				}
 			}
 			m_rules = rules;
+			LOGGER.info("Loaded business alert rule configs, count={}.", m_rules.size());
 		} catch (DalException e) {
+			LOGGER.error("Unable to load business alert rule configs from repository.", e);
 			Cat.logError(e);
 		}
 	}
@@ -217,6 +229,7 @@ public class BusinessRuleConfigManager implements Initializable {
 				m_configDao.insert(proto);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to update business alert rule, domain={}, key={}, type={}.", domain, key, type, e);
 			Cat.logError(e);
 		}
 

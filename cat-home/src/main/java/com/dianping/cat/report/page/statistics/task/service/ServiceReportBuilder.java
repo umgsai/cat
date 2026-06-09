@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -51,6 +53,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = ServiceReportBuilder.ID)
 public class ServiceReportBuilder implements TaskBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_SERVICE;
 
@@ -68,6 +71,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building service daily report, name={}, domain={}, period={}.", name, domain, period);
 
 		ServiceReport serviceReport = queryHourlyReportsByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
 		DailyReport report = new DailyReport();
@@ -86,6 +90,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date start) {
 		refreshSpringBeans();
+		LOGGER.info("Building service hourly report, name={}, domain={}, period={}.", name, domain, start);
 
 		ServiceReport serviceReport = new ServiceReport(Constants.CAT);
 		Date end = new Date(start.getTime() + TimeHelper.ONE_HOUR);
@@ -121,6 +126,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
+		LOGGER.info("Building service monthly report, name={}, domain={}, period={}.", name, domain, period);
 		ServiceReport serviceReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
 
@@ -137,6 +143,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building service weekly report, name={}, domain={}, period={}.", name, domain, period);
 
 		ServiceReport serviceReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
@@ -176,6 +183,8 @@ public class ServiceReportBuilder implements TaskBuilder {
 										.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 				reportModel.accept(merger);
 			} catch (Exception e) {
+				LOGGER.error("Unable to merge service daily report into duration report, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}

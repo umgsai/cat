@@ -25,6 +25,8 @@ import java.util.zip.GZIPInputStream;
 
 import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -38,6 +40,7 @@ import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class RemoteLogViewService extends BaseRemoteModelService<String> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(RemoteLogViewService.class);
 
 	private ServerConfigManager m_manager;
 
@@ -75,6 +78,7 @@ public class RemoteLogViewService extends BaseRemoteModelService<String> {
 			}
 			t.setStatus(Message.SUCCESS);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to invoke remote logview service, request={}, domain={}.", request, request.getDomain(), e);
 			t.setStatus(Message.SUCCESS);
 		} finally {
 			t.complete();

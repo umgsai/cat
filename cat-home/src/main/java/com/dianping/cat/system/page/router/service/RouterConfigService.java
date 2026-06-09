@@ -27,6 +27,8 @@ import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -41,6 +43,7 @@ import com.dianping.cat.system.page.router.config.RouterConfigManager;
 
 @Named
 public class RouterConfigService extends AbstractReportService<RouterConfig> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(RouterConfigService.class);
 
 	@Inject
 	private RouterConfigManager m_routerConfigManager;
@@ -68,6 +71,8 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 			} catch (DalNotFoundException e) {
 				// ignore
 			} catch (Exception e) {
+				LOGGER.error("Unable to query daily router config report, domain={}, start={}, end={}.", domain, start,
+				      end, e);
 				Cat.logError(e);
 			}
 			return null;
@@ -107,6 +112,7 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 		} catch (DalNotFoundException e) {
 			// ignore
 		} catch (Exception e) {
+			LOGGER.error("Unable to query latest router config report, domain={}.", domain, e);
 			Cat.logError(e);
 		}
 		return null;

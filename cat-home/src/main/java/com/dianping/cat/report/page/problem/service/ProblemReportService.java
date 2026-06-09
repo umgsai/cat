@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
@@ -52,6 +54,7 @@ import com.dianping.cat.report.service.AbstractReportService;
 
 @Named
 public class ProblemReportService extends AbstractReportService<ProblemReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProblemReportService.class);
 
 	@Override
 	public ProblemReport makeReport(String domain, Date start, Date end) {
@@ -77,8 +80,10 @@ public class ProblemReportService extends AbstractReportService<ProblemReport> {
 
 				reportModel.accept(merger);
 			} catch (DalNotFoundException e) {
-				// ignore
+				LOGGER.warn("Problem daily report is missing, domain={}, period={}.", domain, new Date(startTime), e);
 			} catch (Exception e) {
+				LOGGER.error("Unable to query problem daily report, domain={}, period={}.", domain, new Date(startTime),
+						e);
 				Cat.logError(e);
 			}
 		}
@@ -145,6 +150,8 @@ public class ProblemReportService extends AbstractReportService<ProblemReport> {
 				reports = m_hourlyReportDao
 										.findAllByDomainNamePeriod(new Date(startTime), domain, name,	HourlyReportEntity.READSET_FULL);
 			} catch (DalException e) {
+				LOGGER.error("Unable to query problem hourly report list, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 			if (reports != null) {
@@ -154,8 +161,11 @@ public class ProblemReportService extends AbstractReportService<ProblemReport> {
 
 						reportModel.accept(merger);
 					} catch (DalNotFoundException e) {
-						// ignore
+						LOGGER.warn("Problem hourly report content is missing, domain={}, reportId={}, period={}.",
+								domain, report.getId(), report.getPeriod(), e);
 					} catch (Exception e) {
+						LOGGER.error("Unable to parse problem hourly report, domain={}, reportId={}, period={}.", domain,
+								report.getId(), report.getPeriod(), e);
 						Cat.logError(e);
 					}
 				}
@@ -181,8 +191,9 @@ public class ProblemReportService extends AbstractReportService<ProblemReport> {
 
 			problemReport = queryFromMonthlyBinary(entity.getId(), domain);
 		} catch (DalNotFoundException e) {
-			// ignore
+			LOGGER.warn("Problem monthly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query problem monthly report, domain={}, period={}.", domain, start, e);
 			Cat.logError(e);
 		}
 		ProblemReportConvertor convertor = new ProblemReportConvertor();
@@ -201,8 +212,9 @@ public class ProblemReportService extends AbstractReportService<ProblemReport> {
 
 			problemReport = queryFromWeeklyBinary(entity.getId(), domain);
 		} catch (DalNotFoundException e) {
-			// ignore
+			LOGGER.warn("Problem weekly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to query problem weekly report, domain={}, period={}.", domain, start, e);
 			Cat.logError(e);
 		}
 		ProblemReportConvertor convertor = new ProblemReportConvertor();

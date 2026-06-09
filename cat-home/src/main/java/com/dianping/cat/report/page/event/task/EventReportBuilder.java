@@ -22,6 +22,8 @@ import java.util.Date;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -47,6 +49,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = EventReportBuilder.ID)
 public class EventReportBuilder implements TaskBuilder, Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(EventReportBuilder.class);
 
 	public static final String ID = EventAnalyzer.ID;
 
@@ -77,6 +80,7 @@ public class EventReportBuilder implements TaskBuilder, Initializable {
 			byte[] binaryContent = DefaultNativeBuilder.build(eventReport);
 			return m_reportService.insertDailyReport(report, binaryContent);
 		} catch (Exception e) {
+			LOGGER.error("Unable to build event daily report, name={}, domain={}, period={}.", name, domain, period, e);
 			Cat.logError(e);
 			return false;
 		}
@@ -90,6 +94,7 @@ public class EventReportBuilder implements TaskBuilder, Initializable {
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building event monthly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date end = null;
 
@@ -115,6 +120,7 @@ public class EventReportBuilder implements TaskBuilder, Initializable {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building event weekly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date end = null;
 
@@ -178,6 +184,8 @@ public class EventReportBuilder implements TaskBuilder, Initializable {
 				creator.createGraph(reportModel);
 				reportModel.accept(merger);
 			} catch (Exception e) {
+				LOGGER.error("Unable to merge event daily report into duration report, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}

@@ -27,12 +27,16 @@ import javax.naming.directory.Attributes;
 import javax.naming.ldap.InitialLdapContext;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.system.page.login.spi.ISessionManager;
 import com.google.common.base.Function;
 
 public class SessionManager implements ISessionManager<Session, Token, Credential> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
+
 	private CatPropertyProvider m_provider;
 
 	private Function<Credential, Token> tokenCreator;
@@ -71,6 +75,8 @@ public class SessionManager implements ISessionManager<Session, Token, Credentia
 					final String account = credential.getAccount();
 					final String pwd = credential.getPassword();
 					if (StringUtils.isEmpty(account) || StringUtils.isEmpty(pwd)) {
+						LOGGER.warn("LDAP authentication skipped because account or password is empty, accountPresent={}.",
+						      !StringUtils.isEmpty(account));
 						return null;
 					}
 					Hashtable<String, String> env = new Hashtable<String, String>();
@@ -95,6 +101,7 @@ public class SessionManager implements ISessionManager<Session, Token, Credentia
 
 						return new Token(account, displayName == null ? account : displayName);
 					} catch (Exception e) {
+						LOGGER.warn("LDAP authentication failed, account={}, ldapUrl={}.", account, ldapUrl, e);
 						Cat.logError(e);
 						return null;
 					}

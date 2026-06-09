@@ -166,12 +166,24 @@ public class Handler implements PageHandler<Context> {
 	private void refreshSpringBeans() {
 		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
 		BusinessConfigManager configManager = CatSpringContext.getBeanIfAvailable(BusinessConfigManager.class);
+		BusinessTagConfigManager tagConfigManager = CatSpringContext.getBeanIfAvailable(BusinessTagConfigManager.class);
+		BusinessRuleConfigManager alertConfigManager = CatSpringContext.getBeanIfAvailable(BusinessRuleConfigManager.class);
+		ConfigHtmlParser configHtmlParser = CatSpringContext.getBeanIfAvailable(ConfigHtmlParser.class);
 
 		if (projectService != null) {
 			m_projectService = projectService;
 		}
 		if (configManager != null) {
 			m_configManager = configManager;
+		}
+		if (tagConfigManager != null) {
+			m_tagConfigManger = tagConfigManager;
+		}
+		if (alertConfigManager != null) {
+			m_alertConfigManager = alertConfigManager;
+		}
+		if (configHtmlParser != null) {
+			m_configHtmlParser = configHtmlParser;
 		}
 	}
 

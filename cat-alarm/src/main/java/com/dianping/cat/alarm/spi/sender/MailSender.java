@@ -23,11 +23,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.sender.entity.Sender;
 import com.dianping.cat.alarm.spi.AlertChannel;
 
 public class MailSender extends AbstractSender {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MailSender.class);
 
 	public static final String ID = AlertChannel.MAIL.getName();
 
@@ -70,6 +74,8 @@ public class MailSender extends AbstractSender {
 									.replace("${time}", URLEncoder.encode(time, "utf-8"));
 
 		} catch (Exception e) {
+			LOGGER.error("Unable to encode mail alert request parameters, receiver={}, title={}.", receiver,
+			      message.getTitle(), e);
 			Cat.logError(e);
 		}
 

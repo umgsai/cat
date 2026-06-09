@@ -9,6 +9,8 @@ import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -16,6 +18,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 final class CatHomeSpringDataSourceFactory {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CatHomeSpringDataSourceFactory.class);
+
 	private static final String CAT_DATA_SOURCE_ID = "cat";
 
 	private CatHomeSpringDataSourceFactory() {
@@ -57,7 +61,11 @@ final class CatHomeSpringDataSourceFactory {
 			}
 		}
 
-		throw new IllegalStateException("Missing data-source id=" + CAT_DATA_SOURCE_ID + " in " + dataSourcesPath());
+		IllegalStateException error = new IllegalStateException(
+				"Missing data-source id=" + CAT_DATA_SOURCE_ID + " in " + dataSourcesPath());
+
+		LOGGER.error("Unable to find CAT datasource definition in Spring datasource config.", error);
+		throw error;
 	}
 
 	private static Document loadDataSourcesXml() {
@@ -70,8 +78,10 @@ final class CatHomeSpringDataSourceFactory {
 			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
 			return factory.newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
 		} catch (IOException e) {
+			LOGGER.error("Unable to read Spring datasource config: {}.", path, e);
 			throw new IllegalStateException("Unable to read Spring datasource config: " + path, e);
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse Spring datasource config: {}.", path, e);
 			throw new IllegalStateException("Unable to parse Spring datasource config: " + path, e);
 		}
 	}
@@ -86,7 +96,11 @@ final class CatHomeSpringDataSourceFactory {
 		NodeList nodes = dataSource.getElementsByTagName("properties");
 
 		if (nodes.getLength() == 0) {
-			throw new IllegalStateException("Missing properties in data-source id=" + CAT_DATA_SOURCE_ID);
+			IllegalStateException error = new IllegalStateException(
+					"Missing properties in data-source id=" + CAT_DATA_SOURCE_ID);
+
+			LOGGER.error("CAT datasource definition is missing properties.", error);
+			throw error;
 		}
 
 		return (Element) nodes.item(0);

@@ -21,6 +21,8 @@ package com.dianping.cat.alarm.spi.rule;
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.rule.entity.Condition;
 import com.dianping.cat.alarm.rule.entity.SubCondition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
@@ -29,6 +31,7 @@ import java.util.List;
 
 @Named(type = DataChecker.class)
 public class DefaultDataChecker implements DataChecker {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataChecker.class);
 
 	private double[] buildLastMinutesDoubleArray(double[] doubleList, int remainCount) {
 		if (doubleList.length <= remainCount) {
@@ -96,6 +99,8 @@ public class DefaultDataChecker implements DataChecker {
 				}
 				builder.append(subResult.getValue()).append("<br/>");
 			} catch (Exception ex) {
+				LOGGER.error("Unable to check alert rule condition, condition={}, subCondition={}.", condition,
+				      subCondition, ex);
 				Cat.logError(condition.toString(), ex);
 				return new Pair<Boolean, String>(false, "");
 			}

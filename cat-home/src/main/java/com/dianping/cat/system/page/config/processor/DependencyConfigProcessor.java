@@ -30,6 +30,7 @@ import com.dianping.cat.system.page.config.Action;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
 import com.dianping.cat.system.page.config.Model;
 import com.dianping.cat.system.page.config.Payload;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class DependencyConfigProcessor {
 
@@ -44,6 +45,31 @@ public class DependencyConfigProcessor {
 
 	@Inject
 	private ConfigHtmlParser m_configHtmlParser;
+
+	public void refreshSpringBeans() {
+		GlobalConfigProcessor globalConfigManager = CatSpringContext.getBeanIfAvailable(GlobalConfigProcessor.class);
+		TopologyGraphConfigManager topologyConfigManager = CatSpringContext
+		      .getBeanIfAvailable(TopologyGraphConfigManager.class);
+		TopoGraphFormatConfigManager formatConfigManager = CatSpringContext
+		      .getBeanIfAvailable(TopoGraphFormatConfigManager.class);
+		ConfigHtmlParser configHtmlParser = CatSpringContext.getBeanIfAvailable(ConfigHtmlParser.class);
+
+		if (globalConfigManager != null) {
+			m_globalConfigManager = globalConfigManager;
+		}
+		if (m_globalConfigManager != null) {
+			m_globalConfigManager.refreshSpringBeans();
+		}
+		if (topologyConfigManager != null) {
+			m_topologyConfigManager = topologyConfigManager;
+		}
+		if (formatConfigManager != null) {
+			m_formatConfigManager = formatConfigManager;
+		}
+		if (configHtmlParser != null) {
+			m_configHtmlParser = configHtmlParser;
+		}
+	}
 
 	private void graphEdgeConfigAdd(Payload payload, Model model) {
 		String type = payload.getType();
@@ -97,6 +123,8 @@ public class DependencyConfigProcessor {
 	}
 
 	public void process(Action action, Payload payload, Model model) {
+		refreshSpringBeans();
+
 		switch (action) {
 		case TOPOLOGY_GRAPH_NODE_CONFIG_LIST:
 			model.setGraphConfig(m_topologyConfigManager.getConfig());

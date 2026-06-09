@@ -36,6 +36,7 @@ import org.unidal.lookup.ContainerLoader;
 import com.dianping.cat.system.page.login.service.SigninContext;
 import com.dianping.cat.system.page.login.service.Token;
 import com.dianping.cat.system.page.login.service.TokenManager;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class PermissionFilter implements Filter {
 
@@ -63,6 +64,7 @@ public class PermissionFilter implements Filter {
 		ModuleContext ctx = new DefaultModuleContext(container);
 		m_userConfigManager = ctx.lookup(UserConfigManager.class);
 		m_resourceConfigManager = ctx.lookup(ResourceConfigManager.class);
+		refreshSpringBeans();
 		m_tokenManager = ctx.lookup(TokenManager.class);
 		m_errorPage = filterConfig.getInitParameter("errorPage");
 		m_loginPage = filterConfig.getInitParameter(LOGIN);
@@ -73,6 +75,7 @@ public class PermissionFilter implements Filter {
 							throws IOException,	ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
+		refreshSpringBeans();
 		httpRequest.setCharacterEncoding("utf-8");
 
 		SigninContext ctx = new SigninContext(httpRequest, httpResponse);
@@ -112,6 +115,18 @@ public class PermissionFilter implements Filter {
 
 	@Override
 	public void destroy() {
+	}
+
+	private void refreshSpringBeans() {
+		UserConfigManager userConfigManager = CatSpringContext.getBeanIfAvailable(UserConfigManager.class);
+		ResourceConfigManager resourceConfigManager = CatSpringContext.getBeanIfAvailable(ResourceConfigManager.class);
+
+		if (userConfigManager != null) {
+			m_userConfigManager = userConfigManager;
+		}
+		if (resourceConfigManager != null) {
+			m_resourceConfigManager = resourceConfigManager;
+		}
 	}
 
 }

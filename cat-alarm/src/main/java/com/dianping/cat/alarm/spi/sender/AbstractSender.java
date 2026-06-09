@@ -26,13 +26,16 @@ import java.net.URLConnection;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Files;
 import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
+import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class AbstractSender implements Sender, LogEnabled {
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractSender.class);
 
     @Inject
     protected SenderConfigManager m_senderConfigManager;
@@ -65,9 +68,12 @@ public abstract class AbstractSender implements Sender, LogEnabled {
                 sendSuccess = true;
                 return true;
             } else {
+                LOGGER.warn("Alert HTTP GET returned unexpected response, urlPrefix={}, successCode={}, response={}.",
+                        urlPrefix, successCode, sb);
                 return false;
             }
         } catch (Exception e) {
+            LOGGER.error("Unable to send alert by HTTP GET, urlPrefix={}, urlPars={}.", urlPrefix, urlPars, e);
             m_logger.error(e.getMessage(), e);
             return false;
         } finally {
@@ -76,6 +82,7 @@ public abstract class AbstractSender implements Sender, LogEnabled {
                     in.close();
                 }
             } catch (IOException e) {
+                LOGGER.warn("Unable to close alert HTTP GET response stream, urlPrefix={}.", urlPrefix, e);
             }
             if (!sendSuccess) {
                 recordSendLog(urlPrefix, urlPars);
@@ -112,9 +119,13 @@ public abstract class AbstractSender implements Sender, LogEnabled {
                 sendSuccess = true;
                 return true;
             } else {
+                LOGGER.warn("Alert HTTP POST returned unexpected response, urlPrefix={}, successCode={}, response={}.",
+                        urlPrefix, successCode, sb);
                 return false;
             }
         } catch (Exception e) {
+            LOGGER.error("Unable to send alert by HTTP POST, urlPrefix={}, contentLength={}.", urlPrefix,
+                    content == null ? 0 : content.length(), e);
             m_logger.error(e.getMessage(), e);
             return false;
         } finally {
@@ -126,6 +137,7 @@ public abstract class AbstractSender implements Sender, LogEnabled {
                     writer.close();
                 }
             } catch (IOException e) {
+                LOGGER.warn("Unable to close alert HTTP POST resources, urlPrefix={}.", urlPrefix, e);
             }
             if (!sendSuccess) {
                 recordSendLog(urlPrefix, content);
@@ -139,18 +151,31 @@ public abstract class AbstractSender implements Sender, LogEnabled {
         } else if ("post".equalsIgnoreCase(type)) {
             return httpPostSend(successCode, urlPrefix, urlPars);
         } else {
+            LOGGER.error("Illegal alert sender request type, type={}, urlPrefix={}.", type, urlPrefix);
             Cat.logError(new RuntimeException("Illegal request type: " + type));
             return false;
         }
     }
 
     public com.dianping.cat.alarm.sender.entity.Sender querySender() {
+        refreshSpringBeans();
+
         String id = getId();
 
         return m_senderConfigManager.querySender(id);
     }
 
+    private void refreshSpringBeans() {
+        SenderConfigManager senderConfigManager = CatSpringContext.getBeanIfAvailable(SenderConfigManager.class);
+
+        if (senderConfigManager != null) {
+            m_senderConfigManager = senderConfigManager;
+            LOGGER.info("Alert sender refreshed Spring SenderConfigManager dependency, senderId={}.", getId());
+        }
+    }
+
     private void recordSendLog(String urlPrefix, String paras) {
+        LOGGER.error("Alert send failed, urlPrefix={}, paras={}.", urlPrefix, paras, new AlertSendException());
         Cat.logError(urlPrefix + "---" + paras, new AlertSendException());
     }
 

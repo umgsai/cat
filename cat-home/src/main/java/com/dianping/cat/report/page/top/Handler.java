@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.PageHandler;
@@ -62,6 +64,8 @@ import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
 public class Handler implements PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
+
 	@Inject
 	private JspViewer m_jspViewer;
 
@@ -139,6 +143,9 @@ public class Handler implements PageHandler<Context> {
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
 
+		LOGGER.info("Handling top report outbound, action={}, domain={}, ip={}, date={}, minute={}, minuteCounts={}.",
+				action, payload.getDomain(), payload.getIpAddress(), payload.getDate(), payload.getMinute(),
+				payload.getMinuteCounts());
 		model.setAction(action);
 		model.setPage(ReportPage.TOP);
 		normalize(model, payload);
@@ -226,6 +233,8 @@ public class Handler implements PageHandler<Context> {
 					removed.add(key);
 				}
 			} catch (Exception e) {
+				LOGGER.error("Unable to parse top metric time key, key={}, domain={}, date={}, minute={}, minuteCounts={}.",
+						key, payload.getDomain(), date, minute, exceptedMinute, e);
 				Cat.logError(e);
 			}
 		}

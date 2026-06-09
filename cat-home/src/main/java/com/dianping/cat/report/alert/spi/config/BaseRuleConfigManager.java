@@ -29,6 +29,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
@@ -58,6 +60,7 @@ import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
 public abstract class BaseRuleConfigManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BaseRuleConfigManager.class);
 
 	@Inject
 	protected ConfigRepository m_configDao;
@@ -77,9 +80,26 @@ public abstract class BaseRuleConfigManager {
 
 	private long m_modifyTime;
 
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
+
+	public void setHelper(BaseRuleHelper helper) {
+		m_helper = helper;
+	}
+
+	public void setUserDefinedRuleManager(UserDefinedRuleManager manager) {
+		m_manager = manager;
+	}
+
 	public void initialize() throws InitializationException {
 		refreshSpringBeans();
 
+		LOGGER.info("Initializing alert rule config manager, configName={}.", getConfigName());
 		try {
 			com.dianping.cat.core.config.Config config = m_configDao.findByName(getConfigName(),
 			      ConfigEntity.READSET_FULL);
@@ -88,6 +108,8 @@ public abstract class BaseRuleConfigManager {
 			m_configId = config.getId();
 			m_config = DefaultSaxParser.parse(content);
 		} catch (DalNotFoundException e) {
+			LOGGER.warn("Alert rule config not found in repository, loading default content, configName={}.",
+			      getConfigName());
 			try {
 				String content = m_fetcher.getConfigContent(getConfigName());
 				com.dianping.cat.core.config.Config config = m_configDao.createLocal();
@@ -99,12 +121,16 @@ public abstract class BaseRuleConfigManager {
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to create default alert rule config, configName={}.", getConfigName(), ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize alert rule config, configName={}.", getConfigName(), e);
 			Cat.logError(e);
 		}
 		if (m_config == null) {
+			LOGGER.warn("Alert rule config is empty after initialization, using an empty config, configName={}.",
+			      getConfigName());
 			m_config = new MonitorRules();
 		}
 
@@ -140,6 +166,7 @@ public abstract class BaseRuleConfigManager {
 
 				m_config = DefaultSaxParser.parse(content);
 				m_modifyTime = modifyTime;
+				LOGGER.info("Refreshed alert rule config, configName={}, modifyTime={}.", getConfigName(), modifyTime);
 			}
 		}
 	}
@@ -163,6 +190,7 @@ public abstract class BaseRuleConfigManager {
 		try {
 			return DefaultSaxParser.parseEntity(Rule.class, rule.toString());
 		} catch (Exception e) {
+			LOGGER.error("Unable to copy alert rule, configName={}, ruleId={}.", getConfigName(), rule.getId(), e);
 			Cat.logError(e);
 			return null;
 		}
@@ -178,6 +206,8 @@ public abstract class BaseRuleConfigManager {
 
 							m_manager.removeById(id);
 						} catch (DalException e) {
+							LOGGER.error("Unable to remove user defined alert rule text, configName={}, id={}.",
+							      getConfigName(), subCondition.getText(), e);
 							Cat.logError(e);
 						}
 					}
@@ -198,6 +228,8 @@ public abstract class BaseRuleConfigManager {
 
 							subCondition.setText(m_manager.getUserDefineText(id));
 						} catch (DalException e) {
+							LOGGER.error("Unable to read user defined alert rule text, configName={}, id={}.",
+							      getConfigName(), subCondition.getText(), e);
 							Cat.logError(e);
 						}
 					}
@@ -226,6 +258,8 @@ public abstract class BaseRuleConfigManager {
 
 							subCondition.setText(m_manager.addUserDefineText(userDefinedText));
 						} catch (DalException e) {
+							LOGGER.error("Unable to store user defined alert rule text, configName={}.",
+							      getConfigName(), e);
 							Cat.logError(e);
 						}
 					}
@@ -243,6 +277,8 @@ public abstract class BaseRuleConfigManager {
 
 				result.add(copiedConfig);
 			} catch (Exception e) {
+				LOGGER.error("Unable to copy alert rule config item, configName={}, item={}.", getConfigName(), config,
+				      e);
 				Cat.logError(e);
 			}
 		}
@@ -339,6 +375,8 @@ public abstract class BaseRuleConfigManager {
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to insert alert rule config, configName={}, xmlLength={}.", getConfigName(),
+			      xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -378,6 +416,8 @@ public abstract class BaseRuleConfigManager {
 				config.setContent(m_config.toString());
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
 			} catch (Exception e) {
+				LOGGER.error("Unable to store alert rule config, configName={}, configId={}.", getConfigName(),
+				      m_configId, e);
 				Cat.logError(e);
 				return false;
 			}
@@ -389,6 +429,7 @@ public abstract class BaseRuleConfigManager {
 		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
 		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
 		UserDefinedRuleManager manager = CatSpringContext.getBeanIfAvailable(UserDefinedRuleManager.class);
+		BaseRuleHelper helper = CatSpringContext.getBeanIfAvailable(BaseRuleHelper.class);
 
 		if (configDao != null) {
 			m_configDao = configDao;
@@ -398,6 +439,9 @@ public abstract class BaseRuleConfigManager {
 		}
 		if (manager != null) {
 			m_manager = manager;
+		}
+		if (helper != null) {
+			m_helper = helper;
 		}
 	}
 

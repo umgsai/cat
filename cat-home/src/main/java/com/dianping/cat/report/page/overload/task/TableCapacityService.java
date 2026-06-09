@@ -27,6 +27,8 @@ import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
@@ -48,6 +50,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class TableCapacityService extends ContainerHolder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TableCapacityService.class);
 
 	@Inject
 	private OverloadRepository m_overloadDao;
@@ -135,11 +138,16 @@ public class TableCapacityService extends ContainerHolder {
 					}
 					reports.add(generateOverloadReport(report, reportSize, reportType));
 				} catch (DalNotFoundException e) {
+					LOGGER.warn("Overload report target record not found, overloadId={}, reportId={}, reportType={}.",
+					      overload.getId(), overload.getReportId(), overload.getReportType());
 				} catch (Exception ex) {
+					LOGGER.error("Unable to build overload report item, overloadId={}, reportId={}, reportType={}.",
+					      overload.getId(), overload.getReportId(), overload.getReportType(), ex);
 					Cat.logError(ex);
 				}
 			}
 		} catch (DalException e) {
+			LOGGER.error("Unable to query overload reports, startTime={}, endTime={}.", startTime, endTime, e);
 			Cat.logError(e);
 		}
 

@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.tuple.Pair;
@@ -57,6 +59,7 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
 public class BusinessGraphCreator extends AbstractGraphCreator {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessGraphCreator.class);
 
 	@Inject
 	private CachedBusinessReportService m_reportService;
@@ -132,6 +135,8 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 				lineChart.add(Chinese.BASELINE_VALUE, convertToMap(m_dataExtractor.extract(baselines), start, step));
 				charts.put(key, lineChart);
 			} catch (Exception e) {
+				LOGGER.error("Unable to build business line chart, key={}, start={}, end={}.", entry.getKey(), start, end,
+						e);
 				Cat.logError(e);
 			}
 		}
@@ -157,6 +162,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 				return builder.toString();
 			}
 		} catch (Exception ex) {
+			LOGGER.error("Unable to build business contact info, domain={}.", domainName, ex);
 			Cat.logError("build contact info error for doamin: " + domainName, ex);
 		}
 		return null;
@@ -164,6 +170,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 
 	public Map<String, LineChart> buildGraphByDomain(Date start, Date end, String domain) {
 		refreshSpringBeans();
+		LOGGER.info("Building business graph by domain, domain={}, start={}, end={}.", domain, start, end);
 
 		BusinessReportConfig config = m_configManager.queryConfigByDomain(domain);
 		HashMap<String, LineChart> result = new LinkedHashMap<String, LineChart>();
@@ -181,6 +188,8 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 
 			result.putAll(buildCharts(datas, baseLines, start, end, configs));
 			result.putAll(buildCharts(customDatas, customBaseLines, start, end, configs));
+		} else {
+			LOGGER.warn("Business report config is null while building graph by domain, domain={}.", domain);
 		}
 
 		return result;
@@ -188,6 +197,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 
 	public Map<String, LineChart> buildGraphByTag(Date start, Date end, String tag) {
 		refreshSpringBeans();
+		LOGGER.info("Building business graph by tag, tag={}, start={}, end={}.", tag, start, end);
 
 		Tag tagConfig = m_tagManager.findTag(tag);
 
@@ -233,6 +243,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 
 			return buildCharts(needed, baseLines, start, end, configs);
 		} else {
+			LOGGER.warn("Business tag config is missing while building graph, tag={}.", tag);
 			return new HashMap<String, LineChart>();
 		}
 	}
@@ -274,6 +285,12 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 	}
 
 	private Map<String, double[]> buildGraphData(BusinessReport report, BusinessReportConfig config) {
+		if (report == null) {
+			LOGGER.error("Business report is null before graph data extraction, configDomain={}, itemCount={}.",
+					config == null ? null : config.getId(),
+					config == null ? 0 : config.getBusinessItemConfigs().size());
+		}
+
 		Map<String, double[]> values = new LinkedHashMap<String, double[]>();
 		Map<String, double[]> datas = m_dataFetcher.buildGraphData(report);
 		Map<String, BusinessItemConfig> businessItemConfigs = config.getBusinessItemConfigs();
@@ -388,6 +405,8 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 
 				customBaseLines.put(key, baseLine);
 			} catch (Exception e) {
+				LOGGER.error("Unable to prepare custom baseline, currentDomain={}, customConfigId={}, start={}, end={}.",
+						currentDomain, customConfig.getId(), start, end, e);
 				Cat.logError(e);
 			}
 		}
@@ -424,6 +443,8 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 
 				customDatas.put(key, data);
 			} catch (Exception e) {
+				LOGGER.error("Unable to prepare custom business data, currentDomain={}, customConfigId={}, start={}, end={}.",
+						currentDomain, customConfig.getId(), start, end, e);
 				Cat.logError(e);
 			}
 		}
@@ -433,12 +454,28 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 	private void refreshSpringBeans() {
 		BusinessConfigManager configManager = CatSpringContext.getBeanIfAvailable(BusinessConfigManager.class);
 		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		BusinessTagConfigManager tagManager = CatSpringContext.getBeanIfAvailable(BusinessTagConfigManager.class);
+		BusinessDataFetcher dataFetcher = CatSpringContext.getBeanIfAvailable(BusinessDataFetcher.class);
+		BusinessKeyHelper keyHelper = CatSpringContext.getBeanIfAvailable(BusinessKeyHelper.class);
+		CustomDataCalculator customDataCalculator = CatSpringContext.getBeanIfAvailable(CustomDataCalculator.class);
 
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
 		if (projectService != null) {
 			m_projectService = projectService;
+		}
+		if (tagManager != null) {
+			m_tagManager = tagManager;
+		}
+		if (dataFetcher != null) {
+			m_dataFetcher = dataFetcher;
+		}
+		if (keyHelper != null) {
+			m_keyHelper = keyHelper;
+		}
+		if (customDataCalculator != null) {
+			m_customDataCalculator = customDataCalculator;
 		}
 	}
 }

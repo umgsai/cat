@@ -24,6 +24,8 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.MonthlyReport;
@@ -38,6 +40,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = CapacityUpdater.class, value = MonthlyCapacityUpdater.ID)
 public class MonthlyCapacityUpdater implements CapacityUpdater {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MonthlyCapacityUpdater.class);
 
 	public static final String ID = "monthly_capacity_updater";
 
@@ -63,6 +66,7 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 		refreshSpringBeans();
 
 		int maxId = m_manager.getMonthlyStatus();
+		LOGGER.info("Starting monthly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
 			List<MonthlyReportContent> reports = m_monthlyReportContentDao
@@ -85,11 +89,15 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 							overload.setPeriod(report.getPeriod());
 							m_overloadDao.insert(overload);
 						} catch (DalNotFoundException e) {
+							LOGGER.warn("Monthly report not found while recording overload report, reportId={}.", reportId);
 						} catch (Exception e) {
+							LOGGER.error("Unable to record monthly overload report, reportId={}, contentLength={}.",
+							      reportId, contentLength, e);
 							Cat.logError(e);
 						}
 					}
 				} catch (Exception ex) {
+					LOGGER.error("Unable to process monthly report capacity item, content={}.", content, ex);
 					Cat.logError(ex);
 				}
 			}
@@ -102,6 +110,7 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 			}
 		}
 		m_manager.updateMonthlyStatus(maxId);
+		LOGGER.info("Finished monthly report capacity scan, finalMaxId={}.", maxId);
 	}
 
 	private void refreshSpringBeans() {

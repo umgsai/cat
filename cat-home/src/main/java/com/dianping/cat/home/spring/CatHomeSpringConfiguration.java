@@ -25,6 +25,9 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
 import com.dianping.cat.core.config.repository.ConfigRepository;
+import com.dianping.cat.alarm.spi.config.AlertConfigManager;
+import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
+import com.dianping.cat.alarm.spi.config.SenderConfigManager;
 import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
@@ -48,14 +51,38 @@ import com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleR
 import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
+import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
+import com.dianping.cat.report.alert.config.BaseRuleHelper;
+import com.dianping.cat.report.alert.business.BusinessRuleConfigManager;
+import com.dianping.cat.report.alert.event.EventRuleConfigManager;
+import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
 import com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager;
 import com.dianping.cat.report.alert.summary.AlertSummaryService;
+import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
 import com.dianping.cat.report.DomainValidator;
+import com.dianping.cat.report.page.DomainGroupConfigManager;
+import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager;
+import com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager;
+import com.dianping.cat.report.page.business.graph.BusinessDataFetcher;
+import com.dianping.cat.report.page.business.graph.CustomDataCalculator;
+import com.dianping.cat.report.page.business.service.BusinessReportService;
+import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
+import com.dianping.cat.report.page.business.task.BusinessPointParser;
+import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.report.page.metric.service.DefaultBaselineService;
+import com.dianping.cat.report.page.metric.task.BaselineConfigManager;
+import com.dianping.cat.report.page.metric.task.BaselineCreator;
+import com.dianping.cat.report.page.metric.task.DefaultBaselineCreator;
+import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
 import com.dianping.cat.report.server.RemoteServersManager;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.statistic.ServerStatisticManager;
+import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
+import com.dianping.cat.system.page.config.ConfigHtmlParser;
+import com.dianping.cat.system.page.permission.ResourceConfigManager;
+import com.dianping.cat.system.page.permission.UserConfigManager;
+import com.dianping.cat.system.page.router.config.RouterConfigManager;
 
 @Configuration
 @MapperScan(basePackages = {
@@ -326,6 +353,228 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public ServerStatisticManager serverStatisticManager() {
 		return new ServerStatisticManager();
+	}
+
+	@Bean
+	public ConfigHtmlParser configHtmlParser() {
+		return new ConfigHtmlParser();
+	}
+
+	@Bean(initMethod = "initialize")
+	public RouterConfigManager routerConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher,
+			DailyReportRepository dailyReportRepository, DailyReportContentRepository dailyReportContentRepository,
+			Logger plexusConsoleLogger) {
+		RouterConfigManager manager = new RouterConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		manager.setDailyReportDao(dailyReportRepository);
+		manager.setDailyReportContentDao(dailyReportContentRepository);
+		manager.enableLogging(plexusConsoleLogger.getChildLogger(RouterConfigManager.class.getName()));
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public DomainGroupConfigManager domainGroupConfigManager(ConfigRepository configRepository,
+			ContentFetcher contentFetcher) {
+		DomainGroupConfigManager manager = new DomainGroupConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public StorageGroupConfigManager storageGroupConfigManager(ConfigRepository configRepository,
+			ContentFetcher contentFetcher) {
+		StorageGroupConfigManager manager = new StorageGroupConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public TopologyGraphConfigManager topologyGraphConfigManager(ConfigRepository configRepository,
+			ContentFetcher contentFetcher) {
+		TopologyGraphConfigManager manager = new TopologyGraphConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public TopoGraphFormatConfigManager topoGraphFormatConfigManager(ConfigRepository configRepository,
+			ContentFetcher contentFetcher) {
+		TopoGraphFormatConfigManager manager = new TopoGraphFormatConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager(ConfigRepository configRepository,
+			ContentFetcher contentFetcher) {
+		HeartbeatDisplayPolicyManager manager = new HeartbeatDisplayPolicyManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ExceptionRuleConfigManager exceptionRuleConfigManager(ConfigRepository configRepository,
+			ContentFetcher contentFetcher) {
+		ExceptionRuleConfigManager manager = new ExceptionRuleConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public AlertConfigManager alertConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
+		AlertConfigManager manager = new AlertConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public AlertPolicyManager alertPolicyManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
+		AlertPolicyManager manager = new AlertPolicyManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean
+	public BaseRuleHelper baseRuleHelper() {
+		return new BaseRuleHelper();
+	}
+
+	@Bean(initMethod = "initialize")
+	public TransactionRuleConfigManager transactionRuleConfigManager(ConfigRepository configRepository,
+			ContentFetcher contentFetcher, UserDefinedRuleManager userDefinedRuleManager, BaseRuleHelper baseRuleHelper) {
+		TransactionRuleConfigManager manager = new TransactionRuleConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		manager.setUserDefinedRuleManager(userDefinedRuleManager);
+		manager.setHelper(baseRuleHelper);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public EventRuleConfigManager eventRuleConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher,
+			UserDefinedRuleManager userDefinedRuleManager, BaseRuleHelper baseRuleHelper) {
+		EventRuleConfigManager manager = new EventRuleConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		manager.setUserDefinedRuleManager(userDefinedRuleManager);
+		manager.setHelper(baseRuleHelper);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public HeartbeatRuleConfigManager heartbeatRuleConfigManager(ConfigRepository configRepository,
+			ContentFetcher contentFetcher, UserDefinedRuleManager userDefinedRuleManager, BaseRuleHelper baseRuleHelper) {
+		HeartbeatRuleConfigManager manager = new HeartbeatRuleConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		manager.setUserDefinedRuleManager(userDefinedRuleManager);
+		manager.setHelper(baseRuleHelper);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public BusinessRuleConfigManager businessRuleConfigManager(BusinessConfigRepository businessConfigRepository) {
+		BusinessRuleConfigManager manager = new BusinessRuleConfigManager();
+
+		manager.setConfigDao(businessConfigRepository);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public BusinessTagConfigManager businessTagConfigManager(BusinessConfigRepository businessConfigRepository) {
+		BusinessTagConfigManager manager = new BusinessTagConfigManager();
+
+		manager.setConfigDao(businessConfigRepository);
+		return manager;
+	}
+
+	@Bean
+	public BusinessKeyHelper businessKeyHelper() {
+		return new BusinessKeyHelper();
+	}
+
+	@Bean
+	public BusinessDataFetcher businessDataFetcher(BusinessKeyHelper businessKeyHelper) {
+		BusinessDataFetcher fetcher = new BusinessDataFetcher();
+
+		fetcher.setKeyHelper(businessKeyHelper);
+		return fetcher;
+	}
+
+	@Bean
+	public CustomDataCalculator customDataCalculator(BusinessKeyHelper businessKeyHelper) {
+		CustomDataCalculator calculator = new CustomDataCalculator();
+
+		calculator.setKeyHelper(businessKeyHelper);
+		return calculator;
+	}
+
+	@Bean
+	public BusinessPointParser businessPointParser() {
+		return new BusinessPointParser();
+	}
+
+	@Bean
+	public BaselineConfigManager baselineConfigManager() {
+		return new BaselineConfigManager();
+	}
+
+	@Bean
+	public BaselineCreator baselineCreator() {
+		return new DefaultBaselineCreator();
+	}
+
+	@Bean
+	public BusinessReportService businessReportService() {
+		return new BusinessReportService();
+	}
+
+	@Bean(initMethod = "initialize")
+	public SenderConfigManager senderConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
+		SenderConfigManager manager = new SenderConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public UserConfigManager userConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
+		UserConfigManager manager = new UserConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ResourceConfigManager resourceConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
+		ResourceConfigManager manager = new ResourceConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
 	}
 
 	@Bean(initMethod = "initialize")

@@ -41,6 +41,7 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
@@ -54,6 +55,7 @@ import java.util.Map.Entry;
 
 @Named
 public class RouterConfigManager implements Initializable, LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RouterConfigManager.class);
 
 	public static final String DEFAULT = "default";
 
@@ -114,11 +116,28 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 		return m_routerConfigs;
 	}
 
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setDailyReportContentDao(DailyReportContentRepository dailyReportContentDao) {
+		m_dailyReportContentDao = dailyReportContentDao;
+	}
+
+	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
+		m_dailyReportDao = dailyReportDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
+
 	@Override
 	public void initialize() throws InitializationException {
 		refreshSpringBeans();
 
 		try {
+			SLF4J_LOGGER.info("Initializing router config manager, configName={}.", CONFIG_NAME);
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
 
@@ -126,6 +145,8 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 			m_routerConfig = DefaultSaxParser.parse(content);
 			m_modifyTime = config.getModifyDate().getTime();
 		} catch (DalNotFoundException e) {
+			SLF4J_LOGGER.warn("Router config not found in repository, loading default content, configName={}.",
+			      CONFIG_NAME);
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -140,12 +161,15 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 				m_routerConfig = DefaultSaxParser.parse(content);
 				m_modifyTime = now.getTime();
 			} catch (Exception ex) {
+				SLF4J_LOGGER.error("Unable to create default router config, configName={}.", CONFIG_NAME, ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			SLF4J_LOGGER.error("Unable to initialize router config, configName={}.", CONFIG_NAME, e);
 			Cat.logError(e);
 		}
 		if (m_routerConfig == null) {
+			SLF4J_LOGGER.warn("Router config is empty after initialization, using an empty config.");
 			m_routerConfig = new RouterConfig();
 		}
 
@@ -177,11 +201,14 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 				if (result) {
 					refreshNetInfo();
 				}
+				SLF4J_LOGGER.info("Inserted router config, result={}, xmlLength={}.", result, xml == null ? 0 : xml.length());
 				return result;
 			} else {
+				SLF4J_LOGGER.warn("Router config validation failed, xmlLength={}.", xml == null ? 0 : xml.length());
 				return false;
 			}
 		} catch (Exception e) {
+			SLF4J_LOGGER.error("Unable to insert router config, xmlLength={}.", xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			m_logger.error(e.getMessage(), e);
 			return false;
@@ -315,6 +342,7 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 				m_routerConfig = DefaultSaxParser.parse(content);
 				m_modifyTime = modifyTime;
 				refreshNetInfo();
+				SLF4J_LOGGER.info("Refreshed router config, configName={}, modifyTime={}.", CONFIG_NAME, modifyTime);
 			}
 		}
 	}
@@ -333,6 +361,8 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 
 						infos.add(netInfo);
 					} catch (Exception e) {
+						SLF4J_LOGGER.warn("Unable to parse router network subnet, policy={}, network={}.",
+						      netPolicy.getKey(), network.getValue().getId(), e);
 						Cat.logError(e);
 					}
 				}
@@ -365,11 +395,12 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 					m_routerConfigs.put(time, new Pair<RouterConfig, Long>(routerConfig, modifyTime));
 					Cat.logEvent("ReloadConfig", "router");
 				} catch (DalNotFoundException ignored) {
-
+					SLF4J_LOGGER.warn("Router report content not found while refreshing report cache, reportId={}.",
+					      report.getId());
 				}
 			}
 		} catch (DalNotFoundException ignored) {
-
+			SLF4J_LOGGER.warn("Router daily report not found while refreshing report cache, period={}.", period);
 		}
 	}
 
@@ -397,6 +428,8 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 				config.setContent(m_routerConfig.toString());
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
 			} catch (Exception e) {
+				SLF4J_LOGGER.error("Unable to store router config, configName={}, configId={}.", CONFIG_NAME,
+				      m_configId, e);
 				Cat.logError(e);
 				return false;
 			}
@@ -410,6 +443,8 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 		for (ServerGroup serverGroup : routerConfig.getServerGroups().values()) {
 			for (GroupServer server : serverGroup.getGroupServers().values()) {
 				if (!servers.contains(server.getId())) {
+					SLF4J_LOGGER.warn("Router config validation failed, groupServer has no default server, server={}.",
+					      server);
 					Cat.logError(new RuntimeException("Error router config in group server, has no server ip: " + server));
 					return false;
 				}
@@ -417,6 +452,7 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 		}
 
 		if (queryEnableServers(routerConfig).isEmpty()) {
+			SLF4J_LOGGER.warn("Router config validation failed, enabled servers are empty.");
 			Cat.logError(new RuntimeException("Error router config, enable servers not exist."));
 			return false;
 		}

@@ -23,6 +23,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Splitters;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.ActionContext;
@@ -33,6 +35,8 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.ReportPage;
 
 public class Payload implements ActionPayload<ReportPage, Action> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Payload.class);
+
 	private ReportPage m_page;
 
 	@FieldMeta("channel")
@@ -110,6 +114,7 @@ public class Payload implements ActionPayload<ReportPage, Action> {
 		try {
 			return m_format.parse(m_alertTime);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to parse alertTime, value={}. Use current time.", m_alertTime);
 			return new Date();
 		}
 	}
@@ -196,6 +201,7 @@ public class Payload implements ActionPayload<ReportPage, Action> {
 		try {
 			return m_format.parse(m_endTime);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to parse alert endTime, value={}. Use current time.", m_endTime);
 			return new Date();
 		}
 	}
@@ -281,6 +287,7 @@ public class Payload implements ActionPayload<ReportPage, Action> {
 		try {
 			return m_format.parse(m_startTime);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to parse alert startTime, value={}. Use default 15 minutes ago.", m_startTime);
 			return new Date(System.currentTimeMillis() - 15 * TimeHelper.ONE_MINUTE);
 		}
 	}

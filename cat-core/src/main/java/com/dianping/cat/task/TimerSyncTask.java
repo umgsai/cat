@@ -21,6 +21,8 @@ package com.dianping.cat.task;
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
 
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public class TimerSyncTask implements Task {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TimerSyncTask.class);
 
 	private static final long DURATION = TimeHelper.ONE_MINUTE;
 
@@ -47,6 +50,7 @@ public class TimerSyncTask implements Task {
 					Threads.forGroup("Cat").start(m_instance);
 
 					m_active = true;
+					LOGGER.info("TimerSyncTask started.");
 				}
 			}
 		}
@@ -60,7 +64,15 @@ public class TimerSyncTask implements Task {
 
 	public void register(SyncHandler handler) {
 		synchronized (this) {
+			String name = handler.getName();
+
+			for (int i = m_handlers.size() - 1; i >= 0; i--) {
+				if (name.equals(m_handlers.get(i).getName())) {
+					m_handlers.remove(i);
+				}
+			}
 			m_handlers.add(handler);
+			LOGGER.info("Registered timer sync handler, name={}, handlerCount={}.", name, m_handlers.size());
 		}
 	}
 
@@ -83,6 +95,7 @@ public class TimerSyncTask implements Task {
 							t.setStatus(Transaction.SUCCESS);
 						} catch (Exception e) {
 							t.setStatus(e);
+							LOGGER.error("Timer sync handler failed, name={}.", handler.getName(), e);
 							Cat.logError(e);
 						} finally {
 							t.complete();
@@ -98,9 +111,11 @@ public class TimerSyncTask implements Task {
 					Thread.sleep(DURATION - duration);
 				}
 			} catch (InterruptedException e) {
+				LOGGER.warn("TimerSyncTask interrupted, shutting down.", e);
 				active = false;
 			}
 		}
+		LOGGER.info("TimerSyncTask stopped.");
 	}
 
 	@Override

@@ -38,6 +38,9 @@ public class BaseProcesser {
 	@Inject
 	protected RuleFTLDecorator m_ruleDecorator;
 
+	protected void refreshSpringBeans() {
+	}
+
 	public boolean addSubmitRule(BaseRuleConfigManager manager, String id, String metrics, String configs) {
 		try {
 			String xmlContent = manager.updateRule(id, metrics, configs);

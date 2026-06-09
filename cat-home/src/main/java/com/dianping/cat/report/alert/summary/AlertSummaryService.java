@@ -18,6 +18,8 @@
  */
 package com.dianping.cat.report.alert.summary;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -29,6 +31,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class AlertSummaryService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryService.class);
 
 	@Inject
 	private AlertSummaryRepository m_alertSummaryDao;
@@ -45,6 +48,8 @@ public class AlertSummaryService {
 		try {
 			m_alertSummaryDao.insert(summary);
 		} catch (DalException e) {
+			LOGGER.error("Unable to insert alert summary, domain={}, alertTime={}.", alertSummary.getDomain(),
+					alertSummary.getAlertDate(), e);
 			Cat.logError("insert alert summary error: " + content, e);
 		}
 	}

@@ -26,10 +26,13 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
 public class ServerRuleFTLDecorator implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServerRuleFTLDecorator.class);
 
 	public Configuration m_configuration;
 
@@ -42,6 +45,7 @@ public class ServerRuleFTLDecorator implements Initializable {
 			Template configsTemplate = m_configuration.getTemplate("server_rule_configs.ftl");
 			configsTemplate.process(dataMap, sw);
 		} catch (Exception e) {
+			LOGGER.error("Unable to render server alert rule config html, template=server_rule_configs.ftl.", e);
 			Cat.logError(e);
 		}
 		return sw.toString();
@@ -54,6 +58,7 @@ public class ServerRuleFTLDecorator implements Initializable {
 		try {
 			m_configuration.setClassForTemplateLoading(this.getClass(), "/freemaker");
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize server alert rule FTL decorator template loading.", e);
 			Cat.logError(e);
 		}
 	}

@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -39,6 +41,8 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.SystemPage;
 
 public class Handler implements PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
+
 	@Inject
 	public ProjectService m_projectService;
 
@@ -82,12 +86,16 @@ public class Handler implements PageHandler<Context> {
 
 				if (temp == null) {
 					m_projectService.insert(project);
+					LOGGER.info("Inserted project config, domain={}.", project.getDomain());
 				} else {
 					m_projectService.update(project);
+					LOGGER.info("Updated project config, domain={}.", project.getDomain());
 				}
 				model.setContent(UpdateStatus.SUCCESS.getStatusJson());
 			} catch (Exception e) {
 				model.setContent(UpdateStatus.INTERNAL_ERROR.getStatusJson());
+				LOGGER.error("Unable to update project config, domain={}.",
+				      payload.getProject() == null ? null : payload.getProject().getDomain(), e);
 				Cat.logError(e);
 			}
 			break;

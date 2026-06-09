@@ -20,12 +20,15 @@ package com.dianping.cat.alarm.spi.decorator;
 
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.service.ProjectService;
 
 public abstract class ProjectDecorator extends Decorator {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectDecorator.class);
 
 	@Inject
 	protected ProjectService m_projectService;
@@ -49,6 +52,7 @@ public abstract class ProjectDecorator extends Decorator {
 				return builder.toString();
 			}
 		} catch (Exception ex) {
+			LOGGER.error("Unable to build project contact info, domain={}.", domainName, ex);
 			Cat.logError("build project contact info error for domain: " + domainName, ex);
 		}
 

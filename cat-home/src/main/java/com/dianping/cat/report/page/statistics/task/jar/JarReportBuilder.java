@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -49,6 +51,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = JarReportBuilder.ID)
 public class JarReportBuilder implements TaskBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(JarReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_JAR;
 
@@ -74,12 +77,14 @@ public class JarReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building jar hourly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date end = new Date(period.getTime() + TimeHelper.ONE_HOUR);
 		Set<String> domains = m_reportService.queryAllDomainNames(period, end, HeartbeatAnalyzer.ID);
 		JarReport jarReport = new JarReport();
 		HeartbeatReportVisitor visitor = new HeartbeatReportVisitor(jarReport);
 
+		LOGGER.info("Preparing jar report from heartbeat reports, period={}, domainCount={}.", period, domains.size());
 		for (String domainName : domains) {
 			if (m_configManager.validateDomain(domainName)) {
 				HeartbeatReport heartbeatReport = m_heartbeatReportService.queryReport(domainName, period, end);

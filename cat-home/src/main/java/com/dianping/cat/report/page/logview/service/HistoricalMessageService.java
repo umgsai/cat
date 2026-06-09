@@ -22,6 +22,8 @@ import java.nio.charset.Charset;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.hdfs.HdfsBucketManager;
 import org.unidal.lookup.annotation.Inject;
 
@@ -38,6 +40,7 @@ import com.dianping.cat.report.service.BaseHistoricalModelService;
 import com.dianping.cat.report.service.ModelRequest;
 
 public class HistoricalMessageService extends BaseHistoricalModelService<String> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalMessageService.class);
 
 	@Inject
 	private HdfsBucketManager m_bucketManager;
@@ -108,7 +111,8 @@ public class HistoricalMessageService extends BaseHistoricalModelService<String>
 			buf.readInt(); // get rid of length
 			return buf.toString(Charset.forName("utf-8"));
 		} catch (Exception e) {
-			// ignore it
+			LOGGER.error("Unable to render historical logview message, messageId={}, waterfall={}.",
+					request.getProperty("messageId"), request.getProperty("waterfall", "false"), e);
 		}
 		return null;
 	}

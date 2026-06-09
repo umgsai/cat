@@ -25,6 +25,8 @@ import com.dianping.cat.core.mybatis.repository.project.ProjectRepository;
 import com.dianping.cat.core.dal.ProjectEntity;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -35,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Named
 public class ProjectService implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectService.class);
 
 	public static final String DEFAULT = "Default";
 
@@ -87,6 +90,7 @@ public class ProjectService implements Initializable {
 
 			return true;
 		} catch (Exception e) {
+			LOGGER.error("Unable to delete project, id={}, domain={}.", id, domainName, e);
 			Cat.logError("delete project error ", e);
 			return false;
 		}
@@ -112,7 +116,9 @@ public class ProjectService implements Initializable {
 				m_domainToProjects.put(pro.getDomain(), pro);
 				return project;
 			} catch (DalException e) {
+				LOGGER.warn("Project is missing or unavailable by domain={}.", domainName, e);
 			} catch (Exception e) {
+				LOGGER.error("Unable to find project by domain={}.", domainName, e);
 				Cat.logError(e);
 			}
 			return null;
@@ -158,7 +164,10 @@ public class ProjectService implements Initializable {
 	@Override
 	public void initialize() throws InitializationException {
 		if (!m_manager.isLocalMode()) {
+			LOGGER.info("Initializing ProjectService in remote mode.");
 			refresh();
+		} else {
+			LOGGER.info("Initializing ProjectService in local mode; skip database refresh.");
 		}
 	}
 
@@ -177,11 +186,15 @@ public class ProjectService implements Initializable {
 			int result = m_projectDao.insert(project);
 
 			if (result == 1) {
+				LOGGER.info("Inserted project, domain={}, id={}.", project.getDomain(), project.getId());
 				return true;
 			} else {
+				LOGGER.warn("Project insert returned unexpected row count, domain={}, result={}.", project.getDomain(),
+						result);
 				return false;
 			}
 		} catch (DalException e) {
+			LOGGER.error("Unable to insert project, domain={}.", project.getDomain(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -200,6 +213,7 @@ public class ProjectService implements Initializable {
 
 			return true;
 		} catch (Exception ex) {
+			LOGGER.error("Unable to insert default project, domain={}.", domain, ex);
 			Cat.logError(ex);
 		}
 		return false;
@@ -227,7 +241,10 @@ public class ProjectService implements Initializable {
 			m_domains = tmpDomains;
 			m_domainToProjects = tmpDomainProjects;
 			m_cmdbToProjects = tmpCmdbProjects;
+			LOGGER.info("Refreshed projects, projectCount={}, cmdbDomainCount={}.", projects.size(),
+					tmpCmdbProjects.size());
 		} catch (DalException e) {
+			LOGGER.error("Unable to refresh ProjectService projects.", e);
 			Cat.logError("initialize ProjectService error", e);
 		}
 	}
@@ -237,8 +254,10 @@ public class ProjectService implements Initializable {
 
 		try {
 			m_projectDao.updateByPK(project, ProjectEntity.UPDATESET_FULL);
+			LOGGER.info("Updated project, domain={}, id={}.", project.getDomain(), project.getId());
 			return true;
 		} catch (DalException e) {
+			LOGGER.error("Unable to update project, domain={}, id={}.", project.getDomain(), project.getId(), e);
 			Cat.logError(e);
 			return false;
 		}

@@ -26,6 +26,8 @@ import java.util.List;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -44,6 +46,7 @@ import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
 @Named
 public class ReportReloadConfigManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReportReloadConfigManager.class);
 
 	private static final String CONFIG_NAME = "report-reload-config";
 
@@ -74,7 +77,11 @@ public class ReportReloadConfigManager implements Initializable {
 			m_configId = config.getId();
 			m_modifyTime = config.getModifyDate().getTime();
 			m_config = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded report reload config from repository, configId={}, modifyTime={}.", m_configId,
+					m_modifyTime);
 		} catch (DalNotFoundException e) {
+			LOGGER.warn("Report reload config is missing in repository, loading default content from fetcher.", e);
+
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -84,14 +91,18 @@ public class ReportReloadConfigManager implements Initializable {
 				m_configDao.insert(config);
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized report reload config from default content, configId={}.", m_configId);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to initialize report reload config from default content.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to load report reload config from repository.", e);
 			Cat.logError(e);
 		}
 		if (m_config == null) {
 			m_config = new ReportReloadConfig();
+			LOGGER.warn("Report reload config is empty after initialization, using a new empty config.");
 		}
 
 		TimerSyncTask.getInstance().register(new SyncHandler() {
@@ -114,6 +125,8 @@ public class ReportReloadConfigManager implements Initializable {
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse report reload config xml for insert. xmlLength={}.",
+					xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -137,6 +150,7 @@ public class ReportReloadConfigManager implements Initializable {
 
 					results.add(period);
 				} catch (ParseException e) {
+					LOGGER.warn("Unable to parse report reload period, type={}, periodId={}.", type, rp.getId(), e);
 					Cat.logError(e);
 				}
 			}
@@ -164,6 +178,7 @@ public class ReportReloadConfigManager implements Initializable {
 
 				m_config = reportReloadConfig;
 				m_modifyTime = modifyTime;
+				LOGGER.info("Refreshed report reload config, configId={}, modifyTime={}.", m_configId, m_modifyTime);
 			}
 		}
 	}
@@ -178,7 +193,9 @@ public class ReportReloadConfigManager implements Initializable {
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				LOGGER.info("Stored report reload config, configId={}.", m_configId);
 			} catch (Exception e) {
+				LOGGER.error("Unable to store report reload config, configId={}.", m_configId, e);
 				Cat.logError(e);
 				return false;
 			}

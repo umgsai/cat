@@ -27,12 +27,16 @@ import java.util.Map;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 
 @Named
 public class IpService implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(IpService.class);
+
 	private static final String OTHER = "其他";
 
 	private int[] m_areaIds;
@@ -158,6 +162,7 @@ public class IpService implements Initializable {
 
 			return findIpInfo(ip_num);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to parse ip string, ip={}.", ip, e);
 			return null;
 		}
 	}
@@ -184,6 +189,7 @@ public class IpService implements Initializable {
 			}
 			areaReader.close();
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize China area map.", e);
 			Cat.logError(e);
 		}
 	}
@@ -207,6 +213,7 @@ public class IpService implements Initializable {
 			}
 			corpReader.close();
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize China corporation map.", e);
 			Cat.logError(e);
 		}
 	}
@@ -233,6 +240,7 @@ public class IpService implements Initializable {
 			}
 			areaReader.close();
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize foreign area map.", e);
 			Cat.logError(e);
 		}
 	}
@@ -258,11 +266,15 @@ public class IpService implements Initializable {
 			}
 
 		} catch (IOException e) {
+			LOGGER.error("Unable to initialize foreign ip table.", e);
 			Cat.logError(e);
 		} finally {
 			try {
-				reader.close();
+				if (reader != null) {
+					reader.close();
+				}
 			} catch (Exception e) {
+				LOGGER.warn("Unable to close foreign ip table reader.", e);
 				Cat.logError(e);
 			}
 		}
@@ -283,6 +295,7 @@ public class IpService implements Initializable {
 
 		initForeignAreaMap(foreignAreaFile);
 		initForeignIpTable(foreignIpFile);
+		LOGGER.info("IpService initialized.");
 	}
 
 	public void initIpTable(InputStream ipFile) {
@@ -308,11 +321,15 @@ public class IpService implements Initializable {
 			}
 
 		} catch (IOException e) {
+			LOGGER.error("Unable to initialize China ip table.", e);
 			Cat.logError(e);
 		} finally {
 			try {
-				reader.close();
+				if (reader != null) {
+					reader.close();
+				}
 			} catch (Exception e) {
+				LOGGER.warn("Unable to close China ip table reader.", e);
 				Cat.logError(e);
 			}
 		}

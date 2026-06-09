@@ -23,6 +23,8 @@ import java.util.Set;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -52,6 +54,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = StateReportBuilder.ID)
 public class StateReportBuilder implements TaskBuilder, Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(StateReportBuilder.class);
 
 	public static final String ID = StateAnalyzer.ID;
 
@@ -73,6 +76,7 @@ public class StateReportBuilder implements TaskBuilder, Initializable {
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building state daily report, name={}, domain={}, period={}.", name, domain, period);
 
 		StateReport stateReport = queryHourlyReportsByDuration(domain, period, TaskHelper.tomorrowZero(period));
 		DailyReport report = new DailyReport();
@@ -90,6 +94,7 @@ public class StateReportBuilder implements TaskBuilder, Initializable {
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building state hourly report side effects, name={}, domain={}, period={}.", name, domain, period);
 
 		StateReport stateReport = m_reportService
 								.queryReport(domain, period, new Date(period.getTime()	+ TimeHelper.ONE_HOUR));
@@ -102,6 +107,7 @@ public class StateReportBuilder implements TaskBuilder, Initializable {
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building state monthly report, name={}, domain={}, period={}.", name, domain, period);
 
 		StateReport stateReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
@@ -119,6 +125,7 @@ public class StateReportBuilder implements TaskBuilder, Initializable {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building state weekly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date start = period;
 		Date end = new Date(start.getTime() + TimeHelper.ONE_DAY * 7);
@@ -175,6 +182,8 @@ public class StateReportBuilder implements TaskBuilder, Initializable {
 
 				reportModel.accept(merger);
 			} catch (Exception e) {
+				LOGGER.error("Unable to merge state daily report into duration report, domain={}, period={}.", domain,
+						new Date(startTime), e);
 				Cat.logError(e);
 			}
 		}
@@ -210,17 +219,21 @@ public class StateReportBuilder implements TaskBuilder, Initializable {
 
 		if (m_serverFilterConfigManager.validateDomain(domain)) {
 			if (!m_projectService.contains(domain)) {
+				LOGGER.info("State report discovered new project domain, domain={}, ip={}.", domain, ip);
 				m_projectService.insert(domain);
 
 			}
 			Hostinfo info = m_hostinfoService.findByIp(ip);
 
 			if (info == null) {
+				LOGGER.info("State report discovered new host, domain={}, ip={}.", domain, ip);
 				m_hostinfoService.insert(domain, ip);
 			} else {
 				String oldDomain = info.getDomain();
 
 				if (!domain.equals(oldDomain) && !Constants.CAT.equals(oldDomain)) {
+					LOGGER.warn("State report updates host domain, ip={}, oldDomain={}, newDomain={}.", ip, oldDomain,
+							domain);
 					m_hostinfoService.update(info.getId(), domain, ip);
 				}
 			}

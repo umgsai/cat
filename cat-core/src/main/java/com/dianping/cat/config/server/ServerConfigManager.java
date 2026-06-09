@@ -34,6 +34,7 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.helper.Files;
 import org.unidal.helper.Splitters;
@@ -64,6 +65,7 @@ import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
 @Named
 public class ServerConfigManager implements LogEnabled, Initializable {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(ServerConfigManager.class);
 
 	public static final String DUMP_DIR = "dump";
 
@@ -404,7 +406,11 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 			m_configId = config.getId();
 			m_modifyTime = config.getModifyDate().getTime();
 			m_config = DefaultSaxParser.parse(content);
+			SLF4J_LOGGER.info("Loaded server config from repository, configId={}, modifyTime={}.", m_configId,
+					m_modifyTime);
 		} catch (DalNotFoundException e) {
+			SLF4J_LOGGER.warn("Server config is missing in repository, loading default content from fetcher.", e);
+
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -414,11 +420,14 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 				m_configDao.insert(config);
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
+				SLF4J_LOGGER.info("Initialized server config from default content, configId={}.", m_configId);
 			} catch (Exception ex) {
+				SLF4J_LOGGER.error("Unable to initialize server config from default content.", ex);
 				m_logger.error("Failed to initialize server config from database fallback.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			SLF4J_LOGGER.error("Unable to load server config from repository.", e);
 			m_logger.error("Failed to load server config from database.", e);
 			Cat.logError(e);
 		}
@@ -430,6 +439,7 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 				m_logger.info("init cat server with cat server xml " + localServerFile);
 				initialize(localServerFile);
 			} catch (Exception e) {
+				SLF4J_LOGGER.error("Unable to initialize server config from local server.xml.", e);
 				m_logger.error("Failed to initialize server config from local server.xml.", e);
 				Cat.logError(e);
 			}
@@ -437,6 +447,7 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 
 		if (m_config == null) {
 			m_config = new ServerConfig();
+			SLF4J_LOGGER.warn("Server config is empty after initialization, using a new empty config.");
 		}
 
 		m_config.accept(new ServerConfigValidator());
@@ -444,6 +455,7 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 		try {
 			refreshServer();
 		} catch (Exception e) {
+			SLF4J_LOGGER.error("Unable to refresh local server config view.", e);
 			m_logger.error("Failed to refresh server config.", e);
 			Cat.logError(e);
 		}
@@ -470,9 +482,11 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 
 			String xml = Files.forIO().readFrom(configFile, "utf-8");
 			m_config = DefaultSaxParser.parse(xml);
+			SLF4J_LOGGER.info("Loaded server config from local file, path={}.", configFile.getCanonicalPath());
 		} else {
 			if (configFile != null) {
 				m_logger.warn(String.format("Configuration file(%s) not found, IGNORED.", configFile.getCanonicalPath()));
+				SLF4J_LOGGER.warn("Server config local file is not readable, path={}.", configFile.getCanonicalPath());
 			}
 
 			m_config = new ServerConfig();
@@ -485,6 +499,8 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 
 			return storeConfig();
 		} catch (Exception e) {
+			SLF4J_LOGGER.error("Unable to parse server config xml for insert. xmlLength={}.",
+					xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -570,6 +586,7 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 				m_modifyTime = modifyTime;
 
 				refreshServer();
+				SLF4J_LOGGER.info("Refreshed server config, configId={}, modifyTime={}.", m_configId, m_modifyTime);
 			}
 		}
 	}
@@ -590,6 +607,8 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 		String forcedStatisticTypePrefixStr = getProperty("forced-statistic-type-prefixes", "Cellar.,Squirrel.");
 		List<String> forcedStatisticTypePrefixes = Splitters.by(",").noEmptyItem().split(forcedStatisticTypePrefixStr);
 		m_forcedStatisticTypePrefixes = new HashSet<>(forcedStatisticTypePrefixes);
+		SLF4J_LOGGER.info("Refreshed server runtime config, localIp={}, forcedStatisticTypePrefixes={}.", ip,
+				m_forcedStatisticTypePrefixes);
 	}
 
 	public boolean storeConfig() {
@@ -602,7 +621,9 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 			config.setContent(m_config.toString());
 			m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
 			refreshServer();
+			SLF4J_LOGGER.info("Stored server config, configId={}.", m_configId);
 		} catch (Exception e) {
+			SLF4J_LOGGER.error("Unable to store server config, configId={}.", m_configId, e);
 			Cat.logError(e);
 			return false;
 		}

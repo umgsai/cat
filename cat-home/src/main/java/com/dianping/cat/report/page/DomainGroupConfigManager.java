@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -41,6 +43,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class DomainGroupConfigManager implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DomainGroupConfigManager.class);
 
 	private static final String CONFIG_NAME = "domainGroup";
 
@@ -58,6 +61,14 @@ public class DomainGroupConfigManager implements Initializable {
 		return m_domainGroup;
 	}
 
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
+	}
+
 	@Override
 	public void initialize() throws InitializationException {
 		refreshSpringBeans();
@@ -68,7 +79,10 @@ public class DomainGroupConfigManager implements Initializable {
 
 			m_configId = config.getId();
 			m_domainGroup = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded domain group config from repository, configId={}.", m_configId);
 		} catch (DalNotFoundException e) {
+			LOGGER.warn("Domain group config is missing in repository, loading default content from fetcher.", e);
+
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -79,14 +93,18 @@ public class DomainGroupConfigManager implements Initializable {
 
 				m_configId = config.getId();
 				m_domainGroup = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized domain group config from default content, configId={}.", m_configId);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to initialize domain group config from default content.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to load domain group config from repository.", e);
 			Cat.logError(e);
 		}
 		if (m_domainGroup == null) {
 			m_domainGroup = new DomainGroup();
+			LOGGER.warn("Domain group config is empty after initialization, using a new empty config.");
 		}
 	}
 
@@ -96,6 +114,7 @@ public class DomainGroupConfigManager implements Initializable {
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse domain group xml for insert. xmlLength={}.", xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -108,6 +127,7 @@ public class DomainGroupConfigManager implements Initializable {
 			m_domainGroup.addDomain(domain);
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse domain group json for insert. jsonLength={}.", json == null ? 0 : json.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -170,7 +190,10 @@ public class DomainGroupConfigManager implements Initializable {
 				config.setName(CONFIG_NAME);
 				config.setContent(m_domainGroup.toString());
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				LOGGER.info("Stored domain group config, configId={}, domainCount={}.", m_configId,
+						m_domainGroup.getDomains().size());
 			} catch (Exception e) {
+				LOGGER.error("Unable to store domain group config, configId={}.", m_configId, e);
 				Cat.logError(e);
 				return false;
 			}
@@ -184,9 +207,11 @@ public class DomainGroupConfigManager implements Initializable {
 
 		if (configDao != null) {
 			m_configDao = configDao;
+			LOGGER.info("DomainGroupConfigManager refreshed Spring ConfigRepository dependency.");
 		}
 		if (fetcher != null) {
 			m_fetcher = fetcher;
+			LOGGER.info("DomainGroupConfigManager refreshed Spring ContentFetcher dependency.");
 		}
 	}
 }

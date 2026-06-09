@@ -26,10 +26,13 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
 public abstract class SummaryBuilder implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SummaryBuilder.class);
 
 	public Configuration m_configuration;
 
@@ -43,6 +46,8 @@ public abstract class SummaryBuilder implements Initializable {
 			Template t = m_configuration.getTemplate(getTemplateAddress());
 			t.process(dataMap, sw);
 		} catch (Exception e) {
+			LOGGER.error("Unable to generate alert summary html, builder={}, template={}, domain={}, date={}.",
+			      getID(), getTemplateAddress(), domain, date, e);
 			Cat.logError(e);
 		}
 		return sw.toString();
@@ -56,6 +61,8 @@ public abstract class SummaryBuilder implements Initializable {
 		try {
 			m_configuration.setClassForTemplateLoading(this.getClass(), "/freemaker");
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize alert summary template loading, builder={}, template={}.", getID(),
+			      getTemplateAddress(), e);
 			Cat.logError(e);
 		}
 	}

@@ -26,6 +26,8 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
@@ -35,6 +37,7 @@ import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 
 @Named
 public class AlertService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlertService.class);
 
 	@Inject
 	private AlertRepository m_alertDao;
@@ -61,6 +64,7 @@ public class AlertService {
 		} catch (DalNotFoundException e) {
 			// ignore
 		} catch (Exception e) {
+			LOGGER.error("Unable to query alerts, start={}, end={}, type={}.", start, end, type, e);
 			Cat.logError(e);
 		}
 
@@ -74,9 +78,13 @@ public class AlertService {
 			int count = m_alertDao.insert(alert);
 
 			if (count != 1) {
+				LOGGER.error("Unexpected alert insert count, count={}, domain={}, category={}, metric={}.", count,
+				      alert.getDomain(), alert.getCategory(), alert.getMetric());
 				Cat.logError("insert alert error: " + alert.toString(), new RuntimeException());
 			}
 		} catch (DalException e) {
+			LOGGER.error("Unable to insert alert, domain={}, type={}, metric={}.", alertEntity.getDomain(),
+			      alertEntity.getType().getName(), alertEntity.getMetric(), e);
 			Cat.logError(e);
 		}
 	}

@@ -26,6 +26,7 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Named;
 
@@ -35,6 +36,7 @@ import com.dianping.cat.task.TaskManager;
 
 @Named
 public class ReportFacade extends ContainerHolder implements LogEnabled, Initializable {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(ReportFacade.class);
 
 	private Logger m_logger;
 
@@ -43,6 +45,7 @@ public class ReportFacade extends ContainerHolder implements LogEnabled, Initial
 	public boolean builderReport(Task task) {
 		try {
 			if (task == null) {
+				SLF4J_LOGGER.warn("Report build skipped because task is null.");
 				return false;
 			}
 			int type = task.getTaskType();
@@ -52,11 +55,15 @@ public class ReportFacade extends ContainerHolder implements LogEnabled, Initial
 			TaskBuilder reportBuilder = getReportBuilder(reportName);
 
 			if (reportBuilder == null) {
+				SLF4J_LOGGER.error("No report builder found, reportName={}, domain={}, type={}, period={}, taskId={}.",
+						reportName, reportDomain, type, reportPeriod, task.getId());
 				Cat.logError(new RuntimeException("no report builder for type:" + " " + reportName));
 				return false;
 			} else {
 				boolean result = false;
 
+				SLF4J_LOGGER.info("Building report task, reportName={}, domain={}, type={}, period={}, taskId={}.",
+						reportName, reportDomain, type, reportPeriod, task.getId());
 				if (type == TaskManager.REPORT_HOUR) {
 					result = reportBuilder.buildHourlyTask(reportName, reportDomain, reportPeriod);
 				} else if (type == TaskManager.REPORT_DAILY) {
@@ -69,10 +76,13 @@ public class ReportFacade extends ContainerHolder implements LogEnabled, Initial
 				if (result) {
 					return result;
 				} else {
+					SLF4J_LOGGER.error("Report builder returned false, reportName={}, domain={}, type={}, period={}, taskId={}.",
+							reportName, reportDomain, type, reportPeriod, task.getId());
 					m_logger.error(task.toString());
 				}
 			}
 		} catch (Exception e) {
+			SLF4J_LOGGER.error("Error when building report, task={}.", task, e);
 			m_logger.error("Error when building report," + e.getMessage(), e);
 			Cat.logError(e);
 			return false;
@@ -92,6 +102,8 @@ public class ReportFacade extends ContainerHolder implements LogEnabled, Initial
 	@Override
 	public void initialize() throws InitializationException {
 		m_reportBuilders = lookupMap(TaskBuilder.class);
+		SLF4J_LOGGER.info("Initialized report facade, builderCount={}, builders={}.", m_reportBuilders.size(),
+				m_reportBuilders.keySet());
 	}
 
 }

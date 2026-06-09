@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.helper.Threads;
 import org.unidal.lookup.annotation.Inject;
@@ -37,6 +39,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = CurrentReportBuilder.ID)
 public class CurrentReportBuilder implements TaskBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CurrentReportBuilder.class);
 
 	public static final String ID = Constants.CURRENT_REPORT;
 
@@ -49,6 +52,7 @@ public class CurrentReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+		LOGGER.info("Building current weekly/monthly refresh task, name={}, domain={}, period={}.", name, domain, period);
 
 		CurrentWeeklyMonthlyReportTask reportTask = CurrentWeeklyMonthlyReportTask.getInstance();
 
@@ -62,9 +66,12 @@ public class CurrentReportBuilder implements TaskBuilder {
 				}
 			}
 			reportTask.setDomains(domains);
+			LOGGER.info("Starting current weekly/monthly refresh task, domainCount={}.", domains.size());
 
 			Threads.forGroup(Constants.CAT).start(reportTask);
 		} catch (DalException e) {
+			LOGGER.error("Unable to build current weekly/monthly refresh task, name={}, domain={}, period={}.", name,
+					domain, period, e);
 			Cat.logError(e);
 		}
 		return true;

@@ -25,6 +25,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.jsp.function.CodecFunction;
 import org.unidal.web.mvc.ActionContext;
@@ -44,6 +46,8 @@ import com.dianping.cat.system.page.login.service.SigninContext;
 import com.dianping.cat.system.page.login.service.SigninService;
 
 public class Handler implements PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
+
 	@Inject
 	private JspViewer m_jspViewer;
 
@@ -71,18 +75,23 @@ public class Handler implements PageHandler<Context> {
 				Session session = m_signinService.signin(sc, credential);
 
 				if (session == null) {
+					LOGGER.warn("User login failed, account={}.", account);
 					ctx.addError(new ErrorObject("biz.login"));
 				} else {
+					LOGGER.info("User login succeeded, account={}.", account);
 					redirect(ctx, payload);
 					return;
 				}
 			} else {
+				LOGGER.warn("User login input is incomplete, accountPresent={}, passwordPresent={}.", account != null,
+				      password != null);
 				ctx.addError(new ErrorObject("biz.login.input").addArgument("account", account).addArgument("password",	password));
 			}
 		} else if (action == Action.LOGOUT) {
 			SigninContext sc = createSigninContext(ctx);
 
 			m_signinService.signout(sc);
+			LOGGER.info("User logout requested.");
 			redirect(ctx, payload);
 			return;
 		} else {
@@ -98,6 +107,7 @@ public class Handler implements PageHandler<Context> {
 						LoginMember member = session.getMember();
 						context.setSigninMember(member);
 						logAccess(ctx, member);
+						LOGGER.info("User session validated, userName={}.", member.getUserName());
 						return;
 					} else if (parent != null) {
 						throw new RuntimeException(String.format("%s should extend %s!", ctx.getClass(), SystemContext.class));
@@ -136,6 +146,7 @@ public class Handler implements PageHandler<Context> {
 
 			return true;
 		} catch (Exception e) {
+			LOGGER.warn("Unable to determine whether current action requires login.", e);
 			return false;
 		}
 	}

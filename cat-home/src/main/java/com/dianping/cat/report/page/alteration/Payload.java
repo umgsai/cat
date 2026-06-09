@@ -22,6 +22,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.ActionContext;
 import org.unidal.web.mvc.payload.annotation.FieldMeta;
@@ -31,6 +33,8 @@ import com.dianping.cat.mvc.AbstractReportPayload;
 import com.dianping.cat.report.ReportPage;
 
 public class Payload extends AbstractReportPayload<Action, ReportPage> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Payload.class);
+
 	private ReportPage m_page;
 
 	@FieldMeta("altType")
@@ -111,6 +115,7 @@ public class Payload extends AbstractReportPayload<Action, ReportPage> {
 			}
 
 		} catch (ParseException e) {
+			LOGGER.warn("Unable to parse alterationDate, value={}. Use current time.", m_alterationDate);
 			return new Date();
 		}
 	}
@@ -174,6 +179,7 @@ public class Payload extends AbstractReportPayload<Action, ReportPage> {
 			try {
 				return m_sdf.parse(m_endTime);
 			} catch (ParseException e) {
+				LOGGER.warn("Unable to parse alteration endTime, value={}. Use current time.", m_endTime);
 				return new Date();
 			}
 		}
@@ -227,6 +233,7 @@ public class Payload extends AbstractReportPayload<Action, ReportPage> {
 			try {
 				return m_sdf.parse(m_startTime);
 			} catch (ParseException e) {
+				LOGGER.warn("Unable to parse alteration startTime, value={}. Use current time.", m_startTime);
 				return new Date();
 			}
 		}

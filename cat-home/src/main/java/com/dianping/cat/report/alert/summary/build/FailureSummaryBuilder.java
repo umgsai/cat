@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -40,6 +42,7 @@ import com.dianping.cat.report.service.ModelService;
 
 @Named(type = SummaryBuilder.class, value = FailureSummaryBuilder.ID)
 public class FailureSummaryBuilder extends SummaryBuilder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FailureSummaryBuilder.class);
 
 	public static final String ID = "FailureDecorator";
 
@@ -85,12 +88,16 @@ public class FailureSummaryBuilder extends SummaryBuilder {
 		if (m_service.isEligable(request)) {
 			ModelResponse<ProblemReport> response = m_service.invoke(request);
 			report = response.getModel();
+		} else {
+			LOGGER.warn("Problem report service is not eligible for alert failure summary, domain={}, date={}.", domain,
+			      endTime);
 		}
 
 		try {
 			addFailureInfo(result, report);
 			addDistributeInfo(result, report);
 		} catch (Exception ex) {
+			LOGGER.error("Unable to build failure summary model, domain={}, date={}.", domain, endTime, ex);
 			Cat.logError(ex);
 		}
 		return result;

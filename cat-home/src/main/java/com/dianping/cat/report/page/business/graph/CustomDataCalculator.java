@@ -44,6 +44,10 @@ public class CustomDataCalculator {
 	@Inject
 	private BusinessKeyHelper m_keyHelper;
 
+	public void setKeyHelper(BusinessKeyHelper keyHelper) {
+		m_keyHelper = keyHelper;
+	}
+
 	public List<CustomInfo> translatePattern(String pattern) {
 		List<CustomInfo> infos = new ArrayList<CustomInfo>();
 		boolean result = true;

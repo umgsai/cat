@@ -22,6 +22,7 @@ import java.util.Date;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
@@ -32,6 +33,7 @@ import com.dianping.cat.report.task.TaskBuilder;
 
 @Named(type = TaskBuilder.class, value = CapacityUpdateTask.ID)
 public class CapacityUpdateTask implements TaskBuilder, LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(CapacityUpdateTask.class);
 
 	public static final String ID = Constants.REPORT_DATABASE_CAPACITY;
 
@@ -52,9 +54,13 @@ public class CapacityUpdateTask implements TaskBuilder, LogEnabled {
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
 		try {
+			SLF4J_LOGGER.info("Starting daily capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			m_dailyUpdater.updateDBCapacity();
+			SLF4J_LOGGER.info("Finished daily capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			return true;
 		} catch (DalException e) {
+			SLF4J_LOGGER.error("Unable to build daily capacity update task, name={}, domain={}, period={}.", name,
+			      domain, period, e);
 			Cat.logError(e);
 			return false;
 		}
@@ -63,9 +69,13 @@ public class CapacityUpdateTask implements TaskBuilder, LogEnabled {
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
 		try {
+			SLF4J_LOGGER.info("Starting hourly capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			m_hourlyUpdater.updateDBCapacity();
+			SLF4J_LOGGER.info("Finished hourly capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			return true;
 		} catch (DalException e) {
+			SLF4J_LOGGER.error("Unable to build hourly capacity update task, name={}, domain={}, period={}.", name,
+			      domain, period, e);
 			Cat.logError(e);
 			return false;
 		}
@@ -74,9 +84,15 @@ public class CapacityUpdateTask implements TaskBuilder, LogEnabled {
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
 		try {
+			SLF4J_LOGGER.info("Starting monthly capacity update task, name={}, domain={}, period={}.", name, domain,
+			      period);
 			m_monthlyUpdater.updateDBCapacity();
+			SLF4J_LOGGER.info("Finished monthly capacity update task, name={}, domain={}, period={}.", name, domain,
+			      period);
 			return true;
 		} catch (DalException e) {
+			SLF4J_LOGGER.error("Unable to build monthly capacity update task, name={}, domain={}, period={}.", name,
+			      domain, period, e);
 			Cat.logError(e);
 			return false;
 		}
@@ -85,9 +101,13 @@ public class CapacityUpdateTask implements TaskBuilder, LogEnabled {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		try {
+			SLF4J_LOGGER.info("Starting weekly capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			m_weeklyUpdater.updateDBCapacity();
+			SLF4J_LOGGER.info("Finished weekly capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			return true;
 		} catch (DalException e) {
+			SLF4J_LOGGER.error("Unable to build weekly capacity update task, name={}, domain={}, period={}.", name,
+			      domain, period, e);
 			Cat.logError(e);
 			return false;
 		}

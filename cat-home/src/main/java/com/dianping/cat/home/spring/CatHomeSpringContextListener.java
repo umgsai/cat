@@ -20,12 +20,18 @@ public class CatHomeSpringContextListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent event) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
-		context.register(CatHomeSpringConfiguration.class);
-		context.refresh();
-		event.getServletContext().setAttribute(ATTRIBUTE_NAME, context);
-		CatSpringContext.setContext(context);
-		m_context = context;
-		LOGGER.info("CAT home Spring context initialized, beanCount={}.", context.getBeanDefinitionCount());
+		try {
+			context.register(CatHomeSpringConfiguration.class);
+			context.refresh();
+			event.getServletContext().setAttribute(ATTRIBUTE_NAME, context);
+			CatSpringContext.setContext(context);
+			m_context = context;
+			LOGGER.info("CAT home Spring context initialized, beanCount={}.", context.getBeanDefinitionCount());
+		} catch (RuntimeException | Error e) {
+			LOGGER.error("Failed to initialize CAT home Spring context.", e);
+			context.close();
+			throw e;
+		}
 	}
 
 	@Override
