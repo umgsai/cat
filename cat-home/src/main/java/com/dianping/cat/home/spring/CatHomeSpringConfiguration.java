@@ -34,6 +34,9 @@ import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.decorator.DecoratorManager;
+import com.dianping.cat.alarm.spi.receiver.Contactor;
+import com.dianping.cat.alarm.spi.receiver.ContactorManager;
+import com.dianping.cat.alarm.spi.receiver.ProjectContactor;
 import com.dianping.cat.alarm.spi.sender.MailSender;
 import com.dianping.cat.alarm.spi.sender.Sender;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
@@ -70,15 +73,20 @@ import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportReposit
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
+import com.dianping.cat.report.alert.business.BusinessContactor;
 import com.dianping.cat.report.alert.business.BusinessDecorator;
 import com.dianping.cat.report.alert.business.BusinessRuleConfigManager;
+import com.dianping.cat.report.alert.event.EventContactor;
 import com.dianping.cat.report.alert.event.EventDecorator;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
+import com.dianping.cat.report.alert.exception.ExceptionContactor;
 import com.dianping.cat.report.alert.exception.ExceptionDecorator;
+import com.dianping.cat.report.alert.heartbeat.HeartbeatContactor;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatDecorator;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
 import com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager;
 import com.dianping.cat.report.alert.summary.AlertSummaryService;
+import com.dianping.cat.report.alert.transaction.TransactionContactor;
 import com.dianping.cat.report.alert.transaction.TransactionDecorator;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
 import com.dianping.cat.report.DomainValidator;
@@ -660,6 +668,70 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(initMethod = "initialize")
+	public ContactorManager contactorManager(@Qualifier("alertContactors") Map<String, Contactor> alertContactors) {
+		ContactorManager manager = new ContactorManager();
+
+		manager.setContactors(alertContactors);
+		return manager;
+	}
+
+	@Bean
+	public Map<String, Contactor> alertContactors(@Qualifier("eventContactor") Contactor eventContactor,
+			@Qualifier("heartbeatContactor") Contactor heartbeatContactor,
+			@Qualifier("transactionContactor") Contactor transactionContactor,
+			@Qualifier("businessContactor") Contactor businessContactor,
+			@Qualifier("exceptionContactor") Contactor exceptionContactor) {
+		Map<String, Contactor> contactors = new LinkedHashMap<String, Contactor>();
+
+		contactors.put(EventContactor.ID, eventContactor);
+		contactors.put(HeartbeatContactor.ID, heartbeatContactor);
+		contactors.put(TransactionContactor.ID, transactionContactor);
+		contactors.put(BusinessContactor.ID, businessContactor);
+		contactors.put(ExceptionContactor.ID, exceptionContactor);
+		return contactors;
+	}
+
+	@Bean
+	public Contactor businessContactor(ProjectService projectService, AlertConfigManager alertConfigManager) {
+		BusinessContactor contactor = new BusinessContactor();
+
+		configureProjectContactor(contactor, projectService, alertConfigManager);
+		return contactor;
+	}
+
+	@Bean
+	public Contactor eventContactor(ProjectService projectService, AlertConfigManager alertConfigManager) {
+		EventContactor contactor = new EventContactor();
+
+		configureProjectContactor(contactor, projectService, alertConfigManager);
+		return contactor;
+	}
+
+	@Bean
+	public Contactor exceptionContactor(ProjectService projectService, AlertConfigManager alertConfigManager) {
+		ExceptionContactor contactor = new ExceptionContactor();
+
+		configureProjectContactor(contactor, projectService, alertConfigManager);
+		return contactor;
+	}
+
+	@Bean
+	public Contactor heartbeatContactor(ProjectService projectService, AlertConfigManager alertConfigManager) {
+		HeartbeatContactor contactor = new HeartbeatContactor();
+
+		configureProjectContactor(contactor, projectService, alertConfigManager);
+		return contactor;
+	}
+
+	@Bean
+	public Contactor transactionContactor(ProjectService projectService, AlertConfigManager alertConfigManager) {
+		TransactionContactor contactor = new TransactionContactor();
+
+		configureProjectContactor(contactor, projectService, alertConfigManager);
+		return contactor;
+	}
+
+	@Bean(initMethod = "initialize")
 	public SpliterManager spliterManager(@Qualifier("alertSpliters") Map<String, Spliter> alertSpliters) {
 		SpliterManager manager = new SpliterManager();
 
@@ -762,6 +834,12 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public DataSource catDataSource() {
 		return CatHomeSpringDataSourceFactory.createCatDataSource();
+	}
+
+	private void configureProjectContactor(ProjectContactor contactor, ProjectService projectService,
+			AlertConfigManager alertConfigManager) {
+		contactor.setProjectService(projectService);
+		contactor.setConfigManager(alertConfigManager);
 	}
 
 	@Bean

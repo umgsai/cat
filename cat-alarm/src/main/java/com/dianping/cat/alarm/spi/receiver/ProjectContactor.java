@@ -28,6 +28,7 @@ import com.dianping.cat.alarm.receiver.entity.Receiver;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class ProjectContactor extends DefaultContactor implements Contactor {
 
@@ -37,10 +38,25 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 	@Inject
 	protected AlertConfigManager m_configManager;
 
+	private AlertConfigManager getConfigManager() {
+		if (m_configManager == null) {
+			m_configManager = CatSpringContext.getBeanIfAvailable(AlertConfigManager.class);
+		}
+		return m_configManager;
+	}
+
+	private ProjectService getProjectService() {
+		if (m_projectService == null) {
+			m_projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		}
+		return m_projectService;
+	}
+
 	@Override
 	public List<String> queryEmailContactors(String id) {
 		List<String> mailReceivers = new ArrayList<String>();
-		Receiver receiver = m_configManager.queryReceiverById(getId());
+		AlertConfigManager configManager = getConfigManager();
+		Receiver receiver = configManager == null ? null : configManager.queryReceiverById(getId());
 
 		if (receiver != null && !receiver.isEnable()) {
 			return mailReceivers;
@@ -48,7 +64,8 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 			mailReceivers.addAll(buildDefaultMailReceivers(receiver));
 
 			if (StringUtils.isNotEmpty(id)) {
-				Project project = m_projectService.findByDomain(id);
+				ProjectService projectService = getProjectService();
+				Project project = projectService == null ? null : projectService.findByDomain(id);
 
 				if (project != null) {
 					mailReceivers.addAll(split(project.getEmail()));
@@ -61,7 +78,8 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 	@Override
 	public List<String> querySmsContactors(String id) {
 		List<String> smsReceivers = new ArrayList<String>();
-		Receiver receiver = m_configManager.queryReceiverById(getId());
+		AlertConfigManager configManager = getConfigManager();
+		Receiver receiver = configManager == null ? null : configManager.queryReceiverById(getId());
 
 		if (receiver != null && !receiver.isEnable()) {
 			return smsReceivers;
@@ -69,7 +87,8 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 			smsReceivers.addAll(buildDefaultSMSReceivers(receiver));
 
 			if (StringUtils.isNotEmpty(id)) {
-				Project project = m_projectService.findByDomain(id);
+				ProjectService projectService = getProjectService();
+				Project project = projectService == null ? null : projectService.findByDomain(id);
 
 				if (project != null) {
 					smsReceivers.addAll(split(project.getPhone()));
@@ -82,7 +101,8 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 	@Override
 	public List<String> queryWeiXinContactors(String id) {
 		List<String> weixinReceivers = new ArrayList<String>();
-		Receiver receiver = m_configManager.queryReceiverById(getId());
+		AlertConfigManager configManager = getConfigManager();
+		Receiver receiver = configManager == null ? null : configManager.queryReceiverById(getId());
 
 		if (receiver != null && !receiver.isEnable()) {
 			return weixinReceivers;
@@ -90,7 +110,8 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 			weixinReceivers.addAll(buildDefaultWeixinReceivers(receiver));
 
 			if (StringUtils.isNotEmpty(id)) {
-				Project project = m_projectService.findByDomain(id);
+				ProjectService projectService = getProjectService();
+				Project project = projectService == null ? null : projectService.findByDomain(id);
 
 				if (project != null) {
 					weixinReceivers.addAll(split(project.getEmail()));
@@ -103,7 +124,8 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 	@Override
 	public List<String> queryDXContactors(String id) {
 		List<String> receivers = new ArrayList<String>();
-		Receiver receiver = m_configManager.queryReceiverById(getId());
+		AlertConfigManager configManager = getConfigManager();
+		Receiver receiver = configManager == null ? null : configManager.queryReceiverById(getId());
 
 		if (receiver != null && !receiver.isEnable()) {
 			return receivers;
@@ -111,7 +133,8 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 			receivers.addAll(buildDefaultDXReceivers(receiver));
 
 			if (StringUtils.isNotEmpty(id)) {
-				Project project = m_projectService.findByDomain(id);
+				ProjectService projectService = getProjectService();
+				Project project = projectService == null ? null : projectService.findByDomain(id);
 
 				if (project != null) {
 					receivers.addAll(split(project.getEmail()));
@@ -119,6 +142,14 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 			}
 			return receivers;
 		}
+	}
+
+	public void setConfigManager(AlertConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
 	}
 
 }
