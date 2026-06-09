@@ -37,6 +37,7 @@ import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.alarm.spi.decorator.ProjectDecorator;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class ExceptionDecorator extends ProjectDecorator implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionDecorator.class);
@@ -52,6 +53,18 @@ public class ExceptionDecorator extends ProjectDecorator implements Initializabl
 
 	public void setExecutor(AlertSummaryExecutor executor) {
 		m_executor = executor;
+	}
+
+	private AlertSummaryExecutor getExecutor() {
+		if (m_executor == null) {
+			AlertSummaryExecutor executor = CatSpringContext.getBeanIfAvailable(AlertSummaryExecutor.class);
+
+			if (executor != null) {
+				m_executor = executor;
+				LOGGER.info("ExceptionDecorator refreshed Spring AlertSummaryExecutor dependency.");
+			}
+		}
+		return m_executor;
 	}
 
 	@Override
@@ -72,7 +85,9 @@ public class ExceptionDecorator extends ProjectDecorator implements Initializabl
 		String summaryContext = "";
 
 		try {
-			summaryContext = m_executor.execute(alert.getGroup(), alert.getDate());
+			AlertSummaryExecutor executor = getExecutor();
+
+			summaryContext = executor == null ? null : executor.execute(alert.getGroup(), alert.getDate());
 		} catch (Exception e) {
 			LOGGER.error("Unable to append exception alert summary, group={}, date={}.", alert.getGroup(),
 					alert.getDate(), e);

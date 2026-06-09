@@ -64,7 +64,7 @@ public class DecoratorManager extends ContainerHolder implements Initializable {
 
 			if (springDecorators != null && !springDecorators.isEmpty()) {
 				setDecorators(springDecorators);
-				mergePlexusDecoratorsIfAvailable();
+				mergePlexusDecoratorsIfMissing();
 				LOGGER.info("Initialized alert decorator manager from Spring context bridge, decoratorCount={}.",
 				      m_decorators.size());
 				return;
@@ -96,7 +96,11 @@ public class DecoratorManager extends ContainerHolder implements Initializable {
 		return Collections.unmodifiableMap(m_decorators);
 	}
 
-	private void mergePlexusDecoratorsIfAvailable() {
+	private void mergePlexusDecoratorsIfMissing() {
+		if (m_decorators.containsKey(AlertType.Business.getName())
+		      && m_decorators.containsKey(AlertType.Exception.getName())) {
+			return;
+		}
 		try {
 			Map<String, Decorator> plexusDecorators = lookupMap(Decorator.class);
 

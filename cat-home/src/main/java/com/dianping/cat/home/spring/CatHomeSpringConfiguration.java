@@ -70,9 +70,11 @@ import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportReposit
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
+import com.dianping.cat.report.alert.business.BusinessDecorator;
 import com.dianping.cat.report.alert.business.BusinessRuleConfigManager;
 import com.dianping.cat.report.alert.event.EventDecorator;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
+import com.dianping.cat.report.alert.exception.ExceptionDecorator;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatDecorator;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
 import com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager;
@@ -676,13 +678,33 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public Map<String, Decorator> alertDecorators(@Qualifier("eventDecorator") Decorator eventDecorator,
 			@Qualifier("heartbeatDecorator") Decorator heartbeatDecorator,
-			@Qualifier("transactionDecorator") Decorator transactionDecorator) {
+			@Qualifier("transactionDecorator") Decorator transactionDecorator,
+			@Qualifier("businessDecorator") Decorator businessDecorator,
+			@Qualifier("exceptionDecorator") Decorator exceptionDecorator) {
 		Map<String, Decorator> decorators = new LinkedHashMap<String, Decorator>();
 
 		decorators.put(EventDecorator.ID, eventDecorator);
 		decorators.put(HeartbeatDecorator.ID, heartbeatDecorator);
 		decorators.put(TransactionDecorator.ID, transactionDecorator);
+		decorators.put(BusinessDecorator.ID, businessDecorator);
+		decorators.put(ExceptionDecorator.ID, exceptionDecorator);
 		return decorators;
+	}
+
+	@Bean
+	public Decorator businessDecorator(ProjectService projectService) {
+		BusinessDecorator decorator = new BusinessDecorator();
+
+		decorator.setProjectService(projectService);
+		return decorator;
+	}
+
+	@Bean(initMethod = "initialize")
+	public Decorator exceptionDecorator(ProjectService projectService) {
+		ExceptionDecorator decorator = new ExceptionDecorator();
+
+		decorator.setProjectService(projectService);
+		return decorator;
 	}
 
 	@Bean(initMethod = "initialize")
