@@ -33,6 +33,10 @@ public abstract class ProjectDecorator extends Decorator {
 	@Inject
 	protected ProjectService m_projectService;
 
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
 	public String buildContactInfo(String domainName) {
 		try {
 			Project project = m_projectService.findByDomain(domainName);

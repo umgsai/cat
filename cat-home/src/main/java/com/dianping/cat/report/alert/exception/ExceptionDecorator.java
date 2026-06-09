@@ -50,6 +50,10 @@ public class ExceptionDecorator extends ProjectDecorator implements Initializabl
 	@Inject
 	private AlertSummaryExecutor m_executor;
 
+	public void setExecutor(AlertSummaryExecutor executor) {
+		m_executor = executor;
+	}
+
 	@Override
 	public String generateContent(AlertEntity alert) {
 		Map<Object, Object> dataMap = generateExceptionMap(alert);

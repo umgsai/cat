@@ -1000,3 +1000,117 @@ rg -n "DataSourceManager|MyBatisRepositorySupport" cat-core/src/main/java cat-ho
 6. 通过后再批量迁移其他 Repository。
 
 这个顺序收益最大，因为它先把 DAO 基础设施从 Unidal 中解耦出来，同时不会立即触碰最高风险的 Web MVC 链路。
+
+## 17. 2026-06-09 当前结论与下一步计划
+
+### 当前代码基线
+
+用户已提交上一轮日志补充和 Spring 迁移相关代码。以 2026-06-09 当前工作树为新基线，`git status --short` 为空。
+
+当前项目仍不能直接删除 Plexus / Unidal 依赖。原因是旧框架仍承担三类核心职责：
+
+1. 组件容器和运行时查找：仍有约 27 个生产 Java 文件使用 `ContainerHolder`、`lookup(...)`、`lookupMap(...)`。
+2. Unidal Web MVC：`cat-home` 中约 146 个生产 Java 文件仍涉及 `org.unidal.web`、`PageHandler`、`ActionPayload`、`ViewModel`、`BaseJspViewer`、`FieldMeta` 等。
+3. Unidal DAL / codegen：约 154 个生产 Java 文件仍涉及 `org.unidal.dal`、`DalException`、`DalNotFoundException` 或生成 DAO / model。
+
+根 `pom.xml` 中仍存在以下关键依赖或插件管理项：
+
+```text
+org.unidal.framework:dal-jdbc
+org.unidal.framework:foundation-service
+org.unidal.framework:web-framework
+org.unidal.framework:test-framework
+org.unidal.webres:WebResServer
+org.unidal.maven.plugins:codegen-maven-plugin
+org.unidal.maven.plugins:plexus-maven-plugin
+```
+
+源码资源中仍存在 Plexus 组件描述文件：
+
+```text
+cat-alarm/src/main/resources/META-INF/plexus/components.xml
+cat-consumer/src/main/resources/META-INF/plexus/components.xml
+cat-core/src/main/resources/META-INF/plexus/components.xml
+cat-hadoop/src/main/resources/META-INF/plexus/components.xml
+cat-home/src/main/resources/META-INF/plexus/components.xml
+```
+
+这些文件暂时不能提前删除，必须等对应 Spring 替代链路验证通过后再分批移除。
+
+### 已存在的迁移桥接基础
+
+当前已经具备继续迁移的 Spring 桥接基础：
+
+1. `cat-home/src/main/java/com/dianping/cat/home/spring/CatHomeSpringContextListener.java` 已创建 Spring `AnnotationConfigApplicationContext`，并将上下文写入 `ServletContext` 和 `CatSpringContext`。
+2. `cat-home/src/main/java/com/dianping/cat/home/spring/CatHomeSpringConfiguration.java` 已手动注册大量 Repository、ConfigManager、Service Bean。
+3. `cat-core/src/main/java/com/dianping/cat/spring/CatSpringContext.java` 已提供旧代码获取 Spring Bean 的过渡桥。
+4. `cat-boot/src/main/java/com/dianping/cat/boot/CatBootApplication.java` 已作为 Spring Boot 启动入口。
+
+但当前 `cat-home/src/main/webapp/WEB-INF/web.xml` 仍将 `/r/*` 和 `/s/*` 交给 `org.unidal.web.MVC`，`CatServlet` 也仍依赖 `AbstractContainerServlet`、`DefaultModuleContext`、`ModuleInitializer`。因此 Web MVC 和启动模块初始化仍属于高风险区域，暂不作为下一步优先项。
+
+### 迁移顺序调整
+
+截至 2026-06-09，推荐迁移顺序调整为：
+
+1. 先替换组件容器和 `lookupMap(...)` 型扩展点。
+2. 再移除 Plexus 生命周期和日志接口，例如 `Initializable`、`LogEnabled`、`org.codehaus.plexus.logging.Logger`。
+3. 然后迁移 Unidal Web MVC。
+4. 再继续替换 Unidal DAL / codegen。
+5. 最后移除 `plexus-maven-plugin`、`codegen-maven-plugin`、`components.xml` 和根 POM 中的 Unidal 依赖。
+
+此顺序的原因是：如果先迁移 Web MVC 或 DAL，会同时牵动 URL 路由、JSP、Filter、Repository、异常语义和启动流程；而 `lookupMap(...)` 型 Manager 边界较清晰，可以先通过 Spring `Map<String, Bean>` / `List<Bean>` 注入建立替代链路，并保留旧 Plexus fallback 作为回滚保护。
+
+### 下一步执行项
+
+下一步建议迁移第一组低风险 `lookupMap(...)` 管理器：
+
+```text
+cat-alarm/src/main/java/com/dianping/cat/alarm/spi/sender/SenderManager.java
+cat-alarm/src/main/java/com/dianping/cat/alarm/spi/decorator/DecoratorManager.java
+cat-alarm/src/main/java/com/dianping/cat/alarm/spi/spliter/SpliterManager.java
+```
+
+执行方式：
+
+1. 为 Manager 增加 Spring 注入入口，例如 setter 或构造器注入。
+2. 优先使用 Spring 注入的 `Map<String, Sender>`、`Map<String, Decorator>`、`Map<String, Spliter>`。
+3. 暂时保留原有 `lookupMap(...)` fallback，确保 Spring Bean 未完全注册时旧链路仍可运行。
+4. 在 `CatHomeSpringConfiguration` 中注册 Manager 及其扩展点 Bean。
+5. 增加必要的 `info` / `warn` 日志，明确当前使用的是 Spring 注入还是 Plexus fallback。
+6. 编译并启动验证告警相关初始化、配置页和常用 `/cat/r/*` 页面。
+
+### 验证命令
+
+```powershell
+mvn -pl cat-alarm,cat-home -am compile -DskipTests
+mvn -pl cat-boot -am package -DskipTests "-Dmaven.javadoc.skip=true"
+java -Dserver.port=18080 -Dcat.tcp.port=12280 -jar cat-boot\target\cat-boot-4.0-RC1.jar
+```
+
+建议验证 URL：
+
+```text
+http://127.0.0.1:18080/cat
+http://127.0.0.1:18080/cat/r
+http://127.0.0.1:18080/cat/r/business
+http://127.0.0.1:18080/cat/s/config
+```
+
+验收标准：
+
+1. 编译和打包通过。
+2. 应用能启动，且没有重复初始化同一 Manager。
+3. 告警 SPI Manager 能正常加载扩展点。
+4. 日志能看出 Spring 注入是否生效。
+5. 如果 Spring 注入缺失，应有明确 warn，并能回退到 Plexus `lookupMap(...)`。
+6. `/cat/r/business` 和配置页保持可访问。
+
+### 暂缓事项
+
+以下事项暂缓，不进入下一步改动：
+
+1. 暂不修复用户当前环境中没有复现的 `/cat/r/business` NPE。
+2. 暂不删除任何 `META-INF/plexus/components.xml`。
+3. 暂不移除根 POM 中的 Unidal / Plexus 依赖。
+4. 暂不迁移 `org.unidal.web.MVC`。
+5. 暂不批量替换所有 DAL / codegen 相关代码。

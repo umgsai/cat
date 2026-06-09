@@ -35,6 +35,10 @@ public class BusinessDecorator extends ProjectDecorator {
 	@Inject
 	private AlertSummaryExecutor m_executor;
 
+	public void setExecutor(AlertSummaryExecutor executor) {
+		m_executor = executor;
+	}
+
 	@Override
 	public String generateContent(AlertEntity alert) {
 		Calendar cal = Calendar.getInstance();

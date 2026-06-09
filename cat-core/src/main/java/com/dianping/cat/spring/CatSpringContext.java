@@ -28,6 +28,19 @@ public final class CatSpringContext {
 		}
 	}
 
+	public static <T> T getBeanIfAvailable(String name, Class<T> type) {
+		ApplicationContext context = s_context;
+
+		if (context == null) {
+			return null;
+		}
+		try {
+			return context.getBean(name, type);
+		} catch (BeansException e) {
+			return null;
+		}
+	}
+
 	public static void setContext(ApplicationContext context) {
 		s_context = context;
 	}

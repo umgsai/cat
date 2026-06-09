@@ -47,6 +47,10 @@ public abstract class AbstractSender implements Sender, LogEnabled {
         m_logger = logger;
     }
 
+    public void setSenderConfigManager(SenderConfigManager senderConfigManager) {
+        m_senderConfigManager = senderConfigManager;
+    }
+
     private boolean httpGetSend(String successCode, String urlPrefix, String urlPars) {
         URL url = null;
         InputStream in = null;
@@ -74,7 +78,9 @@ public abstract class AbstractSender implements Sender, LogEnabled {
             }
         } catch (Exception e) {
             LOGGER.error("Unable to send alert by HTTP GET, urlPrefix={}, urlPars={}.", urlPrefix, urlPars, e);
-            m_logger.error(e.getMessage(), e);
+            if (m_logger != null) {
+                m_logger.error(e.getMessage(), e);
+            }
             return false;
         } finally {
             try {
@@ -126,7 +132,9 @@ public abstract class AbstractSender implements Sender, LogEnabled {
         } catch (Exception e) {
             LOGGER.error("Unable to send alert by HTTP POST, urlPrefix={}, contentLength={}.", urlPrefix,
                     content == null ? 0 : content.length(), e);
-            m_logger.error(e.getMessage(), e);
+            if (m_logger != null) {
+                m_logger.error(e.getMessage(), e);
+            }
             return false;
         } finally {
             try {

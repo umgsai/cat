@@ -1,5 +1,8 @@
 package com.dianping.cat.home.spring;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -10,6 +13,7 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -28,6 +32,19 @@ import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
+import com.dianping.cat.alarm.spi.decorator.Decorator;
+import com.dianping.cat.alarm.spi.decorator.DecoratorManager;
+import com.dianping.cat.alarm.spi.sender.MailSender;
+import com.dianping.cat.alarm.spi.sender.Sender;
+import com.dianping.cat.alarm.spi.sender.SenderManager;
+import com.dianping.cat.alarm.spi.sender.SmsSender;
+import com.dianping.cat.alarm.spi.sender.WeixinSender;
+import com.dianping.cat.alarm.spi.spliter.DXSpliter;
+import com.dianping.cat.alarm.spi.spliter.MailSpliter;
+import com.dianping.cat.alarm.spi.spliter.SmsSpliter;
+import com.dianping.cat.alarm.spi.spliter.Spliter;
+import com.dianping.cat.alarm.spi.spliter.SpliterManager;
+import com.dianping.cat.alarm.spi.spliter.WeixinSpliter;
 import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
@@ -54,10 +71,13 @@ import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
 import com.dianping.cat.report.alert.business.BusinessRuleConfigManager;
+import com.dianping.cat.report.alert.event.EventDecorator;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
+import com.dianping.cat.report.alert.heartbeat.HeartbeatDecorator;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
 import com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager;
 import com.dianping.cat.report.alert.summary.AlertSummaryService;
+import com.dianping.cat.report.alert.transaction.TransactionDecorator;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
 import com.dianping.cat.report.DomainValidator;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
@@ -557,6 +577,127 @@ public class CatHomeSpringConfiguration {
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
 		return manager;
+	}
+
+	@Bean
+	public Sender mailSender(SenderConfigManager senderConfigManager) {
+		MailSender sender = new MailSender();
+
+		sender.setSenderConfigManager(senderConfigManager);
+		return sender;
+	}
+
+	@Bean
+	public Sender smsSender(SenderConfigManager senderConfigManager) {
+		SmsSender sender = new SmsSender();
+
+		sender.setSenderConfigManager(senderConfigManager);
+		return sender;
+	}
+
+	@Bean
+	public Sender weixinSender(SenderConfigManager senderConfigManager) {
+		WeixinSender sender = new WeixinSender();
+
+		sender.setSenderConfigManager(senderConfigManager);
+		return sender;
+	}
+
+	@Bean
+	public Map<String, Sender> alertSenders(@Qualifier("mailSender") Sender mailSender,
+			@Qualifier("smsSender") Sender smsSender, @Qualifier("weixinSender") Sender weixinSender) {
+		Map<String, Sender> senders = new LinkedHashMap<String, Sender>();
+
+		senders.put(MailSender.ID, mailSender);
+		senders.put(SmsSender.ID, smsSender);
+		senders.put(WeixinSender.ID, weixinSender);
+		return senders;
+	}
+
+	@Bean(initMethod = "initialize")
+	public SenderManager senderManager(ServerConfigManager serverConfigManager,
+			@Qualifier("alertSenders") Map<String, Sender> alertSenders) {
+		SenderManager manager = new SenderManager();
+
+		manager.setConfigManager(serverConfigManager);
+		manager.setSenders(alertSenders);
+		return manager;
+	}
+
+	@Bean
+	public Spliter mailSpliter() {
+		return new MailSpliter();
+	}
+
+	@Bean
+	public Spliter smsSpliter() {
+		return new SmsSpliter();
+	}
+
+	@Bean
+	public Spliter weixinSpliter() {
+		return new WeixinSpliter();
+	}
+
+	@Bean
+	public Spliter dxSpliter() {
+		return new DXSpliter();
+	}
+
+	@Bean
+	public Map<String, Spliter> alertSpliters(@Qualifier("mailSpliter") Spliter mailSpliter,
+			@Qualifier("smsSpliter") Spliter smsSpliter, @Qualifier("weixinSpliter") Spliter weixinSpliter,
+			@Qualifier("dxSpliter") Spliter dxSpliter) {
+		Map<String, Spliter> spliters = new LinkedHashMap<String, Spliter>();
+
+		spliters.put(MailSpliter.ID, mailSpliter);
+		spliters.put(SmsSpliter.ID, smsSpliter);
+		spliters.put(WeixinSpliter.ID, weixinSpliter);
+		spliters.put(DXSpliter.ID, dxSpliter);
+		return spliters;
+	}
+
+	@Bean(initMethod = "initialize")
+	public SpliterManager spliterManager(@Qualifier("alertSpliters") Map<String, Spliter> alertSpliters) {
+		SpliterManager manager = new SpliterManager();
+
+		manager.setSpliters(alertSpliters);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public DecoratorManager decoratorManager(@Qualifier("alertDecorators") Map<String, Decorator> alertDecorators) {
+		DecoratorManager manager = new DecoratorManager();
+
+		manager.setDecorators(alertDecorators);
+		return manager;
+	}
+
+	@Bean
+	public Map<String, Decorator> alertDecorators(@Qualifier("eventDecorator") Decorator eventDecorator,
+			@Qualifier("heartbeatDecorator") Decorator heartbeatDecorator,
+			@Qualifier("transactionDecorator") Decorator transactionDecorator) {
+		Map<String, Decorator> decorators = new LinkedHashMap<String, Decorator>();
+
+		decorators.put(EventDecorator.ID, eventDecorator);
+		decorators.put(HeartbeatDecorator.ID, heartbeatDecorator);
+		decorators.put(TransactionDecorator.ID, transactionDecorator);
+		return decorators;
+	}
+
+	@Bean(initMethod = "initialize")
+	public Decorator eventDecorator() {
+		return new EventDecorator();
+	}
+
+	@Bean
+	public Decorator heartbeatDecorator() {
+		return new HeartbeatDecorator();
+	}
+
+	@Bean(initMethod = "initialize")
+	public Decorator transactionDecorator() {
+		return new TransactionDecorator();
 	}
 
 	@Bean(initMethod = "initialize")

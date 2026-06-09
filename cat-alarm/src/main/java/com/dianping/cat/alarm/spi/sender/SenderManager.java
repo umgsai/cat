@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.alarm.spi.sender;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Event;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class SenderManager extends ContainerHolder implements Initializable {
@@ -44,9 +46,43 @@ public class SenderManager extends ContainerHolder implements Initializable {
 	private Map<String, Sender> m_senders = new HashMap<String, Sender>();
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void initialize() throws InitializationException {
-		m_senders = lookupMap(Sender.class);
-		LOGGER.info("Initialized alert sender manager, senderCount={}.", m_senders.size());
+		if (m_senders.isEmpty()) {
+			Map<String, Sender> springSenders = CatSpringContext.getBeanIfAvailable("alertSenders", Map.class);
+
+			if (springSenders != null && !springSenders.isEmpty()) {
+				setSenders(springSenders);
+				LOGGER.info("Initialized alert sender manager from Spring context bridge, senderCount={}.",
+				      m_senders.size());
+				return;
+			}
+			try {
+				m_senders = lookupMap(Sender.class);
+				LOGGER.warn("Initialized alert sender manager from Plexus fallback, senderCount={}.", m_senders.size());
+			} catch (RuntimeException e) {
+				LOGGER.warn("Unable to initialize alert sender manager from Plexus fallback, keep empty senders.", e);
+			}
+		} else {
+			LOGGER.info("Initialized alert sender manager from Spring injection, senderCount={}.", m_senders.size());
+		}
+	}
+
+	public void setSenders(Map<String, Sender> senders) {
+		if (senders == null || senders.isEmpty()) {
+			m_senders = new HashMap<String, Sender>();
+		} else {
+			m_senders = new HashMap<String, Sender>(senders);
+		}
+		LOGGER.info("Configured alert senders from Spring, senderKeys={}.", m_senders.keySet());
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public Map<String, Sender> getSenders() {
+		return Collections.unmodifiableMap(m_senders);
 	}
 
 	public boolean sendAlert(AlertChannel channel, SendMessageEntity message) {
