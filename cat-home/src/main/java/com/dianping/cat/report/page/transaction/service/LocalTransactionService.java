@@ -30,6 +30,7 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import com.dianping.cat.spring.CatSpringContext;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -67,6 +68,11 @@ public class LocalTransactionService extends LocalModelService<TransactionReport
 			long startTime = request.getStartTime();
 			report = getReportFromLocalDisk(startTime, domain);
 		}
+		if (report == null) {
+			report = new TransactionReport(domain);
+			report.setStartTime(new Date(request.getStartTime()));
+			report.setEndTime(new Date(request.getStartTime() + TimeHelper.ONE_HOUR - 1));
+		}
 		return filterReport(payload, report);
 	}
 
@@ -93,14 +99,18 @@ public class LocalTransactionService extends LocalModelService<TransactionReport
 	private TransactionReport getReportFromLocalDisk(long timestamp, String domain) throws Exception {
 		TransactionReport report = new TransactionReport(domain);
 		TransactionReportMerger merger = new TransactionReportMerger(report);
+		ReportBucketManager bucketManager = getBucketManager();
 
 		report.setStartTime(new Date(timestamp));
 		report.setEndTime(new Date(timestamp + TimeHelper.ONE_HOUR - 1));
 
+		if (bucketManager == null) {
+			return report;
+		}
 		for (int i = 0; i < getAnalyzerCount(); i++) {
 			ReportBucket bucket = null;
 			try {
-				bucket = m_bucketManager.getReportBucket(timestamp, TransactionAnalyzer.ID, i);
+				bucket = bucketManager.getReportBucket(timestamp, TransactionAnalyzer.ID, i);
 				String xml = bucket.findById(domain);
 
 				if (xml != null) {
@@ -110,11 +120,22 @@ public class LocalTransactionService extends LocalModelService<TransactionReport
 				}
 			} finally {
 				if (bucket != null) {
-					m_bucketManager.closeBucket(bucket);
+					bucketManager.closeBucket(bucket);
 				}
 			}
 		}
 		return report;
+	}
+
+	private ReportBucketManager getBucketManager() {
+		if (m_bucketManager == null) {
+			m_bucketManager = CatSpringContext.getBeanIfAvailable(ReportBucketManager.class);
+		}
+		return m_bucketManager;
+	}
+
+	public void setBucketManager(ReportBucketManager bucketManager) {
+		m_bucketManager = bucketManager;
 	}
 
 	public static class TransactionReportFilter

@@ -40,6 +40,7 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = LocalModelService.class, value = LocalHeartbeatService.ID)
 public class LocalHeartbeatService extends LocalModelService<HeartbeatReport> {
@@ -86,6 +87,11 @@ public class LocalHeartbeatService extends LocalModelService<HeartbeatReport> {
 			long startTime = request.getStartTime();
 			report = getReportFromLocalDisk(startTime, domain);
 		}
+		if (report == null) {
+			report = new HeartbeatReport(domain);
+			report.setStartTime(new Date(request.getStartTime()));
+			report.setEndTime(new Date(request.getStartTime() + TimeHelper.ONE_HOUR - 1));
+		}
 
 		return filterReport(payload, report);
 	}
@@ -93,14 +99,18 @@ public class LocalHeartbeatService extends LocalModelService<HeartbeatReport> {
 	private HeartbeatReport getReportFromLocalDisk(long timestamp, String domain) throws Exception {
 		HeartbeatReport report = new HeartbeatReport(domain);
 		HeartbeatReportMerger merger = new HeartbeatReportMerger(report);
+		ReportBucketManager bucketManager = getBucketManager();
 
 		report.setStartTime(new Date(timestamp));
 		report.setEndTime(new Date(timestamp + TimeHelper.ONE_HOUR - 1));
 
+		if (bucketManager == null) {
+			return report;
+		}
 		for (int i = 0; i < getAnalyzerCount(); i++) {
 			ReportBucket bucket = null;
 			try {
-				bucket = m_bucketManager.getReportBucket(timestamp, HeartbeatAnalyzer.ID, i);
+				bucket = bucketManager.getReportBucket(timestamp, HeartbeatAnalyzer.ID, i);
 				String xml = bucket.findById(domain);
 
 				if (xml != null) {
@@ -110,11 +120,22 @@ public class LocalHeartbeatService extends LocalModelService<HeartbeatReport> {
 				}
 			} finally {
 				if (bucket != null) {
-					m_bucketManager.closeBucket(bucket);
+					bucketManager.closeBucket(bucket);
 				}
 			}
 		}
 		return report;
+	}
+
+	private ReportBucketManager getBucketManager() {
+		if (m_bucketManager == null) {
+			m_bucketManager = CatSpringContext.getBeanIfAvailable(ReportBucketManager.class);
+		}
+		return m_bucketManager;
+	}
+
+	public void setBucketManager(ReportBucketManager bucketManager) {
+		m_bucketManager = bucketManager;
 	}
 
 	public static class HeartBeatReportFilter

@@ -30,8 +30,11 @@ import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
+import com.dianping.cat.consumer.event.model.entity.EventReport;
+import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
+import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
@@ -109,11 +112,13 @@ import com.dianping.cat.report.page.business.service.BusinessReportService;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.business.task.BusinessPointParser;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
+import com.dianping.cat.report.page.heartbeat.service.LocalHeartbeatService;
 import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.report.page.metric.service.DefaultBaselineService;
 import com.dianping.cat.report.page.metric.task.BaselineConfigManager;
 import com.dianping.cat.report.page.metric.task.BaselineCreator;
 import com.dianping.cat.report.page.metric.task.DefaultBaselineCreator;
+import com.dianping.cat.report.page.event.service.LocalEventService;
 import com.dianping.cat.report.page.problem.service.CompositeProblemService;
 import com.dianping.cat.report.page.problem.service.HistoricalProblemService;
 import com.dianping.cat.report.page.problem.service.LocalProblemService;
@@ -122,6 +127,7 @@ import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
 import com.dianping.cat.report.server.RemoteServersManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.report.page.transaction.service.LocalTransactionService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.statistic.ServerStatisticManager;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
@@ -412,12 +418,42 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize")
+	public LocalModelService<EventReport> localEventService(ServerConfigManager serverConfigManager) {
+		LocalEventService service = new LocalEventService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public LocalModelService<TransactionReport> localTransactionService(ServerConfigManager serverConfigManager) {
+		LocalTransactionService service = new LocalTransactionService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public LocalModelService<HeartbeatReport> localHeartbeatService(ServerConfigManager serverConfigManager) {
+		LocalHeartbeatService service = new LocalHeartbeatService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
 	@Bean
 	public Map<String, LocalModelService> localModelServices(
-			@Qualifier("localProblemService") LocalModelService<ProblemReport> localProblemService) {
+			@Qualifier("localProblemService") LocalModelService<ProblemReport> localProblemService,
+			@Qualifier("localEventService") LocalModelService<EventReport> localEventService,
+			@Qualifier("localTransactionService") LocalModelService<TransactionReport> localTransactionService,
+			@Qualifier("localHeartbeatService") LocalModelService<HeartbeatReport> localHeartbeatService) {
 		Map<String, LocalModelService> services = new LinkedHashMap<String, LocalModelService>();
 
 		services.put(LocalProblemService.ID, localProblemService);
+		services.put(LocalEventService.ID, localEventService);
+		services.put(LocalTransactionService.ID, localTransactionService);
+		services.put(LocalHeartbeatService.ID, localHeartbeatService);
 		return services;
 	}
 
