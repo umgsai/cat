@@ -39,6 +39,7 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = LocalModelService.class, value = LocalProblemService.ID)
 public class LocalProblemService extends LocalModelService<ProblemReport> {
@@ -81,20 +82,29 @@ public class LocalProblemService extends LocalModelService<ProblemReport> {
 			long startTime = request.getStartTime();
 			report = getReportFromLocalDisk(startTime, domain);
 		}
+		if (report == null) {
+			report = new ProblemReport(domain);
+			report.setStartTime(new Date(request.getStartTime()));
+			report.setEndTime(new Date(request.getStartTime() + TimeHelper.ONE_HOUR - 1));
+		}
 		return filterReport(payload, report);
 	}
 
 	private ProblemReport getReportFromLocalDisk(long timestamp, String domain) throws Exception {
 		ProblemReport report = new ProblemReport(domain);
 		ProblemReportMerger merger = new ProblemReportMerger(report);
+		ReportBucketManager bucketManager = getBucketManager();
 
 		report.setStartTime(new Date(timestamp));
 		report.setEndTime(new Date(timestamp + TimeHelper.ONE_HOUR - 1));
 
+		if (bucketManager == null) {
+			return report;
+		}
 		for (int i = 0; i < getAnalyzerCount(); i++) {
 			ReportBucket bucket = null;
 			try {
-				bucket = m_bucketManager.getReportBucket(timestamp, ProblemAnalyzer.ID, i);
+				bucket = bucketManager.getReportBucket(timestamp, ProblemAnalyzer.ID, i);
 				String xml = bucket.findById(domain);
 
 				if (xml != null) {
@@ -104,11 +114,22 @@ public class LocalProblemService extends LocalModelService<ProblemReport> {
 				}
 			} finally {
 				if (bucket != null) {
-					m_bucketManager.closeBucket(bucket);
+					bucketManager.closeBucket(bucket);
 				}
 			}
 		}
 		return report;
+	}
+
+	private ReportBucketManager getBucketManager() {
+		if (m_bucketManager == null) {
+			m_bucketManager = CatSpringContext.getBeanIfAvailable(ReportBucketManager.class);
+		}
+		return m_bucketManager;
+	}
+
+	public void setBucketManager(ReportBucketManager bucketManager) {
+		m_bucketManager = bucketManager;
 	}
 
 	public static class ProblemReportFilter extends com.dianping.cat.consumer.problem.model.transform.DefaultXmlBuilder {

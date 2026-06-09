@@ -116,9 +116,11 @@ import com.dianping.cat.report.page.metric.task.BaselineCreator;
 import com.dianping.cat.report.page.metric.task.DefaultBaselineCreator;
 import com.dianping.cat.report.page.problem.service.CompositeProblemService;
 import com.dianping.cat.report.page.problem.service.HistoricalProblemService;
+import com.dianping.cat.report.page.problem.service.LocalProblemService;
 import com.dianping.cat.report.page.problem.service.ProblemReportService;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.statistic.ServerStatisticManager;
@@ -400,6 +402,23 @@ public class CatHomeSpringConfiguration {
 		service.setConfigManager(serverConfigManager);
 		service.setServerManager(remoteServersManager);
 		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public LocalModelService<ProblemReport> localProblemService(ServerConfigManager serverConfigManager) {
+		LocalProblemService service = new LocalProblemService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean
+	public Map<String, LocalModelService> localModelServices(
+			@Qualifier("localProblemService") LocalModelService<ProblemReport> localProblemService) {
+		Map<String, LocalModelService> services = new LinkedHashMap<String, LocalModelService>();
+
+		services.put(LocalProblemService.ID, localProblemService);
+		return services;
 	}
 
 	@Bean

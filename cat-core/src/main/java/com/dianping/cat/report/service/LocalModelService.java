@@ -24,6 +24,8 @@ import java.util.List;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Constants;
@@ -35,6 +37,7 @@ import com.dianping.cat.mvc.ApiPayload;
 import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class LocalModelService<T> implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(LocalModelService.class);
 
 	public static final int DEFAULT_SIZE = 32 * 1024;
 
@@ -73,6 +76,11 @@ public abstract class LocalModelService<T> implements Initializable {
 			domain = m_defaultDomain;
 		}
 
+		if (m_consumer == null) {
+			LOGGER.warn("Message consumer is not configured for local model service, service={}, period={}, domain={}.",
+			      m_name, period, domain);
+			return null;
+		}
 		if (period.isCurrent()) {
 			analyzers = m_consumer.getCurrentAnalyzer(m_name);
 		} else if (period.isLast()) {
@@ -102,12 +110,24 @@ public abstract class LocalModelService<T> implements Initializable {
 	@Override
 	public void initialize() throws InitializationException {
 		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+		MessageConsumer consumer = CatSpringContext.getBeanIfAvailable(MessageConsumer.class);
 
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
+		if (consumer != null) {
+			m_consumer = consumer;
+		}
 		m_defaultDomain = m_configManager.getConsoleDefaultDomain();
 		m_analyzerCount = m_configManager.getThreadsOfRealtimeAnalyzer(m_name);
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setConsumer(MessageConsumer consumer) {
+		m_consumer = consumer;
 	}
 
 	public boolean isEligable(ModelRequest request) {

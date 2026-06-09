@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
@@ -43,6 +45,7 @@ import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import com.dianping.cat.spring.CatSpringContext;
 
 @SuppressWarnings("rawtypes")
 public class Handler extends ContainerHolder implements Initializable, PageHandler<Context> {
@@ -112,8 +115,46 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 
 	@Override
 	public void initialize() throws InitializationException {
-		m_localServices = lookupMap(LocalModelService.class);
-		LOGGER.info("Initialized model page handler, localServiceCount={}.", m_localServices.size());
+		if (m_localServices == null || m_localServices.isEmpty()) {
+			initializeFromSpringOrPlexus();
+		} else {
+			LOGGER.info("Initialized model page handler from Spring injection, localServiceCount={}.",
+			      m_localServices.size());
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void initializeFromSpringOrPlexus() {
+		Map<String, LocalModelService> springLocalServices = CatSpringContext.getBeanIfAvailable("localModelServices",
+		      Map.class);
+
+		if (springLocalServices != null && !springLocalServices.isEmpty()) {
+			setLocalServices(springLocalServices);
+			LOGGER.info("Initialized model page handler from Spring context bridge, localServiceCount={}.",
+			      m_localServices.size());
+			return;
+		}
+		try {
+			m_localServices = lookupMap(LocalModelService.class);
+			LOGGER.warn("Initialized model page handler from Plexus fallback, localServiceCount={}.",
+			      m_localServices.size());
+		} catch (RuntimeException e) {
+			m_localServices = new HashMap<String, LocalModelService>();
+			LOGGER.warn("Unable to initialize model page handler from Plexus fallback, keep empty local services.", e);
+		}
+	}
+
+	public void setLocalServices(Map<String, LocalModelService> localServices) {
+		if (localServices == null || localServices.isEmpty()) {
+			m_localServices = new HashMap<String, LocalModelService>();
+		} else {
+			m_localServices = new HashMap<String, LocalModelService>(localServices);
+		}
+		LOGGER.info("Configured local model services from Spring, localServiceKeys={}.", m_localServices.keySet());
+	}
+
+	public Map<String, LocalModelService> getLocalServices() {
+		return Collections.unmodifiableMap(m_localServices);
 	}
 
 }
