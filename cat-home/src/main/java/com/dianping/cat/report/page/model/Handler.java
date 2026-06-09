@@ -131,6 +131,7 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 
 		if (springLocalServices != null && !springLocalServices.isEmpty()) {
 			setLocalServices(springLocalServices);
+			mergePlexusLocalServices();
 			configureMessageConsumerFromPlexus();
 			LOGGER.info("Initialized model page handler from Spring context bridge, localServiceCount={}.",
 			      m_localServices.size());
@@ -143,6 +144,23 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 		} catch (RuntimeException e) {
 			m_localServices = new HashMap<String, LocalModelService>();
 			LOGGER.warn("Unable to initialize model page handler from Plexus fallback, keep empty local services.", e);
+		}
+	}
+
+	private void mergePlexusLocalServices() {
+		try {
+			Map<String, LocalModelService> plexusLocalServices = lookupMap(LocalModelService.class);
+			int originalCount = m_localServices.size();
+
+			for (Map.Entry<String, LocalModelService> entry : plexusLocalServices.entrySet()) {
+				if (!m_localServices.containsKey(entry.getKey())) {
+					m_localServices.put(entry.getKey(), entry.getValue());
+				}
+			}
+			LOGGER.info("Merged Plexus local model service fallback, springServiceCount={}, mergedServiceCount={}, keys={}.",
+			      originalCount, m_localServices.size(), m_localServices.keySet());
+		} catch (RuntimeException e) {
+			LOGGER.warn("Unable to merge Plexus local model service fallback.", e);
 		}
 	}
 
