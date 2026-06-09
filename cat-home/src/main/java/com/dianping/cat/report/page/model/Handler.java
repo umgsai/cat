@@ -40,6 +40,7 @@ import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.report.service.LocalModelService;
@@ -130,6 +131,7 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 
 		if (springLocalServices != null && !springLocalServices.isEmpty()) {
 			setLocalServices(springLocalServices);
+			configureMessageConsumerFromPlexus();
 			LOGGER.info("Initialized model page handler from Spring context bridge, localServiceCount={}.",
 			      m_localServices.size());
 			return;
@@ -141,6 +143,20 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 		} catch (RuntimeException e) {
 			m_localServices = new HashMap<String, LocalModelService>();
 			LOGGER.warn("Unable to initialize model page handler from Plexus fallback, keep empty local services.", e);
+		}
+	}
+
+	private void configureMessageConsumerFromPlexus() {
+		try {
+			MessageConsumer consumer = lookup(MessageConsumer.class);
+
+			for (LocalModelService service : m_localServices.values()) {
+				service.setConsumer(consumer);
+			}
+			LOGGER.info("Configured message consumer for Spring local model services, localServiceCount={}.",
+			      m_localServices.size());
+		} catch (RuntimeException e) {
+			LOGGER.warn("Unable to configure message consumer for Spring local model services from Plexus.", e);
 		}
 	}
 
