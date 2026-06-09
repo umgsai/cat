@@ -76,7 +76,11 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 		if (serverManager != null) {
 			m_serverManager = serverManager;
 		}
-		m_allServices.addAll(m_services);
+		m_allServices.clear();
+
+		if (m_services != null) {
+			m_allServices.addAll(m_services);
+		}
 
 		String remoteServers = m_configManager.getConsoleRemoteServers();
 		List<String> endpoints = Splitters.by(',').noEmptyItem().trim().split(remoteServers);
@@ -197,5 +201,17 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 		sb.append(']');
 
 		return sb.toString();
+	}
+
+	public void setServices(List<ModelService<T>> services) {
+		m_services = services;
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setServerManager(RemoteServersManager serverManager) {
+		m_serverManager = serverManager;
 	}
 }

@@ -89,6 +89,10 @@ public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalS
 		return m_localMode;
 	}
 
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(64);

@@ -1,6 +1,8 @@
 package com.dianping.cat.home.spring;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -28,6 +30,8 @@ import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
+import com.dianping.cat.consumer.problem.ProblemAnalyzer;
+import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
@@ -110,8 +114,12 @@ import com.dianping.cat.report.page.metric.service.DefaultBaselineService;
 import com.dianping.cat.report.page.metric.task.BaselineConfigManager;
 import com.dianping.cat.report.page.metric.task.BaselineCreator;
 import com.dianping.cat.report.page.metric.task.DefaultBaselineCreator;
+import com.dianping.cat.report.page.problem.service.CompositeProblemService;
+import com.dianping.cat.report.page.problem.service.HistoricalProblemService;
+import com.dianping.cat.report.page.problem.service.ProblemReportService;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.statistic.ServerStatisticManager;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
@@ -367,6 +375,34 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public ProblemReportService problemReportService() {
+		return new ProblemReportService();
+	}
+
+	@Bean(initMethod = "initialize", name = "problem-historical")
+	public ModelService<ProblemReport> historicalProblemService(ProblemReportService problemReportService,
+			ServerConfigManager serverConfigManager) {
+		HistoricalProblemService service = new HistoricalProblemService();
+
+		service.setReportService(problemReportService);
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize", name = ProblemAnalyzer.ID)
+	public ModelService<ProblemReport> problemModelService(
+			@Qualifier("problem-historical") ModelService<ProblemReport> historicalProblemService,
+			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
+		CompositeProblemService service = new CompositeProblemService();
+		List<ModelService<ProblemReport>> services = Collections.singletonList(historicalProblemService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
+		return service;
+	}
+
+	@Bean
 	public AlertInfoBuilder alertInfoBuilder(AlertRepository alertRepository) {
 		AlertInfoBuilder builder = new AlertInfoBuilder();
 
@@ -385,8 +421,11 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(initMethod = "initialize", name = FailureSummaryBuilder.ID)
-	public SummaryBuilder failureSummaryBuilder() {
-		return new FailureSummaryBuilder();
+	public SummaryBuilder failureSummaryBuilder(@Qualifier(ProblemAnalyzer.ID) ModelService<ProblemReport> problemModelService) {
+		FailureSummaryBuilder builder = new FailureSummaryBuilder();
+
+		builder.setService(problemModelService);
+		return builder;
 	}
 
 	@Bean(initMethod = "initialize", name = AlterationSummaryBuilder.ID)
