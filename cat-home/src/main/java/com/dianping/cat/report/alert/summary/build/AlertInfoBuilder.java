@@ -43,6 +43,7 @@ import com.dianping.cat.home.dependency.graph.entity.TopologyEdge;
 import com.dianping.cat.home.dependency.graph.entity.TopologyGraph;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphManager;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class AlertInfoBuilder {
@@ -57,6 +58,20 @@ public class AlertInfoBuilder {
 
 	@Inject
 	private TopologyGraphManager m_topologyManager;
+
+	private AlertRepository getAlertDao() {
+		if (m_alertDao == null) {
+			m_alertDao = CatSpringContext.getBeanIfAvailable(AlertRepository.class);
+		}
+		return m_alertDao;
+	}
+
+	private TopologyGraphManager getTopologyManager() {
+		if (m_topologyManager == null) {
+			m_topologyManager = CatSpringContext.getBeanIfAvailable(TopologyGraphManager.class);
+		}
+		return m_topologyManager;
+	}
 
 	private Collection<com.dianping.cat.home.alert.summary.entity.Alert> convertToAlert(List<TopologyEdge> edges,
 							Date date) {
@@ -124,7 +139,9 @@ public class AlertInfoBuilder {
 		alertSummary.addCategory(generateCategoryByTimeCateDomain(date, AlertType.Business.getName(), domain));
 		alertSummary.addCategory(generateCategoryByTimeCateDomain(date, AlertType.Exception.getName(), domain));
 
-		TopologyGraph topology = m_topologyManager.buildTopologyGraph(domain, date.getTime());
+		TopologyGraphManager topologyManager = getTopologyManager();
+		TopologyGraph topology = topologyManager == null ? new TopologyGraph() : topologyManager.buildTopologyGraph(domain,
+		      date.getTime());
 		int statusThreshold = 2;
 
 		alertSummary.addCategory(generateLongCallCategory(date, topology, statusThreshold));
@@ -142,7 +159,14 @@ public class AlertInfoBuilder {
 		Date startTime = new Date(date.getTime() - AlertSummaryExecutor.SUMMARY_DURATION);
 
 		try {
-			List<Alert> dbAlerts = m_alertDao
+			AlertRepository alertDao = getAlertDao();
+
+			if (alertDao == null) {
+				LOGGER.warn("Alert repository is not configured for alert summary category, category={}, domain={}, start={}, end={}.",
+				      cate, domain, startTime, date);
+				return category;
+			}
+			List<Alert> dbAlerts = alertDao
 									.queryAlertsByTimeCategoryDomain(startTime, date, dbCategoryName, domain, AlertEntity.READSET_FULL);
 			LOGGER.info("Loaded alert summary category alerts, category={}, domain={}, start={}, end={}, alertCount={}.",
 					cate, domain, startTime, date, dbAlerts.size());
@@ -164,7 +188,14 @@ public class AlertInfoBuilder {
 
 		for (String domain : dependencyDomains) {
 			try {
-				List<Alert> dbAlerts = m_alertDao
+				AlertRepository alertDao = getAlertDao();
+
+				if (alertDao == null) {
+					LOGGER.warn("Alert repository is not configured for dependency alert summary, category={}, domain={}, start={}, end={}.",
+					      cate, domain, startTime, date);
+					continue;
+				}
+				List<Alert> dbAlerts = alertDao
 										.queryAlertsByTimeCategoryDomain(startTime, date, dbCategoryName, domain, AlertEntity.READSET_FULL);
 
 				LOGGER.info("Loaded dependency alert summary alerts, category={}, domain={}, start={}, end={}, alertCount={}.",
@@ -216,5 +247,13 @@ public class AlertInfoBuilder {
 		while (it.hasNext()) {
 			category.addAlert(it.next());
 		}
+	}
+
+	public void setAlertDao(AlertRepository alertDao) {
+		m_alertDao = alertDao;
+	}
+
+	public void setTopologyManager(TopologyGraphManager topologyManager) {
+		m_topologyManager = topologyManager;
 	}
 }

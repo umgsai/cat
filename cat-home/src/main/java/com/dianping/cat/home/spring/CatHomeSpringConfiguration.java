@@ -85,7 +85,13 @@ import com.dianping.cat.report.alert.heartbeat.HeartbeatContactor;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatDecorator;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
 import com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager;
+import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 import com.dianping.cat.report.alert.summary.AlertSummaryService;
+import com.dianping.cat.report.alert.summary.build.AlertInfoBuilder;
+import com.dianping.cat.report.alert.summary.build.AlterationSummaryBuilder;
+import com.dianping.cat.report.alert.summary.build.FailureSummaryBuilder;
+import com.dianping.cat.report.alert.summary.build.RelatedSummaryBuilder;
+import com.dianping.cat.report.alert.summary.build.SummaryBuilder;
 import com.dianping.cat.report.alert.transaction.TransactionContactor;
 import com.dianping.cat.report.alert.transaction.TransactionDecorator;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
@@ -358,6 +364,51 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public AlertSummaryService alertSummaryService() {
 		return new AlertSummaryService();
+	}
+
+	@Bean
+	public AlertInfoBuilder alertInfoBuilder(AlertRepository alertRepository) {
+		AlertInfoBuilder builder = new AlertInfoBuilder();
+
+		builder.setAlertDao(alertRepository);
+		return builder;
+	}
+
+	@Bean(initMethod = "initialize", name = RelatedSummaryBuilder.ID)
+	public SummaryBuilder relatedSummaryBuilder(AlertInfoBuilder alertInfoBuilder,
+			AlertSummaryService alertSummaryService) {
+		RelatedSummaryBuilder builder = new RelatedSummaryBuilder();
+
+		builder.setAlertSummaryManager(alertInfoBuilder);
+		builder.setAlertSummaryService(alertSummaryService);
+		return builder;
+	}
+
+	@Bean(initMethod = "initialize", name = FailureSummaryBuilder.ID)
+	public SummaryBuilder failureSummaryBuilder() {
+		return new FailureSummaryBuilder();
+	}
+
+	@Bean(initMethod = "initialize", name = AlterationSummaryBuilder.ID)
+	public SummaryBuilder alterationSummaryBuilder(AlterationRepository alterationRepository) {
+		AlterationSummaryBuilder builder = new AlterationSummaryBuilder();
+
+		builder.setAlterationDao(alterationRepository);
+		return builder;
+	}
+
+	@Bean
+	public AlertSummaryExecutor alertSummaryExecutor(@Qualifier(RelatedSummaryBuilder.ID) SummaryBuilder relatedBuilder,
+			@Qualifier(FailureSummaryBuilder.ID) SummaryBuilder failureBuilder,
+			@Qualifier(AlterationSummaryBuilder.ID) SummaryBuilder alterationBuilder,
+			SenderManager senderManager) {
+		AlertSummaryExecutor executor = new AlertSummaryExecutor();
+
+		executor.setRelatedBuilder(relatedBuilder);
+		executor.setFailureBuilder(failureBuilder);
+		executor.setAlterationBuilder(alterationBuilder);
+		executor.setSendManager(senderManager);
+		return executor;
 	}
 
 	@Bean
@@ -764,18 +815,20 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public Decorator businessDecorator(ProjectService projectService) {
+	public Decorator businessDecorator(ProjectService projectService, AlertSummaryExecutor alertSummaryExecutor) {
 		BusinessDecorator decorator = new BusinessDecorator();
 
 		decorator.setProjectService(projectService);
+		decorator.setExecutor(alertSummaryExecutor);
 		return decorator;
 	}
 
 	@Bean(initMethod = "initialize")
-	public Decorator exceptionDecorator(ProjectService projectService) {
+	public Decorator exceptionDecorator(ProjectService projectService, AlertSummaryExecutor alertSummaryExecutor) {
 		ExceptionDecorator decorator = new ExceptionDecorator();
 
 		decorator.setProjectService(projectService);
+		decorator.setExecutor(alertSummaryExecutor);
 		return decorator;
 	}
 

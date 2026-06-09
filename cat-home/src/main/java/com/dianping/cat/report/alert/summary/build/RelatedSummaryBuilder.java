@@ -98,11 +98,23 @@ public class RelatedSummaryBuilder extends SummaryBuilder {
 	}
 
 	private void refreshSpringBeans() {
+		AlertInfoBuilder alertSummaryManager = CatSpringContext.getBeanIfAvailable(AlertInfoBuilder.class);
 		AlertSummaryService alertSummaryService = CatSpringContext.getBeanIfAvailable(AlertSummaryService.class);
 
+		if (alertSummaryManager != null) {
+			m_alertSummaryManager = alertSummaryManager;
+		}
 		if (alertSummaryService != null) {
 			m_alertSummaryService = alertSummaryService;
 		}
+	}
+
+	public void setAlertSummaryManager(AlertInfoBuilder alertSummaryManager) {
+		m_alertSummaryManager = alertSummaryManager;
+	}
+
+	public void setAlertSummaryService(AlertSummaryService alertSummaryService) {
+		m_alertSummaryService = alertSummaryService;
 	}
 
 }

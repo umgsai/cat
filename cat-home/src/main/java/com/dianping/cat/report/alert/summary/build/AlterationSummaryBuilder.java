@@ -34,6 +34,7 @@ import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
 import com.dianping.cat.home.dal.report.AlterationEntity;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = SummaryBuilder.class, value = AlterationSummaryBuilder.ID)
 public class AlterationSummaryBuilder extends SummaryBuilder {
@@ -44,12 +45,26 @@ public class AlterationSummaryBuilder extends SummaryBuilder {
 	@Inject
 	private AlterationRepository m_alterationDao;
 
+	private AlterationRepository getAlterationDao() {
+		if (m_alterationDao == null) {
+			m_alterationDao = CatSpringContext.getBeanIfAvailable(AlterationRepository.class);
+		}
+		return m_alterationDao;
+	}
+
 	@Override
 	public Map<Object, Object> generateModel(String domain, Date date) {
 		Map<Object, Object> dataMap = new HashMap<Object, Object>();
 
 		try {
-			List<Alteration> alterations = m_alterationDao
+			AlterationRepository alterationDao = getAlterationDao();
+
+			if (alterationDao == null) {
+				LOGGER.warn("Alteration repository is not configured for alert alteration summary, domain={}, date={}.",
+				      domain, date);
+				return dataMap;
+			}
+			List<Alteration> alterations = alterationDao
 									.findByDomainAndTime(getStartDate(date), date, domain,	AlterationEntity.READSET_FULL);
 
 			dataMap.put("count", alterations.size());
@@ -73,6 +88,10 @@ public class AlterationSummaryBuilder extends SummaryBuilder {
 	@Override
 	protected String getTemplateAddress() {
 		return "alterationInfo.ftl";
+	}
+
+	public void setAlterationDao(AlterationRepository alterationDao) {
+		m_alterationDao = alterationDao;
 	}
 
 }

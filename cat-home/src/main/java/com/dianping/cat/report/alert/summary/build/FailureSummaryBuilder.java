@@ -39,6 +39,7 @@ import com.dianping.cat.report.page.problem.transform.ProblemStatistics.TypeStat
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = SummaryBuilder.class, value = FailureSummaryBuilder.ID)
 public class FailureSummaryBuilder extends SummaryBuilder {
@@ -48,6 +49,14 @@ public class FailureSummaryBuilder extends SummaryBuilder {
 
 	@Inject(type = ModelService.class, value = ProblemAnalyzer.ID)
 	private ModelService<ProblemReport> m_service;
+
+	@SuppressWarnings("unchecked")
+	private ModelService<ProblemReport> getService() {
+		if (m_service == null) {
+			m_service = CatSpringContext.getBeanIfAvailable(ProblemAnalyzer.ID, ModelService.class);
+		}
+		return m_service;
+	}
 
 	private void addDistributeInfo(Map<Object, Object> resultMap, ProblemReport report) {
 		PieGraphChartVisitor pieChart = new PieGraphChartVisitor("error", null);
@@ -84,10 +93,16 @@ public class FailureSummaryBuilder extends SummaryBuilder {
 		ModelRequest request = new ModelRequest(domain, getCurrentHour()).setProperty("queryType", "view");
 		request.setProperty("type", "error");
 		ProblemReport report = null;
+		ModelService<ProblemReport> service = getService();
 
-		if (m_service.isEligable(request)) {
-			ModelResponse<ProblemReport> response = m_service.invoke(request);
-			report = response.getModel();
+		if (service == null) {
+			LOGGER.warn("Problem report service is not configured for alert failure summary, domain={}, date={}.", domain,
+			      endTime);
+			return result;
+		}
+		if (service.isEligable(request)) {
+			ModelResponse<ProblemReport> response = service.invoke(request);
+			report = response == null ? null : response.getModel();
 		} else {
 			LOGGER.warn("Problem report service is not eligible for alert failure summary, domain={}, date={}.", domain,
 			      endTime);
@@ -120,6 +135,10 @@ public class FailureSummaryBuilder extends SummaryBuilder {
 	@Override
 	protected String getTemplateAddress() {
 		return "errorInfo.ftl";
+	}
+
+	public void setService(ModelService<ProblemReport> service) {
+		m_service = service;
 	}
 
 }
