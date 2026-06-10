@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -50,6 +51,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 
 @Named(type = TcpSocketReceiver.class)
 public final class TcpSocketReceiver implements LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TcpSocketReceiver.class);
 
 	@Inject
 	protected ServerConfigManager m_serverConfigManager;
@@ -72,13 +74,19 @@ public final class TcpSocketReceiver implements LogEnabled {
 
 	public synchronized void destory() {
 		try {
-			m_logger.info("start shutdown socket, port " + m_port);
-			m_future.channel().closeFuture();
-			m_bossGroup.shutdownGracefully();
-			m_workerGroup.shutdownGracefully();
-			m_logger.info("shutdown socket success");
+			info("start shutdown socket, port " + m_port);
+			if (m_future != null) {
+				m_future.channel().closeFuture();
+			}
+			if (m_bossGroup != null) {
+				m_bossGroup.shutdownGracefully();
+			}
+			if (m_workerGroup != null) {
+				m_workerGroup.shutdownGracefully();
+			}
+			info("shutdown socket success");
 		} catch (Exception e) {
-			m_logger.warn(e.getMessage(), e);
+			warn(e.getMessage(), e);
 		}
 	}
 
@@ -98,9 +106,15 @@ public final class TcpSocketReceiver implements LogEnabled {
 
 	public void init() {
 		try {
+			if (m_handler == null) {
+				throw new IllegalStateException("MessageHandler is required for TcpSocketReceiver.");
+			}
+			if (m_serverStateManager == null) {
+				throw new IllegalStateException("ServerStatisticManager is required for TcpSocketReceiver.");
+			}
 			startServer(m_port);
 		} catch (Exception e) {
-			m_logger.error(e.getMessage(), e);
+			error(e.getMessage(), e);
 		}
 	}
 
@@ -130,9 +144,45 @@ public final class TcpSocketReceiver implements LogEnabled {
 
 		try {
 			m_future = bootstrap.bind(port).sync();
-			m_logger.info("start netty server!");
+			info("start netty server!");
 		} catch (Exception e) {
-			m_logger.error("Started Netty Server Failed:" + port, e);
+			error("Started Netty Server Failed:" + port, e);
+		}
+	}
+
+	public void setHandler(MessageHandler handler) {
+		m_handler = handler;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
+	}
+
+	public void setServerStateManager(ServerStatisticManager serverStateManager) {
+		m_serverStateManager = serverStateManager;
+	}
+
+	private void error(String message, Throwable cause) {
+		if (m_logger != null) {
+			m_logger.error(message, cause);
+		} else {
+			SLF4J_LOGGER.error(message, cause);
+		}
+	}
+
+	private void info(String message) {
+		if (m_logger != null) {
+			m_logger.info(message);
+		} else {
+			SLF4J_LOGGER.info(message);
+		}
+	}
+
+	private void warn(String message, Throwable cause) {
+		if (m_logger != null) {
+			m_logger.warn(message, cause);
+		} else {
+			SLF4J_LOGGER.warn(message, cause);
 		}
 	}
 
@@ -180,7 +230,7 @@ public final class TcpSocketReceiver implements LogEnabled {
 				}
 			} catch (Exception e) {
 				m_serverStateManager.addMessageTotalLoss(1);
-				m_logger.error(e.getMessage(), e);
+				error(e.getMessage(), e);
 			}
 		}
 	}

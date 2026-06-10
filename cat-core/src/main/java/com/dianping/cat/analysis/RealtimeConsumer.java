@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.helper.Threads;
@@ -37,6 +38,8 @@ import com.dianping.cat.statistic.ServerStatisticManager;
 
 @Named(type = MessageConsumer.class)
 public class RealtimeConsumer extends ContainerHolder implements MessageConsumer, Initializable, LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RealtimeConsumer.class);
+
 	public static final long MINUTE = 60 * 1000L;
 
 	public static final long HOUR = 60 * MINUTE;
@@ -53,29 +56,40 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 
 	@Override
 	public void consume(MessageTree tree) {
+		if (m_periodManager == null) {
+			SLF4J_LOGGER.error("Realtime consumer is not initialized, tree={}.", tree);
+			return;
+		}
+
 		long timestamp = getTimestamp(tree);
 		Period period = m_periodManager.findPeriod(timestamp);
 
 		if (period != null) {
 			period.distribute(tree);
 		} else {
+			SLF4J_LOGGER.warn("No realtime period found for message tree, timestamp={}, tree={}.", timestamp, tree);
 			m_serverStateManager.addNetworkTimeError(1);
 		}
 	}
 
 	public void doCheckpoint() {
-		m_logger.info("starting do checkpoint.");
+		info("starting do checkpoint.");
 		Transaction t = Cat.newTransaction("Checkpoint", getClass().getSimpleName());
 
 		try {
 			long currentStartTime = getCurrentStartTime();
 			Period period = m_periodManager.findPeriod(currentStartTime);
 
-			for (MessageAnalyzer analyzer : period.getAnalyzers()) {
-				try {
-					analyzer.doCheckpoint(false);
-				} catch (Exception e) {
-					Cat.logError(e);
+			if (period == null) {
+				SLF4J_LOGGER.warn("No current realtime period found when doing checkpoint, startTime={}.", currentStartTime);
+			} else {
+				for (MessageAnalyzer analyzer : period.getAnalyzers()) {
+					try {
+						analyzer.doCheckpoint(false);
+					} catch (Exception e) {
+						Cat.logError(e);
+						SLF4J_LOGGER.error("Failed to checkpoint realtime analyzer, analyzer={}.", analyzer, e);
+					}
 				}
 			}
 
@@ -88,11 +102,12 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 			t.setStatus(Message.SUCCESS);
 		} catch (RuntimeException e) {
 			Cat.logError(e);
+			SLF4J_LOGGER.error("Failed to do realtime checkpoint.", e);
 			t.setStatus(e);
 		} finally {
 			t.complete();
 		}
-		m_logger.info("end do checkpoint.");
+		info("end do checkpoint.");
 	}
 
 	@Override
@@ -140,10 +155,33 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 
 	@Override
 	public void initialize() throws InitializationException {
+		if (m_analyzerManager == null) {
+			throw new InitializationException("MessageAnalyzerManager is required for RealtimeConsumer.");
+		}
+		if (m_serverStateManager == null) {
+			throw new InitializationException("ServerStatisticManager is required for RealtimeConsumer.");
+		}
+
 		m_periodManager = new PeriodManager(HOUR, m_analyzerManager, m_serverStateManager, m_logger);
 		m_periodManager.init();
 
 		Threads.forGroup("Cat").start(m_periodManager);
+	}
+
+	private void info(String message) {
+		if (m_logger != null) {
+			m_logger.info(message);
+		} else {
+			SLF4J_LOGGER.info(message);
+		}
+	}
+
+	public void setAnalyzerManager(MessageAnalyzerManager analyzerManager) {
+		m_analyzerManager = analyzerManager;
+	}
+
+	public void setServerStateManager(ServerStatisticManager serverStateManager) {
+		m_serverStateManager = serverStateManager;
 	}
 
 }

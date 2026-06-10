@@ -33,6 +33,8 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
+import com.dianping.cat.analysis.MessageAnalyzerFactory;
 import com.dianping.cat.config.AtomicMessageConfigManager;
 import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.config.business.BusinessConfigManager;
@@ -206,6 +208,11 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public Logger plexusConsoleLogger() {
 		return new ConsoleLogger(Logger.LEVEL_INFO, "spring-managed");
+	}
+
+	@Bean
+	public MessageAnalyzerFactory messageAnalyzerFactory() {
+		return new ContainerMessageAnalyzerFactory();
 	}
 
 	@Bean

@@ -53,6 +53,8 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 	@Inject
 	private MessageAnalyzerFactory m_analyzerFactory;
 
+	private ServerConfigManager m_configManager;
+
 	private final Map<Long, Map<String, List<MessageAnalyzer>>> m_analyzers = new HashMap<Long, Map<String, List<MessageAnalyzer>>>();
 
 	@Override
@@ -152,11 +154,7 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 			}
 		});
 
-		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-
-		if (manager == null) {
-			manager = lookup(ServerConfigManager.class);
-		}
+		ServerConfigManager manager = getConfigManager();
 		List<String> disables = new ArrayList<String>();
 
 		for (String name : m_analyzerNames) {
@@ -187,6 +185,18 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 		return factory == null ? m_analyzerFactory : factory;
 	}
 
+	private ServerConfigManager getConfigManager() {
+		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (manager != null) {
+			return manager;
+		}
+		if (m_configManager != null) {
+			return m_configManager;
+		}
+		return lookup(ServerConfigManager.class);
+	}
+
 	private Map<String, MessageAnalyzer> getAnalyzerMap() {
 		MessageAnalyzerFactory factory = getAnalyzerFactory();
 
@@ -195,5 +205,9 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 
 	public void setAnalyzerFactory(MessageAnalyzerFactory analyzerFactory) {
 		m_analyzerFactory = analyzerFactory;
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
 	}
 }
