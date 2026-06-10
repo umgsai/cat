@@ -43,6 +43,8 @@ public class ReportReloadTask extends ContainerHolder implements Initializable, 
 
 	private static final long DURATION = TimeHelper.ONE_HOUR;
 
+	private static final int EXPECTED_RELOADER_COUNT = 11;
+
 	@Inject
 	private ReportReloadConfigManager m_configManager;
 
@@ -56,19 +58,28 @@ public class ReportReloadTask extends ContainerHolder implements Initializable, 
 	@Override
 	public void initialize() throws InitializationException {
 		ReportReloadConfigManager configManager = CatSpringContext.getBeanIfAvailable(ReportReloadConfigManager.class);
+		Map<String, ReportReloader> springReloaders = CatSpringContext.getBeansIfAvailable(ReportReloader.class);
 
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
-		m_reloaders = CatSpringContext.getBeansIfAvailable(ReportReloader.class);
-		if (m_reloaders.isEmpty()) {
-			m_reloaders = lookupMap(ReportReloader.class);
-			LOGGER.info("Initialized report reload task from Plexus, reloaderCount={}, reloaders={}.", m_reloaders.size(),
-					m_reloaders.keySet());
-		} else {
+
+		if (springReloaders.size() >= EXPECTED_RELOADER_COUNT) {
+			m_reloaders = new java.util.LinkedHashMap<String, ReportReloader>(springReloaders);
 			LOGGER.info("Initialized report reload task from Spring, reloaderCount={}, reloaders={}.", m_reloaders.size(),
 					m_reloaders.keySet());
+			return;
 		}
+
+		Map<String, ReportReloader> plexusReloaders = lookupMap(ReportReloader.class);
+		Map<String, ReportReloader> reloaders = new java.util.LinkedHashMap<String, ReportReloader>();
+
+		reloaders.putAll(plexusReloaders);
+		reloaders.putAll(springReloaders);
+		m_reloaders = reloaders;
+		LOGGER.info(
+				"Initialized report reload task, reloaderCount={}, springReloaderCount={}, plexusReloaderCount={}, reloaders={}.",
+				m_reloaders.size(), springReloaders.size(), plexusReloaders.size(), m_reloaders.keySet());
 	}
 
 	@Override

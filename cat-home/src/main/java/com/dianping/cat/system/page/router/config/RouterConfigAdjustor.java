@@ -313,4 +313,24 @@ public class RouterConfigAdjustor {
 			m_serverConfigManager = serverConfigManager;
 		}
 	}
+
+	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
+		m_dailyReportDao = dailyReportDao;
+	}
+
+	public void setRouterConfigManager(RouterConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setRouterService(RouterConfigService routerService) {
+		m_routerService = routerService;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
+	}
+
+	public void setStateReportService(StateReportService stateReportService) {
+		m_stateReportService = stateReportService;
+	}
 }

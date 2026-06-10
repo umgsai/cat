@@ -128,4 +128,8 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 		throw new RuntimeException("router report don't support weekly report");
 	}
 
+	public void setRouterConfigManager(RouterConfigManager routerConfigManager) {
+		m_routerConfigManager = routerConfigManager;
+	}
+
 }

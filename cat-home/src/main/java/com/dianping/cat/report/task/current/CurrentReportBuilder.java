@@ -104,4 +104,12 @@ public class CurrentReportBuilder implements TaskBuilder {
 			m_serverFilterConfigManager = serverFilterConfigManager;
 		}
 	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		m_serverFilterConfigManager = serverFilterConfigManager;
+	}
 }

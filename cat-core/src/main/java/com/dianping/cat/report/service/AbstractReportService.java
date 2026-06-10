@@ -361,4 +361,36 @@ public abstract class AbstractReportService<T> implements LogEnabled, ReportServ
 		}
 	}
 
+	public void setDailyReportContentDao(DailyReportContentRepository dailyReportContentDao) {
+		m_dailyReportContentDao = dailyReportContentDao;
+	}
+
+	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
+		m_dailyReportDao = dailyReportDao;
+	}
+
+	public void setHourlyReportContentDao(HourlyReportContentRepository hourlyReportContentDao) {
+		m_hourlyReportContentDao = hourlyReportContentDao;
+	}
+
+	public void setHourlyReportDao(HourlyReportRepository hourlyReportDao) {
+		m_hourlyReportDao = hourlyReportDao;
+	}
+
+	public void setMonthlyReportContentDao(MonthlyReportContentRepository monthlyReportContentDao) {
+		m_monthlyReportContentDao = monthlyReportContentDao;
+	}
+
+	public void setMonthlyReportDao(MonthlyReportRepository monthlyReportDao) {
+		m_monthlyReportDao = monthlyReportDao;
+	}
+
+	public void setWeeklyReportContentDao(WeeklyReportContentRepository weeklyReportContentDao) {
+		m_weeklyReportContentDao = weeklyReportContentDao;
+	}
+
+	public void setWeeklyReportDao(WeeklyReportRepository weeklyReportDao) {
+		m_weeklyReportDao = weeklyReportDao;
+	}
+
 }

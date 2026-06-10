@@ -34,7 +34,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
+import com.dianping.cat.analysis.DefaultMessageAnalyzerManager;
 import com.dianping.cat.analysis.MessageAnalyzerFactory;
+import com.dianping.cat.analysis.MessageAnalyzerManager;
 import com.dianping.cat.config.AtomicMessageConfigManager;
 import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.config.business.BusinessConfigManager;
@@ -140,7 +142,9 @@ import com.dianping.cat.report.page.business.task.BusinessPointParser;
 import com.dianping.cat.report.page.cross.service.LocalCrossService;
 import com.dianping.cat.report.page.dependency.service.LocalDependencyService;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
+import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.page.heartbeat.service.LocalHeartbeatService;
+import com.dianping.cat.report.page.heartbeat.task.HeartbeatReportBuilder;
 import com.dianping.cat.report.page.logview.service.LocalMessageService;
 import com.dianping.cat.report.page.matrix.service.LocalMatrixService;
 import com.dianping.cat.report.page.metric.service.BaselineService;
@@ -156,9 +160,13 @@ import com.dianping.cat.report.page.problem.service.ProblemReportService;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
 import com.dianping.cat.report.page.storage.service.LocalStorageService;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.service.AbstractReportService;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.report.task.TaskBuilder;
+import com.dianping.cat.report.task.current.CurrentReportBuilder;
 import com.dianping.cat.report.page.state.service.LocalStateService;
+import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.report.page.top.service.LocalTopService;
 import com.dianping.cat.report.page.transaction.service.LocalTransactionService;
 import com.dianping.cat.report.LocalReportBucket;
@@ -175,7 +183,11 @@ import com.dianping.cat.system.page.login.service.TokenBuilder;
 import com.dianping.cat.system.page.login.service.TokenManager;
 import com.dianping.cat.system.page.permission.ResourceConfigManager;
 import com.dianping.cat.system.page.permission.UserConfigManager;
+import com.dianping.cat.system.page.router.config.RouterConfigAdjustor;
+import com.dianping.cat.system.page.router.config.RouterConfigHandler;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
+import com.dianping.cat.system.page.router.service.RouterConfigService;
+import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
 @Configuration
 @MapperScan(basePackages = {
@@ -213,6 +225,116 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public MessageAnalyzerFactory messageAnalyzerFactory() {
 		return new ContainerMessageAnalyzerFactory();
+	}
+
+	@Bean(initMethod = "initialize")
+	public MessageAnalyzerManager messageAnalyzerManager(MessageAnalyzerFactory messageAnalyzerFactory,
+			ServerConfigManager serverConfigManager) {
+		DefaultMessageAnalyzerManager manager = new DefaultMessageAnalyzerManager();
+
+		manager.setAnalyzerFactory(messageAnalyzerFactory);
+		manager.setConfigManager(serverConfigManager);
+		return manager;
+	}
+
+	@Bean(name = CurrentReportBuilder.ID)
+	public TaskBuilder currentReportBuilder(ProjectService projectService,
+			ServerFilterConfigManager serverFilterConfigManager) {
+		CurrentReportBuilder builder = new CurrentReportBuilder();
+
+		builder.setProjectService(projectService);
+		builder.setServerFilterConfigManager(serverFilterConfigManager);
+		return builder;
+	}
+
+	@Bean
+	public StateReportService stateReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		StateReportService service = new StateReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean
+	public RouterConfigService routerConfigService(RouterConfigManager routerConfigManager,
+			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
+			DailyReportRepository dailyReportRepository, DailyReportContentRepository dailyReportContentRepository,
+			WeeklyReportRepository weeklyReportRepository, WeeklyReportContentRepository weeklyReportContentRepository,
+			MonthlyReportRepository monthlyReportRepository, MonthlyReportContentRepository monthlyReportContentRepository) {
+		RouterConfigService service = new RouterConfigService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		service.setRouterConfigManager(routerConfigManager);
+		return service;
+	}
+
+	@Bean
+	public HeartbeatReportService heartbeatReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		HeartbeatReportService service = new HeartbeatReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean(name = HeartbeatReportBuilder.ID)
+	public TaskBuilder heartbeatReportBuilder(HeartbeatReportService heartbeatReportService) {
+		HeartbeatReportBuilder builder = new HeartbeatReportBuilder();
+
+		builder.setReportService(heartbeatReportService);
+		return builder;
+	}
+
+	@Bean
+	public RouterConfigHandler routerConfigHandler(StateReportService stateReportService,
+			RouterConfigManager routerConfigManager, RouterConfigService routerConfigService,
+			DailyReportRepository dailyReportRepository) {
+		RouterConfigHandler handler = new RouterConfigHandler();
+
+		handler.setStateReportService(stateReportService);
+		handler.setRouterConfigManager(routerConfigManager);
+		handler.setReportService(routerConfigService);
+		handler.setDailyReportDao(dailyReportRepository);
+		return handler;
+	}
+
+	@Bean
+	public RouterConfigAdjustor routerConfigAdjustor(StateReportService stateReportService,
+			RouterConfigManager routerConfigManager, RouterConfigService routerConfigService,
+			ServerConfigManager serverConfigManager, DailyReportRepository dailyReportRepository) {
+		RouterConfigAdjustor adjustor = new RouterConfigAdjustor();
+
+		adjustor.setStateReportService(stateReportService);
+		adjustor.setRouterConfigManager(routerConfigManager);
+		adjustor.setRouterService(routerConfigService);
+		adjustor.setServerConfigManager(serverConfigManager);
+		adjustor.setDailyReportDao(dailyReportRepository);
+		return adjustor;
+	}
+
+	@Bean(name = RouterConfigBuilder.ID)
+	public TaskBuilder routerConfigBuilder(RouterConfigHandler routerConfigHandler, RouterConfigAdjustor routerConfigAdjustor,
+			RouterConfigService routerConfigService, ServerConfigManager serverConfigManager) {
+		RouterConfigBuilder builder = new RouterConfigBuilder();
+
+		builder.setRouterConfigHandler(routerConfigHandler);
+		builder.setRouterAdjustor(routerConfigAdjustor);
+		builder.setReportService(routerConfigService);
+		builder.setServerConfigManager(serverConfigManager);
+		return builder;
 	}
 
 	@Bean
@@ -1252,6 +1374,21 @@ public class CatHomeSpringConfiguration {
 			AlertConfigManager alertConfigManager) {
 		contactor.setProjectService(projectService);
 		contactor.setConfigManager(alertConfigManager);
+	}
+
+	private void configureReportService(AbstractReportService<?> service, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		service.setHourlyReportDao(hourlyReportRepository);
+		service.setHourlyReportContentDao(hourlyReportContentRepository);
+		service.setDailyReportDao(dailyReportRepository);
+		service.setDailyReportContentDao(dailyReportContentRepository);
+		service.setWeeklyReportDao(weeklyReportRepository);
+		service.setWeeklyReportContentDao(weeklyReportContentRepository);
+		service.setMonthlyReportDao(monthlyReportRepository);
+		service.setMonthlyReportContentDao(monthlyReportContentRepository);
 	}
 
 	@Bean

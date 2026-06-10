@@ -294,4 +294,20 @@ public class RouterConfigHandler implements LogEnabled {
 		}
 	}
 
+	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
+		m_dailyReportDao = dailyReportDao;
+	}
+
+	public void setReportService(RouterConfigService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setRouterConfigManager(RouterConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setStateReportService(StateReportService stateReportService) {
+		m_stateReportService = stateReportService;
+	}
+
 }

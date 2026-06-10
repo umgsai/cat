@@ -39,6 +39,8 @@ import com.dianping.cat.task.TaskManager;
 public class ReportFacade extends ContainerHolder implements LogEnabled, Initializable {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(ReportFacade.class);
 
+	private static final int EXPECTED_REPORT_BUILDER_COUNT = 19;
+
 	private Logger m_logger;
 
 	private Map<String, TaskBuilder> m_reportBuilders = new HashMap<String, TaskBuilder>();
@@ -102,15 +104,24 @@ public class ReportFacade extends ContainerHolder implements LogEnabled, Initial
 
 	@Override
 	public void initialize() throws InitializationException {
-		m_reportBuilders = CatSpringContext.getBeansIfAvailable(TaskBuilder.class);
-		if (m_reportBuilders.isEmpty()) {
-			m_reportBuilders = lookupMap(TaskBuilder.class);
-			SLF4J_LOGGER.info("Initialized report facade from Plexus, builderCount={}, builders={}.",
-					m_reportBuilders.size(), m_reportBuilders.keySet());
-		} else {
+		Map<String, TaskBuilder> springBuilders = CatSpringContext.getBeansIfAvailable(TaskBuilder.class);
+
+		if (springBuilders.size() >= EXPECTED_REPORT_BUILDER_COUNT) {
+			m_reportBuilders = new HashMap<String, TaskBuilder>(springBuilders);
 			SLF4J_LOGGER.info("Initialized report facade from Spring, builderCount={}, builders={}.",
 					m_reportBuilders.size(), m_reportBuilders.keySet());
+			return;
 		}
+
+		Map<String, TaskBuilder> plexusBuilders = lookupMap(TaskBuilder.class);
+		Map<String, TaskBuilder> builders = new HashMap<String, TaskBuilder>();
+
+		builders.putAll(plexusBuilders);
+		builders.putAll(springBuilders);
+		m_reportBuilders = builders;
+		SLF4J_LOGGER.info(
+				"Initialized report facade, builderCount={}, springBuilderCount={}, plexusBuilderCount={}, builders={}.",
+				m_reportBuilders.size(), springBuilders.size(), plexusBuilders.size(), m_reportBuilders.keySet());
 	}
 
 }

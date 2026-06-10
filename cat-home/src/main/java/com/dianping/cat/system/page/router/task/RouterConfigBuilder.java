@@ -98,4 +98,20 @@ public class RouterConfigBuilder implements TaskBuilder {
 			m_serverConfigManager = serverConfigManager;
 		}
 	}
+
+	public void setReportService(RouterConfigService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setRouterAdjustor(RouterConfigAdjustor routerAdjustor) {
+		m_routerAdjustor = routerAdjustor;
+	}
+
+	public void setRouterConfigHandler(RouterConfigHandler routerConfigHandler) {
+		m_routerConfigHandler = routerConfigHandler;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
+	}
 }
