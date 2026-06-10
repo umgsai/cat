@@ -52,4 +52,8 @@ public class LocalFileBuilder implements PathBuilder {
 
 		return baseDir + path;
 	}
+
+	public void setConfig(StorageConfiguration config) {
+		m_config = config;
+	}
 }

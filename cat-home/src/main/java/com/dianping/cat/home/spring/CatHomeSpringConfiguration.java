@@ -13,8 +13,18 @@ import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
+import org.unidal.cat.message.storage.Bucket;
+import org.unidal.cat.message.storage.BucketFactory;
+import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.MessageFinderManager;
+import org.unidal.cat.message.storage.StorageConfiguration;
+import org.unidal.cat.message.storage.internals.ByteBufCache;
 import org.unidal.cat.message.storage.internals.DefaultMessageFinderManager;
+import org.unidal.cat.message.storage.internals.DefaultByteBufCache;
+import org.unidal.cat.message.storage.internals.DefaultStorageConfiguration;
+import org.unidal.cat.message.storage.local.LocalBucket;
+import org.unidal.cat.message.storage.local.LocalBucketManager;
+import org.unidal.cat.message.storage.local.LocalFileBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -234,6 +244,53 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public MessageFinderManager messageFinderManager() {
 		return new DefaultMessageFinderManager();
+	}
+
+	@Bean(initMethod = "initialize")
+	public StorageConfiguration storageConfiguration() {
+		return new DefaultStorageConfiguration();
+	}
+
+	@Bean
+	public org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder(StorageConfiguration storageConfiguration) {
+		LocalFileBuilder builder = new LocalFileBuilder();
+
+		builder.setConfig(storageConfiguration);
+		return builder;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ByteBufCache byteBufCache(Logger plexusConsoleLogger) {
+		DefaultByteBufCache cache = new DefaultByteBufCache();
+
+		cache.enableLogging(plexusConsoleLogger.getChildLogger(DefaultByteBufCache.class.getName()));
+		return cache;
+	}
+
+	@Bean
+	public BucketFactory localMessageBucketFactory(org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
+			ByteBufCache byteBufCache, ServerConfigManager serverConfigManager) {
+		return new BucketFactory() {
+			@Override
+			public Bucket createBucket(String domain, String ip, int hour, boolean writeMode) {
+				LocalBucket bucket = new LocalBucket();
+
+				bucket.setPathBuilder(localMessagePathBuilder);
+				bucket.setBufCache(byteBufCache);
+				bucket.setConfig(serverConfigManager);
+				return bucket;
+			}
+		};
+	}
+
+	@Bean("local")
+	public BucketManager localBucketManager(org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
+			BucketFactory localMessageBucketFactory) {
+		LocalBucketManager manager = new LocalBucketManager();
+
+		manager.setPathBuilder(localMessagePathBuilder);
+		manager.setBucketFactory(localMessageBucketFactory);
+		return manager;
 	}
 
 	@Bean

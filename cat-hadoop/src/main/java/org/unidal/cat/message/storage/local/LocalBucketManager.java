@@ -21,7 +21,9 @@ package org.unidal.cat.message.storage.local;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,24 +32,34 @@ import java.util.Set;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.cat.message.storage.Bucket;
+import org.unidal.cat.message.storage.BucketFactory;
 import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.FileType;
 import org.unidal.cat.message.storage.PathBuilder;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
 @Named(type = BucketManager.class, value = "local")
 public class LocalBucketManager extends ContainerHolder implements BucketManager, LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalBucketManager.class);
 
 	protected Logger m_logger;
 
 	@Inject("local")
 	private PathBuilder m_builder;
 
+	private BucketFactory m_bucketFactory;
+
+	private Set<Bucket> m_factoryBuckets = Collections.synchronizedSet(
+	      Collections.newSetFromMap(new IdentityHashMap<Bucket, Boolean>()));
+
 	private Map<Integer, Map<String, Bucket>> m_buckets = new LinkedHashMap<Integer, Map<String, Bucket>>();
+
+	private boolean m_plexusFallbackLogged;
 
 	private boolean bucketFilesExists(String domain, String ip, int hour) {
 		long timestamp = hour * 3600 * 1000L;
@@ -80,7 +92,7 @@ public class LocalBucketManager extends ContainerHolder implements BucketManager
 					} catch (Exception e) {
 						Cat.logError(e);
 					} finally {
-						super.release(bucket);
+						releaseBucket(bucket);
 					}
 				}
 			}
@@ -127,7 +139,7 @@ public class LocalBucketManager extends ContainerHolder implements BucketManager
 					bucket = map.get(domain);
 
 					if (bucket == null) {
-						bucket = lookup(Bucket.class, "local");
+						bucket = createBucket(domain, ip, hour, createIfNotExists);
 						bucket.initialize(domain, ip, hour, createIfNotExists);
 						map.put(domain, bucket);
 					}
@@ -136,6 +148,41 @@ public class LocalBucketManager extends ContainerHolder implements BucketManager
 		}
 
 		return bucket;
+	}
+
+	private Bucket createBucket(String domain, String ip, int hour, boolean createIfNotExists) throws IOException {
+		if (m_bucketFactory != null) {
+			Bucket bucket = m_bucketFactory.createBucket(domain, ip, hour, createIfNotExists);
+
+			m_factoryBuckets.add(bucket);
+			return bucket;
+		}
+
+		Bucket bucket = lookup(Bucket.class, "local");
+
+		if (!m_plexusFallbackLogged) {
+			SLF4J_LOGGER.info("Created local message bucket from Plexus fallback, subsequent fallback bucket creations will be silent.");
+			m_plexusFallbackLogged = true;
+		}
+		return bucket;
+	}
+
+	private void releaseBucket(Bucket bucket) {
+		if (m_factoryBuckets.remove(bucket)) {
+			SLF4J_LOGGER.debug("Closed Spring-created local message bucket without Plexus release, bucket={}.", bucket);
+		} else if (getContainer() != null) {
+			super.release(bucket);
+		} else {
+			SLF4J_LOGGER.warn("Skip Plexus release for local message bucket because container is unavailable, bucket={}.", bucket);
+		}
+	}
+
+	public void setBucketFactory(BucketFactory bucketFactory) {
+		m_bucketFactory = bucketFactory;
+	}
+
+	public void setPathBuilder(PathBuilder builder) {
+		m_builder = builder;
 	}
 
 }

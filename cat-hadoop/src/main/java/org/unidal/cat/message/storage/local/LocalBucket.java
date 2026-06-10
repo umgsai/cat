@@ -140,6 +140,18 @@ public class LocalBucket implements Bucket {
 		}
 	}
 
+	public void setBufCache(ByteBufCache bufCache) {
+		m_bufCache = bufCache;
+	}
+
+	public void setConfig(ServerConfigManager config) {
+		m_config = config;
+	}
+
+	public void setPathBuilder(PathBuilder builder) {
+		m_builder = builder;
+	}
+
 	@Override
 	public String toString() {
 		return String.format("%s[%s]", getClass().getSimpleName(), m_data.getPath());
