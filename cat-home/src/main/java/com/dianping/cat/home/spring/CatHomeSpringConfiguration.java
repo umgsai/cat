@@ -156,6 +156,9 @@ import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.statistic.ServerStatisticManager;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
+import com.dianping.cat.system.page.login.service.CookieManager;
+import com.dianping.cat.system.page.login.service.TokenBuilder;
+import com.dianping.cat.system.page.login.service.TokenManager;
 import com.dianping.cat.system.page.permission.ResourceConfigManager;
 import com.dianping.cat.system.page.permission.UserConfigManager;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
@@ -1118,6 +1121,25 @@ public class CatHomeSpringConfiguration {
 
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean
+	public CookieManager cookieManager() {
+		return new CookieManager();
+	}
+
+	@Bean
+	public TokenBuilder tokenBuilder() {
+		return new TokenBuilder();
+	}
+
+	@Bean
+	public TokenManager tokenManager(CookieManager cookieManager, TokenBuilder tokenBuilder) {
+		TokenManager manager = new TokenManager();
+
+		manager.setCookieManager(cookieManager);
+		manager.setTokenBuilder(tokenBuilder);
 		return manager;
 	}
 

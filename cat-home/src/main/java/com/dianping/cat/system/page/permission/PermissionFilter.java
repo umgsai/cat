@@ -29,6 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import org.codehaus.plexus.PlexusContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.initialization.DefaultModuleContext;
 import org.unidal.initialization.ModuleContext;
 import org.unidal.lookup.ContainerLoader;
@@ -39,6 +41,8 @@ import com.dianping.cat.system.page.login.service.TokenManager;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class PermissionFilter implements Filter {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(PermissionFilter.class);
 
 	private static final String LOG_IN_URL = "/cat/s/login";
 
@@ -60,12 +64,27 @@ public class PermissionFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		PlexusContainer container = ContainerLoader.getDefaultContainer();
-		ModuleContext ctx = new DefaultModuleContext(container);
-		m_userConfigManager = ctx.lookup(UserConfigManager.class);
-		m_resourceConfigManager = ctx.lookup(ResourceConfigManager.class);
 		refreshSpringBeans();
-		m_tokenManager = ctx.lookup(TokenManager.class);
+
+		if (m_userConfigManager == null || m_resourceConfigManager == null || m_tokenManager == null) {
+			LOGGER.info("PermissionFilter dependencies are incomplete in Spring, falling back to Plexus. userConfig={}, resourceConfig={}, tokenManager={}",
+			      m_userConfigManager != null, m_resourceConfigManager != null, m_tokenManager != null);
+			PlexusContainer container = ContainerLoader.getDefaultContainer();
+			ModuleContext ctx = new DefaultModuleContext(container);
+
+			if (m_userConfigManager == null) {
+				m_userConfigManager = ctx.lookup(UserConfigManager.class);
+			}
+			if (m_resourceConfigManager == null) {
+				m_resourceConfigManager = ctx.lookup(ResourceConfigManager.class);
+			}
+			if (m_tokenManager == null) {
+				m_tokenManager = ctx.lookup(TokenManager.class);
+			}
+		} else {
+			LOGGER.info("PermissionFilter dependencies resolved from Spring.");
+		}
+
 		m_errorPage = filterConfig.getInitParameter("errorPage");
 		m_loginPage = filterConfig.getInitParameter(LOGIN);
 	}
@@ -120,12 +139,16 @@ public class PermissionFilter implements Filter {
 	private void refreshSpringBeans() {
 		UserConfigManager userConfigManager = CatSpringContext.getBeanIfAvailable(UserConfigManager.class);
 		ResourceConfigManager resourceConfigManager = CatSpringContext.getBeanIfAvailable(ResourceConfigManager.class);
+		TokenManager tokenManager = CatSpringContext.getBeanIfAvailable(TokenManager.class);
 
 		if (userConfigManager != null) {
 			m_userConfigManager = userConfigManager;
 		}
 		if (resourceConfigManager != null) {
 			m_resourceConfigManager = resourceConfigManager;
+		}
+		if (tokenManager != null) {
+			m_tokenManager = tokenManager;
 		}
 	}
 

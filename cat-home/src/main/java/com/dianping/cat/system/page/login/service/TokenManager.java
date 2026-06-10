@@ -29,6 +29,14 @@ public class TokenManager implements ITokenManager<SigninContext, Token> {
 	@Inject
 	private TokenBuilder m_tokenBuilder;
 
+	public void setCookieManager(CookieManager cookieManager) {
+		m_cookieManager = cookieManager;
+	}
+
+	public void setTokenBuilder(TokenBuilder tokenBuilder) {
+		m_tokenBuilder = tokenBuilder;
+	}
+
 	@Override
 	public Token getToken(SigninContext ctx, String name) {
 		String value = m_cookieManager.getCookie(ctx, name);
