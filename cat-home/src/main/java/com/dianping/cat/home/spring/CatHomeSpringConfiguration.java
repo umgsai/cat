@@ -112,6 +112,7 @@ import com.dianping.cat.report.alert.summary.build.SummaryBuilder;
 import com.dianping.cat.report.alert.transaction.TransactionContactor;
 import com.dianping.cat.report.alert.transaction.TransactionDecorator;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
+import com.dianping.cat.report.alert.AlarmManager;
 import com.dianping.cat.report.DomainValidator;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager;
@@ -433,6 +434,11 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public AlertSummaryService alertSummaryService() {
 		return new AlertSummaryService();
+	}
+
+	@Bean
+	public AlarmManager alarmManager() {
+		return new AlarmManager();
 	}
 
 	@Bean

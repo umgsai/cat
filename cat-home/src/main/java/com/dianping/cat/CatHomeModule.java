@@ -57,7 +57,11 @@ public class CatHomeModule extends AbstractModule {
 			Threads.forGroup("Cat").start(taskConsumer);
 		}
 
-		AlarmManager alarmManager = ctx.lookup(AlarmManager.class);
+		AlarmManager alarmManager = CatSpringContext.getBeanIfAvailable(AlarmManager.class);
+
+		if (alarmManager == null) {
+			alarmManager = ctx.lookup(AlarmManager.class);
+		}
 
 		if (serverConfigManager.isAlertMachine()) {
 			alarmManager.startAlarm();
