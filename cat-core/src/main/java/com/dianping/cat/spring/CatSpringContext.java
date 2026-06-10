@@ -1,5 +1,8 @@
 package com.dianping.cat.spring;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 
@@ -38,6 +41,19 @@ public final class CatSpringContext {
 			return context.getBean(name, type);
 		} catch (BeansException e) {
 			return null;
+		}
+	}
+
+	public static <T> Map<String, T> getBeansIfAvailable(Class<T> type) {
+		ApplicationContext context = s_context;
+
+		if (context == null) {
+			return Collections.emptyMap();
+		}
+		try {
+			return context.getBeansOfType(type);
+		} catch (BeansException e) {
+			return Collections.emptyMap();
 		}
 	}
 

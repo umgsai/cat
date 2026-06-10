@@ -60,9 +60,15 @@ public class ReportReloadTask extends ContainerHolder implements Initializable, 
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
-		m_reloaders = lookupMap(ReportReloader.class);
-		LOGGER.info("Initialized report reload task, reloaderCount={}, reloaders={}.", m_reloaders.size(),
-				m_reloaders.keySet());
+		m_reloaders = CatSpringContext.getBeansIfAvailable(ReportReloader.class);
+		if (m_reloaders.isEmpty()) {
+			m_reloaders = lookupMap(ReportReloader.class);
+			LOGGER.info("Initialized report reload task from Plexus, reloaderCount={}, reloaders={}.", m_reloaders.size(),
+					m_reloaders.keySet());
+		} else {
+			LOGGER.info("Initialized report reload task from Spring, reloaderCount={}, reloaders={}.", m_reloaders.size(),
+					m_reloaders.keySet());
+		}
 	}
 
 	@Override

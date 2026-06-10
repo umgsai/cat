@@ -32,6 +32,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.Task;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 
 @Named
@@ -101,9 +102,15 @@ public class ReportFacade extends ContainerHolder implements LogEnabled, Initial
 
 	@Override
 	public void initialize() throws InitializationException {
-		m_reportBuilders = lookupMap(TaskBuilder.class);
-		SLF4J_LOGGER.info("Initialized report facade, builderCount={}, builders={}.", m_reportBuilders.size(),
-				m_reportBuilders.keySet());
+		m_reportBuilders = CatSpringContext.getBeansIfAvailable(TaskBuilder.class);
+		if (m_reportBuilders.isEmpty()) {
+			m_reportBuilders = lookupMap(TaskBuilder.class);
+			SLF4J_LOGGER.info("Initialized report facade from Plexus, builderCount={}, builders={}.",
+					m_reportBuilders.size(), m_reportBuilders.keySet());
+		} else {
+			SLF4J_LOGGER.info("Initialized report facade from Spring, builderCount={}, builders={}.",
+					m_reportBuilders.size(), m_reportBuilders.keySet());
+		}
 	}
 
 }
