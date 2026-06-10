@@ -21,12 +21,16 @@ package com.dianping.cat.build.report;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.unidal.cat.message.storage.BucketManager;
+import org.unidal.cat.message.storage.MessageFinderManager;
 import org.unidal.cat.message.storage.hdfs.HdfsBucketManager;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
+import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.cross.CrossAnalyzer;
+import com.dianping.cat.consumer.dump.LocalMessageBucketManager;
 import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.top.TopAnalyzer;
@@ -147,12 +151,19 @@ public class ReportComponentConfigurator extends AbstractResourceConfigurator {
 
 		// message service
 		all.add(A(LocalMessageService.class));
+		all.add(C(ModelService.class, "logview-local", LocalMessageService.class) //
+								.req(MessageFinderManager.class) //
+								.req(BucketManager.class, "local") //
+								.req(MessageBucketManager.class, LocalMessageBucketManager.ID) //
+								.req(ServerConfigManager.class) //
+								.req(MessageConsumer.class));
 		all.add(C(ModelService.class, "logview-historical", HistoricalMessageService.class) //
 								.req(MessageBucketManager.class, HdfsMessageBucketManager.ID) //
 								.req(HdfsBucketManager.class).req(ServerConfigManager.class));
 		all.add(C(ModelService.class, "logview", CompositeLogViewService.class) //
 								.req(ServerConfigManager.class, RemoteServersManager.class) //
-								.req(ModelService.class, new String[] { "logview-historical" }, "m_services"));
+								.req(ModelService.class, new String[] { "logview-local", "logview-historical" },
+														"m_services"));
 
 		return all;
 	}

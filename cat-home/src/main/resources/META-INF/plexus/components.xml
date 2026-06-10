@@ -2313,6 +2313,30 @@
 		</component>
 		<component>
 			<role>com.dianping.cat.report.service.ModelService</role>
+			<role-hint>logview-local</role-hint>
+			<implementation>com.dianping.cat.report.page.logview.service.LocalMessageService</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.cat.message.storage.MessageFinderManager</role>
+				</requirement>
+				<requirement>
+					<role>org.unidal.cat.message.storage.BucketManager</role>
+					<role-hint>local</role-hint>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.message.storage.MessageBucketManager</role>
+					<role-hint>local</role-hint>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.analysis.MessageConsumer</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.service.ModelService</role>
 			<role-hint>logview-historical</role-hint>
 			<implementation>com.dianping.cat.report.page.logview.service.HistoricalMessageService</implementation>
 			<requirements>
@@ -2343,6 +2367,7 @@
 					<role>com.dianping.cat.report.service.ModelService</role>
 					<field-name>m_services</field-name>
 					<role-hints>
+						<role-hint>logview-local</role-hint>
 						<role-hint>logview-historical</role-hint>
 					</role-hints>
 				</requirement>

@@ -45,7 +45,6 @@ import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.consumer.cross.model.entity.CrossReport;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
-import com.dianping.cat.consumer.dump.LocalMessageBucketManager;
 import com.dianping.cat.consumer.event.model.entity.EventReport;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
@@ -99,9 +98,6 @@ import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyRepo
 import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.message.DefaultPathBuilder;
-import com.dianping.cat.message.storage.LocalMessageBucket;
-import com.dianping.cat.message.storage.MessageBucketFactory;
-import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.report.DefaultReportBucketManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
@@ -294,32 +290,6 @@ public class CatHomeSpringConfiguration {
 
 		manager.setPathBuilder(localMessagePathBuilder);
 		manager.setBucketFactory(localMessageBucketFactory);
-		return manager;
-	}
-
-	@Bean
-	public MessageBucketFactory localStorageMessageBucketFactory() {
-		return new MessageBucketFactory() {
-			@Override
-			public LocalMessageBucket createBucket(java.io.File baseDir, String dataFile) throws java.io.IOException {
-				LocalMessageBucket bucket = new LocalMessageBucket();
-
-				bucket.setBaseDir(baseDir);
-				bucket.initialize(dataFile);
-				return bucket;
-			}
-		};
-	}
-
-	@Bean(initMethod = "initialize")
-	public MessageBucketManager localMessageBucketManager(ServerConfigManager serverConfigManager, PathBuilder pathBuilder,
-			ServerStatisticManager serverStatisticManager, MessageBucketFactory localStorageMessageBucketFactory) {
-		LocalMessageBucketManager manager = new LocalMessageBucketManager();
-
-		manager.setConfigManager(serverConfigManager);
-		manager.setPathBuilder(pathBuilder);
-		manager.setServerStateManager(serverStatisticManager);
-		manager.setBucketFactory(localStorageMessageBucketFactory);
 		return manager;
 	}
 
