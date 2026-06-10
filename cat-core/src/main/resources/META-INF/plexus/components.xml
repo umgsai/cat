@@ -83,8 +83,17 @@
 			<implementation>com.dianping.cat.message.DefaultPathBuilder</implementation>
 		</component>
 		<component>
+			<role>com.dianping.cat.analysis.MessageAnalyzerFactory</role>
+			<implementation>com.dianping.cat.analysis.PlexusMessageAnalyzerFactory</implementation>
+		</component>
+		<component>
 			<role>com.dianping.cat.analysis.MessageAnalyzerManager</role>
 			<implementation>com.dianping.cat.analysis.DefaultMessageAnalyzerManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.analysis.MessageAnalyzerFactory</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.analysis.TcpSocketReceiver</role>

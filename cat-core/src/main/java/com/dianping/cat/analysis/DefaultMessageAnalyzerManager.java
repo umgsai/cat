@@ -30,6 +30,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.ContainerHolder;
+import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
@@ -48,6 +49,9 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 	private long m_extraTime = 3 * MINUTE;
 
 	private List<String> m_analyzerNames;
+
+	@Inject
+	private MessageAnalyzerFactory m_analyzerFactory;
 
 	private final Map<Long, Map<String, List<MessageAnalyzer>>> m_analyzers = new HashMap<Long, Map<String, List<MessageAnalyzer>>>();
 
@@ -90,7 +94,7 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 				if (analyzers == null) {
 					analyzers = new ArrayList<MessageAnalyzer>();
 
-					MessageAnalyzer analyzer = lookup(MessageAnalyzer.class, name);
+					MessageAnalyzer analyzer = createAnalyzer(name);
 
 					analyzer.setIndex(0);
 					analyzer.initialize(startTime, m_duration, m_extraTime);
@@ -99,7 +103,7 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 					int count = analyzer.getAnanlyzerCount(name);
 
 					for (int i = 1; i < count; i++) {
-						MessageAnalyzer tempAnalyzer = lookup(MessageAnalyzer.class, name);
+						MessageAnalyzer tempAnalyzer = createAnalyzer(name);
 
 						tempAnalyzer.setIndex(i);
 						tempAnalyzer.initialize(startTime, m_duration, m_extraTime);
@@ -120,7 +124,7 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 
 	@Override
 	public void initialize() throws InitializationException {
-		Map<String, MessageAnalyzer> map = lookupMap(MessageAnalyzer.class);
+		Map<String, MessageAnalyzer> map = getAnalyzerMap();
 
 		for (MessageAnalyzer analyzer : map.values()) {
 			analyzer.destroy();
@@ -169,5 +173,27 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 	@Override
 	public void enableLogging(Logger logger) {
 		m_logger = logger;
+	}
+
+	private MessageAnalyzer createAnalyzer(String name) {
+		MessageAnalyzerFactory factory = getAnalyzerFactory();
+
+		return factory == null ? lookup(MessageAnalyzer.class, name) : factory.createAnalyzer(name);
+	}
+
+	private MessageAnalyzerFactory getAnalyzerFactory() {
+		MessageAnalyzerFactory factory = CatSpringContext.getBeanIfAvailable(MessageAnalyzerFactory.class);
+
+		return factory == null ? m_analyzerFactory : factory;
+	}
+
+	private Map<String, MessageAnalyzer> getAnalyzerMap() {
+		MessageAnalyzerFactory factory = getAnalyzerFactory();
+
+		return factory == null ? lookupMap(MessageAnalyzer.class) : factory.getAnalyzerMap();
+	}
+
+	public void setAnalyzerFactory(MessageAnalyzerFactory analyzerFactory) {
+		m_analyzerFactory = analyzerFactory;
 	}
 }

@@ -28,6 +28,7 @@ import com.dianping.cat.CatConstants;
 import com.dianping.cat.CatCoreModule;
 import com.dianping.cat.analysis.DefaultMessageAnalyzerManager;
 import com.dianping.cat.analysis.DefaultMessageHandler;
+import com.dianping.cat.analysis.PlexusMessageAnalyzerFactory;
 import com.dianping.cat.analysis.RealtimeConsumer;
 import com.dianping.cat.analysis.TcpSocketReceiver;
 import com.dianping.cat.config.AtomicMessageConfigManager;
@@ -74,6 +75,7 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		all.add(A(DefaultPathBuilder.class));
 
+		all.add(A(PlexusMessageAnalyzerFactory.class));
 		all.add(A(DefaultMessageAnalyzerManager.class));
 
 		all.add(A(TcpSocketReceiver.class));
