@@ -123,6 +123,7 @@ import com.dianping.cat.report.page.cross.service.LocalCrossService;
 import com.dianping.cat.report.page.dependency.service.LocalDependencyService;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.heartbeat.service.LocalHeartbeatService;
+import com.dianping.cat.report.page.logview.service.LocalMessageService;
 import com.dianping.cat.report.page.matrix.service.LocalMatrixService;
 import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.report.page.metric.service.DefaultBaselineService;
@@ -512,6 +513,14 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize")
+	public LocalModelService<String> localMessageService(ServerConfigManager serverConfigManager) {
+		LocalMessageService service = new LocalMessageService();
+
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
 	@Bean
 	public Map<String, LocalModelService> localModelServices(
 			@Qualifier("localProblemService") LocalModelService<ProblemReport> localProblemService,
@@ -524,7 +533,8 @@ public class CatHomeSpringConfiguration {
 			@Qualifier("localTopService") LocalModelService<TopReport> localTopService,
 			@Qualifier("localStateService") LocalModelService<StateReport> localStateService,
 			@Qualifier("localStorageService") LocalModelService<StorageReport> localStorageService,
-			@Qualifier("localBusinessService") LocalModelService<BusinessReport> localBusinessService) {
+			@Qualifier("localBusinessService") LocalModelService<BusinessReport> localBusinessService,
+			@Qualifier("localMessageService") LocalModelService<String> localMessageService) {
 		Map<String, LocalModelService> services = new LinkedHashMap<String, LocalModelService>();
 
 		services.put(LocalProblemService.ID, localProblemService);
@@ -538,6 +548,7 @@ public class CatHomeSpringConfiguration {
 		services.put(LocalStateService.ID, localStateService);
 		services.put(LocalStorageService.ID, localStorageService);
 		services.put(LocalBusinessService.ID, localBusinessService);
+		services.put("logview", localMessageService);
 		return services;
 	}
 

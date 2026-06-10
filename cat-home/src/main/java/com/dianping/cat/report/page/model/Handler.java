@@ -33,6 +33,8 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unidal.cat.message.storage.BucketManager;
+import org.unidal.cat.message.storage.MessageFinderManager;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -41,8 +43,11 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.analysis.MessageConsumer;
+import com.dianping.cat.consumer.dump.LocalMessageBucketManager;
+import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.report.ReportPage;
+import com.dianping.cat.report.page.logview.service.LocalMessageService;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
@@ -132,6 +137,7 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 		if (springLocalServices != null && !springLocalServices.isEmpty()) {
 			setLocalServices(springLocalServices);
 			mergePlexusLocalServices();
+			configureLogviewDependenciesFromPlexus();
 			configureMessageConsumerFromPlexus();
 			LOGGER.info("Initialized model page handler from Spring context bridge, localServiceCount={}.",
 			      m_localServices.size());
@@ -161,6 +167,23 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 			      originalCount, m_localServices.size(), m_localServices.keySet());
 		} catch (RuntimeException e) {
 			LOGGER.warn("Unable to merge Plexus local model service fallback.", e);
+		}
+	}
+
+	private void configureLogviewDependenciesFromPlexus() {
+		LocalModelService service = m_localServices.get("logview");
+
+		if (service instanceof LocalMessageService) {
+			try {
+				LocalMessageService localMessageService = (LocalMessageService) service;
+
+				localMessageService.setFinderManager(lookup(MessageFinderManager.class));
+				localMessageService.setBucketManager(lookup(BucketManager.class, "local"));
+				localMessageService.setMessageBucketManager(lookup(MessageBucketManager.class, LocalMessageBucketManager.ID));
+				LOGGER.info("Configured Plexus message storage dependencies for Spring local logview service.");
+			} catch (RuntimeException e) {
+				LOGGER.warn("Unable to configure Plexus message storage dependencies for Spring local logview service.", e);
+			}
 		}
 	}
 

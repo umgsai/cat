@@ -88,14 +88,17 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 		String messageId = payload.getMessageId();
 		boolean waterfall = payload.isWaterfall();
 		MessageId id = MessageId.parse(messageId);
-		ByteBuf buf = m_finderManager.find(id);
+		ByteBuf buf = null;
 		MessageTree tree = null;
 
+		if (m_finderManager != null) {
+			buf = m_finderManager.find(id);
+		}
 		if (buf != null) {
 			tree = CodecHandler.decode(changeBuf(buf));
 		}
 
-		if (tree == null) {
+		if (tree == null && m_bucketManager != null) {
 			Bucket bucket = m_bucketManager.getBucket(id.getDomain(),
 			      NetworkInterfaceManager.INSTANCE.getLocalHostAddress(), id.getHour(), false);
 
@@ -146,7 +149,11 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 	      throws Exception {
 		String messageId = payload.getMessageId();
 		boolean waterfall = payload.isWaterfall();
-		MessageTree tree = m_messageBucketManager.loadMessage(messageId);
+		MessageTree tree = null;
+
+		if (m_messageBucketManager != null) {
+			tree = m_messageBucketManager.loadMessage(messageId);
+		}
 
 		if (tree != null) {
 			ByteBuf buf = ByteBufAllocator.DEFAULT.buffer(8192);
@@ -166,6 +173,18 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 			}
 		}
 		return null;
+	}
+
+	public void setBucketManager(BucketManager bucketManager) {
+		m_bucketManager = bucketManager;
+	}
+
+	public void setFinderManager(MessageFinderManager finderManager) {
+		m_finderManager = finderManager;
+	}
+
+	public void setMessageBucketManager(MessageBucketManager messageBucketManager) {
+		m_messageBucketManager = messageBucketManager;
 	}
 
 	@Override
