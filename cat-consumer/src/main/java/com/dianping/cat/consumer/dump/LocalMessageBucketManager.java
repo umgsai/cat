@@ -21,8 +21,10 @@ package com.dianping.cat.consumer.dump;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -41,6 +43,7 @@ import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
@@ -55,6 +58,7 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.storage.LocalMessageBucket;
 import com.dianping.cat.message.storage.MessageBlock;
 import com.dianping.cat.message.storage.MessageBucket;
+import com.dianping.cat.message.storage.MessageBucketFactory;
 import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.statistic.ServerStatisticManager;
@@ -63,6 +67,7 @@ import io.netty.buffer.ByteBuf;
 
 public class LocalMessageBucketManager extends ContainerHolder
 						implements MessageBucketManager, Initializable,	LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalMessageBucketManager.class);
 
 	public static final String ID = "local";
 
@@ -77,7 +82,12 @@ public class LocalMessageBucketManager extends ContainerHolder
 	@Inject
 	private PathBuilder m_pathBuilder;
 
+	private MessageBucketFactory m_bucketFactory;
+
 	private ConcurrentHashMap<String, LocalMessageBucket> m_buckets = new ConcurrentHashMap<String, LocalMessageBucket>();
+
+	private Set<LocalMessageBucket> m_factoryBuckets = Collections.synchronizedSet(
+	      Collections.newSetFromMap(new IdentityHashMap<LocalMessageBucket, Boolean>()));
 
 	private File m_baseDir;
 
@@ -96,6 +106,8 @@ public class LocalMessageBucketManager extends ContainerHolder
 	private List<BlockingQueue<MessageItem>> m_messageQueues = new ArrayList<BlockingQueue<MessageItem>>();
 
 	private BlockingQueue<MessageItem> m_last;
+
+	private boolean m_plexusFallbackLogged;
 
 	@Override
 	public void archive(long startTime) {
@@ -226,9 +238,7 @@ public class LocalMessageBucketManager extends ContainerHolder
 
 					if (file.exists()) {
 						try {
-							bucket = (LocalMessageBucket) lookup(MessageBucket.class, LocalMessageBucket.ID);
-							bucket.setBaseDir(m_baseDir);
-							bucket.initialize(dataFile);
+							bucket = createBucket(dataFile);
 
 							MessageTree tree = bucket.findById(messageId);
 
@@ -239,8 +249,10 @@ public class LocalMessageBucketManager extends ContainerHolder
 						} catch (Exception e) {
 							Cat.logError(e);
 						} finally {
-							bucket.close();
-							release(bucket);
+							if (bucket != null) {
+								bucket.close();
+								releaseBucket(bucket);
+							}
 						}
 					}
 				}
@@ -269,8 +281,24 @@ public class LocalMessageBucketManager extends ContainerHolder
 		m_baseDir = baseDir;
 	}
 
+	public void setBucketFactory(MessageBucketFactory bucketFactory) {
+		m_bucketFactory = bucketFactory;
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
 	public void setLocalIp(String localIp) {
 		m_localIp = localIp;
+	}
+
+	public void setPathBuilder(PathBuilder pathBuilder) {
+		m_pathBuilder = pathBuilder;
+	}
+
+	public void setServerStateManager(ServerStatisticManager serverStateManager) {
+		m_serverStateManager = serverStateManager;
 	}
 
 	private boolean shouldUpload(String path) {
@@ -332,7 +360,7 @@ public class LocalMessageBucketManager extends ContainerHolder
 						Cat.logError(e);
 					} finally {
 						m_buckets.remove(path);
-						release(bucket);
+						releaseBucket(bucket);
 					}
 				}
 			}
@@ -396,9 +424,7 @@ public class LocalMessageBucketManager extends ContainerHolder
 					synchronized (m_buckets) {
 						bucket = m_buckets.get(path);
 						if (bucket == null) {
-							bucket = (LocalMessageBucket) lookup(MessageBucket.class, LocalMessageBucket.ID);
-							bucket.setBaseDir(m_baseDir);
-							bucket.initialize(path);
+							bucket = createBucket(path);
 
 							m_buckets.put(path, bucket);
 						}
@@ -450,6 +476,36 @@ public class LocalMessageBucketManager extends ContainerHolder
 
 		@Override
 		public void shutdown() {
+		}
+	}
+
+	private LocalMessageBucket createBucket(String dataFile) throws Exception {
+		if (m_bucketFactory != null) {
+			LocalMessageBucket bucket = m_bucketFactory.createBucket(m_baseDir, dataFile);
+
+			m_factoryBuckets.add(bucket);
+			return bucket;
+		}
+
+		LocalMessageBucket bucket = (LocalMessageBucket) lookup(MessageBucket.class, LocalMessageBucket.ID);
+
+		bucket.setBaseDir(m_baseDir);
+		bucket.initialize(dataFile);
+		if (!m_plexusFallbackLogged) {
+			SLF4J_LOGGER.info("Created local message storage bucket from Plexus fallback, subsequent fallback bucket creations will be silent.");
+			m_plexusFallbackLogged = true;
+		}
+		return bucket;
+	}
+
+	private void releaseBucket(LocalMessageBucket bucket) {
+		if (m_factoryBuckets.remove(bucket)) {
+			SLF4J_LOGGER.debug("Closed Spring-created local message storage bucket without Plexus release, bucket={}.", bucket);
+		} else if (getContainer() != null) {
+			release(bucket);
+		} else {
+			SLF4J_LOGGER.warn("Skip Plexus release for local message storage bucket because container is unavailable, bucket={}.",
+			      bucket);
 		}
 	}
 

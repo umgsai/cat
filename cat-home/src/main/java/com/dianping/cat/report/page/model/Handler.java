@@ -226,6 +226,15 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 			LOGGER.info("Resolved {}:{} from Spring for model page handler.", type.getSimpleName(), name);
 			return bean;
 		}
+		Map<String, T> beans = CatSpringContext.getBeansIfAvailable(type);
+
+		if (beans.size() == 1) {
+			Map.Entry<String, T> entry = beans.entrySet().iterator().next();
+
+			LOGGER.info("Resolved {}:{} from Spring unique bean for model page handler, beanName={}.",
+			      type.getSimpleName(), name, entry.getKey());
+			return entry.getValue();
+		}
 
 		T component = lookup(type, name);
 
