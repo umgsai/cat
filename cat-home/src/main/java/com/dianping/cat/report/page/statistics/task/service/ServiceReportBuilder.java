@@ -223,11 +223,31 @@ public class ServiceReportBuilder implements TaskBuilder {
 	}
 
 	private void refreshSpringBeans() {
+		ServiceReportService reportService = CatSpringContext.getBeanIfAvailable(ServiceReportService.class);
+		CrossReportService crossReportService = CatSpringContext.getBeanIfAvailable(CrossReportService.class);
 		ServerFilterConfigManager configManger = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
 
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (crossReportService != null) {
+			m_crossReportService = crossReportService;
+		}
 		if (configManger != null) {
 			m_configManger = configManger;
 		}
+	}
+
+	public void setConfigManager(ServerFilterConfigManager configManger) {
+		m_configManger = configManger;
+	}
+
+	public void setCrossReportService(CrossReportService crossReportService) {
+		m_crossReportService = crossReportService;
+	}
+
+	public void setReportService(ServiceReportService reportService) {
+		m_reportService = reportService;
 	}
 
 }

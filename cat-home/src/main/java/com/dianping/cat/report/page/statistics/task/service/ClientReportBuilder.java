@@ -124,15 +124,47 @@ public class ClientReportBuilder implements TaskBuilder {
 	}
 
 	private void refreshSpringBeans() {
+		ClientReportService reportService = CatSpringContext.getBeanIfAvailable(ClientReportService.class);
+		TransactionReportService transactionReportService = CatSpringContext.getBeanIfAvailable(TransactionReportService.class);
 		ServerFilterConfigManager configManger = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
 		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		TransactionMergeHelper mergeHelper = CatSpringContext.getBeanIfAvailable(TransactionMergeHelper.class);
 
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (transactionReportService != null) {
+			m_transactionReportService = transactionReportService;
+		}
 		if (configManger != null) {
 			m_configManger = configManger;
 		}
 		if (projectService != null) {
 			m_projectService = projectService;
 		}
+		if (mergeHelper != null) {
+			m_mergeHelper = mergeHelper;
+		}
+	}
+
+	public void setConfigManager(ServerFilterConfigManager configManger) {
+		m_configManger = configManger;
+	}
+
+	public void setMergeHelper(TransactionMergeHelper mergeHelper) {
+		m_mergeHelper = mergeHelper;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setReportService(ClientReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setTransactionReportService(TransactionReportService transactionReportService) {
+		m_transactionReportService = transactionReportService;
 	}
 
 }

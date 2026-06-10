@@ -265,11 +265,55 @@ public class UtilizationReportBuilder implements TaskBuilder {
 	}
 
 	private void refreshSpringBeans() {
+		UtilizationReportService reportService = CatSpringContext.getBeanIfAvailable(UtilizationReportService.class);
+		TransactionReportService transactionReportService = CatSpringContext.getBeanIfAvailable(TransactionReportService.class);
+		HeartbeatReportService heartbeatReportService = CatSpringContext.getBeanIfAvailable(HeartbeatReportService.class);
+		CrossReportService crossReportService = CatSpringContext.getBeanIfAvailable(CrossReportService.class);
+		TransactionMergeHelper mergeHelper = CatSpringContext.getBeanIfAvailable(TransactionMergeHelper.class);
 		ServerFilterConfigManager configManger = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
 
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (transactionReportService != null) {
+			m_transactionReportService = transactionReportService;
+		}
+		if (heartbeatReportService != null) {
+			m_heartbeatReportService = heartbeatReportService;
+		}
+		if (crossReportService != null) {
+			m_crossReportService = crossReportService;
+		}
+		if (mergeHelper != null) {
+			m_mergeHelper = mergeHelper;
+		}
 		if (configManger != null) {
 			m_configManger = configManger;
 		}
+	}
+
+	public void setConfigManager(ServerFilterConfigManager configManger) {
+		m_configManger = configManger;
+	}
+
+	public void setCrossReportService(CrossReportService crossReportService) {
+		m_crossReportService = crossReportService;
+	}
+
+	public void setHeartbeatReportService(HeartbeatReportService heartbeatReportService) {
+		m_heartbeatReportService = heartbeatReportService;
+	}
+
+	public void setMergeHelper(TransactionMergeHelper mergeHelper) {
+		m_mergeHelper = mergeHelper;
+	}
+
+	public void setReportService(UtilizationReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setTransactionReportService(TransactionReportService transactionReportService) {
+		m_transactionReportService = transactionReportService;
 	}
 
 }

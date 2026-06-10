@@ -98,4 +98,8 @@ public class DependencyItemBuilder {
 		return node;
 	}
 
+	public void setGraphConfigManager(TopologyGraphConfigManager graphConfigManager) {
+		m_graphConfigManager = graphConfigManager;
+	}
+
 }

@@ -116,11 +116,31 @@ public class DependencyReportBuilder implements TaskBuilder {
 	}
 
 	private void refreshSpringBeans() {
+		DependencyReportService reportService = CatSpringContext.getBeanIfAvailable(DependencyReportService.class);
 		TopologyGraphRepository topologyGraphDao = CatSpringContext.getBeanIfAvailable(TopologyGraphRepository.class);
+		TopologyGraphBuilder graphBuilder = CatSpringContext.getBeanIfAvailable(TopologyGraphBuilder.class);
 
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
 		if (topologyGraphDao != null) {
 			m_topologyGraphDao = topologyGraphDao;
 		}
+		if (graphBuilder != null) {
+			m_graphBuilder = graphBuilder;
+		}
+	}
+
+	public void setGraphBuilder(TopologyGraphBuilder graphBuilder) {
+		m_graphBuilder = graphBuilder;
+	}
+
+	public void setReportService(DependencyReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setTopologyGraphDao(TopologyGraphRepository topologyGraphDao) {
+		m_topologyGraphDao = topologyGraphDao;
 	}
 
 }

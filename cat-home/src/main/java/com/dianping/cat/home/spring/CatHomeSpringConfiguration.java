@@ -132,20 +132,26 @@ import com.dianping.cat.report.alert.AlarmManager;
 import com.dianping.cat.report.DomainValidator;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager;
+import com.dianping.cat.report.page.dependency.graph.DependencyItemBuilder;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager;
+import com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder;
 import com.dianping.cat.report.page.business.graph.BusinessDataFetcher;
 import com.dianping.cat.report.page.business.graph.CustomDataCalculator;
 import com.dianping.cat.report.page.business.service.LocalBusinessService;
 import com.dianping.cat.report.page.business.service.BusinessReportService;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.business.task.BusinessPointParser;
+import com.dianping.cat.report.page.cross.service.CrossReportService;
 import com.dianping.cat.report.page.cross.service.LocalCrossService;
+import com.dianping.cat.report.page.dependency.service.DependencyReportService;
 import com.dianping.cat.report.page.dependency.service.LocalDependencyService;
+import com.dianping.cat.report.page.dependency.task.DependencyReportBuilder;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.page.heartbeat.service.LocalHeartbeatService;
 import com.dianping.cat.report.page.heartbeat.task.HeartbeatReportBuilder;
 import com.dianping.cat.report.page.logview.service.LocalMessageService;
+import com.dianping.cat.report.page.matrix.service.MatrixReportService;
 import com.dianping.cat.report.page.matrix.service.LocalMatrixService;
 import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.report.page.metric.service.DefaultBaselineService;
@@ -157,6 +163,16 @@ import com.dianping.cat.report.page.problem.service.CompositeProblemService;
 import com.dianping.cat.report.page.problem.service.HistoricalProblemService;
 import com.dianping.cat.report.page.problem.service.LocalProblemService;
 import com.dianping.cat.report.page.problem.service.ProblemReportService;
+import com.dianping.cat.report.page.statistics.service.ClientReportService;
+import com.dianping.cat.report.page.statistics.service.HeavyReportService;
+import com.dianping.cat.report.page.statistics.service.JarReportService;
+import com.dianping.cat.report.page.statistics.service.ServiceReportService;
+import com.dianping.cat.report.page.statistics.service.UtilizationReportService;
+import com.dianping.cat.report.page.statistics.task.heavy.HeavyReportBuilder;
+import com.dianping.cat.report.page.statistics.task.jar.JarReportBuilder;
+import com.dianping.cat.report.page.statistics.task.service.ClientReportBuilder;
+import com.dianping.cat.report.page.statistics.task.service.ServiceReportBuilder;
+import com.dianping.cat.report.page.statistics.task.utilization.UtilizationReportBuilder;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
 import com.dianping.cat.report.page.storage.service.LocalStorageService;
 import com.dianping.cat.report.server.RemoteServersManager;
@@ -168,7 +184,9 @@ import com.dianping.cat.report.task.current.CurrentReportBuilder;
 import com.dianping.cat.report.page.state.service.LocalStateService;
 import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.report.page.top.service.LocalTopService;
+import com.dianping.cat.report.page.transaction.service.TransactionReportService;
 import com.dianping.cat.report.page.transaction.service.LocalTransactionService;
+import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper;
 import com.dianping.cat.report.LocalReportBucket;
 import com.dianping.cat.report.ReportBucket;
 import com.dianping.cat.report.ReportBucketFactory;
@@ -295,6 +313,227 @@ public class CatHomeSpringConfiguration {
 		HeartbeatReportBuilder builder = new HeartbeatReportBuilder();
 
 		builder.setReportService(heartbeatReportService);
+		return builder;
+	}
+
+	@Bean
+	public DependencyReportService dependencyReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		DependencyReportService service = new DependencyReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean
+	public DependencyItemBuilder dependencyItemBuilder(TopologyGraphConfigManager topologyGraphConfigManager) {
+		DependencyItemBuilder builder = new DependencyItemBuilder();
+
+		builder.setGraphConfigManager(topologyGraphConfigManager);
+		return builder;
+	}
+
+	@Bean
+	public TopologyGraphBuilder topologyGraphBuilder(DependencyItemBuilder dependencyItemBuilder) {
+		TopologyGraphBuilder builder = new TopologyGraphBuilder();
+
+		builder.setItemBuilder(dependencyItemBuilder);
+		return builder;
+	}
+
+	@Bean(name = DependencyReportBuilder.ID)
+	public TaskBuilder dependencyReportBuilder(DependencyReportService dependencyReportService,
+			TopologyGraphBuilder topologyGraphBuilder, TopologyGraphRepository topologyGraphRepository) {
+		DependencyReportBuilder builder = new DependencyReportBuilder();
+
+		builder.setReportService(dependencyReportService);
+		builder.setGraphBuilder(topologyGraphBuilder);
+		builder.setTopologyGraphDao(topologyGraphRepository);
+		return builder;
+	}
+
+	@Bean
+	public JarReportService jarReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		JarReportService service = new JarReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean(name = JarReportBuilder.ID)
+	public TaskBuilder jarReportBuilder(JarReportService jarReportService, HeartbeatReportService heartbeatReportService,
+			ServerFilterConfigManager serverFilterConfigManager) {
+		JarReportBuilder builder = new JarReportBuilder();
+
+		builder.setReportService(jarReportService);
+		builder.setHeartbeatReportService(heartbeatReportService);
+		builder.setConfigManager(serverFilterConfigManager);
+		return builder;
+	}
+
+	@Bean
+	public MatrixReportService matrixReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		MatrixReportService service = new MatrixReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean
+	public HeavyReportService heavyReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		HeavyReportService service = new HeavyReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean(name = HeavyReportBuilder.ID)
+	public TaskBuilder heavyReportBuilder(HeavyReportService heavyReportService, MatrixReportService matrixReportService,
+			ServerFilterConfigManager serverFilterConfigManager) {
+		HeavyReportBuilder builder = new HeavyReportBuilder();
+
+		builder.setReportService(heavyReportService);
+		builder.setMatrixReportService(matrixReportService);
+		builder.setConfigManager(serverFilterConfigManager);
+		return builder;
+	}
+
+	@Bean
+	public TransactionReportService transactionReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		TransactionReportService service = new TransactionReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean
+	public CrossReportService crossReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		CrossReportService service = new CrossReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean
+	public TransactionMergeHelper transactionMergeHelper() {
+		return new TransactionMergeHelper();
+	}
+
+	@Bean
+	public ClientReportService clientReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		ClientReportService service = new ClientReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean
+	public ServiceReportService serviceReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		ServiceReportService service = new ServiceReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean(name = ClientReportBuilder.ID)
+	public TaskBuilder clientReportBuilder(ClientReportService clientReportService,
+			TransactionReportService transactionReportService, ServerFilterConfigManager serverFilterConfigManager,
+			ProjectService projectService, TransactionMergeHelper transactionMergeHelper) {
+		ClientReportBuilder builder = new ClientReportBuilder();
+
+		builder.setReportService(clientReportService);
+		builder.setTransactionReportService(transactionReportService);
+		builder.setConfigManager(serverFilterConfigManager);
+		builder.setProjectService(projectService);
+		builder.setMergeHelper(transactionMergeHelper);
+		return builder;
+	}
+
+	@Bean(name = ServiceReportBuilder.ID)
+	public TaskBuilder serviceReportBuilder(ServiceReportService serviceReportService, CrossReportService crossReportService,
+			ServerFilterConfigManager serverFilterConfigManager) {
+		ServiceReportBuilder builder = new ServiceReportBuilder();
+
+		builder.setReportService(serviceReportService);
+		builder.setCrossReportService(crossReportService);
+		builder.setConfigManager(serverFilterConfigManager);
+		return builder;
+	}
+
+	@Bean
+	public UtilizationReportService utilizationReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		UtilizationReportService service = new UtilizationReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean(name = UtilizationReportBuilder.ID)
+	public TaskBuilder utilizationReportBuilder(UtilizationReportService utilizationReportService,
+			TransactionReportService transactionReportService, HeartbeatReportService heartbeatReportService,
+			CrossReportService crossReportService, TransactionMergeHelper transactionMergeHelper,
+			ServerFilterConfigManager serverFilterConfigManager) {
+		UtilizationReportBuilder builder = new UtilizationReportBuilder();
+
+		builder.setReportService(utilizationReportService);
+		builder.setTransactionReportService(transactionReportService);
+		builder.setHeartbeatReportService(heartbeatReportService);
+		builder.setCrossReportService(crossReportService);
+		builder.setMergeHelper(transactionMergeHelper);
+		builder.setConfigManager(serverFilterConfigManager);
 		return builder;
 	}
 

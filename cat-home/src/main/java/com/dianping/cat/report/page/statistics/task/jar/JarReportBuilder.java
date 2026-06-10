@@ -118,11 +118,31 @@ public class JarReportBuilder implements TaskBuilder {
 	}
 
 	private void refreshSpringBeans() {
+		JarReportService reportService = CatSpringContext.getBeanIfAvailable(JarReportService.class);
+		HeartbeatReportService heartbeatReportService = CatSpringContext.getBeanIfAvailable(HeartbeatReportService.class);
 		ServerFilterConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
 
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (heartbeatReportService != null) {
+			m_heartbeatReportService = heartbeatReportService;
+		}
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
+	}
+
+	public void setConfigManager(ServerFilterConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setHeartbeatReportService(HeartbeatReportService heartbeatReportService) {
+		m_heartbeatReportService = heartbeatReportService;
+	}
+
+	public void setReportService(JarReportService reportService) {
+		m_reportService = reportService;
 	}
 
 	public class HeartbeatReportVisitor extends BaseVisitor {

@@ -190,11 +190,31 @@ public class HeavyReportBuilder implements TaskBuilder {
 	}
 
 	private void refreshSpringBeans() {
+		HeavyReportService reportService = CatSpringContext.getBeanIfAvailable(HeavyReportService.class);
+		MatrixReportService matrixReportService = CatSpringContext.getBeanIfAvailable(MatrixReportService.class);
 		ServerFilterConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
 
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (matrixReportService != null) {
+			m_matrixReportService = matrixReportService;
+		}
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
+	}
+
+	public void setConfigManager(ServerFilterConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setMatrixReportService(MatrixReportService matrixReportService) {
+		m_matrixReportService = matrixReportService;
+	}
+
+	public void setReportService(HeavyReportService reportService) {
+		m_reportService = reportService;
 	}
 
 }
