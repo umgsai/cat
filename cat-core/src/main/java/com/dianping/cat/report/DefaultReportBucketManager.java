@@ -22,8 +22,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -51,6 +53,9 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 	private ServerConfigManager m_configManager;
 
 	private ReportBucketFactory m_bucketFactory;
+
+	private Set<ReportBucket> m_factoryBuckets = Collections.synchronizedSet(
+	      Collections.newSetFromMap(new IdentityHashMap<ReportBucket, Boolean>()));
 
 	private File m_reportBaseDir;
 
@@ -105,9 +110,15 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 		try {
 			bucket.close();
 		} catch (Exception e) {
-			// ignore it
+			LOGGER.warn("Unable to close report bucket, bucket={}.", bucket, e);
 		} finally {
-			release(bucket);
+			if (m_factoryBuckets.remove(bucket)) {
+				LOGGER.debug("Closed Spring-created report bucket without Plexus release, bucket={}.", bucket);
+			} else if (getContainer() != null) {
+				release(bucket);
+			} else {
+				LOGGER.warn("Skip Plexus release for report bucket because container is unavailable, bucket={}.", bucket);
+			}
 		}
 	}
 
@@ -118,6 +129,7 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 
 		if (m_bucketFactory != null) {
 			bucket = m_bucketFactory.createReportBucket(name, date, index);
+			m_factoryBuckets.add(bucket);
 		} else {
 			bucket = lookup(ReportBucket.class);
 			bucket.initialize(name, date, index);
