@@ -23,6 +23,8 @@ import org.unidal.initialization.AbstractModule;
 import org.unidal.initialization.Module;
 import org.unidal.initialization.ModuleContext;
 import org.unidal.lookup.annotation.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.analysis.TcpSocketReceiver;
@@ -36,6 +38,8 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = Module.class, value = CatHomeModule.ID)
 public class CatHomeModule extends AbstractModule {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CatHomeModule.class);
+
 	public static final String ID = "cat-home";
 
 	@Override
@@ -44,15 +48,18 @@ public class CatHomeModule extends AbstractModule {
 
 		if (serverConfigManager == null) {
 			serverConfigManager = ctx.lookup(ServerConfigManager.class);
+			LOGGER.info("Resolved ServerConfigManager from Plexus for CatHomeModule.");
+		} else {
+			LOGGER.info("Resolved ServerConfigManager from Spring for CatHomeModule.");
 		}
-		ReportReloadTask reportReloadTask = ctx.lookup(ReportReloadTask.class);
+		ReportReloadTask reportReloadTask = lookup(ctx, ReportReloadTask.class);
 
 		Threads.forGroup("Cat").start(reportReloadTask);
 
-		ctx.lookup(MessageConsumer.class);
+		lookup(ctx, MessageConsumer.class);
 
 		if (serverConfigManager.isJobMachine()) {
-			DefaultTaskConsumer taskConsumer = ctx.lookup(DefaultTaskConsumer.class);
+			DefaultTaskConsumer taskConsumer = lookup(ctx, DefaultTaskConsumer.class);
 
 			Threads.forGroup("Cat").start(taskConsumer);
 		}
@@ -61,13 +68,16 @@ public class CatHomeModule extends AbstractModule {
 
 		if (alarmManager == null) {
 			alarmManager = ctx.lookup(AlarmManager.class);
+			LOGGER.info("Resolved AlarmManager from Plexus for CatHomeModule.");
+		} else {
+			LOGGER.info("Resolved AlarmManager from Spring for CatHomeModule.");
 		}
 
 		if (serverConfigManager.isAlertMachine()) {
 			alarmManager.startAlarm();
 		}
 
-		final MessageConsumer consumer = ctx.lookup(MessageConsumer.class);
+		final MessageConsumer consumer = lookup(ctx, MessageConsumer.class);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 
 			@Override
@@ -84,7 +94,7 @@ public class CatHomeModule extends AbstractModule {
 
 	@Override
 	protected void setup(ModuleContext ctx) throws Exception {
-		final TcpSocketReceiver messageReceiver = ctx.lookup(TcpSocketReceiver.class);
+		final TcpSocketReceiver messageReceiver = lookup(ctx, TcpSocketReceiver.class);
 
 		messageReceiver.init();
 
@@ -95,5 +105,19 @@ public class CatHomeModule extends AbstractModule {
 				messageReceiver.destory();
 			}
 		});
+	}
+
+	private <T> T lookup(ModuleContext ctx, Class<T> type) {
+		T bean = CatSpringContext.getBeanIfAvailable(type);
+
+		if (bean != null) {
+			LOGGER.info("Resolved {} from Spring for CatHomeModule.", type.getSimpleName());
+			return bean;
+		}
+
+		T component = ctx.lookup(type);
+
+		LOGGER.info("Resolved {} from Plexus for CatHomeModule.", type.getSimpleName());
+		return component;
 	}
 }
