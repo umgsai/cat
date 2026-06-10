@@ -176,20 +176,24 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 		if (service instanceof LocalMessageService) {
 			try {
 				LocalMessageService localMessageService = (LocalMessageService) service;
+				MessageFinderManager finderManager = lookupSpringOrPlexus(MessageFinderManager.class);
+				BucketManager bucketManager = lookupSpringOrPlexus("local", BucketManager.class);
+				MessageBucketManager messageBucketManager = lookupSpringOrPlexus(LocalMessageBucketManager.ID,
+				      MessageBucketManager.class);
 
-				localMessageService.setFinderManager(lookup(MessageFinderManager.class));
-				localMessageService.setBucketManager(lookup(BucketManager.class, "local"));
-				localMessageService.setMessageBucketManager(lookup(MessageBucketManager.class, LocalMessageBucketManager.ID));
-				LOGGER.info("Configured Plexus message storage dependencies for Spring local logview service.");
+				localMessageService.setFinderManager(finderManager);
+				localMessageService.setBucketManager(bucketManager);
+				localMessageService.setMessageBucketManager(messageBucketManager);
+				LOGGER.info("Configured message storage dependencies for Spring local logview service.");
 			} catch (RuntimeException e) {
-				LOGGER.warn("Unable to configure Plexus message storage dependencies for Spring local logview service.", e);
+				LOGGER.warn("Unable to configure message storage dependencies for Spring local logview service.", e);
 			}
 		}
 	}
 
 	private void configureMessageConsumerFromPlexus() {
 		try {
-			MessageConsumer consumer = lookup(MessageConsumer.class);
+			MessageConsumer consumer = lookupSpringOrPlexus(MessageConsumer.class);
 
 			for (LocalModelService service : m_localServices.values()) {
 				service.setConsumer(consumer);
@@ -197,8 +201,36 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 			LOGGER.info("Configured message consumer for Spring local model services, localServiceCount={}.",
 			      m_localServices.size());
 		} catch (RuntimeException e) {
-			LOGGER.warn("Unable to configure message consumer for Spring local model services from Plexus.", e);
+			LOGGER.warn("Unable to configure message consumer for Spring local model services.", e);
 		}
+	}
+
+	private <T> T lookupSpringOrPlexus(Class<T> type) {
+		T bean = CatSpringContext.getBeanIfAvailable(type);
+
+		if (bean != null) {
+			LOGGER.info("Resolved {} from Spring for model page handler.", type.getSimpleName());
+			return bean;
+		}
+
+		T component = lookup(type);
+
+		LOGGER.info("Resolved {} from Plexus for model page handler.", type.getSimpleName());
+		return component;
+	}
+
+	private <T> T lookupSpringOrPlexus(String name, Class<T> type) {
+		T bean = CatSpringContext.getBeanIfAvailable(name, type);
+
+		if (bean != null) {
+			LOGGER.info("Resolved {}:{} from Spring for model page handler.", type.getSimpleName(), name);
+			return bean;
+		}
+
+		T component = lookup(type, name);
+
+		LOGGER.info("Resolved {}:{} from Plexus for model page handler.", type.getSimpleName(), name);
+		return component;
 	}
 
 	public void setLocalServices(Map<String, LocalModelService> localServices) {
