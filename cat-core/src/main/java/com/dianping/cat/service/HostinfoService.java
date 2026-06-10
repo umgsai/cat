@@ -253,6 +253,14 @@ public class HostinfoService implements Initializable, LogEnabled {
 		}
 	}
 
+	public void setHostinfoDao(HostinfoRepository hostinfoDao) {
+		m_hostinfoDao = hostinfoDao;
+	}
+
+	public void setServerConfigManager(ServerConfigManager manager) {
+		m_manager = manager;
+	}
+
 	private boolean validateIp(String str) {
 		Pattern pattern = Pattern.compile(
 		      "^((\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5]|[*])\\.){3}(\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5]|[*])$");

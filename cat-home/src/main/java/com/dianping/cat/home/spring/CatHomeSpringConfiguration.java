@@ -152,6 +152,7 @@ import com.dianping.cat.report.ReportBucket;
 import com.dianping.cat.report.ReportBucketFactory;
 import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.statistic.ServerStatisticManager;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
@@ -1125,6 +1126,16 @@ public class CatHomeSpringConfiguration {
 		ProjectService service = new ProjectService();
 
 		service.setProjectDao(projectRepository);
+		service.setServerConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean
+	public HostinfoService hostinfoService(HostinfoRepository hostinfoRepository,
+			ServerConfigManager serverConfigManager) {
+		HostinfoService service = new HostinfoService();
+
+		service.setHostinfoDao(hostinfoRepository);
 		service.setServerConfigManager(serverConfigManager);
 		return service;
 	}
