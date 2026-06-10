@@ -35,6 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Splitters;
 import org.unidal.helper.Splitters.StringSplitter;
 import org.unidal.lookup.annotation.Inject;
@@ -46,6 +47,8 @@ import com.dianping.cat.message.PathBuilder;
 
 @Named(type = ReportBucket.class, instantiationStrategy = Named.PER_LOOKUP)
 public class LocalReportBucket implements ReportBucket, LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalReportBucket.class);
+
 	@Inject
 	private PathBuilder m_pathBuilder;
 
@@ -113,7 +116,11 @@ public class LocalReportBucket implements ReportBucket, LogEnabled {
 
 				return new String(bytes, "utf-8");
 			} catch (Exception e) {
-				m_logger.error(String.format("Error when reading file(%s)!", m_readDataFile), e);
+				if (m_logger != null) {
+					m_logger.error(String.format("Error when reading file(%s)!", m_readDataFile), e);
+				} else {
+					SLF4J_LOGGER.error("Error when reading report bucket file, file={}.", m_readDataFile, e);
+				}
 			} finally {
 				m_readLock.unlock();
 			}
@@ -145,6 +152,14 @@ public class LocalReportBucket implements ReportBucket, LogEnabled {
 
 	public String getLogicalPath() {
 		return m_logicalPath;
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setPathBuilder(PathBuilder pathBuilder) {
+		m_pathBuilder = pathBuilder;
 	}
 
 	@Override

@@ -29,6 +29,8 @@ import java.util.Set;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Scanners;
 import org.unidal.helper.Scanners.FileMatcher;
 import org.unidal.lookup.ContainerHolder;
@@ -43,11 +45,16 @@ import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = ReportBucketManager.class)
 public class DefaultReportBucketManager extends ContainerHolder implements ReportBucketManager, Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultReportBucketManager.class);
 
 	@Inject
 	private ServerConfigManager m_configManager;
 
+	private ReportBucketFactory m_bucketFactory;
+
 	private File m_reportBaseDir;
+
+	private boolean m_plexusFallbackLogged;
 
 	@Override
 	public void clearOldReports() {
@@ -107,9 +114,19 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 	@Override
 	public ReportBucket getReportBucket(long timestamp, String name, int index) throws IOException {
 		Date date = new Date(timestamp);
-		ReportBucket bucket = lookup(ReportBucket.class);
+		ReportBucket bucket = null;
 
-		bucket.initialize(name, date, index);
+		if (m_bucketFactory != null) {
+			bucket = m_bucketFactory.createReportBucket(name, date, index);
+		} else {
+			bucket = lookup(ReportBucket.class);
+			bucket.initialize(name, date, index);
+
+			if (!m_plexusFallbackLogged) {
+				LOGGER.info("Created report bucket from Plexus fallback, subsequent fallback bucket creations will be silent.");
+				m_plexusFallbackLogged = true;
+			}
+		}
 		return bucket;
 	}
 
@@ -117,6 +134,8 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 	public void initialize() throws InitializationException {
 		refreshSpringBeans();
 		m_reportBaseDir = new File(Cat.getCatHome(), "bucket/report");
+		LOGGER.info("Initialized report bucket manager, baseDir={}, springBucketFactoryConfigured={}.",
+		      m_reportBaseDir.getAbsolutePath(), m_bucketFactory != null);
 	}
 
 	private Set<String> queryValidPath(int day) {
@@ -164,6 +183,14 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
+	}
+
+	public void setBucketFactory(ReportBucketFactory bucketFactory) {
+		m_bucketFactory = bucketFactory;
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
 	}
 
 }

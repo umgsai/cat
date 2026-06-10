@@ -85,6 +85,9 @@ import com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleR
 import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
+import com.dianping.cat.message.DefaultPathBuilder;
+import com.dianping.cat.message.PathBuilder;
+import com.dianping.cat.report.DefaultReportBucketManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
 import com.dianping.cat.report.alert.business.BusinessContactor;
@@ -143,6 +146,10 @@ import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.report.page.state.service.LocalStateService;
 import com.dianping.cat.report.page.top.service.LocalTopService;
 import com.dianping.cat.report.page.transaction.service.LocalTransactionService;
+import com.dianping.cat.report.LocalReportBucket;
+import com.dianping.cat.report.ReportBucket;
+import com.dianping.cat.report.ReportBucketFactory;
+import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.statistic.ServerStatisticManager;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
@@ -209,6 +216,37 @@ public class CatHomeSpringConfiguration {
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
 		manager.enableLogging(plexusConsoleLogger.getChildLogger(ServerConfigManager.class.getName()));
+		return manager;
+	}
+
+	@Bean
+	public PathBuilder pathBuilder() {
+		return new DefaultPathBuilder();
+	}
+
+	@Bean
+	public ReportBucketFactory reportBucketFactory(PathBuilder pathBuilder, ServerConfigManager serverConfigManager) {
+		return new ReportBucketFactory() {
+			@Override
+			public ReportBucket createReportBucket(String name, java.util.Date timestamp, int index)
+			      throws java.io.IOException {
+				LocalReportBucket bucket = new LocalReportBucket();
+
+				bucket.setPathBuilder(pathBuilder);
+				bucket.setConfigManager(serverConfigManager);
+				bucket.initialize(name, timestamp, index);
+				return bucket;
+			}
+		};
+	}
+
+	@Bean(initMethod = "initialize")
+	public ReportBucketManager reportBucketManager(ServerConfigManager serverConfigManager,
+			ReportBucketFactory reportBucketFactory) {
+		DefaultReportBucketManager manager = new DefaultReportBucketManager();
+
+		manager.setConfigManager(serverConfigManager);
+		manager.setBucketFactory(reportBucketFactory);
 		return manager;
 	}
 
@@ -426,90 +464,112 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<ProblemReport> localProblemService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<ProblemReport> localProblemService(ServerConfigManager serverConfigManager,
+			ReportBucketManager reportBucketManager) {
 		LocalProblemService service = new LocalProblemService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(reportBucketManager);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<EventReport> localEventService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<EventReport> localEventService(ServerConfigManager serverConfigManager,
+			ReportBucketManager reportBucketManager) {
 		LocalEventService service = new LocalEventService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(reportBucketManager);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<TransactionReport> localTransactionService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<TransactionReport> localTransactionService(ServerConfigManager serverConfigManager,
+			ReportBucketManager reportBucketManager) {
 		LocalTransactionService service = new LocalTransactionService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(reportBucketManager);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<HeartbeatReport> localHeartbeatService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<HeartbeatReport> localHeartbeatService(ServerConfigManager serverConfigManager,
+			ReportBucketManager reportBucketManager) {
 		LocalHeartbeatService service = new LocalHeartbeatService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(reportBucketManager);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<CrossReport> localCrossService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<CrossReport> localCrossService(ServerConfigManager serverConfigManager,
+			ReportBucketManager reportBucketManager) {
 		LocalCrossService service = new LocalCrossService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(reportBucketManager);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<MatrixReport> localMatrixService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<MatrixReport> localMatrixService(ServerConfigManager serverConfigManager,
+			ReportBucketManager reportBucketManager) {
 		LocalMatrixService service = new LocalMatrixService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(reportBucketManager);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<DependencyReport> localDependencyService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<DependencyReport> localDependencyService(ServerConfigManager serverConfigManager,
+			ReportBucketManager reportBucketManager) {
 		LocalDependencyService service = new LocalDependencyService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(reportBucketManager);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<TopReport> localTopService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<TopReport> localTopService(ServerConfigManager serverConfigManager,
+			ReportBucketManager reportBucketManager) {
 		LocalTopService service = new LocalTopService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(reportBucketManager);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<StateReport> localStateService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<StateReport> localStateService(ServerConfigManager serverConfigManager,
+			ReportBucketManager reportBucketManager) {
 		LocalStateService service = new LocalStateService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(reportBucketManager);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<StorageReport> localStorageService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<StorageReport> localStorageService(ServerConfigManager serverConfigManager,
+			ReportBucketManager reportBucketManager) {
 		LocalStorageService service = new LocalStorageService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(reportBucketManager);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<BusinessReport> localBusinessService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<BusinessReport> localBusinessService(ServerConfigManager serverConfigManager,
+			ReportBucketManager reportBucketManager) {
 		LocalBusinessService service = new LocalBusinessService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(reportBucketManager);
 		return service;
 	}
 
