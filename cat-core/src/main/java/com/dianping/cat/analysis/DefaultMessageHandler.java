@@ -20,14 +20,18 @@ package com.dianping.cat.analysis;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = MessageHandler.class)
 public class DefaultMessageHandler extends ContainerHolder implements MessageHandler, LogEnabled {
+	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(DefaultMessageHandler.class);
+
 	@Inject
 	private MessageConsumer m_consumer;
 
@@ -41,13 +45,28 @@ public class DefaultMessageHandler extends ContainerHolder implements MessageHan
 	@Override
 	public void handle(MessageTree tree) {
 		if (m_consumer == null) {
-			m_consumer = lookup(MessageConsumer.class);
+			m_consumer = CatSpringContext.getBeanIfAvailable(MessageConsumer.class);
+
+			if (m_consumer == null) {
+				m_consumer = lookup(MessageConsumer.class);
+				SLF4J_LOGGER.info("Resolved message consumer from Plexus fallback, consumer={}.", m_consumer);
+			} else {
+				SLF4J_LOGGER.info("Resolved message consumer from Spring context, consumer={}.", m_consumer);
+			}
 		}
 
 		try {
 			m_consumer.consume(tree);
 		} catch (Throwable e) {
-			m_logger.error("Error when consuming message in " + m_consumer + "! tree: " + tree, e);
+			if (m_logger != null) {
+				m_logger.error("Error when consuming message in " + m_consumer + "! tree: " + tree, e);
+			} else {
+				SLF4J_LOGGER.error("Error when consuming message, consumer={}, tree={}.", m_consumer, tree, e);
+			}
 		}
+	}
+
+	public void setConsumer(MessageConsumer consumer) {
+		m_consumer = consumer;
 	}
 }
