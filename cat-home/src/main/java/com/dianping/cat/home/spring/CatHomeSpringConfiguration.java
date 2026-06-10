@@ -13,6 +13,8 @@ import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
+import org.unidal.cat.message.storage.MessageFinderManager;
+import org.unidal.cat.message.storage.internals.DefaultMessageFinderManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -227,6 +229,11 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public PathBuilder pathBuilder() {
 		return new DefaultPathBuilder();
+	}
+
+	@Bean
+	public MessageFinderManager messageFinderManager() {
+		return new DefaultMessageFinderManager();
 	}
 
 	@Bean
