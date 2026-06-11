@@ -26,8 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.helper.Threads;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -37,16 +35,13 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = TaskBuilder.class, value = CurrentReportBuilder.ID)
 public class CurrentReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CurrentReportBuilder.class);
 
 	public static final String ID = Constants.CURRENT_REPORT;
 
-	@Inject
 	private ProjectService m_projectService;
 
-	@Inject
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
 	@Override

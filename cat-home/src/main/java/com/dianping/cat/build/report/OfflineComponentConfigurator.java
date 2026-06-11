@@ -31,8 +31,6 @@ import com.dianping.cat.report.page.overload.task.HourlyCapacityUpdater;
 import com.dianping.cat.report.page.overload.task.MonthlyCapacityUpdater;
 import com.dianping.cat.report.page.overload.task.TableCapacityService;
 import com.dianping.cat.report.page.overload.task.WeeklyCapacityUpdater;
-import com.dianping.cat.report.task.cmdb.CmdbInfoReloadBuilder;
-import com.dianping.cat.report.task.current.CurrentReportBuilder;
 
 public class OfflineComponentConfigurator extends AbstractResourceConfigurator {
 	@Override
@@ -46,9 +44,6 @@ public class OfflineComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(A(MonthlyCapacityUpdater.class));
 		all.add(A(TableCapacityService.class));
 		all.add(A(CapacityUpdateTask.class));
-
-		all.add(A(CurrentReportBuilder.class));
-		all.add(A(CmdbInfoReloadBuilder.class));
 
 		return all;
 	}

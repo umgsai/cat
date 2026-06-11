@@ -222,7 +222,10 @@ import com.dianping.cat.report.page.storage.task.StorageReportBuilder;
 import com.dianping.cat.report.page.storage.task.StorageReportService;
 import com.dianping.cat.report.page.storage.transform.StorageMergeHelper;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.server.ServersUpdater;
+import com.dianping.cat.report.server.ServersUpdaterManager;
 import com.dianping.cat.report.task.DefaultTaskConsumer;
+import com.dianping.cat.report.task.DefaultRemoteServersUpdater;
 import com.dianping.cat.report.task.ReportFacade;
 import com.dianping.cat.report.service.AbstractReportService;
 import com.dianping.cat.report.service.LocalModelService;
@@ -1910,6 +1913,25 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public RemoteServersManager remoteServersManager() {
 		return new RemoteServersManager();
+	}
+
+	@Bean
+	public ServersUpdater remoteServersUpdater(
+			@Qualifier("localStateService") LocalModelService<StateReport> stateModelService) {
+		DefaultRemoteServersUpdater updater = new DefaultRemoteServersUpdater();
+
+		updater.setLocalService(stateModelService);
+		return updater;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ServersUpdaterManager serversUpdaterManager(ServersUpdater remoteServersUpdater,
+			RemoteServersManager remoteServersManager) {
+		ServersUpdaterManager manager = new ServersUpdaterManager();
+
+		manager.setRemoteServerUpdater(remoteServersUpdater);
+		manager.setRemoteServersManager(remoteServersManager);
+		return manager;
 	}
 
 	@Bean

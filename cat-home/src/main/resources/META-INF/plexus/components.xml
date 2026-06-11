@@ -6,20 +6,6 @@
 			<implementation>com.dianping.cat.helper.JsonBuilder</implementation>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.server.RemoteServersManager</role>
-			<implementation>com.dianping.cat.report.server.RemoteServersManager</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.server.ServersUpdater</role>
-			<implementation>com.dianping.cat.report.task.DefaultRemoteServersUpdater</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>state</role-hint>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.graph.svg.ValueTranslater</role>
 			<implementation>com.dianping.cat.report.graph.svg.DefaultValueTranslater</implementation>
 		</component>
@@ -38,21 +24,6 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.task.cmdb.ProjectUpdateTask</role>
-			<implementation>com.dianping.cat.report.task.cmdb.ProjectUpdateTask</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.service.HostinfoService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.service.ProjectService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.service.TransactionReportService</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -2261,29 +2232,6 @@
 					<role>com.dianping.cat.report.page.overload.task.CapacityUpdater</role>
 					<role-hint>monthly_capacity_updater</role-hint>
 					<field-name>m_monthlyUpdater</field-name>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>currentReport</role-hint>
-			<implementation>com.dianping.cat.report.task.current.CurrentReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.service.ProjectService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>cmdb</role-hint>
-			<implementation>com.dianping.cat.report.task.cmdb.CmdbInfoReloadBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.task.cmdb.ProjectUpdateTask</role>
 				</requirement>
 			</requirements>
 		</component>

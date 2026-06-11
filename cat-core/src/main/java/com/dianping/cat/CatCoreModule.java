@@ -24,6 +24,7 @@ import org.unidal.initialization.ModuleContext;
 import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.report.server.ServersUpdaterManager;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = Module.class, value = CatCoreModule.ID)
 public class CatCoreModule extends AbstractModule {
@@ -32,7 +33,11 @@ public class CatCoreModule extends AbstractModule {
 	@Override
 	protected void execute(final ModuleContext ctx) throws Exception {
 		// bring up ServersUpdaterManager
-		ctx.lookup(ServersUpdaterManager.class);
+		ServersUpdaterManager manager = CatSpringContext.getBeanIfAvailable(ServersUpdaterManager.class);
+
+		if (manager == null) {
+			ctx.lookup(ServersUpdaterManager.class);
+		}
 	}
 
 	@Override

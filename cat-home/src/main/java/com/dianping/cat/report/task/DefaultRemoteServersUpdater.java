@@ -33,7 +33,10 @@ import com.dianping.cat.consumer.state.model.entity.Machine;
 import com.dianping.cat.consumer.state.model.entity.ProcessDomain;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.consumer.state.model.transform.BaseVisitor;
+import com.dianping.cat.consumer.state.model.transform.DefaultSaxParser;
+import com.dianping.cat.mvc.ApiPayload;
 import com.dianping.cat.report.server.ServersUpdater;
+import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
@@ -44,6 +47,8 @@ public class DefaultRemoteServersUpdater implements ServersUpdater {
 
 	@Inject(type = ModelService.class, value = StateAnalyzer.ID)
 	private ModelService<StateReport> m_service;
+
+	private LocalModelService<StateReport> m_localService;
 
 	@Override
 	public Map<String, Set<String>> buildServers(Date hour) {
@@ -63,7 +68,15 @@ public class DefaultRemoteServersUpdater implements ServersUpdater {
 		if (period == ModelPeriod.CURRENT || period == ModelPeriod.LAST) {
 			ModelRequest request = new ModelRequest(domain, time);
 
-			if (m_service.isEligable(request)) {
+			if (m_localService != null && m_localService.isEligable(request)) {
+				try {
+					String xml = m_localService.getReport(request, period, domain, new ApiPayload());
+
+					return DefaultSaxParser.parse(xml);
+				} catch (Exception e) {
+					throw new RuntimeException("Unable to build local state report for " + request + "!", e);
+				}
+			} else if (m_service != null && m_service.isEligable(request)) {
 				ModelResponse<StateReport> response = m_service.invoke(request);
 				StateReport report = response.getModel();
 
@@ -74,6 +87,14 @@ public class DefaultRemoteServersUpdater implements ServersUpdater {
 		} else {
 			throw new RuntimeException("Domain server update period is not right: " + period + ", time is: "	+ new Date(time));
 		}
+	}
+
+	public void setService(ModelService<StateReport> service) {
+		m_service = service;
+	}
+
+	public void setLocalService(LocalModelService<StateReport> localService) {
+		m_localService = localService;
 	}
 
 	public static class StateReportVisitor extends BaseVisitor {

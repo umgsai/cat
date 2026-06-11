@@ -68,4 +68,12 @@ public class ServersUpdaterManager implements Initializable {
 			}
 		});
 	}
+
+	public void setRemoteServerUpdater(ServersUpdater remoteServerUpdater) {
+		m_remoteServerUpdater = remoteServerUpdater;
+	}
+
+	public void setRemoteServersManager(RemoteServersManager remoteServersManager) {
+		m_remoteServersManager = remoteServersManager;
+	}
 }

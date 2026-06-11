@@ -20,20 +20,20 @@ package com.dianping.cat.report.task.cmdb;
 
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = TaskBuilder.class, value = CmdbInfoReloadBuilder.ID)
 public class CmdbInfoReloadBuilder implements TaskBuilder {
 
 	public static final String ID = Constants.CMDB;
 
-	@Inject
+	private static final Logger LOGGER = LoggerFactory.getLogger(CmdbInfoReloadBuilder.class);
+
 	private ProjectUpdateTask m_projectUpdateTask;
 
 	@Override
@@ -44,6 +44,12 @@ public class CmdbInfoReloadBuilder implements TaskBuilder {
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
 		refreshSpringBeans();
+
+		if (m_projectUpdateTask == null) {
+			LOGGER.warn("Project update task is not available, skip cmdb reload task, name={}, domain={}, period={}.",
+					name, domain, period);
+			return false;
+		}
 		Threads.forGroup(Constants.CAT).start(m_projectUpdateTask);
 		return true;
 	}

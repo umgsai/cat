@@ -58,9 +58,6 @@ import com.dianping.cat.report.HourlyReportTableProvider;
 import com.dianping.cat.report.graph.svg.DefaultGraphBuilder;
 import com.dianping.cat.report.graph.svg.DefaultValueTranslater;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
-import com.dianping.cat.report.server.RemoteServersManager;
-import com.dianping.cat.report.task.DefaultRemoteServersUpdater;
-import com.dianping.cat.report.task.cmdb.ProjectUpdateTask;
 import com.dianping.cat.system.page.permission.ResourceConfigManager;
 import com.dianping.cat.system.page.permission.UserConfigManager;
 
@@ -82,17 +79,11 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		all.add(A(JsonBuilder.class));
 
-		all.add(A(RemoteServersManager.class));
-
-		all.add(A(DefaultRemoteServersUpdater.class));
-
 		all.add(A(DefaultValueTranslater.class));
 
 		all.add(A(DefaultGraphBuilder.class));
 
 		all.add(A(PayloadNormalizer.class));
-
-		all.add(A(ProjectUpdateTask.class));
 
 		return all;
 	}
