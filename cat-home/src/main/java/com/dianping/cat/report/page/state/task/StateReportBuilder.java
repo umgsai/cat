@@ -241,11 +241,16 @@ public class StateReportBuilder implements TaskBuilder, Initializable {
 	}
 
 	private void refreshSpringBeans() {
+		StateReportService reportService = CatSpringContext.getBeanIfAvailable(StateReportService.class);
 		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
 		      .getBeanIfAvailable(ServerFilterConfigManager.class);
 		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		HostinfoService hostinfoService = CatSpringContext.getBeanIfAvailable(HostinfoService.class);
 
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
 		if (serverConfigManager != null) {
 			m_serverConfigManager = serverConfigManager;
 		}
@@ -255,6 +260,29 @@ public class StateReportBuilder implements TaskBuilder, Initializable {
 		if (projectService != null) {
 			m_projectService = projectService;
 		}
+		if (hostinfoService != null) {
+			m_hostinfoService = hostinfoService;
+		}
+	}
+
+	public void setHostinfoService(HostinfoService hostinfoService) {
+		m_hostinfoService = hostinfoService;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setReportService(StateReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		m_serverFilterConfigManager = serverFilterConfigManager;
 	}
 
 	public static class ClearDetailInfo extends BaseVisitor {

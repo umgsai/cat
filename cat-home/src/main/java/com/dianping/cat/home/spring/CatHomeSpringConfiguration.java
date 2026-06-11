@@ -183,6 +183,7 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.current.CurrentReportBuilder;
 import com.dianping.cat.report.page.state.service.LocalStateService;
 import com.dianping.cat.report.page.state.service.StateReportService;
+import com.dianping.cat.report.page.state.task.StateReportBuilder;
 import com.dianping.cat.report.page.top.service.LocalTopService;
 import com.dianping.cat.report.page.transaction.service.TransactionReportService;
 import com.dianping.cat.report.page.transaction.service.LocalTransactionService;
@@ -277,6 +278,20 @@ public class CatHomeSpringConfiguration {
 				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
 				monthlyReportContentRepository);
 		return service;
+	}
+
+	@Bean(name = StateReportBuilder.ID, initMethod = "initialize")
+	public TaskBuilder stateReportBuilder(StateReportService stateReportService, ServerConfigManager serverConfigManager,
+			ServerFilterConfigManager serverFilterConfigManager, ProjectService projectService,
+			HostinfoService hostinfoService) {
+		StateReportBuilder builder = new StateReportBuilder();
+
+		builder.setReportService(stateReportService);
+		builder.setServerConfigManager(serverConfigManager);
+		builder.setServerFilterConfigManager(serverFilterConfigManager);
+		builder.setProjectService(projectService);
+		builder.setHostinfoService(hostinfoService);
+		return builder;
 	}
 
 	@Bean

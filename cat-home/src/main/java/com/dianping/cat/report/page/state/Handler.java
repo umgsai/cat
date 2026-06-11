@@ -22,6 +22,8 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.tuple.Pair;
@@ -34,6 +36,7 @@ import com.dianping.cat.Constants;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
+import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.mvc.PayloadNormalizer;
 import com.dianping.cat.report.ReportPage;
@@ -46,6 +49,8 @@ import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
+
 	@Inject
 	private JspViewer m_jspViewer;
 
@@ -70,6 +75,7 @@ public class Handler implements PageHandler<Context> {
 	private void buildDisplayInfo(Model model, Payload payload, StateReport report) {
 		refreshSpringBeans();
 
+		report = ensureReport(report, payload);
 		StateDisplay display = new StateDisplay(payload.getIpAddress(), m_serverFilterConfigManager.getUnusedDomains());
 
 		display.setSortType(payload.getSort());
@@ -99,6 +105,21 @@ public class Handler implements PageHandler<Context> {
 		} else {
 			throw new RuntimeException("Internal error: no eligable sql service registered for " + request + "!");
 		}
+	}
+
+	private StateReport ensureReport(StateReport report, Payload payload) {
+		if (report != null) {
+			return report;
+		}
+
+		long startTime = payload.getDate();
+		StateReport empty = new StateReport(Constants.CAT);
+
+		empty.setStartTime(new Date(startTime));
+		empty.setEndTime(new Date(startTime + TimeHelper.ONE_HOUR - 1));
+		LOGGER.warn("State report is missing, using empty report, action={}, period={}, ip={}.", payload.getAction(),
+				empty.getStartTime(), payload.getIpAddress());
+		return empty;
 	}
 
 	@Override

@@ -20,7 +20,9 @@ package com.dianping.cat.report.task.current;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,8 @@ public class CurrentWeeklyMonthlyReportTask implements Task {
 
 	private List<CurrentWeeklyMonthlyTask> m_tasks = new ArrayList<CurrentWeeklyMonthlyTask>();
 
+	private Set<String> m_registeredReports = new HashSet<String>();
+
 	private List<String> m_domains;
 
 	public static CurrentWeeklyMonthlyReportTask getInstance() {
@@ -50,9 +54,17 @@ public class CurrentWeeklyMonthlyReportTask implements Task {
 
 	public void register(CurrentWeeklyMonthlyTask handler) {
 		synchronized (this) {
+			String reportName = handler.getReportName();
+
+			if (m_registeredReports.contains(reportName)) {
+				LOGGER.warn("Skipped duplicate current weekly/monthly report task, reportName={}, taskCount={}.",
+						reportName, m_tasks.size());
+				return;
+			}
+			m_registeredReports.add(reportName);
 			m_tasks.add(handler);
 			LOGGER.info("Registered current weekly/monthly report task, reportName={}, taskCount={}.",
-					handler.getReportName(), m_tasks.size());
+					reportName, m_tasks.size());
 		}
 	}
 
