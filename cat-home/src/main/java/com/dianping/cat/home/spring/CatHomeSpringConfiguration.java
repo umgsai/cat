@@ -46,8 +46,14 @@ import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
+import com.dianping.cat.consumer.business.BusinessAnalyzer;
+import com.dianping.cat.consumer.business.BusinessDelegate;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
+import com.dianping.cat.consumer.cross.CrossAnalyzer;
+import com.dianping.cat.consumer.cross.CrossDelegate;
 import com.dianping.cat.consumer.cross.model.entity.CrossReport;
+import com.dianping.cat.consumer.dependency.DependencyAnalyzer;
+import com.dianping.cat.consumer.dependency.DependencyDelegate;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
 import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.consumer.event.EventDelegate;
@@ -59,10 +65,14 @@ import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
 import com.dianping.cat.consumer.matrix.MatrixDelegate;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
+import com.dianping.cat.consumer.problem.ProblemDelegate;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.StateDelegate;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
+import com.dianping.cat.consumer.storage.StorageAnalyzer;
+import com.dianping.cat.consumer.storage.StorageDelegate;
+import com.dianping.cat.consumer.storage.StorageReportUpdater;
 import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.consumer.top.TopAnalyzer;
 import com.dianping.cat.consumer.top.TopDelegate;
@@ -234,10 +244,15 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.ReportReloader;
+import com.dianping.cat.report.task.reload.impl.BusinessReportReloader;
+import com.dianping.cat.report.task.reload.impl.CrossReportReloader;
+import com.dianping.cat.report.task.reload.impl.DependencyReportReloader;
 import com.dianping.cat.report.task.reload.impl.EventReportReloader;
 import com.dianping.cat.report.task.reload.impl.HeartbeatReportReloader;
 import com.dianping.cat.report.task.reload.impl.MatrixReportReloader;
+import com.dianping.cat.report.task.reload.impl.ProblemReportReloader;
 import com.dianping.cat.report.task.reload.impl.StateReportReloader;
+import com.dianping.cat.report.task.reload.impl.StorageReportReloader;
 import com.dianping.cat.report.task.reload.impl.TopReportReloader;
 import com.dianping.cat.report.task.reload.impl.TransactionReportReloader;
 import com.dianping.cat.service.ProjectService;
@@ -324,6 +339,14 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public ReportDelegate<BusinessReport> businessDelegate(TaskManager taskManager) {
+		BusinessDelegate delegate = new BusinessDelegate();
+
+		delegate.setTaskManager(taskManager);
+		return delegate;
+	}
+
+	@Bean
 	public ReportDelegate<TransactionReport> transactionDelegate(TaskManager taskManager,
 			ServerFilterConfigManager serverFilterConfigManager, AllReportConfigManager allReportConfigManager,
 			ServerConfigManager serverConfigManager, AtomicMessageConfigManager atomicMessageConfigManager) {
@@ -334,6 +357,24 @@ public class CatHomeSpringConfiguration {
 		delegate.setTransactionManager(allReportConfigManager);
 		delegate.setServerConfigManager(serverConfigManager);
 		delegate.setAtomicMessageConfigManager(atomicMessageConfigManager);
+		return delegate;
+	}
+
+	@Bean
+	public ReportDelegate<CrossReport> crossDelegate(TaskManager taskManager,
+			ServerFilterConfigManager serverFilterConfigManager) {
+		CrossDelegate delegate = new CrossDelegate();
+
+		delegate.setTaskManager(taskManager);
+		delegate.setServerFilterConfigManager(serverFilterConfigManager);
+		return delegate;
+	}
+
+	@Bean
+	public ReportDelegate<DependencyReport> dependencyDelegate(TaskManager taskManager) {
+		DependencyDelegate delegate = new DependencyDelegate();
+
+		delegate.setTaskManager(taskManager);
 		return delegate;
 	}
 
@@ -372,6 +413,32 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public ReportDelegate<ProblemReport> problemDelegate(TaskManager taskManager,
+			ServerFilterConfigManager serverFilterConfigManager) {
+		ProblemDelegate delegate = new ProblemDelegate();
+
+		delegate.setTaskManager(taskManager);
+		delegate.setConfigManager(serverFilterConfigManager);
+		return delegate;
+	}
+
+	@Bean
+	public StorageReportUpdater storageReportUpdater() {
+		return new StorageReportUpdater();
+	}
+
+	@Bean
+	public ReportDelegate<StorageReport> storageDelegate(TaskManager taskManager,
+			ServerFilterConfigManager serverFilterConfigManager, StorageReportUpdater storageReportUpdater) {
+		StorageDelegate delegate = new StorageDelegate();
+
+		delegate.setTaskManager(taskManager);
+		delegate.setConfigManager(serverFilterConfigManager);
+		delegate.setReportUpdater(storageReportUpdater);
+		return delegate;
+	}
+
+	@Bean
 	public ReportDelegate<TopReport> topDelegate() {
 		return new TopDelegate();
 	}
@@ -383,6 +450,23 @@ public class CatHomeSpringConfiguration {
 		delegate.setTaskManager(taskManager);
 		delegate.setBucketManager(reportBucketManager);
 		return delegate;
+	}
+
+	@Bean(name = BusinessAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	public ReportManager<BusinessReport> businessReportManager(ReportDelegate<BusinessReport> businessDelegate,
+			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
+			Logger plexusConsoleLogger) {
+		DefaultReportManager<BusinessReport> manager = new DefaultReportManager<BusinessReport>();
+
+		manager.setReportDelegate(businessDelegate);
+		manager.setBucketManager(reportBucketManager);
+		manager.setReportDao(hourlyReportRepository);
+		manager.setReportContentDao(hourlyReportContentRepository);
+		manager.setValidator(domainValidator);
+		manager.setName(BusinessAnalyzer.ID);
+		manager.enableLogging(plexusConsoleLogger);
+		return manager;
 	}
 
 	@Bean(name = TransactionAnalyzer.ID + "ReportManager", initMethod = "initialize")
@@ -398,6 +482,40 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(TransactionAnalyzer.ID);
+		manager.enableLogging(plexusConsoleLogger);
+		return manager;
+	}
+
+	@Bean(name = CrossAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	public ReportManager<CrossReport> crossReportManager(ReportDelegate<CrossReport> crossDelegate,
+			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
+			Logger plexusConsoleLogger) {
+		DefaultReportManager<CrossReport> manager = new DefaultReportManager<CrossReport>();
+
+		manager.setReportDelegate(crossDelegate);
+		manager.setBucketManager(reportBucketManager);
+		manager.setReportDao(hourlyReportRepository);
+		manager.setReportContentDao(hourlyReportContentRepository);
+		manager.setValidator(domainValidator);
+		manager.setName(CrossAnalyzer.ID);
+		manager.enableLogging(plexusConsoleLogger);
+		return manager;
+	}
+
+	@Bean(name = DependencyAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	public ReportManager<DependencyReport> dependencyReportManager(
+			ReportDelegate<DependencyReport> dependencyDelegate, ReportBucketManager reportBucketManager,
+			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
+			DomainValidator domainValidator, Logger plexusConsoleLogger) {
+		DefaultReportManager<DependencyReport> manager = new DefaultReportManager<DependencyReport>();
+
+		manager.setReportDelegate(dependencyDelegate);
+		manager.setBucketManager(reportBucketManager);
+		manager.setReportDao(hourlyReportRepository);
+		manager.setReportContentDao(hourlyReportContentRepository);
+		manager.setValidator(domainValidator);
+		manager.setName(DependencyAnalyzer.ID);
 		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
@@ -453,6 +571,40 @@ public class CatHomeSpringConfiguration {
 		return manager;
 	}
 
+	@Bean(name = ProblemAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	public ReportManager<ProblemReport> problemReportManager(ReportDelegate<ProblemReport> problemDelegate,
+			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
+			Logger plexusConsoleLogger) {
+		DefaultReportManager<ProblemReport> manager = new DefaultReportManager<ProblemReport>();
+
+		manager.setReportDelegate(problemDelegate);
+		manager.setBucketManager(reportBucketManager);
+		manager.setReportDao(hourlyReportRepository);
+		manager.setReportContentDao(hourlyReportContentRepository);
+		manager.setValidator(domainValidator);
+		manager.setName(ProblemAnalyzer.ID);
+		manager.enableLogging(plexusConsoleLogger);
+		return manager;
+	}
+
+	@Bean(name = StorageAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	public ReportManager<StorageReport> storageReportManager(ReportDelegate<StorageReport> storageDelegate,
+			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
+			Logger plexusConsoleLogger) {
+		DefaultReportManager<StorageReport> manager = new DefaultReportManager<StorageReport>();
+
+		manager.setReportDelegate(storageDelegate);
+		manager.setBucketManager(reportBucketManager);
+		manager.setReportDao(hourlyReportRepository);
+		manager.setReportContentDao(hourlyReportContentRepository);
+		manager.setValidator(domainValidator);
+		manager.setName(StorageAnalyzer.ID);
+		manager.enableLogging(plexusConsoleLogger);
+		return manager;
+	}
+
 	@Bean(name = TopAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	public ReportManager<TopReport> topReportManager(ReportDelegate<TopReport> topDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
@@ -488,11 +640,38 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public ReportReloader businessReportReloader(
+			@Qualifier(BusinessAnalyzer.ID + "ReportManager") ReportManager<BusinessReport> businessReportManager) {
+		BusinessReportReloader reloader = new BusinessReportReloader();
+
+		reloader.setReportManager(businessReportManager);
+		return reloader;
+	}
+
+	@Bean
 	public ReportReloader transactionReportReloader(
 			@Qualifier(TransactionAnalyzer.ID + "ReportManager") ReportManager<TransactionReport> transactionReportManager) {
 		TransactionReportReloader reloader = new TransactionReportReloader();
 
 		reloader.setReportManager(transactionReportManager);
+		return reloader;
+	}
+
+	@Bean
+	public ReportReloader crossReportReloader(
+			@Qualifier(CrossAnalyzer.ID + "ReportManager") ReportManager<CrossReport> crossReportManager) {
+		CrossReportReloader reloader = new CrossReportReloader();
+
+		reloader.setReportManager(crossReportManager);
+		return reloader;
+	}
+
+	@Bean
+	public ReportReloader dependencyReportReloader(
+			@Qualifier(DependencyAnalyzer.ID + "ReportManager") ReportManager<DependencyReport> dependencyReportManager) {
+		DependencyReportReloader reloader = new DependencyReportReloader();
+
+		reloader.setReportManager(dependencyReportManager);
 		return reloader;
 	}
 
@@ -520,6 +699,24 @@ public class CatHomeSpringConfiguration {
 		MatrixReportReloader reloader = new MatrixReportReloader();
 
 		reloader.setReportManager(matrixReportManager);
+		return reloader;
+	}
+
+	@Bean
+	public ReportReloader problemReportReloader(
+			@Qualifier(ProblemAnalyzer.ID + "ReportManager") ReportManager<ProblemReport> problemReportManager) {
+		ProblemReportReloader reloader = new ProblemReportReloader();
+
+		reloader.setReportManager(problemReportManager);
+		return reloader;
+	}
+
+	@Bean
+	public ReportReloader storageReportReloader(
+			@Qualifier(StorageAnalyzer.ID + "ReportManager") ReportManager<StorageReport> storageReportManager) {
+		StorageReportReloader reloader = new StorageReportReloader();
+
+		reloader.setReportManager(storageReportManager);
 		return reloader;
 	}
 

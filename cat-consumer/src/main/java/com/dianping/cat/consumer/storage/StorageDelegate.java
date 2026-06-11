@@ -24,16 +24,20 @@ import com.dianping.cat.consumer.storage.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.consumer.storage.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.storage.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.Map;
 
 @Named(type = ReportDelegate.class, value = StorageAnalyzer.ID)
 public class StorageDelegate implements ReportDelegate<StorageReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(StorageDelegate.class);
 
 	@Inject
 	private TaskManager m_taskManager;
@@ -50,6 +54,8 @@ public class StorageDelegate implements ReportDelegate<StorageReport> {
 
 	@Override
 	public void beforeSave(Map<String, StorageReport> reports) {
+		refreshSpringBeans();
+
 		for (StorageReport report : reports.values()) {
 
 			m_reportUpdater.updateStorageIds(report.getId(), reports.keySet(), report);
@@ -68,6 +74,8 @@ public class StorageDelegate implements ReportDelegate<StorageReport> {
 
 	@Override
 	public boolean createHourlyTask(StorageReport report) {
+		refreshSpringBeans();
+
 		String id = report.getId();
 
 		if (m_configManager.validateDomain(id)) {
@@ -86,10 +94,17 @@ public class StorageDelegate implements ReportDelegate<StorageReport> {
 	public StorageReport makeReport(String id, long startTime, long duration) {
 		StorageReport report = new StorageReport(id);
 		int index = id.lastIndexOf("-");
-		String name = id.substring(0, index);
-		String type = id.substring(index + 1);
 
-		report.setName(name).setType(type);
+		if (index <= 0 || index >= id.length() - 1) {
+			LOGGER.warn("Invalid storage report id, id={}, expectedFormat=<name>-<type>, startTime={}, duration={}.",
+			      id, startTime, duration);
+			report.setName(id);
+		} else {
+			String name = id.substring(0, index);
+			String type = id.substring(index + 1);
+
+			report.setName(name).setType(type);
+		}
 		report.setStartTime(new Date(startTime)).setEndTime(new Date(startTime + duration - 1));
 
 		return report;
@@ -111,6 +126,34 @@ public class StorageDelegate implements ReportDelegate<StorageReport> {
 	@Override
 	public StorageReport parseXml(String xml) throws Exception {
 		return DefaultSaxParser.parse(xml);
+	}
+
+	private void refreshSpringBeans() {
+		TaskManager taskManager = CatSpringContext.getBeanIfAvailable(TaskManager.class);
+		ServerFilterConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
+		StorageReportUpdater reportUpdater = CatSpringContext.getBeanIfAvailable(StorageReportUpdater.class);
+
+		if (taskManager != null) {
+			m_taskManager = taskManager;
+		}
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
+		if (reportUpdater != null) {
+			m_reportUpdater = reportUpdater;
+		}
+	}
+
+	public void setTaskManager(TaskManager taskManager) {
+		m_taskManager = taskManager;
+	}
+
+	public void setConfigManager(ServerFilterConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setReportUpdater(StorageReportUpdater reportUpdater) {
+		m_reportUpdater = reportUpdater;
 	}
 
 }

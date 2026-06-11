@@ -29,6 +29,7 @@ import com.dianping.cat.consumer.business.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.consumer.business.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.business.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
@@ -91,7 +92,21 @@ public class BusinessDelegate implements ReportDelegate<BusinessReport> {
 
 	@Override
 	public boolean createHourlyTask(BusinessReport report) {
+		refreshSpringBeans();
+
 		return m_taskManager.createTask(report.getStartTime(), report.getDomain(), BusinessAnalyzer.ID, TaskProlicy.DAILY);
+	}
+
+	private void refreshSpringBeans() {
+		TaskManager taskManager = CatSpringContext.getBeanIfAvailable(TaskManager.class);
+
+		if (taskManager != null) {
+			m_taskManager = taskManager;
+		}
+	}
+
+	public void setTaskManager(TaskManager taskManager) {
+		m_taskManager = taskManager;
 	}
 
 }

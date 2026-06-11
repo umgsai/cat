@@ -38,6 +38,7 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 import com.dianping.cat.report.task.reload.ReportReloader;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = ReportReloader.class, value = DependencyAnalyzer.ID)
 public class DependencyReportReloader extends AbstractReportReloader {
@@ -72,6 +73,8 @@ public class DependencyReportReloader extends AbstractReportReloader {
 
 	@Override
 	public List<ReportReloadEntity> loadReport(long time) {
+		refreshSpringBeans();
+
 		List<ReportReloadEntity> results = new ArrayList<ReportReloadEntity>();
 		Map<String, List<DependencyReport>> mergedReports = new HashMap<String, List<DependencyReport>>();
 
@@ -110,5 +113,19 @@ public class DependencyReportReloader extends AbstractReportReloader {
 			results.add(entity);
 		}
 		return results;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void refreshSpringBeans() {
+		ReportManager<DependencyReport> reportManager = CatSpringContext.getBeanIfAvailable(
+		      DependencyAnalyzer.ID + "ReportManager", ReportManager.class);
+
+		if (reportManager != null) {
+			m_reportManager = reportManager;
+		}
+	}
+
+	public void setReportManager(ReportManager<DependencyReport> reportManager) {
+		m_reportManager = reportManager;
 	}
 }
