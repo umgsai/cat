@@ -43,6 +43,7 @@ import com.dianping.cat.consumer.all.config.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -76,6 +77,8 @@ public class AllReportConfigManager implements Initializable, LogEnabled {
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
+
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -151,6 +154,8 @@ public class AllReportConfigManager implements Initializable, LogEnabled {
 
 	private boolean storeConfig() {
 		synchronized (this) {
+			refreshSpringBeans();
+
 			try {
 				Config config = m_configDao.createLocal();
 
@@ -199,6 +204,26 @@ public class AllReportConfigManager implements Initializable, LogEnabled {
 			}
 		}
 		return false;
+	}
+
+	private void refreshSpringBeans() {
+		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
+		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
+
+		if (configDao != null) {
+			m_configDao = configDao;
+		}
+		if (fetcher != null) {
+			m_fetcher = fetcher;
+		}
+	}
+
+	public void setConfigDao(ConfigRepository configDao) {
+		m_configDao = configDao;
+	}
+
+	public void setFetcher(ContentFetcher fetcher) {
+		m_fetcher = fetcher;
 	}
 
 }

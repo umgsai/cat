@@ -111,6 +111,10 @@ public class TaskManager {
 		}
 	}
 
+	public void setTaskDao(TaskRepository taskDao) {
+		m_taskDao = taskDao;
+	}
+
 	public enum TaskProlicy implements TaskCreationPolicy {
 
 		ALL {

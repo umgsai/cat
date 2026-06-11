@@ -35,6 +35,7 @@ import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.consumer.state.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.report.ReportManager;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 import com.dianping.cat.report.task.reload.ReportReloader;
@@ -72,6 +73,8 @@ public class StateReportReloader extends AbstractReportReloader {
 
 	@Override
 	public List<ReportReloadEntity> loadReport(long time) {
+		refreshSpringBeans();
+
 		List<ReportReloadEntity> results = new ArrayList<ReportReloadEntity>();
 		Map<String, List<StateReport>> mergedReports = new HashMap<String, List<StateReport>>();
 
@@ -110,5 +113,18 @@ public class StateReportReloader extends AbstractReportReloader {
 			results.add(entity);
 		}
 		return results;
+	}
+
+	private void refreshSpringBeans() {
+		ReportManager<StateReport> reportManager = CatSpringContext.getBeanIfAvailable(
+		      StateAnalyzer.ID + "ReportManager", ReportManager.class);
+
+		if (reportManager != null) {
+			m_reportManager = reportManager;
+		}
+	}
+
+	public void setReportManager(ReportManager<StateReport> reportManager) {
+		m_reportManager = reportManager;
 	}
 }

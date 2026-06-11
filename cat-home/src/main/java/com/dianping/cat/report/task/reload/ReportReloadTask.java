@@ -64,8 +64,10 @@ public class ReportReloadTask extends ContainerHolder implements Initializable, 
 			m_configManager = configManager;
 		}
 
-		if (springReloaders.size() >= EXPECTED_RELOADER_COUNT) {
-			m_reloaders = new java.util.LinkedHashMap<String, ReportReloader>(springReloaders);
+		Map<String, ReportReloader> indexedSpringReloaders = indexSpringReloaders(springReloaders);
+
+		if (indexedSpringReloaders.size() >= EXPECTED_RELOADER_COUNT) {
+			m_reloaders = indexedSpringReloaders;
 			LOGGER.info("Initialized report reload task from Spring, reloaderCount={}, reloaders={}.", m_reloaders.size(),
 					m_reloaders.keySet());
 			return;
@@ -75,11 +77,21 @@ public class ReportReloadTask extends ContainerHolder implements Initializable, 
 		Map<String, ReportReloader> reloaders = new java.util.LinkedHashMap<String, ReportReloader>();
 
 		reloaders.putAll(plexusReloaders);
-		reloaders.putAll(springReloaders);
+		reloaders.putAll(indexedSpringReloaders);
 		m_reloaders = reloaders;
 		LOGGER.info(
-				"Initialized report reload task, reloaderCount={}, springReloaderCount={}, plexusReloaderCount={}, reloaders={}.",
-				m_reloaders.size(), springReloaders.size(), plexusReloaders.size(), m_reloaders.keySet());
+				"Initialized report reload task, reloaderCount={}, springReloaderCount={}, springBeanCount={}, plexusReloaderCount={}, reloaders={}.",
+				m_reloaders.size(), indexedSpringReloaders.size(), springReloaders.size(), plexusReloaders.size(),
+				m_reloaders.keySet());
+	}
+
+	private Map<String, ReportReloader> indexSpringReloaders(Map<String, ReportReloader> springReloaders) {
+		Map<String, ReportReloader> reloaders = new java.util.LinkedHashMap<String, ReportReloader>();
+
+		for (ReportReloader reloader : springReloaders.values()) {
+			reloaders.put(reloader.getId(), reloader);
+		}
+		return reloaders;
 	}
 
 	@Override

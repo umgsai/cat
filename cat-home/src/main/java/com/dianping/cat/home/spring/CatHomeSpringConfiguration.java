@@ -49,14 +49,27 @@ import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.consumer.cross.model.entity.CrossReport;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
+import com.dianping.cat.consumer.event.EventAnalyzer;
+import com.dianping.cat.consumer.event.EventDelegate;
 import com.dianping.cat.consumer.event.model.entity.EventReport;
+import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
+import com.dianping.cat.consumer.heartbeat.HeartbeatDelegate;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
+import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
+import com.dianping.cat.consumer.matrix.MatrixDelegate;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
+import com.dianping.cat.consumer.state.StateAnalyzer;
+import com.dianping.cat.consumer.state.StateDelegate;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.consumer.storage.model.entity.StorageReport;
+import com.dianping.cat.consumer.top.TopAnalyzer;
+import com.dianping.cat.consumer.top.TopDelegate;
 import com.dianping.cat.consumer.top.model.entity.TopReport;
+import com.dianping.cat.consumer.config.AllReportConfigManager;
+import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
+import com.dianping.cat.consumer.transaction.TransactionDelegate;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
@@ -105,6 +118,7 @@ import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.message.DefaultPathBuilder;
 import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.report.DefaultReportBucketManager;
+import com.dianping.cat.report.DefaultReportManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
 import com.dianping.cat.report.alert.business.BusinessContactor;
@@ -217,9 +231,19 @@ import com.dianping.cat.report.LocalReportBucket;
 import com.dianping.cat.report.ReportBucket;
 import com.dianping.cat.report.ReportBucketFactory;
 import com.dianping.cat.report.ReportBucketManager;
+import com.dianping.cat.report.ReportDelegate;
+import com.dianping.cat.report.ReportManager;
+import com.dianping.cat.report.task.reload.ReportReloader;
+import com.dianping.cat.report.task.reload.impl.EventReportReloader;
+import com.dianping.cat.report.task.reload.impl.HeartbeatReportReloader;
+import com.dianping.cat.report.task.reload.impl.MatrixReportReloader;
+import com.dianping.cat.report.task.reload.impl.StateReportReloader;
+import com.dianping.cat.report.task.reload.impl.TopReportReloader;
+import com.dianping.cat.report.task.reload.impl.TransactionReportReloader;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.statistic.ServerStatisticManager;
+import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
 import com.dianping.cat.system.page.login.service.CookieManager;
@@ -279,6 +303,242 @@ public class CatHomeSpringConfiguration {
 		manager.setAnalyzerFactory(messageAnalyzerFactory);
 		manager.setConfigManager(serverConfigManager);
 		return manager;
+	}
+
+	@Bean
+	public TaskManager taskManager(TaskRepository taskRepository) {
+		TaskManager manager = new TaskManager();
+
+		manager.setTaskDao(taskRepository);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public AllReportConfigManager allReportConfigManager(ConfigRepository configRepository,
+			ContentFetcher contentFetcher) {
+		AllReportConfigManager manager = new AllReportConfigManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setFetcher(contentFetcher);
+		return manager;
+	}
+
+	@Bean
+	public ReportDelegate<TransactionReport> transactionDelegate(TaskManager taskManager,
+			ServerFilterConfigManager serverFilterConfigManager, AllReportConfigManager allReportConfigManager,
+			ServerConfigManager serverConfigManager, AtomicMessageConfigManager atomicMessageConfigManager) {
+		TransactionDelegate delegate = new TransactionDelegate();
+
+		delegate.setTaskManager(taskManager);
+		delegate.setConfigManager(serverFilterConfigManager);
+		delegate.setTransactionManager(allReportConfigManager);
+		delegate.setServerConfigManager(serverConfigManager);
+		delegate.setAtomicMessageConfigManager(atomicMessageConfigManager);
+		return delegate;
+	}
+
+	@Bean
+	public ReportDelegate<EventReport> eventDelegate(TaskManager taskManager,
+			ServerFilterConfigManager serverFilterConfigManager, AllReportConfigManager allReportConfigManager,
+			ServerConfigManager serverConfigManager, AtomicMessageConfigManager atomicMessageConfigManager) {
+		EventDelegate delegate = new EventDelegate();
+
+		delegate.setTaskManager(taskManager);
+		delegate.setConfigManager(serverFilterConfigManager);
+		delegate.setAllManager(allReportConfigManager);
+		delegate.setServerConfigManager(serverConfigManager);
+		delegate.setAtomicMessageConfigManager(atomicMessageConfigManager);
+		return delegate;
+	}
+
+	@Bean
+	public ReportDelegate<HeartbeatReport> heartbeatDelegate(TaskManager taskManager,
+			ServerFilterConfigManager serverFilterConfigManager) {
+		HeartbeatDelegate delegate = new HeartbeatDelegate();
+
+		delegate.setTaskManager(taskManager);
+		delegate.setConfigManager(serverFilterConfigManager);
+		return delegate;
+	}
+
+	@Bean
+	public ReportDelegate<MatrixReport> matrixDelegate(TaskManager taskManager,
+			ServerFilterConfigManager serverFilterConfigManager) {
+		MatrixDelegate delegate = new MatrixDelegate();
+
+		delegate.setTaskManager(taskManager);
+		delegate.setConfigManager(serverFilterConfigManager);
+		return delegate;
+	}
+
+	@Bean
+	public ReportDelegate<TopReport> topDelegate() {
+		return new TopDelegate();
+	}
+
+	@Bean
+	public ReportDelegate<StateReport> stateDelegate(TaskManager taskManager, ReportBucketManager reportBucketManager) {
+		StateDelegate delegate = new StateDelegate();
+
+		delegate.setTaskManager(taskManager);
+		delegate.setBucketManager(reportBucketManager);
+		return delegate;
+	}
+
+	@Bean(name = TransactionAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	public ReportManager<TransactionReport> transactionReportManager(
+			ReportDelegate<TransactionReport> transactionDelegate, ReportBucketManager reportBucketManager,
+			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
+			DomainValidator domainValidator, Logger plexusConsoleLogger) {
+		DefaultReportManager<TransactionReport> manager = new DefaultReportManager<TransactionReport>();
+
+		manager.setReportDelegate(transactionDelegate);
+		manager.setBucketManager(reportBucketManager);
+		manager.setReportDao(hourlyReportRepository);
+		manager.setReportContentDao(hourlyReportContentRepository);
+		manager.setValidator(domainValidator);
+		manager.setName(TransactionAnalyzer.ID);
+		manager.enableLogging(plexusConsoleLogger);
+		return manager;
+	}
+
+	@Bean(name = EventAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	public ReportManager<EventReport> eventReportManager(ReportDelegate<EventReport> eventDelegate,
+			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
+			Logger plexusConsoleLogger) {
+		DefaultReportManager<EventReport> manager = new DefaultReportManager<EventReport>();
+
+		manager.setReportDelegate(eventDelegate);
+		manager.setBucketManager(reportBucketManager);
+		manager.setReportDao(hourlyReportRepository);
+		manager.setReportContentDao(hourlyReportContentRepository);
+		manager.setValidator(domainValidator);
+		manager.setName(EventAnalyzer.ID);
+		manager.enableLogging(plexusConsoleLogger);
+		return manager;
+	}
+
+	@Bean(name = HeartbeatAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	public ReportManager<HeartbeatReport> heartbeatReportManager(ReportDelegate<HeartbeatReport> heartbeatDelegate,
+			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
+			Logger plexusConsoleLogger) {
+		DefaultReportManager<HeartbeatReport> manager = new DefaultReportManager<HeartbeatReport>();
+
+		manager.setReportDelegate(heartbeatDelegate);
+		manager.setBucketManager(reportBucketManager);
+		manager.setReportDao(hourlyReportRepository);
+		manager.setReportContentDao(hourlyReportContentRepository);
+		manager.setValidator(domainValidator);
+		manager.setName(HeartbeatAnalyzer.ID);
+		manager.enableLogging(plexusConsoleLogger);
+		return manager;
+	}
+
+	@Bean(name = MatrixAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	public ReportManager<MatrixReport> matrixReportManager(ReportDelegate<MatrixReport> matrixDelegate,
+			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
+			Logger plexusConsoleLogger) {
+		DefaultReportManager<MatrixReport> manager = new DefaultReportManager<MatrixReport>();
+
+		manager.setReportDelegate(matrixDelegate);
+		manager.setBucketManager(reportBucketManager);
+		manager.setReportDao(hourlyReportRepository);
+		manager.setReportContentDao(hourlyReportContentRepository);
+		manager.setValidator(domainValidator);
+		manager.setName(MatrixAnalyzer.ID);
+		manager.enableLogging(plexusConsoleLogger);
+		return manager;
+	}
+
+	@Bean(name = TopAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	public ReportManager<TopReport> topReportManager(ReportDelegate<TopReport> topDelegate,
+			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
+			Logger plexusConsoleLogger) {
+		DefaultReportManager<TopReport> manager = new DefaultReportManager<TopReport>();
+
+		manager.setReportDelegate(topDelegate);
+		manager.setBucketManager(reportBucketManager);
+		manager.setReportDao(hourlyReportRepository);
+		manager.setReportContentDao(hourlyReportContentRepository);
+		manager.setValidator(domainValidator);
+		manager.setName(TopAnalyzer.ID);
+		manager.enableLogging(plexusConsoleLogger);
+		return manager;
+	}
+
+	@Bean(name = StateAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	public ReportManager<StateReport> stateReportManager(ReportDelegate<StateReport> stateDelegate,
+			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
+			Logger plexusConsoleLogger) {
+		DefaultReportManager<StateReport> manager = new DefaultReportManager<StateReport>();
+
+		manager.setReportDelegate(stateDelegate);
+		manager.setBucketManager(reportBucketManager);
+		manager.setReportDao(hourlyReportRepository);
+		manager.setReportContentDao(hourlyReportContentRepository);
+		manager.setValidator(domainValidator);
+		manager.setName(StateAnalyzer.ID);
+		manager.enableLogging(plexusConsoleLogger);
+		return manager;
+	}
+
+	@Bean
+	public ReportReloader transactionReportReloader(
+			@Qualifier(TransactionAnalyzer.ID + "ReportManager") ReportManager<TransactionReport> transactionReportManager) {
+		TransactionReportReloader reloader = new TransactionReportReloader();
+
+		reloader.setReportManager(transactionReportManager);
+		return reloader;
+	}
+
+	@Bean
+	public ReportReloader eventReportReloader(
+			@Qualifier(EventAnalyzer.ID + "ReportManager") ReportManager<EventReport> eventReportManager) {
+		EventReportReloader reloader = new EventReportReloader();
+
+		reloader.setReportManager(eventReportManager);
+		return reloader;
+	}
+
+	@Bean
+	public ReportReloader heartbeatReportReloader(
+			@Qualifier(HeartbeatAnalyzer.ID + "ReportManager") ReportManager<HeartbeatReport> heartbeatReportManager) {
+		HeartbeatReportReloader reloader = new HeartbeatReportReloader();
+
+		reloader.setReportManager(heartbeatReportManager);
+		return reloader;
+	}
+
+	@Bean
+	public ReportReloader matrixReportReloader(
+			@Qualifier(MatrixAnalyzer.ID + "ReportManager") ReportManager<MatrixReport> matrixReportManager) {
+		MatrixReportReloader reloader = new MatrixReportReloader();
+
+		reloader.setReportManager(matrixReportManager);
+		return reloader;
+	}
+
+	@Bean
+	public ReportReloader topReportReloader(
+			@Qualifier(TopAnalyzer.ID + "ReportManager") ReportManager<TopReport> topReportManager) {
+		TopReportReloader reloader = new TopReportReloader();
+
+		reloader.setReportManager(topReportManager);
+		return reloader;
+	}
+
+	@Bean
+	public ReportReloader stateReportReloader(
+			@Qualifier(StateAnalyzer.ID + "ReportManager") ReportManager<StateReport> stateReportManager) {
+		StateReportReloader reloader = new StateReportReloader();
+
+		reloader.setReportManager(stateReportManager);
+		return reloader;
 	}
 
 	@Bean(name = CurrentReportBuilder.ID)
