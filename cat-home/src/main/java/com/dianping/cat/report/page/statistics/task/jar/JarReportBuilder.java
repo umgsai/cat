@@ -28,8 +28,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
@@ -49,7 +47,6 @@ import com.dianping.cat.report.page.statistics.service.JarReportService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = TaskBuilder.class, value = JarReportBuilder.ID)
 public class JarReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JarReportBuilder.class);
 
@@ -60,13 +57,10 @@ public class JarReportBuilder implements TaskBuilder {
 													"zebra-api", "swallow-client", "swallow-consumerclient",	"swallow-producerclient", "platform-sdk",
 													"squirrel-client");
 
-	@Inject
 	private JarReportService m_reportService;
 
-	@Inject
 	private HeartbeatReportService m_heartbeatReportService;
 
-	@Inject
 	private ServerFilterConfigManager m_configManager;
 
 	@Override

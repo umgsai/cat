@@ -24,8 +24,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -55,28 +53,21 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = TaskBuilder.class, value = UtilizationReportBuilder.ID)
 public class UtilizationReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UtilizationReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_UTILIZATION;
 
-	@Inject
 	protected UtilizationReportService m_reportService;
 
-	@Inject
 	protected TransactionReportService m_transactionReportService;
 
-	@Inject
 	protected HeartbeatReportService m_heartbeatReportService;
 
-	@Inject
 	protected CrossReportService m_crossReportService;
 
-	@Inject
 	private TransactionMergeHelper m_mergeHelper;
 
-	@Inject
 	private ServerFilterConfigManager m_configManger;
 
 	@Override

@@ -24,9 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.config.business.BusinessConfigManager;
 import com.dianping.cat.configuration.business.entity.BusinessItemConfig;
 import com.dianping.cat.configuration.business.entity.BusinessReportConfig;
@@ -44,32 +41,24 @@ import com.dianping.cat.report.page.metric.task.BaselineCreator;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = TaskBuilder.class, value = BusinessBaselineReportBuilder.ID)
 public class BusinessBaselineReportBuilder implements TaskBuilder {
 
 	public static final String ID = BusinessAnalyzer.ID;
 
 	private static final int POINT_NUMBER = 60 * 24;
 
-	@Inject
 	private BusinessReportService m_reportService;
 
-	@Inject
 	private BusinessConfigManager m_configManager;
 
-	@Inject
 	private BaselineConfigManager m_baselineConfigManager;
 
-	@Inject
 	private BusinessPointParser m_parser;
 
-	@Inject
 	private BaselineCreator m_baselineCreator;
 
-	@Inject
 	private BaselineService m_baselineService;
 
-	@Inject
 	private BusinessKeyHelper m_keyHelper;
 
 	@Override

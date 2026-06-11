@@ -26,8 +26,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -51,21 +49,17 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = TaskBuilder.class, value = ServiceReportBuilder.ID)
 public class ServiceReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_SERVICE;
 
-	@Inject
 	protected ServiceReportService m_reportService;
 
-	@Inject
 	protected CrossReportService m_crossReportService;
 
 	Map<String, Domain> stat = new HashMap<String, Domain>();
 
-	@Inject
 	private ServerFilterConfigManager m_configManger;
 
 	@Override

@@ -227,22 +227,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>transaction</role-hint>
-			<implementation>com.dianping.cat.report.page.transaction.task.TransactionReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.service.TransactionReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.AtomicMessageConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.alert.event.EventRuleConfigManager</role>
 			<implementation>com.dianping.cat.report.alert.event.EventRuleConfigManager</implementation>
 			<requirements>
@@ -380,22 +364,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>event</role-hint>
-			<implementation>com.dianping.cat.report.page.event.task.EventReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.event.service.EventReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.AtomicMessageConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.alert.business.BusinessRuleConfigManager</role>
 			<implementation>com.dianping.cat.report.alert.business.BusinessRuleConfigManager</implementation>
 			<requirements>
@@ -519,34 +487,6 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.baseline.BaselineRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>business</role-hint>
-			<implementation>com.dianping.cat.report.page.business.task.BusinessBaselineReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.service.BusinessReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.business.BusinessConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.metric.task.BaselineConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.task.BusinessPointParser</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.metric.task.BaselineCreator</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.metric.service.BaselineService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.task.BusinessKeyHelper</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -755,16 +695,6 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.service.ProjectService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>heartbeat</role-hint>
-			<implementation>com.dianping.cat.report.page.heartbeat.task.HeartbeatReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -1265,22 +1195,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>dependency</role-hint>
-			<implementation>com.dianping.cat.report.page.dependency.task.DependencyReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.dependency.service.DependencyReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.topologygraph.TopologyGraphRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.page.statistics.service.UtilizationReportService</role>
 			<implementation>com.dianping.cat.report.page.statistics.service.UtilizationReportService</implementation>
 			<requirements>
@@ -1307,31 +1221,6 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>utilization</role-hint>
-			<implementation>com.dianping.cat.report.page.statistics.task.utilization.UtilizationReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.statistics.service.UtilizationReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.service.TransactionReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.cross.service.CrossReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -1366,22 +1255,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>service</role-hint>
-			<implementation>com.dianping.cat.report.page.statistics.task.service.ServiceReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.statistics.service.ServiceReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.cross.service.CrossReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.page.statistics.service.HeavyReportService</role>
 			<implementation>com.dianping.cat.report.page.statistics.service.HeavyReportService</implementation>
 			<requirements>
@@ -1408,22 +1281,6 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>heavy</role-hint>
-			<implementation>com.dianping.cat.report.page.statistics.task.heavy.HeavyReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.statistics.service.HeavyReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.matrix.service.MatrixReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -1576,22 +1433,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>jar</role-hint>
-			<implementation>com.dianping.cat.report.page.statistics.task.jar.JarReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.statistics.service.JarReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.page.statistics.service.ClientReportService</role>
 			<implementation>com.dianping.cat.report.page.statistics.service.ClientReportService</implementation>
 			<requirements>
@@ -1622,28 +1463,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>client</role-hint>
-			<implementation>com.dianping.cat.report.page.statistics.task.service.ClientReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.statistics.service.ClientReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.service.TransactionReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.service.ProjectService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.page.cross.service.CrossReportService</role>
 			<implementation>com.dianping.cat.report.page.cross.service.CrossReportService</implementation>
 			<requirements>
@@ -1670,16 +1489,6 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>cross</role-hint>
-			<implementation>com.dianping.cat.report.page.cross.task.CrossReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.cross.service.CrossReportService</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -1763,16 +1572,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>matrix</role-hint>
-			<implementation>com.dianping.cat.report.page.matrix.task.MatrixReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.matrix.service.MatrixReportService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.service.LocalModelService</role>
 			<role-hint>matrix</role-hint>
 			<implementation>com.dianping.cat.report.page.matrix.service.LocalMatrixService</implementation>
@@ -1848,28 +1647,6 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.task.TaskBuilder</role>
-			<role-hint>state</role-hint>
-			<implementation>com.dianping.cat.report.page.state.task.StateReportBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.state.service.StateReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.service.ProjectService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.service.HostinfoService</role>
 				</requirement>
 			</requirements>
 		</component>

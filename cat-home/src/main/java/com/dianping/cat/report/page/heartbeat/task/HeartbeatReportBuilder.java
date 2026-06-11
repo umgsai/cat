@@ -22,8 +22,6 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
@@ -37,13 +35,11 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = TaskBuilder.class, value = HeartbeatReportBuilder.ID)
 public class HeartbeatReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatReportBuilder.class);
 
 	public static final String ID = HeartbeatAnalyzer.ID;
 
-	@Inject
 	protected HeartbeatReportService m_reportService;
 
 	@Override

@@ -25,8 +25,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
@@ -41,19 +39,15 @@ import com.dianping.cat.report.page.dependency.service.DependencyReportService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = TaskBuilder.class, value = DependencyReportBuilder.ID)
 public class DependencyReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DependencyReportBuilder.class);
 
 	public static final String ID = DependencyAnalyzer.ID;
 
-	@Inject
 	private DependencyReportService m_reportService;
 
-	@Inject
 	private TopologyGraphBuilder m_graphBuilder;
 
-	@Inject
 	private TopologyGraphRepository m_topologyGraphDao;
 
 	@Override

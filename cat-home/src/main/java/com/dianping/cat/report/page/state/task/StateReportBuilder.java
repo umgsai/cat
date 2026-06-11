@@ -25,8 +25,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -52,25 +50,19 @@ import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = TaskBuilder.class, value = StateReportBuilder.ID)
 public class StateReportBuilder implements TaskBuilder, Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StateReportBuilder.class);
 
 	public static final String ID = StateAnalyzer.ID;
 
-	@Inject
 	protected StateReportService m_reportService;
 
-	@Inject
 	protected ServerConfigManager m_serverConfigManager;
 
-	@Inject
 	protected ServerFilterConfigManager m_serverFilterConfigManager;
 
-	@Inject
 	private ProjectService m_projectService;
 
-	@Inject
 	private HostinfoService m_hostinfoService;
 
 	@Override

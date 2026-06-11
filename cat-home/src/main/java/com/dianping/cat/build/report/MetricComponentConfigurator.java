@@ -40,7 +40,6 @@ import com.dianping.cat.report.page.business.service.BusinessReportService;
 import com.dianping.cat.report.page.business.service.CompositeBusinessService;
 import com.dianping.cat.report.page.business.service.HistoricalBusinessService;
 import com.dianping.cat.report.page.business.service.LocalBusinessService;
-import com.dianping.cat.report.page.business.task.BusinessBaselineReportBuilder;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.business.task.BusinessPointParser;
 import com.dianping.cat.report.page.metric.service.DefaultBaselineService;
@@ -75,7 +74,6 @@ public class MetricComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(A(BusinessKeyHelper.class));
 		all.add(A(DefaultBaselineCreator.class));
 		all.add(A(DefaultBaselineService.class));
-		all.add(A(BusinessBaselineReportBuilder.class));
 
 		all.add(C(Contactor.class, BusinessContactor.ID, BusinessContactor.class)
 								.req(ProjectService.class, AlertConfigManager.class));

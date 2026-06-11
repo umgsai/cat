@@ -23,8 +23,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -42,25 +40,19 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = TaskBuilder.class, value = ClientReportBuilder.ID)
 public class ClientReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClientReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_CLIENT;
 
-	@Inject
 	protected ClientReportService m_reportService;
 
-	@Inject
 	protected TransactionReportService m_transactionReportService;
 
-	@Inject
 	private ServerFilterConfigManager m_configManger;
 
-	@Inject
 	private ProjectService m_projectService;
 
-	@Inject
 	private TransactionMergeHelper m_mergeHelper;
 
 	@Override
