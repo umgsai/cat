@@ -28,7 +28,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -38,7 +37,7 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.spring.CatSpringContext;
 
 @Named
-public class ReportReloadTask extends ContainerHolder implements Initializable, Task {
+public class ReportReloadTask implements Initializable, Task {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReportReloadTask.class);
 
 	private static final long DURATION = TimeHelper.ONE_HOUR;
@@ -66,22 +65,17 @@ public class ReportReloadTask extends ContainerHolder implements Initializable, 
 
 		Map<String, ReportReloader> indexedSpringReloaders = indexSpringReloaders(springReloaders);
 
-		if (indexedSpringReloaders.size() >= EXPECTED_RELOADER_COUNT) {
-			m_reloaders = indexedSpringReloaders;
-			LOGGER.info("Initialized report reload task from Spring, reloaderCount={}, reloaders={}.", m_reloaders.size(),
-					m_reloaders.keySet());
-			return;
+		if (indexedSpringReloaders.size() < EXPECTED_RELOADER_COUNT) {
+			String message = String.format(
+					"Report reload task requires %s Spring reloaders but found %s, springBeanCount=%s, reloaders=%s.",
+					EXPECTED_RELOADER_COUNT, indexedSpringReloaders.size(), springReloaders.size(), indexedSpringReloaders.keySet());
+
+			LOGGER.error(message);
+			throw new InitializationException(message);
 		}
 
-		Map<String, ReportReloader> plexusReloaders = lookupMap(ReportReloader.class);
-		Map<String, ReportReloader> reloaders = new java.util.LinkedHashMap<String, ReportReloader>();
-
-		reloaders.putAll(plexusReloaders);
-		reloaders.putAll(indexedSpringReloaders);
-		m_reloaders = reloaders;
-		LOGGER.info(
-				"Initialized report reload task, reloaderCount={}, springReloaderCount={}, springBeanCount={}, plexusReloaderCount={}, reloaders={}.",
-				m_reloaders.size(), indexedSpringReloaders.size(), springReloaders.size(), plexusReloaders.size(),
+		m_reloaders = indexedSpringReloaders;
+		LOGGER.info("Initialized report reload task from Spring, reloaderCount={}, reloaders={}.", m_reloaders.size(),
 				m_reloaders.keySet());
 	}
 

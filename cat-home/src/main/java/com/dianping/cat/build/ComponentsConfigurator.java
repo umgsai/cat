@@ -64,17 +64,6 @@ import com.dianping.cat.report.task.DefaultTaskConsumer;
 import com.dianping.cat.report.task.ReportFacade;
 import com.dianping.cat.report.task.cmdb.ProjectUpdateTask;
 import com.dianping.cat.report.task.reload.ReportReloadTask;
-import com.dianping.cat.report.task.reload.impl.BusinessReportReloader;
-import com.dianping.cat.report.task.reload.impl.CrossReportReloader;
-import com.dianping.cat.report.task.reload.impl.DependencyReportReloader;
-import com.dianping.cat.report.task.reload.impl.EventReportReloader;
-import com.dianping.cat.report.task.reload.impl.HeartbeatReportReloader;
-import com.dianping.cat.report.task.reload.impl.MatrixReportReloader;
-import com.dianping.cat.report.task.reload.impl.ProblemReportReloader;
-import com.dianping.cat.report.task.reload.impl.StateReportReloader;
-import com.dianping.cat.report.task.reload.impl.StorageReportReloader;
-import com.dianping.cat.report.task.reload.impl.TopReportReloader;
-import com.dianping.cat.report.task.reload.impl.TransactionReportReloader;
 import com.dianping.cat.system.page.permission.ResourceConfigManager;
 import com.dianping.cat.system.page.permission.UserConfigManager;
 
@@ -193,17 +182,6 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(A(DomainGroupConfigManager.class));
 
 		all.add(A(ReportReloadTask.class));
-		all.add(A(BusinessReportReloader.class));
-		all.add(A(CrossReportReloader.class));
-		all.add(A(DependencyReportReloader.class));
-		all.add(A(EventReportReloader.class));
-		all.add(A(HeartbeatReportReloader.class));
-		all.add(A(MatrixReportReloader.class));
-		all.add(A(ProblemReportReloader.class));
-		all.add(A(StateReportReloader.class));
-		all.add(A(StorageReportReloader.class));
-		all.add(A(TopReportReloader.class));
-		all.add(A(TransactionReportReloader.class));
 
 		return all;
 	}
