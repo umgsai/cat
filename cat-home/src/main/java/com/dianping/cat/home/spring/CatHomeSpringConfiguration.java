@@ -143,9 +143,12 @@ import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.business.task.BusinessPointParser;
 import com.dianping.cat.report.page.cross.service.CrossReportService;
 import com.dianping.cat.report.page.cross.service.LocalCrossService;
+import com.dianping.cat.report.page.cross.task.CrossReportBuilder;
 import com.dianping.cat.report.page.dependency.service.DependencyReportService;
 import com.dianping.cat.report.page.dependency.service.LocalDependencyService;
 import com.dianping.cat.report.page.dependency.task.DependencyReportBuilder;
+import com.dianping.cat.report.page.event.service.EventReportService;
+import com.dianping.cat.report.page.event.task.EventReportBuilder;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.page.heartbeat.service.LocalHeartbeatService;
@@ -153,6 +156,7 @@ import com.dianping.cat.report.page.heartbeat.task.HeartbeatReportBuilder;
 import com.dianping.cat.report.page.logview.service.LocalMessageService;
 import com.dianping.cat.report.page.matrix.service.MatrixReportService;
 import com.dianping.cat.report.page.matrix.service.LocalMatrixService;
+import com.dianping.cat.report.page.matrix.task.MatrixReportBuilder;
 import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.report.page.metric.service.DefaultBaselineService;
 import com.dianping.cat.report.page.metric.task.BaselineConfigManager;
@@ -163,6 +167,7 @@ import com.dianping.cat.report.page.problem.service.CompositeProblemService;
 import com.dianping.cat.report.page.problem.service.HistoricalProblemService;
 import com.dianping.cat.report.page.problem.service.LocalProblemService;
 import com.dianping.cat.report.page.problem.service.ProblemReportService;
+import com.dianping.cat.report.page.problem.task.ProblemReportBuilder;
 import com.dianping.cat.report.page.statistics.service.ClientReportService;
 import com.dianping.cat.report.page.statistics.service.HeavyReportService;
 import com.dianping.cat.report.page.statistics.service.JarReportService;
@@ -175,6 +180,9 @@ import com.dianping.cat.report.page.statistics.task.service.ServiceReportBuilder
 import com.dianping.cat.report.page.statistics.task.utilization.UtilizationReportBuilder;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
 import com.dianping.cat.report.page.storage.service.LocalStorageService;
+import com.dianping.cat.report.page.storage.task.StorageReportBuilder;
+import com.dianping.cat.report.page.storage.task.StorageReportService;
+import com.dianping.cat.report.page.storage.transform.StorageMergeHelper;
 import com.dianping.cat.report.server.RemoteServersManager;
 import com.dianping.cat.report.service.AbstractReportService;
 import com.dianping.cat.report.service.LocalModelService;
@@ -295,6 +303,31 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public EventReportService eventReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		EventReportService service = new EventReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean(name = EventReportBuilder.ID, initMethod = "initialize")
+	public TaskBuilder eventReportBuilder(EventReportService eventReportService, ServerConfigManager serverConfigManager,
+			AtomicMessageConfigManager atomicMessageConfigManager) {
+		EventReportBuilder builder = new EventReportBuilder();
+
+		builder.setReportService(eventReportService);
+		builder.setServerConfigManager(serverConfigManager);
+		builder.setAtomicMessageConfigManager(atomicMessageConfigManager);
+		return builder;
+	}
+
+	@Bean
 	public RouterConfigService routerConfigService(RouterConfigManager routerConfigManager,
 			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
 			DailyReportRepository dailyReportRepository, DailyReportContentRepository dailyReportContentRepository,
@@ -411,6 +444,14 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(name = MatrixReportBuilder.ID, initMethod = "initialize")
+	public TaskBuilder matrixReportBuilder(MatrixReportService matrixReportService) {
+		MatrixReportBuilder builder = new MatrixReportBuilder();
+
+		builder.setReportService(matrixReportService);
+		return builder;
+	}
+
 	@Bean
 	public HeavyReportService heavyReportService(HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
@@ -462,6 +503,14 @@ public class CatHomeSpringConfiguration {
 				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
 				monthlyReportContentRepository);
 		return service;
+	}
+
+	@Bean(name = CrossReportBuilder.ID, initMethod = "initialize")
+	public TaskBuilder crossReportBuilder(CrossReportService crossReportService) {
+		CrossReportBuilder builder = new CrossReportBuilder();
+
+		builder.setReportService(crossReportService);
+		return builder;
 	}
 
 	@Bean
@@ -895,6 +944,42 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public ProblemReportService problemReportService() {
 		return new ProblemReportService();
+	}
+
+	@Bean(initMethod = "initialize")
+	public TaskBuilder problemReportBuilder(ProblemReportService problemReportService) {
+		ProblemReportBuilder builder = new ProblemReportBuilder();
+
+		builder.setReportService(problemReportService);
+		return builder;
+	}
+
+	@Bean
+	public StorageReportService storageReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		StorageReportService service = new StorageReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean
+	public StorageMergeHelper storageMergeHelper() {
+		return new StorageMergeHelper();
+	}
+
+	@Bean(initMethod = "initialize")
+	public TaskBuilder storageReportBuilder(StorageReportService storageReportService, StorageMergeHelper storageMergeHelper) {
+		StorageReportBuilder builder = new StorageReportBuilder();
+
+		builder.setReportService(storageReportService);
+		builder.setStorageMergerHelper(storageMergeHelper);
+		return builder;
 	}
 
 	@Bean(initMethod = "initialize", name = "problem-historical")

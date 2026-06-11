@@ -44,6 +44,7 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = ProblemReportBuilder.ID)
 public class ProblemReportBuilder implements TaskBuilder, Initializable {
@@ -56,6 +57,7 @@ public class ProblemReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
 		try {
 			ProblemReport problemReport = queryHourlyReportsByDuration(name, domain, period,	TaskHelper.tomorrowZero(period));
 
@@ -84,6 +86,7 @@ public class ProblemReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
 		LOGGER.info("Building problem monthly report, name={}, domain={}, period={}.", name, domain, period);
 		ProblemReport problemReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 
@@ -103,6 +106,7 @@ public class ProblemReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
 		LOGGER.info("Building problem weekly report, name={}, domain={}, period={}.", name, domain, period);
 		ProblemReport problemReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
@@ -120,6 +124,7 @@ public class ProblemReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
 			@Override
@@ -191,5 +196,17 @@ public class ProblemReportBuilder implements TaskBuilder, Initializable {
 		dailyReport.setStartTime(TaskHelper.todayZero(date));
 		dailyReport.setEndTime(end);
 		return dailyReport;
+	}
+
+	private void refreshSpringBeans() {
+		ProblemReportService reportService = CatSpringContext.getBeanIfAvailable(ProblemReportService.class);
+
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+	}
+
+	public void setReportService(ProblemReportService reportService) {
+		m_reportService = reportService;
 	}
 }

@@ -42,6 +42,7 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = CrossReportBuilder.ID)
 public class CrossReportBuilder implements TaskBuilder, Initializable {
@@ -54,6 +55,7 @@ public class CrossReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
 		LOGGER.info("Building cross daily report, name={}, domain={}, period={}.", name, domain, period);
 		CrossReport crossReport = queryHourlyReportsByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
 		DailyReport report = new DailyReport();
@@ -75,6 +77,7 @@ public class CrossReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
 		LOGGER.info("Building cross monthly report, name={}, domain={}, period={}.", name, domain, period);
 		CrossReport crossReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
@@ -91,6 +94,7 @@ public class CrossReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
 		LOGGER.info("Building cross weekly report, name={}, domain={}, period={}.", name, domain, period);
 		CrossReport crossReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
@@ -108,6 +112,7 @@ public class CrossReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
 			@Override
@@ -165,5 +170,17 @@ public class CrossReportBuilder implements TaskBuilder, Initializable {
 		crossReport.setEndTime(endDate);
 
 		return crossReport;
+	}
+
+	private void refreshSpringBeans() {
+		CrossReportService reportService = CatSpringContext.getBeanIfAvailable(CrossReportService.class);
+
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+	}
+
+	public void setReportService(CrossReportService reportService) {
+		m_reportService = reportService;
 	}
 }

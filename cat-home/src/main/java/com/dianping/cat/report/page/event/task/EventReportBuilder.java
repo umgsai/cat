@@ -231,16 +231,32 @@ public class EventReportBuilder implements TaskBuilder, Initializable {
 	}
 
 	private void refreshSpringBeans() {
+		EventReportService reportService = CatSpringContext.getBeanIfAvailable(EventReportService.class);
 		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 		AtomicMessageConfigManager atomicMessageConfigManager = CatSpringContext
 		      .getBeanIfAvailable(AtomicMessageConfigManager.class);
 
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
 		if (serverConfigManager != null) {
 			m_serverConfigManager = serverConfigManager;
 		}
 		if (atomicMessageConfigManager != null) {
 			m_atomicMessageConfigManager = atomicMessageConfigManager;
 		}
+	}
+
+	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {
+		m_atomicMessageConfigManager = atomicMessageConfigManager;
+	}
+
+	public void setReportService(EventReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
 	}
 
 }

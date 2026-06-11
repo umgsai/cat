@@ -43,6 +43,7 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = MatrixReportBuilder.ID)
 public class MatrixReportBuilder implements TaskBuilder, Initializable {
@@ -55,6 +56,7 @@ public class MatrixReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
 		LOGGER.info("Building matrix daily report, name={}, domain={}, period={}.", name, domain, period);
 		MatrixReport matrixReport = queryHourlyReportByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
 		DailyReport report = new DailyReport();
@@ -76,6 +78,7 @@ public class MatrixReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
 		LOGGER.info("Building matrix monthly report, name={}, domain={}, period={}.", name, domain, period);
 		MatrixReport matrixReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
@@ -92,6 +95,7 @@ public class MatrixReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
 		LOGGER.info("Building matrix weekly report, name={}, domain={}, period={}.", name, domain, period);
 		MatrixReport matrixReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
@@ -109,6 +113,7 @@ public class MatrixReportBuilder implements TaskBuilder, Initializable {
 
 	@Override
 	public void initialize() throws InitializationException {
+		refreshSpringBeans();
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
 			@Override
@@ -170,6 +175,18 @@ public class MatrixReportBuilder implements TaskBuilder, Initializable {
 		matrixReport.setStartTime(start);
 		matrixReport.setEndTime(end);
 		return matrixReport;
+	}
+
+	private void refreshSpringBeans() {
+		MatrixReportService reportService = CatSpringContext.getBeanIfAvailable(MatrixReportService.class);
+
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+	}
+
+	public void setReportService(MatrixReportService reportService) {
+		m_reportService = reportService;
 	}
 
 }
