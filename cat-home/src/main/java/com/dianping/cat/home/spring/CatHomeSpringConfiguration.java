@@ -222,6 +222,8 @@ import com.dianping.cat.report.page.storage.task.StorageReportBuilder;
 import com.dianping.cat.report.page.storage.task.StorageReportService;
 import com.dianping.cat.report.page.storage.transform.StorageMergeHelper;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.task.DefaultTaskConsumer;
+import com.dianping.cat.report.task.ReportFacade;
 import com.dianping.cat.report.service.AbstractReportService;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
@@ -244,6 +246,7 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.ReportReloader;
+import com.dianping.cat.report.task.reload.ReportReloadTask;
 import com.dianping.cat.report.task.reload.impl.BusinessReportReloader;
 import com.dianping.cat.report.task.reload.impl.CrossReportReloader;
 import com.dianping.cat.report.task.reload.impl.DependencyReportReloader;
@@ -736,6 +739,62 @@ public class CatHomeSpringConfiguration {
 
 		reloader.setReportManager(stateReportManager);
 		return reloader;
+	}
+
+	@Bean
+	public Map<String, ReportReloader> reportReloaders(@Qualifier("businessReportReloader") ReportReloader businessReportReloader,
+			@Qualifier("transactionReportReloader") ReportReloader transactionReportReloader,
+			@Qualifier("crossReportReloader") ReportReloader crossReportReloader,
+			@Qualifier("dependencyReportReloader") ReportReloader dependencyReportReloader,
+			@Qualifier("eventReportReloader") ReportReloader eventReportReloader,
+			@Qualifier("heartbeatReportReloader") ReportReloader heartbeatReportReloader,
+			@Qualifier("matrixReportReloader") ReportReloader matrixReportReloader,
+			@Qualifier("problemReportReloader") ReportReloader problemReportReloader,
+			@Qualifier("storageReportReloader") ReportReloader storageReportReloader,
+			@Qualifier("topReportReloader") ReportReloader topReportReloader,
+			@Qualifier("stateReportReloader") ReportReloader stateReportReloader) {
+		Map<String, ReportReloader> reloaders = new LinkedHashMap<String, ReportReloader>();
+
+		reloaders.put(businessReportReloader.getId(), businessReportReloader);
+		reloaders.put(transactionReportReloader.getId(), transactionReportReloader);
+		reloaders.put(crossReportReloader.getId(), crossReportReloader);
+		reloaders.put(dependencyReportReloader.getId(), dependencyReportReloader);
+		reloaders.put(eventReportReloader.getId(), eventReportReloader);
+		reloaders.put(heartbeatReportReloader.getId(), heartbeatReportReloader);
+		reloaders.put(matrixReportReloader.getId(), matrixReportReloader);
+		reloaders.put(problemReportReloader.getId(), problemReportReloader);
+		reloaders.put(storageReportReloader.getId(), storageReportReloader);
+		reloaders.put(topReportReloader.getId(), topReportReloader);
+		reloaders.put(stateReportReloader.getId(), stateReportReloader);
+		return reloaders;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ReportReloadTask reportReloadTask(ReportReloadConfigManager reportReloadConfigManager,
+			@Qualifier("reportReloaders") Map<String, ReportReloader> reportReloaders) {
+		ReportReloadTask task = new ReportReloadTask();
+
+		task.setConfigManager(reportReloadConfigManager);
+		task.setReloaders(reportReloaders);
+		return task;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ReportFacade reportFacade(Logger plexusConsoleLogger, Map<String, TaskBuilder> taskBuilders) {
+		ReportFacade facade = new ReportFacade();
+
+		facade.enableLogging(plexusConsoleLogger.getChildLogger(ReportFacade.class.getName()));
+		facade.setReportBuilders(taskBuilders);
+		return facade;
+	}
+
+	@Bean
+	public DefaultTaskConsumer defaultTaskConsumer(ReportFacade reportFacade, TaskRepository taskRepository) {
+		DefaultTaskConsumer consumer = new DefaultTaskConsumer();
+
+		consumer.setReportFacade(reportFacade);
+		consumer.setTaskDao(taskRepository);
+		return consumer;
 	}
 
 	@Bean(name = CurrentReportBuilder.ID)

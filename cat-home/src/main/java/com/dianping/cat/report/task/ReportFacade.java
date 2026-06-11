@@ -33,7 +33,6 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.Task;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 
 @Named
@@ -105,25 +104,16 @@ public class ReportFacade extends ContainerHolder implements LogEnabled, Initial
 
 	@Override
 	public void initialize() throws InitializationException {
-		Map<String, TaskBuilder> springBuilders = CatSpringContext.getBeansIfAvailable(TaskBuilder.class);
-		Map<String, TaskBuilder> springReportBuilders = buildReportBuilderMap(springBuilders);
+		if (m_reportBuilders.size() < EXPECTED_REPORT_BUILDER_COUNT) {
+			String message = String.format("Report facade requires %s Spring task builders but found %s, builders=%s.",
+					EXPECTED_REPORT_BUILDER_COUNT, m_reportBuilders.size(), m_reportBuilders.keySet());
 
-		if (springBuilders.size() >= EXPECTED_REPORT_BUILDER_COUNT) {
-			m_reportBuilders = springReportBuilders;
-			SLF4J_LOGGER.info("Initialized report facade from Spring, builderCount={}, builders={}.",
-					m_reportBuilders.size(), m_reportBuilders.keySet());
-			return;
+			SLF4J_LOGGER.error(message);
+			throw new InitializationException(message);
 		}
 
-		Map<String, TaskBuilder> plexusBuilders = lookupMap(TaskBuilder.class);
-		Map<String, TaskBuilder> builders = new HashMap<String, TaskBuilder>();
-
-		builders.putAll(plexusBuilders);
-		builders.putAll(springReportBuilders);
-		m_reportBuilders = builders;
-		SLF4J_LOGGER.info(
-				"Initialized report facade, builderCount={}, springBuilderCount={}, plexusBuilderCount={}, builders={}.",
-				m_reportBuilders.size(), springBuilders.size(), plexusBuilders.size(), m_reportBuilders.keySet());
+		SLF4J_LOGGER.info("Initialized report facade from Spring, builderCount={}, builders={}.",
+				m_reportBuilders.size(), m_reportBuilders.keySet());
 	}
 
 	private Map<String, TaskBuilder> buildReportBuilderMap(Map<String, TaskBuilder> springBuilders) {
@@ -154,6 +144,10 @@ public class ReportFacade extends ContainerHolder implements LogEnabled, Initial
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	public void setReportBuilders(Map<String, TaskBuilder> reportBuilders) {
+		m_reportBuilders = buildReportBuilderMap(reportBuilders);
 	}
 
 }

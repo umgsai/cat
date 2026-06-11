@@ -60,10 +60,7 @@ import com.dianping.cat.report.graph.svg.DefaultValueTranslater;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.server.RemoteServersManager;
 import com.dianping.cat.report.task.DefaultRemoteServersUpdater;
-import com.dianping.cat.report.task.DefaultTaskConsumer;
-import com.dianping.cat.report.task.ReportFacade;
 import com.dianping.cat.report.task.cmdb.ProjectUpdateTask;
-import com.dianping.cat.report.task.reload.ReportReloadTask;
 import com.dianping.cat.system.page.permission.ResourceConfigManager;
 import com.dianping.cat.system.page.permission.UserConfigManager;
 
@@ -96,10 +93,6 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(A(PayloadNormalizer.class));
 
 		all.add(A(ProjectUpdateTask.class));
-
-		all.add(A(ReportFacade.class));
-
-		all.add(A(DefaultTaskConsumer.class));
 
 		return all;
 	}
@@ -180,8 +173,6 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		List<Component> all = new ArrayList<Component>();
 
 		all.add(A(DomainGroupConfigManager.class));
-
-		all.add(A(ReportReloadTask.class));
 
 		return all;
 	}

@@ -176,4 +176,12 @@ public class DefaultTaskConsumer extends TaskConsumer {
 			m_taskDao = taskDao;
 		}
 	}
+
+	public void setReportFacade(ReportFacade reportFacade) {
+		m_reportFacade = reportFacade;
+	}
+
+	public void setTaskDao(TaskRepository taskDao) {
+		m_taskDao = taskDao;
+	}
 }

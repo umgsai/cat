@@ -34,7 +34,6 @@ import org.unidal.lookup.annotation.Named;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.helper.TimeHelper;
-import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class ReportReloadTask implements Initializable, Task {
@@ -56,36 +55,18 @@ public class ReportReloadTask implements Initializable, Task {
 
 	@Override
 	public void initialize() throws InitializationException {
-		ReportReloadConfigManager configManager = CatSpringContext.getBeanIfAvailable(ReportReloadConfigManager.class);
-		Map<String, ReportReloader> springReloaders = CatSpringContext.getBeansIfAvailable(ReportReloader.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-
-		Map<String, ReportReloader> indexedSpringReloaders = indexSpringReloaders(springReloaders);
-
-		if (indexedSpringReloaders.size() < EXPECTED_RELOADER_COUNT) {
+		if (m_reloaders == null || m_reloaders.size() < EXPECTED_RELOADER_COUNT) {
 			String message = String.format(
-					"Report reload task requires %s Spring reloaders but found %s, springBeanCount=%s, reloaders=%s.",
-					EXPECTED_RELOADER_COUNT, indexedSpringReloaders.size(), springReloaders.size(), indexedSpringReloaders.keySet());
+					"Report reload task requires %s Spring reloaders but found %s, reloaders=%s.",
+					EXPECTED_RELOADER_COUNT, m_reloaders == null ? 0 : m_reloaders.size(),
+					m_reloaders == null ? java.util.Collections.emptySet() : m_reloaders.keySet());
 
 			LOGGER.error(message);
 			throw new InitializationException(message);
 		}
 
-		m_reloaders = indexedSpringReloaders;
 		LOGGER.info("Initialized report reload task from Spring, reloaderCount={}, reloaders={}.", m_reloaders.size(),
 				m_reloaders.keySet());
-	}
-
-	private Map<String, ReportReloader> indexSpringReloaders(Map<String, ReportReloader> springReloaders) {
-		Map<String, ReportReloader> reloaders = new java.util.LinkedHashMap<String, ReportReloader>();
-
-		for (ReportReloader reloader : springReloaders.values()) {
-			reloaders.put(reloader.getId(), reloader);
-		}
-		return reloaders;
 	}
 
 	@Override
@@ -129,5 +110,13 @@ public class ReportReloadTask implements Initializable, Task {
 	@Override
 	public void shutdown() {
 
+	}
+
+	public void setConfigManager(ReportReloadConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setReloaders(Map<String, ReportReloader> reloaders) {
+		m_reloaders = reloaders;
 	}
 }

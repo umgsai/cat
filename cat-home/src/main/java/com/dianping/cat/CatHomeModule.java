@@ -52,15 +52,24 @@ public class CatHomeModule extends AbstractModule {
 		} else {
 			LOGGER.info("Resolved ServerConfigManager from Spring for CatHomeModule.");
 		}
-		ReportReloadTask reportReloadTask = lookup(ctx, ReportReloadTask.class);
+		ReportReloadTask reportReloadTask = CatSpringContext.getBeanIfAvailable(ReportReloadTask.class);
+
+		if (reportReloadTask == null) {
+			throw new IllegalStateException("ReportReloadTask must be configured by Spring for CatHomeModule.");
+		}
+		LOGGER.info("Resolved ReportReloadTask from Spring for CatHomeModule.");
 
 		Threads.forGroup("Cat").start(reportReloadTask);
 
 		lookup(ctx, MessageConsumer.class);
 
 		if (serverConfigManager.isJobMachine()) {
-			DefaultTaskConsumer taskConsumer = lookup(ctx, DefaultTaskConsumer.class);
+			DefaultTaskConsumer taskConsumer = CatSpringContext.getBeanIfAvailable(DefaultTaskConsumer.class);
 
+			if (taskConsumer == null) {
+				throw new IllegalStateException("DefaultTaskConsumer must be configured by Spring for CatHomeModule.");
+			}
+			LOGGER.info("Resolved DefaultTaskConsumer from Spring for CatHomeModule.");
 			Threads.forGroup("Cat").start(taskConsumer);
 		}
 
