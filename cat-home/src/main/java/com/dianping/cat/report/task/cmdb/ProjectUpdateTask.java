@@ -474,6 +474,7 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 	private void refreshSpringBeans() {
 		HostinfoService hostinfoService = CatSpringContext.getBeanIfAvailable(HostinfoService.class);
 		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		TransactionReportService reportService = CatSpringContext.getBeanIfAvailable(TransactionReportService.class);
 
 		if (hostinfoService != null) {
 			m_hostInfoService = hostinfoService;
@@ -481,6 +482,21 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 		if (projectService != null) {
 			m_projectService = projectService;
 		}
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+	}
+
+	public void setHostInfoService(HostinfoService hostInfoService) {
+		m_hostInfoService = hostInfoService;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setReportService(TransactionReportService reportService) {
+		m_reportService = reportService;
 	}
 
 }

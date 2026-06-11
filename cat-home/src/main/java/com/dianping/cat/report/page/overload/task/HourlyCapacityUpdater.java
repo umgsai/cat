@@ -120,6 +120,7 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 		      .getBeanIfAvailable(HourlyReportContentRepository.class);
 		HourlyReportRepository hourlyReportDao = CatSpringContext.getBeanIfAvailable(HourlyReportRepository.class);
 		OverloadRepository overloadDao = CatSpringContext.getBeanIfAvailable(OverloadRepository.class);
+		CapacityUpdateStatusManager manager = CatSpringContext.getBeanIfAvailable(CapacityUpdateStatusManager.class);
 
 		if (hourlyReportContentDao != null) {
 			m_hourlyReportContentDao = hourlyReportContentDao;
@@ -130,6 +131,25 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 		if (overloadDao != null) {
 			m_overloadDao = overloadDao;
 		}
+		if (manager != null) {
+			m_manager = manager;
+		}
+	}
+
+	public void setHourlyReportContentDao(HourlyReportContentRepository hourlyReportContentDao) {
+		m_hourlyReportContentDao = hourlyReportContentDao;
+	}
+
+	public void setHourlyReportDao(HourlyReportRepository hourlyReportDao) {
+		m_hourlyReportDao = hourlyReportDao;
+	}
+
+	public void setOverloadDao(OverloadRepository overloadDao) {
+		m_overloadDao = overloadDao;
+	}
+
+	public void setManager(CapacityUpdateStatusManager manager) {
+		m_manager = manager;
 	}
 
 }

@@ -197,4 +197,32 @@ public class BusinessBaselineReportBuilder implements TaskBuilder {
 		}
 	}
 
+	public void setBaselineConfigManager(BaselineConfigManager baselineConfigManager) {
+		m_baselineConfigManager = baselineConfigManager;
+	}
+
+	public void setBaselineCreator(BaselineCreator baselineCreator) {
+		m_baselineCreator = baselineCreator;
+	}
+
+	public void setBaselineService(BaselineService baselineService) {
+		m_baselineService = baselineService;
+	}
+
+	public void setConfigManager(BusinessConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setKeyHelper(BusinessKeyHelper keyHelper) {
+		m_keyHelper = keyHelper;
+	}
+
+	public void setParser(BusinessPointParser parser) {
+		m_parser = parser;
+	}
+
+	public void setReportService(BusinessReportService reportService) {
+		m_reportService = reportService;
+	}
+
 }

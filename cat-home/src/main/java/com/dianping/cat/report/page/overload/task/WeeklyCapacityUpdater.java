@@ -118,6 +118,7 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 		WeeklyReportContentRepository weeklyReportContentDao = CatSpringContext
 		      .getBeanIfAvailable(WeeklyReportContentRepository.class);
 		OverloadRepository overloadDao = CatSpringContext.getBeanIfAvailable(OverloadRepository.class);
+		CapacityUpdateStatusManager manager = CatSpringContext.getBeanIfAvailable(CapacityUpdateStatusManager.class);
 
 		if (weeklyReportDao != null) {
 			m_weeklyReportDao = weeklyReportDao;
@@ -128,6 +129,25 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 		if (overloadDao != null) {
 			m_overloadDao = overloadDao;
 		}
+		if (manager != null) {
+			m_manager = manager;
+		}
+	}
+
+	public void setWeeklyReportDao(WeeklyReportRepository weeklyReportDao) {
+		m_weeklyReportDao = weeklyReportDao;
+	}
+
+	public void setWeeklyReportContentDao(WeeklyReportContentRepository weeklyReportContentDao) {
+		m_weeklyReportContentDao = weeklyReportContentDao;
+	}
+
+	public void setOverloadDao(OverloadRepository overloadDao) {
+		m_overloadDao = overloadDao;
+	}
+
+	public void setManager(CapacityUpdateStatusManager manager) {
+		m_manager = manager;
 	}
 
 }

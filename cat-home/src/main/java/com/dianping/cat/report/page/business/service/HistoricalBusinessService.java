@@ -61,4 +61,8 @@ public class HistoricalBusinessService extends BaseHistoricalModelService<Busine
 		}
 	}
 
+	public void setReportService(BusinessReportService reportService) {
+		m_reportService = reportService;
+	}
+
 }

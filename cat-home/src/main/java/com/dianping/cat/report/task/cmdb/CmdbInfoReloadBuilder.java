@@ -26,6 +26,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.report.task.TaskBuilder;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named(type = TaskBuilder.class, value = CmdbInfoReloadBuilder.ID)
 public class CmdbInfoReloadBuilder implements TaskBuilder {
@@ -42,6 +43,7 @@ public class CmdbInfoReloadBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
+		refreshSpringBeans();
 		Threads.forGroup(Constants.CAT).start(m_projectUpdateTask);
 		return true;
 	}
@@ -54,6 +56,18 @@ public class CmdbInfoReloadBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		throw new RuntimeException("project builder don't support weekly task");
+	}
+
+	private void refreshSpringBeans() {
+		ProjectUpdateTask projectUpdateTask = CatSpringContext.getBeanIfAvailable(ProjectUpdateTask.class);
+
+		if (projectUpdateTask != null) {
+			m_projectUpdateTask = projectUpdateTask;
+		}
+	}
+
+	public void setProjectUpdateTask(ProjectUpdateTask projectUpdateTask) {
+		m_projectUpdateTask = projectUpdateTask;
 	}
 
 }

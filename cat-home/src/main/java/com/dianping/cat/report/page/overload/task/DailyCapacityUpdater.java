@@ -118,6 +118,7 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 		      .getBeanIfAvailable(DailyReportContentRepository.class);
 		DailyReportRepository dailyReportDao = CatSpringContext.getBeanIfAvailable(DailyReportRepository.class);
 		OverloadRepository overloadDao = CatSpringContext.getBeanIfAvailable(OverloadRepository.class);
+		CapacityUpdateStatusManager manager = CatSpringContext.getBeanIfAvailable(CapacityUpdateStatusManager.class);
 
 		if (dailyReportContentDao != null) {
 			m_dailyReportContentDao = dailyReportContentDao;
@@ -128,6 +129,25 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 		if (overloadDao != null) {
 			m_overloadDao = overloadDao;
 		}
+		if (manager != null) {
+			m_manager = manager;
+		}
+	}
+
+	public void setDailyReportContentDao(DailyReportContentRepository dailyReportContentDao) {
+		m_dailyReportContentDao = dailyReportContentDao;
+	}
+
+	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
+		m_dailyReportDao = dailyReportDao;
+	}
+
+	public void setOverloadDao(OverloadRepository overloadDao) {
+		m_overloadDao = overloadDao;
+	}
+
+	public void setManager(CapacityUpdateStatusManager manager) {
+		m_manager = manager;
 	}
 
 }

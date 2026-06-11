@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.report.task;
 
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -105,9 +106,10 @@ public class ReportFacade extends ContainerHolder implements LogEnabled, Initial
 	@Override
 	public void initialize() throws InitializationException {
 		Map<String, TaskBuilder> springBuilders = CatSpringContext.getBeansIfAvailable(TaskBuilder.class);
+		Map<String, TaskBuilder> springReportBuilders = buildReportBuilderMap(springBuilders);
 
 		if (springBuilders.size() >= EXPECTED_REPORT_BUILDER_COUNT) {
-			m_reportBuilders = new HashMap<String, TaskBuilder>(springBuilders);
+			m_reportBuilders = springReportBuilders;
 			SLF4J_LOGGER.info("Initialized report facade from Spring, builderCount={}, builders={}.",
 					m_reportBuilders.size(), m_reportBuilders.keySet());
 			return;
@@ -117,11 +119,41 @@ public class ReportFacade extends ContainerHolder implements LogEnabled, Initial
 		Map<String, TaskBuilder> builders = new HashMap<String, TaskBuilder>();
 
 		builders.putAll(plexusBuilders);
-		builders.putAll(springBuilders);
+		builders.putAll(springReportBuilders);
 		m_reportBuilders = builders;
 		SLF4J_LOGGER.info(
 				"Initialized report facade, builderCount={}, springBuilderCount={}, plexusBuilderCount={}, builders={}.",
 				m_reportBuilders.size(), springBuilders.size(), plexusBuilders.size(), m_reportBuilders.keySet());
+	}
+
+	private Map<String, TaskBuilder> buildReportBuilderMap(Map<String, TaskBuilder> springBuilders) {
+		Map<String, TaskBuilder> reportBuilders = new HashMap<String, TaskBuilder>();
+
+		for (Map.Entry<String, TaskBuilder> entry : springBuilders.entrySet()) {
+			String beanName = entry.getKey();
+			TaskBuilder builder = entry.getValue();
+			String reportName = getReportName(builder);
+
+			reportBuilders.put(beanName, builder);
+			if (reportName != null && reportName.length() > 0) {
+				reportBuilders.put(reportName, builder);
+			}
+		}
+		return reportBuilders;
+	}
+
+	private String getReportName(TaskBuilder builder) {
+		if (builder == null) {
+			return null;
+		}
+		try {
+			Field field = builder.getClass().getField("ID");
+			Object value = field.get(null);
+
+			return value instanceof String ? (String) value : null;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 }

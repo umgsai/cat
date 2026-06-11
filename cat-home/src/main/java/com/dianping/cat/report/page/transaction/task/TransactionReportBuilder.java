@@ -86,7 +86,9 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 		} catch (Exception e) {
 			SLF4J_LOGGER.error("Unable to build transaction daily report, name={}, domain={}, period={}.", name, domain,
 					period, e);
-			m_logger.error(e.getMessage(), e);
+			if (m_logger != null) {
+				m_logger.error(e.getMessage(), e);
+			}
 			Cat.logError(e);
 			return false;
 		}
@@ -246,16 +248,32 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 	}
 
 	private void refreshSpringBeans() {
+		TransactionReportService reportService = CatSpringContext.getBeanIfAvailable(TransactionReportService.class);
 		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 		AtomicMessageConfigManager atomicMessageConfigManager = CatSpringContext
 		      .getBeanIfAvailable(AtomicMessageConfigManager.class);
 
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
 		if (serverConfigManager != null) {
 			m_serverConfigManager = serverConfigManager;
 		}
 		if (atomicMessageConfigManager != null) {
 			m_atomicMessageConfigManager = atomicMessageConfigManager;
 		}
+	}
+
+	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {
+		m_atomicMessageConfigManager = atomicMessageConfigManager;
+	}
+
+	public void setReportService(TransactionReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
 	}
 
 }

@@ -118,6 +118,7 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 		MonthlyReportContentRepository monthlyReportContentDao = CatSpringContext
 		      .getBeanIfAvailable(MonthlyReportContentRepository.class);
 		OverloadRepository overloadDao = CatSpringContext.getBeanIfAvailable(OverloadRepository.class);
+		CapacityUpdateStatusManager manager = CatSpringContext.getBeanIfAvailable(CapacityUpdateStatusManager.class);
 
 		if (monthlyReportDao != null) {
 			m_monthlyReportDao = monthlyReportDao;
@@ -128,6 +129,25 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 		if (overloadDao != null) {
 			m_overloadDao = overloadDao;
 		}
+		if (manager != null) {
+			m_manager = manager;
+		}
+	}
+
+	public void setMonthlyReportDao(MonthlyReportRepository monthlyReportDao) {
+		m_monthlyReportDao = monthlyReportDao;
+	}
+
+	public void setMonthlyReportContentDao(MonthlyReportContentRepository monthlyReportContentDao) {
+		m_monthlyReportContentDao = monthlyReportContentDao;
+	}
+
+	public void setOverloadDao(OverloadRepository overloadDao) {
+		m_overloadDao = overloadDao;
+	}
+
+	public void setManager(CapacityUpdateStatusManager manager) {
+		m_manager = manager;
 	}
 
 }

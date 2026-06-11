@@ -478,4 +478,32 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 			m_customDataCalculator = customDataCalculator;
 		}
 	}
+
+	public void setConfigManager(BusinessConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setCustomDataCalculator(CustomDataCalculator customDataCalculator) {
+		m_customDataCalculator = customDataCalculator;
+	}
+
+	public void setDataFetcher(BusinessDataFetcher dataFetcher) {
+		m_dataFetcher = dataFetcher;
+	}
+
+	public void setKeyHelper(BusinessKeyHelper keyHelper) {
+		m_keyHelper = keyHelper;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setReportService(CachedBusinessReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setTagManager(BusinessTagConfigManager tagManager) {
+		m_tagManager = tagManager;
+	}
 }

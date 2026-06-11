@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -26,6 +27,10 @@ public abstract class SpringBackedRepositorySupport<T> {
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;
 
+	private SqlSessionTemplate m_sqlSessionTemplate;
+
+	private TransactionTemplate m_transactionTemplate;
+
 	protected SpringBackedRepositorySupport(Class<T> mapperClass, String mapperResource,
 			String springMapperMessage) {
 		m_mapperClass = mapperClass;
@@ -38,12 +43,31 @@ public abstract class SpringBackedRepositorySupport<T> {
 	}
 
 	protected T springMapper(Logger logger) {
+		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
+
+		if (sqlSessionTemplate != null) {
+			if (m_springMapperLogged.compareAndSet(false, true)) {
+				logger.info(m_springMapperMessage);
+			}
+			return sqlSessionTemplate.getMapper(m_mapperClass);
+		}
 		return SupportingMyBatisRepository.springMapper(m_mapperClass, logger, m_springMapperLogged,
 				m_springMapperMessage);
 	}
 
 	protected TransactionTemplate springTransactionTemplate() {
+		if (m_transactionTemplate != null) {
+			return m_transactionTemplate;
+		}
 		return SupportingMyBatisRepository.springTransactionTemplate();
+	}
+
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		m_sqlSessionTemplate = sqlSessionTemplate;
+	}
+
+	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+		m_transactionTemplate = transactionTemplate;
 	}
 
 	private SqlSessionFactory getSqlSessionFactory() {

@@ -65,7 +65,7 @@ public class CachedBusinessReportService {
 				ModelResponse<BusinessReport> response = m_service.invoke(request);
 				BusinessReport report = response.getModel();
 
-				return report;
+				return report == null ? new BusinessReport(domain) : report;
 			} else {
 				throw new RuntimeException("Internal error: no eligable business service registered for " + request + "!");
 			}
@@ -83,6 +83,9 @@ public class CachedBusinessReportService {
 			Date end = new Date(time + TimeHelper.ONE_HOUR);
 
 			result = m_reportService.queryReport(domain, start, end);
+			if (result == null) {
+				result = new BusinessReport(domain);
+			}
 			m_businessReports.put(key, result);
 		}
 		return result;
@@ -94,5 +97,13 @@ public class CachedBusinessReportService {
 		if (reportService != null) {
 			m_reportService = reportService;
 		}
+	}
+
+	public void setModelService(ModelService<BusinessReport> service) {
+		m_service = service;
+	}
+
+	public void setReportService(BusinessReportService reportService) {
+		m_reportService = reportService;
 	}
 }

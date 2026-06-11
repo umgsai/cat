@@ -255,4 +255,16 @@ public abstract class AbstractGraphCreator implements LogEnabled {
 		}
 		return allCurrentValues;
 	}
+
+	public void setAlertManager(AlertManager alertManager) {
+		m_alertManager = alertManager;
+	}
+
+	public void setBaselineService(BaselineService baselineService) {
+		m_baselineService = baselineService;
+	}
+
+	public void setDataExtractor(DataExtractor dataExtractor) {
+		m_dataExtractor = dataExtractor;
+	}
 }

@@ -59,6 +59,7 @@ import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.consumer.top.model.entity.TopReport;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.core.config.repository.ConfigRepository;
+import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
@@ -130,6 +131,8 @@ import com.dianping.cat.report.alert.transaction.TransactionDecorator;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
 import com.dianping.cat.report.alert.AlarmManager;
 import com.dianping.cat.report.DomainValidator;
+import com.dianping.cat.report.graph.metric.DataExtractor;
+import com.dianping.cat.report.graph.metric.impl.DataExtractorImpl;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager;
 import com.dianping.cat.report.page.dependency.graph.DependencyItemBuilder;
@@ -137,8 +140,12 @@ import com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder;
 import com.dianping.cat.report.page.business.graph.BusinessDataFetcher;
 import com.dianping.cat.report.page.business.graph.CustomDataCalculator;
+import com.dianping.cat.report.page.business.service.CachedBusinessReportService;
+import com.dianping.cat.report.page.business.service.CompositeBusinessService;
+import com.dianping.cat.report.page.business.service.HistoricalBusinessService;
 import com.dianping.cat.report.page.business.service.LocalBusinessService;
 import com.dianping.cat.report.page.business.service.BusinessReportService;
+import com.dianping.cat.report.page.business.task.BusinessBaselineReportBuilder;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.business.task.BusinessPointParser;
 import com.dianping.cat.report.page.cross.service.CrossReportService;
@@ -162,6 +169,13 @@ import com.dianping.cat.report.page.metric.service.DefaultBaselineService;
 import com.dianping.cat.report.page.metric.task.BaselineConfigManager;
 import com.dianping.cat.report.page.metric.task.BaselineCreator;
 import com.dianping.cat.report.page.metric.task.DefaultBaselineCreator;
+import com.dianping.cat.report.page.overload.task.CapacityUpdateStatusManager;
+import com.dianping.cat.report.page.overload.task.CapacityUpdateTask;
+import com.dianping.cat.report.page.overload.task.CapacityUpdater;
+import com.dianping.cat.report.page.overload.task.DailyCapacityUpdater;
+import com.dianping.cat.report.page.overload.task.HourlyCapacityUpdater;
+import com.dianping.cat.report.page.overload.task.MonthlyCapacityUpdater;
+import com.dianping.cat.report.page.overload.task.WeeklyCapacityUpdater;
 import com.dianping.cat.report.page.event.service.LocalEventService;
 import com.dianping.cat.report.page.problem.service.CompositeProblemService;
 import com.dianping.cat.report.page.problem.service.HistoricalProblemService;
@@ -189,12 +203,15 @@ import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.current.CurrentReportBuilder;
+import com.dianping.cat.report.task.cmdb.CmdbInfoReloadBuilder;
+import com.dianping.cat.report.task.cmdb.ProjectUpdateTask;
 import com.dianping.cat.report.page.state.service.LocalStateService;
 import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.report.page.state.task.StateReportBuilder;
 import com.dianping.cat.report.page.top.service.LocalTopService;
 import com.dianping.cat.report.page.transaction.service.TransactionReportService;
 import com.dianping.cat.report.page.transaction.service.LocalTransactionService;
+import com.dianping.cat.report.page.transaction.task.TransactionReportBuilder;
 import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper;
 import com.dianping.cat.report.LocalReportBucket;
 import com.dianping.cat.report.ReportBucket;
@@ -271,6 +288,25 @@ public class CatHomeSpringConfiguration {
 
 		builder.setProjectService(projectService);
 		builder.setServerFilterConfigManager(serverFilterConfigManager);
+		return builder;
+	}
+
+	@Bean
+	public ProjectUpdateTask projectUpdateTask(HostinfoService hostinfoService, ProjectService projectService,
+			TransactionReportService transactionReportService) {
+		ProjectUpdateTask task = new ProjectUpdateTask();
+
+		task.setHostInfoService(hostinfoService);
+		task.setProjectService(projectService);
+		task.setReportService(transactionReportService);
+		return task;
+	}
+
+	@Bean(name = CmdbInfoReloadBuilder.ID)
+	public TaskBuilder cmdbInfoReloadBuilder(ProjectUpdateTask projectUpdateTask) {
+		CmdbInfoReloadBuilder builder = new CmdbInfoReloadBuilder();
+
+		builder.setProjectUpdateTask(projectUpdateTask);
 		return builder;
 	}
 
@@ -489,6 +525,110 @@ public class CatHomeSpringConfiguration {
 				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
 				monthlyReportContentRepository);
 		return service;
+	}
+
+	@Bean(name = TransactionReportBuilder.ID, initMethod = "initialize")
+	public TaskBuilder transactionReportBuilder(TransactionReportService transactionReportService,
+			ServerConfigManager serverConfigManager, AtomicMessageConfigManager atomicMessageConfigManager) {
+		TransactionReportBuilder builder = new TransactionReportBuilder();
+
+		builder.setReportService(transactionReportService);
+		builder.setServerConfigManager(serverConfigManager);
+		builder.setAtomicMessageConfigManager(atomicMessageConfigManager);
+		return builder;
+	}
+
+	@Bean(name = BusinessBaselineReportBuilder.ID)
+	public TaskBuilder businessBaselineReportBuilder(BusinessReportService businessReportService,
+			BusinessConfigManager businessConfigManager, BaselineConfigManager baselineConfigManager,
+			BusinessPointParser businessPointParser, BaselineCreator baselineCreator, BaselineService baselineService,
+			BusinessKeyHelper businessKeyHelper) {
+		BusinessBaselineReportBuilder builder = new BusinessBaselineReportBuilder();
+
+		builder.setReportService(businessReportService);
+		builder.setConfigManager(businessConfigManager);
+		builder.setBaselineConfigManager(baselineConfigManager);
+		builder.setParser(businessPointParser);
+		builder.setBaselineCreator(baselineCreator);
+		builder.setBaselineService(baselineService);
+		builder.setKeyHelper(businessKeyHelper);
+		return builder;
+	}
+
+	@Bean(initMethod = "initialize")
+	public CapacityUpdateStatusManager capacityUpdateStatusManager(ConfigRepository configRepository,
+			OverloadRepository overloadRepository) {
+		CapacityUpdateStatusManager manager = new CapacityUpdateStatusManager();
+
+		manager.setConfigDao(configRepository);
+		manager.setOverloadDao(overloadRepository);
+		return manager;
+	}
+
+	@Bean(name = HourlyCapacityUpdater.ID)
+	public CapacityUpdater hourlyCapacityUpdater(HourlyReportContentRepository hourlyReportContentRepository,
+			HourlyReportRepository hourlyReportRepository, OverloadRepository overloadRepository,
+			CapacityUpdateStatusManager capacityUpdateStatusManager) {
+		HourlyCapacityUpdater updater = new HourlyCapacityUpdater();
+
+		updater.setHourlyReportContentDao(hourlyReportContentRepository);
+		updater.setHourlyReportDao(hourlyReportRepository);
+		updater.setOverloadDao(overloadRepository);
+		updater.setManager(capacityUpdateStatusManager);
+		return updater;
+	}
+
+	@Bean(name = DailyCapacityUpdater.ID)
+	public CapacityUpdater dailyCapacityUpdater(DailyReportContentRepository dailyReportContentRepository,
+			DailyReportRepository dailyReportRepository, OverloadRepository overloadRepository,
+			CapacityUpdateStatusManager capacityUpdateStatusManager) {
+		DailyCapacityUpdater updater = new DailyCapacityUpdater();
+
+		updater.setDailyReportContentDao(dailyReportContentRepository);
+		updater.setDailyReportDao(dailyReportRepository);
+		updater.setOverloadDao(overloadRepository);
+		updater.setManager(capacityUpdateStatusManager);
+		return updater;
+	}
+
+	@Bean(name = WeeklyCapacityUpdater.ID)
+	public CapacityUpdater weeklyCapacityUpdater(WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, OverloadRepository overloadRepository,
+			CapacityUpdateStatusManager capacityUpdateStatusManager) {
+		WeeklyCapacityUpdater updater = new WeeklyCapacityUpdater();
+
+		updater.setWeeklyReportDao(weeklyReportRepository);
+		updater.setWeeklyReportContentDao(weeklyReportContentRepository);
+		updater.setOverloadDao(overloadRepository);
+		updater.setManager(capacityUpdateStatusManager);
+		return updater;
+	}
+
+	@Bean(name = MonthlyCapacityUpdater.ID)
+	public CapacityUpdater monthlyCapacityUpdater(MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository, OverloadRepository overloadRepository,
+			CapacityUpdateStatusManager capacityUpdateStatusManager) {
+		MonthlyCapacityUpdater updater = new MonthlyCapacityUpdater();
+
+		updater.setMonthlyReportDao(monthlyReportRepository);
+		updater.setMonthlyReportContentDao(monthlyReportContentRepository);
+		updater.setOverloadDao(overloadRepository);
+		updater.setManager(capacityUpdateStatusManager);
+		return updater;
+	}
+
+	@Bean(name = CapacityUpdateTask.ID)
+	public TaskBuilder capacityUpdateTask(@Qualifier(HourlyCapacityUpdater.ID) CapacityUpdater hourlyCapacityUpdater,
+			@Qualifier(DailyCapacityUpdater.ID) CapacityUpdater dailyCapacityUpdater,
+			@Qualifier(WeeklyCapacityUpdater.ID) CapacityUpdater weeklyCapacityUpdater,
+			@Qualifier(MonthlyCapacityUpdater.ID) CapacityUpdater monthlyCapacityUpdater) {
+		CapacityUpdateTask task = new CapacityUpdateTask();
+
+		task.setHourlyUpdater(hourlyCapacityUpdater);
+		task.setDailyUpdater(dailyCapacityUpdater);
+		task.setWeeklyUpdater(weeklyCapacityUpdater);
+		task.setMonthlyUpdater(monthlyCapacityUpdater);
+		return task;
 	}
 
 	@Bean
@@ -872,28 +1012,33 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public OverloadRepository overloadRepository() {
-		return new OverloadRepository();
+	public OverloadRepository overloadRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
+		return configureSpringBackedRepository(new OverloadRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
 	@Bean
-	public AlertRepository alertRepository() {
-		return new AlertRepository();
+	public AlertRepository alertRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
+		return configureSpringBackedRepository(new AlertRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
 	@Bean
-	public AlterationRepository alterationRepository() {
-		return new AlterationRepository();
+	public AlterationRepository alterationRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
+		return configureSpringBackedRepository(new AlterationRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
 	@Bean
-	public BaselineRepository baselineRepository() {
-		return new BaselineRepository();
+	public BaselineRepository baselineRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
+		return configureSpringBackedRepository(new BaselineRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
 	@Bean
-	public TopologyGraphRepository topologyGraphRepository() {
-		return new TopologyGraphRepository();
+	public TopologyGraphRepository topologyGraphRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
+		return configureSpringBackedRepository(new TopologyGraphRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
 	@Bean
@@ -902,33 +1047,39 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public AlertSummaryRepository alertSummaryRepository() {
-		return new AlertSummaryRepository();
+	public AlertSummaryRepository alertSummaryRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
+		return configureSpringBackedRepository(new AlertSummaryRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
 	@Bean
-	public ConfigModificationRepository configModificationRepository() {
-		return new ConfigModificationRepository();
+	public ConfigModificationRepository configModificationRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
+		return configureSpringBackedRepository(new ConfigModificationRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
 	@Bean
-	public MetricGraphRepository metricGraphRepository() {
-		return new MetricGraphRepository();
+	public MetricGraphRepository metricGraphRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
+		return configureSpringBackedRepository(new MetricGraphRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
 	@Bean
-	public MetricScreenRepository metricScreenRepository() {
-		return new MetricScreenRepository();
+	public MetricScreenRepository metricScreenRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
+		return configureSpringBackedRepository(new MetricScreenRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
 	@Bean
-	public ServerAlarmRuleRepository serverAlarmRuleRepository() {
-		return new ServerAlarmRuleRepository();
+	public ServerAlarmRuleRepository serverAlarmRuleRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
+		return configureSpringBackedRepository(new ServerAlarmRuleRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
 	@Bean
-	public UserDefineRuleRepository userDefineRuleRepository() {
-		return new UserDefineRuleRepository();
+	public UserDefineRuleRepository userDefineRuleRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
+		return configureSpringBackedRepository(new UserDefineRuleRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
 	@Bean
@@ -939,6 +1090,11 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public AlarmManager alarmManager() {
 		return new AlarmManager();
+	}
+
+	@Bean
+	public DataExtractor dataExtractor() {
+		return new DataExtractorImpl();
 	}
 
 	@Bean
@@ -992,12 +1148,35 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize", name = "business-historical")
+	public ModelService<BusinessReport> historicalBusinessService(BusinessReportService businessReportService,
+			ServerConfigManager serverConfigManager) {
+		HistoricalBusinessService service = new HistoricalBusinessService();
+
+		service.setReportService(businessReportService);
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
 	@Bean(initMethod = "initialize", name = ProblemAnalyzer.ID)
 	public ModelService<ProblemReport> problemModelService(
 			@Qualifier("problem-historical") ModelService<ProblemReport> historicalProblemService,
 			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
 		CompositeProblemService service = new CompositeProblemService();
 		List<ModelService<ProblemReport>> services = Collections.singletonList(historicalProblemService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize", name = "businessModelService")
+	public ModelService<BusinessReport> businessModelService(
+			@Qualifier("business-historical") ModelService<BusinessReport> historicalBusinessService,
+			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
+		CompositeBusinessService service = new CompositeBusinessService();
+		List<ModelService<BusinessReport>> services = Collections.singletonList(historicalBusinessService);
 
 		service.setServices(services);
 		service.setConfigManager(serverConfigManager);
@@ -1395,6 +1574,16 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public CachedBusinessReportService cachedBusinessReportService(BusinessReportService businessReportService,
+			@Qualifier("businessModelService") ModelService<BusinessReport> businessModelService) {
+		CachedBusinessReportService service = new CachedBusinessReportService();
+
+		service.setReportService(businessReportService);
+		service.setModelService(businessModelService);
+		return service;
+	}
+
+	@Bean
 	public CustomDataCalculator customDataCalculator(BusinessKeyHelper businessKeyHelper) {
 		CustomDataCalculator calculator = new CustomDataCalculator();
 
@@ -1713,6 +1902,13 @@ public class CatHomeSpringConfiguration {
 			AlertConfigManager alertConfigManager) {
 		contactor.setProjectService(projectService);
 		contactor.setConfigManager(alertConfigManager);
+	}
+
+	private <T extends SpringBackedRepositorySupport<?>> T configureSpringBackedRepository(T repository,
+			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
+		repository.setSqlSessionTemplate(sqlSessionTemplate);
+		repository.setTransactionTemplate(transactionTemplate);
+		return repository;
 	}
 
 	private void configureReportService(AbstractReportService<?> service, HourlyReportRepository hourlyReportRepository,
