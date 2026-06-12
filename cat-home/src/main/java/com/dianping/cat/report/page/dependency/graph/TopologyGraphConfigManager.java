@@ -25,12 +25,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.helper.Files;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import com.dianping.cat.Cat;
@@ -48,8 +44,7 @@ import com.dianping.cat.home.dependency.config.entity.TopologyGraphConfig;
 import com.dianping.cat.home.dependency.config.transform.DefaultSaxParser;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
-public class TopologyGraphConfigManager implements Initializable {
+public class TopologyGraphConfigManager {
 	private static final String AVG_STR = Chinese.RESPONSE_TIME;
 
 	private static final String ERROR_STR = Chinese.EXCEPTION_COUNT;
@@ -66,10 +61,8 @@ public class TopologyGraphConfigManager implements Initializable {
 
 	private static final String CONFIG_NAME = "topologyConfig";
 
-	@Inject
 	private ConfigRepository m_configDao;
 
-	@Inject
 	private ContentFetcher m_fetcher;
 
 	private TopologyGraphConfig m_config;
@@ -96,6 +89,8 @@ public class TopologyGraphConfigManager implements Initializable {
 	}
 
 	public Pair<Integer, String> buildEdgeState(String domain, Dependency dependency) {
+		ensureInitialized();
+
 		String type = formatType(dependency.getType());
 		String from = domain;
 		String to = dependency.getTarget();
@@ -146,6 +141,8 @@ public class TopologyGraphConfigManager implements Initializable {
 	}
 
 	public Pair<Integer, String> buildNodeState(String domain, Index index) {
+		ensureInitialized();
+
 		String type = index.getName();
 		String realType = formatType(type);
 		DomainConfig config = queryNodeConfig(realType, domain);
@@ -212,12 +209,16 @@ public class TopologyGraphConfigManager implements Initializable {
 	}
 
 	public boolean deleteDomainConfig(String type, String domain) {
+		ensureInitialized();
+
 		NodeConfig types = m_config.getNodeConfigs().get(type);
 		types.removeDomainConfig(domain);
 		return storeConfig();
 	}
 
 	public boolean deleteEdgeConfig(String type, String from, String to) {
+		ensureInitialized();
+
 		String key = type + ':' + from + ':' + to;
 		m_config.removeEdgeConfig(key);
 		return storeConfig();
@@ -236,6 +237,8 @@ public class TopologyGraphConfigManager implements Initializable {
 	}
 
 	public synchronized TopologyGraphConfig getConfig() {
+		ensureInitialized();
+
 		return m_config;
 	}
 
@@ -247,8 +250,7 @@ public class TopologyGraphConfigManager implements Initializable {
 		m_fetcher = fetcher;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 
 		if (m_fileName != null) {
@@ -289,11 +291,15 @@ public class TopologyGraphConfigManager implements Initializable {
 	}
 
 	public boolean insertDomainConfig(String type, DomainConfig config) {
+		ensureInitialized();
+
 		m_config.findOrCreateNodeConfig(type).addDomainConfig(config);
 		return storeConfig();
 	}
 
 	public boolean insertDomainDefaultConfig(String type, DomainConfig config) {
+		ensureInitialized();
+
 		NodeConfig node = m_config.findOrCreateNodeConfig(type);
 
 		node.setDefaultMinCountThreshold(config.getMinCountThreshold());
@@ -305,12 +311,16 @@ public class TopologyGraphConfigManager implements Initializable {
 	}
 
 	public boolean insertEdgeConfig(EdgeConfig config) {
+		ensureInitialized();
+
 		config.setKey(config.getType() + ":" + config.getFrom() + ":" + config.getTo());
 		m_config.addEdgeConfig(config);
 		return storeConfig();
 	}
 
 	public EdgeConfig queryEdgeConfig(String type, String from, String to) {
+		ensureInitialized();
+
 		EdgeConfig edgeConfig = m_config.findEdgeConfig(type + ":" + from + ":" + to);
 
 		if (edgeConfig == null) {
@@ -330,6 +340,8 @@ public class TopologyGraphConfigManager implements Initializable {
 	}
 
 	public DomainConfig queryNodeConfig(String type, String domain) {
+		ensureInitialized();
+
 		NodeConfig typesConfig = m_config.findNodeConfig(type);
 
 		if (typesConfig != null) {
@@ -353,7 +365,19 @@ public class TopologyGraphConfigManager implements Initializable {
 		m_fileName = file;
 	}
 
+	private void ensureInitialized() {
+		if (m_config == null) {
+			synchronized (this) {
+				if (m_config == null) {
+					initialize();
+				}
+			}
+		}
+	}
+
 	private boolean storeConfig() {
+		ensureInitialized();
+
 		if (m_fileName != null) {
 			try {
 				Files.forIO().writeTo(new File(m_fileName), m_config.toString());

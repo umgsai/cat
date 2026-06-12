@@ -25,8 +25,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.lookup.util.StringUtils;
 
 import com.dianping.cat.consumer.dependency.model.entity.Dependency;
@@ -39,10 +37,8 @@ import com.dianping.cat.home.dependency.graph.entity.TopologyEdge;
 import com.dianping.cat.home.dependency.graph.entity.TopologyGraph;
 import com.dianping.cat.home.dependency.graph.entity.TopologyNode;
 
-@Named
 public class TopologyGraphBuilder extends BaseVisitor {
 
-	@Inject
 	private DependencyItemBuilder m_itemBuilder;
 
 	private String m_domain;

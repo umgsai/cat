@@ -18,8 +18,6 @@
  */
 package com.dianping.cat.report.page.dependency.graph;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import com.dianping.cat.consumer.dependency.model.entity.Dependency;
@@ -27,7 +25,6 @@ import com.dianping.cat.consumer.dependency.model.entity.Index;
 import com.dianping.cat.home.dependency.graph.entity.TopologyEdge;
 import com.dianping.cat.home.dependency.graph.entity.TopologyNode;
 
-@Named
 public class DependencyItemBuilder {
 
 	private static final int OK = GraphConstrant.OK;
@@ -38,7 +35,6 @@ public class DependencyItemBuilder {
 
 	private static final String CACHE = GraphConstrant.CACHE;
 
-	@Inject
 	private TopologyGraphConfigManager m_graphConfigManager;
 
 	public TopologyEdge buildEdge(String domain, Dependency dependency) {

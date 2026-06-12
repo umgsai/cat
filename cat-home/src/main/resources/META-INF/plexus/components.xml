@@ -1039,26 +1039,10 @@
 		<component>
 			<role>com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager</role>
 			<implementation>com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.content.ContentFetcher</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</role>
 			<implementation>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.content.ContentFetcher</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.dependency.service.DependencyReportService</role>
@@ -2518,6 +2502,10 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</role>
+			<implementation>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</implementation>
+		</component>
+		<component>
 			<role>com.dianping.cat.report.page.cross.Handler</role>
 			<implementation>com.dianping.cat.report.page.cross.Handler</implementation>
 			<requirements>
@@ -3163,6 +3151,10 @@
 					<role>com.dianping.cat.system.page.config.ConfigHtmlParser</role>
 				</requirement>
 			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager</role>
+			<implementation>com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager</implementation>
 		</component>
 		<component>
 			<role>com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor</role>

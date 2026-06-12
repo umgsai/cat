@@ -43,15 +43,15 @@ public class DependencyComponentConfigurator extends AbstractResourceConfigurato
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(DependencyItemBuilder.class));
+		all.add(C(DependencyItemBuilder.class).req(TopologyGraphConfigManager.class));
 
-		all.add(A(TopologyGraphBuilder.class));
+		all.add(C(TopologyGraphBuilder.class).req(DependencyItemBuilder.class));
 
 		all.add(A(TopologyGraphManager.class));
 
-		all.add(A(TopologyGraphConfigManager.class));
+		all.add(C(TopologyGraphConfigManager.class));
 
-		all.add(A(TopoGraphFormatConfigManager.class));
+		all.add(C(TopoGraphFormatConfigManager.class));
 
 		all.add(A(DependencyReportService.class));
 

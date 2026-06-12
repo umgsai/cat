@@ -22,11 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -39,15 +35,12 @@ import com.dianping.cat.home.dependency.format.entity.TopoGraphFormatConfig;
 import com.dianping.cat.home.dependency.format.transform.DefaultSaxParser;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
-public class TopoGraphFormatConfigManager implements Initializable {
+public class TopoGraphFormatConfigManager {
 
 	private static final String CONFIG_NAME = "topoGraphFormat";
 
-	@Inject
 	private ConfigRepository m_configDao;
 
-	@Inject
 	private ContentFetcher m_fetcher;
 
 	private int m_configId;
@@ -55,6 +48,8 @@ public class TopoGraphFormatConfigManager implements Initializable {
 	private TopoGraphFormatConfig m_config;
 
 	public String buildFormatJson() {
+		ensureInitialized();
+
 		Map<String, Map<String, Integer>> map = new HashMap<String, Map<String, Integer>>();
 
 		for (ProductLine productline : m_config.getProductLines()) {
@@ -67,6 +62,8 @@ public class TopoGraphFormatConfigManager implements Initializable {
 	}
 
 	public TopoGraphFormatConfig getConfig() {
+		ensureInitialized();
+
 		return m_config;
 	}
 
@@ -78,8 +75,7 @@ public class TopoGraphFormatConfigManager implements Initializable {
 		m_fetcher = fetcher;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 
 		try {
@@ -120,7 +116,19 @@ public class TopoGraphFormatConfigManager implements Initializable {
 		}
 	}
 
+	private void ensureInitialized() {
+		if (m_config == null) {
+			synchronized (this) {
+				if (m_config == null) {
+					initialize();
+				}
+			}
+		}
+	}
+
 	public List<ProductLine> queryProduct() {
+		ensureInitialized();
+
 		return m_config.getProductLines();
 	}
 
