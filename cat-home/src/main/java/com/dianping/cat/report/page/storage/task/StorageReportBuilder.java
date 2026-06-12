@@ -21,8 +21,6 @@ package com.dianping.cat.report.page.storage.task;
 import java.util.Date;
 import java.util.Set;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
@@ -45,7 +43,7 @@ import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class StorageReportBuilder implements TaskBuilder, Initializable {
+public class StorageReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageReportBuilder.class);
 
 	public static final String ID = StorageAnalyzer.ID;
@@ -183,8 +181,7 @@ public class StorageReportBuilder implements TaskBuilder, Initializable {
 		return storageReport;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 

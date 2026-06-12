@@ -21,8 +21,6 @@ package com.dianping.cat.report.page.state.task;
 import java.util.Date;
 import java.util.Set;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +48,7 @@ import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class StateReportBuilder implements TaskBuilder, Initializable {
+public class StateReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StateReportBuilder.class);
 
 	public static final String ID = StateAnalyzer.ID;
@@ -135,8 +133,7 @@ public class StateReportBuilder implements TaskBuilder, Initializable {
 		return m_reportService.insertWeeklyReport(report, binaryContent);
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {

@@ -20,8 +20,6 @@ package com.dianping.cat.report.page.problem.task;
 
 import java.util.Date;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
@@ -44,7 +42,7 @@ import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class ProblemReportBuilder implements TaskBuilder, Initializable {
+public class ProblemReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProblemReportBuilder.class);
 
 	public static final String ID = ProblemAnalyzer.ID;
@@ -118,8 +116,7 @@ public class ProblemReportBuilder implements TaskBuilder, Initializable {
 		return m_reportService.insertWeeklyReport(report, binaryContent);
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 

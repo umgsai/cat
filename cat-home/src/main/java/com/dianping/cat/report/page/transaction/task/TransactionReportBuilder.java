@@ -20,10 +20,6 @@ package com.dianping.cat.report.page.transaction.task;
 
 import java.util.Date;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 
@@ -46,7 +42,7 @@ import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class TransactionReportBuilder implements Initializable, TaskBuilder, LogEnabled {
+public class TransactionReportBuilder implements TaskBuilder {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TransactionReportBuilder.class);
 
 	public static final String ID = TransactionAnalyzer.ID;
@@ -56,8 +52,6 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 	protected ServerConfigManager m_serverConfigManager;
 
 	private AtomicMessageConfigManager m_atomicMessageConfigManager;
-
-	private Logger m_logger;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -80,9 +74,6 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 		} catch (Exception e) {
 			SLF4J_LOGGER.error("Unable to build transaction daily report, name={}, domain={}, period={}.", name, domain,
 					period, e);
-			if (m_logger != null) {
-				m_logger.error(e.getMessage(), e);
-			}
 			Cat.logError(e);
 			return false;
 		}
@@ -145,13 +136,7 @@ public class TransactionReportBuilder implements Initializable, TaskBuilder, Log
 		return m_reportService.insertWeeklyReport(report, binaryContent);
 	}
 
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
-
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {

@@ -20,8 +20,6 @@ package com.dianping.cat.report.page.cross.task;
 
 import java.util.Date;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +40,7 @@ import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class CrossReportBuilder implements TaskBuilder, Initializable {
+public class CrossReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrossReportBuilder.class);
 
 	public static final String ID = CrossAnalyzer.ID;
@@ -106,8 +104,7 @@ public class CrossReportBuilder implements TaskBuilder, Initializable {
 		return m_reportService.insertWeeklyReport(report, binaryContent);
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
