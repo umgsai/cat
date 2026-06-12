@@ -216,10 +216,27 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 												"m_configManager") //
 								.req(JsonBuilder.class, (String) null, "m_builder"));
 		all.add(C(com.dianping.cat.report.page.top.JspViewer.class).req(ModelHandler.class));
+		all.add(C(com.dianping.cat.report.page.state.Handler.class) //
+								.req(com.dianping.cat.report.page.state.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(com.dianping.cat.report.page.state.service.StateReportService.class, (String) null,
+												"m_reportService") //
+								.req(com.dianping.cat.report.page.state.StateGraphBuilder.class, (String) null,
+												"m_stateGraphs") //
+								.req(com.dianping.cat.report.page.state.StateBuilder.class, (String) null, "m_stateBuilder") //
+								.req(ModelService.class, StateAnalyzer.ID, "m_service") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(com.dianping.cat.config.server.ServerFilterConfigManager.class, (String) null,
+												"m_serverFilterConfigManager"));
+		all.add(C(com.dianping.cat.report.page.state.JspViewer.class).req(ModelHandler.class));
 		all.add(C(com.dianping.cat.report.page.state.StateBuilder.class) //
 								.req(com.dianping.cat.system.page.router.config.RouterConfigManager.class, (String) null,
 												"m_routerManager") //
 								.req(ModelService.class, StateAnalyzer.ID, "m_stateService"));
+		all.add(C(com.dianping.cat.report.page.state.StateGraphBuilder.class) //
+								.req(com.dianping.cat.report.page.state.service.StateReportService.class, (String) null,
+												"m_reportService") //
+								.req(com.dianping.cat.config.server.ServerFilterConfigManager.class, (String) null,
+												"m_serverFilterConfigManager"));
 
 		all.add(A(CatHomeModule.class));
 

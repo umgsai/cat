@@ -24,7 +24,6 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.tuple.Pair;
 import org.unidal.web.mvc.PageHandler;
@@ -51,25 +50,18 @@ import com.dianping.cat.spring.CatSpringContext;
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private StateReportService m_reportService;
 
-	@Inject
 	private StateGraphBuilder m_stateGraphs;
 
-	@Inject
 	private StateBuilder m_stateBuilder;
 
-	@Inject(type = ModelService.class, value = StateAnalyzer.ID)
 	private ModelService<StateReport> m_service;
 
-	@Inject
 	private PayloadNormalizer m_normalizePayload;
 
-	@Inject
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
 	private void buildDisplayInfo(Model model, Payload payload, StateReport report) {
@@ -184,12 +176,64 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private void refreshSpringBeans() {
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
+		StateReportService reportService = CatSpringContext.getBeanIfAvailable(StateReportService.class);
+		StateGraphBuilder stateGraphs = CatSpringContext.getBeanIfAvailable(StateGraphBuilder.class);
+		StateBuilder stateBuilder = CatSpringContext.getBeanIfAvailable(StateBuilder.class);
+		ModelService<StateReport> service = CatSpringContext.getBeanIfAvailable("stateModelService", ModelService.class);
+		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
 		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
 		      .getBeanIfAvailable(ServerFilterConfigManager.class);
 
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (stateGraphs != null) {
+			m_stateGraphs = stateGraphs;
+		}
+		if (stateBuilder != null) {
+			m_stateBuilder = stateBuilder;
+		}
+		if (service != null) {
+			m_service = service;
+		}
+		if (normalizer != null) {
+			m_normalizePayload = normalizer;
+		}
 		if (serverFilterConfigManager != null) {
 			m_serverFilterConfigManager = serverFilterConfigManager;
 		}
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
+		m_normalizePayload = normalizePayload;
+	}
+
+	public void setReportService(StateReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		m_serverFilterConfigManager = serverFilterConfigManager;
+	}
+
+	public void setService(ModelService<StateReport> service) {
+		m_service = service;
+	}
+
+	public void setStateBuilder(StateBuilder stateBuilder) {
+		m_stateBuilder = stateBuilder;
+	}
+
+	public void setStateGraphs(StateGraphBuilder stateGraphs) {
+		m_stateGraphs = stateGraphs;
 	}
 
 }

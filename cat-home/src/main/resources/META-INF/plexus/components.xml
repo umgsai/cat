@@ -424,6 +424,50 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.state.Handler</role>
+			<implementation>com.dianping.cat.report.page.state.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.state.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.state.service.StateReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.state.StateGraphBuilder</role>
+					<field-name>m_stateGraphs</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.state.StateBuilder</role>
+					<field-name>m_stateBuilder</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>state</role-hint>
+					<field-name>m_service</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
+					<field-name>m_normalizePayload</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_serverFilterConfigManager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.state.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.state.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.dianping.cat.report.page.state.StateBuilder</role>
 			<implementation>com.dianping.cat.report.page.state.StateBuilder</implementation>
 			<requirements>
@@ -435,6 +479,20 @@
 					<role>com.dianping.cat.report.service.ModelService</role>
 					<role-hint>state</role-hint>
 					<field-name>m_stateService</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.state.StateGraphBuilder</role>
+			<implementation>com.dianping.cat.report.page.state.StateGraphBuilder</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.state.service.StateReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_serverFilterConfigManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1995,18 +2053,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.page.state.StateGraphBuilder</role>
-			<implementation>com.dianping.cat.report.page.state.StateGraphBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.state.service.StateReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.service.LocalModelService</role>
 			<role-hint>state</role-hint>
 			<implementation>com.dianping.cat.report.page.state.service.LocalStateService</implementation>
@@ -2711,43 +2757,6 @@
 		<component>
 			<role>com.dianping.cat.report.page.cross.JspViewer</role>
 			<implementation>com.dianping.cat.report.page.cross.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.state.Handler</role>
-			<implementation>com.dianping.cat.report.page.state.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.state.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.state.service.StateReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.state.StateGraphBuilder</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.state.StateBuilder</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>state</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.state.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.state.JspViewer</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>

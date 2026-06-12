@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
@@ -40,10 +39,8 @@ import com.dianping.cat.spring.CatSpringContext;
 @Named
 public class StateGraphBuilder {
 
-	@Inject
 	private StateReportService m_reportService;
 
-	@Inject
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
 	public Pair<LineChart, PieChart> buildGraph(Payload payload, String key) {
@@ -130,11 +127,23 @@ public class StateGraphBuilder {
 	}
 
 	private void refreshSpringBeans() {
+		StateReportService reportService = CatSpringContext.getBeanIfAvailable(StateReportService.class);
 		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
 		      .getBeanIfAvailable(ServerFilterConfigManager.class);
 
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
 		if (serverFilterConfigManager != null) {
 			m_serverFilterConfigManager = serverFilterConfigManager;
 		}
+	}
+
+	public void setReportService(StateReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		m_serverFilterConfigManager = serverFilterConfigManager;
 	}
 }

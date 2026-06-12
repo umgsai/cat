@@ -1171,6 +1171,22 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public com.dianping.cat.report.page.state.JspViewer stateJspViewer() {
+		return new com.dianping.cat.report.page.state.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.state.StateGraphBuilder stateGraphBuilder(
+			StateReportService stateReportService, ServerFilterConfigManager serverFilterConfigManager) {
+		com.dianping.cat.report.page.state.StateGraphBuilder builder =
+		      new com.dianping.cat.report.page.state.StateGraphBuilder();
+
+		builder.setReportService(stateReportService);
+		builder.setServerFilterConfigManager(serverFilterConfigManager);
+		return builder;
+	}
+
+	@Bean
 	public com.dianping.cat.report.page.state.StateBuilder stateBuilder(RouterConfigManager routerConfigManager,
 			@Qualifier("stateModelService") ModelService<StateReport> stateModelService) {
 		com.dianping.cat.report.page.state.StateBuilder builder = new com.dianping.cat.report.page.state.StateBuilder();
@@ -1202,6 +1218,25 @@ public class CatHomeSpringConfiguration {
 		handler.setMergeHelper(transactionMergeHelper);
 		handler.setConfigManager(exceptionRuleConfigManager);
 		handler.setBuilder(jsonBuilder);
+		return handler;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.state.Handler stateHandler(
+			com.dianping.cat.report.page.state.JspViewer stateJspViewer, StateReportService stateReportService,
+			com.dianping.cat.report.page.state.StateGraphBuilder stateGraphBuilder,
+			com.dianping.cat.report.page.state.StateBuilder stateBuilder,
+			@Qualifier("stateModelService") ModelService<StateReport> stateModelService,
+			PayloadNormalizer payloadNormalizer, ServerFilterConfigManager serverFilterConfigManager) {
+		com.dianping.cat.report.page.state.Handler handler = new com.dianping.cat.report.page.state.Handler();
+
+		handler.setJspViewer(stateJspViewer);
+		handler.setReportService(stateReportService);
+		handler.setStateGraphs(stateGraphBuilder);
+		handler.setStateBuilder(stateBuilder);
+		handler.setService(stateModelService);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setServerFilterConfigManager(serverFilterConfigManager);
 		return handler;
 	}
 
