@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.Bucket;
 import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.MessageFinderManager;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
@@ -49,19 +47,15 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
-@Named(type = LocalModelService.class, value = "logview")
 public class LocalMessageService extends LocalModelService<String> implements ModelService<String> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LocalMessageService.class);
 
 	public static final String ID = DumpAnalyzer.ID;
 
-	@Inject
 	private MessageFinderManager m_finderManager;
 
-	@Inject("local")
 	private BucketManager m_bucketManager;
 
-	@Inject(type = MessageBucketManager.class, value = LocalMessageBucketManager.ID)
 	private MessageBucketManager m_messageBucketManager;
 
 	private WaterfallMessageCodec m_waterfall = new WaterfallMessageCodec();
@@ -90,17 +84,20 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 		MessageId id = MessageId.parse(messageId);
 		ByteBuf buf = null;
 		MessageTree tree = null;
+		String localHostAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 
 		if (m_finderManager != null) {
 			buf = m_finderManager.find(id);
+		} else {
+			LOGGER.warn("Message finder manager is not configured for local logview lookup, messageId={}, period={}, domain={}.",
+					messageId, period, domain);
 		}
 		if (buf != null) {
 			tree = CodecHandler.decode(changeBuf(buf));
 		}
 
 		if (tree == null && m_bucketManager != null) {
-			Bucket bucket = m_bucketManager.getBucket(id.getDomain(),
-			      NetworkInterfaceManager.INSTANCE.getLocalHostAddress(), id.getHour(), false);
+			Bucket bucket = m_bucketManager.getBucket(id.getDomain(), localHostAddress, id.getHour(), false);
 
 			if (bucket != null) {
 				bucket.flush();
@@ -110,7 +107,14 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 				if (data != null) {
 					tree = CodecHandler.decode(changeBuf(data));
 				}
+			} else {
+				LOGGER.warn(
+						"Local bucket is not available for logview lookup, messageId={}, messageDomain={}, localHost={}, hour={}, period={}, domain={}.",
+						messageId, id.getDomain(), localHostAddress, id.getHour(), period, domain);
 			}
+		} else if (tree == null) {
+			LOGGER.warn("Local bucket manager is not configured for logview lookup, messageId={}, period={}, domain={}.",
+					messageId, period, domain);
 		}
 
 		if (tree != null) {
@@ -131,6 +135,10 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 			}
 		}
 
+		LOGGER.warn(
+				"New local logview message not found, messageId={}, messageDomain={}, localHost={}, hour={}, period={}, domain={}, finderManagerConfigured={}, bucketManagerConfigured={}.",
+				messageId, id.getDomain(), localHostAddress, id.getHour(), period, domain, m_finderManager != null,
+				m_bucketManager != null);
 		return null;
 	}
 
@@ -153,6 +161,9 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 
 		if (m_messageBucketManager != null) {
 			tree = m_messageBucketManager.loadMessage(messageId);
+		} else {
+			LOGGER.warn("Old local message bucket manager is not configured for logview lookup, messageId={}, period={}, domain={}.",
+					messageId, period, domain);
 		}
 
 		if (tree != null) {
@@ -172,6 +183,9 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 						waterfall, e);
 			}
 		}
+		LOGGER.warn(
+				"Old local logview message not found, messageId={}, period={}, domain={}, waterfall={}, messageBucketManagerConfigured={}.",
+				messageId, period, domain, waterfall, m_messageBucketManager != null);
 		return null;
 	}
 

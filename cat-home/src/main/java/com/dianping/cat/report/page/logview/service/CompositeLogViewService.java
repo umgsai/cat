@@ -20,12 +20,17 @@ package com.dianping.cat.report.page.logview.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 
 public class CompositeLogViewService extends BaseCompositeModelService<String> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CompositeLogViewService.class);
+
 	public CompositeLogViewService() {
 		super("logview");
 	}
@@ -50,6 +55,8 @@ public class CompositeLogViewService extends BaseCompositeModelService<String> {
 			}
 		}
 
+		LOGGER.warn("Composite logview service returned empty result, messageId={}, domain={}, period={}, responseCount={}.",
+				request.getProperty("messageId"), request.getDomain(), request.getPeriod(), responses.size());
 		return null;
 	}
 }

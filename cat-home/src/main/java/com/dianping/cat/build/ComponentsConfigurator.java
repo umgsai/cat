@@ -287,6 +287,13 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 												"m_tableCapacityService"));
 		all.add(C(com.dianping.cat.report.page.overload.JspViewer.class).req(ModelHandler.class));
 
+		all.add(C(com.dianping.cat.report.page.logview.Handler.class) //
+								.req(com.dianping.cat.report.page.logview.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(ModelService.class, "logview", "m_service") //
+								.req(com.dianping.cat.config.server.ServerConfigManager.class, (String) null,
+												"m_configManager"));
+		all.add(C(com.dianping.cat.report.page.logview.JspViewer.class).req(ModelHandler.class));
+
 		all.add(C(com.dianping.cat.report.page.business.Handler.class) //
 								.req(com.dianping.cat.report.page.business.JspViewer.class, (String) null, "m_jspViewer") //
 								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //

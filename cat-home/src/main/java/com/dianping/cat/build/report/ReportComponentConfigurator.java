@@ -62,6 +62,7 @@ import com.dianping.cat.report.page.top.service.HistoricalTopService;
 import com.dianping.cat.report.page.top.service.LocalTopService;
 import com.dianping.cat.report.page.top.service.TopReportService;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.system.page.router.config.RouterConfigAdjustor;
 import com.dianping.cat.system.page.router.config.RouterConfigHandler;
@@ -132,16 +133,22 @@ public class ReportComponentConfigurator extends AbstractResourceConfigurator {
 								.req(ModelService.class, new String[] { "top-historical" }, "m_services"));
 
 		// message service
-		all.add(A(LocalMessageService.class));
+		all.add(C(LocalModelService.class, "logview", LocalMessageService.class) //
+								.req(MessageFinderManager.class, (String) null, "m_finderManager") //
+								.req(BucketManager.class, "local", "m_bucketManager") //
+								.req(MessageBucketManager.class, LocalMessageBucketManager.ID, "m_messageBucketManager") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager") //
+								.req(MessageConsumer.class, (String) null, "m_consumer"));
 		all.add(C(ModelService.class, "logview-local", LocalMessageService.class) //
-								.req(MessageFinderManager.class) //
-								.req(BucketManager.class, "local") //
-								.req(MessageBucketManager.class, LocalMessageBucketManager.ID) //
-								.req(ServerConfigManager.class) //
-								.req(MessageConsumer.class));
+								.req(MessageFinderManager.class, (String) null, "m_finderManager") //
+								.req(BucketManager.class, "local", "m_bucketManager") //
+								.req(MessageBucketManager.class, LocalMessageBucketManager.ID, "m_messageBucketManager") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager") //
+								.req(MessageConsumer.class, (String) null, "m_consumer"));
 		all.add(C(ModelService.class, "logview-historical", HistoricalMessageService.class) //
-								.req(MessageBucketManager.class, HdfsMessageBucketManager.ID) //
-								.req(HdfsBucketManager.class).req(ServerConfigManager.class));
+								.req(MessageBucketManager.class, HdfsMessageBucketManager.ID, "m_hdfsBucketManager") //
+								.req(HdfsBucketManager.class, (String) null, "m_bucketManager") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager"));
 		all.add(C(ModelService.class, "logview", CompositeLogViewService.class) //
 								.req(ServerConfigManager.class, RemoteServersManager.class) //
 								.req(ModelService.class, new String[] { "logview-local", "logview-historical" },

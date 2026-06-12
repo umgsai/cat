@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -43,13 +42,10 @@ import com.dianping.cat.spring.CatSpringContext;
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject(type = ModelService.class, value = "logview")
 	private ModelService<String> m_service;
 
-	@Inject
 	private ServerConfigManager m_configManager;
 
 	private boolean checkStorageTime(MessageId msg) {
@@ -162,5 +158,17 @@ public class Handler implements PageHandler<Context> {
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setService(ModelService<String> service) {
+		m_service = service;
 	}
 }

@@ -25,7 +25,6 @@ import io.netty.buffer.ByteBufAllocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.hdfs.HdfsBucketManager;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.hadoop.hdfs.HdfsMessageBucketManager;
@@ -42,10 +41,8 @@ import com.dianping.cat.report.service.ModelRequest;
 public class HistoricalMessageService extends BaseHistoricalModelService<String> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalMessageService.class);
 
-	@Inject
 	private HdfsBucketManager m_bucketManager;
 
-	@Inject(type = MessageBucketManager.class, value = HdfsMessageBucketManager.ID)
 	private MessageBucketManager m_hdfsBucketManager;
 
 	private WaterfallMessageCodec m_waterfall = new WaterfallMessageCodec();
@@ -69,11 +66,17 @@ public class HistoricalMessageService extends BaseHistoricalModelService<String>
 	protected String buildOldMessageModel(ModelRequest request) throws Exception {
 		String messageId = request.getProperty("messageId");
 		Cat.logEvent("LoadMessage", "messageTree", Event.SUCCESS, messageId);
+		if (m_hdfsBucketManager == null) {
+			LOGGER.warn("HDFS message bucket manager is not configured for historical old logview lookup, request={}.",
+					request);
+			return null;
+		}
 		MessageTree tree = m_hdfsBucketManager.loadMessage(messageId);
 
 		if (tree != null) {
 			return toString(request, tree);
 		} else {
+			LOGGER.warn("Historical old logview message not found, messageId={}, request={}.", messageId, request);
 			return null;
 		}
 	}
@@ -82,11 +85,16 @@ public class HistoricalMessageService extends BaseHistoricalModelService<String>
 		String messageId = request.getProperty("messageId");
 		Cat.logEvent("LoadMessage", "messageTree", Event.SUCCESS, messageId);
 		MessageId id = MessageId.parse(messageId);
+		if (m_bucketManager == null) {
+			LOGGER.warn("HDFS bucket manager is not configured for historical new logview lookup, request={}.", request);
+			return null;
+		}
 		MessageTree tree = m_bucketManager.loadMessage(id);
 
 		if (tree != null) {
 			return toString(request, tree);
 		} else {
+			LOGGER.warn("Historical new logview message not found, messageId={}, request={}.", messageId, request);
 			return null;
 		}
 	}
@@ -115,5 +123,13 @@ public class HistoricalMessageService extends BaseHistoricalModelService<String>
 					request.getProperty("messageId"), request.getProperty("waterfall", "false"), e);
 		}
 		return null;
+	}
+
+	public void setBucketManager(HdfsBucketManager bucketManager) {
+		m_bucketManager = bucketManager;
+	}
+
+	public void setHdfsBucketManager(MessageBucketManager hdfsBucketManager) {
+		m_hdfsBucketManager = hdfsBucketManager;
 	}
 }

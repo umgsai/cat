@@ -662,6 +662,34 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.logview.Handler</role>
+			<implementation>com.dianping.cat.report.page.logview.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.logview.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>logview</role-hint>
+					<field-name>m_service</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.logview.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.logview.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.dianping.cat.report.page.business.Handler</role>
 			<implementation>com.dianping.cat.report.page.business.Handler</implementation>
 			<requirements>
@@ -2462,20 +2490,25 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.cat.message.storage.MessageFinderManager</role>
+					<field-name>m_finderManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.BucketManager</role>
 					<role-hint>local</role-hint>
+					<field-name>m_bucketManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.message.storage.MessageBucketManager</role>
 					<role-hint>local</role-hint>
+					<field-name>m_messageBucketManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.analysis.MessageConsumer</role>
+					<field-name>m_consumer</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2486,20 +2519,25 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.cat.message.storage.MessageFinderManager</role>
+					<field-name>m_finderManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.BucketManager</role>
 					<role-hint>local</role-hint>
+					<field-name>m_bucketManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.message.storage.MessageBucketManager</role>
 					<role-hint>local</role-hint>
+					<field-name>m_messageBucketManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.analysis.MessageConsumer</role>
+					<field-name>m_consumer</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2511,12 +2549,15 @@
 				<requirement>
 					<role>com.dianping.cat.message.storage.MessageBucketManager</role>
 					<role-hint>hdfs</role-hint>
+					<field-name>m_hdfsBucketManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.hdfs.HdfsBucketManager</role>
+					<field-name>m_bucketManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2970,31 +3011,6 @@
 			<role>org.unidal.web.mvc.Module</role>
 			<role-hint>com.dianping.cat.report.ReportModule</role-hint>
 			<implementation>com.dianping.cat.report.ReportModule</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.logview.Handler</role>
-			<implementation>com.dianping.cat.report.page.logview.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.logview.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>logview</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.logview.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.logview.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.model.Handler</role>

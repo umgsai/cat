@@ -2560,10 +2560,13 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<String> localMessageService(ServerConfigManager serverConfigManager) {
+	public LocalModelService<String> localMessageService(ServerConfigManager serverConfigManager,
+			MessageFinderManager messageFinderManager, @Qualifier("local") BucketManager localBucketManager) {
 		LocalMessageService service = new LocalMessageService();
 
 		service.setConfigManager(serverConfigManager);
+		service.setFinderManager(messageFinderManager);
+		service.setBucketManager(localBucketManager);
 		return service;
 	}
 
