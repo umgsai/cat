@@ -49,26 +49,10 @@
 		<component>
 			<role>com.dianping.cat.system.page.permission.UserConfigManager</role>
 			<implementation>com.dianping.cat.system.page.permission.UserConfigManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.content.ContentFetcher</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.system.page.permission.ResourceConfigManager</role>
 			<implementation>com.dianping.cat.system.page.permission.ResourceConfigManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.content.ContentFetcher</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>org.unidal.initialization.ModuleManager</role>
@@ -3393,6 +3377,14 @@
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
 				</requirement>
 			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.system.page.permission.UserConfigManager</role>
+			<implementation>com.dianping.cat.system.page.permission.UserConfigManager</implementation>
+		</component>
+		<component>
+			<role>com.dianping.cat.system.page.permission.ResourceConfigManager</role>
+			<implementation>com.dianping.cat.system.page.permission.ResourceConfigManager</implementation>
 		</component>
 		<component>
 			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>

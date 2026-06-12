@@ -18,13 +18,9 @@
  */
 package com.dianping.cat.system.page.permission;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -38,18 +34,15 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-@Named
-public class UserConfigManager implements Initializable {
+public class UserConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserConfigManager.class);
 
 	public static final int DEFAULT_ROLE = 1;
 
 	private static final String CONFIG_NAME = "user-config";
 
-	@Inject
 	protected ConfigRepository m_configDao;
 
-	@Inject
 	protected ContentFetcher m_fetcher;
 
 	private int m_configId;
@@ -67,10 +60,14 @@ public class UserConfigManager implements Initializable {
 	}
 
 	public UserConfig getConfig() {
+		ensureInitialized();
+
 		return m_config;
 	}
 
 	public int getRole(String user) {
+		ensureInitialized();
+
 		User usr = m_config.findUser(user);
 
 		if (usr != null) {
@@ -80,8 +77,7 @@ public class UserConfigManager implements Initializable {
 		return DEFAULT_ROLE;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 
 		try {
@@ -147,6 +143,17 @@ public class UserConfigManager implements Initializable {
 				m_modifyTime = modifyTime;
 				LOGGER.info("Refreshed user config, configId={}, modifyTime={}, userCount={}.", m_configId,
 						m_modifyTime, m_config.getUsers().size());
+			}
+		}
+	}
+
+	private void ensureInitialized() {
+		if (m_config == null) {
+			synchronized (this) {
+				if (m_config == null) {
+					LOGGER.warn("User config is not initialized yet, loading it lazily.");
+					initialize();
+				}
 			}
 		}
 	}

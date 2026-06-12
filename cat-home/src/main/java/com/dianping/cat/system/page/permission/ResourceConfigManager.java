@@ -21,13 +21,9 @@ package com.dianping.cat.system.page.permission;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -41,8 +37,7 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-@Named
-public class ResourceConfigManager implements Initializable {
+public class ResourceConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceConfigManager.class);
 
 	public static final int DEFAULT_RESOURCE_ROLE = 1;
@@ -51,10 +46,8 @@ public class ResourceConfigManager implements Initializable {
 
 	private static final String ALL = "*";
 
-	@Inject
 	protected ConfigRepository m_configDao;
 
-	@Inject
 	protected ContentFetcher m_fetcher;
 
 	private int m_configId;
@@ -74,10 +67,14 @@ public class ResourceConfigManager implements Initializable {
 	}
 
 	public ResourceConfig getConfig() {
+		ensureInitialized();
+
 		return m_config;
 	}
 
 	public int getRole(String path, String op) {
+		ensureInitialized();
+
 		Map<String, Integer> pathPermission = m_permissions.get(path);
 
 		if (pathPermission == null) {
@@ -99,8 +96,7 @@ public class ResourceConfigManager implements Initializable {
 		return DEFAULT_RESOURCE_ROLE;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 
 		try {
@@ -183,6 +179,17 @@ public class ResourceConfigManager implements Initializable {
 				refreshData();
 				LOGGER.info("Refreshed resource config, configId={}, modifyTime={}, resourceCount={}.", m_configId,
 						m_modifyTime, m_config.getResources().size());
+			}
+		}
+	}
+
+	private void ensureInitialized() {
+		if (m_config == null) {
+			synchronized (this) {
+				if (m_config == null) {
+					LOGGER.warn("Resource config is not initialized yet, loading it lazily.");
+					initialize();
+				}
 			}
 		}
 	}

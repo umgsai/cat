@@ -101,9 +101,9 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		all.add(A(CatHomeModule.class));
 
-		all.add(A(UserConfigManager.class));
+		all.add(C(UserConfigManager.class));
 
-		all.add(A(ResourceConfigManager.class));
+		all.add(C(ResourceConfigManager.class));
 
 		all.add(C(ModuleManager.class, DefaultModuleManager.class) //
 								.config(E("topLevelModules").value(CatHomeModule.ID)));
