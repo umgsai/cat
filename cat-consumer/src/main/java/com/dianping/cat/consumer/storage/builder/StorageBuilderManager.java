@@ -48,7 +48,13 @@ public class StorageBuilderManager extends ContainerHolder implements Initializa
 
 	@Override
 	public void initialize() throws InitializationException {
-		m_storageBuilders = lookupMap(StorageBuilder.class);
+		if (m_storageBuilders == null) {
+			m_storageBuilders = lookupMap(StorageBuilder.class);
+		}
+	}
+
+	public void setStorageBuilders(Map<String, StorageBuilder> storageBuilders) {
+		m_storageBuilders = storageBuilders;
 	}
 
 }

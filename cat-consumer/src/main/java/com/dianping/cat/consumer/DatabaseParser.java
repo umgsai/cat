@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.util.StringUtils;
 
 import com.dianping.cat.Cat;
@@ -32,6 +33,8 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 
 public class DatabaseParser implements LogEnabled {
+
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DatabaseParser.class);
 
 	private Logger m_logger;
 
@@ -81,7 +84,7 @@ public class DatabaseParser implements LogEnabled {
 					m_connections.put(connection, database);
 				} else {
 					m_errorConnections.add(connection);
-					m_logger.info("Unrecognized jdbc connection string: " + connection);
+					logUnrecognizedConnection(connection);
 				}
 			} catch (Exception e) {
 				m_errorConnections.add(connection);
@@ -100,6 +103,14 @@ public class DatabaseParser implements LogEnabled {
 			}
 			t.setStatus(Transaction.SUCCESS);
 			t.complete();
+		}
+	}
+
+	private void logUnrecognizedConnection(String connection) {
+		if (m_logger != null) {
+			m_logger.info("Unrecognized jdbc connection string: " + connection);
+		} else {
+			LOGGER.warn("Unrecognized jdbc connection string: {}", connection);
 		}
 	}
 

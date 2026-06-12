@@ -88,4 +88,8 @@ public class AlertService {
 			Cat.logError(e);
 		}
 	}
+
+	public void setAlertDao(AlertRepository alertDao) {
+		m_alertDao = alertDao;
+	}
 }

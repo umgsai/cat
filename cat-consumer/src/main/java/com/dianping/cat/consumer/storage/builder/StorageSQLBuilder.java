@@ -84,4 +84,8 @@ public class StorageSQLBuilder implements StorageBuilder {
 		return "SQL".equals(t.getType());
 	}
 
+	public void setDatabaseParser(DatabaseParser databaseParser) {
+		m_databaseParser = databaseParser;
+	}
+
 }

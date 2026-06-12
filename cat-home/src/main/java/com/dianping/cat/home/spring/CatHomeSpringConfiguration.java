@@ -73,6 +73,11 @@ import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.consumer.storage.StorageAnalyzer;
 import com.dianping.cat.consumer.storage.StorageDelegate;
 import com.dianping.cat.consumer.storage.StorageReportUpdater;
+import com.dianping.cat.consumer.storage.builder.StorageBuilder;
+import com.dianping.cat.consumer.storage.builder.StorageBuilderManager;
+import com.dianping.cat.consumer.storage.builder.StorageCacheBuilder;
+import com.dianping.cat.consumer.storage.builder.StorageRPCBuilder;
+import com.dianping.cat.consumer.storage.builder.StorageSQLBuilder;
 import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.consumer.top.TopAnalyzer;
 import com.dianping.cat.consumer.top.TopDelegate;
@@ -232,6 +237,9 @@ import com.dianping.cat.report.page.statistics.task.service.ClientReportBuilder;
 import com.dianping.cat.report.page.statistics.task.service.ServiceReportBuilder;
 import com.dianping.cat.report.page.statistics.task.utilization.UtilizationReportBuilder;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
+import com.dianping.cat.report.page.storage.display.StorageAlertInfoBuilder;
+import com.dianping.cat.report.page.storage.service.CompositeStorageService;
+import com.dianping.cat.report.page.storage.service.HistoricalStorageService;
 import com.dianping.cat.report.page.storage.service.LocalStorageService;
 import com.dianping.cat.report.page.storage.task.StorageReportBuilder;
 import com.dianping.cat.report.page.storage.task.StorageReportService;
@@ -1241,6 +1249,44 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public com.dianping.cat.report.page.storage.JspViewer storageJspViewer() {
+		return new com.dianping.cat.report.page.storage.JspViewer();
+	}
+
+	@Bean
+	public StorageAlertInfoBuilder storageAlertInfoBuilder(com.dianping.cat.alarm.service.AlertService alertService) {
+		StorageAlertInfoBuilder builder = new StorageAlertInfoBuilder();
+
+		builder.setAlertService(alertService);
+		return builder;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.storage.Handler storageHandler(
+			com.dianping.cat.report.page.storage.JspViewer storageJspViewer, StorageReportService storageReportService,
+			PayloadNormalizer payloadNormalizer,
+			@Qualifier("storageModelService") ModelService<StorageReport> storageModelService,
+			StorageMergeHelper storageMergeHelper, StorageGroupConfigManager storageGroupConfigManager,
+			JsonBuilder jsonBuilder, AlterationRepository alterationRepository,
+			com.dianping.cat.alarm.service.AlertService alertService, StorageAlertInfoBuilder storageAlertInfoBuilder,
+			StorageBuilderManager storageBuilderManager) {
+		com.dianping.cat.report.page.storage.Handler handler = new com.dianping.cat.report.page.storage.Handler();
+
+		handler.setJspViewer(storageJspViewer);
+		handler.setReportService(storageReportService);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setService(storageModelService);
+		handler.setMergeHelper(storageMergeHelper);
+		handler.setStorageGroupConfigManager(storageGroupConfigManager);
+		handler.setJsonBuilder(jsonBuilder);
+		handler.setAlterationDao(alterationRepository);
+		handler.setAlertService(alertService);
+		handler.setAlertInfoBuilder(storageAlertInfoBuilder);
+		handler.setStorageBuilderManager(storageBuilderManager);
+		return handler;
+	}
+
+	@Bean
 	public com.dianping.cat.report.page.dependency.JspViewer dependencyJspViewer() {
 		return new com.dianping.cat.report.page.dependency.JspViewer();
 	}
@@ -1946,6 +1992,14 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public com.dianping.cat.alarm.service.AlertService alertService(AlertRepository alertRepository) {
+		com.dianping.cat.alarm.service.AlertService service = new com.dianping.cat.alarm.service.AlertService();
+
+		service.setAlertDao(alertRepository);
+		return service;
+	}
+
+	@Bean
 	public AlarmManager alarmManager() {
 		return new AlarmManager();
 	}
@@ -1985,6 +2039,42 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public StorageMergeHelper storageMergeHelper() {
 		return new StorageMergeHelper();
+	}
+
+	@Bean
+	public com.dianping.cat.consumer.DatabaseParser databaseParser() {
+		return new com.dianping.cat.consumer.DatabaseParser();
+	}
+
+	@Bean
+	public StorageSQLBuilder storageSQLBuilder(com.dianping.cat.consumer.DatabaseParser databaseParser) {
+		StorageSQLBuilder builder = new StorageSQLBuilder();
+
+		builder.setDatabaseParser(databaseParser);
+		return builder;
+	}
+
+	@Bean
+	public StorageCacheBuilder storageCacheBuilder() {
+		return new StorageCacheBuilder();
+	}
+
+	@Bean
+	public StorageRPCBuilder storageRPCBuilder() {
+		return new StorageRPCBuilder();
+	}
+
+	@Bean(initMethod = "initialize")
+	public StorageBuilderManager storageBuilderManager(StorageSQLBuilder storageSQLBuilder,
+			StorageCacheBuilder storageCacheBuilder, StorageRPCBuilder storageRPCBuilder) {
+		StorageBuilderManager manager = new StorageBuilderManager();
+		Map<String, StorageBuilder> builders = new LinkedHashMap<String, StorageBuilder>();
+
+		builders.put(storageSQLBuilder.getType(), storageSQLBuilder);
+		builders.put(storageCacheBuilder.getType(), storageCacheBuilder);
+		builders.put(storageRPCBuilder.getType(), storageRPCBuilder);
+		manager.setStorageBuilders(builders);
+		return manager;
 	}
 
 	@Bean(initMethod = "initialize")
@@ -2062,6 +2152,16 @@ public class CatHomeSpringConfiguration {
 		HistoricalStateService service = new HistoricalStateService();
 
 		service.setReportService(stateReportService);
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize", name = "storage-historical")
+	public ModelService<StorageReport> historicalStorageService(StorageReportService storageReportService,
+			ServerConfigManager serverConfigManager) {
+		HistoricalStorageService service = new HistoricalStorageService();
+
+		service.setReportService(storageReportService);
 		service.setConfigManager(serverConfigManager);
 		return service;
 	}
@@ -2160,6 +2260,19 @@ public class CatHomeSpringConfiguration {
 			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
 		CompositeStateService service = new CompositeStateService();
 		List<ModelService<StateReport>> services = Collections.singletonList(historicalStateService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ModelService<StorageReport> storageModelService(
+			@Qualifier("storage-historical") ModelService<StorageReport> historicalStorageService,
+			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
+		CompositeStorageService service = new CompositeStorageService();
+		List<ModelService<StorageReport>> services = Collections.singletonList(historicalStorageService);
 
 		service.setServices(services);
 		service.setConfigManager(serverConfigManager);

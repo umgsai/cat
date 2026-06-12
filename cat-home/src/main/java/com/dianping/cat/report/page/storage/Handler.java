@@ -33,7 +33,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.tuple.Pair;
 import org.slf4j.Logger;
@@ -73,41 +72,31 @@ import com.dianping.cat.report.page.storage.transform.StorageOperationFilter;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private StorageReportService m_reportService;
 
-	@Inject
 	private PayloadNormalizer m_normalizePayload;
 
-	@Inject(type = ModelService.class, value = StorageAnalyzer.ID)
 	private ModelService<StorageReport> m_service;
 
-	@Inject
 	private StorageMergeHelper m_mergeHelper;
 
-	@Inject
 	private StorageGroupConfigManager m_storageGroupConfigManager;
 
-	@Inject
 	private JsonBuilder m_jsonBuilder;
 
-	@Inject
 	private AlterationRepository m_alterationDao;
 
-	@Inject
 	private AlertService m_alertService;
 
-	@Inject
 	private StorageAlertInfoBuilder m_alertInfoBuilder;
 
-	@Inject
 	private StorageBuilderManager m_storageBuilderManager;
 
 	private Map<String, Map<String, List<String>>> buildAlertLinks(Map<String, StorageAlertInfo> alertInfos, String type) {
@@ -241,6 +230,8 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "storage")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
+
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		normalize(model, payload);
@@ -463,6 +454,99 @@ public class Handler implements PageHandler<Context> {
 				return Integer.parseInt(end) - Integer.parseInt(first);
 			}
 		}
+	}
+
+	private void refreshSpringBeans() {
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
+		StorageReportService reportService = CatSpringContext.getBeanIfAvailable(StorageReportService.class);
+		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
+		ModelService<StorageReport> service = CatSpringContext.getBeanIfAvailable("storageModelService", ModelService.class);
+		StorageMergeHelper mergeHelper = CatSpringContext.getBeanIfAvailable(StorageMergeHelper.class);
+		StorageGroupConfigManager storageGroupConfigManager = CatSpringContext
+		      .getBeanIfAvailable(StorageGroupConfigManager.class);
+		JsonBuilder jsonBuilder = CatSpringContext.getBeanIfAvailable(JsonBuilder.class);
+		AlterationRepository alterationRepository = CatSpringContext.getBeanIfAvailable(AlterationRepository.class);
+		AlertService alertService = CatSpringContext.getBeanIfAvailable(AlertService.class);
+		StorageAlertInfoBuilder alertInfoBuilder = CatSpringContext.getBeanIfAvailable(StorageAlertInfoBuilder.class);
+		StorageBuilderManager storageBuilderManager = CatSpringContext.getBeanIfAvailable(StorageBuilderManager.class);
+
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (normalizer != null) {
+			m_normalizePayload = normalizer;
+		}
+		if (service != null) {
+			m_service = service;
+		}
+		if (mergeHelper != null) {
+			m_mergeHelper = mergeHelper;
+		}
+		if (storageGroupConfigManager != null) {
+			m_storageGroupConfigManager = storageGroupConfigManager;
+		}
+		if (jsonBuilder != null) {
+			m_jsonBuilder = jsonBuilder;
+		}
+		if (alterationRepository != null) {
+			m_alterationDao = alterationRepository;
+		}
+		if (alertService != null) {
+			m_alertService = alertService;
+		}
+		if (alertInfoBuilder != null) {
+			m_alertInfoBuilder = alertInfoBuilder;
+		}
+		if (storageBuilderManager != null) {
+			m_storageBuilderManager = storageBuilderManager;
+		}
+	}
+
+	public void setAlertInfoBuilder(StorageAlertInfoBuilder alertInfoBuilder) {
+		m_alertInfoBuilder = alertInfoBuilder;
+	}
+
+	public void setAlertService(AlertService alertService) {
+		m_alertService = alertService;
+	}
+
+	public void setAlterationDao(AlterationRepository alterationDao) {
+		m_alterationDao = alterationDao;
+	}
+
+	public void setJsonBuilder(JsonBuilder jsonBuilder) {
+		m_jsonBuilder = jsonBuilder;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setMergeHelper(StorageMergeHelper mergeHelper) {
+		m_mergeHelper = mergeHelper;
+	}
+
+	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
+		m_normalizePayload = normalizePayload;
+	}
+
+	public void setReportService(StorageReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setService(ModelService<StorageReport> service) {
+		m_service = service;
+	}
+
+	public void setStorageBuilderManager(StorageBuilderManager storageBuilderManager) {
+		m_storageBuilderManager = storageBuilderManager;
+	}
+
+	public void setStorageGroupConfigManager(StorageGroupConfigManager storageGroupConfigManager) {
+		m_storageGroupConfigManager = storageGroupConfigManager;
 	}
 
 }

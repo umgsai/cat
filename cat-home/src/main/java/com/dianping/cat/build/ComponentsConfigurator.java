@@ -48,6 +48,7 @@ import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.state.StateAnalyzer;
+import com.dianping.cat.consumer.storage.StorageAnalyzer;
 import com.dianping.cat.consumer.top.TopAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
@@ -237,6 +238,28 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 												"m_reportService") //
 								.req(com.dianping.cat.config.server.ServerFilterConfigManager.class, (String) null,
 												"m_serverFilterConfigManager"));
+
+		all.add(C(com.dianping.cat.report.page.storage.Handler.class) //
+								.req(com.dianping.cat.report.page.storage.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(com.dianping.cat.report.page.storage.task.StorageReportService.class, (String) null,
+												"m_reportService") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(ModelService.class, StorageAnalyzer.ID, "m_service") //
+								.req(com.dianping.cat.report.page.storage.transform.StorageMergeHelper.class, (String) null,
+												"m_mergeHelper") //
+								.req(com.dianping.cat.report.page.storage.config.StorageGroupConfigManager.class,
+												(String) null, "m_storageGroupConfigManager") //
+								.req(JsonBuilder.class, (String) null, "m_jsonBuilder") //
+								.req(AlterationRepository.class, (String) null, "m_alterationDao") //
+								.req(com.dianping.cat.alarm.service.AlertService.class, (String) null, "m_alertService") //
+								.req(com.dianping.cat.report.page.storage.display.StorageAlertInfoBuilder.class,
+												(String) null, "m_alertInfoBuilder") //
+								.req(com.dianping.cat.consumer.storage.builder.StorageBuilderManager.class, (String) null,
+												"m_storageBuilderManager"));
+		all.add(C(com.dianping.cat.report.page.storage.JspViewer.class).req(ModelHandler.class));
+		all.add(C(com.dianping.cat.report.page.storage.display.StorageAlertInfoBuilder.class) //
+								.req(com.dianping.cat.alarm.service.AlertService.class, (String) null, "m_alertService"));
+		all.add(C(com.dianping.cat.report.page.storage.transform.StorageMergeHelper.class));
 
 		all.add(A(CatHomeModule.class));
 

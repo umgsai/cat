@@ -497,6 +497,80 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.storage.Handler</role>
+			<implementation>com.dianping.cat.report.page.storage.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.storage.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.storage.task.StorageReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
+					<field-name>m_normalizePayload</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>storage</role-hint>
+					<field-name>m_service</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</role>
+					<field-name>m_mergeHelper</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.storage.config.StorageGroupConfigManager</role>
+					<field-name>m_storageGroupConfigManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.helper.JsonBuilder</role>
+					<field-name>m_jsonBuilder</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository</role>
+					<field-name>m_alterationDao</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.alarm.service.AlertService</role>
+					<field-name>m_alertService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.storage.display.StorageAlertInfoBuilder</role>
+					<field-name>m_alertInfoBuilder</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.consumer.storage.builder.StorageBuilderManager</role>
+					<field-name>m_storageBuilderManager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.storage.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.storage.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.storage.display.StorageAlertInfoBuilder</role>
+			<implementation>com.dianping.cat.report.page.storage.display.StorageAlertInfoBuilder</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.alarm.service.AlertService</role>
+					<field-name>m_alertService</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</role>
+			<implementation>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</implementation>
+		</component>
+		<component>
 			<role>org.unidal.initialization.Module</role>
 			<role-hint>cat-home</role-hint>
 			<implementation>com.dianping.cat.CatHomeModule</implementation>
@@ -1433,15 +1507,6 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.storage.display.StorageAlertInfoBuilder</role>
-			<implementation>com.dianping.cat.report.page.storage.display.StorageAlertInfoBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.alarm.service.AlertService</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -2829,59 +2894,6 @@
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
 				</requirement>
 			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.storage.Handler</role>
-			<implementation>com.dianping.cat.report.page.storage.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.storage.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.storage.task.StorageReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>storage</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.storage.config.StorageGroupConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.helper.JsonBuilder</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.alarm.service.AlertService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.storage.display.StorageAlertInfoBuilder</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.consumer.storage.builder.StorageBuilderManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.storage.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.storage.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</role>
-			<implementation>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</implementation>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.business.Handler</role>

@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.unidal.helper.Splitters;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
@@ -40,11 +39,11 @@ import com.dianping.cat.home.storage.alert.entity.Storage;
 import com.dianping.cat.home.storage.alert.entity.StorageAlertInfo;
 import com.dianping.cat.home.storage.alert.entity.Target;
 import com.dianping.cat.report.page.storage.StorageConstants;
+import com.dianping.cat.spring.CatSpringContext;
 
 @Named
 public class StorageAlertInfoBuilder {
 
-	@Inject
 	private AlertService m_alertService;
 
 	private SimpleDateFormat m_sdf = new SimpleDateFormat("HH:mm");
@@ -55,6 +54,8 @@ public class StorageAlertInfoBuilder {
 
 	public Map<String, StorageAlertInfo> buildStorageAlertInfos(Date start, Date end, int minuteCounts, String type,
 							List<Alert> alerts) {
+		refreshSpringBeans();
+
 		Map<String, StorageAlertInfo> results = prepareBlankAlert(start.getTime(), end.getTime(), minuteCounts, type);
 
 		for (Alert alert : alerts) {
@@ -128,5 +129,17 @@ public class StorageAlertInfoBuilder {
 		} else {
 			return target;
 		}
+	}
+
+	private void refreshSpringBeans() {
+		AlertService alertService = CatSpringContext.getBeanIfAvailable(AlertService.class);
+
+		if (alertService != null) {
+			m_alertService = alertService;
+		}
+	}
+
+	public void setAlertService(AlertService alertService) {
+		m_alertService = alertService;
 	}
 }
