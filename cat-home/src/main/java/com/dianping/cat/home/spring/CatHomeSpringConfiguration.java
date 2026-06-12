@@ -185,7 +185,9 @@ import com.dianping.cat.report.page.business.service.BusinessReportService;
 import com.dianping.cat.report.page.business.task.BusinessBaselineReportBuilder;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.business.task.BusinessPointParser;
+import com.dianping.cat.report.page.cross.service.CompositeCrossService;
 import com.dianping.cat.report.page.cross.service.CrossReportService;
+import com.dianping.cat.report.page.cross.service.HistoricalCrossService;
 import com.dianping.cat.report.page.cross.service.LocalCrossService;
 import com.dianping.cat.report.page.cross.task.CrossReportBuilder;
 import com.dianping.cat.report.page.dependency.service.DependencyReportService;
@@ -1536,6 +1538,26 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public com.dianping.cat.report.page.cross.JspViewer crossJspViewer() {
+		return new com.dianping.cat.report.page.cross.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.cross.Handler crossHandler(
+			com.dianping.cat.report.page.cross.JspViewer crossJspViewer, CrossReportService crossReportService,
+			PayloadNormalizer payloadNormalizer, HostinfoService hostinfoService,
+			@Qualifier("crossModelService") ModelService<CrossReport> crossModelService) {
+		com.dianping.cat.report.page.cross.Handler handler = new com.dianping.cat.report.page.cross.Handler();
+
+		handler.setJspViewer(crossJspViewer);
+		handler.setReportService(crossReportService);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setHostinfoService(hostinfoService);
+		handler.setService(crossModelService);
+		return handler;
+	}
+
+	@Bean
 	public CrossReportService crossReportService(HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
 			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
@@ -2166,6 +2188,16 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize", name = "cross-historical")
+	public ModelService<CrossReport> historicalCrossService(CrossReportService crossReportService,
+			ServerConfigManager serverConfigManager) {
+		HistoricalCrossService service = new HistoricalCrossService();
+
+		service.setReportService(crossReportService);
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
 	@Bean(initMethod = "initialize", name = "dependency-historical")
 	public ModelService<DependencyReport> historicalDependencyService(DependencyReportService dependencyReportService,
 			ServerConfigManager serverConfigManager) {
@@ -2273,6 +2305,19 @@ public class CatHomeSpringConfiguration {
 			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
 		CompositeStorageService service = new CompositeStorageService();
 		List<ModelService<StorageReport>> services = Collections.singletonList(historicalStorageService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize", name = "crossModelService")
+	public ModelService<CrossReport> crossModelService(
+			@Qualifier("cross-historical") ModelService<CrossReport> historicalCrossService,
+			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
+		CompositeCrossService service = new CompositeCrossService();
+		List<ModelService<CrossReport>> services = Collections.singletonList(historicalCrossService);
 
 		service.setServices(services);
 		service.setConfigManager(serverConfigManager);

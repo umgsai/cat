@@ -45,6 +45,7 @@ import com.dianping.cat.build.report.ReportComponentConfigurator;
 import com.dianping.cat.build.report.StorageComponentConfigurator;
 import com.dianping.cat.build.report.TransactionComponentConfigurator;
 import com.dianping.cat.consumer.event.EventAnalyzer;
+import com.dianping.cat.consumer.cross.CrossAnalyzer;
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.state.StateAnalyzer;
@@ -260,6 +261,15 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(C(com.dianping.cat.report.page.storage.display.StorageAlertInfoBuilder.class) //
 								.req(com.dianping.cat.alarm.service.AlertService.class, (String) null, "m_alertService"));
 		all.add(C(com.dianping.cat.report.page.storage.transform.StorageMergeHelper.class));
+
+		all.add(C(com.dianping.cat.report.page.cross.Handler.class) //
+								.req(com.dianping.cat.report.page.cross.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(com.dianping.cat.report.page.cross.service.CrossReportService.class, (String) null,
+												"m_reportService") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(com.dianping.cat.service.HostinfoService.class, (String) null, "m_hostinfoService") //
+								.req(ModelService.class, CrossAnalyzer.ID, "m_service"));
+		all.add(C(com.dianping.cat.report.page.cross.JspViewer.class).req(ModelHandler.class));
 
 		all.add(A(CatHomeModule.class));
 

@@ -22,7 +22,6 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Date;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -41,21 +40,17 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.HostinfoService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private CrossReportService m_reportService;
 
-	@Inject
 	private PayloadNormalizer m_normalizePayload;
 
-	@Inject
 	private HostinfoService m_hostinfoService;
 
-	@Inject(type = ModelService.class, value = CrossAnalyzer.ID)
 	private ModelService<CrossReport> m_service;
 
 	private CrossReport getHourlyReport(Payload payload) {
@@ -93,6 +88,8 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = CrossAnalyzer.ID)
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
+
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 
@@ -218,4 +215,48 @@ public class Handler implements PageHandler<Context> {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private void refreshSpringBeans() {
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
+		CrossReportService reportService = CatSpringContext.getBeanIfAvailable(CrossReportService.class);
+		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
+		HostinfoService hostinfoService = CatSpringContext.getBeanIfAvailable(HostinfoService.class);
+		ModelService<CrossReport> service = CatSpringContext.getBeanIfAvailable("crossModelService", ModelService.class);
+
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (normalizer != null) {
+			m_normalizePayload = normalizer;
+		}
+		if (hostinfoService != null) {
+			m_hostinfoService = hostinfoService;
+		}
+		if (service != null) {
+			m_service = service;
+		}
+	}
+
+	public void setHostinfoService(HostinfoService hostinfoService) {
+		m_hostinfoService = hostinfoService;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
+		m_normalizePayload = normalizePayload;
+	}
+
+	public void setReportService(CrossReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setService(ModelService<CrossReport> service) {
+		m_service = service;
+	}
 }
