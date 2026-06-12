@@ -33,6 +33,10 @@ public class WeeklyReportContentRepository {
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;
 
+	public void setDataSourceManager(DataSourceManager dataSourceManager) {
+		m_dataSourceManager = dataSourceManager;
+	}
+
 	public WeeklyReportContent createLocal() {
 		return new WeeklyReportContent();
 	}

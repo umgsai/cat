@@ -25,6 +25,9 @@ import org.unidal.cat.message.storage.internals.DefaultStorageConfiguration;
 import org.unidal.cat.message.storage.local.LocalBucket;
 import org.unidal.cat.message.storage.local.LocalBucketManager;
 import org.unidal.cat.message.storage.local.LocalFileBuilder;
+import org.unidal.dal.jdbc.datasource.DataSourceManager;
+import org.unidal.lookup.ContainerLoader;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -1919,43 +1922,76 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public DailyReportRepository dailyReportRepository() {
-		return new DailyReportRepository();
+	public DataSourceManager dataSourceManager() {
+		try {
+			return ContainerLoader.getDefaultContainer().lookup(DataSourceManager.class);
+		} catch (ComponentLookupException e) {
+			throw new IllegalStateException("Unable to resolve DataSourceManager from Unidal container.", e);
+		}
 	}
 
 	@Bean
-	public DailyReportContentRepository dailyReportContentRepository() {
-		return new DailyReportContentRepository();
+	public DailyReportRepository dailyReportRepository(DataSourceManager dataSourceManager) {
+		DailyReportRepository repository = new DailyReportRepository();
+
+		repository.setDataSourceManager(dataSourceManager);
+		return repository;
 	}
 
 	@Bean
-	public HourlyReportRepository hourlyReportRepository() {
-		return new HourlyReportRepository();
+	public DailyReportContentRepository dailyReportContentRepository(DataSourceManager dataSourceManager) {
+		DailyReportContentRepository repository = new DailyReportContentRepository();
+
+		repository.setDataSourceManager(dataSourceManager);
+		return repository;
 	}
 
 	@Bean
-	public HourlyReportContentRepository hourlyReportContentRepository() {
-		return new HourlyReportContentRepository();
+	public HourlyReportRepository hourlyReportRepository(DataSourceManager dataSourceManager) {
+		HourlyReportRepository repository = new HourlyReportRepository();
+
+		repository.setDataSourceManager(dataSourceManager);
+		return repository;
 	}
 
 	@Bean
-	public WeeklyReportRepository weeklyReportRepository() {
-		return new WeeklyReportRepository();
+	public HourlyReportContentRepository hourlyReportContentRepository(DataSourceManager dataSourceManager) {
+		HourlyReportContentRepository repository = new HourlyReportContentRepository();
+
+		repository.setDataSourceManager(dataSourceManager);
+		return repository;
 	}
 
 	@Bean
-	public WeeklyReportContentRepository weeklyReportContentRepository() {
-		return new WeeklyReportContentRepository();
+	public WeeklyReportRepository weeklyReportRepository(DataSourceManager dataSourceManager) {
+		WeeklyReportRepository repository = new WeeklyReportRepository();
+
+		repository.setDataSourceManager(dataSourceManager);
+		return repository;
 	}
 
 	@Bean
-	public MonthlyReportRepository monthlyReportRepository() {
-		return new MonthlyReportRepository();
+	public WeeklyReportContentRepository weeklyReportContentRepository(DataSourceManager dataSourceManager) {
+		WeeklyReportContentRepository repository = new WeeklyReportContentRepository();
+
+		repository.setDataSourceManager(dataSourceManager);
+		return repository;
 	}
 
 	@Bean
-	public MonthlyReportContentRepository monthlyReportContentRepository() {
-		return new MonthlyReportContentRepository();
+	public MonthlyReportRepository monthlyReportRepository(DataSourceManager dataSourceManager) {
+		MonthlyReportRepository repository = new MonthlyReportRepository();
+
+		repository.setDataSourceManager(dataSourceManager);
+		return repository;
+	}
+
+	@Bean
+	public MonthlyReportContentRepository monthlyReportContentRepository(DataSourceManager dataSourceManager) {
+		MonthlyReportContentRepository repository = new MonthlyReportContentRepository();
+
+		repository.setDataSourceManager(dataSourceManager);
+		return repository;
 	}
 
 	@Bean

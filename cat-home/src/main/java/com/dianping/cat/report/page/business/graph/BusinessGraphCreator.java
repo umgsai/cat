@@ -32,7 +32,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.tuple.Pair;
 
@@ -61,25 +60,18 @@ import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 public class BusinessGraphCreator extends AbstractGraphCreator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessGraphCreator.class);
 
-	@Inject
 	private CachedBusinessReportService m_reportService;
 
-	@Inject
 	private BusinessConfigManager m_configManager;
 
-	@Inject
 	private BusinessDataFetcher m_dataFetcher;
 
-	@Inject
 	private ProjectService m_projectService;
 
-	@Inject
 	private BusinessTagConfigManager m_tagManager;
 
-	@Inject
 	private BusinessKeyHelper m_keyHelper;
 
-	@Inject
 	private CustomDataCalculator m_customDataCalculator;
 
 	private Pair<String, Boolean> buildTitleAndPrivilege(BusinessReportConfig businessReportConfig, String itemId,
@@ -458,6 +450,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 		BusinessDataFetcher dataFetcher = CatSpringContext.getBeanIfAvailable(BusinessDataFetcher.class);
 		BusinessKeyHelper keyHelper = CatSpringContext.getBeanIfAvailable(BusinessKeyHelper.class);
 		CustomDataCalculator customDataCalculator = CatSpringContext.getBeanIfAvailable(CustomDataCalculator.class);
+		CachedBusinessReportService reportService = CatSpringContext.getBeanIfAvailable(CachedBusinessReportService.class);
 
 		if (configManager != null) {
 			m_configManager = configManager;
@@ -476,6 +469,9 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 		}
 		if (customDataCalculator != null) {
 			m_customDataCalculator = customDataCalculator;
+		}
+		if (reportService != null) {
+			m_reportService = reportService;
 		}
 	}
 

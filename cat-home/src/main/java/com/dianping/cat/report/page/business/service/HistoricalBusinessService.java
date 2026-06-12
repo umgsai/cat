@@ -20,8 +20,6 @@ package com.dianping.cat.report.page.business.service;
 
 import java.util.Date;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.helper.TimeHelper;
@@ -31,7 +29,6 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public class HistoricalBusinessService extends BaseHistoricalModelService<BusinessReport> {
 
-	@Inject
 	private BusinessReportService m_reportService;
 
 	public HistoricalBusinessService() {

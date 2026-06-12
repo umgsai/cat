@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -43,19 +42,14 @@ import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private PayloadNormalizer m_normalizePayload;
 
-	@Inject
 	private ProjectService m_projectService;
 
-	@Inject
 	private BusinessGraphCreator m_graphCreator;
 
-	@Inject
 	private BusinessTagConfigManager m_tagConfigManager;
 
 	@Override
@@ -103,11 +97,23 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private void refreshSpringBeans() {
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
+		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
 		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		BusinessGraphCreator graphCreator = CatSpringContext.getBeanIfAvailable(BusinessGraphCreator.class);
 		BusinessTagConfigManager tagConfigManager = CatSpringContext.getBeanIfAvailable(BusinessTagConfigManager.class);
 
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
+		if (normalizer != null) {
+			m_normalizePayload = normalizer;
+		}
 		if (projectService != null) {
 			m_projectService = projectService;
+		}
+		if (graphCreator != null) {
+			m_graphCreator = graphCreator;
 		}
 		if (tagConfigManager != null) {
 			m_tagConfigManager = tagConfigManager;
@@ -133,5 +139,25 @@ public class Handler implements PageHandler<Context> {
 		model.setPage(ReportPage.BUSINESS);
 		model.setAction(payload.getAction());
 		m_normalizePayload.normalize(model, payload);
+	}
+
+	public void setGraphCreator(BusinessGraphCreator graphCreator) {
+		m_graphCreator = graphCreator;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
+		m_normalizePayload = normalizePayload;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setTagConfigManager(BusinessTagConfigManager tagConfigManager) {
+		m_tagConfigManager = tagConfigManager;
 	}
 }

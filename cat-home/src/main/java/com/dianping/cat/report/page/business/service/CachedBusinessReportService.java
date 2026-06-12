@@ -23,8 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.helper.TimeHelper;
@@ -46,10 +44,8 @@ public class CachedBusinessReportService {
 		}
 	};
 
-	@Inject
 	private BusinessReportService m_reportService;
 
-	@Inject(type = ModelService.class, value = BusinessAnalyzer.ID)
 	private ModelService<BusinessReport> m_service;
 
 	public BusinessReport queryBusinessReport(String domain, Date start) {
@@ -93,9 +89,13 @@ public class CachedBusinessReportService {
 
 	private void refreshSpringBeans() {
 		BusinessReportService reportService = CatSpringContext.getBeanIfAvailable(BusinessReportService.class);
+		ModelService<BusinessReport> service = CatSpringContext.getBeanIfAvailable("businessModelService", ModelService.class);
 
 		if (reportService != null) {
 			m_reportService = reportService;
+		}
+		if (service != null) {
+			m_service = service;
 		}
 	}
 

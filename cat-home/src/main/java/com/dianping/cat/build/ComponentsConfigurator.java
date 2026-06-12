@@ -44,6 +44,7 @@ import com.dianping.cat.build.report.ProblemComponentConfigurator;
 import com.dianping.cat.build.report.ReportComponentConfigurator;
 import com.dianping.cat.build.report.StorageComponentConfigurator;
 import com.dianping.cat.build.report.TransactionComponentConfigurator;
+import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.consumer.cross.CrossAnalyzer;
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
@@ -279,6 +280,45 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
 								.req(ModelService.class, MatrixAnalyzer.ID, "m_service"));
 		all.add(C(com.dianping.cat.report.page.matrix.JspViewer.class).req(ModelHandler.class));
+
+		all.add(C(com.dianping.cat.report.page.business.Handler.class) //
+								.req(com.dianping.cat.report.page.business.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(com.dianping.cat.service.ProjectService.class, (String) null, "m_projectService") //
+								.req(com.dianping.cat.report.page.business.graph.BusinessGraphCreator.class, (String) null,
+												"m_graphCreator") //
+								.req(com.dianping.cat.system.page.business.config.BusinessTagConfigManager.class,
+												(String) null, "m_tagConfigManager"));
+		all.add(C(com.dianping.cat.report.page.business.JspViewer.class).req(ModelHandler.class));
+		all.add(C(com.dianping.cat.report.page.business.graph.BusinessGraphCreator.class) //
+								.req(com.dianping.cat.report.page.business.service.CachedBusinessReportService.class,
+												(String) null, "m_reportService") //
+								.req(com.dianping.cat.config.business.BusinessConfigManager.class, (String) null,
+												"m_configManager") //
+								.req(com.dianping.cat.report.page.business.graph.BusinessDataFetcher.class, (String) null,
+												"m_dataFetcher") //
+								.req(com.dianping.cat.service.ProjectService.class, (String) null, "m_projectService") //
+								.req(com.dianping.cat.system.page.business.config.BusinessTagConfigManager.class,
+												(String) null, "m_tagManager") //
+								.req(com.dianping.cat.report.page.business.task.BusinessKeyHelper.class, (String) null,
+												"m_keyHelper") //
+								.req(com.dianping.cat.report.page.business.graph.CustomDataCalculator.class, (String) null,
+												"m_customDataCalculator") //
+								.req(com.dianping.cat.report.page.metric.service.BaselineService.class, (String) null,
+												"m_baselineService") //
+								.req(com.dianping.cat.report.graph.metric.DataExtractor.class, (String) null,
+												"m_dataExtractor") //
+								.req(com.dianping.cat.alarm.spi.AlertManager.class, (String) null, "m_alertManager"));
+		all.add(C(com.dianping.cat.report.page.business.service.CachedBusinessReportService.class) //
+								.req(com.dianping.cat.report.page.business.service.BusinessReportService.class, (String) null,
+												"m_reportService") //
+								.req(ModelService.class, BusinessAnalyzer.ID, "m_service"));
+		all.add(C(com.dianping.cat.report.page.business.graph.BusinessDataFetcher.class) //
+								.req(com.dianping.cat.report.page.business.task.BusinessKeyHelper.class, (String) null,
+												"m_keyHelper"));
+		all.add(C(com.dianping.cat.report.page.business.graph.CustomDataCalculator.class) //
+								.req(com.dianping.cat.report.page.business.task.BusinessKeyHelper.class, (String) null,
+												"m_keyHelper"));
 
 		all.add(A(CatHomeModule.class));
 

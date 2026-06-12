@@ -27,6 +27,7 @@ import org.unidal.lookup.configuration.Component;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
+import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.report.alert.business.BusinessAlert;
@@ -42,10 +43,12 @@ import com.dianping.cat.report.page.business.service.HistoricalBusinessService;
 import com.dianping.cat.report.page.business.service.LocalBusinessService;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.business.task.BusinessPointParser;
+import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.page.metric.service.DefaultBaselineService;
 import com.dianping.cat.report.page.metric.task.BaselineConfigManager;
 import com.dianping.cat.report.page.metric.task.DefaultBaselineCreator;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
 
@@ -62,7 +65,10 @@ public class MetricComponentConfigurator extends AbstractResourceConfigurator {
 
 		all.add(A(BusinessReportGroupService.class));
 
-		all.add(A(LocalBusinessService.class));
+		all.add(C(LocalModelService.class, LocalBusinessService.ID, LocalBusinessService.class) //
+								.req(ReportBucketManager.class, (String) null, "m_bucketManager") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager") //
+								.req(MessageConsumer.class, (String) null, "m_consumer"));
 		all.add(C(ModelService.class, "business-historical", HistoricalBusinessService.class) //
 								.req(BusinessReportService.class, ServerConfigManager.class));
 		all.add(C(ModelService.class, BusinessAnalyzer.ID, CompositeBusinessService.class) //

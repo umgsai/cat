@@ -21,7 +21,6 @@ package com.dianping.cat.report.page.business.service;
 import java.util.Date;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
@@ -43,7 +42,6 @@ public class LocalBusinessService extends LocalModelService<BusinessReport> {
 
 	public static final String ID = BusinessAnalyzer.ID;
 
-	@Inject
 	private ReportBucketManager m_bucketManager;
 
 	public LocalBusinessService() {

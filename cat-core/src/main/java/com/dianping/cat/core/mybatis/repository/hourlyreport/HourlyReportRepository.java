@@ -47,6 +47,10 @@ public class HourlyReportRepository {
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;
 
+	public void setDataSourceManager(DataSourceManager dataSourceManager) {
+		m_dataSourceManager = dataSourceManager;
+	}
+
 	public HourlyReport createLocal() {
 		return new HourlyReport();
 	}

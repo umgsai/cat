@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.consumer.business.model.entity.BusinessItem;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
@@ -31,11 +30,11 @@ import com.dianping.cat.consumer.business.model.entity.Segment;
 import com.dianping.cat.consumer.business.model.transform.BaseVisitor;
 import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class BusinessDataFetcher {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessDataFetcher.class);
 
-	@Inject
 	private BusinessKeyHelper m_keyHelper;
 
 	public void setKeyHelper(BusinessKeyHelper keyHelper) {
@@ -43,6 +42,8 @@ public class BusinessDataFetcher {
 	}
 
 	public Map<String, double[]> buildGraphData(BusinessReport businessReport) {
+		refreshSpringBeans();
+
 		BusinessDataBuilder builder = new BusinessDataBuilder();
 
 		if (businessReport == null) {
@@ -50,6 +51,14 @@ public class BusinessDataFetcher {
 		}
 		builder.visitBusinessReport(businessReport);
 		return builder.getDatas();
+	}
+
+	private void refreshSpringBeans() {
+		BusinessKeyHelper keyHelper = CatSpringContext.getBeanIfAvailable(BusinessKeyHelper.class);
+
+		if (keyHelper != null) {
+			m_keyHelper = keyHelper;
+		}
 	}
 
 	public class BusinessDataBuilder extends BaseVisitor {

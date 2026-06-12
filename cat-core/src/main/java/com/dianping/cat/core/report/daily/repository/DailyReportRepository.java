@@ -47,6 +47,10 @@ public class DailyReportRepository {
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;
 
+	public void setDataSourceManager(DataSourceManager dataSourceManager) {
+		m_dataSourceManager = dataSourceManager;
+	}
+
 	public DailyReport createLocal() {
 		return new DailyReport();
 	}

@@ -45,6 +45,10 @@ public class MonthlyReportRepository {
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;
 
+	public void setDataSourceManager(DataSourceManager dataSourceManager) {
+		m_dataSourceManager = dataSourceManager;
+	}
+
 	public MonthlyReport createLocal() {
 		return new MonthlyReport();
 	}

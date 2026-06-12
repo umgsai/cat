@@ -639,6 +639,122 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.business.Handler</role>
+			<implementation>com.dianping.cat.report.page.business.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.business.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
+					<field-name>m_normalizePayload</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.service.ProjectService</role>
+					<field-name>m_projectService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.business.graph.BusinessGraphCreator</role>
+					<field-name>m_graphCreator</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</role>
+					<field-name>m_tagConfigManager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.business.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.business.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.business.graph.BusinessGraphCreator</role>
+			<implementation>com.dianping.cat.report.page.business.graph.BusinessGraphCreator</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.business.service.CachedBusinessReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.business.BusinessConfigManager</role>
+					<field-name>m_configManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.business.graph.BusinessDataFetcher</role>
+					<field-name>m_dataFetcher</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.service.ProjectService</role>
+					<field-name>m_projectService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</role>
+					<field-name>m_tagManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.business.task.BusinessKeyHelper</role>
+					<field-name>m_keyHelper</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.business.graph.CustomDataCalculator</role>
+					<field-name>m_customDataCalculator</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.metric.service.BaselineService</role>
+					<field-name>m_baselineService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.graph.metric.DataExtractor</role>
+					<field-name>m_dataExtractor</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.alarm.spi.AlertManager</role>
+					<field-name>m_alertManager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.business.service.CachedBusinessReportService</role>
+			<implementation>com.dianping.cat.report.page.business.service.CachedBusinessReportService</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.business.service.BusinessReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>business</role-hint>
+					<field-name>m_service</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.business.graph.BusinessDataFetcher</role>
+			<implementation>com.dianping.cat.report.page.business.graph.BusinessDataFetcher</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.business.task.BusinessKeyHelper</role>
+					<field-name>m_keyHelper</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.business.graph.CustomDataCalculator</role>
+			<implementation>com.dianping.cat.report.page.business.graph.CustomDataCalculator</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.business.task.BusinessKeyHelper</role>
+					<field-name>m_keyHelper</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>org.unidal.initialization.Module</role>
 			<role-hint>cat-home</role-hint>
 			<implementation>com.dianping.cat.CatHomeModule</implementation>
@@ -996,12 +1112,15 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.report.ReportBucketManager</role>
+					<field-name>m_bucketManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.analysis.MessageConsumer</role>
+					<field-name>m_consumer</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2905,121 +3024,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.page.business.Handler</role>
-			<implementation>com.dianping.cat.report.page.business.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.service.ProjectService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.graph.BusinessGraphCreator</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.business.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.business.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.business.graph.BusinessGraphCreator</role>
-			<implementation>com.dianping.cat.report.page.business.graph.BusinessGraphCreator</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.service.CachedBusinessReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.business.BusinessConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.graph.BusinessDataFetcher</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.service.ProjectService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.task.BusinessKeyHelper</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.graph.CustomDataCalculator</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.metric.service.BaselineService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.graph.metric.DataExtractor</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.alarm.spi.AlertManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.business.service.CachedBusinessReportService</role>
-			<implementation>com.dianping.cat.report.page.business.service.CachedBusinessReportService</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.service.BusinessReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>business</role-hint>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.business.graph.BusinessDataFetcher</role>
-			<implementation>com.dianping.cat.report.page.business.graph.BusinessDataFetcher</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.task.BusinessKeyHelper</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</role>
-			<implementation>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.business.graph.CustomDataCalculator</role>
-			<implementation>com.dianping.cat.report.page.business.graph.CustomDataCalculator</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.business.task.BusinessKeyHelper</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>org.unidal.web.mvc.Module</role>
 			<role-hint>com.dianping.cat.system.SystemModule</role-hint>
 			<implementation>com.dianping.cat.system.SystemModule</implementation>
@@ -3366,6 +3370,24 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</role>
+			<implementation>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>
