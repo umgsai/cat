@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.tuple.Pair;
 import org.unidal.web.mvc.PageHandler;
@@ -64,31 +63,22 @@ import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private HeavyReportService m_heavyReportService;
 
-	@Inject
 	private UtilizationReportService m_utilizationReportService;
 
-	@Inject
 	private ServiceReportService m_serviceReportService;
 
-	@Inject
 	private ClientReportService m_clientReportService;
 
-	@Inject
 	private JarReportService m_jarReportService;
 
-	@Inject
 	private ProjectService m_projectService;
 
-	@Inject
 	private PayloadNormalizer m_normalizePayload;
 
-	@Inject
 	private AlertSummaryExecutor m_executor;
 
 	private void buildHeavyInfo(Model model, Payload payload) {
@@ -312,6 +302,42 @@ public class Handler implements PageHandler<Context> {
 			}
 		});
 		return result;
+	}
+
+	public void setClientReportService(ClientReportService clientReportService) {
+		m_clientReportService = clientReportService;
+	}
+
+	public void setExecutor(AlertSummaryExecutor executor) {
+		m_executor = executor;
+	}
+
+	public void setHeavyReportService(HeavyReportService heavyReportService) {
+		m_heavyReportService = heavyReportService;
+	}
+
+	public void setJarReportService(JarReportService jarReportService) {
+		m_jarReportService = jarReportService;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
+		m_normalizePayload = normalizePayload;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setServiceReportService(ServiceReportService serviceReportService) {
+		m_serviceReportService = serviceReportService;
+	}
+
+	public void setUtilizationReportService(UtilizationReportService utilizationReportService) {
+		m_utilizationReportService = utilizationReportService;
 	}
 
 }

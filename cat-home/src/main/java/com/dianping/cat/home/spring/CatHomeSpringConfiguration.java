@@ -1370,6 +1370,33 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public com.dianping.cat.report.page.statistics.JspViewer statisticsJspViewer() {
+		return new com.dianping.cat.report.page.statistics.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.statistics.Handler statisticsHandler(
+			com.dianping.cat.report.page.statistics.JspViewer statisticsJspViewer,
+			HeavyReportService heavyReportService, UtilizationReportService utilizationReportService,
+			ServiceReportService serviceReportService, ClientReportService clientReportService,
+			JarReportService jarReportService, ProjectService projectService, PayloadNormalizer payloadNormalizer,
+			AlertSummaryExecutor alertSummaryExecutor) {
+		com.dianping.cat.report.page.statistics.Handler handler =
+		      new com.dianping.cat.report.page.statistics.Handler();
+
+		handler.setJspViewer(statisticsJspViewer);
+		handler.setHeavyReportService(heavyReportService);
+		handler.setUtilizationReportService(utilizationReportService);
+		handler.setServiceReportService(serviceReportService);
+		handler.setClientReportService(clientReportService);
+		handler.setJarReportService(jarReportService);
+		handler.setProjectService(projectService);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setExecutor(alertSummaryExecutor);
+		return handler;
+	}
+
+	@Bean
 	public com.dianping.cat.report.page.matrix.Handler matrixHandler(
 			com.dianping.cat.report.page.matrix.JspViewer matrixJspViewer, MatrixReportService matrixReportService,
 			PayloadNormalizer payloadNormalizer,

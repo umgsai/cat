@@ -29,6 +29,14 @@ import org.unidal.lookup.configuration.Component;
 
 import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
+import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.consumer.cross.CrossAnalyzer;
 import com.dianping.cat.consumer.dump.LocalMessageBucketManager;
 import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
@@ -75,11 +83,11 @@ public class ReportComponentConfigurator extends AbstractResourceConfigurator {
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(UtilizationReportService.class));
+		all.add(reportService(UtilizationReportService.class));
 
-		all.add(A(ServiceReportService.class));
+		all.add(reportService(ServiceReportService.class));
 
-		all.add(A(HeavyReportService.class));
+		all.add(reportService(HeavyReportService.class));
 
 		all.add(A(RouterConfigManager.class));
 		all.add(A(RouterConfigHandler.class));
@@ -87,9 +95,9 @@ public class ReportComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(A(CachedRouterConfigService.class));
 		all.add(A(RouterConfigAdjustor.class));
 
-		all.add(A(JarReportService.class));
+		all.add(reportService(JarReportService.class));
 
-		all.add(A(ClientReportService.class));
+		all.add(reportService(ClientReportService.class));
 
 		// cross report
 		all.add(A(CrossReportService.class));
@@ -155,5 +163,17 @@ public class ReportComponentConfigurator extends AbstractResourceConfigurator {
 														"m_services"));
 
 		return all;
+	}
+
+	private Component reportService(Class<?> implementation) {
+		return C(implementation) //
+								.req(HourlyReportRepository.class, (String) null, "m_hourlyReportDao") //
+								.req(HourlyReportContentRepository.class, (String) null, "m_hourlyReportContentDao") //
+								.req(DailyReportRepository.class, (String) null, "m_dailyReportDao") //
+								.req(DailyReportContentRepository.class, (String) null, "m_dailyReportContentDao") //
+								.req(WeeklyReportRepository.class, (String) null, "m_weeklyReportDao") //
+								.req(WeeklyReportContentRepository.class, (String) null, "m_weeklyReportContentDao") //
+								.req(MonthlyReportRepository.class, (String) null, "m_monthlyReportDao") //
+								.req(MonthlyReportContentRepository.class, (String) null, "m_monthlyReportContentDao");
 	}
 }

@@ -690,6 +690,57 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.statistics.Handler</role>
+			<implementation>com.dianping.cat.report.page.statistics.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.statistics.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.statistics.service.HeavyReportService</role>
+					<field-name>m_heavyReportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.statistics.service.UtilizationReportService</role>
+					<field-name>m_utilizationReportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.statistics.service.ServiceReportService</role>
+					<field-name>m_serviceReportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.statistics.service.ClientReportService</role>
+					<field-name>m_clientReportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.statistics.service.JarReportService</role>
+					<field-name>m_jarReportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.service.ProjectService</role>
+					<field-name>m_projectService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
+					<field-name>m_normalizePayload</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.summary.AlertSummaryExecutor</role>
+					<field-name>m_executor</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.statistics.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.statistics.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.dianping.cat.report.page.business.Handler</role>
 			<implementation>com.dianping.cat.report.page.business.Handler</implementation>
 			<requirements>
@@ -1924,27 +1975,35 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+					<field-name>m_hourlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
+					<field-name>m_hourlyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+					<field-name>m_dailyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+					<field-name>m_dailyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+					<field-name>m_weeklyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
+					<field-name>m_weeklyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+					<field-name>m_monthlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
+					<field-name>m_monthlyReportContentDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1954,27 +2013,35 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+					<field-name>m_hourlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
+					<field-name>m_hourlyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+					<field-name>m_dailyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+					<field-name>m_dailyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+					<field-name>m_weeklyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
+					<field-name>m_weeklyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+					<field-name>m_monthlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
+					<field-name>m_monthlyReportContentDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1984,27 +2051,35 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+					<field-name>m_hourlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
+					<field-name>m_hourlyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+					<field-name>m_dailyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+					<field-name>m_dailyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+					<field-name>m_weeklyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
+					<field-name>m_weeklyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+					<field-name>m_monthlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
+					<field-name>m_monthlyReportContentDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2113,27 +2188,35 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+					<field-name>m_hourlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
+					<field-name>m_hourlyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+					<field-name>m_dailyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+					<field-name>m_dailyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+					<field-name>m_weeklyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
+					<field-name>m_weeklyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+					<field-name>m_monthlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
+					<field-name>m_monthlyReportContentDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2143,27 +2226,35 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+					<field-name>m_hourlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
+					<field-name>m_hourlyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+					<field-name>m_dailyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+					<field-name>m_dailyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+					<field-name>m_weeklyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
+					<field-name>m_weeklyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+					<field-name>m_monthlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
+					<field-name>m_monthlyReportContentDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -3015,48 +3106,6 @@
 		<component>
 			<role>com.dianping.cat.report.page.model.Handler</role>
 			<implementation>com.dianping.cat.report.page.model.Handler</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.statistics.Handler</role>
-			<implementation>com.dianping.cat.report.page.statistics.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.statistics.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.statistics.service.HeavyReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.statistics.service.UtilizationReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.statistics.service.ServiceReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.statistics.service.ClientReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.statistics.service.JarReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.service.ProjectService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.alert.summary.AlertSummaryExecutor</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.statistics.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.statistics.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.monitor.Handler</role>

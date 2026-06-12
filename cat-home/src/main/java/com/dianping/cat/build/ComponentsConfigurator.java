@@ -71,6 +71,7 @@ import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportReposit
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.mvc.PayloadNormalizer;
+import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 import com.dianping.cat.report.HourlyReportContentTableProvider;
 import com.dianping.cat.report.HourlyReportTableProvider;
 import com.dianping.cat.report.graph.svg.DefaultGraphBuilder;
@@ -80,8 +81,14 @@ import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.event.service.EventReportService;
 import com.dianping.cat.report.page.event.transform.EventMergeHelper;
 import com.dianping.cat.report.page.problem.service.ProblemReportService;
+import com.dianping.cat.report.page.statistics.service.ClientReportService;
+import com.dianping.cat.report.page.statistics.service.HeavyReportService;
+import com.dianping.cat.report.page.statistics.service.JarReportService;
+import com.dianping.cat.report.page.statistics.service.ServiceReportService;
+import com.dianping.cat.report.page.statistics.service.UtilizationReportService;
 import com.dianping.cat.report.page.transaction.service.TransactionReportService;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.page.permission.ResourceConfigManager;
 import com.dianping.cat.system.page.permission.UserConfigManager;
 
@@ -293,6 +300,18 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 								.req(com.dianping.cat.config.server.ServerConfigManager.class, (String) null,
 												"m_configManager"));
 		all.add(C(com.dianping.cat.report.page.logview.JspViewer.class).req(ModelHandler.class));
+
+		all.add(C(com.dianping.cat.report.page.statistics.Handler.class) //
+								.req(com.dianping.cat.report.page.statistics.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(HeavyReportService.class, (String) null, "m_heavyReportService") //
+								.req(UtilizationReportService.class, (String) null, "m_utilizationReportService") //
+								.req(ServiceReportService.class, (String) null, "m_serviceReportService") //
+								.req(ClientReportService.class, (String) null, "m_clientReportService") //
+								.req(JarReportService.class, (String) null, "m_jarReportService") //
+								.req(ProjectService.class, (String) null, "m_projectService") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(AlertSummaryExecutor.class, (String) null, "m_executor"));
+		all.add(C(com.dianping.cat.report.page.statistics.JspViewer.class).req(ModelHandler.class));
 
 		all.add(C(com.dianping.cat.report.page.business.Handler.class) //
 								.req(com.dianping.cat.report.page.business.JspViewer.class, (String) null, "m_jspViewer") //
