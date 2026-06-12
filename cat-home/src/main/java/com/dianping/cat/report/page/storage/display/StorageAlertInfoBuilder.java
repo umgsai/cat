@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.unidal.helper.Splitters;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
@@ -41,7 +40,6 @@ import com.dianping.cat.home.storage.alert.entity.Target;
 import com.dianping.cat.report.page.storage.StorageConstants;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class StorageAlertInfoBuilder {
 
 	private AlertService m_alertService;

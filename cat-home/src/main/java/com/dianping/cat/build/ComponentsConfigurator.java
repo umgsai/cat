@@ -77,6 +77,7 @@ import com.dianping.cat.report.HourlyReportTableProvider;
 import com.dianping.cat.report.graph.svg.DefaultGraphBuilder;
 import com.dianping.cat.report.graph.svg.DefaultValueTranslater;
 import com.dianping.cat.report.graph.svg.GraphBuilder;
+import com.dianping.cat.report.graph.svg.ValueTranslater;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.event.service.EventReportService;
 import com.dianping.cat.report.page.event.transform.EventMergeHelper;
@@ -110,9 +111,10 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		all.add(A(JsonBuilder.class));
 
-		all.add(A(DefaultValueTranslater.class));
+		all.add(C(ValueTranslater.class, DefaultValueTranslater.class));
 
-		all.add(A(DefaultGraphBuilder.class));
+		all.add(C(GraphBuilder.class, DefaultGraphBuilder.class) //
+								.req(ValueTranslater.class, (String) null, "m_translater"));
 
 		all.add(C(EventMergeHelper.class));
 

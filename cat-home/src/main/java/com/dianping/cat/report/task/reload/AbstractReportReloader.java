@@ -23,7 +23,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -36,13 +35,10 @@ import com.dianping.cat.spring.CatSpringContext;
 public abstract class AbstractReportReloader implements ReportReloader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractReportReloader.class);
 
-	@Inject
 	protected HourlyReportRepository m_hourlyReportDao;
 
-	@Inject
 	protected HourlyReportContentRepository m_hourlyReportContentDao;
 
-	@Inject
 	protected ServerConfigManager m_serverConfigManager;
 
 	protected int getAnalyzerCount() {

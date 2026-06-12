@@ -24,11 +24,21 @@ import java.util.List;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
+import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
+import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
+import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatAlert;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatContactor;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatDecorator;
@@ -38,6 +48,7 @@ import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.page.heartbeat.service.HistoricalHeartbeatService;
 import com.dianping.cat.report.page.heartbeat.service.LocalHeartbeatService;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
 
@@ -48,11 +59,15 @@ public class HeartbeatComponentConfigurator extends AbstractResourceConfigurator
 
 		all.add(A(HeartbeatRuleConfigManager.class));
 
-		all.add(A(HeartbeatReportService.class));
+		all.add(reportService(HeartbeatReportService.class));
 
-		all.add(A(LocalHeartbeatService.class));
+		all.add(C(LocalModelService.class, LocalHeartbeatService.ID, LocalHeartbeatService.class) //
+								.req(ReportBucketManager.class, (String) null, "m_bucketManager") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager") //
+								.req(MessageConsumer.class, (String) null, "m_consumer"));
 		all.add(C(ModelService.class, "heartbeat-historical", HistoricalHeartbeatService.class) //
-								.req(HeartbeatReportService.class, ServerConfigManager.class));
+								.req(HeartbeatReportService.class, (String) null, "m_reportService") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager"));
 		all.add(C(ModelService.class, HeartbeatAnalyzer.ID, CompositeHeartbeatService.class) //
 								.req(ServerConfigManager.class, RemoteServersManager.class) //
 								.req(ModelService.class, new String[] { "heartbeat-historical" }, "m_services"));
@@ -64,5 +79,17 @@ public class HeartbeatComponentConfigurator extends AbstractResourceConfigurator
 		all.add(A(HeartbeatAlert.class));
 
 		return all;
+	}
+
+	private Component reportService(Class<?> implementation) {
+		return C(implementation) //
+								.req(HourlyReportRepository.class, (String) null, "m_hourlyReportDao") //
+								.req(HourlyReportContentRepository.class, (String) null, "m_hourlyReportContentDao") //
+								.req(DailyReportRepository.class, (String) null, "m_dailyReportDao") //
+								.req(DailyReportContentRepository.class, (String) null, "m_dailyReportContentDao") //
+								.req(WeeklyReportRepository.class, (String) null, "m_weeklyReportDao") //
+								.req(WeeklyReportContentRepository.class, (String) null, "m_weeklyReportContentDao") //
+								.req(MonthlyReportRepository.class, (String) null, "m_monthlyReportDao") //
+								.req(MonthlyReportContentRepository.class, (String) null, "m_monthlyReportContentDao");
 	}
 }

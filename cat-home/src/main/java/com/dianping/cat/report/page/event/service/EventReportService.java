@@ -26,7 +26,6 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -56,7 +55,6 @@ import com.dianping.cat.core.dal.WeeklyReportEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
-@Named
 public class EventReportService extends AbstractReportService<EventReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EventReportService.class);
 

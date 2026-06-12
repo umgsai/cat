@@ -21,9 +21,6 @@ package com.dianping.cat.report.page.event.service;
 import java.util.Date;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.consumer.event.EventReportMerger;
@@ -40,12 +37,10 @@ import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = LocalModelService.class, value = LocalEventService.ID)
 public class LocalEventService extends LocalModelService<EventReport> {
 
 	public static final String ID = EventAnalyzer.ID;
 
-	@Inject
 	private ReportBucketManager m_bucketManager;
 
 	public LocalEventService() {

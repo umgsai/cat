@@ -18,9 +18,6 @@
  */
 package com.dianping.cat.report.page.business.task;
 
-import org.unidal.lookup.annotation.Named;
-
-@Named
 public class BusinessKeyHelper {
 
 	public final String SPLITTER = ":";

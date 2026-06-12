@@ -28,14 +28,11 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.helper.TimeHelper;
 
-@Named
 public class ReportReloadTask implements Initializable, Task {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReportReloadTask.class);
 
@@ -43,7 +40,6 @@ public class ReportReloadTask implements Initializable, Task {
 
 	private static final int EXPECTED_RELOADER_COUNT = 11;
 
-	@Inject
 	private ReportReloadConfigManager m_configManager;
 
 	private Map<String, ReportReloader> m_reloaders;

@@ -31,18 +31,14 @@ import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.spring.CatSpringContext;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.Date;
 import java.util.List;
 
-@Named(type = LocalModelService.class, value = LocalTransactionService.ID)
 public class LocalTransactionService extends LocalModelService<TransactionReport> {
 
 	public static final String ID = TransactionAnalyzer.ID;
 
-	@Inject
 	private ReportBucketManager m_bucketManager;
 
 	public LocalTransactionService() {

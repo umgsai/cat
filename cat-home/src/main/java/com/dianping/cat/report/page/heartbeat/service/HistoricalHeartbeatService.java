@@ -20,8 +20,6 @@ package com.dianping.cat.report.page.heartbeat.service;
 
 import java.util.Date;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.helper.TimeHelper;
@@ -30,7 +28,6 @@ import com.dianping.cat.report.service.ModelRequest;
 
 public class HistoricalHeartbeatService extends BaseHistoricalModelService<HeartbeatReport> {
 
-	@Inject
 	private HeartbeatReportService m_reportService;
 
 	public HistoricalHeartbeatService() {

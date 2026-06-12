@@ -20,16 +20,11 @@ package com.dianping.cat.report.graph.svg;
 
 import java.text.DecimalFormat;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
-
-@Named(type = GraphBuilder.class)
 public class DefaultGraphBuilder implements GraphBuilder {
 	private static final int BAR = 1;
 
 	private static final int LINE = 2;
 
-	@Inject
 	private ValueTranslater m_translater;
 
 	private int m_type = BAR;

@@ -25,9 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.cross.CrossAnalyzer;
 import com.dianping.cat.consumer.cross.CrossReportMerger;
@@ -40,10 +37,8 @@ import com.dianping.cat.report.task.reload.ReportReloadEntity;
 import com.dianping.cat.report.task.reload.ReportReloader;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = ReportReloader.class, value = CrossAnalyzer.ID)
 public class CrossReportReloader extends AbstractReportReloader {
 
-	@Inject(CrossAnalyzer.ID)
 	protected ReportManager<CrossReport> m_reportManager;
 
 	private List<CrossReport> buildMergedReports(Map<String, List<CrossReport>> mergedReports) {

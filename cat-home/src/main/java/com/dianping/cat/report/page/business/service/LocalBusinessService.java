@@ -21,8 +21,6 @@ package com.dianping.cat.report.page.business.service;
 import java.util.Date;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.consumer.business.BusinessReportMerger;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
@@ -37,7 +35,6 @@ import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = LocalModelService.class, value = LocalBusinessService.ID)
 public class LocalBusinessService extends LocalModelService<BusinessReport> {
 
 	public static final String ID = BusinessAnalyzer.ID;

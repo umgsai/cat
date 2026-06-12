@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
@@ -37,7 +36,6 @@ import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
-@Named
 public class BusinessReportService extends AbstractReportService<BusinessReport> {
 
 	@Override

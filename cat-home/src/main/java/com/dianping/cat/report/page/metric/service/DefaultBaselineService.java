@@ -29,8 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
@@ -41,10 +39,8 @@ import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = BaselineService.class)
 public class DefaultBaselineService implements BaselineService {
 
-	@Inject
 	private BaselineRepository m_baselineDao;
 
 	private Map<String, Baseline> m_baselines = new LinkedHashMap<String, Baseline>() {

@@ -21,9 +21,6 @@ package com.dianping.cat.report.page.problem.service;
 import java.util.Date;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.ProblemReportMerger;
 import com.dianping.cat.consumer.problem.model.entity.Entry;
@@ -41,12 +38,10 @@ import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = LocalModelService.class, value = LocalProblemService.ID)
 public class LocalProblemService extends LocalModelService<ProblemReport> {
 
 	public static final String ID = ProblemAnalyzer.ID;
 
-	@Inject
 	private ReportBucketManager m_bucketManager;
 
 	public LocalProblemService() {

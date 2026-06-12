@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import com.dianping.cat.config.server.ServerFilterConfigManager;
@@ -36,7 +35,6 @@ import com.dianping.cat.report.graph.PieChart.Item;
 import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class StateGraphBuilder {
 
 	private StateReportService m_reportService;

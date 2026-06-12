@@ -22,11 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.report.graph.metric.DataExtractor;
 
-@Named(type = DataExtractor.class)
 public class DataExtractorImpl implements DataExtractor {
 
 	private static final int MIN_POINT_NUMBER = 60;

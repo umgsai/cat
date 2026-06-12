@@ -25,9 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.StateReportMerger;
@@ -40,10 +37,8 @@ import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 import com.dianping.cat.report.task.reload.ReportReloader;
 
-@Named(type = ReportReloader.class, value = StateAnalyzer.ID)
 public class StateReportReloader extends AbstractReportReloader {
 
-	@Inject(StateAnalyzer.ID)
 	protected ReportManager<StateReport> m_reportManager;
 
 	private List<StateReport> buildMergedReports(Map<String, List<StateReport>> mergedReports) {

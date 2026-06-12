@@ -24,11 +24,21 @@ import java.util.List;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
+import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
+import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.consumer.event.EventAnalyzer;
+import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.alert.event.EventAlert;
 import com.dianping.cat.report.alert.event.EventContactor;
 import com.dianping.cat.report.alert.event.EventDecorator;
@@ -38,6 +48,7 @@ import com.dianping.cat.report.page.event.service.EventReportService;
 import com.dianping.cat.report.page.event.service.HistoricalEventService;
 import com.dianping.cat.report.page.event.service.LocalEventService;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
 
@@ -53,9 +64,12 @@ public class EventComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(C(Decorator.class, EventDecorator.ID, EventDecorator.class));
 		all.add(A(EventAlert.class));
 
-		all.add(A(EventReportService.class));
+		all.add(reportService(EventReportService.class));
 
-		all.add(A(LocalEventService.class));
+		all.add(C(LocalModelService.class, LocalEventService.ID, LocalEventService.class) //
+								.req(ReportBucketManager.class, (String) null, "m_bucketManager") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager") //
+								.req(MessageConsumer.class, (String) null, "m_consumer"));
 		all.add(C(ModelService.class, "event-historical", HistoricalEventService.class) //
 								.req(EventReportService.class, ServerConfigManager.class));
 		all.add(C(ModelService.class, EventAnalyzer.ID, CompositeEventService.class) //
@@ -63,5 +77,17 @@ public class EventComponentConfigurator extends AbstractResourceConfigurator {
 								.req(ModelService.class, new String[] { "event-historical" }, "m_services"));
 
 		return all;
+	}
+
+	private Component reportService(Class<?> implementation) {
+		return C(implementation) //
+								.req(HourlyReportRepository.class, (String) null, "m_hourlyReportDao") //
+								.req(HourlyReportContentRepository.class, (String) null, "m_hourlyReportContentDao") //
+								.req(DailyReportRepository.class, (String) null, "m_dailyReportDao") //
+								.req(DailyReportContentRepository.class, (String) null, "m_dailyReportContentDao") //
+								.req(WeeklyReportRepository.class, (String) null, "m_weeklyReportDao") //
+								.req(WeeklyReportContentRepository.class, (String) null, "m_weeklyReportContentDao") //
+								.req(MonthlyReportRepository.class, (String) null, "m_monthlyReportDao") //
+								.req(MonthlyReportContentRepository.class, (String) null, "m_monthlyReportContentDao");
 	}
 }

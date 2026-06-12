@@ -24,11 +24,21 @@ import java.util.List;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
+import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
+import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
+import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
+import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.alert.exception.AlertExceptionBuilder;
 import com.dianping.cat.report.alert.exception.ExceptionAlert;
 import com.dianping.cat.report.alert.exception.ExceptionContactor;
@@ -45,6 +55,7 @@ import com.dianping.cat.report.page.problem.service.HistoricalProblemService;
 import com.dianping.cat.report.page.problem.service.LocalProblemService;
 import com.dianping.cat.report.page.problem.service.ProblemReportService;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
 
@@ -55,11 +66,15 @@ public class ProblemComponentConfigurator extends AbstractResourceConfigurator {
 
 		all.add(A(ExceptionRuleConfigManager.class));
 
-		all.add(A(ProblemReportService.class));
+		all.add(reportService(ProblemReportService.class));
 
-		all.add(A(LocalProblemService.class));
+		all.add(C(LocalModelService.class, LocalProblemService.ID, LocalProblemService.class) //
+								.req(ReportBucketManager.class, (String) null, "m_bucketManager") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager") //
+								.req(MessageConsumer.class, (String) null, "m_consumer"));
 		all.add(C(ModelService.class, "problem-historical", HistoricalProblemService.class) //
-								.req(ProblemReportService.class, ServerConfigManager.class));
+								.req(ProblemReportService.class, (String) null, "m_reportService") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager"));
 		all.add(C(ModelService.class, ProblemAnalyzer.ID, CompositeProblemService.class) //
 								.req(ServerConfigManager.class, RemoteServersManager.class) //
 								.req(ModelService.class, new String[] { "problem-historical" }, "m_services"));
@@ -80,5 +95,17 @@ public class ProblemComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(A(AlertInfoBuilder.class));
 
 		return all;
+	}
+
+	private Component reportService(Class<?> implementation) {
+		return C(implementation) //
+								.req(HourlyReportRepository.class, (String) null, "m_hourlyReportDao") //
+								.req(HourlyReportContentRepository.class, (String) null, "m_hourlyReportContentDao") //
+								.req(DailyReportRepository.class, (String) null, "m_dailyReportDao") //
+								.req(DailyReportContentRepository.class, (String) null, "m_dailyReportContentDao") //
+								.req(WeeklyReportRepository.class, (String) null, "m_weeklyReportDao") //
+								.req(WeeklyReportContentRepository.class, (String) null, "m_weeklyReportContentDao") //
+								.req(MonthlyReportRepository.class, (String) null, "m_monthlyReportDao") //
+								.req(MonthlyReportContentRepository.class, (String) null, "m_monthlyReportContentDao");
 	}
 }

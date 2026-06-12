@@ -20,8 +20,6 @@ package com.dianping.cat.report.page.problem.service;
 
 import java.util.Date;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.helper.TimeHelper;
@@ -31,7 +29,6 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public class HistoricalProblemService extends BaseHistoricalModelService<ProblemReport> {
 
-	@Inject
 	private ProblemReportService m_reportService;
 
 	public HistoricalProblemService() {

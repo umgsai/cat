@@ -22,9 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Named;
-
-@Named(type = BaselineCreator.class)
 public class DefaultBaselineCreator implements BaselineCreator {
 
 	public double computeAvg(List<Double> data) {
