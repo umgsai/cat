@@ -27,7 +27,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -36,6 +35,7 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.heartbeat.model.entity.Machine;
@@ -55,25 +55,18 @@ import com.dianping.cat.report.service.ModelService;
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	@Inject
 	private GraphBuilder m_builder;
 
-	@Inject
 	private HistoryGraphs m_historyGraphs;
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private HeartbeatReportService m_reportService;
 
-	@Inject(type = ModelService.class, value = HeartbeatAnalyzer.ID)
 	private ModelService<HeartbeatReport> m_service;
 
-	@Inject
 	private PayloadNormalizer m_normalizePayload;
 
-	@Inject
 	private HeartbeatDisplayPolicyManager m_manager;
 
 	private void buildHeartbeatGraphInfo(Model model, HeartbeatSvgGraph displayHeartbeat) {
@@ -152,6 +145,7 @@ public class Handler implements PageHandler<Context> {
 		Payload payload = ctx.getPayload();
 		HeartbeatSvgGraph heartbeat = null;
 
+		refreshSpringBeans();
 		normalize(model, payload);
 		switch (payload.getAction()) {
 		case VIEW:
@@ -212,6 +206,67 @@ public class Handler implements PageHandler<Context> {
 			model.setException(e);
 		}
 		return null;
+	}
+
+	private void refreshSpringBeans() {
+		GraphBuilder builder = CatSpringContext.getBeanIfAvailable(GraphBuilder.class);
+		HistoryGraphs historyGraphs = CatSpringContext.getBeanIfAvailable(HistoryGraphs.class);
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
+		HeartbeatReportService reportService = CatSpringContext.getBeanIfAvailable(HeartbeatReportService.class);
+		ModelService<HeartbeatReport> service = CatSpringContext.getBeanIfAvailable("heartbeatModelService",
+		      ModelService.class);
+		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
+		HeartbeatDisplayPolicyManager manager = CatSpringContext.getBeanIfAvailable(HeartbeatDisplayPolicyManager.class);
+
+		if (builder != null) {
+			m_builder = builder;
+		}
+		if (historyGraphs != null) {
+			m_historyGraphs = historyGraphs;
+		}
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (service != null) {
+			m_service = service;
+		}
+		if (normalizer != null) {
+			m_normalizePayload = normalizer;
+		}
+		if (manager != null) {
+			m_manager = manager;
+		}
+	}
+
+	public void setBuilder(GraphBuilder builder) {
+		m_builder = builder;
+	}
+
+	public void setHistoryGraphs(HistoryGraphs historyGraphs) {
+		m_historyGraphs = historyGraphs;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setManager(HeartbeatDisplayPolicyManager manager) {
+		m_manager = manager;
+	}
+
+	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
+		m_normalizePayload = normalizePayload;
+	}
+
+	public void setReportService(HeartbeatReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setService(ModelService<HeartbeatReport> service) {
+		m_service = service;
 	}
 
 	// the detail order of heartbeat is:name min max sum sum2 count_in_minutes

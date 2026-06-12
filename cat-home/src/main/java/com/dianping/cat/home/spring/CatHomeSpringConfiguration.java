@@ -194,7 +194,9 @@ import com.dianping.cat.report.page.event.service.HistoricalEventService;
 import com.dianping.cat.report.page.event.task.EventReportBuilder;
 import com.dianping.cat.report.page.event.transform.EventMergeHelper;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
+import com.dianping.cat.report.page.heartbeat.service.CompositeHeartbeatService;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
+import com.dianping.cat.report.page.heartbeat.service.HistoricalHeartbeatService;
 import com.dianping.cat.report.page.heartbeat.service.LocalHeartbeatService;
 import com.dianping.cat.report.page.heartbeat.task.HeartbeatReportBuilder;
 import com.dianping.cat.report.page.logview.service.LocalMessageService;
@@ -1124,6 +1126,41 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public com.dianping.cat.report.page.heartbeat.JspViewer heartbeatJspViewer() {
+		return new com.dianping.cat.report.page.heartbeat.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.heartbeat.HistoryGraphs heartbeatHistoryGraphs(
+			HeartbeatReportService heartbeatReportService, HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager) {
+		com.dianping.cat.report.page.heartbeat.HistoryGraphs historyGraphs =
+		      new com.dianping.cat.report.page.heartbeat.HistoryGraphs();
+
+		historyGraphs.setReportService(heartbeatReportService);
+		historyGraphs.setManager(heartbeatDisplayPolicyManager);
+		return historyGraphs;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.heartbeat.Handler heartbeatHandler(GraphBuilder graphBuilder,
+			com.dianping.cat.report.page.heartbeat.HistoryGraphs heartbeatHistoryGraphs,
+			com.dianping.cat.report.page.heartbeat.JspViewer heartbeatJspViewer,
+			HeartbeatReportService heartbeatReportService,
+			@Qualifier("heartbeatModelService") ModelService<HeartbeatReport> heartbeatModelService,
+			PayloadNormalizer payloadNormalizer, HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager) {
+		com.dianping.cat.report.page.heartbeat.Handler handler = new com.dianping.cat.report.page.heartbeat.Handler();
+
+		handler.setBuilder(graphBuilder);
+		handler.setHistoryGraphs(heartbeatHistoryGraphs);
+		handler.setJspViewer(heartbeatJspViewer);
+		handler.setReportService(heartbeatReportService);
+		handler.setService(heartbeatModelService);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setManager(heartbeatDisplayPolicyManager);
+		return handler;
+	}
+
+	@Bean
 	public com.dianping.cat.report.page.dependency.JspViewer dependencyJspViewer() {
 		return new com.dianping.cat.report.page.dependency.JspViewer();
 	}
@@ -1905,6 +1942,16 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize", name = "heartbeat-historical")
+	public ModelService<HeartbeatReport> historicalHeartbeatService(HeartbeatReportService heartbeatReportService,
+			ServerConfigManager serverConfigManager) {
+		HistoricalHeartbeatService service = new HistoricalHeartbeatService();
+
+		service.setReportService(heartbeatReportService);
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
 	@Bean(initMethod = "initialize", name = "dependency-historical")
 	public ModelService<DependencyReport> historicalDependencyService(DependencyReportService dependencyReportService,
 			ServerConfigManager serverConfigManager) {
@@ -1960,6 +2007,19 @@ public class CatHomeSpringConfiguration {
 			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
 		CompositeTransactionService service = new CompositeTransactionService();
 		List<ModelService<TransactionReport>> services = Collections.singletonList(historicalTransactionService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ModelService<HeartbeatReport> heartbeatModelService(
+			@Qualifier("heartbeat-historical") ModelService<HeartbeatReport> historicalHeartbeatService,
+			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
+		CompositeHeartbeatService service = new CompositeHeartbeatService();
+		List<ModelService<HeartbeatReport>> services = Collections.singletonList(historicalHeartbeatService);
 
 		service.setServices(services);
 		service.setConfigManager(serverConfigManager);

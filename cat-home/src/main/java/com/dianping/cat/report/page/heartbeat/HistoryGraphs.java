@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.consumer.heartbeat.model.entity.Extension;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.heartbeat.model.entity.Machine;
@@ -37,6 +35,7 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class HistoryGraphs {
 
@@ -44,10 +43,8 @@ public class HistoryGraphs {
 
 	private static final int MINUTE_ONE_DAY = 1440;
 
-	@Inject
 	private HeartbeatReportService m_reportService;
 
-	@Inject
 	private HeartbeatDisplayPolicyManager m_manager;
 
 	private Set<String> m_extensionMetrics = new HashSet<String>();
@@ -157,6 +154,8 @@ public class HistoryGraphs {
 
 	// show the graph of heartbeat
 	public void showHeartBeatGraph(Model model, Payload payload) {
+		refreshSpringBeans();
+
 		Date start = payload.getHistoryStartDate();
 		Date end = payload.getHistoryEndDate();
 		int size = (int) ((end.getTime() - start.getTime()) / TimeHelper.ONE_HOUR * 60);
@@ -169,6 +168,26 @@ public class HistoryGraphs {
 
 		model.setExtensionCount(metrics.size());
 		model.setExtensionHistoryGraphs(new JsonBuilder().toJson(graphs));
+	}
+
+	private void refreshSpringBeans() {
+		HeartbeatReportService reportService = CatSpringContext.getBeanIfAvailable(HeartbeatReportService.class);
+		HeartbeatDisplayPolicyManager manager = CatSpringContext.getBeanIfAvailable(HeartbeatDisplayPolicyManager.class);
+
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (manager != null) {
+			m_manager = manager;
+		}
+	}
+
+	public void setManager(HeartbeatDisplayPolicyManager manager) {
+		m_manager = manager;
+	}
+
+	public void setReportService(HeartbeatReportService reportService) {
+		m_reportService = reportService;
 	}
 
 	private void updateMetricArray(Map<String, double[]> datas, int minute, String metricName, double value) {

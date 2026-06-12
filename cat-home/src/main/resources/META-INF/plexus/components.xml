@@ -304,6 +304,64 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.heartbeat.Handler</role>
+			<implementation>com.dianping.cat.report.page.heartbeat.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.graph.svg.GraphBuilder</role>
+					<field-name>m_builder</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.heartbeat.HistoryGraphs</role>
+					<field-name>m_historyGraphs</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.heartbeat.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>heartbeat</role-hint>
+					<field-name>m_service</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
+					<field-name>m_normalizePayload</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</role>
+					<field-name>m_manager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.heartbeat.HistoryGraphs</role>
+			<implementation>com.dianping.cat.report.page.heartbeat.HistoryGraphs</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</role>
+					<field-name>m_manager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.heartbeat.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.heartbeat.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>org.unidal.initialization.Module</role>
 			<role-hint>cat-home</role-hint>
 			<implementation>com.dianping.cat.CatHomeModule</implementation>
@@ -2495,59 +2553,6 @@
 			<implementation>com.dianping.cat.report.ReportModule</implementation>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.page.heartbeat.Handler</role>
-			<implementation>com.dianping.cat.report.page.heartbeat.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.graph.svg.GraphBuilder</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.heartbeat.HistoryGraphs</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.heartbeat.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>heartbeat</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.heartbeat.HistoryGraphs</role>
-			<implementation>com.dianping.cat.report.page.heartbeat.HistoryGraphs</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</role>
-			<implementation>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.heartbeat.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.heartbeat.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.page.logview.Handler</role>
 			<implementation>com.dianping.cat.report.page.logview.Handler</implementation>
 			<requirements>
@@ -3171,6 +3176,10 @@
 					<role>com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator</role>
 				</requirement>
 			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</role>
+			<implementation>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</implementation>
 		</component>
 		<component>
 			<role>com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator</role>

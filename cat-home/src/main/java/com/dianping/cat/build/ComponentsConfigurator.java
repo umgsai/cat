@@ -45,6 +45,7 @@ import com.dianping.cat.build.report.ReportComponentConfigurator;
 import com.dianping.cat.build.report.StorageComponentConfigurator;
 import com.dianping.cat.build.report.TransactionComponentConfigurator;
 import com.dianping.cat.consumer.event.EventAnalyzer;
+import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
@@ -177,6 +178,24 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
 								.req(JsonBuilder.class, (String) null, "m_jsonBuilder"));
 		all.add(C(com.dianping.cat.report.page.problem.JspViewer.class).req(ModelHandler.class));
+
+		all.add(C(com.dianping.cat.report.page.heartbeat.Handler.class) //
+								.req(GraphBuilder.class, (String) null, "m_builder") //
+								.req(com.dianping.cat.report.page.heartbeat.HistoryGraphs.class, (String) null,
+												"m_historyGraphs") //
+								.req(com.dianping.cat.report.page.heartbeat.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService.class, (String) null,
+												"m_reportService") //
+								.req(ModelService.class, HeartbeatAnalyzer.ID, "m_service") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager.class,
+												(String) null, "m_manager"));
+		all.add(C(com.dianping.cat.report.page.heartbeat.HistoryGraphs.class) //
+								.req(com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService.class, (String) null,
+												"m_reportService") //
+								.req(com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager.class,
+												(String) null, "m_manager"));
+		all.add(C(com.dianping.cat.report.page.heartbeat.JspViewer.class).req(ModelHandler.class));
 
 		all.add(A(CatHomeModule.class));
 

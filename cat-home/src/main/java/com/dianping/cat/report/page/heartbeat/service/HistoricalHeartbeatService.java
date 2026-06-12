@@ -50,4 +50,8 @@ public class HistoricalHeartbeatService extends BaseHistoricalModelService<Heart
 		return m_reportService.queryReport(domain, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
 	}
 
+	public void setReportService(HeartbeatReportService reportService) {
+		m_reportService = reportService;
+	}
+
 }
