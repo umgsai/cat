@@ -40,7 +40,7 @@ public class StorageComponentConfigurator extends AbstractResourceConfigurator {
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(StorageGroupConfigManager.class));
+		all.add(C(StorageGroupConfigManager.class));
 
 		all.add(A(LocalStorageService.class));
 		all.add(C(ModelService.class, "storage-historical", HistoricalStorageService.class) //

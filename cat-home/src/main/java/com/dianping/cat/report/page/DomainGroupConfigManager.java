@@ -21,13 +21,9 @@ package com.dianping.cat.report.page;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -41,16 +37,13 @@ import com.dianping.cat.home.group.entity.Group;
 import com.dianping.cat.home.group.transform.DefaultSaxParser;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
-public class DomainGroupConfigManager implements Initializable {
+public class DomainGroupConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DomainGroupConfigManager.class);
 
 	private static final String CONFIG_NAME = "domainGroup";
 
-	@Inject
 	private ConfigRepository m_configDao;
 
-	@Inject
 	private ContentFetcher m_fetcher;
 
 	private int m_configId;
@@ -58,6 +51,8 @@ public class DomainGroupConfigManager implements Initializable {
 	private DomainGroup m_domainGroup;
 
 	public DomainGroup getDomainGroup() {
+		ensureInitialized();
+
 		return m_domainGroup;
 	}
 
@@ -69,8 +64,7 @@ public class DomainGroupConfigManager implements Initializable {
 		m_fetcher = fetcher;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 
 		try {
@@ -150,12 +144,16 @@ public class DomainGroupConfigManager implements Initializable {
 	}
 
 	public Domain queryGroupDomain(String domain) {
+		ensureInitialized();
+
 		Domain domainGroup = m_domainGroup.findDomain(domain);
 
 		return domainGroup;
 	}
 
 	public List<String> queryDomainGroup(String domain) {
+		ensureInitialized();
+
 		Domain domainGroup = m_domainGroup.findDomain(domain);
 
 		if (domainGroup == null) {
@@ -166,6 +164,8 @@ public class DomainGroupConfigManager implements Initializable {
 	}
 
 	public List<String> queryIpByDomainAndGroup(String domain, String group) {
+		ensureInitialized();
+
 		Domain domainInfo = m_domainGroup.findDomain(domain);
 
 		if (domainInfo != null) {
@@ -176,6 +176,17 @@ public class DomainGroupConfigManager implements Initializable {
 			}
 		}
 		return new ArrayList<String>();
+	}
+
+	private void ensureInitialized() {
+		if (m_domainGroup == null) {
+			synchronized (this) {
+				if (m_domainGroup == null) {
+					LOGGER.warn("Domain group config is not initialized yet, loading it lazily.");
+					initialize();
+				}
+			}
+		}
 	}
 
 	private boolean storeConfig() {

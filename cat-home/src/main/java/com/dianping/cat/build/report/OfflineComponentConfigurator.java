@@ -36,7 +36,7 @@ public class OfflineComponentConfigurator extends AbstractResourceConfigurator {
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(CapacityUpdateStatusManager.class));
+		all.add(C(CapacityUpdateStatusManager.class));
 		all.add(A(HourlyCapacityUpdater.class));
 		all.add(A(DailyCapacityUpdater.class));
 		all.add(A(WeeklyCapacityUpdater.class));

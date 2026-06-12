@@ -30,14 +30,6 @@
 		<component>
 			<role>com.dianping.cat.report.page.DomainGroupConfigManager</role>
 			<implementation>com.dianping.cat.report.page.DomainGroupConfigManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.content.ContentFetcher</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
@@ -925,14 +917,6 @@
 		<component>
 			<role>com.dianping.cat.report.page.storage.config.StorageGroupConfigManager</role>
 			<implementation>com.dianping.cat.report.page.storage.config.StorageGroupConfigManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.content.ContentFetcher</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.service.LocalModelService</role>
@@ -1837,14 +1821,6 @@
 		<component>
 			<role>com.dianping.cat.report.page.overload.task.CapacityUpdateStatusManager</role>
 			<implementation>com.dianping.cat.report.page.overload.task.CapacityUpdateStatusManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.overload.OverloadRepository</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.overload.task.CapacityUpdater</role>
@@ -2309,6 +2285,10 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.DomainGroupConfigManager</role>
+			<implementation>com.dianping.cat.report.page.DomainGroupConfigManager</implementation>
+		</component>
+		<component>
 			<role>com.dianping.cat.report.page.transaction.Handler</role>
 			<implementation>com.dianping.cat.report.page.transaction.Handler</implementation>
 			<requirements>
@@ -2436,23 +2416,6 @@
 		<component>
 			<role>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</role>
 			<implementation>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.content.ContentFetcher</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-			<implementation>com.dianping.cat.core.config.repository.ConfigRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.heartbeat.JspViewer</role>
@@ -2875,6 +2838,10 @@
 		<component>
 			<role>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</role>
 			<implementation>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</implementation>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.storage.config.StorageGroupConfigManager</role>
+			<implementation>com.dianping.cat.report.page.storage.config.StorageGroupConfigManager</implementation>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.top.Handler</role>

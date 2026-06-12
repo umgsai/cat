@@ -25,10 +25,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -41,16 +38,14 @@ import com.dianping.cat.home.heartbeat.entity.Metric;
 import com.dianping.cat.home.heartbeat.transform.DefaultSaxParser;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class HeartbeatDisplayPolicyManager implements Initializable {
+public class HeartbeatDisplayPolicyManager {
 
 	private static final int K = 1024;
 
 	private static final String CONFIG_NAME = "heartbeat-display-policy";
 
-	@Inject
 	private ConfigRepository m_configDao;
 
-	@Inject
 	private ContentFetcher m_fetcher;
 
 	private int m_configId;
@@ -69,8 +64,7 @@ public class HeartbeatDisplayPolicyManager implements Initializable {
 		m_fetcher = fetcher;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 
 		try {

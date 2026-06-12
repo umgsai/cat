@@ -163,7 +163,7 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 	private List<Component> defineConfigComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(DomainGroupConfigManager.class));
+		all.add(C(DomainGroupConfigManager.class));
 
 		return all;
 	}

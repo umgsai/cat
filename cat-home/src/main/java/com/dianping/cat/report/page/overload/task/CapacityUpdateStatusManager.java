@@ -18,13 +18,9 @@
  */
 package com.dianping.cat.report.page.overload.task;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.config.Config;
@@ -34,16 +30,13 @@ import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 import com.dianping.cat.home.dal.report.OverloadEntity;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
-public class CapacityUpdateStatusManager implements Initializable {
+public class CapacityUpdateStatusManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CapacityUpdateStatusManager.class);
 
 	private static final String CONFIG_NAME = "capacityUpdateStatus";
 
-	@Inject
 	private ConfigRepository m_configDao;
 
-	@Inject
 	private OverloadRepository m_overloadDao;
 
 	private int m_hourlyStatus;
@@ -97,8 +90,7 @@ public class CapacityUpdateStatusManager implements Initializable {
 		return m_weeklyStatus;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 
 		try {
