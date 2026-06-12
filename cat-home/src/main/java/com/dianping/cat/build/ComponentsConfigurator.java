@@ -47,6 +47,8 @@ import com.dianping.cat.build.report.TransactionComponentConfigurator;
 import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
+import com.dianping.cat.consumer.state.StateAnalyzer;
+import com.dianping.cat.consumer.top.TopAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
@@ -196,6 +198,28 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 								.req(com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager.class,
 												(String) null, "m_manager"));
 		all.add(C(com.dianping.cat.report.page.heartbeat.JspViewer.class).req(ModelHandler.class));
+
+		all.add(C(com.dianping.cat.report.page.top.Handler.class) //
+								.req(com.dianping.cat.report.page.top.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(com.dianping.cat.report.page.dependency.ExternalInfoBuilder.class, (String) null,
+												"m_externalInfoBuilder") //
+								.req(com.dianping.cat.report.page.state.StateBuilder.class, (String) null, "m_stateBuilder") //
+								.req(ModelService.class, TopAnalyzer.ID, "m_topService") //
+								.req(ModelService.class, TransactionAnalyzer.ID, "m_transactionService") //
+								.req(ModelService.class, ProblemAnalyzer.ID, "m_problemService") //
+								.req(com.dianping.cat.report.page.top.service.TopReportService.class, (String) null,
+												"m_topReportService") //
+								.req(com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper.class,
+												(String) null, "m_mergeHelper") //
+								.req(com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager.class, (String) null,
+												"m_configManager") //
+								.req(JsonBuilder.class, (String) null, "m_builder"));
+		all.add(C(com.dianping.cat.report.page.top.JspViewer.class).req(ModelHandler.class));
+		all.add(C(com.dianping.cat.report.page.state.StateBuilder.class) //
+								.req(com.dianping.cat.system.page.router.config.RouterConfigManager.class, (String) null,
+												"m_routerManager") //
+								.req(ModelService.class, StateAnalyzer.ID, "m_stateService"));
 
 		all.add(A(CatHomeModule.class));
 

@@ -20,8 +20,6 @@ package com.dianping.cat.report.page.top.service;
 
 import java.util.Date;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.consumer.top.TopAnalyzer;
 import com.dianping.cat.consumer.top.model.entity.TopReport;
 import com.dianping.cat.helper.TimeHelper;
@@ -30,7 +28,6 @@ import com.dianping.cat.report.service.ModelRequest;
 
 public class HistoricalTopService extends BaseHistoricalModelService<TopReport> {
 
-	@Inject
 	private TopReportService m_reportService;
 
 	public HistoricalTopService() {
@@ -48,6 +45,10 @@ public class HistoricalTopService extends BaseHistoricalModelService<TopReport> 
 
 	private TopReport getReportFromDatabase(long timestamp, String domain) throws Exception {
 		return m_reportService.queryReport(domain, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
+	}
+
+	public void setReportService(TopReportService reportService) {
+		m_reportService = reportService;
 	}
 
 }

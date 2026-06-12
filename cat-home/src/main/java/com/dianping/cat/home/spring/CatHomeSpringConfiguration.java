@@ -250,9 +250,14 @@ import com.dianping.cat.report.task.current.CurrentReportBuilder;
 import com.dianping.cat.report.task.cmdb.CmdbInfoReloadBuilder;
 import com.dianping.cat.report.task.cmdb.ProjectUpdateTask;
 import com.dianping.cat.report.page.state.service.LocalStateService;
+import com.dianping.cat.report.page.state.service.CompositeStateService;
+import com.dianping.cat.report.page.state.service.HistoricalStateService;
 import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.report.page.state.task.StateReportBuilder;
+import com.dianping.cat.report.page.top.service.CompositeTopService;
+import com.dianping.cat.report.page.top.service.HistoricalTopService;
 import com.dianping.cat.report.page.top.service.LocalTopService;
+import com.dianping.cat.report.page.top.service.TopReportService;
 import com.dianping.cat.report.page.transaction.service.TransactionReportService;
 import com.dianping.cat.report.page.transaction.service.CompositeTransactionService;
 import com.dianping.cat.report.page.transaction.service.HistoricalTransactionService;
@@ -1161,6 +1166,46 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public com.dianping.cat.report.page.top.JspViewer topJspViewer() {
+		return new com.dianping.cat.report.page.top.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.state.StateBuilder stateBuilder(RouterConfigManager routerConfigManager,
+			@Qualifier("stateModelService") ModelService<StateReport> stateModelService) {
+		com.dianping.cat.report.page.state.StateBuilder builder = new com.dianping.cat.report.page.state.StateBuilder();
+
+		builder.setRouterManager(routerConfigManager);
+		builder.setStateService(stateModelService);
+		return builder;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.top.Handler topHandler(
+			com.dianping.cat.report.page.top.JspViewer topJspViewer, PayloadNormalizer payloadNormalizer,
+			ExternalInfoBuilder externalInfoBuilder, com.dianping.cat.report.page.state.StateBuilder stateBuilder,
+			@Qualifier("topModelService") ModelService<TopReport> topModelService,
+			@Qualifier("transactionModelService") ModelService<TransactionReport> transactionModelService,
+			@Qualifier("problemModelService") ModelService<ProblemReport> problemModelService,
+			TopReportService topReportService, TransactionMergeHelper transactionMergeHelper,
+			ExceptionRuleConfigManager exceptionRuleConfigManager, JsonBuilder jsonBuilder) {
+		com.dianping.cat.report.page.top.Handler handler = new com.dianping.cat.report.page.top.Handler();
+
+		handler.setJspViewer(topJspViewer);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setExternalInfoBuilder(externalInfoBuilder);
+		handler.setStateBuilder(stateBuilder);
+		handler.setTopService(topModelService);
+		handler.setTransactionService(transactionModelService);
+		handler.setProblemService(problemModelService);
+		handler.setTopReportService(topReportService);
+		handler.setMergeHelper(transactionMergeHelper);
+		handler.setConfigManager(exceptionRuleConfigManager);
+		handler.setBuilder(jsonBuilder);
+		return handler;
+	}
+
+	@Bean
 	public com.dianping.cat.report.page.dependency.JspViewer dependencyJspViewer() {
 		return new com.dianping.cat.report.page.dependency.JspViewer();
 	}
@@ -1284,6 +1329,20 @@ public class CatHomeSpringConfiguration {
 			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
 			MonthlyReportContentRepository monthlyReportContentRepository) {
 		TransactionReportService service = new TransactionReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
+	}
+
+	@Bean
+	public TopReportService topReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		TopReportService service = new TopReportService();
 
 		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
 				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
@@ -1952,6 +2011,26 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize", name = "top-historical")
+	public ModelService<TopReport> historicalTopService(TopReportService topReportService,
+			ServerConfigManager serverConfigManager) {
+		HistoricalTopService service = new HistoricalTopService();
+
+		service.setReportService(topReportService);
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize", name = "state-historical")
+	public ModelService<StateReport> historicalStateService(StateReportService stateReportService,
+			ServerConfigManager serverConfigManager) {
+		HistoricalStateService service = new HistoricalStateService();
+
+		service.setReportService(stateReportService);
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
 	@Bean(initMethod = "initialize", name = "dependency-historical")
 	public ModelService<DependencyReport> historicalDependencyService(DependencyReportService dependencyReportService,
 			ServerConfigManager serverConfigManager) {
@@ -2020,6 +2099,32 @@ public class CatHomeSpringConfiguration {
 			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
 		CompositeHeartbeatService service = new CompositeHeartbeatService();
 		List<ModelService<HeartbeatReport>> services = Collections.singletonList(historicalHeartbeatService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ModelService<TopReport> topModelService(
+			@Qualifier("top-historical") ModelService<TopReport> historicalTopService,
+			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
+		CompositeTopService service = new CompositeTopService();
+		List<ModelService<TopReport>> services = Collections.singletonList(historicalTopService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ModelService<StateReport> stateModelService(
+			@Qualifier("state-historical") ModelService<StateReport> historicalStateService,
+			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
+		CompositeStateService service = new CompositeStateService();
+		List<ModelService<StateReport>> services = Collections.singletonList(historicalStateService);
 
 		service.setServices(services);
 		service.setConfigManager(serverConfigManager);

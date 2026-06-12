@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.model.entity.Machine;
@@ -35,16 +33,15 @@ import com.dianping.cat.home.router.entity.DefaultServer;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 
 public class StateBuilder {
 
 	public static final int COUNT = 500 * 10000;
 
-	@Inject
 	private RouterConfigManager m_routerManager;
 
-	@Inject(type = ModelService.class, value = StateAnalyzer.ID)
 	private ModelService<StateReport> m_stateService;
 
 	public static boolean checkTooMuchLoss(Machine machine) {
@@ -52,6 +49,8 @@ public class StateBuilder {
 	}
 
 	public String buildStateMessage(long date, String ip) {
+		refreshSpringBeans();
+
 		StateReport report = queryHourlyReport(date, ip);
 
 		if (report != null) {
@@ -116,5 +115,26 @@ public class StateBuilder {
 		} else {
 			throw new RuntimeException("Internal error: no eligable sql service registered for " + request + "!");
 		}
+	}
+
+	private void refreshSpringBeans() {
+		RouterConfigManager routerManager = CatSpringContext.getBeanIfAvailable(RouterConfigManager.class);
+		ModelService<StateReport> stateService = CatSpringContext.getBeanIfAvailable("stateModelService",
+		      ModelService.class);
+
+		if (routerManager != null) {
+			m_routerManager = routerManager;
+		}
+		if (stateService != null) {
+			m_stateService = stateService;
+		}
+	}
+
+	public void setRouterManager(RouterConfigManager routerManager) {
+		m_routerManager = routerManager;
+	}
+
+	public void setStateService(ModelService<StateReport> stateService) {
+		m_stateService = stateService;
 	}
 }

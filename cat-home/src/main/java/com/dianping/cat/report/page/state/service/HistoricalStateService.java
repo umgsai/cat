@@ -20,8 +20,6 @@ package com.dianping.cat.report.page.state.service;
 
 import java.util.Date;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.helper.TimeHelper;
@@ -30,7 +28,6 @@ import com.dianping.cat.report.service.ModelRequest;
 
 public class HistoricalStateService extends BaseHistoricalModelService<StateReport> {
 
-	@Inject
 	private StateReportService m_reportService;
 
 	public HistoricalStateService() {
@@ -48,6 +45,10 @@ public class HistoricalStateService extends BaseHistoricalModelService<StateRepo
 
 	private StateReport getReportFromDatabase(long timestamp, String domain) throws Exception {
 		return m_reportService.queryReport(domain, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
+	}
+
+	public void setReportService(StateReportService reportService) {
+		m_reportService = reportService;
 	}
 
 }

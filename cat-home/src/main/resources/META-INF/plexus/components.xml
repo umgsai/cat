@@ -362,6 +362,83 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.top.Handler</role>
+			<implementation>com.dianping.cat.report.page.top.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.top.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
+					<field-name>m_normalizePayload</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.dependency.ExternalInfoBuilder</role>
+					<field-name>m_externalInfoBuilder</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.state.StateBuilder</role>
+					<field-name>m_stateBuilder</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>top</role-hint>
+					<field-name>m_topService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>transaction</role-hint>
+					<field-name>m_transactionService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>problem</role-hint>
+					<field-name>m_problemService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.top.service.TopReportService</role>
+					<field-name>m_topReportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper</role>
+					<field-name>m_mergeHelper</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager</role>
+					<field-name>m_configManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.helper.JsonBuilder</role>
+					<field-name>m_builder</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.top.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.top.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.state.StateBuilder</role>
+			<implementation>com.dianping.cat.report.page.state.StateBuilder</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.system.page.router.config.RouterConfigManager</role>
+					<field-name>m_routerManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>state</role-hint>
+					<field-name>m_stateService</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>org.unidal.initialization.Module</role>
 			<role-hint>cat-home</role-hint>
 			<implementation>com.dianping.cat.CatHomeModule</implementation>
@@ -2678,19 +2755,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.page.state.StateBuilder</role>
-			<implementation>com.dianping.cat.report.page.state.StateBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.system.page.router.config.RouterConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>state</role-hint>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.page.statistics.Handler</role>
 			<implementation>com.dianping.cat.report.page.statistics.Handler</implementation>
 			<requirements>
@@ -2809,60 +2873,6 @@
 		<component>
 			<role>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</role>
 			<implementation>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.top.Handler</role>
-			<implementation>com.dianping.cat.report.page.top.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.top.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.dependency.ExternalInfoBuilder</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.state.StateBuilder</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>top</role-hint>
-					<field-name>m_topService</field-name>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>transaction</role-hint>
-					<field-name>m_transactionService</field-name>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>problem</role-hint>
-					<field-name>m_problemService</field-name>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.top.service.TopReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.helper.JsonBuilder</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.top.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.top.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.business.Handler</role>
