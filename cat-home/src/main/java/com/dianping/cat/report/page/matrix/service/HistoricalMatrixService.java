@@ -20,8 +20,6 @@ package com.dianping.cat.report.page.matrix.service;
 
 import java.util.Date;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.helper.TimeHelper;
@@ -30,7 +28,6 @@ import com.dianping.cat.report.service.ModelRequest;
 
 public class HistoricalMatrixService extends BaseHistoricalModelService<MatrixReport> {
 
-	@Inject
 	private MatrixReportService m_reportService;
 
 	public HistoricalMatrixService() {
@@ -48,6 +45,10 @@ public class HistoricalMatrixService extends BaseHistoricalModelService<MatrixRe
 
 	private MatrixReport getReportFromDatabase(long timestamp, String domain) throws Exception {
 		return m_reportService.queryReport(domain, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
+	}
+
+	public void setReportService(MatrixReportService reportService) {
+		m_reportService = reportService;
 	}
 
 }

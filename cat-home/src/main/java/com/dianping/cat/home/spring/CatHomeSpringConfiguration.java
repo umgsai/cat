@@ -207,6 +207,8 @@ import com.dianping.cat.report.page.heartbeat.service.HistoricalHeartbeatService
 import com.dianping.cat.report.page.heartbeat.service.LocalHeartbeatService;
 import com.dianping.cat.report.page.heartbeat.task.HeartbeatReportBuilder;
 import com.dianping.cat.report.page.logview.service.LocalMessageService;
+import com.dianping.cat.report.page.matrix.service.CompositeMatrixService;
+import com.dianping.cat.report.page.matrix.service.HistoricalMatrixService;
 import com.dianping.cat.report.page.matrix.service.MatrixReportService;
 import com.dianping.cat.report.page.matrix.service.LocalMatrixService;
 import com.dianping.cat.report.page.matrix.task.MatrixReportBuilder;
@@ -1359,6 +1361,25 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public com.dianping.cat.report.page.matrix.JspViewer matrixJspViewer() {
+		return new com.dianping.cat.report.page.matrix.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.matrix.Handler matrixHandler(
+			com.dianping.cat.report.page.matrix.JspViewer matrixJspViewer, MatrixReportService matrixReportService,
+			PayloadNormalizer payloadNormalizer,
+			@Qualifier("matrixModelService") ModelService<MatrixReport> matrixModelService) {
+		com.dianping.cat.report.page.matrix.Handler handler = new com.dianping.cat.report.page.matrix.Handler();
+
+		handler.setJspViewer(matrixJspViewer);
+		handler.setReportService(matrixReportService);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setService(matrixModelService);
+		return handler;
+	}
+
+	@Bean
 	public MatrixReportService matrixReportService(HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
 			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
@@ -2198,6 +2219,16 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize", name = "matrix-historical")
+	public ModelService<MatrixReport> historicalMatrixService(MatrixReportService matrixReportService,
+			ServerConfigManager serverConfigManager) {
+		HistoricalMatrixService service = new HistoricalMatrixService();
+
+		service.setReportService(matrixReportService);
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
 	@Bean(initMethod = "initialize", name = "dependency-historical")
 	public ModelService<DependencyReport> historicalDependencyService(DependencyReportService dependencyReportService,
 			ServerConfigManager serverConfigManager) {
@@ -2318,6 +2349,19 @@ public class CatHomeSpringConfiguration {
 			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
 		CompositeCrossService service = new CompositeCrossService();
 		List<ModelService<CrossReport>> services = Collections.singletonList(historicalCrossService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize", name = "matrixModelService")
+	public ModelService<MatrixReport> matrixModelService(
+			@Qualifier("matrix-historical") ModelService<MatrixReport> historicalMatrixService,
+			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
+		CompositeMatrixService service = new CompositeMatrixService();
+		List<ModelService<MatrixReport>> services = Collections.singletonList(historicalMatrixService);
 
 		service.setServices(services);
 		service.setConfigManager(serverConfigManager);

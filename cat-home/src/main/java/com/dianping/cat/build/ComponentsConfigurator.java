@@ -47,6 +47,7 @@ import com.dianping.cat.build.report.TransactionComponentConfigurator;
 import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.consumer.cross.CrossAnalyzer;
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
+import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.storage.StorageAnalyzer;
@@ -270,6 +271,14 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 								.req(com.dianping.cat.service.HostinfoService.class, (String) null, "m_hostinfoService") //
 								.req(ModelService.class, CrossAnalyzer.ID, "m_service"));
 		all.add(C(com.dianping.cat.report.page.cross.JspViewer.class).req(ModelHandler.class));
+
+		all.add(C(com.dianping.cat.report.page.matrix.Handler.class) //
+								.req(com.dianping.cat.report.page.matrix.service.MatrixReportService.class, (String) null,
+												"m_reportService") //
+								.req(com.dianping.cat.report.page.matrix.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(ModelService.class, MatrixAnalyzer.ID, "m_service"));
+		all.add(C(com.dianping.cat.report.page.matrix.JspViewer.class).req(ModelHandler.class));
 
 		all.add(A(CatHomeModule.class));
 
