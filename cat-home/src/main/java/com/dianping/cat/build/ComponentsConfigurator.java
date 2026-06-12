@@ -45,6 +45,7 @@ import com.dianping.cat.build.report.ReportComponentConfigurator;
 import com.dianping.cat.build.report.StorageComponentConfigurator;
 import com.dianping.cat.build.report.TransactionComponentConfigurator;
 import com.dianping.cat.consumer.event.EventAnalyzer;
+import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
@@ -67,8 +68,11 @@ import com.dianping.cat.report.HourlyReportContentTableProvider;
 import com.dianping.cat.report.HourlyReportTableProvider;
 import com.dianping.cat.report.graph.svg.DefaultGraphBuilder;
 import com.dianping.cat.report.graph.svg.DefaultValueTranslater;
+import com.dianping.cat.report.graph.svg.GraphBuilder;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.event.service.EventReportService;
+import com.dianping.cat.report.page.event.transform.EventMergeHelper;
+import com.dianping.cat.report.page.problem.service.ProblemReportService;
 import com.dianping.cat.report.page.transaction.service.TransactionReportService;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.system.page.permission.ResourceConfigManager;
@@ -95,6 +99,8 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(A(DefaultValueTranslater.class));
 
 		all.add(A(DefaultGraphBuilder.class));
+
+		all.add(C(EventMergeHelper.class));
 
 		all.add(A(PayloadNormalizer.class));
 
@@ -137,6 +143,40 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
 								.req(ModelService.class, TransactionAnalyzer.ID, "m_transactionService"));
 		all.add(C(com.dianping.cat.report.page.cache.JspViewer.class).req(ModelHandler.class));
+
+		all.add(C(com.dianping.cat.report.page.event.Handler.class) //
+								.req(GraphBuilder.class, (String) null, "m_builder") //
+								.req(com.dianping.cat.report.page.event.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(EventReportService.class, (String) null, "m_reportService") //
+								.req(com.dianping.cat.report.page.event.transform.EventMergeHelper.class, (String) null,
+												"m_mergeHelper") //
+								.req(ModelService.class, EventAnalyzer.ID, "m_service") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(DomainGroupConfigManager.class, (String) null, "m_configManager"));
+		all.add(C(com.dianping.cat.report.page.event.JspViewer.class).req(ModelHandler.class));
+
+		all.add(C(com.dianping.cat.report.page.transaction.Handler.class) //
+								.req(GraphBuilder.class, (String) null, "m_builder") //
+								.req(com.dianping.cat.report.page.transaction.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(com.dianping.cat.report.page.transaction.XmlViewer.class, (String) null, "m_xmlViewer") //
+								.req(TransactionReportService.class, (String) null, "m_reportService") //
+								.req(com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper.class,
+												(String) null, "m_mergeHelper") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(DomainGroupConfigManager.class, (String) null, "m_configManager") //
+								.req(ModelService.class, TransactionAnalyzer.ID, "m_service"));
+		all.add(C(com.dianping.cat.report.page.transaction.JspViewer.class).req(ModelHandler.class));
+		all.add(C(com.dianping.cat.report.page.transaction.XmlViewer.class));
+
+		all.add(C(com.dianping.cat.report.page.problem.Handler.class) //
+								.req(com.dianping.cat.report.page.problem.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(com.dianping.cat.config.server.ServerConfigManager.class, (String) null, "m_manager") //
+								.req(ProblemReportService.class, (String) null, "m_reportService") //
+								.req(ModelService.class, ProblemAnalyzer.ID, "m_service") //
+								.req(DomainGroupConfigManager.class, (String) null, "m_configManager") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(JsonBuilder.class, (String) null, "m_jsonBuilder"));
+		all.add(C(com.dianping.cat.report.page.problem.JspViewer.class).req(ModelHandler.class));
 
 		all.add(A(CatHomeModule.class));
 

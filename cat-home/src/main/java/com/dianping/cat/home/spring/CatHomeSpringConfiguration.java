@@ -125,6 +125,7 @@ import com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleR
 import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
+import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.message.DefaultPathBuilder;
 import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.mvc.PayloadNormalizer;
@@ -156,6 +157,10 @@ import com.dianping.cat.report.alert.transaction.TransactionDecorator;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
 import com.dianping.cat.report.alert.AlarmManager;
 import com.dianping.cat.report.DomainValidator;
+import com.dianping.cat.report.graph.svg.DefaultGraphBuilder;
+import com.dianping.cat.report.graph.svg.DefaultValueTranslater;
+import com.dianping.cat.report.graph.svg.GraphBuilder;
+import com.dianping.cat.report.graph.svg.ValueTranslater;
 import com.dianping.cat.report.graph.metric.DataExtractor;
 import com.dianping.cat.report.graph.metric.impl.DataExtractorImpl;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
@@ -187,6 +192,7 @@ import com.dianping.cat.report.page.event.service.EventReportService;
 import com.dianping.cat.report.page.event.service.CompositeEventService;
 import com.dianping.cat.report.page.event.service.HistoricalEventService;
 import com.dianping.cat.report.page.event.task.EventReportBuilder;
+import com.dianping.cat.report.page.event.transform.EventMergeHelper;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.page.heartbeat.service.LocalHeartbeatService;
@@ -879,6 +885,11 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean
+	public EventMergeHelper eventMergeHelper() {
+		return new EventMergeHelper();
+	}
+
 	@Bean(name = EventReportBuilder.ID, initMethod = "initialize")
 	public TaskBuilder eventReportBuilder(EventReportService eventReportService, ServerConfigManager serverConfigManager,
 			AtomicMessageConfigManager atomicMessageConfigManager) {
@@ -963,6 +974,24 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public JsonBuilder jsonBuilder() {
+		return new JsonBuilder();
+	}
+
+	@Bean
+	public ValueTranslater valueTranslater() {
+		return new DefaultValueTranslater();
+	}
+
+	@Bean
+	public GraphBuilder graphBuilder(ValueTranslater valueTranslater) {
+		DefaultGraphBuilder builder = new DefaultGraphBuilder();
+
+		builder.setTranslater(valueTranslater);
+		return builder;
+	}
+
+	@Bean
 	public com.dianping.cat.report.page.alteration.JspViewer alterationJspViewer() {
 		return new com.dianping.cat.report.page.alteration.JspViewer();
 	}
@@ -1015,6 +1044,82 @@ public class CatHomeSpringConfiguration {
 		handler.setEventReportService(eventReportService);
 		handler.setNormalizePayload(payloadNormalizer);
 		handler.setTransactionService(transactionModelService);
+		return handler;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.event.JspViewer eventJspViewer() {
+		return new com.dianping.cat.report.page.event.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.event.Handler eventHandler(GraphBuilder graphBuilder,
+			com.dianping.cat.report.page.event.JspViewer eventJspViewer, EventReportService eventReportService,
+			EventMergeHelper eventMergeHelper, @Qualifier("eventModelService") ModelService<EventReport> eventModelService,
+			PayloadNormalizer payloadNormalizer, DomainGroupConfigManager domainGroupConfigManager) {
+		com.dianping.cat.report.page.event.Handler handler = new com.dianping.cat.report.page.event.Handler();
+
+		handler.setBuilder(graphBuilder);
+		handler.setJspViewer(eventJspViewer);
+		handler.setReportService(eventReportService);
+		handler.setMergeHelper(eventMergeHelper);
+		handler.setService(eventModelService);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setConfigManager(domainGroupConfigManager);
+		return handler;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.transaction.JspViewer transactionJspViewer() {
+		return new com.dianping.cat.report.page.transaction.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.transaction.XmlViewer transactionXmlViewer() {
+		return new com.dianping.cat.report.page.transaction.XmlViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.transaction.Handler transactionHandler(GraphBuilder graphBuilder,
+			com.dianping.cat.report.page.transaction.JspViewer transactionJspViewer,
+			com.dianping.cat.report.page.transaction.XmlViewer transactionXmlViewer,
+			TransactionReportService transactionReportService, TransactionMergeHelper transactionMergeHelper,
+			PayloadNormalizer payloadNormalizer, DomainGroupConfigManager domainGroupConfigManager,
+			@Qualifier("transactionModelService") ModelService<TransactionReport> transactionModelService) {
+		com.dianping.cat.report.page.transaction.Handler handler = new com.dianping.cat.report.page.transaction.Handler();
+
+		handler.setBuilder(graphBuilder);
+		handler.setJspViewer(transactionJspViewer);
+		handler.setXmlViewer(transactionXmlViewer);
+		handler.setReportService(transactionReportService);
+		handler.setMergeHelper(transactionMergeHelper);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setConfigManager(domainGroupConfigManager);
+		handler.setService(transactionModelService);
+		return handler;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.problem.JspViewer problemJspViewer() {
+		return new com.dianping.cat.report.page.problem.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.problem.Handler problemHandler(
+			com.dianping.cat.report.page.problem.JspViewer problemJspViewer, ServerConfigManager serverConfigManager,
+			ProblemReportService problemReportService,
+			@Qualifier("problemModelService") ModelService<ProblemReport> problemModelService,
+			DomainGroupConfigManager domainGroupConfigManager, PayloadNormalizer payloadNormalizer,
+			JsonBuilder jsonBuilder) {
+		com.dianping.cat.report.page.problem.Handler handler = new com.dianping.cat.report.page.problem.Handler();
+
+		handler.setJspViewer(problemJspViewer);
+		handler.setManager(serverConfigManager);
+		handler.setReportService(problemReportService);
+		handler.setService(problemModelService);
+		handler.setConfigManager(domainGroupConfigManager);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setJsonBuilder(jsonBuilder);
 		return handler;
 	}
 

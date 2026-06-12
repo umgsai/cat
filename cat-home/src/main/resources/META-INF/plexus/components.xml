@@ -19,6 +19,10 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.event.transform.EventMergeHelper</role>
+			<implementation>com.dianping.cat.report.page.event.transform.EventMergeHelper</implementation>
+		</component>
+		<component>
 			<role>com.dianping.cat.mvc.PayloadNormalizer</role>
 			<implementation>com.dianping.cat.mvc.PayloadNormalizer</implementation>
 			<requirements>
@@ -153,6 +157,146 @@
 		<component>
 			<role>com.dianping.cat.report.page.cache.JspViewer</role>
 			<implementation>com.dianping.cat.report.page.cache.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.event.Handler</role>
+			<implementation>com.dianping.cat.report.page.event.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.graph.svg.GraphBuilder</role>
+					<field-name>m_builder</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.event.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.event.service.EventReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.event.transform.EventMergeHelper</role>
+					<field-name>m_mergeHelper</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>event</role-hint>
+					<field-name>m_service</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
+					<field-name>m_normalizePayload</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.DomainGroupConfigManager</role>
+					<field-name>m_configManager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.event.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.event.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.transaction.Handler</role>
+			<implementation>com.dianping.cat.report.page.transaction.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.graph.svg.GraphBuilder</role>
+					<field-name>m_builder</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.transaction.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.transaction.XmlViewer</role>
+					<field-name>m_xmlViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.transaction.service.TransactionReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper</role>
+					<field-name>m_mergeHelper</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
+					<field-name>m_normalizePayload</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.DomainGroupConfigManager</role>
+					<field-name>m_configManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>transaction</role-hint>
+					<field-name>m_service</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.transaction.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.transaction.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.transaction.XmlViewer</role>
+			<implementation>com.dianping.cat.report.page.transaction.XmlViewer</implementation>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.problem.Handler</role>
+			<implementation>com.dianping.cat.report.page.problem.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.problem.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_manager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.problem.service.ProblemReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>problem</role-hint>
+					<field-name>m_service</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.DomainGroupConfigManager</role>
+					<field-name>m_configManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
+					<field-name>m_normalizePayload</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.helper.JsonBuilder</role>
+					<field-name>m_jsonBuilder</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.problem.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.problem.JspViewer</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
@@ -2235,6 +2379,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.web.mvc.model.ModuleRegistry</role>
+					<field-name>m_registry</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2276,9 +2421,11 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.web.mvc.lifecycle.RequestContextBuilder</role>
+					<field-name>m_builder</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.web.mvc.lifecycle.ActionHandlerManager</role>
+					<field-name>m_actionHandlerManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2288,6 +2435,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.web.mvc.model.ModelManager</role>
+					<field-name>m_modelManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2345,128 +2493,6 @@
 			<role>org.unidal.web.mvc.Module</role>
 			<role-hint>com.dianping.cat.report.ReportModule</role-hint>
 			<implementation>com.dianping.cat.report.ReportModule</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.problem.Handler</role>
-			<implementation>com.dianping.cat.report.page.problem.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.problem.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.problem.service.ProblemReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>problem</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.DomainGroupConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.helper.JsonBuilder</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.problem.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.problem.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.transaction.Handler</role>
-			<implementation>com.dianping.cat.report.page.transaction.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.graph.svg.GraphBuilder</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.XmlViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.service.TransactionReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.DomainGroupConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>transaction</role-hint>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.transaction.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.transaction.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.transaction.XmlViewer</role>
-			<implementation>com.dianping.cat.report.page.transaction.XmlViewer</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.event.Handler</role>
-			<implementation>com.dianping.cat.report.page.event.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.graph.svg.GraphBuilder</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.event.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.event.service.EventReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.event.transform.EventMergeHelper</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>event</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.DomainGroupConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.event.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.event.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.event.transform.EventMergeHelper</role>
-			<implementation>com.dianping.cat.report.page.event.transform.EventMergeHelper</implementation>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.heartbeat.Handler</role>

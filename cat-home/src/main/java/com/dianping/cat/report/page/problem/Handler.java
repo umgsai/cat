@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -63,25 +62,18 @@ public class Handler implements PageHandler<Context> {
 
 	private static final String VIEW = "view";
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private ServerConfigManager m_manager;
 
-	@Inject
 	private ProblemReportService m_reportService;
 
-	@Inject(type = ModelService.class, value = ProblemAnalyzer.ID)
 	private ModelService<ProblemReport> m_service;
 
-	@Inject
 	private DomainGroupConfigManager m_configManager;
 
-	@Inject
 	private PayloadNormalizer m_normalizePayload;
 
-	@Inject
 	private JsonBuilder m_jsonBuilder;
 
 	private void buildDefaultThreshold(Model model, Payload payload) {
@@ -401,10 +393,63 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private void refreshSpringBeans() {
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
 		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+		ProblemReportService reportService = CatSpringContext.getBeanIfAvailable(ProblemReportService.class);
+		ModelService<ProblemReport> service = CatSpringContext.getBeanIfAvailable("problemModelService",
+		      ModelService.class);
+		DomainGroupConfigManager configManager = CatSpringContext.getBeanIfAvailable(DomainGroupConfigManager.class);
+		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
+		JsonBuilder jsonBuilder = CatSpringContext.getBeanIfAvailable(JsonBuilder.class);
 
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
 		if (manager != null) {
 			m_manager = manager;
 		}
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (service != null) {
+			m_service = service;
+		}
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
+		if (normalizer != null) {
+			m_normalizePayload = normalizer;
+		}
+		if (jsonBuilder != null) {
+			m_jsonBuilder = jsonBuilder;
+		}
+	}
+
+	public void setConfigManager(DomainGroupConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setJsonBuilder(JsonBuilder jsonBuilder) {
+		m_jsonBuilder = jsonBuilder;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setManager(ServerConfigManager manager) {
+		m_manager = manager;
+	}
+
+	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
+		m_normalizePayload = normalizePayload;
+	}
+
+	public void setReportService(ProblemReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setService(ModelService<ProblemReport> service) {
+		m_service = service;
 	}
 }

@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -54,28 +53,22 @@ import com.dianping.cat.report.page.event.transform.PieGraphChartVisitor;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 
-	@Inject
 	private GraphBuilder m_builder;
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private EventReportService m_reportService;
 
-	@Inject
 	private EventMergeHelper m_mergeHelper;
 
-	@Inject(type = ModelService.class, value = EventAnalyzer.ID)
 	private ModelService<EventReport> m_service;
 
-	@Inject
 	private PayloadNormalizer m_normalizePayload;
 
-	@Inject
 	private DomainGroupConfigManager m_configManager;
 
 	private void buildDistributionInfo(Model model, String type, String name, EventReport report) {
@@ -196,6 +189,7 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "e")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
 		Cat.logMetricForCount("http-request-event");
 
 		Model model = new Model(ctx);
@@ -331,6 +325,66 @@ public class Handler implements PageHandler<Context> {
 		if (StringUtils.isEmpty(payload.getType())) {
 			payload.setType(null);
 		}
+	}
+
+	private void refreshSpringBeans() {
+		GraphBuilder builder = CatSpringContext.getBeanIfAvailable(GraphBuilder.class);
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
+		EventReportService reportService = CatSpringContext.getBeanIfAvailable(EventReportService.class);
+		EventMergeHelper mergeHelper = CatSpringContext.getBeanIfAvailable(EventMergeHelper.class);
+		ModelService<EventReport> service = CatSpringContext.getBeanIfAvailable("eventModelService", ModelService.class);
+		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
+		DomainGroupConfigManager configManager = CatSpringContext.getBeanIfAvailable(DomainGroupConfigManager.class);
+
+		if (builder != null) {
+			m_builder = builder;
+		}
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (mergeHelper != null) {
+			m_mergeHelper = mergeHelper;
+		}
+		if (service != null) {
+			m_service = service;
+		}
+		if (normalizer != null) {
+			m_normalizePayload = normalizer;
+		}
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
+	}
+
+	public void setBuilder(GraphBuilder builder) {
+		m_builder = builder;
+	}
+
+	public void setConfigManager(DomainGroupConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setMergeHelper(EventMergeHelper mergeHelper) {
+		m_mergeHelper = mergeHelper;
+	}
+
+	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
+		m_normalizePayload = normalizePayload;
+	}
+
+	public void setReportService(EventReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setService(ModelService<EventReport> service) {
+		m_service = service;
 	}
 
 	public enum DetailOrder {

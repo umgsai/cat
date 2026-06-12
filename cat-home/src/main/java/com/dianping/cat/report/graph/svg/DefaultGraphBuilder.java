@@ -58,6 +58,10 @@ public class DefaultGraphBuilder implements GraphBuilder {
 		return b.getResult().toString();
 	}
 
+	public void setTranslater(ValueTranslater translater) {
+		m_translater = translater;
+	}
+
 	protected void buildBars(GraphPayload payload, XmlBuilder b, double maxValue, double[] values) {
 		DecimalFormat format = new DecimalFormat("0.#");
 		int width = payload.getWidth();

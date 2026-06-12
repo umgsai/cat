@@ -24,6 +24,8 @@ import java.util.List;
 import org.unidal.lookup.configuration.Component;
 import org.unidal.web.configuration.AbstractWebComponentsConfigurator;
 import org.unidal.web.lifecycle.DefaultActionResolver;
+import org.unidal.web.lifecycle.RequestLifecycle;
+import org.unidal.web.mvc.lifecycle.ActionHandlerManager;
 import org.unidal.web.mvc.lifecycle.DefaultActionHandlerManager;
 import org.unidal.web.mvc.lifecycle.DefaultErrorHandler;
 import org.unidal.web.mvc.lifecycle.DefaultInboundActionHandler;
@@ -31,8 +33,10 @@ import org.unidal.web.mvc.lifecycle.DefaultOutboundActionHandler;
 import org.unidal.web.mvc.lifecycle.DefaultRequestContextBuilder;
 import org.unidal.web.mvc.lifecycle.DefaultRequestLifecycle;
 import org.unidal.web.mvc.lifecycle.DefaultTransitionHandler;
+import org.unidal.web.mvc.lifecycle.RequestContextBuilder;
 import org.unidal.web.mvc.model.AnnotationMatrix;
 import org.unidal.web.mvc.model.ModelManager;
+import org.unidal.web.mvc.model.ModuleRegistry;
 import org.unidal.web.mvc.payload.DefaultParameterProvider;
 import org.unidal.web.mvc.payload.DefaultPayloadProvider;
 import org.unidal.web.mvc.payload.MultipartParameterProvider;
@@ -58,7 +62,7 @@ class WebComponentConfigurator extends AbstractWebComponentsConfigurator {
 
 	private void defineWebMvcComponents(List<Component> all) {
 		all.add(A(AnnotationMatrix.class));
-		all.add(A(ModelManager.class));
+		all.add(C(ModelManager.class).req(ModuleRegistry.class, (String) null, "m_registry"));
 		all.add(A(DefaultActionResolver.class));
 		all.add(A(DefaultInboundActionHandler.class));
 		all.add(A(DefaultOutboundActionHandler.class));
@@ -66,8 +70,11 @@ class WebComponentConfigurator extends AbstractWebComponentsConfigurator {
 		all.add(A(DefaultErrorHandler.class));
 		all.add(A(DefaultPayloadProvider.class));
 		all.add(A(DefaultActionHandlerManager.class));
-		all.add(A(DefaultRequestLifecycle.class));
-		all.add(A(DefaultRequestContextBuilder.class));
+		all.add(C(RequestLifecycle.class, "mvc", DefaultRequestLifecycle.class) //
+								.req(RequestContextBuilder.class, (String) null, "m_builder") //
+								.req(ActionHandlerManager.class, (String) null, "m_actionHandlerManager"));
+		all.add(C(RequestContextBuilder.class, DefaultRequestContextBuilder.class) //
+								.req(ModelManager.class, (String) null, "m_modelManager"));
 		all.add(A(UrlEncodedParameterProvider.class));
 		all.add(A(MultipartParameterProvider.class));
 		all.add(A(DefaultParameterProvider.class));

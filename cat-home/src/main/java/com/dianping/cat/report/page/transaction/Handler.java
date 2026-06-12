@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -59,31 +58,24 @@ import com.dianping.cat.report.page.transaction.transform.TransactionTrendGraphB
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 
-	@Inject
 	private GraphBuilder m_builder;
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private XmlViewer m_xmlViewer;
 
-	@Inject
 	private TransactionReportService m_reportService;
 
-	@Inject
 	private TransactionMergeHelper m_mergeHelper;
 
-	@Inject
 	private PayloadNormalizer m_normalizePayload;
 
-	@Inject
 	private DomainGroupConfigManager m_configManager;
 
-	@Inject(type = ModelService.class, value = TransactionAnalyzer.ID)
 	private ModelService<TransactionReport> m_service;
 
 	private void buildDistributionInfo(Model model, String type, String name, TransactionReport report) {
@@ -210,6 +202,7 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "t")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
 		Cat.logMetricForCount("http-request-transaction");
 
 		Model model = new Model(ctx);
@@ -362,6 +355,75 @@ public class Handler implements PageHandler<Context> {
 		} else {
 			payload.setQueryName(null);
 		}
+	}
+
+	private void refreshSpringBeans() {
+		GraphBuilder builder = CatSpringContext.getBeanIfAvailable(GraphBuilder.class);
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
+		XmlViewer xmlViewer = CatSpringContext.getBeanIfAvailable(XmlViewer.class);
+		TransactionReportService reportService = CatSpringContext.getBeanIfAvailable(TransactionReportService.class);
+		TransactionMergeHelper mergeHelper = CatSpringContext.getBeanIfAvailable(TransactionMergeHelper.class);
+		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
+		DomainGroupConfigManager configManager = CatSpringContext.getBeanIfAvailable(DomainGroupConfigManager.class);
+		ModelService<TransactionReport> service = CatSpringContext.getBeanIfAvailable("transactionModelService",
+		      ModelService.class);
+
+		if (builder != null) {
+			m_builder = builder;
+		}
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
+		if (xmlViewer != null) {
+			m_xmlViewer = xmlViewer;
+		}
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+		if (mergeHelper != null) {
+			m_mergeHelper = mergeHelper;
+		}
+		if (normalizer != null) {
+			m_normalizePayload = normalizer;
+		}
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
+		if (service != null) {
+			m_service = service;
+		}
+	}
+
+	public void setBuilder(GraphBuilder builder) {
+		m_builder = builder;
+	}
+
+	public void setConfigManager(DomainGroupConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setMergeHelper(TransactionMergeHelper mergeHelper) {
+		m_mergeHelper = mergeHelper;
+	}
+
+	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
+		m_normalizePayload = normalizePayload;
+	}
+
+	public void setReportService(TransactionReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setService(ModelService<TransactionReport> service) {
+		m_service = service;
+	}
+
+	public void setXmlViewer(XmlViewer xmlViewer) {
+		m_xmlViewer = xmlViewer;
 	}
 
 	public enum DetailOrder {

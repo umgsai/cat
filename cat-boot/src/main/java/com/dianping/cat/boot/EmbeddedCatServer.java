@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
@@ -16,7 +17,8 @@ public class EmbeddedCatServer {
 
 	public void start() throws IOException {
 		int port = Integer.parseInt(System.getProperty("server.port", "8080"));
-		Path baseDir = Files.createTempDirectory("cat-boot-");
+		Path baseDir = resolveBaseDir(port);
+		deleteDirectory(baseDir);
 		Path appBase = Files.createDirectories(baseDir.resolve("webapps"));
 		Path warFile = copyWar(baseDir);
 
@@ -48,5 +50,35 @@ public class EmbeddedCatServer {
 		}
 
 		return warFile;
+	}
+
+	private void deleteDirectory(Path directory) throws IOException {
+		if (!Files.exists(directory)) {
+			return;
+		}
+
+		try (java.util.stream.Stream<Path> paths = Files.walk(directory)) {
+			paths.sorted(java.util.Comparator.reverseOrder()).forEach(path -> {
+				try {
+					Files.deleteIfExists(path);
+				} catch (IOException e) {
+					throw new IllegalStateException("Unable to clean CAT boot directory: " + directory, e);
+				}
+			});
+		} catch (IllegalStateException e) {
+			if (e.getCause() instanceof IOException) {
+				throw (IOException) e.getCause();
+			}
+			throw e;
+		}
+	}
+
+	private Path resolveBaseDir(int port) {
+		String configuredBaseDir = System.getProperty("cat.boot.baseDir");
+
+		if (configuredBaseDir != null && configuredBaseDir.trim().length() > 0) {
+			return Paths.get(configuredBaseDir).toAbsolutePath().normalize();
+		}
+		return Paths.get("target", "cat-boot-" + port).toAbsolutePath().normalize();
 	}
 }
