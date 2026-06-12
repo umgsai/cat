@@ -22,8 +22,6 @@ import java.util.List;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,22 +36,17 @@ import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = CapacityUpdater.class, value = WeeklyCapacityUpdater.ID)
 public class WeeklyCapacityUpdater implements CapacityUpdater {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WeeklyCapacityUpdater.class);
 
 	public static final String ID = "weekly_capacity_updater";
 
-	@Inject
 	private WeeklyReportRepository m_weeklyReportDao;
 
-	@Inject
 	private WeeklyReportContentRepository m_weeklyReportContentDao;
 
-	@Inject
 	private OverloadRepository m_overloadDao;
 
-	@Inject
 	private CapacityUpdateStatusManager m_manager;
 
 	@Override

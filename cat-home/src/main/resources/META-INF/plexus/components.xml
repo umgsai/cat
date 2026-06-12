@@ -639,6 +639,29 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.overload.Handler</role>
+			<implementation>com.dianping.cat.report.page.overload.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.overload.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.overload.task.TableCapacityService</role>
+					<field-name>m_tableCapacityService</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.overload.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.overload.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.dianping.cat.report.page.business.Handler</role>
 			<implementation>com.dianping.cat.report.page.business.Handler</implementation>
 			<requirements>
@@ -2529,15 +2552,19 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
+					<field-name>m_hourlyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+					<field-name>m_hourlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.overload.OverloadRepository</role>
+					<field-name>m_overloadDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.overload.task.CapacityUpdateStatusManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2548,15 +2575,19 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+					<field-name>m_dailyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+					<field-name>m_dailyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.overload.OverloadRepository</role>
+					<field-name>m_overloadDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.overload.task.CapacityUpdateStatusManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2567,15 +2598,19 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+					<field-name>m_weeklyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
+					<field-name>m_weeklyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.overload.OverloadRepository</role>
+					<field-name>m_overloadDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.overload.task.CapacityUpdateStatusManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2586,15 +2621,19 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+					<field-name>m_monthlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
+					<field-name>m_monthlyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.overload.OverloadRepository</role>
+					<field-name>m_overloadDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.overload.task.CapacityUpdateStatusManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2604,18 +2643,23 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.overload.OverloadRepository</role>
+					<field-name>m_overloadDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+					<field-name>m_hourlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+					<field-name>m_dailyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+					<field-name>m_weeklyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+					<field-name>m_monthlyReportDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -3001,27 +3045,6 @@
 		<component>
 			<role>com.dianping.cat.report.page.monitor.Handler</role>
 			<implementation>com.dianping.cat.report.page.monitor.Handler</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.overload.Handler</role>
-			<implementation>com.dianping.cat.report.page.overload.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.overload.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.overload.task.TableCapacityService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.overload.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.overload.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>org.unidal.web.mvc.Module</role>

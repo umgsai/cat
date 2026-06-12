@@ -281,6 +281,12 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 								.req(ModelService.class, MatrixAnalyzer.ID, "m_service"));
 		all.add(C(com.dianping.cat.report.page.matrix.JspViewer.class).req(ModelHandler.class));
 
+		all.add(C(com.dianping.cat.report.page.overload.Handler.class) //
+								.req(com.dianping.cat.report.page.overload.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(com.dianping.cat.report.page.overload.task.TableCapacityService.class, (String) null,
+												"m_tableCapacityService"));
+		all.add(C(com.dianping.cat.report.page.overload.JspViewer.class).req(ModelHandler.class));
+
 		all.add(C(com.dianping.cat.report.page.business.Handler.class) //
 								.req(com.dianping.cat.report.page.business.JspViewer.class, (String) null, "m_jspViewer") //
 								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //

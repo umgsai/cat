@@ -226,6 +226,7 @@ import com.dianping.cat.report.page.overload.task.CapacityUpdater;
 import com.dianping.cat.report.page.overload.task.DailyCapacityUpdater;
 import com.dianping.cat.report.page.overload.task.HourlyCapacityUpdater;
 import com.dianping.cat.report.page.overload.task.MonthlyCapacityUpdater;
+import com.dianping.cat.report.page.overload.task.TableCapacityService;
 import com.dianping.cat.report.page.overload.task.WeeklyCapacityUpdater;
 import com.dianping.cat.report.page.event.service.LocalEventService;
 import com.dianping.cat.report.page.problem.service.CompositeProblemService;
@@ -1559,6 +1560,36 @@ public class CatHomeSpringConfiguration {
 		task.setWeeklyUpdater(weeklyCapacityUpdater);
 		task.setMonthlyUpdater(monthlyCapacityUpdater);
 		return task;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.overload.JspViewer overloadJspViewer() {
+		return new com.dianping.cat.report.page.overload.JspViewer();
+	}
+
+	@Bean
+	public TableCapacityService tableCapacityService(OverloadRepository overloadRepository,
+			HourlyReportRepository hourlyReportRepository, DailyReportRepository dailyReportRepository,
+			WeeklyReportRepository weeklyReportRepository, MonthlyReportRepository monthlyReportRepository) {
+		TableCapacityService service = new TableCapacityService();
+
+		service.setOverloadDao(overloadRepository);
+		service.setHourlyReportDao(hourlyReportRepository);
+		service.setDailyReportDao(dailyReportRepository);
+		service.setWeeklyReportDao(weeklyReportRepository);
+		service.setMonthlyReportDao(monthlyReportRepository);
+		return service;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.overload.Handler overloadHandler(
+			com.dianping.cat.report.page.overload.JspViewer overloadJspViewer,
+			TableCapacityService tableCapacityService) {
+		com.dianping.cat.report.page.overload.Handler handler = new com.dianping.cat.report.page.overload.Handler();
+
+		handler.setJspViewer(overloadJspViewer);
+		handler.setTableCapacityService(tableCapacityService);
+		return handler;
 	}
 
 	@Bean

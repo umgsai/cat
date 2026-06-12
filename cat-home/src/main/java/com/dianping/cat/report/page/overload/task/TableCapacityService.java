@@ -24,9 +24,6 @@ import java.util.List;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,23 +45,17 @@ import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 import com.dianping.cat.home.dal.report.OverloadEntity;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
-public class TableCapacityService extends ContainerHolder {
+public class TableCapacityService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TableCapacityService.class);
 
-	@Inject
 	private OverloadRepository m_overloadDao;
 
-	@Inject
 	private HourlyReportRepository m_hourlyReportDao;
 
-	@Inject
 	private DailyReportRepository m_dailyReportDao;
 
-	@Inject
 	private WeeklyReportRepository m_weeklyReportDao;
 
-	@Inject
 	private MonthlyReportRepository m_monthlyReportDao;
 
 	private OverloadReport generateOverloadReport(Object object, double reportSize, int reportType) {
@@ -176,6 +167,26 @@ public class TableCapacityService extends ContainerHolder {
 		if (monthlyReportDao != null) {
 			m_monthlyReportDao = monthlyReportDao;
 		}
+	}
+
+	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
+		m_dailyReportDao = dailyReportDao;
+	}
+
+	public void setHourlyReportDao(HourlyReportRepository hourlyReportDao) {
+		m_hourlyReportDao = hourlyReportDao;
+	}
+
+	public void setMonthlyReportDao(MonthlyReportRepository monthlyReportDao) {
+		m_monthlyReportDao = monthlyReportDao;
+	}
+
+	public void setOverloadDao(OverloadRepository overloadDao) {
+		m_overloadDao = overloadDao;
+	}
+
+	public void setWeeklyReportDao(WeeklyReportRepository weeklyReportDao) {
+		m_weeklyReportDao = weeklyReportDao;
 	}
 
 }
