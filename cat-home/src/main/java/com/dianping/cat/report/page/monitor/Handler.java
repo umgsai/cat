@@ -21,18 +21,12 @@ package com.dianping.cat.report.page.monitor;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
-import com.dianping.cat.helper.JsonBuilder;
-
 public class Handler implements PageHandler<Context> {
-
-	@Inject
-	private JsonBuilder m_builder;
 
 	@Override
 	@PayloadMeta(Payload.class)

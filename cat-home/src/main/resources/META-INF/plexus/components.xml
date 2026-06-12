@@ -42,6 +42,124 @@
 			<implementation>com.dianping.cat.report.HourlyReportContentTableProvider</implementation>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.page.home.Handler</role>
+			<implementation>com.dianping.cat.report.page.home.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.home.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.analysis.TcpSocketReceiver</role>
+					<field-name>m_receiver</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.analysis.MessageConsumer</role>
+					<field-name>m_realtimeConsumer</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.home.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.home.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.alteration.Handler</role>
+			<implementation>com.dianping.cat.report.page.alteration.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.alteration.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository</role>
+					<field-name>m_alterationDao</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.alteration.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.alteration.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.alert.Handler</role>
+			<implementation>com.dianping.cat.report.page.alert.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.page.alert.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.alarm.spi.sender.SenderManager</role>
+					<field-name>m_senderManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.alert.AlertRepository</role>
+					<field-name>m_alertDao</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.alert.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.alert.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.cache.Handler</role>
+			<implementation>com.dianping.cat.report.page.cache.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>event</role-hint>
+					<field-name>m_eventService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.cache.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.transaction.service.TransactionReportService</role>
+					<field-name>m_transactionReportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.event.service.EventReportService</role>
+					<field-name>m_eventReportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
+					<field-name>m_normalizePayload</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>transaction</role-hint>
+					<field-name>m_transactionService</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.cache.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.cache.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>org.unidal.initialization.Module</role>
 			<role-hint>cat-home</role-hint>
 			<implementation>com.dianping.cat.CatHomeModule</implementation>
@@ -1015,24 +1133,31 @@
 				<requirement>
 					<role>com.dianping.cat.report.service.ModelService</role>
 					<role-hint>dependency</role-hint>
+					<field-name>m_service</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.dependency.graph.DependencyItemBuilder</role>
+					<field-name>m_itemBuilder</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_serverFilterConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.service.ProjectService</role>
+					<field-name>m_projectService</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.topologygraph.TopologyGraphRepository</role>
+					<field-name>m_topologyGraphDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1043,6 +1168,65 @@
 		<component>
 			<role>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</role>
 			<implementation>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</implementation>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.dependency.ExternalInfoBuilder</role>
+			<implementation>com.dianping.cat.report.page.dependency.ExternalInfoBuilder</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_serverConfigManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>problem</role-hint>
+					<field-name>m_problemservice</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.dependency.service.DependencyReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.dependency.Handler</role>
+			<implementation>com.dianping.cat.report.page.dependency.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>dependency</role-hint>
+					<field-name>m_dependencyService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.dependency.graph.TopologyGraphManager</role>
+					<field-name>m_graphManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.dependency.ExternalInfoBuilder</role>
+					<field-name>m_externalInfoBuilder</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.dependency.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
+					<field-name>m_normalizePayload</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</role>
+					<field-name>m_formatConfigManager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.dependency.JspViewer</role>
+			<implementation>com.dianping.cat.report.page.dependency.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.dependency.service.DependencyReportService</role>
@@ -2163,30 +2347,6 @@
 			<implementation>com.dianping.cat.report.ReportModule</implementation>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.page.home.Handler</role>
-			<implementation>com.dianping.cat.report.page.home.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.home.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.analysis.TcpSocketReceiver</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.analysis.MessageConsumer</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.home.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.home.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.page.problem.Handler</role>
 			<implementation>com.dianping.cat.report.page.problem.Handler</implementation>
 			<requirements>
@@ -2222,10 +2382,6 @@
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
 				</requirement>
 			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.DomainGroupConfigManager</role>
-			<implementation>com.dianping.cat.report.page.DomainGroupConfigManager</implementation>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.transaction.Handler</role>
@@ -2423,162 +2579,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.page.dependency.Handler</role>
-			<implementation>com.dianping.cat.report.page.dependency.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>dependency</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.dependency.graph.TopologyGraphManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.dependency.ExternalInfoBuilder</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.dependency.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.dependency.ExternalInfoBuilder</role>
-			<implementation>com.dianping.cat.report.page.dependency.ExternalInfoBuilder</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>problem</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.dependency.service.DependencyReportService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.dependency.service.DependencyReportService</role>
-			<implementation>com.dianping.cat.report.page.dependency.service.DependencyReportService</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
-			<implementation>com.dianping.cat.core.report.daily.repository.DailyReportRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.dependency.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.dependency.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</role>
-			<implementation>com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager</implementation>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.page.cross.Handler</role>
 			<implementation>com.dianping.cat.report.page.cross.Handler</implementation>
 			<requirements>
@@ -2603,43 +2603,6 @@
 		<component>
 			<role>com.dianping.cat.report.page.cross.JspViewer</role>
 			<implementation>com.dianping.cat.report.page.cross.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.cache.Handler</role>
-			<implementation>com.dianping.cat.report.page.cache.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>event</role-hint>
-					<field-name>m_eventService</field-name>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.cache.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.transaction.service.TransactionReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.page.event.service.EventReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.mvc.PayloadNormalizer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.service.ModelService</role>
-					<role-hint>transaction</role-hint>
-					<field-name>m_transactionService</field-name>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.cache.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.cache.JspViewer</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
@@ -2739,76 +2702,8 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.page.alteration.Handler</role>
-			<implementation>com.dianping.cat.report.page.alteration.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.alteration.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.alteration.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.alteration.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.report.page.monitor.Handler</role>
 			<implementation>com.dianping.cat.report.page.monitor.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.helper.JsonBuilder</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.alert.Handler</role>
-			<implementation>com.dianping.cat.report.page.alert.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.report.page.alert.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.alarm.spi.sender.SenderManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.alert.AlertRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.alert.JspViewer</role>
-			<implementation>com.dianping.cat.report.page.alert.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.alert.AlertRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.alert.AlertRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.overload.Handler</role>
@@ -2883,10 +2778,6 @@
 		<component>
 			<role>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</role>
 			<implementation>com.dianping.cat.report.page.storage.transform.StorageMergeHelper</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.report.page.storage.config.StorageGroupConfigManager</role>
-			<implementation>com.dianping.cat.report.page.storage.config.StorageGroupConfigManager</implementation>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.page.top.Handler</role>
@@ -3226,10 +3117,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager</role>
-			<implementation>com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager</implementation>
-		</component>
-		<component>
 			<role>com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor</role>
 			<implementation>com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor</implementation>
 			<requirements>
@@ -3308,15 +3195,6 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.config.modification.ConfigModificationRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.config.modification.ConfigModificationRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -3442,14 +3320,6 @@
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
 				</requirement>
 			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.system.page.permission.UserConfigManager</role>
-			<implementation>com.dianping.cat.system.page.permission.UserConfigManager</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.system.page.permission.ResourceConfigManager</role>
-			<implementation>com.dianping.cat.system.page.permission.ResourceConfigManager</implementation>
 		</component>
 		<component>
 			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>

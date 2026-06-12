@@ -19,16 +19,22 @@
 package com.dianping.cat.build;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.unidal.dal.jdbc.configuration.AbstractJdbcResourceConfigurator;
 import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import org.unidal.initialization.DefaultModuleManager;
 import org.unidal.initialization.ModuleManager;
 import org.unidal.lookup.configuration.Component;
+import org.unidal.web.mvc.view.model.ModelHandler;
 
+import com.dianping.cat.analysis.MessageConsumer;
+import com.dianping.cat.analysis.TcpSocketReceiver;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.CatHomeModule;
+import com.dianping.cat.alarm.spi.sender.SenderManager;
 import com.dianping.cat.build.report.DependencyComponentConfigurator;
 import com.dianping.cat.build.report.EventComponentConfigurator;
 import com.dianping.cat.build.report.HeartbeatComponentConfigurator;
@@ -38,6 +44,10 @@ import com.dianping.cat.build.report.ProblemComponentConfigurator;
 import com.dianping.cat.build.report.ReportComponentConfigurator;
 import com.dianping.cat.build.report.StorageComponentConfigurator;
 import com.dianping.cat.build.report.TransactionComponentConfigurator;
+import com.dianping.cat.consumer.event.EventAnalyzer;
+import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
+import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
+import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
 import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
@@ -58,6 +68,9 @@ import com.dianping.cat.report.HourlyReportTableProvider;
 import com.dianping.cat.report.graph.svg.DefaultGraphBuilder;
 import com.dianping.cat.report.graph.svg.DefaultValueTranslater;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
+import com.dianping.cat.report.page.event.service.EventReportService;
+import com.dianping.cat.report.page.transaction.service.TransactionReportService;
+import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.system.page.permission.ResourceConfigManager;
 import com.dianping.cat.system.page.permission.UserConfigManager;
 
@@ -99,6 +112,32 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		// must define in home module instead of core
 		all.addAll(defineTableProviderComponents());
 
+		all.add(C(com.dianping.cat.report.page.home.Handler.class) //
+								.req(com.dianping.cat.report.page.home.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(TcpSocketReceiver.class, (String) null, "m_receiver") //
+								.req(MessageConsumer.class, (String) null, "m_realtimeConsumer"));
+		all.add(C(com.dianping.cat.report.page.home.JspViewer.class).req(ModelHandler.class));
+
+		all.add(C(com.dianping.cat.report.page.alteration.Handler.class) //
+								.req(com.dianping.cat.report.page.alteration.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(AlterationRepository.class, (String) null, "m_alterationDao"));
+		all.add(C(com.dianping.cat.report.page.alteration.JspViewer.class).req(ModelHandler.class));
+
+		all.add(C(com.dianping.cat.report.page.alert.Handler.class) //
+								.req(com.dianping.cat.report.page.alert.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(SenderManager.class, (String) null, "m_senderManager") //
+								.req(AlertRepository.class, (String) null, "m_alertDao"));
+		all.add(C(com.dianping.cat.report.page.alert.JspViewer.class).req(ModelHandler.class));
+
+		all.add(C(com.dianping.cat.report.page.cache.Handler.class) //
+								.req(ModelService.class, EventAnalyzer.ID, "m_eventService") //
+								.req(com.dianping.cat.report.page.cache.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(TransactionReportService.class, (String) null, "m_transactionReportService") //
+								.req(EventReportService.class, (String) null, "m_eventReportService") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(ModelService.class, TransactionAnalyzer.ID, "m_transactionService"));
+		all.add(C(com.dianping.cat.report.page.cache.JspViewer.class).req(ModelHandler.class));
+
 		all.add(A(CatHomeModule.class));
 
 		all.add(C(UserConfigManager.class));
@@ -139,6 +178,7 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.addAll(new WebComponentConfigurator().defineComponents());
 
 		removeReplacedDaoComponents(all);
+		removeDuplicateComponents(all);
 		addCoreRepositoryComponents(all);
 
 		return all;
@@ -179,6 +219,19 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 	private void removeReplacedDaoComponents(List<Component> components) {
 		components.removeIf(component -> isCoreReplacedDaoRole(component.getModel().getRole()));
+	}
+
+	private void removeDuplicateComponents(List<Component> components) {
+		Set<String> keys = new HashSet<String>();
+
+		components.removeIf(component -> {
+			String role = component.getModel().getRole();
+			String roleHint = component.getModel().getRoleHint();
+			String normalizedRoleHint = roleHint == null ? "" : roleHint;
+			String key = role + ":" + normalizedRoleHint;
+
+			return !keys.add(key);
+		});
 	}
 
 	private boolean isCoreReplacedDaoRole(String role) {

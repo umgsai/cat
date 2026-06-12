@@ -25,7 +25,6 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.TreeMap;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -34,15 +33,13 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.analysis.TcpSocketReceiver;
 import com.dianping.cat.report.ReportPage;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private TcpSocketReceiver m_receiver;
 
-	@Inject
 	private MessageConsumer m_realtimeConsumer;
 
 	@Override
@@ -54,6 +51,8 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "home")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
+
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 
@@ -111,5 +110,33 @@ public class Handler implements PageHandler<Context> {
 		sb.append("</pre>");
 
 		model.setContent(sb.toString());
+	}
+
+	private void refreshSpringBeans() {
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
+		TcpSocketReceiver receiver = CatSpringContext.getBeanIfAvailable(TcpSocketReceiver.class);
+		MessageConsumer realtimeConsumer = CatSpringContext.getBeanIfAvailable(MessageConsumer.class);
+
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
+		if (receiver != null) {
+			m_receiver = receiver;
+		}
+		if (realtimeConsumer != null) {
+			m_realtimeConsumer = realtimeConsumer;
+		}
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setRealtimeConsumer(MessageConsumer realtimeConsumer) {
+		m_realtimeConsumer = realtimeConsumer;
+	}
+
+	public void setReceiver(TcpSocketReceiver receiver) {
+		m_receiver = receiver;
 	}
 }

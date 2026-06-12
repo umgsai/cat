@@ -33,7 +33,6 @@ import java.util.Map;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.helper.Splitters;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +54,10 @@ import com.dianping.cat.spring.CatSpringContext;
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private SenderManager m_senderManager;
 
-	@Inject
 	private AlertRepository m_alertDao;
 
 	private Alert buildAlertEntity(Payload payload) {
@@ -217,10 +213,26 @@ public class Handler implements PageHandler<Context> {
 
 	private void refreshSpringBeans() {
 		AlertRepository alertDao = CatSpringContext.getBeanIfAvailable(AlertRepository.class);
+		SenderManager senderManager = CatSpringContext.getBeanIfAvailable(SenderManager.class);
 
 		if (alertDao != null) {
 			m_alertDao = alertDao;
 		}
+		if (senderManager != null) {
+			m_senderManager = senderManager;
+		}
+	}
+
+	public void setAlertDao(AlertRepository alertDao) {
+		m_alertDao = alertDao;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setSenderManager(SenderManager senderManager) {
+		m_senderManager = senderManager;
 	}
 
 	public class AlertDomain {

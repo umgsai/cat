@@ -21,8 +21,6 @@ package com.dianping.cat.report.page.dependency;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
@@ -37,13 +35,10 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public class ExternalInfoBuilder {
 
-	@Inject
 	protected ServerConfigManager m_serverConfigManager;
 
-	@Inject(type = ModelService.class, value = ProblemAnalyzer.ID)
 	private ModelService<ProblemReport> m_problemservice;
 
-	@Inject
 	private DependencyReportService m_reportService;
 
 	private SimpleDateFormat m_dateFormat = new SimpleDateFormat("yyyyMMddHH");
@@ -108,10 +103,31 @@ public class ExternalInfoBuilder {
 
 	private void refreshSpringBeans() {
 		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+		ModelService<ProblemReport> problemService = CatSpringContext.getBeanIfAvailable("problemModelService",
+		      ModelService.class);
+		DependencyReportService reportService = CatSpringContext.getBeanIfAvailable(DependencyReportService.class);
 
 		if (serverConfigManager != null) {
 			m_serverConfigManager = serverConfigManager;
 		}
+		if (problemService != null) {
+			m_problemservice = problemService;
+		}
+		if (reportService != null) {
+			m_reportService = reportService;
+		}
+	}
+
+	public void setProblemService(ModelService<ProblemReport> problemService) {
+		m_problemservice = problemService;
+	}
+
+	public void setReportService(DependencyReportService reportService) {
+		m_reportService = reportService;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
 	}
 
 }

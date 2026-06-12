@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,10 +55,8 @@ public class Handler implements PageHandler<Context> {
 
 	private final static String EMPTY = "N/A";
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private AlterationRepository m_alterationDao;
 
 	private SimpleDateFormat m_sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -291,6 +288,14 @@ public class Handler implements PageHandler<Context> {
 		if (alterationDao != null) {
 			m_alterationDao = alterationDao;
 		}
+	}
+
+	public void setAlterationDao(AlterationRepository alterationDao) {
+		m_alterationDao = alterationDao;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
 	}
 
 	public static class AlterationDomain {

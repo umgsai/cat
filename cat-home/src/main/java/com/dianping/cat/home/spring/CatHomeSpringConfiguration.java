@@ -127,6 +127,7 @@ import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportReposit
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.message.DefaultPathBuilder;
 import com.dianping.cat.message.PathBuilder;
+import com.dianping.cat.mvc.PayloadNormalizer;
 import com.dianping.cat.report.DefaultReportBucketManager;
 import com.dianping.cat.report.DefaultReportManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
@@ -159,9 +160,11 @@ import com.dianping.cat.report.graph.metric.DataExtractor;
 import com.dianping.cat.report.graph.metric.impl.DataExtractorImpl;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager;
+import com.dianping.cat.report.page.dependency.ExternalInfoBuilder;
 import com.dianping.cat.report.page.dependency.graph.DependencyItemBuilder;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder;
+import com.dianping.cat.report.page.dependency.graph.TopologyGraphManager;
 import com.dianping.cat.report.page.business.graph.BusinessDataFetcher;
 import com.dianping.cat.report.page.business.graph.CustomDataCalculator;
 import com.dianping.cat.report.page.business.service.CachedBusinessReportService;
@@ -176,9 +179,13 @@ import com.dianping.cat.report.page.cross.service.CrossReportService;
 import com.dianping.cat.report.page.cross.service.LocalCrossService;
 import com.dianping.cat.report.page.cross.task.CrossReportBuilder;
 import com.dianping.cat.report.page.dependency.service.DependencyReportService;
+import com.dianping.cat.report.page.dependency.service.CompositeDependencyService;
+import com.dianping.cat.report.page.dependency.service.HistoricalDependencyService;
 import com.dianping.cat.report.page.dependency.service.LocalDependencyService;
 import com.dianping.cat.report.page.dependency.task.DependencyReportBuilder;
 import com.dianping.cat.report.page.event.service.EventReportService;
+import com.dianping.cat.report.page.event.service.CompositeEventService;
+import com.dianping.cat.report.page.event.service.HistoricalEventService;
 import com.dianping.cat.report.page.event.task.EventReportBuilder;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
@@ -239,6 +246,8 @@ import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.report.page.state.task.StateReportBuilder;
 import com.dianping.cat.report.page.top.service.LocalTopService;
 import com.dianping.cat.report.page.transaction.service.TransactionReportService;
+import com.dianping.cat.report.page.transaction.service.CompositeTransactionService;
+import com.dianping.cat.report.page.transaction.service.HistoricalTransactionService;
 import com.dianping.cat.report.page.transaction.service.LocalTransactionService;
 import com.dianping.cat.report.page.transaction.task.TransactionReportBuilder;
 import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper;
@@ -946,6 +955,101 @@ public class CatHomeSpringConfiguration {
 
 		builder.setItemBuilder(dependencyItemBuilder);
 		return builder;
+	}
+
+	@Bean
+	public PayloadNormalizer payloadNormalizer() {
+		return new PayloadNormalizer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.alteration.JspViewer alterationJspViewer() {
+		return new com.dianping.cat.report.page.alteration.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.alteration.Handler alterationHandler(
+			com.dianping.cat.report.page.alteration.JspViewer alterationJspViewer,
+			AlterationRepository alterationRepository) {
+		com.dianping.cat.report.page.alteration.Handler handler = new com.dianping.cat.report.page.alteration.Handler();
+
+		handler.setJspViewer(alterationJspViewer);
+		handler.setAlterationDao(alterationRepository);
+		return handler;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.alert.JspViewer alertJspViewer() {
+		return new com.dianping.cat.report.page.alert.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.alert.Handler alertHandler(
+			com.dianping.cat.report.page.alert.JspViewer alertJspViewer, SenderManager senderManager,
+			AlertRepository alertRepository) {
+		com.dianping.cat.report.page.alert.Handler handler = new com.dianping.cat.report.page.alert.Handler();
+
+		handler.setJspViewer(alertJspViewer);
+		handler.setSenderManager(senderManager);
+		handler.setAlertDao(alertRepository);
+		return handler;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.cache.JspViewer cacheJspViewer() {
+		return new com.dianping.cat.report.page.cache.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.cache.Handler cacheHandler(
+			@Qualifier("eventModelService") ModelService<EventReport> eventModelService,
+			com.dianping.cat.report.page.cache.JspViewer cacheJspViewer,
+			TransactionReportService transactionReportService, EventReportService eventReportService,
+			PayloadNormalizer payloadNormalizer,
+			@Qualifier("transactionModelService") ModelService<TransactionReport> transactionModelService) {
+		com.dianping.cat.report.page.cache.Handler handler = new com.dianping.cat.report.page.cache.Handler();
+
+		handler.setEventService(eventModelService);
+		handler.setJspViewer(cacheJspViewer);
+		handler.setTransactionReportService(transactionReportService);
+		handler.setEventReportService(eventReportService);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setTransactionService(transactionModelService);
+		return handler;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.dependency.JspViewer dependencyJspViewer() {
+		return new com.dianping.cat.report.page.dependency.JspViewer();
+	}
+
+	@Bean
+	public ExternalInfoBuilder externalInfoBuilder(ServerConfigManager serverConfigManager,
+			@Qualifier("problemModelService") ModelService<ProblemReport> problemModelService,
+			DependencyReportService dependencyReportService) {
+		ExternalInfoBuilder builder = new ExternalInfoBuilder();
+
+		builder.setServerConfigManager(serverConfigManager);
+		builder.setProblemService(problemModelService);
+		builder.setReportService(dependencyReportService);
+		return builder;
+	}
+
+	@Bean(initMethod = "initialize")
+	public TopologyGraphManager topologyGraphManager(@Qualifier("dependencyModelService") ModelService<DependencyReport> dependencyModelService,
+			DependencyItemBuilder dependencyItemBuilder, TopoGraphFormatConfigManager topoGraphFormatConfigManager,
+			ServerConfigManager serverConfigManager, ServerFilterConfigManager serverFilterConfigManager,
+			ProjectService projectService, TopologyGraphRepository topologyGraphRepository) {
+		TopologyGraphManager manager = new TopologyGraphManager();
+
+		manager.setService(dependencyModelService);
+		manager.setItemBuilder(dependencyItemBuilder);
+		manager.setConfigManager(topoGraphFormatConfigManager);
+		manager.setManager(serverConfigManager);
+		manager.setServerFilterConfigManager(serverFilterConfigManager);
+		manager.setProjectService(projectService);
+		manager.setTopologyGraphDao(topologyGraphRepository);
+		return manager;
 	}
 
 	@Bean(name = DependencyReportBuilder.ID)
@@ -1676,7 +1780,37 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
-	@Bean(initMethod = "initialize", name = ProblemAnalyzer.ID)
+	@Bean(initMethod = "initialize", name = "event-historical")
+	public ModelService<EventReport> historicalEventService(EventReportService eventReportService,
+			ServerConfigManager serverConfigManager) {
+		HistoricalEventService service = new HistoricalEventService();
+
+		service.setReportService(eventReportService);
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize", name = "transaction-historical")
+	public ModelService<TransactionReport> historicalTransactionService(
+			TransactionReportService transactionReportService, ServerConfigManager serverConfigManager) {
+		HistoricalTransactionService service = new HistoricalTransactionService();
+
+		service.setReportService(transactionReportService);
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize", name = "dependency-historical")
+	public ModelService<DependencyReport> historicalDependencyService(DependencyReportService dependencyReportService,
+			ServerConfigManager serverConfigManager) {
+		HistoricalDependencyService service = new HistoricalDependencyService();
+
+		service.setReportService(dependencyReportService);
+		service.setConfigManager(serverConfigManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
 	public ModelService<ProblemReport> problemModelService(
 			@Qualifier("problem-historical") ModelService<ProblemReport> historicalProblemService,
 			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
@@ -1695,6 +1829,45 @@ public class CatHomeSpringConfiguration {
 			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
 		CompositeBusinessService service = new CompositeBusinessService();
 		List<ModelService<BusinessReport>> services = Collections.singletonList(historicalBusinessService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ModelService<EventReport> eventModelService(
+			@Qualifier("event-historical") ModelService<EventReport> historicalEventService,
+			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
+		CompositeEventService service = new CompositeEventService();
+		List<ModelService<EventReport>> services = Collections.singletonList(historicalEventService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ModelService<TransactionReport> transactionModelService(
+			@Qualifier("transaction-historical") ModelService<TransactionReport> historicalTransactionService,
+			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
+		CompositeTransactionService service = new CompositeTransactionService();
+		List<ModelService<TransactionReport>> services = Collections.singletonList(historicalTransactionService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize")
+	public ModelService<DependencyReport> dependencyModelService(
+			@Qualifier("dependency-historical") ModelService<DependencyReport> historicalDependencyService,
+			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
+		CompositeDependencyService service = new CompositeDependencyService();
+		List<ModelService<DependencyReport>> services = Collections.singletonList(historicalDependencyService);
 
 		service.setServices(services);
 		service.setConfigManager(serverConfigManager);
@@ -1870,7 +2043,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(initMethod = "initialize", name = FailureSummaryBuilder.ID)
-	public SummaryBuilder failureSummaryBuilder(@Qualifier(ProblemAnalyzer.ID) ModelService<ProblemReport> problemModelService) {
+	public SummaryBuilder failureSummaryBuilder(@Qualifier("problemModelService") ModelService<ProblemReport> problemModelService) {
 		FailureSummaryBuilder builder = new FailureSummaryBuilder();
 
 		builder.setService(problemModelService);

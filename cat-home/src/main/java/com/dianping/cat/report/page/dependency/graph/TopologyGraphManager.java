@@ -27,15 +27,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -60,35 +56,27 @@ import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
-public class TopologyGraphManager implements Initializable, LogEnabled {
+public class TopologyGraphManager {
 
-	@Inject(type = ModelService.class, value = DependencyAnalyzer.ID)
+	private static final Logger LOGGER = LoggerFactory.getLogger(TopologyGraphManager.class);
+
 	private ModelService<DependencyReport> m_service;
 
-	@Inject
 	private DependencyItemBuilder m_itemBuilder;
 
-	@Inject
 	private TopoGraphFormatConfigManager m_configManager;
 
-	@Inject
 	private ServerConfigManager m_manager;
 
-	@Inject
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
-	@Inject
 	private ProjectService m_projectService;
 
-	@Inject
 	private TopologyGraphRepository m_topologyGraphDao;
 
 	private TopologyGraphBuilder m_currentBuilder;
 
 	private Map<Long, TopologyGraph> m_topologyGraphs = new ConcurrentHashMap<Long, TopologyGraph>();
-
-	private Logger m_logger;
 
 	public Set<TopologyEdge> buildEdges(Set<String> domains, Date start, Date end) {
 		Set<TopologyEdge> result = new HashSet<TopologyEdge>();
@@ -205,17 +193,14 @@ public class TopologyGraphManager implements Initializable, LogEnabled {
 		return topologyGraph;
 	}
 
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
-
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		refreshSpringBeans();
 
 		if (m_manager.isJobMachine()) {
+			LOGGER.info("Starting dependency topology graph reload task.");
 			Threads.forGroup("cat").start(new DependencyReloadTask());
+		} else {
+			LOGGER.info("Skip dependency topology graph reload task because current node is not job machine.");
 		}
 	}
 
@@ -232,6 +217,7 @@ public class TopologyGraphManager implements Initializable, LogEnabled {
 				return DefaultNativeParser.parse(content);
 			}
 		} catch (DalException e) {
+			LOGGER.error("Unable to query dependency topology graph from database, time={}.", time, e);
 			Cat.logError(e);
 		}
 		return null;
@@ -276,7 +262,7 @@ public class TopologyGraphManager implements Initializable, LogEnabled {
 						builder.visitDependencyReport(report);
 					}
 				} else {
-					m_logger.warn(String.format("Can't get dependency report of %s", domain));
+					LOGGER.warn("Can't get dependency report, domain={}.", domain);
 				}
 			}
 		}
@@ -303,6 +289,7 @@ public class TopologyGraphManager implements Initializable, LogEnabled {
 						try {
 							buildDependencyInfo(builder, domain);
 						} catch (Exception e) {
+							LOGGER.error("Unable to build dependency topology info, domain={}.", domain, e);
 							Cat.logError(e);
 						}
 					}
@@ -316,7 +303,7 @@ public class TopologyGraphManager implements Initializable, LogEnabled {
 					m_currentBuilder = builder;
 					t.setStatus(Transaction.SUCCESS);
 				} catch (Exception e) {
-					m_logger.error(e.getMessage(), e);
+					LOGGER.error("Unable to reload dependency topology graph.", e);
 					t.setStatus(e);
 				} finally {
 					t.complete();
@@ -340,11 +327,25 @@ public class TopologyGraphManager implements Initializable, LogEnabled {
 	}
 
 	private void refreshSpringBeans() {
+		ModelService<DependencyReport> service = CatSpringContext.getBeanIfAvailable("dependencyModelService",
+		      ModelService.class);
+		DependencyItemBuilder itemBuilder = CatSpringContext.getBeanIfAvailable(DependencyItemBuilder.class);
+		TopoGraphFormatConfigManager configManager = CatSpringContext.getBeanIfAvailable(TopoGraphFormatConfigManager.class);
 		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
 		      .getBeanIfAvailable(ServerFilterConfigManager.class);
 		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
+		TopologyGraphRepository topologyGraphDao = CatSpringContext.getBeanIfAvailable(TopologyGraphRepository.class);
 
+		if (service != null) {
+			m_service = service;
+		}
+		if (itemBuilder != null) {
+			m_itemBuilder = itemBuilder;
+		}
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
 		if (manager != null) {
 			m_manager = manager;
 		}
@@ -354,6 +355,37 @@ public class TopologyGraphManager implements Initializable, LogEnabled {
 		if (projectService != null) {
 			m_projectService = projectService;
 		}
+		if (topologyGraphDao != null) {
+			m_topologyGraphDao = topologyGraphDao;
+		}
+	}
+
+	public void setConfigManager(TopoGraphFormatConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setItemBuilder(DependencyItemBuilder itemBuilder) {
+		m_itemBuilder = itemBuilder;
+	}
+
+	public void setManager(ServerConfigManager manager) {
+		m_manager = manager;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		m_serverFilterConfigManager = serverFilterConfigManager;
+	}
+
+	public void setService(ModelService<DependencyReport> service) {
+		m_service = service;
+	}
+
+	public void setTopologyGraphDao(TopologyGraphRepository topologyGraphDao) {
+		m_topologyGraphDao = topologyGraphDao;
 	}
 
 }

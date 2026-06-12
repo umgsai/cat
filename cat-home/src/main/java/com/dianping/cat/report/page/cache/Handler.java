@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -48,25 +47,20 @@ import com.dianping.cat.report.page.transaction.transform.AllNameMerger;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 
-	@Inject(type = ModelService.class, value = EventAnalyzer.ID)
 	private ModelService<EventReport> m_eventService;
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private TransactionReportService m_transactionReportService;
 
-	@Inject
 	private EventReportService m_eventReportService;
 
-	@Inject
 	private PayloadNormalizer m_normalizePayload;
 
-	@Inject(type = ModelService.class, value = TransactionAnalyzer.ID)
 	private ModelService<TransactionReport> m_transactionService;
 
 	private CacheReport buildCacheReport(TransactionReport transactionReport, EventReport eventReport, Payload payload) {
@@ -219,6 +213,7 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "cache")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		String type = payload.getType();
@@ -253,6 +248,57 @@ public class Handler implements PageHandler<Context> {
 		model.setAction(payload.getAction());
 		model.setPage(ReportPage.CACHE);
 		model.setQueryName(payload.getQueryName());
+	}
+
+	private void refreshSpringBeans() {
+		EventReportService eventReportService = CatSpringContext.getBeanIfAvailable(EventReportService.class);
+		TransactionReportService transactionReportService = CatSpringContext
+		      .getBeanIfAvailable(TransactionReportService.class);
+		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
+		ModelService<EventReport> eventService = CatSpringContext.getBeanIfAvailable("eventModelService",
+		      ModelService.class);
+		ModelService<TransactionReport> transactionService = CatSpringContext.getBeanIfAvailable(
+		      "transactionModelService", ModelService.class);
+
+		if (eventReportService != null) {
+			m_eventReportService = eventReportService;
+		}
+		if (transactionReportService != null) {
+			m_transactionReportService = transactionReportService;
+		}
+		if (normalizer != null) {
+			m_normalizePayload = normalizer;
+		}
+		if (eventService != null) {
+			m_eventService = eventService;
+		}
+		if (transactionService != null) {
+			m_transactionService = transactionService;
+		}
+	}
+
+	public void setEventReportService(EventReportService eventReportService) {
+		m_eventReportService = eventReportService;
+	}
+
+	public void setEventService(ModelService<EventReport> eventService) {
+		m_eventService = eventService;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
+		m_normalizePayload = normalizePayload;
+	}
+
+	public void setTransactionReportService(TransactionReportService transactionReportService) {
+		m_transactionReportService = transactionReportService;
+	}
+
+	public void setTransactionService(ModelService<TransactionReport> transactionService) {
+		m_transactionService = transactionService;
 	}
 
 }

@@ -38,7 +38,7 @@ import com.dianping.cat.report.page.dependency.graph.TopologyGraphManager;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import org.unidal.lookup.annotation.Inject;
+import com.dianping.cat.spring.CatSpringContext;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -55,22 +55,16 @@ public class Handler implements PageHandler<Context> {
 
 	public static final List<String> NORMAL_URLS = Arrays.asList("/cat/r", "/cat/r/", "/cat/r/dependency");
 
-	@Inject(type = ModelService.class, value = DependencyAnalyzer.ID)
 	private ModelService<DependencyReport> m_dependencyService;
 
-	@Inject
 	private TopologyGraphManager m_graphManager;
 
-	@Inject
 	private ExternalInfoBuilder m_externalInfoBuilder;
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private PayloadNormalizer m_normalizePayload;
 
-	@Inject
 	private TopoGraphFormatConfigManager m_formatConfigManager;
 
 	private Segment buildAllSegmentsInfo(DependencyReport report) {
@@ -187,6 +181,8 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = DependencyAnalyzer.ID)
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		refreshSpringBeans();
+
 		if (validate(ctx)) {
 			Model model = new Model(ctx);
 			Payload payload = ctx.getPayload();
@@ -249,6 +245,8 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private DependencyReport queryDependencyReport(Payload payload) {
+		refreshSpringBeans();
+
 		String domain = payload.getDomain();
 		ModelRequest request = new ModelRequest(domain, payload.getDate());
 
@@ -271,6 +269,60 @@ public class Handler implements PageHandler<Context> {
 		String actionUrl = url.split("\\?")[0];
 
 		return NORMAL_URLS.contains(actionUrl);
+	}
+
+	private void refreshSpringBeans() {
+		ModelService<DependencyReport> dependencyService = CatSpringContext.getBeanIfAvailable(DependencyAnalyzer.ID,
+		      ModelService.class);
+		TopologyGraphManager graphManager = CatSpringContext.getBeanIfAvailable(TopologyGraphManager.class);
+		ExternalInfoBuilder externalInfoBuilder = CatSpringContext.getBeanIfAvailable(ExternalInfoBuilder.class);
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
+		PayloadNormalizer normalizePayload = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
+		TopoGraphFormatConfigManager formatConfigManager = CatSpringContext
+		      .getBeanIfAvailable(TopoGraphFormatConfigManager.class);
+
+		if (dependencyService != null) {
+			m_dependencyService = dependencyService;
+		}
+		if (graphManager != null) {
+			m_graphManager = graphManager;
+		}
+		if (externalInfoBuilder != null) {
+			m_externalInfoBuilder = externalInfoBuilder;
+		}
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
+		if (normalizePayload != null) {
+			m_normalizePayload = normalizePayload;
+		}
+		if (formatConfigManager != null) {
+			m_formatConfigManager = formatConfigManager;
+		}
+	}
+
+	public void setDependencyService(ModelService<DependencyReport> dependencyService) {
+		m_dependencyService = dependencyService;
+	}
+
+	public void setExternalInfoBuilder(ExternalInfoBuilder externalInfoBuilder) {
+		m_externalInfoBuilder = externalInfoBuilder;
+	}
+
+	public void setFormatConfigManager(TopoGraphFormatConfigManager formatConfigManager) {
+		m_formatConfigManager = formatConfigManager;
+	}
+
+	public void setGraphManager(TopologyGraphManager graphManager) {
+		m_graphManager = graphManager;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
+		m_normalizePayload = normalizePayload;
 	}
 
 }

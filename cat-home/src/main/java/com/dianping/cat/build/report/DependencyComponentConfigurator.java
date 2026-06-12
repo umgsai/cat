@@ -23,9 +23,17 @@ import java.util.List;
 
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
+import org.unidal.web.mvc.view.model.ModelHandler;
 
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.dependency.DependencyAnalyzer;
+import com.dianping.cat.consumer.problem.ProblemAnalyzer;
+import com.dianping.cat.core.mybatis.repository.topologygraph.TopologyGraphRepository;
+import com.dianping.cat.mvc.PayloadNormalizer;
+import com.dianping.cat.report.page.dependency.ExternalInfoBuilder;
+import com.dianping.cat.report.page.dependency.Handler;
+import com.dianping.cat.report.page.dependency.JspViewer;
 import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager;
 import com.dianping.cat.report.page.dependency.graph.DependencyItemBuilder;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder;
@@ -39,6 +47,7 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.server.RemoteServersManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.service.ProjectService;
 
 public class DependencyComponentConfigurator extends AbstractResourceConfigurator {
 	@Override
@@ -49,11 +58,32 @@ public class DependencyComponentConfigurator extends AbstractResourceConfigurato
 
 		all.add(C(TopologyGraphBuilder.class).req(DependencyItemBuilder.class));
 
-		all.add(A(TopologyGraphManager.class));
+		all.add(C(TopologyGraphManager.class) //
+								.req(ModelService.class, DependencyAnalyzer.ID, "m_service") //
+								.req(DependencyItemBuilder.class, (String) null, "m_itemBuilder") //
+								.req(TopoGraphFormatConfigManager.class, (String) null, "m_configManager") //
+								.req(ServerConfigManager.class, (String) null, "m_manager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_serverFilterConfigManager") //
+								.req(ProjectService.class, (String) null, "m_projectService") //
+								.req(TopologyGraphRepository.class, (String) null, "m_topologyGraphDao"));
 
 		all.add(C(TopologyGraphConfigManager.class));
 
 		all.add(C(TopoGraphFormatConfigManager.class));
+
+		all.add(C(ExternalInfoBuilder.class) //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager") //
+								.req(ModelService.class, ProblemAnalyzer.ID, "m_problemservice") //
+								.req(DependencyReportService.class, (String) null, "m_reportService"));
+
+		all.add(C(Handler.class) //
+								.req(ModelService.class, DependencyAnalyzer.ID, "m_dependencyService") //
+								.req(TopologyGraphManager.class, (String) null, "m_graphManager") //
+								.req(ExternalInfoBuilder.class, (String) null, "m_externalInfoBuilder") //
+								.req(JspViewer.class, (String) null, "m_jspViewer") //
+								.req(PayloadNormalizer.class, (String) null, "m_normalizePayload") //
+								.req(TopoGraphFormatConfigManager.class, (String) null, "m_formatConfigManager"));
+		all.add(C(JspViewer.class).req(ModelHandler.class));
 
 		all.add(C(DependencyReportService.class));
 

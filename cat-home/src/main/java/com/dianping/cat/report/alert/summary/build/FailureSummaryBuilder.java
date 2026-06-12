@@ -53,7 +53,7 @@ public class FailureSummaryBuilder extends SummaryBuilder {
 	@SuppressWarnings("unchecked")
 	private ModelService<ProblemReport> getService() {
 		if (m_service == null) {
-			m_service = CatSpringContext.getBeanIfAvailable(ProblemAnalyzer.ID, ModelService.class);
+			m_service = CatSpringContext.getBeanIfAvailable("problemModelService", ModelService.class);
 		}
 		return m_service;
 	}
