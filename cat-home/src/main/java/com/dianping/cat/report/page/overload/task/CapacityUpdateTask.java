@@ -20,35 +20,24 @@ package com.dianping.cat.report.page.overload.task;
 
 import java.util.Date;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.report.task.TaskBuilder;
 
-@Named(type = TaskBuilder.class, value = CapacityUpdateTask.ID)
-public class CapacityUpdateTask implements TaskBuilder, LogEnabled {
+public class CapacityUpdateTask implements TaskBuilder {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(CapacityUpdateTask.class);
 
 	public static final String ID = Constants.REPORT_DATABASE_CAPACITY;
 
-	protected Logger m_logger;
-
-	@Inject(type = CapacityUpdater.class, value = HourlyCapacityUpdater.ID)
 	private CapacityUpdater m_hourlyUpdater;
 
-	@Inject(type = CapacityUpdater.class, value = DailyCapacityUpdater.ID)
 	private CapacityUpdater m_dailyUpdater;
 
-	@Inject(type = CapacityUpdater.class, value = WeeklyCapacityUpdater.ID)
 	private CapacityUpdater m_weeklyUpdater;
 
-	@Inject(type = CapacityUpdater.class, value = MonthlyCapacityUpdater.ID)
 	private CapacityUpdater m_monthlyUpdater;
 
 	@Override
@@ -111,11 +100,6 @@ public class CapacityUpdateTask implements TaskBuilder, LogEnabled {
 			Cat.logError(e);
 			return false;
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	public void setDailyUpdater(CapacityUpdater dailyUpdater) {

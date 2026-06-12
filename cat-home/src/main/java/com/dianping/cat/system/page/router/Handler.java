@@ -42,11 +42,9 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.router.entity.Domain;
 import com.dianping.cat.home.router.entity.RouterConfig;
 import com.dianping.cat.home.router.entity.Server;
-import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.system.page.router.config.RouterConfigHandler;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 import com.dianping.cat.system.page.router.service.CachedRouterConfigService;
-import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
@@ -63,9 +61,6 @@ public class Handler implements PageHandler<Context> {
 
 	@Inject
 	private ServerFilterConfigManager m_filterManager;
-
-	@Inject(RouterConfigBuilder.ID)
-	private TaskBuilder m_routerConfigBuilder;
 
 	@Inject
 	private RouterConfigHandler m_routerConfigHandler;

@@ -68,7 +68,6 @@ import com.dianping.cat.system.page.router.config.RouterConfigHandler;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 import com.dianping.cat.system.page.router.service.CachedRouterConfigService;
 import com.dianping.cat.system.page.router.service.RouterConfigService;
-import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
 public class ReportComponentConfigurator extends AbstractResourceConfigurator {
 	@Override
@@ -86,7 +85,6 @@ public class ReportComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(A(RouterConfigService.class));
 		all.add(A(CachedRouterConfigService.class));
 		all.add(A(RouterConfigAdjustor.class));
-		all.add(A(RouterConfigBuilder.class));
 
 		all.add(A(JarReportService.class));
 

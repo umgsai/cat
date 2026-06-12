@@ -25,7 +25,6 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.dianping.cat.report.page.overload.task.CapacityUpdateStatusManager;
-import com.dianping.cat.report.page.overload.task.CapacityUpdateTask;
 import com.dianping.cat.report.page.overload.task.DailyCapacityUpdater;
 import com.dianping.cat.report.page.overload.task.HourlyCapacityUpdater;
 import com.dianping.cat.report.page.overload.task.MonthlyCapacityUpdater;
@@ -43,7 +42,6 @@ public class OfflineComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(A(WeeklyCapacityUpdater.class));
 		all.add(A(MonthlyCapacityUpdater.class));
 		all.add(A(TableCapacityService.class));
-		all.add(A(CapacityUpdateTask.class));
 
 		return all;
 	}
