@@ -35,7 +35,9 @@ import com.dianping.cat.report.page.dependency.service.CompositeDependencyServic
 import com.dianping.cat.report.page.dependency.service.DependencyReportService;
 import com.dianping.cat.report.page.dependency.service.HistoricalDependencyService;
 import com.dianping.cat.report.page.dependency.service.LocalDependencyService;
+import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
 
 public class DependencyComponentConfigurator extends AbstractResourceConfigurator {
@@ -53,9 +55,11 @@ public class DependencyComponentConfigurator extends AbstractResourceConfigurato
 
 		all.add(C(TopoGraphFormatConfigManager.class));
 
-		all.add(A(DependencyReportService.class));
+		all.add(C(DependencyReportService.class));
 
-		all.add(A(LocalDependencyService.class));
+		all.add(C(LocalModelService.class, LocalDependencyService.ID, LocalDependencyService.class) //
+								.req(ServerConfigManager.class) //
+								.req(ReportBucketManager.class));
 		all.add(C(ModelService.class, "dependency-historical", HistoricalDependencyService.class) //
 								.req(DependencyReportService.class, ServerConfigManager.class));
 		all.add(C(ModelService.class, DependencyAnalyzer.ID, CompositeDependencyService.class) //

@@ -1047,32 +1047,6 @@
 		<component>
 			<role>com.dianping.cat.report.page.dependency.service.DependencyReportService</role>
 			<implementation>com.dianping.cat.report.page.dependency.service.DependencyReportService</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.report.service.LocalModelService</role>
@@ -1080,13 +1054,10 @@
 			<implementation>com.dianping.cat.report.page.dependency.service.LocalDependencyService</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.report.ReportBucketManager</role>
-				</requirement>
-				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.cat.analysis.MessageConsumer</role>
+					<role>com.dianping.cat.report.ReportBucketManager</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -2489,6 +2460,108 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.dependency.service.DependencyReportService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.page.dependency.service.DependencyReportService</role>
+			<implementation>com.dianping.cat.report.page.dependency.service.DependencyReportService</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+			<implementation>com.dianping.cat.core.report.daily.repository.DailyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
+			<implementation>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>
