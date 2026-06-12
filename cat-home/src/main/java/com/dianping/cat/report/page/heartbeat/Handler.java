@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.PageHandler;
@@ -51,6 +53,8 @@ import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
 public class Handler implements PageHandler<Context> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
+
 	@Inject
 	private GraphBuilder m_builder;
 
@@ -201,6 +205,9 @@ public class Handler implements PageHandler<Context> {
 				return new HeartbeatSvgGraph(m_builder, m_manager).display(report, displayIp);
 			}
 		} catch (Throwable e) {
+			LOGGER.error("Unable to render heartbeat report, domain={}, ip={}, realIp={}, type={}, period={}, date={}, action={}.",
+					payload.getDomain(), payload.getIpAddress(), payload.getRealIp(), payload.getType(), payload.getPeriod(),
+					payload.getDate(), payload.getAction(), e);
 			Cat.logError(e);
 			model.setException(e);
 		}

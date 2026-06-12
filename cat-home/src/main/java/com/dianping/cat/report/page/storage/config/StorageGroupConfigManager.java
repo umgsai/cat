@@ -67,6 +67,8 @@ public class StorageGroupConfigManager {
 	}
 
 	public StorageGroupConfig getConfig() {
+		ensureInitialized();
+
 		return m_config;
 	}
 
@@ -135,6 +137,8 @@ public class StorageGroupConfigManager {
 	}
 
 	public Map<String, Department> queryStorageDepartments(List<String> ids, String type) {
+		ensureInitialized();
+
 		Map<String, Department> departments = new LinkedHashMap<String, Department>();
 
 		for (String id : ids) {
@@ -163,6 +167,8 @@ public class StorageGroupConfigManager {
 	}
 
 	public StorageGroup queryStorageGroup(String type) {
+		ensureInitialized();
+
 		StorageGroup group = m_config.getStorageGroups().get(type);
 
 		if (group != null) {
@@ -172,8 +178,19 @@ public class StorageGroupConfigManager {
 		}
 	}
 
+	private void ensureInitialized() {
+		if (m_config == null) {
+			synchronized (this) {
+				if (m_config == null) {
+					initialize();
+				}
+			}
+		}
+	}
+
 	private boolean storeConfig() {
 		synchronized (this) {
+			ensureInitialized();
 			refreshSpringBeans();
 
 			try {

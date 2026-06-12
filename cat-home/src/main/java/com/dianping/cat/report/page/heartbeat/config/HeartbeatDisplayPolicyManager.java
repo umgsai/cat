@@ -53,6 +53,8 @@ public class HeartbeatDisplayPolicyManager {
 	private HeartbeatDisplayPolicy m_config;
 
 	public HeartbeatDisplayPolicy getHeartbeatDisplayPolicy() {
+		ensureInitialized();
+
 		return m_config;
 	}
 
@@ -107,6 +109,8 @@ public class HeartbeatDisplayPolicyManager {
 	}
 
 	public boolean isDelta(String groupName, String metricName) {
+		ensureInitialized();
+
 		Group group = m_config.findGroup(groupName);
 
 		if (group != null) {
@@ -120,6 +124,8 @@ public class HeartbeatDisplayPolicyManager {
 	}
 
 	public Metric queryMetric(String groupName, String metricName) {
+		ensureInitialized();
+
 		Group group = m_config.findGroup(groupName);
 
 		if (group != null) {
@@ -133,6 +139,8 @@ public class HeartbeatDisplayPolicyManager {
 	}
 
 	public List<String> queryAlertMetrics() {
+		ensureInitialized();
+
 		List<String> metrics = new ArrayList<String>();
 
 		for (Group group : m_config.getGroups().values()) {
@@ -148,6 +156,8 @@ public class HeartbeatDisplayPolicyManager {
 	}
 
 	public int queryUnit(String groupName, String metricName) {
+		ensureInitialized();
+
 		Group group = m_config.findGroup(groupName);
 
 		if (group != null) {
@@ -171,6 +181,8 @@ public class HeartbeatDisplayPolicyManager {
 	}
 
 	public List<String> sortGroupNames(List<String> originGroupNames) {
+		ensureInitialized();
+
 		List<Group> groups = new ArrayList<Group>();
 
 		for (Entry<String, Group> entry : m_config.getGroups().entrySet()) {
@@ -203,6 +215,8 @@ public class HeartbeatDisplayPolicyManager {
 	}
 
 	public List<String> sortMetricNames(String groupName, List<String> originMetricNames) {
+		ensureInitialized();
+
 		Group group = m_config.findGroup(groupName);
 		List<String> result = new ArrayList<String>();
 
@@ -237,8 +251,19 @@ public class HeartbeatDisplayPolicyManager {
 		return sortMetricNames(groupName, new ArrayList<String>(originMetricNames));
 	}
 
+	private void ensureInitialized() {
+		if (m_config == null) {
+			synchronized (this) {
+				if (m_config == null) {
+					initialize();
+				}
+			}
+		}
+	}
+
 	private boolean storeConfig() {
 		synchronized (this) {
+			ensureInitialized();
 			refreshSpringBeans();
 
 			try {
