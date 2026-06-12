@@ -23,25 +23,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.task.TaskManager;
 
-@Named
-public class ReportFacade extends ContainerHolder implements LogEnabled, Initializable {
+public class ReportFacade {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(ReportFacade.class);
 
 	private static final int EXPECTED_REPORT_BUILDER_COUNT = 19;
-
-	private Logger m_logger;
 
 	private Map<String, TaskBuilder> m_reportBuilders = new HashMap<String, TaskBuilder>();
 
@@ -81,35 +72,27 @@ public class ReportFacade extends ContainerHolder implements LogEnabled, Initial
 				} else {
 					SLF4J_LOGGER.error("Report builder returned false, reportName={}, domain={}, type={}, period={}, taskId={}.",
 							reportName, reportDomain, type, reportPeriod, task.getId());
-					m_logger.error(task.toString());
 				}
 			}
 		} catch (Exception e) {
 			SLF4J_LOGGER.error("Error when building report, task={}.", task, e);
-			m_logger.error("Error when building report," + e.getMessage(), e);
 			Cat.logError(e);
 			return false;
 		}
 		return false;
 	}
 
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
-
 	private TaskBuilder getReportBuilder(String reportName) {
 		return m_reportBuilders.get(reportName);
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		if (m_reportBuilders.size() < EXPECTED_REPORT_BUILDER_COUNT) {
 			String message = String.format("Report facade requires %s Spring task builders but found %s, builders=%s.",
 					EXPECTED_REPORT_BUILDER_COUNT, m_reportBuilders.size(), m_reportBuilders.keySet());
 
 			SLF4J_LOGGER.error(message);
-			throw new InitializationException(message);
+			throw new IllegalStateException(message);
 		}
 
 		SLF4J_LOGGER.info("Initialized report facade from Spring, builderCount={}, builders={}.",

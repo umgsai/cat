@@ -783,10 +783,9 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(initMethod = "initialize")
-	public ReportFacade reportFacade(Logger plexusConsoleLogger, Map<String, TaskBuilder> taskBuilders) {
+	public ReportFacade reportFacade(Map<String, TaskBuilder> taskBuilders) {
 		ReportFacade facade = new ReportFacade();
 
-		facade.enableLogging(plexusConsoleLogger.getChildLogger(ReportFacade.class.getName()));
 		facade.setReportBuilders(taskBuilders);
 		return facade;
 	}
