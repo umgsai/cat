@@ -29,8 +29,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import com.dianping.cat.Cat;
@@ -59,7 +57,6 @@ import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
-@Named
 public class BusinessAlert implements Task {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessAlert.class);
 
@@ -69,37 +66,26 @@ public class BusinessAlert implements Task {
 
 	private static final int DATA_AREADY_MINUTE = 1;
 
-	@Inject
 	protected BaseRuleHelper m_baseRuleHelper;
 
-	@Inject
 	private BusinessRuleConfigManager m_alertConfigManager;
 
-	@Inject
 	private BusinessConfigManager m_configManager;
 
-	@Inject
 	private BusinessTagConfigManager m_tagConfigManager;
 
-	@Inject
 	private BusinessReportGroupService m_service;
 
-	@Inject
 	private ProjectService m_projectService;
 
-	@Inject
 	private AlertManager m_sendManager;
 
-	@Inject
 	private BusinessKeyHelper m_keyHelper;
 
-	@Inject
 	private BaselineService m_baselineService;
 
-	@Inject
 	private DataChecker m_dataChecker;
 
-	@Inject
 	private CustomDataCalculator m_customDataCalculator;
 
 	private void buidMonitorConfigs(String domain, String key,	Map<String, Map<MetricType, List<Config>>> monitorConfigs,
@@ -373,6 +359,50 @@ public class BusinessAlert implements Task {
 
 	@Override
 	public void shutdown() {
+	}
+
+	public void setAlertConfigManager(BusinessRuleConfigManager alertConfigManager) {
+		m_alertConfigManager = alertConfigManager;
+	}
+
+	public void setBaseRuleHelper(BaseRuleHelper baseRuleHelper) {
+		m_baseRuleHelper = baseRuleHelper;
+	}
+
+	public void setBaselineService(BaselineService baselineService) {
+		m_baselineService = baselineService;
+	}
+
+	public void setConfigManager(BusinessConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setCustomDataCalculator(CustomDataCalculator customDataCalculator) {
+		m_customDataCalculator = customDataCalculator;
+	}
+
+	public void setDataChecker(DataChecker dataChecker) {
+		m_dataChecker = dataChecker;
+	}
+
+	public void setKeyHelper(BusinessKeyHelper keyHelper) {
+		m_keyHelper = keyHelper;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setSendManager(AlertManager sendManager) {
+		m_sendManager = sendManager;
+	}
+
+	public void setService(BusinessReportGroupService service) {
+		m_service = service;
+	}
+
+	public void setTagConfigManager(BusinessTagConfigManager tagConfigManager) {
+		m_tagConfigManager = tagConfigManager;
 	}
 
 	private void refreshSpringBeans() {

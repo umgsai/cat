@@ -25,6 +25,7 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.dianping.cat.analysis.MessageConsumer;
+import com.dianping.cat.alarm.spi.AlertManager;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
@@ -97,7 +98,11 @@ public class ProblemComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(C(AlertExceptionBuilder.class) //
 								.req(ExceptionRuleConfigManager.class, (String) null, "m_exceptionConfigManager"));
 
-		all.add(A(ExceptionAlert.class));
+		all.add(C(ExceptionAlert.class) //
+								.req(ExceptionRuleConfigManager.class, (String) null, "m_exceptionConfigManager") //
+								.req(AlertExceptionBuilder.class, (String) null, "m_alertBuilder") //
+								.req(ModelService.class, "top", "m_topService") //
+								.req(AlertManager.class, (String) null, "m_sendManager"));
 		all.add(C(AlertSummaryService.class) //
 								.req(AlertSummaryRepository.class, (String) null, "m_alertSummaryDao"));
 		all.add(C(SummaryBuilder.class, RelatedSummaryBuilder.ID, RelatedSummaryBuilder.class) //

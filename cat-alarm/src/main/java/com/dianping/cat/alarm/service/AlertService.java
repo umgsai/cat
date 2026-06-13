@@ -24,8 +24,6 @@ import java.util.List;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +33,9 @@ import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 
-@Named
 public class AlertService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertService.class);
 
-	@Inject
 	private AlertRepository m_alertDao;
 
 	private Alert buildAlert(AlertEntity alertEntity, SendMessageEntity message) {

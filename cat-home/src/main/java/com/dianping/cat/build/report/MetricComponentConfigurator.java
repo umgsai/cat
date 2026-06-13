@@ -24,10 +24,13 @@ import java.util.List;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
+import com.dianping.cat.alarm.spi.AlertManager;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
+import com.dianping.cat.alarm.spi.rule.DataChecker;
 import com.dianping.cat.analysis.MessageConsumer;
+import com.dianping.cat.config.business.BusinessConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
@@ -45,6 +48,7 @@ import com.dianping.cat.report.alert.business.BusinessContactor;
 import com.dianping.cat.report.alert.business.BusinessDecorator;
 import com.dianping.cat.report.alert.business.BusinessReportGroupService;
 import com.dianping.cat.report.alert.business.BusinessRuleConfigManager;
+import com.dianping.cat.report.alert.config.BaseRuleHelper;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 import com.dianping.cat.report.graph.metric.DataExtractor;
 import com.dianping.cat.report.graph.metric.impl.DataExtractorImpl;
@@ -53,6 +57,7 @@ import com.dianping.cat.report.page.business.service.BusinessReportService;
 import com.dianping.cat.report.page.business.service.CompositeBusinessService;
 import com.dianping.cat.report.page.business.service.HistoricalBusinessService;
 import com.dianping.cat.report.page.business.service.LocalBusinessService;
+import com.dianping.cat.report.page.business.graph.CustomDataCalculator;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.business.task.BusinessPointParser;
 import com.dianping.cat.report.page.metric.service.BaselineService;
@@ -64,6 +69,7 @@ import com.dianping.cat.report.server.RemoteServersManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
 public class MetricComponentConfigurator extends AbstractResourceConfigurator {
 	@Override
@@ -104,7 +110,18 @@ public class MetricComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(C(Decorator.class, BusinessDecorator.ID, BusinessDecorator.class)
 								.req(ProjectService.class, AlertSummaryExecutor.class));
 
-		all.add(A(BusinessAlert.class));
+		all.add(C(BusinessAlert.class) //
+								.req(BaseRuleHelper.class, (String) null, "m_baseRuleHelper") //
+								.req(BusinessRuleConfigManager.class, (String) null, "m_alertConfigManager") //
+								.req(BusinessConfigManager.class, (String) null, "m_configManager") //
+								.req(BusinessTagConfigManager.class, (String) null, "m_tagConfigManager") //
+								.req(BusinessReportGroupService.class, (String) null, "m_service") //
+								.req(ProjectService.class, (String) null, "m_projectService") //
+								.req(AlertManager.class, (String) null, "m_sendManager") //
+								.req(BusinessKeyHelper.class, (String) null, "m_keyHelper") //
+								.req(BaselineService.class, (String) null, "m_baselineService") //
+								.req(DataChecker.class, (String) null, "m_dataChecker") //
+								.req(CustomDataCalculator.class, (String) null, "m_customDataCalculator"));
 
 		return all;
 	}

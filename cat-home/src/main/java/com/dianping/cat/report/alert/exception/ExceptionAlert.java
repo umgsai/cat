@@ -28,8 +28,6 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -48,7 +46,6 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
-@Named
 public class ExceptionAlert implements Task {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionAlert.class);
 
@@ -56,16 +53,12 @@ public class ExceptionAlert implements Task {
 
 	protected static final int ALERT_PERIOD = 1;
 
-	@Inject
 	protected ExceptionRuleConfigManager m_exceptionConfigManager;
 
-	@Inject
 	protected AlertExceptionBuilder m_alertBuilder;
 
-	@Inject(type = ModelService.class, value = TopAnalyzer.ID)
 	protected ModelService<TopReport> m_topService;
 
-	@Inject
 	protected AlertManager m_sendManager;
 
 	protected TopMetric buildTopMetric(Date date) {
@@ -176,5 +169,21 @@ public class ExceptionAlert implements Task {
 
 	@Override
 	public void shutdown() {
+	}
+
+	public void setAlertBuilder(AlertExceptionBuilder alertBuilder) {
+		m_alertBuilder = alertBuilder;
+	}
+
+	public void setExceptionConfigManager(ExceptionRuleConfigManager exceptionConfigManager) {
+		m_exceptionConfigManager = exceptionConfigManager;
+	}
+
+	public void setSendManager(AlertManager sendManager) {
+		m_sendManager = sendManager;
+	}
+
+	public void setTopService(ModelService<TopReport> topService) {
+		m_topService = topService;
 	}
 }

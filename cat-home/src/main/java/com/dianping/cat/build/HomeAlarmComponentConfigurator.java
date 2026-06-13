@@ -31,8 +31,13 @@ import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleRepository;
 import com.dianping.cat.report.alert.AlarmManager;
+import com.dianping.cat.report.alert.business.BusinessAlert;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
+import com.dianping.cat.report.alert.event.EventAlert;
+import com.dianping.cat.report.alert.exception.ExceptionAlert;
+import com.dianping.cat.report.alert.heartbeat.HeartbeatAlert;
 import com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager;
+import com.dianping.cat.report.alert.transaction.TransactionAlert;
 
 public class HomeAlarmComponentConfigurator extends AbstractResourceConfigurator {
 	@Override
@@ -40,7 +45,12 @@ public class HomeAlarmComponentConfigurator extends AbstractResourceConfigurator
 
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(AlarmManager.class));
+		all.add(C(AlarmManager.class) //
+								.req(BusinessAlert.class, (String) null, "m_businessAlert") //
+								.req(EventAlert.class, (String) null, "m_eventAlert") //
+								.req(ExceptionAlert.class, (String) null, "m_exceptionAlert") //
+								.req(HeartbeatAlert.class, (String) null, "m_heartbeatAlert") //
+								.req(TransactionAlert.class, (String) null, "m_transactionAlert"));
 		all.add(C(AlertConfigManager.class) //
 								.req(ConfigRepository.class, (String) null, "m_configDao") //
 								.req(ContentFetcher.class, (String) null, "m_fetcher"));

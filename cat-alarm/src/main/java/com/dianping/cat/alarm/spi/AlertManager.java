@@ -35,8 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import java.text.DateFormat;
@@ -49,31 +47,23 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-@Named
 public class AlertManager implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertManager.class);
 
 	private static final int MILLIS1MINUTE = 60 * 1000;
 
-	@Inject
 	protected SpliterManager m_splitterManager;
 
-	@Inject
 	protected SenderManager m_senderManager;
 
-	@Inject
 	protected AlertService m_alertService;
 
-	@Inject
 	private AlertPolicyManager m_policyManager;
 
-	@Inject
 	private DecoratorManager m_decoratorManager;
 
-	@Inject
 	private ContactorManager m_contactorManager;
 
-	@Inject
 	private ServerConfigManager m_configManager;
 
 	private BlockingQueue<AlertEntity> m_alerts = new LinkedBlockingDeque<AlertEntity>(10000);
@@ -126,6 +116,34 @@ public class AlertManager implements Initializable {
 			}
 		}
 		return false;
+	}
+
+	public void setAlertService(AlertService alertService) {
+		m_alertService = alertService;
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setContactorManager(ContactorManager contactorManager) {
+		m_contactorManager = contactorManager;
+	}
+
+	public void setDecoratorManager(DecoratorManager decoratorManager) {
+		m_decoratorManager = decoratorManager;
+	}
+
+	public void setPolicyManager(AlertPolicyManager policyManager) {
+		m_policyManager = policyManager;
+	}
+
+	public void setSenderManager(SenderManager senderManager) {
+		m_senderManager = senderManager;
+	}
+
+	public void setSplitterManager(SpliterManager splitterManager) {
+		m_splitterManager = splitterManager;
 	}
 
 	public List<AlertEntity> queryLastestAlarmKey(int minute) {

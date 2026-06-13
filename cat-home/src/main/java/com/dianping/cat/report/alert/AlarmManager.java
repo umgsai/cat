@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.report.alert.business.BusinessAlert;
 import com.dianping.cat.report.alert.event.EventAlert;
@@ -32,7 +31,6 @@ import com.dianping.cat.report.alert.heartbeat.HeartbeatAlert;
 import com.dianping.cat.report.alert.transaction.TransactionAlert;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class AlarmManager extends ContainerHolder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlarmManager.class);
 

@@ -30,8 +30,6 @@ import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Splitters;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import com.dianping.cat.Cat;
@@ -58,7 +56,6 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
-@Named
 public class EventAlert implements Task, LogEnabled {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(EventAlert.class);
 
@@ -74,21 +71,16 @@ public class EventAlert implements Task, LogEnabled {
 
 	private static String FAIL_RATIO = "failRatio";
 
-	@Inject
 	protected EventRuleConfigManager m_ruleConfigManager;
 
-	@Inject
 	protected DataChecker m_dataChecker;
 
-	@Inject
 	protected AlertManager m_sendManager;
 
 	protected Logger m_logger;
 
-	@Inject(type = ModelService.class, value = EventAnalyzer.ID)
 	private ModelService<EventReport> m_service;
 
-	@Inject
 	private EventMergeHelper m_mergeHelper;
 
 	private double[] buildArrayData(int start, int end, String type, String name, String monitor, EventReport report) {
@@ -310,6 +302,26 @@ public class EventAlert implements Task, LogEnabled {
 
 	@Override
 	public void shutdown() {
+	}
+
+	public void setDataChecker(DataChecker dataChecker) {
+		m_dataChecker = dataChecker;
+	}
+
+	public void setMergeHelper(EventMergeHelper mergeHelper) {
+		m_mergeHelper = mergeHelper;
+	}
+
+	public void setRuleConfigManager(EventRuleConfigManager ruleConfigManager) {
+		m_ruleConfigManager = ruleConfigManager;
+	}
+
+	public void setSendManager(AlertManager sendManager) {
+		m_sendManager = sendManager;
+	}
+
+	public void setService(ModelService<EventReport> service) {
+		m_service = service;
 	}
 
 }

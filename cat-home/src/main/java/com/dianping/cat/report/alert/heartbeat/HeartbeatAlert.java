@@ -28,8 +28,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.tuple.Pair;
 
@@ -59,7 +57,6 @@ import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class HeartbeatAlert implements Task {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatAlert.class);
 
@@ -67,25 +64,18 @@ public class HeartbeatAlert implements Task {
 
 	private static final int DATA_ALREADY_MINUTE = 1;
 
-	@Inject
 	protected HeartbeatRuleConfigManager m_ruleConfigManager;
 
-	@Inject
 	protected DataChecker m_dataChecker;
 
-	@Inject
 	protected AlertManager m_sendManager;
 
-	@Inject(type = ModelService.class, value = HeartbeatAnalyzer.ID)
 	private ModelService<HeartbeatReport> m_heartbeatService;
 
-	@Inject
 	private HeartbeatDisplayPolicyManager m_displayManager;
 
-	@Inject
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
-	@Inject
 	private ProjectService m_projectService;
 
 	private Map<String, double[]> buildArrayForExtensions(List<Period> periods) {
@@ -423,6 +413,34 @@ public class HeartbeatAlert implements Task {
 	@Override
 	public void shutdown() {
 
+	}
+
+	public void setDataChecker(DataChecker dataChecker) {
+		m_dataChecker = dataChecker;
+	}
+
+	public void setDisplayManager(HeartbeatDisplayPolicyManager displayManager) {
+		m_displayManager = displayManager;
+	}
+
+	public void setHeartbeatService(ModelService<HeartbeatReport> heartbeatService) {
+		m_heartbeatService = heartbeatService;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setRuleConfigManager(HeartbeatRuleConfigManager ruleConfigManager) {
+		m_ruleConfigManager = ruleConfigManager;
+	}
+
+	public void setSendManager(AlertManager sendManager) {
+		m_sendManager = sendManager;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		m_serverFilterConfigManager = serverFilterConfigManager;
 	}
 
 	private void refreshSpringBeans() {

@@ -32,6 +32,7 @@ import com.dianping.cat.alarm.spi.spliter.*;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.config.repository.ConfigRepository;
+import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
@@ -71,17 +72,27 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(SpliterManager.class));
 
-		all.add(C(Sender.class, MailSender.ID, MailSender.class).req(SenderConfigManager.class));
+		all.add(C(Sender.class, MailSender.ID, MailSender.class) //
+								.req(SenderConfigManager.class, (String) null, "m_senderConfigManager"));
 
-		all.add(C(Sender.class, SmsSender.ID, SmsSender.class).req(SenderConfigManager.class));
+		all.add(C(Sender.class, SmsSender.ID, SmsSender.class) //
+								.req(SenderConfigManager.class, (String) null, "m_senderConfigManager"));
 
-		all.add(C(Sender.class, WeixinSender.ID, WeixinSender.class).req(SenderConfigManager.class));
+		all.add(C(Sender.class, WeixinSender.ID, WeixinSender.class) //
+								.req(SenderConfigManager.class, (String) null, "m_senderConfigManager"));
 
 		all.add(C(SenderManager.class).req(ServerConfigManager.class));
 
-		all.add(A(AlertManager.class));
+		all.add(C(AlertManager.class) //
+								.req(SpliterManager.class, (String) null, "m_splitterManager") //
+								.req(SenderManager.class, (String) null, "m_senderManager") //
+								.req(AlertService.class, (String) null, "m_alertService") //
+								.req(AlertPolicyManager.class, (String) null, "m_policyManager") //
+								.req(DecoratorManager.class, (String) null, "m_decoratorManager") //
+								.req(ContactorManager.class, (String) null, "m_contactorManager") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager"));
 
-		all.add(A(AlertService.class));
+		all.add(C(AlertService.class).req(AlertRepository.class, (String) null, "m_alertDao"));
 
 		all.add(C(AlertConfigManager.class) //
 								.req(ConfigRepository.class, (String) null, "m_configDao") //

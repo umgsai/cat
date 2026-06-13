@@ -126,6 +126,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.config.SenderConfigManager</role>
+					<field-name>m_senderConfigManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -136,6 +137,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.config.SenderConfigManager</role>
+					<field-name>m_senderConfigManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -146,6 +148,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.config.SenderConfigManager</role>
+					<field-name>m_senderConfigManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -164,24 +167,31 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.spliter.SpliterManager</role>
+					<field-name>m_splitterManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.sender.SenderManager</role>
+					<field-name>m_senderManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.service.AlertService</role>
+					<field-name>m_alertService</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.config.AlertPolicyManager</role>
+					<field-name>m_policyManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.decorator.DecoratorManager</role>
+					<field-name>m_decoratorManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.receiver.ContactorManager</role>
+					<field-name>m_contactorManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -191,6 +201,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.alert.AlertRepository</role>
+					<field-name>m_alertDao</field-name>
 				</requirement>
 			</requirements>
 		</component>

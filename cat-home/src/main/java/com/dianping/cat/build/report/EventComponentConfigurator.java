@@ -25,9 +25,11 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.dianping.cat.analysis.MessageConsumer;
+import com.dianping.cat.alarm.spi.AlertManager;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
+import com.dianping.cat.alarm.spi.rule.DataChecker;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.config.repository.ConfigRepository;
@@ -51,6 +53,7 @@ import com.dianping.cat.report.page.event.service.CompositeEventService;
 import com.dianping.cat.report.page.event.service.EventReportService;
 import com.dianping.cat.report.page.event.service.HistoricalEventService;
 import com.dianping.cat.report.page.event.service.LocalEventService;
+import com.dianping.cat.report.page.event.transform.EventMergeHelper;
 import com.dianping.cat.report.server.RemoteServersManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
@@ -66,7 +69,12 @@ public class EventComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(C(Contactor.class, EventContactor.ID, EventContactor.class)
 								.req(ProjectService.class,	AlertConfigManager.class));
 		all.add(C(Decorator.class, EventDecorator.ID, EventDecorator.class));
-		all.add(A(EventAlert.class));
+		all.add(C(EventAlert.class) //
+								.req(EventRuleConfigManager.class, (String) null, "m_ruleConfigManager") //
+								.req(DataChecker.class, (String) null, "m_dataChecker") //
+								.req(AlertManager.class, (String) null, "m_sendManager") //
+								.req(ModelService.class, EventAnalyzer.ID, "m_service") //
+								.req(EventMergeHelper.class, (String) null, "m_mergeHelper"));
 
 		all.add(reportService(EventReportService.class));
 

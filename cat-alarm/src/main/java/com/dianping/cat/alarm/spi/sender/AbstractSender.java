@@ -28,7 +28,6 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Files;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
@@ -37,7 +36,6 @@ import com.dianping.cat.spring.CatSpringContext;
 public abstract class AbstractSender implements Sender, LogEnabled {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractSender.class);
 
-    @Inject
     protected SenderConfigManager m_senderConfigManager;
 
     protected Logger m_logger;

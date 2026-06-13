@@ -25,9 +25,11 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.dianping.cat.analysis.MessageConsumer;
+import com.dianping.cat.alarm.spi.AlertManager;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
+import com.dianping.cat.alarm.spi.rule.DataChecker;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.config.repository.ConfigRepository;
@@ -69,7 +71,12 @@ public class TransactionComponentConfigurator extends AbstractResourceConfigurat
 		all.add(C(Contactor.class, TransactionContactor.ID, TransactionContactor.class)
 								.req(ProjectService.class,	AlertConfigManager.class));
 		all.add(C(Decorator.class, TransactionDecorator.ID, TransactionDecorator.class));
-		all.add(A(TransactionAlert.class));
+		all.add(C(TransactionAlert.class) //
+								.req(TransactionRuleConfigManager.class, (String) null, "m_ruleConfigManager") //
+								.req(DataChecker.class, (String) null, "m_dataChecker") //
+								.req(AlertManager.class, (String) null, "m_sendManager") //
+								.req(ModelService.class, TransactionAnalyzer.ID, "m_service") //
+								.req(TransactionMergeHelper.class, (String) null, "m_mergeHelper"));
 
 		all.add(C(LocalModelService.class, LocalTransactionService.ID, LocalTransactionService.class) //
 								.req(ReportBucketManager.class, (String) null, "m_bucketManager") //

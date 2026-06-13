@@ -965,19 +965,24 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager</role>
+					<field-name>m_ruleConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.rule.DataChecker</role>
+					<field-name>m_dataChecker</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.AlertManager</role>
+					<field-name>m_sendManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.service.ModelService</role>
 					<role-hint>transaction</role-hint>
+					<field-name>m_service</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper</role>
+					<field-name>m_mergeHelper</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1079,19 +1084,24 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.report.alert.event.EventRuleConfigManager</role>
+					<field-name>m_ruleConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.rule.DataChecker</role>
+					<field-name>m_dataChecker</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.AlertManager</role>
+					<field-name>m_sendManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.service.ModelService</role>
 					<role-hint>event</role-hint>
+					<field-name>m_service</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.event.transform.EventMergeHelper</role>
+					<field-name>m_mergeHelper</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1360,36 +1370,47 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.report.alert.config.BaseRuleHelper</role>
+					<field-name>m_baseRuleHelper</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.alert.business.BusinessRuleConfigManager</role>
+					<field-name>m_alertConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.business.BusinessConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</role>
+					<field-name>m_tagConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.alert.business.BusinessReportGroupService</role>
+					<field-name>m_service</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.service.ProjectService</role>
+					<field-name>m_projectService</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.AlertManager</role>
+					<field-name>m_sendManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.business.task.BusinessKeyHelper</role>
+					<field-name>m_keyHelper</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.metric.service.BaselineService</role>
+					<field-name>m_baselineService</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.rule.DataChecker</role>
+					<field-name>m_dataChecker</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.business.graph.CustomDataCalculator</role>
+					<field-name>m_customDataCalculator</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1531,25 +1552,32 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager</role>
+					<field-name>m_ruleConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.rule.DataChecker</role>
+					<field-name>m_dataChecker</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.AlertManager</role>
+					<field-name>m_sendManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.service.ModelService</role>
 					<role-hint>heartbeat</role-hint>
+					<field-name>m_heartbeatService</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager</role>
+					<field-name>m_displayManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_serverFilterConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.service.ProjectService</role>
+					<field-name>m_projectService</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1701,16 +1729,20 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager</role>
+					<field-name>m_exceptionConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.alert.exception.AlertExceptionBuilder</role>
+					<field-name>m_alertBuilder</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.service.ModelService</role>
 					<role-hint>top</role-hint>
+					<field-name>m_topService</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.AlertManager</role>
+					<field-name>m_sendManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -3077,6 +3109,28 @@
 		<component>
 			<role>com.dianping.cat.report.alert.AlarmManager</role>
 			<implementation>com.dianping.cat.report.alert.AlarmManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.alert.business.BusinessAlert</role>
+					<field-name>m_businessAlert</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.event.EventAlert</role>
+					<field-name>m_eventAlert</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.exception.ExceptionAlert</role>
+					<field-name>m_exceptionAlert</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.heartbeat.HeartbeatAlert</role>
+					<field-name>m_heartbeatAlert</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.transaction.TransactionAlert</role>
+					<field-name>m_transactionAlert</field-name>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.alarm.spi.config.AlertConfigManager</role>

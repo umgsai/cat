@@ -47,8 +47,6 @@ import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Splitters;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import java.util.ArrayList;
@@ -57,7 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-@Named
 public class TransactionAlert implements Task, LogEnabled {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TransactionAlert.class);
 
@@ -73,21 +70,16 @@ public class TransactionAlert implements Task, LogEnabled {
 
 	private static final String FAIL_RATIO = "failRatio";
 
-	@Inject
 	protected TransactionRuleConfigManager m_ruleConfigManager;
 
-	@Inject
 	protected DataChecker m_dataChecker;
 
-	@Inject
 	protected AlertManager m_sendManager;
 
 	protected Logger m_logger;
 
-	@Inject(type = ModelService.class, value = TransactionAnalyzer.ID)
 	private ModelService<TransactionReport> m_service;
 
-	@Inject
 	private TransactionMergeHelper m_mergeHelper;
 
 	private double[] buildArrayData(int start, int end, String type, String name, String monitor,
@@ -315,6 +307,26 @@ public class TransactionAlert implements Task, LogEnabled {
 
 	@Override
 	public void shutdown() {
+	}
+
+	public void setDataChecker(DataChecker dataChecker) {
+		m_dataChecker = dataChecker;
+	}
+
+	public void setMergeHelper(TransactionMergeHelper mergeHelper) {
+		m_mergeHelper = mergeHelper;
+	}
+
+	public void setRuleConfigManager(TransactionRuleConfigManager ruleConfigManager) {
+		m_ruleConfigManager = ruleConfigManager;
+	}
+
+	public void setSendManager(AlertManager sendManager) {
+		m_sendManager = sendManager;
+	}
+
+	public void setService(ModelService<TransactionReport> service) {
+		m_service = service;
 	}
 
 }
