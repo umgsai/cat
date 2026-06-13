@@ -1691,6 +1691,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager</role>
+					<field-name>m_exceptionConfigManager</field-name>
 				</requirement>
 			</requirements>
 		</component>

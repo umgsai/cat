@@ -24,18 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import com.dianping.cat.alarm.spi.AlertLevel;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;
 import com.dianping.cat.report.page.dependency.TopMetric.Item;
 
-@Named
 public class AlertExceptionBuilder {
 
-	@Inject
 	private ExceptionRuleConfigManager m_exceptionConfigManager;
 
 	public Map<String, List<AlertException>> buildAlertExceptions(List<Item> items) {
@@ -126,6 +122,10 @@ public class AlertExceptionBuilder {
 		limits.setValue(totalErrorLimit);
 
 		return limits;
+	}
+
+	public void setExceptionConfigManager(ExceptionRuleConfigManager exceptionConfigManager) {
+		m_exceptionConfigManager = exceptionConfigManager;
 	}
 
 	public class AlertException {

@@ -94,7 +94,8 @@ public class ProblemComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(C(Decorator.class, ExceptionDecorator.ID, ExceptionDecorator.class)
 								.req(ProjectService.class,	AlertSummaryExecutor.class));
 
-		all.add(A(AlertExceptionBuilder.class));
+		all.add(C(AlertExceptionBuilder.class) //
+								.req(ExceptionRuleConfigManager.class, (String) null, "m_exceptionConfigManager"));
 
 		all.add(A(ExceptionAlert.class));
 		all.add(C(AlertSummaryService.class) //

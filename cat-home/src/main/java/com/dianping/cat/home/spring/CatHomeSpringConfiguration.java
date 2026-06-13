@@ -148,6 +148,7 @@ import com.dianping.cat.report.alert.business.BusinessRuleConfigManager;
 import com.dianping.cat.report.alert.event.EventContactor;
 import com.dianping.cat.report.alert.event.EventDecorator;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
+import com.dianping.cat.report.alert.exception.AlertExceptionBuilder;
 import com.dianping.cat.report.alert.exception.ExceptionContactor;
 import com.dianping.cat.report.alert.exception.ExceptionDecorator;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatContactor;
@@ -2805,6 +2806,14 @@ public class CatHomeSpringConfiguration {
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
 		return manager;
+	}
+
+	@Bean
+	public AlertExceptionBuilder alertExceptionBuilder(ExceptionRuleConfigManager exceptionRuleConfigManager) {
+		AlertExceptionBuilder builder = new AlertExceptionBuilder();
+
+		builder.setExceptionConfigManager(exceptionRuleConfigManager);
+		return builder;
 	}
 
 	@Bean(initMethod = "initialize")
