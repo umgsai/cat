@@ -25,7 +25,9 @@ import java.util.Set;
 
 import org.unidal.dal.jdbc.configuration.AbstractJdbcResourceConfigurator;
 import org.unidal.dal.jdbc.datasource.DataSourceManager;
+import org.unidal.dal.jdbc.mapping.TableProvider;
 import org.unidal.initialization.DefaultModuleManager;
+import org.unidal.initialization.Module;
 import org.unidal.initialization.ModuleManager;
 import org.unidal.lookup.configuration.Component;
 import org.unidal.web.mvc.view.model.ModelHandler;
@@ -160,7 +162,8 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		all.add(C(EventMergeHelper.class));
 
-		all.add(A(PayloadNormalizer.class));
+		all.add(C(PayloadNormalizer.class) //
+								.req(ServerConfigManager.class, (String) null, "m_manager"));
 
 		return all;
 	}
@@ -400,7 +403,7 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 								.req(com.dianping.cat.report.page.business.task.BusinessKeyHelper.class, (String) null,
 												"m_keyHelper"));
 
-		all.add(A(CatHomeModule.class));
+		all.add(C(Module.class, CatHomeModule.ID, CatHomeModule.class));
 
 		all.add(C(UserConfigManager.class));
 
@@ -485,6 +488,9 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(C(BusinessConfigManager.class) //
 								.req(BusinessConfigRepository.class, (String) null, "m_configDao") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(ProjectService.class) //
+								.req(ProjectRepository.class, (String) null, "m_projectDao") //
+								.req(ServerConfigManager.class, (String) null, "m_manager"));
 
 		return all;
 	}
@@ -555,8 +561,9 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 	private List<Component> defineTableProviderComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(HourlyReportTableProvider.class));
-		all.add(A(HourlyReportContentTableProvider.class));
+		all.add(C(TableProvider.class, HourlyReportTableProvider.LOGIC_TABLE_NAME, HourlyReportTableProvider.class));
+		all.add(C(TableProvider.class, HourlyReportContentTableProvider.LOGIC_TABLE_NAME,
+								HourlyReportContentTableProvider.class));
 
 		return all;
 	}

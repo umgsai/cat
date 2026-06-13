@@ -29,6 +29,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -75,6 +76,20 @@
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
 					<field-name>m_serverConfigManager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.service.ProjectService</role>
+			<implementation>com.dianping.cat.service.ProjectService</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.project.ProjectRepository</role>
+					<field-name>m_projectDao</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 			</requirements>
 		</component>

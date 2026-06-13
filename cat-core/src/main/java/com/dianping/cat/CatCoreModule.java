@@ -21,12 +21,10 @@ package com.dianping.cat;
 import org.unidal.initialization.AbstractModule;
 import org.unidal.initialization.Module;
 import org.unidal.initialization.ModuleContext;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.report.server.ServersUpdaterManager;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = Module.class, value = CatCoreModule.ID)
 public class CatCoreModule extends AbstractModule {
 	public static final String ID = "cat-core";
 

@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.unidal.dal.jdbc.configuration.AbstractJdbcResourceConfigurator;
+import org.unidal.initialization.Module;
 import org.unidal.lookup.configuration.Component;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.CatCoreModule;
@@ -42,6 +43,7 @@ import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
 import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
 import com.dianping.cat.core.config.repository.ConfigRepository;
+import com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository;
 import com.dianping.cat.message.DefaultPathBuilder;
 import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.message.storage.LocalMessageBucket;
@@ -68,7 +70,9 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(A(RealtimeConsumer.class));
 
 		all.add(A(ServerConfigManager.class));
-		all.add(A(HostinfoService.class));
+		all.add(C(HostinfoService.class) //
+				.req(HostinfoRepository.class, (String) null, "m_hostinfoDao") //
+				.req(ServerConfigManager.class, (String) null, "m_manager"));
 		all.add(C(IpService.class));
 		all.add(C(IpService2.class));
 		all.add(A(TaskManager.class));
@@ -98,7 +102,7 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 				.req(ConfigRepository.class, (String) null, "m_configDao") //
 				.req(ContentFetcher.class, (String) null, "m_fetcher"));
 
-		all.add(A(CatCoreModule.class));
+		all.add(C(Module.class, CatCoreModule.ID, CatCoreModule.class));
 
 		all.addAll(defineStorageComponents());
 

@@ -31,9 +31,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository</role>
+					<field-name>m_hostinfoDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 			</requirements>
 		</component>

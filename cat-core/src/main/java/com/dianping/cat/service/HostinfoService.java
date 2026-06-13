@@ -34,8 +34,6 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.lookup.util.StringUtils;
 
 import com.dianping.cat.Cat;
@@ -46,7 +44,6 @@ import com.dianping.cat.core.dal.HostinfoEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = HostinfoService.class)
 public class HostinfoService implements Initializable, LogEnabled {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(HostinfoService.class);
 
@@ -54,10 +51,8 @@ public class HostinfoService implements Initializable, LogEnabled {
 
 	protected Logger m_logger;
 
-	@Inject
 	private HostinfoRepository m_hostinfoDao;
 
-	@Inject
 	private ServerConfigManager m_manager;
 
 	private Map<String, String> m_ipDomains = new ConcurrentHashMap<String, String>();

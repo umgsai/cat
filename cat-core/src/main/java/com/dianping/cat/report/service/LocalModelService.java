@@ -26,7 +26,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
@@ -41,10 +40,8 @@ public abstract class LocalModelService<T> implements Initializable {
 
 	public static final int DEFAULT_SIZE = 32 * 1024;
 
-	@Inject
 	protected ServerConfigManager m_configManager;
 
-	@Inject
 	private MessageConsumer m_consumer;
 
 	private int m_analyzerCount = 2;

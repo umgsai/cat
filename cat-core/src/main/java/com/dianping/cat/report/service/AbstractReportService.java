@@ -32,7 +32,6 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
@@ -70,28 +69,20 @@ public abstract class AbstractReportService<T> implements LogEnabled, ReportServ
 
 	public static final int s_customer = 5;
 
-	@Inject
 	protected HourlyReportRepository m_hourlyReportDao;
 
-	@Inject
 	protected HourlyReportContentRepository m_hourlyReportContentDao;
 
-	@Inject
 	protected DailyReportRepository m_dailyReportDao;
 
-	@Inject
 	protected DailyReportContentRepository m_dailyReportContentDao;
 
-	@Inject
 	protected WeeklyReportRepository m_weeklyReportDao;
 
-	@Inject
 	protected WeeklyReportContentRepository m_weeklyReportContentDao;
 
-	@Inject
 	protected MonthlyReportRepository m_monthlyReportDao;
 
-	@Inject
 	protected MonthlyReportContentRepository m_monthlyReportContentDao;
 
 	protected Logger m_logger;

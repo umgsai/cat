@@ -20,7 +20,6 @@ package com.dianping.cat.report.service;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Message;
@@ -30,7 +29,6 @@ import com.dianping.cat.spring.CatSpringContext;
 public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalSupport
 						implements ModelService<T>,	Initializable {
 
-	@Inject
 	protected ServerConfigManager m_configManager;
 
 	private boolean m_localMode = true;

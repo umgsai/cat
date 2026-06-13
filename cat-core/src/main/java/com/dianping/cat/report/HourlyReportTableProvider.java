@@ -23,9 +23,7 @@ import java.util.Map;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.dal.jdbc.mapping.TableProvider;
-import org.unidal.lookup.annotation.Named;
 
-@Named(type = TableProvider.class, value = HourlyReportTableProvider.LOGIC_TABLE_NAME)
 public class HourlyReportTableProvider implements TableProvider, Initializable {
 
 	public final static String LOGIC_TABLE_NAME = "report";

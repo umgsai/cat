@@ -20,17 +20,12 @@ package com.dianping.cat.mvc;
 
 import java.util.Date;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class PayloadNormalizer {
 
-	@Inject
 	protected ServerConfigManager m_manager;
 
 	@SuppressWarnings("rawtypes")
@@ -63,6 +58,10 @@ public class PayloadNormalizer {
 			model.setDate(start.getTime());
 			model.setCustomDate(start, end);
 		}
+	}
+
+	public void setManager(ServerConfigManager manager) {
+		m_manager = manager;
 	}
 
 }

@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.helper.Splitters;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -41,13 +40,10 @@ import com.dianping.cat.spring.CatSpringContext;
 public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSupport
 						implements ModelService<T>,	Initializable {
 
-	@Inject
 	protected ServerConfigManager m_configManager;
 
-	@Inject
 	private RemoteServersManager m_serverManager;
 
-	@Inject
 	private List<ModelService<T>> m_services;
 
 	private List<ModelService<T>> m_allServices = new ArrayList<ModelService<T>>();

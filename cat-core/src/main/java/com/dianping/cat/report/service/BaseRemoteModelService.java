@@ -25,7 +25,6 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.report.server.RemoteServersManager;
 import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
-import org.unidal.lookup.annotation.Inject;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -49,7 +48,6 @@ public abstract class BaseRemoteModelService<T> extends ModelServiceWithCalSuppo
 
 	private int m_port = 2281; // default admin port
 
-	@Inject
 	private String m_serviceUri = "/cat/r/model";
 
 	public BaseRemoteModelService(String name) {

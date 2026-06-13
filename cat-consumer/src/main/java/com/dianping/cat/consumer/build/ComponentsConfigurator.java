@@ -70,6 +70,7 @@ import com.dianping.cat.consumer.transaction.TransactionDelegate;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.project.ProjectRepository;
 import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.report.DefaultReportManager;
@@ -248,7 +249,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(A(StateAnalyzer.class));
 		all.add(A(StateDelegate.class));
 
-		all.add(A(ProjectService.class));
+		all.add(C(ProjectService.class) //
+								.req(ProjectRepository.class, (String) null, "m_projectDao") //
+								.req(ServerConfigManager.class, (String) null, "m_manager"));
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
 								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //

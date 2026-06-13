@@ -22,7 +22,6 @@ import org.unidal.helper.Threads;
 import org.unidal.initialization.AbstractModule;
 import org.unidal.initialization.Module;
 import org.unidal.initialization.ModuleContext;
-import org.unidal.lookup.annotation.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,6 @@ import com.dianping.cat.report.task.DefaultTaskConsumer;
 import com.dianping.cat.report.task.reload.ReportReloadTask;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = Module.class, value = CatHomeModule.ID)
 public class CatHomeModule extends AbstractModule {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CatHomeModule.class);
 

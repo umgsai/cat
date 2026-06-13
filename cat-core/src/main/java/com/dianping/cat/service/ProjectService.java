@@ -28,23 +28,18 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Named
 public class ProjectService implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectService.class);
 
 	public static final String DEFAULT = "Default";
 
-	@Inject
 	private ProjectRepository m_projectDao;
 
-	@Inject
 	private ServerConfigManager m_manager;
 
 	private ConcurrentHashMap<String, String> m_domains = new ConcurrentHashMap<String, String>();
