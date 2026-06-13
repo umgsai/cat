@@ -21,9 +21,6 @@ package com.dianping.cat.consumer.business;
 import java.util.Date;
 import java.util.Map;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.consumer.business.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.consumer.business.model.transform.DefaultNativeParser;
@@ -33,10 +30,8 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
-@Named(type = ReportDelegate.class, value = BusinessAnalyzer.ID)
 public class BusinessDelegate implements ReportDelegate<BusinessReport> {
 
-	@Inject
 	private TaskManager m_taskManager;
 
 	@Override

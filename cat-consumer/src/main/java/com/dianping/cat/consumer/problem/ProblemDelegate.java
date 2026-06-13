@@ -28,20 +28,15 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
-@Named(type = ReportDelegate.class, value = ProblemAnalyzer.ID)
 public class ProblemDelegate implements ReportDelegate<ProblemReport> {
 
-	@Inject
 	private TaskManager m_taskManager;
 
-	@Inject
 	private ServerFilterConfigManager m_configManager;
 
 	@Override

@@ -27,25 +27,19 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.Map;
 
-@Named(type = ReportDelegate.class, value = StorageAnalyzer.ID)
 public class StorageDelegate implements ReportDelegate<StorageReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageDelegate.class);
 
-	@Inject
 	private TaskManager m_taskManager;
 
-	@Inject
 	private ServerFilterConfigManager m_configManager;
 
-	@Inject
 	private StorageReportUpdater m_reportUpdater;
 
 	@Override

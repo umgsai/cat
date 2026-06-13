@@ -31,28 +31,20 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.Date;
 import java.util.Map;
 
-@Named(type = ReportDelegate.class, value = TransactionAnalyzer.ID)
 public class TransactionDelegate implements ReportDelegate<TransactionReport> {
 
-	@Inject
 	private TaskManager m_taskManager;
 
-	@Inject
 	private ServerFilterConfigManager m_configManager;
 
-	@Inject
 	private AllReportConfigManager m_transactionManager;
 
-	@Inject
 	private ServerConfigManager m_serverConfigManager;
 
-	@Inject
 	private AtomicMessageConfigManager m_atomicMessageConfigManager;
 
 	private TransactionStatisticsComputer m_computer = new TransactionStatisticsComputer();

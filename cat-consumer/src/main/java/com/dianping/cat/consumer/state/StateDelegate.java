@@ -28,20 +28,15 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
-@Named(type = ReportDelegate.class, value = StateAnalyzer.ID)
 public class StateDelegate implements ReportDelegate<StateReport> {
 
-	@Inject
 	private TaskManager m_taskManager;
 
-	@Inject
 	private ReportBucketManager m_bucketManager;
 
 	@Override

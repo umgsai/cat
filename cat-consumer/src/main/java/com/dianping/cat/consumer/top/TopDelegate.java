@@ -23,12 +23,10 @@ import com.dianping.cat.consumer.top.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.consumer.top.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.top.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.Date;
 import java.util.Map;
 
-@Named(type = ReportDelegate.class, value = TopAnalyzer.ID)
 public class TopDelegate implements ReportDelegate<TopReport> {
 
 	@Override

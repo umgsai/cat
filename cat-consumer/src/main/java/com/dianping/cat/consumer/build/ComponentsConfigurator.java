@@ -82,6 +82,7 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.statistic.ServerStatisticManager;
+import com.dianping.cat.task.TaskManager;
 import org.unidal.cat.message.storage.MessageDumperManager;
 import org.unidal.cat.message.storage.MessageFinderManager;
 
@@ -131,7 +132,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ReportManager.class, ID, "m_reportManager") //
 								.req(IpConvertManager.class, (String) null, "m_ipConvertManager") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
-		all.add(A(CrossDelegate.class));
+		all.add(C(ReportDelegate.class, ID, CrossDelegate.class) //
+								.req(TaskManager.class, (String) null, "m_taskManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_serverFilterConfigManager"));
 
 		all.add(C(IpConvertManager.class));
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
@@ -151,7 +154,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ServerFilterConfigManager.class, (String) null, "m_serverFilterConfigManager") //
 								.req(DatabaseParser.class, (String) null, "m_parser") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
-		all.add(A(DependencyDelegate.class));
+		all.add(C(ReportDelegate.class, ID, DependencyDelegate.class) //
+								.req(TaskManager.class, (String) null, "m_taskManager"));
 
 		all.add(C(DatabaseParser.class));
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
@@ -184,7 +188,12 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ReportManager.class, ID, "m_reportManager") //
 								.req(AtomicMessageConfigManager.class, (String) null, "m_atomicMessageConfigManager") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
-		all.add(A(EventDelegate.class));
+		all.add(C(ReportDelegate.class, ID, EventDelegate.class) //
+								.req(TaskManager.class, (String) null, "m_taskManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_configManager") //
+								.req(AllReportConfigManager.class, (String) null, "m_allManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager") //
+								.req(AtomicMessageConfigManager.class, (String) null, "m_atomicMessageConfigManager"));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
@@ -202,7 +211,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ReportManager.class, ID, "m_reportManager") //
 								.req(ServerFilterConfigManager.class, (String) null, "m_serverFilterConfigManager") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
-		all.add(A(HeartbeatDelegate.class));
+		all.add(C(ReportDelegate.class, ID, HeartbeatDelegate.class) //
+								.req(TaskManager.class, (String) null, "m_taskManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_manager"));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
@@ -219,7 +230,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(MessageAnalyzer.class, ID, MatrixAnalyzer.class).is(PER_LOOKUP) //
 								.req(ReportManager.class, ID, "m_reportManager") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
-		all.add(A(MatrixDelegate.class));
+		all.add(C(ReportDelegate.class, ID, MatrixDelegate.class) //
+								.req(TaskManager.class, (String) null, "m_taskManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_configManager"));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
@@ -237,7 +250,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ReportManager.class, ID, "m_reportManager") //
 								.req(BusinessConfigManager.class, (String) null, "m_configManager") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
-		all.add(A(BusinessDelegate.class));
+		all.add(C(ReportDelegate.class, ID, BusinessDelegate.class) //
+								.req(TaskManager.class, (String) null, "m_taskManager"));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
@@ -267,7 +281,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ReportBucketManager.class, HourlyReportRepository.class, HourlyReportContentRepository.class, DomainValidator.class) //
 								.config(E("name").value(ID)));
 
-		all.add(A(ProblemDelegate.class));
+		all.add(C(ReportDelegate.class, ID, ProblemDelegate.class) //
+								.req(TaskManager.class, (String) null, "m_taskManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_configManager"));
 
 		return all;
 	}
@@ -282,7 +298,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ServerFilterConfigManager.class, (String) null, "m_serverFilterConfigManager") //
 								.req(ProjectService.class, (String) null, "m_projectService") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
-		all.add(A(StateDelegate.class));
+		all.add(C(ReportDelegate.class, ID, StateDelegate.class) //
+								.req(TaskManager.class, (String) null, "m_taskManager") //
+								.req(ReportBucketManager.class, (String) null, "m_bucketManager"));
 
 		all.add(C(ProjectService.class) //
 								.req(ProjectRepository.class, (String) null, "m_projectDao") //
@@ -304,7 +322,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ServerFilterConfigManager.class, (String) null, "m_serverFilterConfigManager") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager")
 								.config(E("errorType").value("Error,RuntimeException,Exception")));
-		all.add(A(TopDelegate.class));
+		all.add(C(ReportDelegate.class, ID, TopDelegate.class));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
@@ -324,7 +342,12 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(TpValueStatisticConfigManager.class, (String) null, "m_statisticManager") //
 								.req(AtomicMessageConfigManager.class, (String) null, "m_atomicMessageConfigManager") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
-		all.add(A(TransactionDelegate.class));
+		all.add(C(ReportDelegate.class, ID, TransactionDelegate.class) //
+								.req(TaskManager.class, (String) null, "m_taskManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_configManager") //
+								.req(AllReportConfigManager.class, (String) null, "m_transactionManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager") //
+								.req(AtomicMessageConfigManager.class, (String) null, "m_atomicMessageConfigManager"));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //
@@ -349,7 +372,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(DatabaseParser.class, (String) null, "m_databaseParser") //
 								.req(StorageReportUpdater.class, (String) null, "m_updater") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
-		all.add(A(StorageDelegate.class));
+		all.add(C(ReportDelegate.class, ID, StorageDelegate.class) //
+								.req(TaskManager.class, (String) null, "m_taskManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_configManager") //
+								.req(StorageReportUpdater.class, (String) null, "m_reportUpdater"));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
 								.req(ReportDelegate.class, ID) //

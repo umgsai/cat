@@ -27,16 +27,12 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.Date;
 import java.util.Map;
 
-@Named(type = ReportDelegate.class, value = DependencyAnalyzer.ID)
 public class DependencyDelegate implements ReportDelegate<DependencyReport> {
 
-	@Inject
 	private TaskManager m_taskManager;
 
 	@Override

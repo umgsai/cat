@@ -21,9 +21,6 @@ package com.dianping.cat.consumer.matrix;
 import java.util.Date;
 import java.util.Map;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.matrix.model.transform.DefaultNativeBuilder;
@@ -34,13 +31,10 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
-@Named(type = ReportDelegate.class, value = MatrixAnalyzer.ID)
 public class MatrixDelegate implements ReportDelegate<MatrixReport> {
 
-	@Inject
 	private TaskManager m_taskManager;
 
-	@Inject
 	private ServerFilterConfigManager m_configManager;
 
 	@Override

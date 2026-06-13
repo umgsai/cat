@@ -32,28 +32,20 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.Date;
 import java.util.Map;
 
-@Named(type = ReportDelegate.class, value = EventAnalyzer.ID)
 public class EventDelegate implements ReportDelegate<EventReport> {
 
-	@Inject
 	private TaskManager m_taskManager;
 
-	@Inject
 	private ServerFilterConfigManager m_configManager;
 
-	@Inject
 	private AllReportConfigManager m_allManager;
 
-	@Inject
 	private ServerConfigManager m_serverConfigManager;
 
-	@Inject
 	private AtomicMessageConfigManager m_atomicMessageConfigManager;
 
 	private final EventTpsStatisticsComputer m_computer = new EventTpsStatisticsComputer();

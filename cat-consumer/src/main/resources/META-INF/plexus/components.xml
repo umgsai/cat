@@ -37,18 +37,23 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.task.TaskManager</role>
+					<field-name>m_taskManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.consumer.config.AllReportConfigManager</role>
+					<field-name>m_transactionManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_serverConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.AtomicMessageConfigManager</role>
+					<field-name>m_atomicMessageConfigManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -107,18 +112,23 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.task.TaskManager</role>
+					<field-name>m_taskManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.consumer.config.AllReportConfigManager</role>
+					<field-name>m_allManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_serverConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.AtomicMessageConfigManager</role>
+					<field-name>m_atomicMessageConfigManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -231,9 +241,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.task.TaskManager</role>
+					<field-name>m_taskManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -265,9 +277,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.task.TaskManager</role>
+					<field-name>m_taskManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -430,9 +444,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.task.TaskManager</role>
+					<field-name>m_taskManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.ReportBucketManager</role>
+					<field-name>m_bucketManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -505,9 +521,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.task.TaskManager</role>
+					<field-name>m_taskManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_serverFilterConfigManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -566,9 +584,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.task.TaskManager</role>
+					<field-name>m_taskManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -631,6 +651,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.task.TaskManager</role>
+					<field-name>m_taskManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -725,12 +746,15 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.task.TaskManager</role>
+					<field-name>m_taskManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.consumer.storage.StorageReportUpdater</role>
+					<field-name>m_reportUpdater</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -789,6 +813,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.task.TaskManager</role>
+					<field-name>m_taskManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
