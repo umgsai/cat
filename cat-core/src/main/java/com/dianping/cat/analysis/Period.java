@@ -28,7 +28,6 @@ import java.util.Map.Entry;
 
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.helper.Threads;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.spi.MessageTree;
@@ -43,13 +42,10 @@ public class Period {
 
 	private Map<String, List<PeriodTask>> m_tasks;
 
-	@Inject
 	private MessageAnalyzerManager m_analyzerManager;
 
-	@Inject
 	private ServerStatisticManager m_serverStateManager;
 
-	@Inject
 	private Logger m_logger;
 
 	public Period(long startTime, long endTime, MessageAnalyzerManager analyzerManager,

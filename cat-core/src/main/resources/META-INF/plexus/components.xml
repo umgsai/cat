@@ -7,9 +7,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.analysis.MessageAnalyzerManager</role>
+					<field-name>m_analyzerManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.statistic.ServerStatisticManager</role>
+					<field-name>m_serverStateManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -19,9 +21,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -97,6 +101,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.analysis.MessageAnalyzerFactory</role>
+					<field-name>m_analyzerFactory</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -106,12 +115,15 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_serverConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.analysis.MessageHandler</role>
+					<field-name>m_handler</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.statistic.ServerStatisticManager</role>
+					<field-name>m_serverStateManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -121,6 +133,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.analysis.MessageConsumer</role>
+					<field-name>m_consumer</field-name>
 				</requirement>
 			</requirements>
 		</component>

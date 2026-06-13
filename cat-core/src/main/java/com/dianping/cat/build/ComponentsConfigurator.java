@@ -29,6 +29,10 @@ import com.dianping.cat.CatConstants;
 import com.dianping.cat.CatCoreModule;
 import com.dianping.cat.analysis.DefaultMessageAnalyzerManager;
 import com.dianping.cat.analysis.DefaultMessageHandler;
+import com.dianping.cat.analysis.MessageConsumer;
+import com.dianping.cat.analysis.MessageAnalyzerFactory;
+import com.dianping.cat.analysis.MessageAnalyzerManager;
+import com.dianping.cat.analysis.MessageHandler;
 import com.dianping.cat.analysis.PlexusMessageAnalyzerFactory;
 import com.dianping.cat.analysis.RealtimeConsumer;
 import com.dianping.cat.analysis.TcpSocketReceiver;
@@ -72,9 +76,13 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(RealtimeConsumer.class));
+		all.add(C(MessageConsumer.class, RealtimeConsumer.class) //
+				.req(MessageAnalyzerManager.class, (String) null, "m_analyzerManager") //
+				.req(ServerStatisticManager.class, (String) null, "m_serverStateManager"));
 
-		all.add(A(ServerConfigManager.class));
+		all.add(C(ServerConfigManager.class) //
+				.req(ConfigRepository.class, (String) null, "m_configDao") //
+				.req(ContentFetcher.class, (String) null, "m_fetcher"));
 		all.add(C(HostinfoService.class) //
 				.req(HostinfoRepository.class, (String) null, "m_hostinfoDao") //
 				.req(ServerConfigManager.class, (String) null, "m_manager"));
@@ -91,12 +99,18 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		all.add(C(PathBuilder.class, DefaultPathBuilder.class));
 
-		all.add(A(PlexusMessageAnalyzerFactory.class));
-		all.add(A(DefaultMessageAnalyzerManager.class));
+		all.add(C(MessageAnalyzerFactory.class, PlexusMessageAnalyzerFactory.class));
+		all.add(C(MessageAnalyzerManager.class, DefaultMessageAnalyzerManager.class) //
+				.req(MessageAnalyzerFactory.class, (String) null, "m_analyzerFactory") //
+				.req(ServerConfigManager.class, (String) null, "m_configManager"));
 
-		all.add(A(TcpSocketReceiver.class));
+		all.add(C(TcpSocketReceiver.class) //
+				.req(ServerConfigManager.class, (String) null, "m_serverConfigManager") //
+				.req(MessageHandler.class, (String) null, "m_handler") //
+				.req(ServerStatisticManager.class, (String) null, "m_serverStateManager"));
 
-		all.add(A(DefaultMessageHandler.class));
+		all.add(C(MessageHandler.class, DefaultMessageHandler.class) //
+				.req(MessageConsumer.class, (String) null, "m_consumer"));
 
 		all.add(C(SampleConfigManager.class) //
 				.req(ConfigRepository.class, (String) null, "m_configDao") //

@@ -24,7 +24,6 @@ import java.util.List;
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.statistic.ServerStatisticManager;
@@ -38,13 +37,10 @@ public class PeriodManager implements Task {
 
 	private boolean m_active;
 
-	@Inject
 	private MessageAnalyzerManager m_analyzerManager;
 
-	@Inject
 	private ServerStatisticManager m_serverStateManager;
 
-	@Inject
 	private Logger m_logger;
 
 	public PeriodManager(long duration, MessageAnalyzerManager analyzerManager,	ServerStatisticManager serverStateManager,

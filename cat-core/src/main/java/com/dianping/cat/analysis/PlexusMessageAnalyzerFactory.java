@@ -3,9 +3,7 @@ package com.dianping.cat.analysis;
 import java.util.Map;
 
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Named;
 
-@Named(type = MessageAnalyzerFactory.class)
 public class PlexusMessageAnalyzerFactory extends ContainerHolder implements MessageAnalyzerFactory {
 
 	@Override

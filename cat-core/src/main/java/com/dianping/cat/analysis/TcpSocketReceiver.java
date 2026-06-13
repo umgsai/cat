@@ -23,8 +23,6 @@ import java.util.List;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -49,17 +47,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
-@Named(type = TcpSocketReceiver.class)
 public final class TcpSocketReceiver implements LogEnabled {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TcpSocketReceiver.class);
 
-	@Inject
 	protected ServerConfigManager m_serverConfigManager;
 
-	@Inject
 	private MessageHandler m_handler;
 
-	@Inject
 	private ServerStatisticManager m_serverStateManager;
 
 	private ChannelFuture m_future;

@@ -27,8 +27,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.helper.Threads;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
@@ -36,7 +34,6 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
-@Named(type = MessageConsumer.class)
 public class RealtimeConsumer extends ContainerHolder implements MessageConsumer, Initializable, LogEnabled {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RealtimeConsumer.class);
 
@@ -44,10 +41,8 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 
 	public static final long HOUR = 60 * MINUTE;
 
-	@Inject
 	private MessageAnalyzerManager m_analyzerManager;
 
-	@Inject
 	private ServerStatisticManager m_serverStateManager;
 
 	private PeriodManager m_periodManager;

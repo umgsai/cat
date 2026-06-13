@@ -30,14 +30,11 @@ import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = MessageAnalyzerManager.class)
 public class DefaultMessageAnalyzerManager extends ContainerHolder
 						implements MessageAnalyzerManager, Initializable,	LogEnabled {
 	private static final long MINUTE = 60 * 1000L;
@@ -50,7 +47,6 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 
 	private List<String> m_analyzerNames;
 
-	@Inject
 	private MessageAnalyzerFactory m_analyzerFactory;
 
 	private ServerConfigManager m_configManager;
