@@ -1114,3 +1114,91 @@ http://127.0.0.1:18080/cat/s/config
 3. 暂不移除根 POM 中的 Unidal / Plexus 依赖。
 4. 暂不迁移 `org.unidal.web.MVC`。
 5. 暂不批量替换所有 DAL / codegen 相关代码。
+
+## 18. 2026-06-13 当前进度更新
+
+### 已完成
+
+最近一批迁移已经完成并提交，重点是把 `cat-home` 报表页面服务层从 Unidal lookup 注解迁移到显式注册：
+
+```text
+cat-home/src/main/java/com/dianping/cat/report/page
+```
+
+该目录下当前已经没有 `@Named` / `@Inject` 残留。
+
+已覆盖的报表域：
+
+```text
+transaction
+event
+problem
+heartbeat
+storage
+cross
+matrix
+state
+top
+business
+metric baseline
+```
+
+同时已完成：
+
+```text
+report/graph/svg -> GraphBuilder / ValueTranslater 显式注册
+report/graph/metric/impl/DataExtractorImpl -> DataExtractor 显式注册
+report/task/reload -> 清理 Unidal 注解，保留 Spring setter 注入路径
+```
+
+### 验证结果
+
+最近一批迁移后已通过：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+mvn -pl cat-boot -am package -DskipTests "-Dmaven.javadoc.skip=true"
+```
+
+### 当前阶段判断
+
+项目仍然不能直接移除 Plexus / Unidal 依赖。当前大致完成度约为：
+
+```text
+35% - 45%
+```
+
+主要剩余工作：
+
+```text
+cat-home/report/alert
+cat-home/system/page
+cat-home/report/task
+cat-core
+cat-consumer
+cat-alarm
+cat-hadoop
+Unidal Web MVC
+Unidal DAL / codegen
+Plexus components.xml 生成链路
+```
+
+### 下一步推荐
+
+下一步建议进入 `cat-home/report/alert` 的小批量迁移，优先迁移低风险 helper / manager / summary builder，不要直接迁移 Web Handler 或删除 `components.xml`。
+
+推荐顺序：
+
+```text
+1. Alert helper / config manager
+2. Alert summary service / executor / builders
+3. business / transaction / event / heartbeat / exception alert domain
+4. 最后再考虑 system/page 和 Web MVC
+```
+
+每完成一小批后继续执行：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+mvn -pl cat-boot -am package -DskipTests "-Dmaven.javadoc.skip=true"
+```

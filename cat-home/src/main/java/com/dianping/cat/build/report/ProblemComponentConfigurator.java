@@ -28,7 +28,11 @@ import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
+import com.dianping.cat.alarm.spi.sender.SenderManager;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
+import com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository;
+import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
 import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
@@ -50,6 +54,8 @@ import com.dianping.cat.report.alert.summary.build.AlertInfoBuilder;
 import com.dianping.cat.report.alert.summary.build.AlterationSummaryBuilder;
 import com.dianping.cat.report.alert.summary.build.FailureSummaryBuilder;
 import com.dianping.cat.report.alert.summary.build.RelatedSummaryBuilder;
+import com.dianping.cat.report.alert.summary.build.SummaryBuilder;
+import com.dianping.cat.report.page.dependency.graph.TopologyGraphManager;
 import com.dianping.cat.report.page.problem.service.CompositeProblemService;
 import com.dianping.cat.report.page.problem.service.HistoricalProblemService;
 import com.dianping.cat.report.page.problem.service.LocalProblemService;
@@ -87,12 +93,23 @@ public class ProblemComponentConfigurator extends AbstractResourceConfigurator {
 		all.add(A(AlertExceptionBuilder.class));
 
 		all.add(A(ExceptionAlert.class));
-		all.add(A(AlertSummaryService.class));
-		all.add(A(RelatedSummaryBuilder.class));
-		all.add(A(FailureSummaryBuilder.class));
-		all.add(A(AlterationSummaryBuilder.class));
-		all.add(A(AlertSummaryExecutor.class));
-		all.add(A(AlertInfoBuilder.class));
+		all.add(C(AlertSummaryService.class) //
+								.req(AlertSummaryRepository.class, (String) null, "m_alertSummaryDao"));
+		all.add(C(SummaryBuilder.class, RelatedSummaryBuilder.ID, RelatedSummaryBuilder.class) //
+								.req(AlertInfoBuilder.class, (String) null, "m_alertSummaryManager") //
+								.req(AlertSummaryService.class, (String) null, "m_alertSummaryService"));
+		all.add(C(SummaryBuilder.class, FailureSummaryBuilder.ID, FailureSummaryBuilder.class) //
+								.req(ModelService.class, ProblemAnalyzer.ID, "m_service"));
+		all.add(C(SummaryBuilder.class, AlterationSummaryBuilder.ID, AlterationSummaryBuilder.class) //
+								.req(AlterationRepository.class, (String) null, "m_alterationDao"));
+		all.add(C(AlertSummaryExecutor.class) //
+								.req(SummaryBuilder.class, RelatedSummaryBuilder.ID, "m_relatedBuilder") //
+								.req(SummaryBuilder.class, FailureSummaryBuilder.ID, "m_failureBuilder") //
+								.req(SummaryBuilder.class, AlterationSummaryBuilder.ID, "m_alterationBuilder") //
+								.req(SenderManager.class, (String) null, "m_sendManager"));
+		all.add(C(AlertInfoBuilder.class) //
+								.req(AlertRepository.class, (String) null, "m_alertDao") //
+								.req(TopologyGraphManager.class, (String) null, "m_topologyManager"));
 
 		return all;
 	}

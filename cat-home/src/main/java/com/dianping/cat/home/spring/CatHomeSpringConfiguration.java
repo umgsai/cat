@@ -2124,8 +2124,11 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public AlertSummaryService alertSummaryService() {
-		return new AlertSummaryService();
+	public AlertSummaryService alertSummaryService(AlertSummaryRepository alertSummaryRepository) {
+		AlertSummaryService service = new AlertSummaryService();
+
+		service.setAlertSummaryDao(alertSummaryRepository);
+		return service;
 	}
 
 	@Bean
@@ -2629,10 +2632,11 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public AlertInfoBuilder alertInfoBuilder(AlertRepository alertRepository) {
+	public AlertInfoBuilder alertInfoBuilder(AlertRepository alertRepository, TopologyGraphManager topologyGraphManager) {
 		AlertInfoBuilder builder = new AlertInfoBuilder();
 
 		builder.setAlertDao(alertRepository);
+		builder.setTopologyManager(topologyGraphManager);
 		return builder;
 	}
 

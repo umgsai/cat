@@ -803,3 +803,108 @@ NoSuchBeanDefinitionException
 Address already in use
 同一个任务或 SyncHandler 重复启动导致的重复执行
 ```
+
+## 12. 最新进度快照（2026-06-13 更新）
+
+本节记录 2026-06-12 至 2026-06-13 的最新迁移进度。下次继续前，优先阅读本节，再结合 `git status --short` 判断工作区状态。
+
+### 12.1 当前 Git 状态
+
+截至本节更新时，工作区为干净状态：
+
+```powershell
+git status --short
+```
+
+输出为空。上一批代码已经由用户提交。
+
+### 12.2 已完成的最新迁移范围
+
+围绕“最终移除 Plexus / Unidal Lookup / Unidal 相关依赖”的目标，最近一批已经完成并提交的改动包括：
+
+1. `cat-home/src/main/java/com/dianping/cat/report/page` 下的 `@Named` / `@Inject` 已清空。
+2. 报表页面服务层已迁移到显式组件注册，覆盖：`transaction`、`event`、`problem`、`heartbeat`、`storage`、`cross`、`matrix`、`state`、`top`、`business`、`metric baseline`。
+3. 多个 `ReportService` 子类已经从注解注册迁移为 configurator 中的显式字段依赖注册。
+4. 多个 `LocalModelService` 子类已经从注解注册迁移为显式组件注册，并补齐 `m_bucketManager`、`m_configManager`、`m_consumer`。
+5. historical model service 的隐式依赖已经改为显式字段名依赖：`m_reportService`、`m_configManager`。
+6. 已迁移 `business` 相关组件：`BusinessReportService`、`LocalBusinessService`、`BusinessPointParser`、`BusinessKeyHelper`。
+7. 已迁移 `metric baseline` 相关组件：`DefaultBaselineService`、`BaselineConfigManager`、`DefaultBaselineCreator`。
+8. 已迁移 `report/graph/svg`：`GraphBuilder`、`ValueTranslater`、`DefaultGraphBuilder`、`DefaultValueTranslater`。
+9. 已迁移 `DataExtractorImpl`，改为 `DataExtractor` 接口显式注册。
+10. 已清理 `report/task/reload` 组的 Unidal 注解：`ReportReloadTask`、`AbstractReportReloader` 和所有 `*ReportReloader` 实现。
+
+`report/task/reload` 这一组已经由 `CatHomeSpringConfiguration` 通过 Spring Bean 和 setter 注入组装；生成的 `components.xml` 中没有对应 `ReportReloadTask` / `ReportReloader` 条目，因此只做注解清理，没有新增 Plexus 显式注册。
+
+### 12.3 最近验证结果
+
+最近一批迁移完成后，以下命令均已通过：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+mvn -pl cat-boot -am package -DskipTests "-Dmaven.javadoc.skip=true"
+```
+
+验证过程中 Maven 仍会出现已知 warning，例如 deprecated API、shade overlapping resource、plexus plugin 执行时的 SLF4J no provider warning。这些 warning 暂时不是当前迁移阻塞项。
+
+### 12.4 当前剩余注解范围
+
+`cat-home/src/main/java/com/dianping/cat/report/page` 已经清空 Unidal lookup 注解。
+
+`cat-home` 里剩余 `@Named` / `@Inject` 主要集中在：
+
+```text
+cat-home/src/main/java/com/dianping/cat/report/alert
+cat-home/src/main/java/com/dianping/cat/system/page
+cat-home/src/main/java/com/dianping/cat/report/task
+cat-home/src/main/java/com/dianping/cat/report/graph/metric/AbstractGraphCreator.java
+cat-home/src/main/java/com/dianping/cat/CatHomeModule.java
+```
+
+跨模块仍然存在 Unidal 注解和容器依赖，主要在 `cat-core`、`cat-consumer`、`cat-alarm`、`cat-hadoop`。
+
+因此现在还不能删除 Unidal / Plexus 依赖、`plexus-maven-plugin`、`codegen-maven-plugin` 或任何 `META-INF/plexus/components.xml`。
+
+### 12.5 当前完成度评估
+
+按最终目标“移除 Plexus / Unidal 相关依赖”估算，当前整体完成度约为：
+
+```text
+35% - 45%
+```
+
+判断依据：
+
+1. 报表页面服务层这一条主线已经基本清理完成。
+2. Spring 手工配置和旧 MVC 兼容桥接已经比较稳定。
+3. 但 alert、system page、core/consumer/alarm/hadoop、Unidal Web MVC、Unidal DAL/codegen、Plexus 插件链路仍未完成。
+4. `components.xml` 仍然需要生成，旧容器仍是兼容运行链路的一部分。
+
+### 12.6 推荐下一步计划
+
+下一步建议继续迁移 `cat-home/report/alert`，但要拆小批次，不要一次性迁移全部 alert 链路。
+
+推荐顺序：
+
+1. 先迁移低风险、已在 configurator 中注册或 Spring 中已有替代链路的 alert helper / manager。
+2. 再迁移 alert summary builder：`AlertSummaryExecutor`、`AlertSummaryService`、`RelatedSummaryBuilder`、`FailureSummaryBuilder`、`AlterationSummaryBuilder`、`AlertInfoBuilder`。
+3. 再迁移各类 alert domain：`business`、`transaction`、`event`、`heartbeat`、`exception`。
+4. 暂缓直接迁移 Web Handler、Unidal MVC、`RuleFTLDecorator` 等复杂链路。
+
+每一小批迁移后至少执行：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+mvn -pl cat-boot -am package -DskipTests "-Dmaven.javadoc.skip=true"
+```
+
+如果涉及 `components.xml` 生成，必须检查生成结果中是否包含预期 role、role-hint 和 field-name。
+
+### 12.7 重要注意事项
+
+1. 不要删除任何 `META-INF/plexus/components.xml`。
+2. 不要删除根 POM 或模块 POM 中的 Unidal / Plexus 依赖。
+3. 不要全量 Spring 扫描 `com.dianping.cat`。
+4. 不要让 Spring 和 Plexus 同时创建会启动线程、注册定时任务或注册 sync handler 的同一个组件。
+5. 迁移 descriptor 兼容组件时，优先使用显式 `field-name`，不要依赖注解扫描。
+6. 对 analyzer ID 相关 bean，避免 Spring bean 名和 analyzer ID 冲突，例如 `business`、`matrix`、`transaction` 等。
+7. 用户已经多次要求：如果验证没问题，可以继续后面的计划；但遇到需要运行时页面验证或业务决策的问题，应停下来让用户确认。

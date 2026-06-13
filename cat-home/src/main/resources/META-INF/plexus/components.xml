@@ -1703,6 +1703,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository</role>
+					<field-name>m_alertSummaryDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1713,9 +1714,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.report.alert.summary.build.AlertInfoBuilder</role>
+					<field-name>m_alertSummaryManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.alert.summary.AlertSummaryService</role>
+					<field-name>m_alertSummaryService</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1727,6 +1730,7 @@
 				<requirement>
 					<role>com.dianping.cat.report.service.ModelService</role>
 					<role-hint>problem</role-hint>
+					<field-name>m_service</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1737,6 +1741,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository</role>
+					<field-name>m_alterationDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1761,6 +1766,7 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.sender.SenderManager</role>
+					<field-name>m_sendManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1770,9 +1776,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.alert.AlertRepository</role>
+					<field-name>m_alertDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.page.dependency.graph.TopologyGraphManager</role>
+					<field-name>m_topologyManager</field-name>
 				</requirement>
 			</requirements>
 		</component>

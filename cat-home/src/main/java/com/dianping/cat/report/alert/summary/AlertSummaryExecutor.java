@@ -27,8 +27,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Splitters;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.AlertChannel;
@@ -42,7 +40,6 @@ import com.dianping.cat.report.alert.summary.build.RelatedSummaryBuilder;
 import com.dianping.cat.report.alert.summary.build.SummaryBuilder;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class AlertSummaryExecutor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryExecutor.class);
 
@@ -50,16 +47,12 @@ public class AlertSummaryExecutor {
 
 	public static final long ALTERATION_DURATION = 30 * TimeHelper.ONE_MINUTE;
 
-	@Inject(type = SummaryBuilder.class, value = RelatedSummaryBuilder.ID)
 	private SummaryBuilder m_relatedBuilder;
 
-	@Inject(type = SummaryBuilder.class, value = FailureSummaryBuilder.ID)
 	private SummaryBuilder m_failureBuilder;
 
-	@Inject(type = SummaryBuilder.class, value = AlterationSummaryBuilder.ID)
 	private SummaryBuilder m_alterationBuilder;
 
-	@Inject
 	private SenderManager m_sendManager;
 
 	private void refreshSpringBeans() {

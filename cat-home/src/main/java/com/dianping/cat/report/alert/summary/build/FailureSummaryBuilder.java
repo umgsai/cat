@@ -25,8 +25,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
@@ -41,13 +39,11 @@ import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = SummaryBuilder.class, value = FailureSummaryBuilder.ID)
 public class FailureSummaryBuilder extends SummaryBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FailureSummaryBuilder.class);
 
 	public static final String ID = "FailureDecorator";
 
-	@Inject(type = ModelService.class, value = ProblemAnalyzer.ID)
 	private ModelService<ProblemReport> m_service;
 
 	@SuppressWarnings("unchecked")

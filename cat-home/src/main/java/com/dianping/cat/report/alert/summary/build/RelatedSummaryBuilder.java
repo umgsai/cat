@@ -26,24 +26,19 @@ import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.alert.summary.entity.AlertSummary;
 import com.dianping.cat.report.alert.summary.AlertSummaryService;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = SummaryBuilder.class, value = RelatedSummaryBuilder.ID)
 public class RelatedSummaryBuilder extends SummaryBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RelatedSummaryBuilder.class);
 
 	public static final String ID = "AlertSummaryContentGenerator";
 
-	@Inject
 	private AlertInfoBuilder m_alertSummaryManager;
 
-	@Inject
 	private AlertSummaryService m_alertSummaryService;
 
 	@SuppressWarnings("unchecked")

@@ -29,8 +29,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
@@ -45,7 +43,6 @@ import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphManager;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class AlertInfoBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertInfoBuilder.class);
 
@@ -53,10 +50,8 @@ public class AlertInfoBuilder {
 
 	public static final String PREFIX = "dependency_";
 
-	@Inject
 	private AlertRepository m_alertDao;
 
-	@Inject
 	private TopologyGraphManager m_topologyManager;
 
 	private AlertRepository getAlertDao() {

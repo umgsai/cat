@@ -25,14 +25,12 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.rule.entity.Condition;
 import com.dianping.cat.alarm.rule.entity.Config;
 
-@Named
 public class BaseRuleHelper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BaseRuleHelper.class);
 

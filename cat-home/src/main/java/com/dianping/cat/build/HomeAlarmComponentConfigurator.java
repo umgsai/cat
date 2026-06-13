@@ -37,7 +37,7 @@ public class HomeAlarmComponentConfigurator extends AbstractResourceConfigurator
 
 		all.add(A(AlarmManager.class));
 		all.add(A(AlertConfigManager.class));
-		all.add(A(BaseRuleHelper.class));
+		all.add(C(BaseRuleHelper.class));
 		all.add(A(UserDefinedRuleManager.class));
 		return all;
 	}

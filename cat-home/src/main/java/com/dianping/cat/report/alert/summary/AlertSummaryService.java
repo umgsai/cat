@@ -21,19 +21,15 @@ package com.dianping.cat.report.alert.summary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.dal.report.AlertSummary;
 import com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class AlertSummaryService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryService.class);
 
-	@Inject
 	private AlertSummaryRepository m_alertSummaryDao;
 
 	public void insert(com.dianping.cat.home.alert.summary.entity.AlertSummary alertSummary) {
@@ -60,6 +56,10 @@ public class AlertSummaryService {
 		if (alertSummaryDao != null) {
 			m_alertSummaryDao = alertSummaryDao;
 		}
+	}
+
+	public void setAlertSummaryDao(AlertSummaryRepository alertSummaryDao) {
+		m_alertSummaryDao = alertSummaryDao;
 	}
 
 }
