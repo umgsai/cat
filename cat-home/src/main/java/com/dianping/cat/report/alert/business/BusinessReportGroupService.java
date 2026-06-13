@@ -18,20 +18,14 @@
  */
 package com.dianping.cat.report.alert.business;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
-
-import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
-@Named
 public class BusinessReportGroupService {
 
-	@Inject(BusinessAnalyzer.ID)
 	private ModelService<BusinessReport> m_service;
 
 	private BusinessReport fetchMetricReport(String product, ModelPeriod period, int min, int max) {
@@ -87,5 +81,9 @@ public class BusinessReportGroupService {
 
 		reports.setLast(lastReport).setCurrent(currentReport).setDataReady(dataReady);
 		return reports;
+	}
+
+	public void setService(ModelService<BusinessReport> service) {
+		m_service = service;
 	}
 }

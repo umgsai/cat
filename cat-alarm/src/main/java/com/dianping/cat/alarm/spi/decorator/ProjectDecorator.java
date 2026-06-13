@@ -18,7 +18,6 @@
  */
 package com.dianping.cat.alarm.spi.decorator;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,6 @@ import com.dianping.cat.spring.CatSpringContext;
 public abstract class ProjectDecorator extends Decorator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectDecorator.class);
 
-	@Inject
 	protected ProjectService m_projectService;
 
 	public void setProjectService(ProjectService projectService) {

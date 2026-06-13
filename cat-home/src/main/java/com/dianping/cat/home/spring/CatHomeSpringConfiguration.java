@@ -143,6 +143,7 @@ import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
 import com.dianping.cat.report.alert.business.BusinessContactor;
 import com.dianping.cat.report.alert.business.BusinessDecorator;
+import com.dianping.cat.report.alert.business.BusinessReportGroupService;
 import com.dianping.cat.report.alert.business.BusinessRuleConfigManager;
 import com.dianping.cat.report.alert.event.EventContactor;
 import com.dianping.cat.report.alert.event.EventDecorator;
@@ -2901,6 +2902,15 @@ public class CatHomeSpringConfiguration {
 
 		service.setReportService(businessReportService);
 		service.setModelService(businessModelService);
+		return service;
+	}
+
+	@Bean
+	public BusinessReportGroupService businessReportGroupService(
+			@Qualifier("businessModelService") ModelService<BusinessReport> businessModelService) {
+		BusinessReportGroupService service = new BusinessReportGroupService();
+
+		service.setService(businessModelService);
 		return service;
 	}
 

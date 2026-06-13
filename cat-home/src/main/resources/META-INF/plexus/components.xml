@@ -1244,6 +1244,7 @@
 				<requirement>
 					<role>com.dianping.cat.report.service.ModelService</role>
 					<role-hint>business</role-hint>
+					<field-name>m_service</field-name>
 				</requirement>
 			</requirements>
 		</component>

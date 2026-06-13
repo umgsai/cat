@@ -23,7 +23,6 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
@@ -36,7 +35,6 @@ public class BusinessDecorator extends ProjectDecorator {
 
 	public static final String ID = AlertType.Business.getName();
 
-	@Inject
 	private AlertSummaryExecutor m_executor;
 
 	public void setExecutor(AlertSummaryExecutor executor) {

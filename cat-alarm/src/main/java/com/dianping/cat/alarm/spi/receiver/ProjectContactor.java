@@ -21,7 +21,6 @@ package com.dianping.cat.alarm.spi.receiver;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 
 import com.dianping.cat.alarm.receiver.entity.Receiver;
@@ -32,10 +31,8 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class ProjectContactor extends DefaultContactor implements Contactor {
 
-	@Inject
 	protected ProjectService m_projectService;
 
-	@Inject
 	protected AlertConfigManager m_configManager;
 
 	private AlertConfigManager getConfigManager() {

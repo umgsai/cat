@@ -77,7 +77,8 @@ public class MetricComponentConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(DataExtractor.class, DataExtractorImpl.class));
 
-		all.add(A(BusinessReportGroupService.class));
+		all.add(C(BusinessReportGroupService.class) //
+								.req(ModelService.class, BusinessAnalyzer.ID, "m_service"));
 
 		all.add(C(LocalModelService.class, LocalBusinessService.ID, LocalBusinessService.class) //
 								.req(ReportBucketManager.class, (String) null, "m_bucketManager") //

@@ -30,7 +30,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.AlertEntity;
@@ -48,7 +47,6 @@ public class ExceptionDecorator extends ProjectDecorator implements Initializabl
 
 	protected DateFormat m_linkFormat = new SimpleDateFormat("yyyyMMddHH");
 
-	@Inject
 	private AlertSummaryExecutor m_executor;
 
 	public void setExecutor(AlertSummaryExecutor executor) {
