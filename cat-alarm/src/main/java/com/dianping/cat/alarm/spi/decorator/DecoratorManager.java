@@ -27,14 +27,12 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class DecoratorManager extends ContainerHolder implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DecoratorManager.class);
 

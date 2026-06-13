@@ -27,12 +27,10 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class SpliterManager extends ContainerHolder implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpliterManager.class);
 

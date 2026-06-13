@@ -27,8 +27,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.AlertChannel;
@@ -36,11 +34,9 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class SenderManager extends ContainerHolder implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SenderManager.class);
 
-	@Inject
 	private ServerConfigManager m_configManager;
 
 	private Map<String, Sender> m_senders = new HashMap<String, Sender>();

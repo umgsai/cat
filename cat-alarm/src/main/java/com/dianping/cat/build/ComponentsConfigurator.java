@@ -28,6 +28,7 @@ import com.dianping.cat.alarm.spi.receiver.ContactorManager;
 import com.dianping.cat.alarm.spi.rule.DefaultDataChecker;
 import com.dianping.cat.alarm.spi.sender.*;
 import com.dianping.cat.alarm.spi.spliter.*;
+import com.dianping.cat.config.server.ServerConfigManager;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
@@ -48,8 +49,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(A(SenderConfigManager.class));
 
 		all.add(A(DefaultDataChecker.class));
-		all.add(A(DecoratorManager.class));
-		all.add(A(ContactorManager.class));
+		all.add(C(DecoratorManager.class));
+		all.add(C(ContactorManager.class));
 
 		all.add(A(AlertPolicyManager.class));
 
@@ -61,7 +62,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(Spliter.class, DXSpliter.ID, DXSpliter.class));
 
-		all.add(A(SpliterManager.class));
+		all.add(C(SpliterManager.class));
 
 		all.add(C(Sender.class, MailSender.ID, MailSender.class).req(SenderConfigManager.class));
 
@@ -69,7 +70,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(Sender.class, WeixinSender.ID, WeixinSender.class).req(SenderConfigManager.class));
 
-		all.add(A(SenderManager.class));
+		all.add(C(SenderManager.class).req(ServerConfigManager.class));
 
 		all.add(A(AlertManager.class));
 
