@@ -44,8 +44,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 import org.xml.sax.SAXException;
 
@@ -53,7 +51,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
-@Named
 public class RouterConfigManager implements Initializable, LogEnabled {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RouterConfigManager.class);
 
@@ -61,16 +58,12 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 
 	private static final String CONFIG_NAME = "routerConfig";
 
-	@Inject
 	private ConfigRepository m_configDao;
 
-	@Inject
 	private ContentFetcher m_fetcher;
 
-	@Inject
 	private DailyReportRepository m_dailyReportDao;
 
-	@Inject
 	private DailyReportContentRepository m_dailyReportContentDao;
 
 	private int m_configId;

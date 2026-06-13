@@ -33,8 +33,6 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.helper.Files;
 import org.unidal.helper.Threads.Task;
 import org.unidal.helper.Urls;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.webres.json.JsonArray;
 import org.unidal.webres.json.JsonObject;
@@ -52,7 +50,6 @@ import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class ProjectUpdateTask implements Task, LogEnabled {
 
 	private static final String CMDB_DOMAIN_URL = "http://api.cmdb.dp/api/v0.1/projects/s?private_ip=%s";
@@ -67,13 +64,10 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 
 	protected Logger m_logger;
 
-	@Inject
 	private HostinfoService m_hostInfoService;
 
-	@Inject
 	private ProjectService m_projectService;
 
-	@Inject
 	private TransactionReportService m_reportService;
 
 	private boolean checkIfNullOrEqual(String source, int target) {

@@ -28,8 +28,10 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.dianping.cat.analysis.MessageConsumer;
+import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
@@ -91,11 +93,26 @@ public class ReportComponentConfigurator extends AbstractResourceConfigurator {
 
 		all.add(reportService(HeavyReportService.class));
 
-		all.add(A(RouterConfigManager.class));
-		all.add(A(RouterConfigHandler.class));
-		all.add(A(RouterConfigService.class));
-		all.add(A(CachedRouterConfigService.class));
-		all.add(A(RouterConfigAdjustor.class));
+		all.add(C(RouterConfigManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher") //
+								.req(DailyReportRepository.class, (String) null, "m_dailyReportDao") //
+								.req(DailyReportContentRepository.class, (String) null, "m_dailyReportContentDao"));
+		all.add(C(RouterConfigHandler.class) //
+								.req(StateReportService.class, (String) null, "m_stateReportService") //
+								.req(RouterConfigManager.class, (String) null, "m_configManager") //
+								.req(RouterConfigService.class, (String) null, "m_reportService") //
+								.req(DailyReportRepository.class, (String) null, "m_dailyReportDao"));
+		all.add(reportService(RouterConfigService.class) //
+								.req(RouterConfigManager.class, (String) null, "m_routerConfigManager"));
+		all.add(C(CachedRouterConfigService.class) //
+								.req(RouterConfigService.class, (String) null, "m_routerConfigService"));
+		all.add(C(RouterConfigAdjustor.class) //
+								.req(StateReportService.class, (String) null, "m_stateReportService") //
+								.req(RouterConfigManager.class, (String) null, "m_configManager") //
+								.req(RouterConfigService.class, (String) null, "m_routerService") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager") //
+								.req(DailyReportRepository.class, (String) null, "m_dailyReportDao"));
 
 		all.add(reportService(JarReportService.class));
 

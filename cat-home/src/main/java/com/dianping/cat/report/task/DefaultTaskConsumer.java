@@ -27,8 +27,6 @@ import java.util.concurrent.locks.LockSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
@@ -38,14 +36,11 @@ import com.dianping.cat.core.dal.TaskEntity;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class DefaultTaskConsumer extends TaskConsumer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTaskConsumer.class);
 
-	@Inject
 	private ReportFacade m_reportFacade;
 
-	@Inject
 	private TaskRepository m_taskDao;
 
 	@Override

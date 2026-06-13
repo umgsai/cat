@@ -18,15 +18,11 @@
  */
 package com.dianping.cat.system.page.login.service;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.system.page.login.spi.ITokenManager;
 
 public class TokenManager implements ITokenManager<SigninContext, Token> {
-	@Inject
 	private CookieManager m_cookieManager;
 
-	@Inject
 	private TokenBuilder m_tokenBuilder;
 
 	public void setCookieManager(CookieManager cookieManager) {

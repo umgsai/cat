@@ -18,16 +18,12 @@
  */
 package com.dianping.cat.system.page.login.service;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.system.page.login.spi.ISigninService;
 
 public class SigninService implements ISigninService<SigninContext, Credential, Session> {
 
-	@Inject
 	private TokenManager m_tokenManager;
 
-	@Inject
 	private SessionManager m_sessionManager;
 
 	@Override
@@ -62,5 +58,13 @@ public class SigninService implements ISigninService<SigninContext, Credential, 
 		} else {
 			return null;
 		}
+	}
+
+	public void setSessionManager(SessionManager sessionManager) {
+		m_sessionManager = sessionManager;
+	}
+
+	public void setTokenManager(TokenManager tokenManager) {
+		m_tokenManager = tokenManager;
 	}
 }

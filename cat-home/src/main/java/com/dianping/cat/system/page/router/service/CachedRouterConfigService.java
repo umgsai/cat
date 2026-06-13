@@ -20,18 +20,14 @@ package com.dianping.cat.system.page.router.service;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.home.router.entity.RouterConfig;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-@Named
 public class CachedRouterConfigService implements Initializable {
 
-	@Inject
 	private RouterConfigService m_routerConfigService;
 
 	private volatile RouterConfig m_routerConfig;
@@ -62,4 +58,7 @@ public class CachedRouterConfigService implements Initializable {
 		m_routerConfig = m_routerConfigService.queryLastReport(Constants.CAT);
 	}
 
+	public void setRouterConfigService(RouterConfigService routerConfigService) {
+		m_routerConfigService = routerConfigService;
+	}
 }

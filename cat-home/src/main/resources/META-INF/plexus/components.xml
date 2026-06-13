@@ -47,6 +47,54 @@
 			<implementation>com.dianping.cat.report.HourlyReportContentTableProvider</implementation>
 		</component>
 		<component>
+			<role>com.dianping.cat.report.task.DefaultTaskConsumer</role>
+			<implementation>com.dianping.cat.report.task.DefaultTaskConsumer</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.task.ReportFacade</role>
+					<field-name>m_reportFacade</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.task.TaskRepository</role>
+					<field-name>m_taskDao</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.task.cmdb.ProjectUpdateTask</role>
+			<implementation>com.dianping.cat.report.task.cmdb.ProjectUpdateTask</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.service.HostinfoService</role>
+					<field-name>m_hostInfoService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.service.ProjectService</role>
+					<field-name>m_projectService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.page.transaction.service.TransactionReportService</role>
+					<field-name>m_reportService</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.report.server.ServersUpdater</role>
+			<implementation>com.dianping.cat.report.task.DefaultRemoteServersUpdater</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.report.service.LocalModelService</role>
+					<role-hint>state</role-hint>
+					<field-name>m_localService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.service.ModelService</role>
+					<role-hint>state</role-hint>
+					<field-name>m_service</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.dianping.cat.report.page.home.Handler</role>
 			<implementation>com.dianping.cat.report.page.home.Handler</implementation>
 			<requirements>
@@ -869,6 +917,46 @@
 		<component>
 			<role>com.dianping.cat.system.page.permission.ResourceConfigManager</role>
 			<implementation>com.dianping.cat.system.page.permission.ResourceConfigManager</implementation>
+		</component>
+		<component>
+			<role>com.dianping.cat.system.page.login.service.SigninService</role>
+			<implementation>com.dianping.cat.system.page.login.service.SigninService</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.system.page.login.service.TokenManager</role>
+					<field-name>m_tokenManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.system.page.login.service.SessionManager</role>
+					<field-name>m_sessionManager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.system.page.login.service.TokenManager</role>
+			<implementation>com.dianping.cat.system.page.login.service.TokenManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.system.page.login.service.CookieManager</role>
+					<field-name>m_cookieManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.system.page.login.service.TokenBuilder</role>
+					<field-name>m_tokenBuilder</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.system.page.login.service.CookieManager</role>
+			<implementation>com.dianping.cat.system.page.login.service.CookieManager</implementation>
+		</component>
+		<component>
+			<role>com.dianping.cat.system.page.login.service.TokenBuilder</role>
+			<implementation>com.dianping.cat.system.page.login.service.TokenBuilder</implementation>
+		</component>
+		<component>
+			<role>com.dianping.cat.system.page.login.service.SessionManager</role>
+			<implementation>com.dianping.cat.system.page.login.service.SessionManager</implementation>
 		</component>
 		<component>
 			<role>org.unidal.initialization.ModuleManager</role>
@@ -2219,15 +2307,19 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+					<field-name>m_dailyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+					<field-name>m_dailyReportContentDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2237,15 +2329,19 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.report.page.state.service.StateReportService</role>
+					<field-name>m_stateReportService</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.system.page.router.config.RouterConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.system.page.router.service.RouterConfigService</role>
+					<field-name>m_reportService</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+					<field-name>m_dailyReportDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2254,31 +2350,40 @@
 			<implementation>com.dianping.cat.system.page.router.service.RouterConfigService</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.cat.system.page.router.config.RouterConfigManager</role>
-				</requirement>
-				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository</role>
+					<field-name>m_hourlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository</role>
+					<field-name>m_hourlyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+					<field-name>m_dailyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository</role>
+					<field-name>m_dailyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository</role>
+					<field-name>m_weeklyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository</role>
+					<field-name>m_weeklyReportContentDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository</role>
+					<field-name>m_monthlyReportDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository</role>
+					<field-name>m_monthlyReportContentDao</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.system.page.router.config.RouterConfigManager</role>
+					<field-name>m_routerConfigManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2288,6 +2393,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.system.page.router.service.RouterConfigService</role>
+					<field-name>m_routerConfigService</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -2297,18 +2403,23 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.report.page.state.service.StateReportService</role>
+					<field-name>m_stateReportService</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.system.page.router.config.RouterConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.system.page.router.service.RouterConfigService</role>
+					<field-name>m_routerService</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_serverConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.core.report.daily.repository.DailyReportRepository</role>
+					<field-name>m_dailyReportDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -3349,42 +3460,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.system.page.login.service.SigninService</role>
-			<implementation>com.dianping.cat.system.page.login.service.SigninService</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.system.page.login.service.TokenManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.system.page.login.service.SessionManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.system.page.login.service.TokenManager</role>
-			<implementation>com.dianping.cat.system.page.login.service.TokenManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.system.page.login.service.CookieManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.system.page.login.service.TokenBuilder</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.system.page.login.service.CookieManager</role>
-			<implementation>com.dianping.cat.system.page.login.service.CookieManager</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.system.page.login.service.TokenBuilder</role>
-			<implementation>com.dianping.cat.system.page.login.service.TokenBuilder</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.system.page.login.service.SessionManager</role>
-			<implementation>com.dianping.cat.system.page.login.service.SessionManager</implementation>
-		</component>
-		<component>
 			<role>com.dianping.cat.system.page.config.Handler</role>
 			<implementation>com.dianping.cat.system.page.config.Handler</implementation>
 			<requirements>
@@ -3675,20 +3750,6 @@
 		<component>
 			<role>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</role>
 			<implementation>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</role>
-			<implementation>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.system.page.permission.Handler</role>

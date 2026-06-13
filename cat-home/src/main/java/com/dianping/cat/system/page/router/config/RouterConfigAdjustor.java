@@ -28,8 +28,6 @@ import java.util.Map.Entry;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.helper.Splitters;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -54,22 +52,16 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.router.service.RouterConfigService;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
-@Named
 public class RouterConfigAdjustor {
 
-	@Inject
 	private StateReportService m_stateReportService;
 
-	@Inject
 	private RouterConfigManager m_configManager;
 
-	@Inject
 	private RouterConfigService m_routerService;
 
-	@Inject
 	private ServerConfigManager m_serverConfigManager;
 
-	@Inject
 	private DailyReportRepository m_dailyReportDao;
 
 	public void Adjust(Date period) {

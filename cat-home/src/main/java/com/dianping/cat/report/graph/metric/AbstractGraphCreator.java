@@ -28,7 +28,6 @@ import java.util.Set;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.alarm.spi.AlertManager;
 import com.dianping.cat.helper.TimeHelper;
@@ -37,13 +36,10 @@ import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class AbstractGraphCreator implements LogEnabled {
-	@Inject
 	protected BaselineService m_baselineService;
 
-	@Inject
 	protected DataExtractor m_dataExtractor;
 
-	@Inject
 	protected AlertManager m_alertManager;
 
 	protected int m_lastMinute = 6;

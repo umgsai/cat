@@ -51,6 +51,7 @@ import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
 import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.state.StateAnalyzer;
+import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.consumer.storage.StorageAnalyzer;
 import com.dianping.cat.consumer.top.TopAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
@@ -87,9 +88,22 @@ import com.dianping.cat.report.page.statistics.service.HeavyReportService;
 import com.dianping.cat.report.page.statistics.service.JarReportService;
 import com.dianping.cat.report.page.statistics.service.ServiceReportService;
 import com.dianping.cat.report.page.statistics.service.UtilizationReportService;
+import com.dianping.cat.report.page.state.service.LocalStateService;
 import com.dianping.cat.report.page.transaction.service.TransactionReportService;
+import com.dianping.cat.report.server.ServersUpdater;
+import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.report.task.DefaultRemoteServersUpdater;
+import com.dianping.cat.report.task.DefaultTaskConsumer;
+import com.dianping.cat.report.task.ReportFacade;
+import com.dianping.cat.report.task.cmdb.ProjectUpdateTask;
+import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.system.page.login.service.CookieManager;
+import com.dianping.cat.system.page.login.service.SessionManager;
+import com.dianping.cat.system.page.login.service.SigninService;
+import com.dianping.cat.system.page.login.service.TokenBuilder;
+import com.dianping.cat.system.page.login.service.TokenManager;
 import com.dianping.cat.system.page.permission.ResourceConfigManager;
 import com.dianping.cat.system.page.permission.UserConfigManager;
 
@@ -133,6 +147,8 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		// must define in home module instead of core
 		all.addAll(defineTableProviderComponents());
+
+		all.addAll(defineTaskComponents());
 
 		all.add(C(com.dianping.cat.report.page.home.Handler.class) //
 								.req(com.dianping.cat.report.page.home.JspViewer.class, (String) null, "m_jspViewer") //
@@ -360,6 +376,16 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		all.add(C(ResourceConfigManager.class));
 
+		all.add(C(SigninService.class) //
+								.req(TokenManager.class, (String) null, "m_tokenManager") //
+								.req(SessionManager.class, (String) null, "m_sessionManager"));
+		all.add(C(TokenManager.class) //
+								.req(CookieManager.class, (String) null, "m_cookieManager") //
+								.req(TokenBuilder.class, (String) null, "m_tokenBuilder"));
+		all.add(C(CookieManager.class));
+		all.add(C(TokenBuilder.class));
+		all.add(C(SessionManager.class));
+
 		all.add(C(ModuleManager.class, DefaultModuleManager.class) //
 								.config(E("topLevelModules").value(CatHomeModule.ID)));
 
@@ -420,6 +446,23 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		List<Component> all = new ArrayList<Component>();
 
 		all.add(C(DomainGroupConfigManager.class));
+
+		return all;
+	}
+
+	private List<Component> defineTaskComponents() {
+		List<Component> all = new ArrayList<Component>();
+
+		all.add(C(DefaultTaskConsumer.class) //
+								.req(ReportFacade.class, (String) null, "m_reportFacade") //
+								.req(TaskRepository.class, (String) null, "m_taskDao"));
+		all.add(C(ProjectUpdateTask.class) //
+								.req(HostinfoService.class, (String) null, "m_hostInfoService") //
+								.req(ProjectService.class, (String) null, "m_projectService") //
+								.req(TransactionReportService.class, (String) null, "m_reportService"));
+		all.add(C(ServersUpdater.class, DefaultRemoteServersUpdater.class) //
+								.req(LocalModelService.class, LocalStateService.ID, "m_localService") //
+								.req(ModelService.class, StateAnalyzer.ID, "m_service"));
 
 		return all;
 	}

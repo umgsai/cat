@@ -29,7 +29,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -47,7 +46,6 @@ public class BusinessTagConfigManager implements Initializable {
 
 	public final static String TAG_CONFIG = "tag";
 
-	@Inject
 	private BusinessConfigRepository m_configDao;
 
 	private int m_configId;
