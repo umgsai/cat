@@ -26,8 +26,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -40,7 +38,6 @@ import com.dianping.cat.home.exception.entity.ExceptionRuleConfig;
 import com.dianping.cat.home.exception.transform.DefaultSaxParser;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class ExceptionRuleConfigManager implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionRuleConfigManager.class);
 
@@ -50,10 +47,8 @@ public class ExceptionRuleConfigManager implements Initializable {
 
 	public static String TOTAL_STRING = "Total";
 
-	@Inject
 	private ConfigRepository m_configDao;
 
-	@Inject
 	private ContentFetcher m_fetcher;
 
 	private int m_configId;

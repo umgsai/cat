@@ -29,7 +29,9 @@ import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
+import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
@@ -70,7 +72,9 @@ public class ProblemComponentConfigurator extends AbstractResourceConfigurator {
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(ExceptionRuleConfigManager.class));
+		all.add(C(ExceptionRuleConfigManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher"));
 
 		all.add(reportService(ProblemReportService.class));
 

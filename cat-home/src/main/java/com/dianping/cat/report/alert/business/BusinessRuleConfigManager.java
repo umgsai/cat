@@ -30,8 +30,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.rule.entity.Condition;
@@ -50,7 +48,6 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-@Named
 public class BusinessRuleConfigManager implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessRuleConfigManager.class);
 
@@ -62,7 +59,6 @@ public class BusinessRuleConfigManager implements Initializable {
 
 	Map<String, MonitorRules> m_rules = new ConcurrentHashMap<String, MonitorRules>();
 
-	@Inject
 	private BusinessConfigRepository m_configDao;
 
 	public void setConfigDao(BusinessConfigRepository configDao) {

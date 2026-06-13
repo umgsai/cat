@@ -28,7 +28,9 @@ import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
+import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
@@ -39,6 +41,8 @@ import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportReposit
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.report.ReportBucketManager;
+import com.dianping.cat.report.alert.config.BaseRuleHelper;
+import com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager;
 import com.dianping.cat.report.alert.transaction.TransactionAlert;
 import com.dianping.cat.report.alert.transaction.TransactionContactor;
 import com.dianping.cat.report.alert.transaction.TransactionDecorator;
@@ -60,7 +64,7 @@ public class TransactionComponentConfigurator extends AbstractResourceConfigurat
 
 		all.add(C(TransactionMergeHelper.class));
 		all.add(reportService(TransactionReportService.class));
-		all.add(A(TransactionRuleConfigManager.class));
+		all.add(ruleConfigManager(TransactionRuleConfigManager.class));
 
 		all.add(C(Contactor.class, TransactionContactor.ID, TransactionContactor.class)
 								.req(ProjectService.class,	AlertConfigManager.class));
@@ -90,5 +94,13 @@ public class TransactionComponentConfigurator extends AbstractResourceConfigurat
 								.req(WeeklyReportContentRepository.class, (String) null, "m_weeklyReportContentDao") //
 								.req(MonthlyReportRepository.class, (String) null, "m_monthlyReportDao") //
 								.req(MonthlyReportContentRepository.class, (String) null, "m_monthlyReportContentDao");
+	}
+
+	private Component ruleConfigManager(Class<?> implementation) {
+		return C(implementation) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher") //
+								.req(UserDefinedRuleManager.class, (String) null, "m_manager") //
+								.req(BaseRuleHelper.class, (String) null, "m_helper");
 	}
 }

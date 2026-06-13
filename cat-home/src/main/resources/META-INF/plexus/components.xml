@@ -925,15 +925,19 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.alert.config.BaseRuleHelper</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager</role>
+					<field-name>m_manager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.config.BaseRuleHelper</role>
+					<field-name>m_helper</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1035,15 +1039,19 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.alert.config.BaseRuleHelper</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager</role>
+					<field-name>m_manager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.config.BaseRuleHelper</role>
+					<field-name>m_helper</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1183,6 +1191,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1389,15 +1398,19 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.report.alert.config.BaseRuleHelper</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager</role>
+					<field-name>m_manager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.report.alert.config.BaseRuleHelper</role>
+					<field-name>m_helper</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -1545,9 +1558,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -3415,6 +3430,15 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+			<implementation>com.dianping.cat.core.config.repository.ConfigRepository</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>

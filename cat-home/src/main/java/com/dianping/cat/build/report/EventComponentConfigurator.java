@@ -28,7 +28,9 @@ import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
+import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
@@ -39,10 +41,12 @@ import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportReposit
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.report.ReportBucketManager;
+import com.dianping.cat.report.alert.config.BaseRuleHelper;
 import com.dianping.cat.report.alert.event.EventAlert;
 import com.dianping.cat.report.alert.event.EventContactor;
 import com.dianping.cat.report.alert.event.EventDecorator;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
+import com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager;
 import com.dianping.cat.report.page.event.service.CompositeEventService;
 import com.dianping.cat.report.page.event.service.EventReportService;
 import com.dianping.cat.report.page.event.service.HistoricalEventService;
@@ -57,7 +61,7 @@ public class EventComponentConfigurator extends AbstractResourceConfigurator {
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(EventRuleConfigManager.class));
+		all.add(ruleConfigManager(EventRuleConfigManager.class));
 
 		all.add(C(Contactor.class, EventContactor.ID, EventContactor.class)
 								.req(ProjectService.class,	AlertConfigManager.class));
@@ -89,5 +93,13 @@ public class EventComponentConfigurator extends AbstractResourceConfigurator {
 								.req(WeeklyReportContentRepository.class, (String) null, "m_weeklyReportContentDao") //
 								.req(MonthlyReportRepository.class, (String) null, "m_monthlyReportDao") //
 								.req(MonthlyReportContentRepository.class, (String) null, "m_monthlyReportContentDao");
+	}
+
+	private Component ruleConfigManager(Class<?> implementation) {
+		return C(implementation) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher") //
+								.req(UserDefinedRuleManager.class, (String) null, "m_manager") //
+								.req(BaseRuleHelper.class, (String) null, "m_helper");
 	}
 }

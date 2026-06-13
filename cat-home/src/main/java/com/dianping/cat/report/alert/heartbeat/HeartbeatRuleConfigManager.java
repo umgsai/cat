@@ -29,9 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.unidal.lookup.annotation.Named;
 
-@Named
 public class HeartbeatRuleConfigManager extends BaseRuleConfigManager implements Initializable {
 
 	private static final String CONFIG_NAME = "heartbeatRuleConfig";

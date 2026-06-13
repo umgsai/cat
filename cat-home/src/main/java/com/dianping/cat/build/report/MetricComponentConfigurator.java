@@ -30,6 +30,7 @@ import com.dianping.cat.alarm.spi.receiver.Contactor;
 import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
+import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
 import com.dianping.cat.core.mybatis.repository.baseline.BaselineRepository;
 import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
@@ -69,7 +70,8 @@ public class MetricComponentConfigurator extends AbstractResourceConfigurator {
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(BusinessRuleConfigManager.class));
+		all.add(C(BusinessRuleConfigManager.class) //
+								.req(BusinessConfigRepository.class, (String) null, "m_configDao"));
 
 		all.add(reportService(BusinessReportService.class));
 

@@ -20,9 +20,7 @@ package com.dianping.cat.report.alert.event;
 
 import com.dianping.cat.report.alert.spi.config.BaseRuleConfigManager;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.unidal.lookup.annotation.Named;
 
-@Named
 public class EventRuleConfigManager extends BaseRuleConfigManager implements Initializable {
 
 	private static final String CONFIG_NAME = "eventRule";
