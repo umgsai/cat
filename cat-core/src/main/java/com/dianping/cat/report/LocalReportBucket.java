@@ -38,21 +38,16 @@ import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Splitters;
 import org.unidal.helper.Splitters.StringSplitter;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.PathBuilder;
 
-@Named(type = ReportBucket.class, instantiationStrategy = Named.PER_LOOKUP)
 public class LocalReportBucket implements ReportBucket, LogEnabled {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalReportBucket.class);
 
-	@Inject
 	private PathBuilder m_pathBuilder;
 
-	@Inject
 	private ServerConfigManager m_configManager;
 
 	private File m_baseDir = new File("target/bucket/report");

@@ -44,13 +44,18 @@ import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
 import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository;
+import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
 import com.dianping.cat.message.DefaultPathBuilder;
 import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.message.storage.LocalMessageBucket;
+import com.dianping.cat.message.storage.MessageBucket;
 import com.dianping.cat.report.DefaultReportBucketManager;
 import com.dianping.cat.report.DomainValidator;
 import com.dianping.cat.report.LocalReportBucket;
+import com.dianping.cat.report.ReportBucket;
+import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.server.RemoteServersManager;
+import com.dianping.cat.report.server.ServersUpdater;
 import com.dianping.cat.report.server.ServersUpdaterManager;
 import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.IpService;
@@ -75,7 +80,8 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 				.req(ServerConfigManager.class, (String) null, "m_manager"));
 		all.add(C(IpService.class));
 		all.add(C(IpService2.class));
-		all.add(A(TaskManager.class));
+		all.add(C(TaskManager.class) //
+				.req(TaskRepository.class, (String) null, "m_taskDao"));
 		all.add(C(ServerStatisticManager.class));
 		all.add(C(DomainValidator.class));
 		all.add(C(ContentFetcher.class, LocalResourceContentFetcher.class));
@@ -107,7 +113,9 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.addAll(defineStorageComponents());
 
 		all.add(C(RemoteServersManager.class));
-		all.add(A(ServersUpdaterManager.class));
+		all.add(C(ServersUpdaterManager.class) //
+				.req(ServersUpdater.class, (String) null, "m_remoteServerUpdater") //
+				.req(RemoteServersManager.class, (String) null, "m_remoteServersManager"));
 
 		all.add(C(TpValueStatisticConfigManager.class) //
 				.req(ConfigRepository.class, (String) null, "m_configDao") //
@@ -130,9 +138,12 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 	private Collection<Component> defineStorageComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(DefaultReportBucketManager.class));
-		all.add(A(LocalReportBucket.class));
-		all.add(A(LocalMessageBucket.class));
+		all.add(C(ReportBucketManager.class, DefaultReportBucketManager.class) //
+				.req(ServerConfigManager.class, (String) null, "m_configManager"));
+		all.add(C(ReportBucket.class, LocalReportBucket.class).is(PER_LOOKUP) //
+				.req(PathBuilder.class, (String) null, "m_pathBuilder") //
+				.req(ServerConfigManager.class, (String) null, "m_configManager"));
+		all.add(C(MessageBucket.class, LocalMessageBucket.ID, LocalMessageBucket.class).is(PER_LOOKUP));
 
 		return all;
 	}

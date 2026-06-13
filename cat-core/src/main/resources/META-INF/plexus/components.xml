@@ -53,6 +53,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.task.TaskRepository</role>
+					<field-name>m_taskDao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -176,6 +177,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -186,9 +188,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.message.PathBuilder</role>
+					<field-name>m_pathBuilder</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -208,9 +212,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.report.server.ServersUpdater</role>
+					<field-name>m_remoteServerUpdater</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.report.server.RemoteServersManager</role>
+					<field-name>m_remoteServersManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -279,6 +285,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -288,6 +295,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -297,6 +305,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -306,6 +315,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -315,6 +325,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -324,6 +335,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -333,6 +345,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -342,6 +355,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -351,6 +365,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -360,6 +375,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -369,6 +385,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -378,6 +395,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -387,6 +405,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -612,6 +631,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -621,6 +641,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -630,6 +651,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -639,6 +661,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -648,6 +671,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -657,6 +681,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -666,6 +691,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -675,6 +701,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -684,6 +711,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -693,6 +721,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -702,6 +731,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -711,6 +741,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -720,6 +751,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
+					<field-name>m_dataSourceManager</field-name>
 				</requirement>
 			</requirements>
 		</component>

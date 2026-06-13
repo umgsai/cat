@@ -24,21 +24,16 @@ import java.util.Set;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-@Named
 public class ServersUpdaterManager implements Initializable {
 
-	@Inject
 	private ServersUpdater m_remoteServerUpdater;
 
-	@Inject
 	private RemoteServersManager m_remoteServersManager;
 
 	@Override

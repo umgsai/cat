@@ -26,7 +26,6 @@ import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
 import org.unidal.dal.jdbc.datasource.DataSourceManager;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.report.daily.dao.DailyReportMapper;
@@ -42,7 +41,6 @@ public class DailyReportRepository {
 
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 
-	@Inject
 	private DataSourceManager m_dataSourceManager;
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;

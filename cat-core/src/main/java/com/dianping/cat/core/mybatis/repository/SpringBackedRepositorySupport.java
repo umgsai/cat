@@ -9,12 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.datasource.DataSourceManager;
-import org.unidal.lookup.annotation.Inject;
 
 public abstract class SpringBackedRepositorySupport<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpringBackedRepositorySupport.class);
 
-	@Inject
 	private DataSourceManager m_dataSourceManager;
 
 	private final Class<T> m_mapperClass;

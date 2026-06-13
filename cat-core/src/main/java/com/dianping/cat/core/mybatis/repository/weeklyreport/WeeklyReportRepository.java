@@ -24,7 +24,6 @@ import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
 import org.unidal.dal.jdbc.datasource.DataSourceManager;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.mybatis.generated.weeklyreport.dao.WeeklyreportMapper;
@@ -39,8 +38,6 @@ public class WeeklyReportRepository {
 	private static final String MAPPER_RESOURCE = "mybatis/mapper/WeeklyreportMapper.xml";
 
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
-
-	@Inject
 	private DataSourceManager m_dataSourceManager;
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;

@@ -36,8 +36,6 @@ import org.slf4j.LoggerFactory;
 import org.unidal.helper.Scanners;
 import org.unidal.helper.Scanners.FileMatcher;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -45,11 +43,9 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named(type = ReportBucketManager.class)
 public class DefaultReportBucketManager extends ContainerHolder implements ReportBucketManager, Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultReportBucketManager.class);
 
-	@Inject
 	private ServerConfigManager m_configManager;
 
 	private ReportBucketFactory m_bucketFactory;

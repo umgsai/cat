@@ -28,14 +28,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import org.unidal.lookup.annotation.Named;
 import org.xerial.snappy.SnappyOutputStream;
 
 import com.dianping.cat.message.CodecHandler;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 
-@Named(type = MessageBucket.class, value = LocalMessageBucket.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class LocalMessageBucket implements MessageBucket {
 	public static final String ID = "local";
 

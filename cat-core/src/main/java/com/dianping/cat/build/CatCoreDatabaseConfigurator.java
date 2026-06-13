@@ -65,19 +65,19 @@ final class CatCoreDatabaseConfigurator extends AbstractJdbcResourceConfigurator
 	}
 
 	private void addRepositoryComponents(List<Component> components) {
-		components.add(C(ConfigRepository.class).req(DataSourceManager.class));
-		components.add(C(DailyReportRepository.class).req(DataSourceManager.class));
-		components.add(C(BusinessConfigRepository.class).req(DataSourceManager.class));
-		components.add(C(DailyReportContentRepository.class).req(DataSourceManager.class));
-		components.add(C(HostinfoRepository.class).req(DataSourceManager.class));
-		components.add(C(HourlyReportRepository.class).req(DataSourceManager.class));
-		components.add(C(HourlyReportContentRepository.class).req(DataSourceManager.class));
-		components.add(C(MonthlyReportRepository.class).req(DataSourceManager.class));
-		components.add(C(MonthlyReportContentRepository.class).req(DataSourceManager.class));
-		components.add(C(ProjectRepository.class).req(DataSourceManager.class));
-		components.add(C(TaskRepository.class).req(DataSourceManager.class));
-		components.add(C(WeeklyReportRepository.class).req(DataSourceManager.class));
-		components.add(C(WeeklyReportContentRepository.class).req(DataSourceManager.class));
+		components.add(C(ConfigRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(DailyReportRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(BusinessConfigRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(DailyReportContentRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(HostinfoRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(HourlyReportRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(HourlyReportContentRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(MonthlyReportRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(MonthlyReportContentRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(ProjectRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(TaskRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(WeeklyReportRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
+		components.add(C(WeeklyReportContentRepository.class).req(DataSourceManager.class, (String) null, "m_dataSourceManager"));
 	}
 
 	private boolean isReplacedDaoRole(String role) {

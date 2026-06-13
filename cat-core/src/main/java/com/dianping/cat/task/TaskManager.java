@@ -24,13 +24,10 @@ import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
 import com.dianping.cat.spring.CatSpringContext;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.Calendar;
 import java.util.Date;
 
-@Named
 public class TaskManager {
 
 	public static final int REPORT_HOUR = 0;
@@ -47,7 +44,6 @@ public class TaskManager {
 
 	private static final int STATUS_TODO = 1;
 
-	@Inject
 	private TaskRepository m_taskDao;
 
 	public boolean createTask(Date period, String domain, String name, TaskCreationPolicy prolicy) {

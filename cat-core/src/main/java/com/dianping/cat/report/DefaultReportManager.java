@@ -32,7 +32,6 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
@@ -50,19 +49,14 @@ import static com.dianping.cat.Constants.HOUR;
 	* for a couple of hours.
 	*/
 public class DefaultReportManager<T> extends ContainerHolder implements ReportManager<T>, Initializable, LogEnabled {
-	@Inject
 	private ReportDelegate<T> m_reportDelegate;
 
-	@Inject
 	private ReportBucketManager m_bucketManager;
 
-	@Inject
 	private HourlyReportRepository m_reportDao;
 
-	@Inject
 	private HourlyReportContentRepository m_reportContentDao;
 
-	@Inject
 	private DomainValidator m_validator;
 
 	private String m_name;
