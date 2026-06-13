@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.tuple.Pair;
 import org.xml.sax.SAXException;
@@ -62,16 +61,12 @@ import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 public abstract class BaseRuleConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BaseRuleConfigManager.class);
 
-	@Inject
 	protected ConfigRepository m_configDao;
 
-	@Inject
 	protected UserDefinedRuleManager m_manager;
 
-	@Inject
 	protected BaseRuleHelper m_helper;
 
-	@Inject
 	protected ContentFetcher m_fetcher;
 
 	protected int m_configId;

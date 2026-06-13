@@ -2681,8 +2681,11 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public UserDefinedRuleManager userDefinedRuleManager() {
-		return new UserDefinedRuleManager();
+	public UserDefinedRuleManager userDefinedRuleManager(UserDefineRuleRepository userDefineRuleRepository) {
+		UserDefinedRuleManager manager = new UserDefinedRuleManager();
+
+		manager.setDao(userDefineRuleRepository);
+		return manager;
 	}
 
 	@Bean

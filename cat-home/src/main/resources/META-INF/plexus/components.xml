@@ -3098,6 +3098,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleRepository</role>
+					<field-name>m_dao</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -3430,15 +3431,6 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
-			<implementation>com.dianping.cat.core.config.repository.ConfigRepository</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.datasource.DataSourceManager</role>
 				</requirement>
 			</requirements>
 		</component>

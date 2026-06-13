@@ -19,18 +19,14 @@
 package com.dianping.cat.report.alert.spi.config;
 
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.alarm.UserDefineRule;
 import com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleRepository;
 import com.dianping.cat.alarm.UserDefineRuleEntity;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class UserDefinedRuleManager {
 
-	@Inject
 	private UserDefineRuleRepository m_dao;
 
 	public String addUserDefineText(String userDefinedText) throws DalException {
@@ -71,6 +67,10 @@ public class UserDefinedRuleManager {
 		if (dao != null) {
 			m_dao = dao;
 		}
+	}
+
+	public void setDao(UserDefineRuleRepository dao) {
+		m_dao = dao;
 	}
 
 }
