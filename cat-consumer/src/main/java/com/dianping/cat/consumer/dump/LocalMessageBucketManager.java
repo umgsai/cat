@@ -42,7 +42,6 @@ import org.unidal.helper.Scanners.FileMatcher;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
@@ -73,13 +72,10 @@ public class LocalMessageBucketManager extends ContainerHolder
 
 	protected Logger m_logger;
 
-	@Inject
 	private ServerConfigManager m_configManager;
 
-	@Inject
 	private ServerStatisticManager m_serverStateManager;
 
-	@Inject
 	private PathBuilder m_pathBuilder;
 
 	private MessageBucketFactory m_bucketFactory;

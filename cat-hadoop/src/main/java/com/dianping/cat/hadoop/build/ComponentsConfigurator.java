@@ -81,21 +81,22 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		List<Component> all = new ArrayList<Component>();
 
 		all.add(C(FileSystemManager.class) //
-								.req(ServerConfigManager.class));
+								.req(ServerConfigManager.class, (String) null, "m_configManager"));
 
 		all.add(C(Module.class, CatHadoopModule.ID, CatHadoopModule.class));
 
 		all.add(C(MessageBucket.class, HdfsMessageBucket.ID, HdfsMessageBucket.class) //
 								.is(PER_LOOKUP) //
-								.req(FileSystemManager.class));
+								.req(FileSystemManager.class, (String) null, "m_manager"));
 
 		all.add(C(MessageBucket.class, HarfsMessageBucket.ID, HarfsMessageBucket.class) //
 								.is(PER_LOOKUP) //
-								.req(FileSystemManager.class));
+								.req(FileSystemManager.class, (String) null, "m_manager"));
 
 		all.add(C(MessageBucketManager.class, HdfsMessageBucketManager.ID, HdfsMessageBucketManager.class) //
-								.req(FileSystemManager.class, ServerConfigManager.class) //
-								.req(PathBuilder.class));
+								.req(FileSystemManager.class, (String) null, "m_manager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager") //
+								.req(PathBuilder.class, (String) null, "m_pathBuilder"));
 
 		return all;
 

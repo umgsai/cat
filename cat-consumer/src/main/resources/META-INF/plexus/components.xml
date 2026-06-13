@@ -166,11 +166,6 @@
 			<configuration>
 				<errorType>Error,RuntimeException,Exception</errorType>
 			</configuration>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerConfigManager</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.consumer.problem.ProblemHandler</role>
@@ -179,6 +174,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -399,12 +395,15 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.message.PathBuilder</role>
+					<field-name>m_pathBuilder</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.statistic.ServerStatisticManager</role>
+					<field-name>m_serverStateManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -701,6 +700,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.consumer.DatabaseParser</role>
+					<field-name>m_databaseParser</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -896,9 +896,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
 				</requirement>
 			</requirements>
 		</component>

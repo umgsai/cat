@@ -21,16 +21,12 @@ package com.dianping.cat.consumer.storage.builder;
 import java.util.Arrays;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.consumer.DatabaseParser;
 import com.dianping.cat.consumer.DatabaseParser.Database;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
-@Named(type = StorageBuilder.class, value = StorageSQLBuilder.ID)
 public class StorageSQLBuilder implements StorageBuilder {
 
 	public final static String ID = "SQL";
@@ -39,7 +35,6 @@ public class StorageSQLBuilder implements StorageBuilder {
 
 	public final static List<String> DEFAULT_METHODS = Arrays.asList("select", "delete", "insert", "update");
 
-	@Inject
 	private DatabaseParser m_databaseParser;
 
 	@Override

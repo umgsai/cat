@@ -7,6 +7,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -23,6 +24,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.hadoop.hdfs.FileSystemManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -34,6 +36,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.hadoop.hdfs.FileSystemManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -44,12 +47,15 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.hadoop.hdfs.FileSystemManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_serverConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.message.PathBuilder</role>
+					<field-name>m_pathBuilder</field-name>
 				</requirement>
 			</requirements>
 		</component>

@@ -29,8 +29,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.xml.sax.SAXException;
 
 import com.dianping.cat.Cat;
@@ -47,15 +45,12 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-@Named
 public class AllReportConfigManager implements Initializable, LogEnabled {
 
 	private static final String CONFIG_NAME = "all-report-config";
 
-	@Inject
 	private ConfigRepository m_configDao;
 
-	@Inject
 	private ContentFetcher m_fetcher;
 
 	private int m_configId;

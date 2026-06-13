@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.configuration.server.entity.Domain;
@@ -37,7 +36,6 @@ import com.dianping.cat.message.spi.MessageTree;
 public class LongExecutionProblemHandler extends ProblemHandler implements Initializable {
 	public static final String ID = "long-execution";
 
-	@Inject
 	private ServerConfigManager m_configManager;
 
 	private int[] m_defaultLongServiceDuration = { 50, 100, 500, 1000, 3000, 5000 };

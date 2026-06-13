@@ -25,9 +25,7 @@ import java.util.Map;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Named;
 
-@Named
 public class StorageBuilderManager extends ContainerHolder implements Initializable {
 
 	private Map<String, StorageBuilder> m_storageBuilders;

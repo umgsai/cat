@@ -24,7 +24,6 @@ import java.util.Date;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.hadoop.hdfs.FileSystemManager;
@@ -36,7 +35,6 @@ import com.dianping.cat.message.tree.MessageId;
 
 public abstract class AbstractHdfsMessageBucket implements MessageBucket {
 
-	@Inject
 	protected FileSystemManager m_manager;
 
 	protected MessageBlockReader m_reader;

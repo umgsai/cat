@@ -23,9 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.unidal.helper.Splitters;
-import org.unidal.lookup.annotation.Inject;
 
-import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.problem.model.entity.Entity;
 import com.dianping.cat.consumer.problem.model.entity.Machine;
 import com.dianping.cat.message.Event;
@@ -37,10 +35,6 @@ import com.dianping.cat.message.spi.MessageTree;
 public class DefaultProblemHandler extends ProblemHandler {
 	public static final String ID = "default-problem";
 
-	@Inject
-	private ServerConfigManager m_configManager;
-
-	@Inject
 	private Set<String> m_errorTypes;
 
 	@Override

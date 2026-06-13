@@ -61,6 +61,7 @@ import com.dianping.cat.consumer.state.StateDelegate;
 import com.dianping.cat.consumer.storage.StorageAnalyzer;
 import com.dianping.cat.consumer.storage.StorageDelegate;
 import com.dianping.cat.consumer.storage.StorageReportUpdater;
+import com.dianping.cat.consumer.storage.builder.StorageBuilder;
 import com.dianping.cat.consumer.storage.builder.StorageBuilderManager;
 import com.dianping.cat.consumer.storage.builder.StorageCacheBuilder;
 import com.dianping.cat.consumer.storage.builder.StorageRPCBuilder;
@@ -118,7 +119,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ConfigRepository.class, (String) null, "m_configDao") //
 								.req(ContentFetcher.class, (String) null, "m_fetcher") //
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
-		all.add(A(AllReportConfigManager.class));
+		all.add(C(AllReportConfigManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher"));
 		all.add(C(Module.class, CatConsumerModule.ID, CatConsumerModule.class));
 
 		return all;
@@ -175,7 +178,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 
 		all.add(C(MessageBucketManager.class, LocalMessageBucketManager.ID, LocalMessageBucketManager.class) //
-								.req(ServerConfigManager.class, PathBuilder.class, ServerStatisticManager.class));
+								.req(ServerConfigManager.class, (String) null, "m_configManager") //
+								.req(PathBuilder.class, (String) null, "m_pathBuilder") //
+								.req(ServerStatisticManager.class, (String) null, "m_serverStateManager"));
 
 		return all;
 	}
@@ -265,11 +270,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		final String ID = ProblemAnalyzer.ID;
 
 		all.add(C(ProblemHandler.class, DefaultProblemHandler.ID, DefaultProblemHandler.class)//
-								.config(E("errorType").value("Error,RuntimeException,Exception"))//
-								.req(ServerConfigManager.class));
+								.config(E("errorType").value("Error,RuntimeException,Exception")));
 
 		all.add(C(ProblemHandler.class, LongExecutionProblemHandler.ID, LongExecutionProblemHandler.class) //
-								.req(ServerConfigManager.class));
+								.req(ServerConfigManager.class, (String) null, "m_configManager"));
 
 		all.add(C(MessageAnalyzer.class, ID, ProblemAnalyzer.class).is(PER_LOOKUP) //
 								.req(ReportManager.class, ID, "m_reportManager")
@@ -361,11 +365,12 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		final List<Component> all = new ArrayList<Component>();
 		final String ID = StorageAnalyzer.ID;
 
-		all.add(A(StorageReportUpdater.class));
-		all.add(A(StorageBuilderManager.class));
-		all.add(A(StorageSQLBuilder.class));
-		all.add(A(StorageCacheBuilder.class));
-		all.add(A(StorageRPCBuilder.class));
+		all.add(C(StorageReportUpdater.class));
+		all.add(C(StorageBuilderManager.class));
+		all.add(C(StorageBuilder.class, StorageSQLBuilder.ID, StorageSQLBuilder.class) //
+								.req(DatabaseParser.class, (String) null, "m_databaseParser"));
+		all.add(C(StorageBuilder.class, StorageCacheBuilder.ID, StorageCacheBuilder.class));
+		all.add(C(StorageBuilder.class, StorageRPCBuilder.ID, StorageRPCBuilder.class));
 
 		all.add(C(MessageAnalyzer.class, ID, StorageAnalyzer.class).is(PER_LOOKUP) //
 								.req(ReportManager.class, ID, "m_reportManager") //

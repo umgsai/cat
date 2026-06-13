@@ -37,7 +37,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
 import java.io.IOException;
@@ -52,13 +51,10 @@ public class HdfsMessageBucketManager extends ContainerHolder implements Message
 
 	public static final String HARFS_BUCKET = "HarfsMessageBucket";
 
-	@Inject
 	private FileSystemManager m_manager;
 
-	@Inject
 	private PathBuilder m_pathBuilder;
 
-	@Inject
 	private ServerConfigManager m_serverConfigManager;
 
 	private Map<String, MessageBucket> m_buckets = new ConcurrentHashMap<String, MessageBucket>();
