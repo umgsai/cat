@@ -37,6 +37,48 @@
 			<implementation>com.dianping.cat.report.page.DomainGroupConfigManager</implementation>
 		</component>
 		<component>
+			<role>com.dianping.cat.config.sample.SampleConfigManager</role>
+			<implementation>com.dianping.cat.config.sample.SampleConfigManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+			<implementation>com.dianping.cat.config.server.ServerFilterConfigManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.config.business.BusinessConfigManager</role>
+			<implementation>com.dianping.cat.config.business.BusinessConfigManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository</role>
+					<field-name>m_configDao</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_serverConfigManager</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.dianping.cat.system.page.config.ConfigHtmlParser</role>
 			<implementation>com.dianping.cat.system.page.config.ConfigHtmlParser</implementation>
 		</component>
@@ -3728,10 +3770,6 @@
 					<role>com.dianping.cat.system.page.router.config.RouterConfigHandler</role>
 				</requirement>
 			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.config.sample.SampleConfigManager</role>
-			<implementation>com.dianping.cat.config.sample.SampleConfigManager</implementation>
 		</component>
 		<component>
 			<role>com.dianping.cat.system.page.project.Handler</role>

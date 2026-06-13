@@ -21,11 +21,9 @@ package com.dianping.cat.config.content;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.helper.Files;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 
-@Named(type = ContentFetcher.class)
 public class LocalResourceContentFetcher implements ContentFetcher, LogEnabled {
 	private final String PATH = "/config/";
 

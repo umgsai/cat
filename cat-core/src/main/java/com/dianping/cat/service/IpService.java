@@ -29,11 +29,9 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 
-@Named
 public class IpService implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IpService.class);
 

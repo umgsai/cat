@@ -100,6 +100,7 @@ import com.dianping.cat.report.task.cmdb.ProjectUpdateTask;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
+import com.dianping.cat.config.business.BusinessConfigManager;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
@@ -150,7 +151,7 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 	private List<Component> defineCommonComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(JsonBuilder.class));
+		all.add(C(JsonBuilder.class));
 
 		all.add(C(ValueTranslater.class, DefaultValueTranslater.class));
 
@@ -475,6 +476,15 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		List<Component> all = new ArrayList<Component>();
 
 		all.add(C(DomainGroupConfigManager.class));
+		all.add(C(SampleConfigManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(com.dianping.cat.config.content.ContentFetcher.class, (String) null, "m_fetcher"));
+		all.add(C(ServerFilterConfigManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(com.dianping.cat.config.content.ContentFetcher.class, (String) null, "m_fetcher"));
+		all.add(C(BusinessConfigManager.class) //
+								.req(BusinessConfigRepository.class, (String) null, "m_configDao") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 
 		return all;
 	}

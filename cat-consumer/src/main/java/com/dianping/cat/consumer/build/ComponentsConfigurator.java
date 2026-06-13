@@ -106,7 +106,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ConfigRepository.class, (String) null, "m_configDao") //
 								.req(ContentFetcher.class, (String) null, "m_fetcher"));
 		all.add(A(ServerConfigManager.class));
-		all.add(A(TpValueStatisticConfigManager.class));
+		all.add(C(TpValueStatisticConfigManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(A(AllReportConfigManager.class));
 		all.add(C(Module.class, CatConsumerModule.ID, CatConsumerModule.class));
 

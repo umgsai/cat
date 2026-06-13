@@ -36,9 +36,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import org.unidal.lookup.annotation.Named;
 
-@Named
 public class JsonBuilder {
 
 	private FieldNamingStrategy m_fieldNamingStrategy = new FieldNamingStrategy() {

@@ -22,11 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.report.service.ModelPeriod;
 
-@Named
 public class RemoteServersManager {
 
 	private volatile Map<String, Set<String>> m_currentServers = new ConcurrentHashMap<String, Set<String>>();

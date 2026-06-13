@@ -26,8 +26,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.xml.sax.SAXException;
 
 import com.dianping.cat.Cat;
@@ -41,15 +39,12 @@ import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-@Named(type = ServerFilterConfigManager.class)
 public class ServerFilterConfigManager implements Initializable {
 
 	private static final String CONFIG_NAME = "serverFilter";
 
-	@Inject
 	protected ConfigRepository m_configDao;
 
-	@Inject
 	protected ContentFetcher m_fetcher;
 
 	private volatile ServerFilterConfig m_config;

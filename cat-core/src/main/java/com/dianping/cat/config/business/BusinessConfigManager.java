@@ -32,8 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -47,13 +45,11 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-@Named
 public class BusinessConfigManager extends ContainerHolder implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessConfigManager.class);
 
 	public final static String BASE_CONFIG = "base";
 
-	@Inject
 	private BusinessConfigRepository m_configDao;
 
 	private ServerConfigManager m_serverConfigManager;

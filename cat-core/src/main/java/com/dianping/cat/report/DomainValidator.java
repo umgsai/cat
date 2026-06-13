@@ -18,11 +18,8 @@
  */
 package com.dianping.cat.report;
 
-import org.unidal.lookup.annotation.Named;
-
 import java.util.concurrent.ConcurrentHashMap;
 
-@Named
 public class DomainValidator {
 
 	private ConcurrentHashMap<String, String> m_valids = new ConcurrentHashMap<String, String>();

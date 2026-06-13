@@ -28,12 +28,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.helper.Files;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.service.IpService.IpInfo;
 
-@Named
 public class IpService2 implements Initializable {
 
 	private int m_offset;

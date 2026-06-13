@@ -18,11 +18,8 @@
  */
 package com.dianping.cat.statistic;
 
-import org.unidal.lookup.annotation.Named;
-
 import com.dianping.cat.statistic.ServerStatistic.Statistic;
 
-@Named
 public class ServerStatisticManager {
 
 	public ServerStatistic m_serverState = new ServerStatistic();

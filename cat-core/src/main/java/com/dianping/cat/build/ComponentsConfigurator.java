@@ -40,8 +40,10 @@ import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
+import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.message.DefaultPathBuilder;
+import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.message.storage.LocalMessageBucket;
 import com.dianping.cat.report.DefaultReportBucketManager;
 import com.dianping.cat.report.DomainValidator;
@@ -67,15 +69,17 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		all.add(A(ServerConfigManager.class));
 		all.add(A(HostinfoService.class));
-		all.add(A(IpService.class));
-		all.add(A(IpService2.class));
+		all.add(C(IpService.class));
+		all.add(C(IpService2.class));
 		all.add(A(TaskManager.class));
-		all.add(A(ServerStatisticManager.class));
-		all.add(A(DomainValidator.class));
-		all.add(A(LocalResourceContentFetcher.class));
-		all.add(A(ServerFilterConfigManager.class));
+		all.add(C(ServerStatisticManager.class));
+		all.add(C(DomainValidator.class));
+		all.add(C(ContentFetcher.class, LocalResourceContentFetcher.class));
+		all.add(C(ServerFilterConfigManager.class) //
+				.req(ConfigRepository.class, (String) null, "m_configDao") //
+				.req(ContentFetcher.class, (String) null, "m_fetcher"));
 
-		all.add(A(DefaultPathBuilder.class));
+		all.add(C(PathBuilder.class, DefaultPathBuilder.class));
 
 		all.add(A(PlexusMessageAnalyzerFactory.class));
 		all.add(A(DefaultMessageAnalyzerManager.class));
@@ -87,7 +91,9 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(C(SampleConfigManager.class) //
 				.req(ConfigRepository.class, (String) null, "m_configDao") //
 				.req(ContentFetcher.class, (String) null, "m_fetcher"));
-		all.add(A(BusinessConfigManager.class));
+		all.add(C(BusinessConfigManager.class) //
+				.req(BusinessConfigRepository.class, (String) null, "m_configDao") //
+				.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(C(ReportReloadConfigManager.class) //
 				.req(ConfigRepository.class, (String) null, "m_configDao") //
 				.req(ContentFetcher.class, (String) null, "m_fetcher"));
@@ -96,10 +102,13 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		all.addAll(defineStorageComponents());
 
-		all.add(A(RemoteServersManager.class));
+		all.add(C(RemoteServersManager.class));
 		all.add(A(ServersUpdaterManager.class));
 
-		all.add(A(TpValueStatisticConfigManager.class));
+		all.add(C(TpValueStatisticConfigManager.class) //
+				.req(ConfigRepository.class, (String) null, "m_configDao") //
+				.req(ContentFetcher.class, (String) null, "m_fetcher") //
+				.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(C(AtomicMessageConfigManager.class) //
 				.req(ConfigRepository.class, (String) null, "m_configDao") //
 				.req(ContentFetcher.class, (String) null, "m_fetcher"));

@@ -24,8 +24,6 @@ import java.util.Set;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -38,20 +36,16 @@ import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 
-@Named
 public class TpValueStatisticConfigManager implements Initializable {
 
 	public static final String DEFAULT = "default";
 
 	private static final String CONFIG_NAME = "tp-value-statistic-config";
 
-	@Inject
 	protected ConfigRepository m_configDao;
 
-	@Inject
 	protected ContentFetcher m_fetcher;
 
-	@Inject
 	private ServerConfigManager m_serverConfigManager;
 
 	private int m_configId;
