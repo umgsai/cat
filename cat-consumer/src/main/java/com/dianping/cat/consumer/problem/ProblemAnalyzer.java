@@ -29,21 +29,16 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@Named(type = MessageAnalyzer.class, value = ProblemAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> implements LogEnabled, Initializable {
 	public static final String ID = "problem";
 
-	@Inject(ID)
 	private ReportManager<ProblemReport> m_reportManager;
 
-	@Inject
 	private List<ProblemHandler> m_handlers;
 
 	@Override

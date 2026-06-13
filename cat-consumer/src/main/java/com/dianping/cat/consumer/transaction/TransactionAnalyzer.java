@@ -27,8 +27,6 @@ import java.util.Set;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.helper.Threads;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
@@ -54,23 +52,18 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 
-@Named(type = MessageAnalyzer.class, value = TransactionAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionReport> implements LogEnabled {
 
 	public static final String ID = "transaction";
 
 	private static final int m_statusCodeCountLimit = 100;
 
-	@Inject(ID)
 	private ReportManager<TransactionReport> m_reportManager;
 
-	@Inject
 	private ServerFilterConfigManager m_filterConfigManager;
 
-	@Inject
 	private TpValueStatisticConfigManager m_statisticManager;
 
-	@Inject
 	private AtomicMessageConfigManager m_atomicMessageConfigManager;
 
 	private final TransactionStatisticsComputer m_computer = new TransactionStatisticsComputer();

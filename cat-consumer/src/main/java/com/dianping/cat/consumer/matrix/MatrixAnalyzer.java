@@ -30,19 +30,15 @@ import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-@Named(type = MessageAnalyzer.class, value = MatrixAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class MatrixAnalyzer extends AbstractMessageAnalyzer<MatrixReport> implements LogEnabled {
 	public static final String ID = "matrix";
 
-	@Inject(ID)
 	private ReportManager<MatrixReport> m_reportManager;
 
 	@Override

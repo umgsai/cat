@@ -10,15 +10,19 @@
 				<requirement>
 					<role>com.dianping.cat.report.ReportManager</role>
 					<role-hint>transaction</role-hint>
+					<field-name>m_reportManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_filterConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.transaction.TpValueStatisticConfigManager</role>
+					<field-name>m_statisticManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.AtomicMessageConfigManager</role>
+					<field-name>m_atomicMessageConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -84,9 +88,11 @@
 				<requirement>
 					<role>com.dianping.cat.report.ReportManager</role>
 					<role-hint>event</role-hint>
+					<field-name>m_reportManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.AtomicMessageConfigManager</role>
+					<field-name>m_atomicMessageConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -175,6 +181,7 @@
 				<requirement>
 					<role>com.dianping.cat.report.ReportManager</role>
 					<role-hint>problem</role-hint>
+					<field-name>m_reportManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -239,9 +246,11 @@
 				<requirement>
 					<role>com.dianping.cat.report.ReportManager</role>
 					<role-hint>heartbeat</role-hint>
+					<field-name>m_reportManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_serverFilterConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -301,9 +310,11 @@
 				<requirement>
 					<role>com.dianping.cat.report.ReportManager</role>
 					<role-hint>top</role-hint>
+					<field-name>m_reportManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_serverFilterConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -351,12 +362,15 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.statistic.ServerStatisticManager</role>
+					<field-name>m_serverStateManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.MessageDumperManager</role>
+					<field-name>m_dumperManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.MessageFinderManager</role>
+					<field-name>m_finderManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -389,15 +403,19 @@
 				<requirement>
 					<role>com.dianping.cat.report.ReportManager</role>
 					<role-hint>state</role-hint>
+					<field-name>m_reportManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.statistic.ServerStatisticManager</role>
+					<field-name>m_serverStateManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_serverFilterConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.service.ProjectService</role>
+					<field-name>m_projectService</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -468,9 +486,11 @@
 				<requirement>
 					<role>com.dianping.cat.report.ReportManager</role>
 					<role-hint>cross</role-hint>
+					<field-name>m_reportManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.consumer.cross.IpConvertManager</role>
+					<field-name>m_ipConvertManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -531,6 +551,7 @@
 				<requirement>
 					<role>com.dianping.cat.report.ReportManager</role>
 					<role-hint>matrix</role-hint>
+					<field-name>m_reportManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -587,12 +608,15 @@
 				<requirement>
 					<role>com.dianping.cat.report.ReportManager</role>
 					<role-hint>dependency</role-hint>
+					<field-name>m_reportManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_serverFilterConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.consumer.DatabaseParser</role>
+					<field-name>m_parser</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -678,12 +702,15 @@
 				<requirement>
 					<role>com.dianping.cat.report.ReportManager</role>
 					<role-hint>storage</role-hint>
+					<field-name>m_reportManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.consumer.DatabaseParser</role>
+					<field-name>m_databaseParser</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.consumer.storage.StorageReportUpdater</role>
+					<field-name>m_updater</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
@@ -743,9 +770,11 @@
 				<requirement>
 					<role>com.dianping.cat.report.ReportManager</role>
 					<role-hint>business</role-hint>
+					<field-name>m_reportManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.business.BusinessConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>

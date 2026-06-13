@@ -25,8 +25,6 @@ import java.util.Set;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.helper.Splitters;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
@@ -39,14 +37,11 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 
-@Named(type = MessageAnalyzer.class, value = TopAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class TopAnalyzer extends AbstractMessageAnalyzer<TopReport> implements LogEnabled {
 	public static final String ID = "top";
 
-	@Inject(ID)
 	private ReportManager<TopReport> m_reportManager;
 
-	@Inject
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
 	private Set<String> m_errorTypes;

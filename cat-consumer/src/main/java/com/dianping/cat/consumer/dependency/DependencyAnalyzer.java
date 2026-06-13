@@ -35,25 +35,19 @@ import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Named(type = MessageAnalyzer.class, value = DependencyAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class DependencyAnalyzer extends AbstractMessageAnalyzer<DependencyReport> implements LogEnabled {
 	public static final String ID = "dependency";
 
-	@Inject(ID)
 	private ReportManager<DependencyReport> m_reportManager;
 
-	@Inject
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
-	@Inject
 	private DatabaseParser m_parser;
 
 	private Set<String> m_types = new HashSet<String>(

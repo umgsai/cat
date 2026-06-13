@@ -33,21 +33,16 @@ import com.dianping.cat.status.model.StatusInfoHelper;
 import com.dianping.cat.status.model.entity.*;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-@Named(type = MessageAnalyzer.class, value = HeartbeatAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> implements LogEnabled {
 	public static final String ID = "heartbeat";
 
-	@Inject(ID)
 	private ReportManager<HeartbeatReport> m_reportManager;
 
-	@Inject
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
 	private Period buildHeartBeatInfo(Machine machine, Heartbeat heartbeat, long timestamp) {

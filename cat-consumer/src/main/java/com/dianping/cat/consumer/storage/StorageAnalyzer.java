@@ -26,8 +26,6 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.lookup.util.StringUtils;
 
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
@@ -42,18 +40,14 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 
-@Named(type = MessageAnalyzer.class, value = StorageAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> implements LogEnabled, Initializable {
 
 	public static final String ID = "storage";
 
-	@Inject(ID)
 	private ReportManager<StorageReport> m_reportManager;
 
-	@Inject
 	private DatabaseParser m_databaseParser;
 
-	@Inject
 	private StorageReportUpdater m_updater;
 
 	private Map<String, StorageBuilder> m_storageBuilders;

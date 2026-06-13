@@ -22,8 +22,6 @@ import java.util.List;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
 import com.dianping.cat.analysis.MessageAnalyzer;
@@ -38,15 +36,12 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 
-@Named(type = MessageAnalyzer.class, value = BusinessAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> implements LogEnabled {
 
 	public static final String ID = "business";
 
-	@Inject(ID)
 	private ReportManager<BusinessReport> m_reportManager;
 
-	@Inject
 	private BusinessConfigManager m_configManager;
 
 	@Override

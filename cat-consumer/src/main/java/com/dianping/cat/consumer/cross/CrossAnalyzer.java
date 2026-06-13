@@ -30,22 +30,17 @@ import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.lookup.util.StringUtils;
 
 import java.util.List;
 
-@Named(type = MessageAnalyzer.class, value = CrossAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class CrossAnalyzer extends AbstractMessageAnalyzer<CrossReport> implements LogEnabled {
 	public static final String ID = "cross";
 
 	public static final String DEFAULT = "unknown";
 
-	@Inject(ID)
 	protected ReportManager<CrossReport> m_reportManager;
 
-	@Inject
 	protected IpConvertManager m_ipConvertManager;
 
 	private int m_discardLogs = 0;

@@ -28,8 +28,10 @@ import org.unidal.lookup.configuration.Component;
 
 import com.dianping.cat.analysis.MessageAnalyzer;
 import com.dianping.cat.config.AtomicMessageConfigManager;
+import com.dianping.cat.config.business.BusinessConfigManager;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
 import com.dianping.cat.consumer.CatConsumerModule;
 import com.dianping.cat.consumer.DatabaseParser;
@@ -80,6 +82,8 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.statistic.ServerStatisticManager;
+import org.unidal.cat.message.storage.MessageDumperManager;
+import org.unidal.cat.message.storage.MessageFinderManager;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 	public static void main(String[] args) {
@@ -123,7 +127,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		final List<Component> all = new ArrayList<Component>();
 		final String ID = CrossAnalyzer.ID;
 
-		all.add(A(CrossAnalyzer.class).req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(MessageAnalyzer.class, ID, CrossAnalyzer.class).is(PER_LOOKUP) //
+								.req(ReportManager.class, ID, "m_reportManager") //
+								.req(IpConvertManager.class, (String) null, "m_ipConvertManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(A(CrossDelegate.class));
 
 		all.add(C(IpConvertManager.class));
@@ -139,7 +146,11 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		final List<Component> all = new ArrayList<Component>();
 		final String ID = DependencyAnalyzer.ID;
 
-		all.add(A(DependencyAnalyzer.class).req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(MessageAnalyzer.class, ID, DependencyAnalyzer.class).is(PER_LOOKUP) //
+								.req(ReportManager.class, ID, "m_reportManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_serverFilterConfigManager") //
+								.req(DatabaseParser.class, (String) null, "m_parser") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(A(DependencyDelegate.class));
 
 		all.add(C(DatabaseParser.class));
@@ -153,7 +164,11 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 	private Collection<Component> defineDumpComponents() {
 		final List<Component> all = new ArrayList<Component>();
-		all.add(A(DumpAnalyzer.class).req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(MessageAnalyzer.class, DumpAnalyzer.ID, DumpAnalyzer.class).is(PER_LOOKUP) //
+								.req(ServerStatisticManager.class, (String) null, "m_serverStateManager") //
+								.req(MessageDumperManager.class, (String) null, "m_dumperManager") //
+								.req(MessageFinderManager.class, (String) null, "m_finderManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 
 		all.add(C(MessageBucketManager.class, LocalMessageBucketManager.ID, LocalMessageBucketManager.class) //
 								.req(ServerConfigManager.class, PathBuilder.class, ServerStatisticManager.class));
@@ -165,7 +180,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		final List<Component> all = new ArrayList<Component>();
 		final String ID = EventAnalyzer.ID;
 
-		all.add(A(EventAnalyzer.class).req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(MessageAnalyzer.class, ID, EventAnalyzer.class).is(PER_LOOKUP) //
+								.req(ReportManager.class, ID, "m_reportManager") //
+								.req(AtomicMessageConfigManager.class, (String) null, "m_atomicMessageConfigManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(A(EventDelegate.class));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
@@ -180,7 +198,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		final List<Component> all = new ArrayList<Component>();
 		final String ID = HeartbeatAnalyzer.ID;
 
-		all.add(A(HeartbeatAnalyzer.class).req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(MessageAnalyzer.class, ID, HeartbeatAnalyzer.class).is(PER_LOOKUP) //
+								.req(ReportManager.class, ID, "m_reportManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_serverFilterConfigManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(A(HeartbeatDelegate.class));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
@@ -195,7 +216,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		final List<Component> all = new ArrayList<Component>();
 		final String ID = MatrixAnalyzer.ID;
 
-		all.add(A(MatrixAnalyzer.class).req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(MessageAnalyzer.class, ID, MatrixAnalyzer.class).is(PER_LOOKUP) //
+								.req(ReportManager.class, ID, "m_reportManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(A(MatrixDelegate.class));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
@@ -210,7 +233,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		final List<Component> all = new ArrayList<Component>();
 		final String ID = BusinessAnalyzer.ID;
 
-		all.add(A(BusinessAnalyzer.class).req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(MessageAnalyzer.class, ID, BusinessAnalyzer.class).is(PER_LOOKUP) //
+								.req(ReportManager.class, ID, "m_reportManager") //
+								.req(BusinessConfigManager.class, (String) null, "m_configManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(A(BusinessDelegate.class));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
@@ -232,7 +258,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ServerConfigManager.class));
 
 		all.add(C(MessageAnalyzer.class, ID, ProblemAnalyzer.class).is(PER_LOOKUP) //
-								.req(ReportManager.class, ID)
+								.req(ReportManager.class, ID, "m_reportManager")
 								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager")
 								.req(ProblemHandler.class, //
 														new String[] { DefaultProblemHandler.ID, LongExecutionProblemHandler.ID }, "m_handlers"));
@@ -250,7 +276,12 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		final List<Component> all = new ArrayList<Component>();
 		final String ID = StateAnalyzer.ID;
 
-		all.add(A(StateAnalyzer.class).req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(MessageAnalyzer.class, ID, StateAnalyzer.class).is(PER_LOOKUP) //
+								.req(ReportManager.class, ID, "m_reportManager") //
+								.req(ServerStatisticManager.class, (String) null, "m_serverStateManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_serverFilterConfigManager") //
+								.req(ProjectService.class, (String) null, "m_projectService") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(A(StateDelegate.class));
 
 		all.add(C(ProjectService.class) //
@@ -268,7 +299,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		final List<Component> all = new ArrayList<Component>();
 		final String ID = TopAnalyzer.ID;
 
-		all.add(A(TopAnalyzer.class).req(ServerConfigManager.class, (String) null, "m_serverConfigManager")
+		all.add(C(MessageAnalyzer.class, ID, TopAnalyzer.class).is(PER_LOOKUP) //
+								.req(ReportManager.class, ID, "m_reportManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_serverFilterConfigManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager")
 								.config(E("errorType").value("Error,RuntimeException,Exception")));
 		all.add(A(TopDelegate.class));
 
@@ -284,7 +318,12 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		final List<Component> all = new ArrayList<Component>();
 		final String ID = TransactionAnalyzer.ID;
 
-		all.add(A(TransactionAnalyzer.class).req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(MessageAnalyzer.class, ID, TransactionAnalyzer.class).is(PER_LOOKUP) //
+								.req(ReportManager.class, ID, "m_reportManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_filterConfigManager") //
+								.req(TpValueStatisticConfigManager.class, (String) null, "m_statisticManager") //
+								.req(AtomicMessageConfigManager.class, (String) null, "m_atomicMessageConfigManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(A(TransactionDelegate.class));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //
@@ -305,7 +344,11 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(A(StorageCacheBuilder.class));
 		all.add(A(StorageRPCBuilder.class));
 
-		all.add(A(StorageAnalyzer.class).req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(MessageAnalyzer.class, ID, StorageAnalyzer.class).is(PER_LOOKUP) //
+								.req(ReportManager.class, ID, "m_reportManager") //
+								.req(DatabaseParser.class, (String) null, "m_databaseParser") //
+								.req(StorageReportUpdater.class, (String) null, "m_updater") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
 		all.add(A(StorageDelegate.class));
 
 		all.add(C(ReportManager.class, ID, DefaultReportManager.class).is(PER_LOOKUP) //

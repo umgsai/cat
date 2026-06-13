@@ -33,21 +33,16 @@ import com.dianping.cat.report.ReportManager;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.helper.Threads;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.List;
 import java.util.Set;
 
-@Named(type = MessageAnalyzer.class, value = EventAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> implements LogEnabled {
 
 	public static final String ID = "event";
 
-	@Inject(ID)
 	private ReportManager<EventReport> m_reportManager;
 
-	@Inject
 	private AtomicMessageConfigManager m_atomicMessageConfigManager;
 
 	private final EventTpsStatisticsComputer m_computer = new EventTpsStatisticsComputer();

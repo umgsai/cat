@@ -32,22 +32,16 @@ import org.unidal.cat.message.storage.MessageDumper;
 import org.unidal.cat.message.storage.MessageDumperManager;
 import org.unidal.cat.message.storage.MessageFinderManager;
 import org.unidal.helper.Threads;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.concurrent.TimeUnit;
 
-@Named(type = MessageAnalyzer.class, value = DumpAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class DumpAnalyzer extends AbstractMessageAnalyzer<Object> implements LogEnabled {
 	public static final String ID = "dump";
 
-	@Inject
 	private ServerStatisticManager m_serverStateManager;
 
-	@Inject
 	private MessageDumperManager m_dumperManager;
 
-	@Inject
 	private MessageFinderManager m_finderManager;
 
 	private Logger m_logger;

@@ -34,8 +34,6 @@ import com.dianping.cat.statistic.ServerStatistic.Statistic;
 import com.dianping.cat.statistic.ServerStatisticManager;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import java.util.Date;
 import java.util.List;
@@ -43,20 +41,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Named(type = MessageAnalyzer.class, value = StateAnalyzer.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> implements LogEnabled {
 	public static final String ID = "state";
 
-	@Inject(ID)
 	private ReportManager<StateReport> m_reportManager;
 
-	@Inject
 	private ServerStatisticManager m_serverStateManager;
 
-	@Inject
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
-	@Inject
 	private ProjectService m_projectService;
 
 	private String m_ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
