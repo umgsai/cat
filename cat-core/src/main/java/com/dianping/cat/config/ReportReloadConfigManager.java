@@ -29,8 +29,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -44,7 +42,6 @@ import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-@Named
 public class ReportReloadConfigManager implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReportReloadConfigManager.class);
 
@@ -52,10 +49,8 @@ public class ReportReloadConfigManager implements Initializable {
 
 	private static final String DEFAULT = "default";
 
-	@Inject
 	protected ConfigRepository m_configDao;
 
-	@Inject
 	protected ContentFetcher m_fetcher;
 
 	private int m_configId;

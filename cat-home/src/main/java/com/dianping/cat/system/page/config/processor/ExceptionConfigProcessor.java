@@ -21,7 +21,6 @@ package com.dianping.cat.system.page.config.processor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 
 import com.dianping.cat.home.exception.entity.ExceptionExclude;
@@ -34,10 +33,8 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public class ExceptionConfigProcessor {
 
-	@Inject
 	private GlobalConfigProcessor m_globalConfigProcessor;
 
-	@Inject
 	private ExceptionRuleConfigManager m_exceptionRuleConfigManager;
 
 	public void refreshSpringBeans() {
@@ -132,6 +129,14 @@ public class ExceptionConfigProcessor {
 
 	private List<String> queryExceptionList() {
 		return new ArrayList<String>();
+	}
+
+	public void setExceptionRuleConfigManager(ExceptionRuleConfigManager exceptionRuleConfigManager) {
+		m_exceptionRuleConfigManager = exceptionRuleConfigManager;
+	}
+
+	public void setGlobalConfigProcessor(GlobalConfigProcessor globalConfigProcessor) {
+		m_globalConfigProcessor = globalConfigProcessor;
 	}
 
 	private void updateExceptionExclude(Payload payload) {

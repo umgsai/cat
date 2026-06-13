@@ -20,8 +20,6 @@ package com.dianping.cat.system.page.config.processor;
 
 import java.util.Map;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.alarm.rule.entity.Rule;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
 import com.dianping.cat.system.page.config.Action;
@@ -31,7 +29,6 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public class EventConfigProcessor extends BaseProcesser {
 
-	@Inject
 	private EventRuleConfigManager m_configManager;
 
 	@Override
@@ -81,5 +78,9 @@ public class EventConfigProcessor extends BaseProcesser {
 				rule.setAvailable(true);
 			}
 		}
+	}
+
+	public void setConfigManager(EventRuleConfigManager configManager) {
+		m_configManager = configManager;
 	}
 }

@@ -97,8 +97,35 @@ import com.dianping.cat.report.task.DefaultRemoteServersUpdater;
 import com.dianping.cat.report.task.DefaultTaskConsumer;
 import com.dianping.cat.report.task.ReportFacade;
 import com.dianping.cat.report.task.cmdb.ProjectUpdateTask;
+import com.dianping.cat.alarm.spi.config.AlertConfigManager;
+import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
+import com.dianping.cat.alarm.spi.config.SenderConfigManager;
+import com.dianping.cat.report.alert.event.EventRuleConfigManager;
+import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
+import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
+import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
+import com.dianping.cat.config.ReportReloadConfigManager;
+import com.dianping.cat.config.sample.SampleConfigManager;
+import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.config.server.ServerFilterConfigManager;
+import com.dianping.cat.consumer.config.AllReportConfigManager;
+import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager;
+import com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager;
+import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
+import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
 import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator;
+import com.dianping.cat.system.page.config.ConfigHtmlParser;
+import com.dianping.cat.system.page.config.processor.AlertConfigProcessor;
+import com.dianping.cat.system.page.config.processor.DependencyConfigProcessor;
+import com.dianping.cat.system.page.config.processor.EventConfigProcessor;
+import com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor;
+import com.dianping.cat.system.page.config.processor.GlobalConfigProcessor;
+import com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor;
+import com.dianping.cat.system.page.config.processor.StorageConfigProcessor;
+import com.dianping.cat.system.page.config.processor.TransactionConfigProcessor;
+import com.dianping.cat.system.page.router.config.RouterConfigManager;
 import com.dianping.cat.system.page.login.service.CookieManager;
 import com.dianping.cat.system.page.login.service.SessionManager;
 import com.dianping.cat.system.page.login.service.SigninService;
@@ -144,6 +171,8 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.addAll(defineCommonComponents());
 
 		all.addAll(defineConfigComponents());
+
+		all.addAll(defineConfigProcessorComponents());
 
 		// must define in home module instead of core
 		all.addAll(defineTableProviderComponents());
@@ -446,6 +475,52 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		List<Component> all = new ArrayList<Component>();
 
 		all.add(C(DomainGroupConfigManager.class));
+
+		return all;
+	}
+
+	private List<Component> defineConfigProcessorComponents() {
+		List<Component> all = new ArrayList<Component>();
+
+		all.add(C(ConfigHtmlParser.class));
+		all.add(C(RuleFTLDecorator.class));
+		all.add(C(GlobalConfigProcessor.class) //
+								.req(ProjectService.class, (String) null, "m_projectService") //
+								.req(RouterConfigManager.class, (String) null, "m_routerConfigManager") //
+								.req(DomainGroupConfigManager.class, (String) null, "m_domainGroupConfigManger") //
+								.req(SenderConfigManager.class, (String) null, "m_senderConfigManager") //
+								.req(StorageGroupConfigManager.class, (String) null, "m_groupConfigManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_serverFilterConfigManager") //
+								.req(AllReportConfigManager.class, (String) null, "m_transactionConfigManager") //
+								.req(ConfigHtmlParser.class, (String) null, "m_configHtmlParser") //
+								.req(SampleConfigManager.class, (String) null, "m_sampleConfigManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager") //
+								.req(ReportReloadConfigManager.class, (String) null, "m_reloadConfigManager"));
+		all.add(C(TransactionConfigProcessor.class) //
+								.req(TransactionRuleConfigManager.class, (String) null, "m_configManager") //
+								.req(RuleFTLDecorator.class, (String) null, "m_ruleDecorator"));
+		all.add(C(EventConfigProcessor.class) //
+								.req(EventRuleConfigManager.class, (String) null, "m_configManager") //
+								.req(RuleFTLDecorator.class, (String) null, "m_ruleDecorator"));
+		all.add(C(StorageConfigProcessor.class) //
+								.req(RuleFTLDecorator.class, (String) null, "m_ruleDecorator"));
+		all.add(C(HeartbeatConfigProcessor.class) //
+								.req(HeartbeatRuleConfigManager.class, (String) null, "m_heartbeatRuleConfigManager") //
+								.req(HeartbeatDisplayPolicyManager.class, (String) null, "m_displayPolicyManager") //
+								.req(ConfigHtmlParser.class, (String) null, "m_configHtmlParser") //
+								.req(RuleFTLDecorator.class, (String) null, "m_ruleDecorator"));
+		all.add(C(AlertConfigProcessor.class) //
+								.req(AlertConfigManager.class, (String) null, "m_alertConfigManager") //
+								.req(AlertPolicyManager.class, (String) null, "m_alertPolicyManager") //
+								.req(ConfigHtmlParser.class, (String) null, "m_configHtmlParser"));
+		all.add(C(ExceptionConfigProcessor.class) //
+								.req(GlobalConfigProcessor.class, (String) null, "m_globalConfigProcessor") //
+								.req(ExceptionRuleConfigManager.class, (String) null, "m_exceptionRuleConfigManager"));
+		all.add(C(DependencyConfigProcessor.class) //
+								.req(GlobalConfigProcessor.class, (String) null, "m_globalConfigManager") //
+								.req(TopologyGraphConfigManager.class, (String) null, "m_topologyConfigManager") //
+								.req(TopoGraphFormatConfigManager.class, (String) null, "m_formatConfigManager") //
+								.req(ConfigHtmlParser.class, (String) null, "m_configHtmlParser"));
 
 		return all;
 	}

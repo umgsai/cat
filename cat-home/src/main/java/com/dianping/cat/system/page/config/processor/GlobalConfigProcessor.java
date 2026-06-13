@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 
 import com.dianping.cat.Cat;
@@ -48,37 +47,26 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public class GlobalConfigProcessor {
 
-	@Inject
 	public ProjectService m_projectService;
 
-	@Inject
 	private RouterConfigManager m_routerConfigManager;
 
-	@Inject
 	private DomainGroupConfigManager m_domainGroupConfigManger;
 
-	@Inject
 	private SenderConfigManager m_senderConfigManager;
 
-	@Inject
 	private StorageGroupConfigManager m_groupConfigManager;
 
-	@Inject
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
-	@Inject
 	private AllReportConfigManager m_transactionConfigManager;
 
-	@Inject
 	private ConfigHtmlParser m_configHtmlParser;
 
-	@Inject
 	private SampleConfigManager m_sampleConfigManager;
 
-	@Inject
 	private ServerConfigManager m_serverConfigManager;
 
-	@Inject
 	private ReportReloadConfigManager m_reloadConfigManager;
 
 	private boolean deleteProject(Payload payload) {
@@ -282,6 +270,50 @@ public class GlobalConfigProcessor {
 			result.add(p.getDomain());
 		}
 		return result;
+	}
+
+	public void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
+		m_configHtmlParser = configHtmlParser;
+	}
+
+	public void setDomainGroupConfigManger(DomainGroupConfigManager domainGroupConfigManger) {
+		m_domainGroupConfigManger = domainGroupConfigManger;
+	}
+
+	public void setGroupConfigManager(StorageGroupConfigManager groupConfigManager) {
+		m_groupConfigManager = groupConfigManager;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setReloadConfigManager(ReportReloadConfigManager reloadConfigManager) {
+		m_reloadConfigManager = reloadConfigManager;
+	}
+
+	public void setRouterConfigManager(RouterConfigManager routerConfigManager) {
+		m_routerConfigManager = routerConfigManager;
+	}
+
+	public void setSampleConfigManager(SampleConfigManager sampleConfigManager) {
+		m_sampleConfigManager = sampleConfigManager;
+	}
+
+	public void setSenderConfigManager(SenderConfigManager senderConfigManager) {
+		m_senderConfigManager = senderConfigManager;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		m_serverFilterConfigManager = serverFilterConfigManager;
+	}
+
+	public void setTransactionConfigManager(AllReportConfigManager transactionConfigManager) {
+		m_transactionConfigManager = transactionConfigManager;
 	}
 
 	private boolean updateProject(Payload payload) {

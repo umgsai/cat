@@ -28,6 +28,7 @@ import org.unidal.lookup.configuration.Component;
 
 import com.dianping.cat.analysis.MessageAnalyzer;
 import com.dianping.cat.config.AtomicMessageConfigManager;
+import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
 import com.dianping.cat.consumer.CatConsumerModule;
@@ -66,6 +67,7 @@ import com.dianping.cat.consumer.top.TopAnalyzer;
 import com.dianping.cat.consumer.top.TopDelegate;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionDelegate;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
 import com.dianping.cat.message.PathBuilder;
@@ -100,7 +102,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.addAll(defineStorageComponents());
 		all.addAll(defineBusinessComponents());
 
-		all.add(A(AtomicMessageConfigManager.class));
+		all.add(C(AtomicMessageConfigManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher"));
 		all.add(A(ServerConfigManager.class));
 		all.add(A(TpValueStatisticConfigManager.class));
 		all.add(A(AllReportConfigManager.class));

@@ -18,7 +18,6 @@
  */
 package com.dianping.cat.system.page.config.processor;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 
 import com.dianping.cat.Constants;
@@ -34,16 +33,12 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public class DependencyConfigProcessor {
 
-	@Inject
 	private GlobalConfigProcessor m_globalConfigManager;
 
-	@Inject
 	private TopologyGraphConfigManager m_topologyConfigManager;
 
-	@Inject
 	private TopoGraphFormatConfigManager m_formatConfigManager;
 
-	@Inject
 	private ConfigHtmlParser m_configHtmlParser;
 
 	public void refreshSpringBeans() {
@@ -169,6 +164,22 @@ public class DependencyConfigProcessor {
 		default:
 			throw new RuntimeException("Error action name " + action.getName());
 		}
+	}
+
+	public void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
+		m_configHtmlParser = configHtmlParser;
+	}
+
+	public void setFormatConfigManager(TopoGraphFormatConfigManager formatConfigManager) {
+		m_formatConfigManager = formatConfigManager;
+	}
+
+	public void setGlobalConfigManager(GlobalConfigProcessor globalConfigManager) {
+		m_globalConfigManager = globalConfigManager;
+	}
+
+	public void setTopologyConfigManager(TopologyGraphConfigManager topologyConfigManager) {
+		m_topologyConfigManager = topologyConfigManager;
 	}
 
 }

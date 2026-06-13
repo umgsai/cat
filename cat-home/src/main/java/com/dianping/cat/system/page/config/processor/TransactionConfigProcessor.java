@@ -20,8 +20,6 @@ package com.dianping.cat.system.page.config.processor;
 
 import java.util.Map;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.alarm.rule.entity.Rule;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
 import com.dianping.cat.system.page.config.Action;
@@ -31,7 +29,6 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public class TransactionConfigProcessor extends BaseProcesser {
 
-	@Inject
 	private TransactionRuleConfigManager m_configManager;
 
 	@Override
@@ -81,5 +78,9 @@ public class TransactionConfigProcessor extends BaseProcesser {
 				rule.setAvailable(true);
 			}
 		}
+	}
+
+	public void setConfigManager(TransactionRuleConfigManager configManager) {
+		m_configManager = configManager;
 	}
 }

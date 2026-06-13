@@ -34,11 +34,13 @@ import com.dianping.cat.analysis.TcpSocketReceiver;
 import com.dianping.cat.config.AtomicMessageConfigManager;
 import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.config.business.BusinessConfigManager;
+import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.content.LocalResourceContentFetcher;
 import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.message.DefaultPathBuilder;
 import com.dianping.cat.message.storage.LocalMessageBucket;
 import com.dianping.cat.report.DefaultReportBucketManager;
@@ -82,9 +84,13 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		all.add(A(DefaultMessageHandler.class));
 
-		all.add(A(SampleConfigManager.class));
+		all.add(C(SampleConfigManager.class) //
+				.req(ConfigRepository.class, (String) null, "m_configDao") //
+				.req(ContentFetcher.class, (String) null, "m_fetcher"));
 		all.add(A(BusinessConfigManager.class));
-		all.add(A(ReportReloadConfigManager.class));
+		all.add(C(ReportReloadConfigManager.class) //
+				.req(ConfigRepository.class, (String) null, "m_configDao") //
+				.req(ContentFetcher.class, (String) null, "m_fetcher"));
 
 		all.add(A(CatCoreModule.class));
 
@@ -94,7 +100,9 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(A(ServersUpdaterManager.class));
 
 		all.add(A(TpValueStatisticConfigManager.class));
-		all.add(A(AtomicMessageConfigManager.class));
+		all.add(C(AtomicMessageConfigManager.class) //
+				.req(ConfigRepository.class, (String) null, "m_configDao") //
+				.req(ContentFetcher.class, (String) null, "m_fetcher"));
 
 		all.add(defineJdbcDataSourceConfigurationManagerComponent("datasources.xml")
 				.config(E("baseDirRef").value("CAT_HOME"))

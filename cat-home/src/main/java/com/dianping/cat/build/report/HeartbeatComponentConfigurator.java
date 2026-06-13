@@ -66,6 +66,9 @@ public class HeartbeatComponentConfigurator extends AbstractResourceConfigurator
 		List<Component> all = new ArrayList<Component>();
 
 		all.add(ruleConfigManager(HeartbeatRuleConfigManager.class));
+		all.add(C(HeartbeatDisplayPolicyManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher"));
 
 		all.add(reportService(HeartbeatReportService.class));
 

@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 
 import com.dianping.cat.Cat;
@@ -35,10 +34,13 @@ import com.dianping.cat.system.page.config.Model;
 
 public class BaseProcesser {
 
-	@Inject
 	protected RuleFTLDecorator m_ruleDecorator;
 
 	protected void refreshSpringBeans() {
+	}
+
+	public void setRuleDecorator(RuleFTLDecorator ruleDecorator) {
+		m_ruleDecorator = ruleDecorator;
 	}
 
 	public boolean addSubmitRule(BaseRuleConfigManager manager, String id, String metrics, String configs) {

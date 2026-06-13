@@ -19,7 +19,6 @@
 package com.dianping.cat.system.page.config.processor;
 
 import org.codehaus.plexus.util.StringUtils;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
@@ -31,13 +30,10 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public class AlertConfigProcessor {
 
-	@Inject
 	private AlertConfigManager m_alertConfigManager;
 
-	@Inject
 	private AlertPolicyManager m_alertPolicyManager;
 
-	@Inject
 	private ConfigHtmlParser m_configHtmlParser;
 
 	public void process(Action action, Payload payload, Model model) {
@@ -85,5 +81,17 @@ public class AlertConfigProcessor {
 		if (configHtmlParser != null) {
 			m_configHtmlParser = configHtmlParser;
 		}
+	}
+
+	public void setAlertConfigManager(AlertConfigManager alertConfigManager) {
+		m_alertConfigManager = alertConfigManager;
+	}
+
+	public void setAlertPolicyManager(AlertPolicyManager alertPolicyManager) {
+		m_alertPolicyManager = alertPolicyManager;
+	}
+
+	public void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
+		m_configHtmlParser = configHtmlParser;
 	}
 }

@@ -19,7 +19,6 @@
 package com.dianping.cat.system.page.config.processor;
 
 import org.codehaus.plexus.util.StringUtils;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
@@ -31,13 +30,10 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public class HeartbeatConfigProcessor extends BaseProcesser {
 
-	@Inject
 	private HeartbeatRuleConfigManager m_heartbeatRuleConfigManager;
 
-	@Inject
 	private HeartbeatDisplayPolicyManager m_displayPolicyManager;
 
-	@Inject
 	private ConfigHtmlParser m_configHtmlParser;
 
 	public void process(Action action, Payload payload, Model model) {
@@ -96,4 +92,15 @@ public class HeartbeatConfigProcessor extends BaseProcesser {
 		}
 	}
 
+	public void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
+		m_configHtmlParser = configHtmlParser;
+	}
+
+	public void setDisplayPolicyManager(HeartbeatDisplayPolicyManager displayPolicyManager) {
+		m_displayPolicyManager = displayPolicyManager;
+	}
+
+	public void setHeartbeatRuleConfigManager(HeartbeatRuleConfigManager heartbeatRuleConfigManager) {
+		m_heartbeatRuleConfigManager = heartbeatRuleConfigManager;
+	}
 }
