@@ -23,13 +23,11 @@ import com.dianping.cat.alarm.rule.entity.Condition;
 import com.dianping.cat.alarm.rule.entity.SubCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Named(type = DataChecker.class)
 public class DefaultDataChecker implements DataChecker {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataChecker.class);
 

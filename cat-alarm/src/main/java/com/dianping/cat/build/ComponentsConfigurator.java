@@ -25,10 +25,13 @@ import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
 import com.dianping.cat.alarm.spi.decorator.DecoratorManager;
 import com.dianping.cat.alarm.spi.receiver.ContactorManager;
+import com.dianping.cat.alarm.spi.rule.DataChecker;
 import com.dianping.cat.alarm.spi.rule.DefaultDataChecker;
 import com.dianping.cat.alarm.spi.sender.*;
 import com.dianping.cat.alarm.spi.spliter.*;
+import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
@@ -46,13 +49,17 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.addAll(new CatDatabaseConfigurator().defineComponents());
 
-		all.add(A(SenderConfigManager.class));
+		all.add(C(SenderConfigManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher"));
 
-		all.add(A(DefaultDataChecker.class));
+		all.add(C(DataChecker.class, DefaultDataChecker.class));
 		all.add(C(DecoratorManager.class));
 		all.add(C(ContactorManager.class));
 
-		all.add(A(AlertPolicyManager.class));
+		all.add(C(AlertPolicyManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher"));
 
 		all.add(C(Spliter.class, MailSpliter.ID, MailSpliter.class));
 
@@ -76,7 +83,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(A(AlertService.class));
 
-		all.add(A(AlertConfigManager.class));
+		all.add(C(AlertConfigManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher"));
 
 		return all;
 	}

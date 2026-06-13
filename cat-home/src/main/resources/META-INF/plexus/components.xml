@@ -3084,9 +3084,39 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.alarm.spi.config.SenderConfigManager</role>
+			<implementation>com.dianping.cat.alarm.spi.config.SenderConfigManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.alarm.spi.config.AlertPolicyManager</role>
+			<implementation>com.dianping.cat.alarm.spi.config.AlertPolicyManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
 				</requirement>
 			</requirements>
 		</component>

@@ -25,8 +25,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.sender.entity.Par;
@@ -39,16 +37,13 @@ import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.spring.CatSpringContext;
 
-@Named
 public class SenderConfigManager implements Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SenderConfigManager.class);
 
 	private static final String CONFIG_NAME = "senderConfig";
 
-	@Inject
 	private ConfigRepository m_configDao;
 
-	@Inject
 	private ContentFetcher m_fetcher;
 
 	private int m_configId;

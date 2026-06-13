@@ -25,6 +25,10 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
+import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
+import com.dianping.cat.alarm.spi.config.SenderConfigManager;
+import com.dianping.cat.config.content.ContentFetcher;
+import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleRepository;
 import com.dianping.cat.report.alert.AlarmManager;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
@@ -37,7 +41,15 @@ public class HomeAlarmComponentConfigurator extends AbstractResourceConfigurator
 		List<Component> all = new ArrayList<Component>();
 
 		all.add(A(AlarmManager.class));
-		all.add(A(AlertConfigManager.class));
+		all.add(C(AlertConfigManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher"));
+		all.add(C(SenderConfigManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher"));
+		all.add(C(AlertPolicyManager.class) //
+								.req(ConfigRepository.class, (String) null, "m_configDao") //
+								.req(ContentFetcher.class, (String) null, "m_fetcher"));
 		all.add(C(BaseRuleHelper.class));
 		all.add(C(UserDefinedRuleManager.class) //
 								.req(UserDefineRuleRepository.class, (String) null, "m_dao"));

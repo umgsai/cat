@@ -61,9 +61,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -85,9 +87,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -196,9 +200,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.core.config.repository.ConfigRepository</role>
+					<field-name>m_configDao</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.content.ContentFetcher</role>
+					<field-name>m_fetcher</field-name>
 				</requirement>
 			</requirements>
 		</component>
