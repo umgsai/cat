@@ -35,8 +35,8 @@ import org.apache.hadoop.fs.PathFilter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.helper.Threads;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads;
+import com.dianping.cat.support.Threads.Task;
 import org.unidal.lookup.ContainerHolder;
 
 import java.io.IOException;

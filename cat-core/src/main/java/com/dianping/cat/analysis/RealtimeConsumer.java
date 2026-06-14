@@ -25,7 +25,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.helper.Threads;
+import com.dianping.cat.support.Threads;
 import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;

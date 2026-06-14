@@ -31,7 +31,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.unidal.cat.message.storage.MessageDumper;
 import org.unidal.cat.message.storage.MessageDumperManager;
 import org.unidal.cat.message.storage.MessageFinderManager;
-import org.unidal.helper.Threads;
+import com.dianping.cat.support.Threads;
 
 import java.util.concurrent.TimeUnit;
 

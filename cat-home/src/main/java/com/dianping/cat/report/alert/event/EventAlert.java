@@ -29,7 +29,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads.Task;
 
 import com.google.common.base.Splitter;
 

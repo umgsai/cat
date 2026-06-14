@@ -38,7 +38,7 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.cat.message.storage.hdfs.HdfsSystemManager;
 import org.unidal.helper.Formats;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads.Task;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;

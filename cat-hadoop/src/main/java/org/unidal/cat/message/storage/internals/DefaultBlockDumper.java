@@ -31,7 +31,7 @@ import org.unidal.cat.message.storage.Block;
 import org.unidal.cat.message.storage.BlockDumper;
 import org.unidal.cat.message.storage.BlockWriter;
 import org.unidal.cat.message.storage.exception.BlockQueueFullException;
-import org.unidal.helper.Threads;
+import com.dianping.cat.support.Threads;
 import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;

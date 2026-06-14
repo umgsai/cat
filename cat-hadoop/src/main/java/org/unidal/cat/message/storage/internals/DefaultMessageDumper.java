@@ -34,7 +34,7 @@ import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.MessageDumper;
 import org.unidal.cat.message.storage.MessageProcessor;
 import org.unidal.cat.message.storage.exception.MessageQueueFullException;
-import org.unidal.helper.Threads;
+import com.dianping.cat.support.Threads;
 import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;

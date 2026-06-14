@@ -27,7 +27,7 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads.Task;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;

@@ -34,8 +34,8 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Threads;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads;
+import com.dianping.cat.support.Threads.Task;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

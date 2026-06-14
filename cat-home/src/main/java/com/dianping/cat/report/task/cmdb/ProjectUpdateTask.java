@@ -35,7 +35,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads.Task;
 import org.unidal.webres.json.JsonArray;
 import org.unidal.webres.json.JsonObject;
 

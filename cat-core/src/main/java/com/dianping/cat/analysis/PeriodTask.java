@@ -24,7 +24,7 @@ import java.util.Date;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads.Task;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;

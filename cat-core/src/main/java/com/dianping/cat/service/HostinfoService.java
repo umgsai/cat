@@ -32,8 +32,8 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.helper.Threads;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads;
+import com.dianping.cat.support.Threads.Task;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;

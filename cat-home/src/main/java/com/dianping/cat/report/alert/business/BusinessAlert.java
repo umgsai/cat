@@ -28,7 +28,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads.Task;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.dianping.cat.Cat;

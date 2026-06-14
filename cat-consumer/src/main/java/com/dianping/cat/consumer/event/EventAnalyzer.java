@@ -32,7 +32,7 @@ import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.helper.Threads;
+import com.dianping.cat.support.Threads;
 
 import java.util.List;
 import java.util.Set;

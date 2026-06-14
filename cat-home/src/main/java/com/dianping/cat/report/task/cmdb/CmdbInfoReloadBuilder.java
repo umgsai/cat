@@ -22,7 +22,7 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Threads;
+import com.dianping.cat.support.Threads;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.report.task.TaskBuilder;

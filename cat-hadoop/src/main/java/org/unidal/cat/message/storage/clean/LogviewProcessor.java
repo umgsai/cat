@@ -19,6 +19,9 @@
 package org.unidal.cat.message.storage.clean;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,12 +29,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.helper.Scanners;
-import org.unidal.helper.Scanners.FileMatcher;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads.Task;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -61,26 +63,11 @@ public class LogviewProcessor implements Task, Initializable {
 		final Set<String> paths = new HashSet<String>();
 		final Set<String> validPaths = findValidPath(m_configManager.getLogViewStroageTime());
 
-		Scanners.forDir().scan(m_baseDir, new FileMatcher() {
-			@Override
-			public Direction matches(File base, String path) {
-				if (new File(base, path).isFile()) {
-					if (shouldDelete(path)) {
-						paths.add(path);
-					}
-				}
-				return Direction.DOWN;
+		for (String path : listRelativeFiles(m_baseDir)) {
+			if (shouldDelete(path, validPaths)) {
+				paths.add(path);
 			}
-
-			private boolean shouldDelete(String path) {
-				for (String str : validPaths) {
-					if (path.contains(str)) {
-						return false;
-					}
-				}
-				return true;
-			}
-		});
+		}
 
 		if (paths.size() > 0) {
 			processLogviewFiles(new ArrayList<String>(paths), false);
@@ -90,17 +77,11 @@ public class LogviewProcessor implements Task, Initializable {
 	public List<String> findOldBuckets() {
 		final Set<String> paths = new HashSet<String>();
 
-		Scanners.forDir().scan(m_baseDir, new FileMatcher() {
-			@Override
-			public Direction matches(File base, String path) {
-				if (new File(base, path).isFile()) {
-					if (isOldBucketFile(path)) {
-						paths.add(path);
-					}
-				}
-				return Direction.DOWN;
+		for (String path : listRelativeFiles(m_baseDir)) {
+			if (isOldBucketFile(path)) {
+				paths.add(path);
 			}
-		});
+		}
 		return new ArrayList<String>(paths);
 	}
 
@@ -142,6 +123,27 @@ public class LogviewProcessor implements Task, Initializable {
 			return false;
 		}
 		return true;
+	}
+
+	private List<String> listRelativeFiles(File baseFile) {
+		List<String> paths = new ArrayList<String>();
+
+		if (baseFile == null || !baseFile.exists()) {
+			return paths;
+		}
+
+		try (Stream<Path> stream = Files.walk(baseFile.toPath())) {
+			stream.filter(Files::isRegularFile)
+			      .map(path -> relativePath(baseFile, path))
+			      .forEach(paths::add);
+		} catch (IOException e) {
+			Cat.logError(e);
+		}
+		return paths;
+	}
+
+	private String relativePath(File baseFile, Path path) {
+		return baseFile.toPath().relativize(path).toString().replace(File.separatorChar, '/');
 	}
 
 	private void processLogviewFiles(final List<String> paths, boolean upload) {
@@ -219,6 +221,15 @@ public class LogviewProcessor implements Task, Initializable {
 		File file = new File(m_baseDir, path);
 
 		m_hdfsUploader.uploadLogviewFile(path, file);
+	}
+
+	private boolean shouldDelete(String path, Set<String> validPaths) {
+		for (String str : validPaths) {
+			if (path.contains(str)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

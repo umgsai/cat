@@ -20,6 +20,8 @@ package com.dianping.cat.report;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,13 +30,12 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Scanners;
-import org.unidal.helper.Scanners.FileMatcher;
 import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
@@ -66,25 +67,11 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 			final List<String> toRemovePaths = new ArrayList<String>();
 			final Set<String> validPaths = queryValidPath(m_configManager.getLocalReportStroageTime());
 
-			Scanners.forDir().scan(m_reportBaseDir, new FileMatcher() {
-				@Override
-				public Direction matches(File base, String path) {
-					File file = new File(base, path);
-					if (file.isFile() && shouldDeleteReport(path)) {
-						toRemovePaths.add(path);
-					}
-					return Direction.DOWN;
+			for (String path : listRelativeFiles(m_reportBaseDir)) {
+				if (shouldDeleteReport(path, validPaths)) {
+					toRemovePaths.add(path);
 				}
-
-				private boolean shouldDeleteReport(String path) {
-					for (String str : validPaths) {
-						if (path.contains(str)) {
-							return false;
-						}
-					}
-					return true;
-				}
-			});
+			}
 			for (String path : toRemovePaths) {
 				File file = new File(m_reportBaseDir, path);
 
@@ -159,22 +146,49 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 		return strs;
 	}
 
+	private List<String> listRelativeDirectories(File baseFile) {
+		List<String> paths = new ArrayList<String>();
+
+		if (baseFile == null || !baseFile.exists()) {
+			return paths;
+		}
+
+		try (Stream<Path> stream = Files.walk(baseFile.toPath())) {
+			stream.filter(path -> !path.equals(baseFile.toPath()))
+			      .filter(Files::isDirectory)
+			      .map(path -> relativePath(baseFile, path))
+			      .forEach(paths::add);
+		} catch (IOException e) {
+			Cat.logError(e);
+		}
+		return paths;
+	}
+
+	private List<String> listRelativeFiles(File baseFile) {
+		List<String> paths = new ArrayList<String>();
+
+		if (baseFile == null || !baseFile.exists()) {
+			return paths;
+		}
+
+		try (Stream<Path> stream = Files.walk(baseFile.toPath())) {
+			stream.filter(Files::isRegularFile)
+			      .map(path -> relativePath(baseFile, path))
+			      .forEach(paths::add);
+		} catch (IOException e) {
+			Cat.logError(e);
+		}
+		return paths;
+	}
+
+	private String relativePath(File baseFile, Path path) {
+		return baseFile.toPath().relativize(path).toString().replace(File.separatorChar, '/');
+	}
+
 	private void removeEmptyDir(File baseFile) {
 		// the path has two depth
 		for (int i = 0; i < 2; i++) {
-			final List<String> directionPaths = new ArrayList<String>();
-
-			Scanners.forDir().scan(baseFile, new FileMatcher() {
-				@Override
-				public Direction matches(File base, String path) {
-					if (new File(base, path).isDirectory()) {
-						directionPaths.add(path);
-					}
-
-					return Direction.DOWN;
-				}
-			});
-			for (String path : directionPaths) {
+			for (String path : listRelativeDirectories(baseFile)) {
 				try {
 					File file = new File(baseFile, path);
 
@@ -191,6 +205,15 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
+	}
+
+	private boolean shouldDeleteReport(String path, Set<String> validPaths) {
+		for (String str : validPaths) {
+			if (path.contains(str)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public void setBucketFactory(ReportBucketFactory bucketFactory) {

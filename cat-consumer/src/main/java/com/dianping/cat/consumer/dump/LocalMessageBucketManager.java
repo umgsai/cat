@@ -19,6 +19,9 @@
 package com.dianping.cat.consumer.dump;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,15 +35,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import java.util.stream.Stream;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.helper.Scanners;
-import org.unidal.helper.Scanners.FileMatcher;
-import org.unidal.helper.Threads;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads;
+import com.dianping.cat.support.Threads.Task;
 import org.unidal.lookup.ContainerHolder;
 import org.slf4j.LoggerFactory;
 
@@ -137,23 +139,17 @@ public class LocalMessageBucketManager extends ContainerHolder
 	public List<String> findCloseBuckets() {
 		final Set<String> paths = new HashSet<String>();
 
-		Scanners.forDir().scan(m_baseDir, new FileMatcher() {
-			@Override
-			public Direction matches(File base, String path) {
-				if (new File(base, path).isFile()) {
-					if (shouldUpload(path)) {
-						int index = path.indexOf(".idx");
+		for (String path : listRelativeFiles(m_baseDir)) {
+			if (shouldUpload(path)) {
+				int index = path.indexOf(".idx");
 
-						if (index == -1) {
-							paths.add(path);
-						} else {
-							paths.add(path.substring(0, index));
-						}
-					}
+				if (index == -1) {
+					paths.add(path);
+				} else {
+					paths.add(path.substring(0, index));
 				}
-				return Direction.DOWN;
 			}
-		});
+		}
 		return new ArrayList<String>(paths);
 	}
 
@@ -192,15 +188,11 @@ public class LocalMessageBucketManager extends ContainerHolder
 			final String key = id.getDomain() + '-' + id.getIpAddress();
 			final List<String> paths = new ArrayList<String>();
 
-			Scanners.forDir().scan(dir, new FileMatcher() {
-				@Override
-				public Direction matches(File base, String name) {
-					if (name.contains(key) && !name.endsWith(".idx")) {
-						paths.add(path + name);
-					}
-					return Direction.NEXT;
+			for (String name : listRelativeFiles(dir)) {
+				if (name.contains(key) && !name.endsWith(".idx")) {
+					paths.add(path + name);
 				}
-			});
+			}
 
 			for (String dataFile : paths) {
 				LocalMessageBucket bucket = m_buckets.get(dataFile);
@@ -271,6 +263,27 @@ public class LocalMessageBucketManager extends ContainerHolder
 		if ((++m_total) % CatConstants.SUCCESS_COUNT == 0) {
 			m_serverStateManager.addMessageDump(CatConstants.SUCCESS_COUNT);
 		}
+	}
+
+	private List<String> listRelativeFiles(File baseFile) {
+		List<String> paths = new ArrayList<String>();
+
+		if (baseFile == null || !baseFile.exists()) {
+			return paths;
+		}
+
+		try (Stream<Path> stream = Files.walk(baseFile.toPath())) {
+			stream.filter(Files::isRegularFile)
+			      .map(path -> relativePath(baseFile, path))
+			      .forEach(paths::add);
+		} catch (IOException e) {
+			Cat.logError(e);
+		}
+		return paths;
+	}
+
+	private String relativePath(File baseFile, Path path) {
+		return baseFile.toPath().relativize(path).toString().replace(File.separatorChar, '/');
 	}
 
 	public void setBaseDir(File baseDir) {

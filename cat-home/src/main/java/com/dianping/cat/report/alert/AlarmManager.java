@@ -20,8 +20,8 @@ package com.dianping.cat.report.alert;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Threads;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads;
+import com.dianping.cat.support.Threads.Task;
 import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.report.alert.business.BusinessAlert;

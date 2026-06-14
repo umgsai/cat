@@ -19,7 +19,7 @@
 package com.dianping.cat.hadoop;
 
 import org.unidal.cat.message.storage.clean.LogviewProcessor;
-import org.unidal.helper.Threads;
+import com.dianping.cat.support.Threads;
 import org.unidal.initialization.AbstractModule;
 import org.unidal.initialization.Module;
 import org.unidal.initialization.ModuleContext;
