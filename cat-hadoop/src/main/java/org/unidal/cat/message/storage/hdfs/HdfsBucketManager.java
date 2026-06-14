@@ -26,8 +26,6 @@ import java.util.Set;
 import io.netty.buffer.ByteBuf;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.cat.message.storage.Bucket;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -37,13 +35,15 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 
-public class HdfsBucketManager extends ContainerHolder implements Initializable {
+public class HdfsBucketManager implements Initializable {
 
 	private ServerConfigManager m_configManager;
 
 	private HdfsSystemManager m_fileSystemManager;
 
 	private MessageConsumerFinder m_consumerFinder;
+
+	private org.unidal.cat.message.storage.BucketFactory m_bucketFactory;
 
 	private Map<String, HdfsBucket> m_buckets = new LinkedHashMap<String, HdfsBucket>() {
 
@@ -98,12 +98,8 @@ public class HdfsBucketManager extends ContainerHolder implements Initializable 
 						bucket = m_buckets.get(key);
 
 						if (bucket == null) {
-							bucket = (HdfsBucket) lookup(Bucket.class, HdfsBucket.ID);
-
-							bucket.initialize(domain, ip, hour);
+							bucket = createBucket(domain, ip, hour);
 							m_buckets.put(key, bucket);
-
-							super.release(bucket);
 						}
 					}
 				}
@@ -124,6 +120,29 @@ public class HdfsBucketManager extends ContainerHolder implements Initializable 
 			}
 		}
 		return null;
+	}
+
+	private HdfsBucket createBucket(String domain, String ip, int hour) throws Exception {
+		if (m_bucketFactory == null) {
+			throw new IllegalStateException("BucketFactory is required for HDFS message storage.");
+		}
+		return (HdfsBucket) m_bucketFactory.createBucket(domain, ip, hour, false);
+	}
+
+	public void setBucketFactory(org.unidal.cat.message.storage.BucketFactory bucketFactory) {
+		m_bucketFactory = bucketFactory;
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setConsumerFinder(MessageConsumerFinder consumerFinder) {
+		m_consumerFinder = consumerFinder;
+	}
+
+	public void setFileSystemManager(HdfsSystemManager fileSystemManager) {
+		m_fileSystemManager = fileSystemManager;
 	}
 
 }

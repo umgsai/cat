@@ -194,4 +194,8 @@ public class LocalTokenMapping implements TokenMapping {
 			m_map.put(MAGIC_CODE, 0);
 		}
 	}
+
+	public void setPathBuilder(PathBuilder bulider) {
+		m_bulider = bulider;
+	}
 }

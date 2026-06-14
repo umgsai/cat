@@ -27,10 +27,12 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.unidal.cat.message.storage.TokenMapping;
+import org.unidal.cat.message.storage.TokenMappingFactory;
 import org.unidal.cat.message.storage.TokenMappingManager;
-import org.unidal.lookup.ContainerHolder;
 
-public class HdfsTokenMappingManager extends ContainerHolder implements TokenMappingManager {
+public class HdfsTokenMappingManager implements TokenMappingManager {
+	private TokenMappingFactory m_tokenMappingFactory;
+
 	private Map<Pair<Integer, String>, TokenMapping> m_cache = new LinkedHashMap<Pair<Integer, String>, TokenMapping>() {
 
 		private static final long serialVersionUID = 1L;
@@ -65,7 +67,6 @@ public class HdfsTokenMappingManager extends ContainerHolder implements TokenMap
 			if (mapping != null) {
 				mapping.close();
 			}
-			super.release(mapping);
 		}
 	}
 
@@ -79,15 +80,24 @@ public class HdfsTokenMappingManager extends ContainerHolder implements TokenMap
 				mapping = m_cache.get(pair);
 
 				if (mapping == null) {
-					mapping = lookup(TokenMapping.class, "hdfs");
-					mapping.open(hour, ip);
+					mapping = createTokenMapping(hour, ip);
 					m_cache.put(pair, mapping);
-					super.release(mapping);
 				}
 			}
 		}
 
 		return mapping;
+	}
+
+	private TokenMapping createTokenMapping(int hour, String ip) throws IOException {
+		if (m_tokenMappingFactory == null) {
+			throw new IllegalStateException("TokenMappingFactory is required for HDFS token mapping storage.");
+		}
+		return m_tokenMappingFactory.createTokenMapping(hour, ip);
+	}
+
+	public void setTokenMappingFactory(TokenMappingFactory tokenMappingFactory) {
+		m_tokenMappingFactory = tokenMappingFactory;
 	}
 
 }

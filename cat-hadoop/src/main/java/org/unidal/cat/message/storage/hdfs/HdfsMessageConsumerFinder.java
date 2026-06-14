@@ -99,4 +99,8 @@ public class HdfsMessageConsumerFinder implements MessageConsumerFinder {
 		return result;
 	}
 
+	public void setFileSystemManager(HdfsSystemManager fileSystemManager) {
+		m_fileSystemManager = fileSystemManager;
+	}
+
 }

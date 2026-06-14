@@ -25,8 +25,7 @@ import java.util.Set;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.cat.message.storage.Index;
-import org.unidal.lookup.ContainerHolder;
+import org.unidal.cat.message.storage.IndexFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -34,13 +33,15 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.tree.MessageId;
 
-public class HdfsIndexManager extends ContainerHolder implements Initializable {
+public class HdfsIndexManager implements Initializable {
 
 	private ServerConfigManager m_configManager;
 
 	private HdfsSystemManager m_fileSystemManager;
 
 	private MessageConsumerFinder m_consumerFinder;
+
+	private IndexFactory m_indexFactory;
 
 	private Map<String, HdfsIndex> m_buckets = new LinkedHashMap<String, HdfsIndex>() {
 
@@ -95,12 +96,8 @@ public class HdfsIndexManager extends ContainerHolder implements Initializable {
 						bucket = m_buckets.get(key);
 
 						if (bucket == null) {
-							bucket = (HdfsIndex) lookup(Index.class, HdfsIndex.ID);
-
-							bucket.initialize(domain, ip, hour);
+							bucket = createIndex(domain, ip, hour);
 							m_buckets.put(key, bucket);
-
-							super.release(bucket);
 						}
 					}
 				}
@@ -117,6 +114,29 @@ public class HdfsIndexManager extends ContainerHolder implements Initializable {
 			}
 		}
 		return null;
+	}
+
+	private HdfsIndex createIndex(String domain, String ip, int hour) throws Exception {
+		if (m_indexFactory == null) {
+			throw new IllegalStateException("IndexFactory is required for HDFS message index storage.");
+		}
+		return (HdfsIndex) m_indexFactory.createIndex(domain, ip, hour);
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setConsumerFinder(MessageConsumerFinder consumerFinder) {
+		m_consumerFinder = consumerFinder;
+	}
+
+	public void setFileSystemManager(HdfsSystemManager fileSystemManager) {
+		m_fileSystemManager = fileSystemManager;
+	}
+
+	public void setIndexFactory(IndexFactory indexFactory) {
+		m_indexFactory = indexFactory;
 	}
 
 }

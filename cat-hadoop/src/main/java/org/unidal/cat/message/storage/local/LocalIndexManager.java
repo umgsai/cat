@@ -29,14 +29,16 @@ import java.util.Set;
 
 import org.unidal.cat.message.storage.FileType;
 import org.unidal.cat.message.storage.Index;
+import org.unidal.cat.message.storage.IndexFactory;
 import org.unidal.cat.message.storage.IndexManager;
 import org.unidal.cat.message.storage.PathBuilder;
-import org.unidal.lookup.ContainerHolder;
 
-public class LocalIndexManager extends ContainerHolder implements IndexManager {
+public class LocalIndexManager implements IndexManager {
 	private Map<Integer, Map<String, Index>> m_indexes = new LinkedHashMap<Integer, Map<String, Index>>();
 
 	private PathBuilder m_bulider;
+
+	private IndexFactory m_indexFactory;
 
 	private boolean bucketFilesExsits(String domain, String ip, int hour) {
 		long timestamp = hour * 3600 * 1000L;
@@ -64,7 +66,6 @@ public class LocalIndexManager extends ContainerHolder implements IndexManager {
 
 				for (Index index : value.values()) {
 					index.close();
-					super.release(index);
 				}
 			}
 		}
@@ -99,13 +100,27 @@ public class LocalIndexManager extends ContainerHolder implements IndexManager {
 				index = map.get(domain);
 
 				if (index == null) {
-					index = lookup(Index.class, "local");
-					index.initialize(domain, ip, hour);
+					index = createIndex(domain, ip, hour);
 					map.put(domain, index);
 				}
 			}
 		}
 
 		return index;
+	}
+
+	private Index createIndex(String domain, String ip, int hour) throws IOException {
+		if (m_indexFactory == null) {
+			throw new IllegalStateException("IndexFactory is required for local message index storage.");
+		}
+		return m_indexFactory.createIndex(domain, ip, hour);
+	}
+
+	public void setIndexFactory(IndexFactory indexFactory) {
+		m_indexFactory = indexFactory;
+	}
+
+	public void setPathBuilder(PathBuilder bulider) {
+		m_bulider = bulider;
 	}
 }

@@ -190,6 +190,14 @@ public class HdfsUploader implements Initializable {
 		}
 	}
 
+	public void setFileSystemManager(HdfsSystemManager fileSystemManager) {
+		m_fileSystemManager = fileSystemManager;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
+	}
+
 	public class Uploader implements Task {
 
 		private String m_path;

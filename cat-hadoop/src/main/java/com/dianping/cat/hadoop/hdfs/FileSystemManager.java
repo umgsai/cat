@@ -161,4 +161,8 @@ public class FileSystemManager implements Initializable {
 	public Configuration getConfig() {
 		return m_config;
 	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
 }

@@ -34,12 +34,11 @@ import org.unidal.cat.message.storage.BucketFactory;
 import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.FileType;
 import org.unidal.cat.message.storage.PathBuilder;
-import org.unidal.lookup.ContainerHolder;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
-public class LocalBucketManager extends ContainerHolder implements BucketManager {
+public class LocalBucketManager implements BucketManager {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalBucketManager.class);
 
 	private PathBuilder m_builder;
@@ -50,8 +49,6 @@ public class LocalBucketManager extends ContainerHolder implements BucketManager
 	      Collections.newSetFromMap(new IdentityHashMap<Bucket, Boolean>()));
 
 	private Map<Integer, Map<String, Bucket>> m_buckets = new LinkedHashMap<Integer, Map<String, Bucket>>();
-
-	private boolean m_plexusFallbackLogged;
 
 	private boolean bucketFilesExists(String domain, String ip, int hour) {
 		long timestamp = hour * 3600 * 1000L;
@@ -138,29 +135,20 @@ public class LocalBucketManager extends ContainerHolder implements BucketManager
 	}
 
 	private Bucket createBucket(String domain, String ip, int hour, boolean createIfNotExists) throws IOException {
-		if (m_bucketFactory != null) {
-			Bucket bucket = m_bucketFactory.createBucket(domain, ip, hour, createIfNotExists);
-
-			m_factoryBuckets.add(bucket);
-			return bucket;
+		if (m_bucketFactory == null) {
+			throw new IllegalStateException("BucketFactory is required for local message storage.");
 		}
+		Bucket bucket = m_bucketFactory.createBucket(domain, ip, hour, createIfNotExists);
 
-		Bucket bucket = lookup(Bucket.class, "local");
-
-		if (!m_plexusFallbackLogged) {
-			SLF4J_LOGGER.info("Created local message bucket from Plexus fallback, subsequent fallback bucket creations will be silent.");
-			m_plexusFallbackLogged = true;
-		}
+		m_factoryBuckets.add(bucket);
 		return bucket;
 	}
 
 	private void releaseBucket(Bucket bucket) {
 		if (m_factoryBuckets.remove(bucket)) {
-			SLF4J_LOGGER.debug("Closed Spring-created local message bucket without Plexus release, bucket={}.", bucket);
-		} else if (getContainer() != null) {
-			super.release(bucket);
+			SLF4J_LOGGER.debug("Closed Spring-created local message bucket, bucket={}.", bucket);
 		} else {
-			SLF4J_LOGGER.warn("Skip Plexus release for local message bucket because container is unavailable, bucket={}.", bucket);
+			SLF4J_LOGGER.debug("Closed externally-created local message bucket, bucket={}.", bucket);
 		}
 	}
 

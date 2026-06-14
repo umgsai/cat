@@ -76,6 +76,10 @@ public abstract class AbstractHdfsMessageBucket implements MessageBucket {
 		return m_id;
 	}
 
+	public void setFileSystemManager(FileSystemManager manager) {
+		m_manager = manager;
+	}
+
 	public void setId(String id) {
 		m_id = id;
 	}

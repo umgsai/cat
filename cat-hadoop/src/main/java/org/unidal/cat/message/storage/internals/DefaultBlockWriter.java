@@ -145,4 +145,12 @@ public class DefaultBlockWriter implements BlockWriter {
 		}
 	}
 
+	public void setBucketManager(BucketManager bucketManager) {
+		m_bucketManager = bucketManager;
+	}
+
+	public void setStatisticManager(ServerStatisticManager statisticManager) {
+		m_statisticManager = statisticManager;
+	}
+
 }

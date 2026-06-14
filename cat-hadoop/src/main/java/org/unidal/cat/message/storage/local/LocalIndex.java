@@ -122,6 +122,18 @@ public class LocalIndex implements Index {
 		}
 	}
 
+	public void setBufCache(ByteBufCache bufCache) {
+		m_bufCache = bufCache;
+	}
+
+	public void setPathBuilder(PathBuilder bulider) {
+		m_bulider = bulider;
+	}
+
+	public void setTokenMappingManager(TokenMappingManager manager) {
+		m_manager = manager;
+	}
+
 	private class IndexHelper {
 		private static final int BYTE_PER_MESSAGE = 8;
 

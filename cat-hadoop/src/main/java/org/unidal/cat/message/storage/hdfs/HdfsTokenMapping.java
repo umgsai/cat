@@ -153,4 +153,12 @@ public class HdfsTokenMapping implements TokenMapping {
 		}
 	}
 
+	public void setFileSystemManager(HdfsSystemManager manager) {
+		m_manager = manager;
+	}
+
+	public void setPathBuilder(PathBuilder bulider) {
+		m_bulider = bulider;
+	}
+
 }

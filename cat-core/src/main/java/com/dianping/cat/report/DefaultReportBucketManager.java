@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -42,7 +41,7 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class DefaultReportBucketManager extends ContainerHolder implements ReportBucketManager {
+public class DefaultReportBucketManager implements ReportBucketManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultReportBucketManager.class);
 
 	private ServerConfigManager m_configManager;
@@ -55,8 +54,6 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 	private File m_reportBaseDir;
 
 	private volatile boolean m_initialized;
-
-	private boolean m_plexusFallbackLogged;
 
 	@Override
 	public void clearOldReports() {
@@ -97,11 +94,9 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 			LOGGER.warn("Unable to close report bucket, bucket={}.", bucket, e);
 		} finally {
 			if (m_factoryBuckets.remove(bucket)) {
-				LOGGER.debug("Closed Spring-created report bucket without Plexus release, bucket={}.", bucket);
-			} else if (getContainer() != null) {
-				release(bucket);
+				LOGGER.debug("Closed Spring-created report bucket, bucket={}.", bucket);
 			} else {
-				LOGGER.warn("Skip Plexus release for report bucket because container is unavailable, bucket={}.", bucket);
+				LOGGER.debug("Closed externally-created report bucket, bucket={}.", bucket);
 			}
 		}
 	}
@@ -111,20 +106,13 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 		initialize();
 
 		Date date = new Date(timestamp);
-		ReportBucket bucket = null;
 
-		if (m_bucketFactory != null) {
-			bucket = m_bucketFactory.createReportBucket(name, date, index);
-			m_factoryBuckets.add(bucket);
-		} else {
-			bucket = lookup(ReportBucket.class);
-			bucket.initialize(name, date, index);
-
-			if (!m_plexusFallbackLogged) {
-				LOGGER.info("Created report bucket from Plexus fallback, subsequent fallback bucket creations will be silent.");
-				m_plexusFallbackLogged = true;
-			}
+		if (m_bucketFactory == null) {
+			throw new IllegalStateException("ReportBucketFactory is required for report storage.");
 		}
+		ReportBucket bucket = m_bucketFactory.createReportBucket(name, date, index);
+
+		m_factoryBuckets.add(bucket);
 		return bucket;
 	}
 

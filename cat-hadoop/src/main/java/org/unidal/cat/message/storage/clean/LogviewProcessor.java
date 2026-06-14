@@ -217,6 +217,14 @@ public class LogviewProcessor implements Task, Initializable {
 	public void shutdown() {
 	}
 
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setHdfsUploader(HdfsUploader hdfsUploader) {
+		m_hdfsUploader = hdfsUploader;
+	}
+
 	private void uploadFileToHdfs(String path) {
 		File file = new File(m_baseDir, path);
 

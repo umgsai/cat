@@ -1,5 +1,6 @@
 package com.dianping.cat.home.spring;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,19 +16,49 @@ import org.unidal.cat.message.storage.Bucket;
 import org.unidal.cat.message.storage.BucketFactory;
 import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.BlockDumperManager;
+import org.unidal.cat.message.storage.BlockDumperFactory;
+import org.unidal.cat.message.storage.BlockWriterFactory;
+import org.unidal.cat.message.storage.Index;
+import org.unidal.cat.message.storage.IndexFactory;
+import org.unidal.cat.message.storage.IndexManager;
 import org.unidal.cat.message.storage.MessageDumperManager;
+import org.unidal.cat.message.storage.MessageDumperFactory;
 import org.unidal.cat.message.storage.MessageFinderManager;
+import org.unidal.cat.message.storage.MessageProcessorFactory;
 import org.unidal.cat.message.storage.StorageConfiguration;
+import org.unidal.cat.message.storage.TokenMapping;
+import org.unidal.cat.message.storage.TokenMappingFactory;
+import org.unidal.cat.message.storage.TokenMappingManager;
 import org.unidal.cat.message.storage.internals.ByteBufCache;
+import org.unidal.cat.message.storage.internals.DefaultBlockDumper;
+import org.unidal.cat.message.storage.internals.DefaultBlockDumperManager;
+import org.unidal.cat.message.storage.internals.DefaultBlockWriter;
 import org.unidal.cat.message.storage.internals.DefaultMessageFinderManager;
+import org.unidal.cat.message.storage.internals.DefaultMessageDumper;
+import org.unidal.cat.message.storage.internals.DefaultMessageDumperManager;
+import org.unidal.cat.message.storage.internals.DefaultMessageProcessor;
 import org.unidal.cat.message.storage.internals.DefaultByteBufCache;
 import org.unidal.cat.message.storage.internals.DefaultStorageConfiguration;
+import org.unidal.cat.message.storage.hdfs.HdfsBucket;
+import org.unidal.cat.message.storage.hdfs.HdfsBucketManager;
+import org.unidal.cat.message.storage.hdfs.HdfsFileBuilder;
+import org.unidal.cat.message.storage.hdfs.HdfsIndex;
+import org.unidal.cat.message.storage.hdfs.HdfsIndexManager;
+import org.unidal.cat.message.storage.hdfs.HdfsMessageConsumerFinder;
+import org.unidal.cat.message.storage.hdfs.HdfsSystemManager;
+import org.unidal.cat.message.storage.hdfs.HdfsTokenMapping;
+import org.unidal.cat.message.storage.hdfs.HdfsTokenMappingManager;
+import org.unidal.cat.message.storage.hdfs.MessageConsumerFinder;
 import org.unidal.cat.message.storage.local.LocalBucket;
 import org.unidal.cat.message.storage.local.LocalBucketManager;
 import org.unidal.cat.message.storage.local.LocalFileBuilder;
+import org.unidal.cat.message.storage.local.LocalIndex;
+import org.unidal.cat.message.storage.local.LocalIndexManager;
+import org.unidal.cat.message.storage.local.LocalTokenMapping;
+import org.unidal.cat.message.storage.local.LocalTokenMappingManager;
+import org.unidal.cat.message.storage.clean.HdfsUploader;
+import org.unidal.cat.message.storage.clean.LogviewProcessor;
 import org.unidal.dal.jdbc.datasource.DataSourceManager;
-import org.unidal.lookup.ContainerLoader;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -150,6 +181,12 @@ import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyRepo
 import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.helper.JsonBuilder;
+import com.dianping.cat.hadoop.hdfs.FileSystemManager;
+import com.dianping.cat.hadoop.hdfs.HdfsMessageBucketFactory;
+import com.dianping.cat.hadoop.hdfs.HdfsMessageBucketManager;
+import com.dianping.cat.hadoop.hdfs.bucket.AbstractHdfsMessageBucket;
+import com.dianping.cat.hadoop.hdfs.bucket.HarfsMessageBucket;
+import com.dianping.cat.hadoop.hdfs.bucket.HdfsMessageBucket;
 import com.dianping.cat.home.spring.storage.SpringBackedBlockDumperManager;
 import com.dianping.cat.home.spring.storage.SpringBackedMessageDumperManager;
 import com.dianping.cat.message.DefaultPathBuilder;
@@ -237,6 +274,8 @@ import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.page.heartbeat.service.HistoricalHeartbeatService;
 import com.dianping.cat.report.page.heartbeat.service.LocalHeartbeatService;
 import com.dianping.cat.report.page.heartbeat.task.HeartbeatReportBuilder;
+import com.dianping.cat.report.page.logview.service.CompositeLogViewService;
+import com.dianping.cat.report.page.logview.service.HistoricalMessageService;
 import com.dianping.cat.report.page.logview.service.LocalMessageService;
 import com.dianping.cat.report.page.matrix.service.CompositeMatrixService;
 import com.dianping.cat.report.page.matrix.service.HistoricalMatrixService;
@@ -501,7 +540,7 @@ public class CatHomeSpringConfiguration {
 		ProblemAnalyzer analyzer = new ProblemAnalyzer();
 
 		analyzer.setReportManager(problemReportManager);
-		analyzer.setHandlers(List.of(defaultProblemHandler, longExecutionProblemHandler));
+		analyzer.setHandlers(Arrays.asList(defaultProblemHandler, longExecutionProblemHandler));
 		analyzer.setServerConfigManager(serverConfigManager);
 		return analyzer;
 	}
@@ -588,6 +627,50 @@ public class CatHomeSpringConfiguration {
 		receiver.setHandler(messageHandler);
 		receiver.setServerStateManager(serverStatisticManager);
 		return receiver;
+	}
+
+	@Bean(initMethod = "initialize")
+	public HdfsSystemManager hdfsSystemManager(ServerConfigManager serverConfigManager) {
+		HdfsSystemManager manager = new HdfsSystemManager();
+
+		manager.setConfigManager(serverConfigManager);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public HdfsUploader hdfsUploader(HdfsSystemManager hdfsSystemManager, ServerConfigManager serverConfigManager) {
+		HdfsUploader uploader = new HdfsUploader();
+
+		uploader.setFileSystemManager(hdfsSystemManager);
+		uploader.setServerConfigManager(serverConfigManager);
+		return uploader;
+	}
+
+	@Bean(initMethod = "initialize")
+	public LogviewProcessor logviewProcessor(HdfsUploader hdfsUploader, ServerConfigManager serverConfigManager) {
+		LogviewProcessor processor = new LogviewProcessor();
+
+		processor.setHdfsUploader(hdfsUploader);
+		processor.setConfigManager(serverConfigManager);
+		return processor;
+	}
+
+	@Bean(initMethod = "start", destroyMethod = "shutdown")
+	public CatHomeRuntimeBootstrap catHomeRuntimeBootstrap(AlarmManager alarmManager,
+			DefaultTaskConsumer defaultTaskConsumer, LogviewProcessor logviewProcessor, MessageConsumer messageConsumer,
+			ReportReloadTask reportReloadTask, ServerConfigManager serverConfigManager,
+			ServersUpdaterManager serversUpdaterManager, TcpSocketReceiver tcpSocketReceiver) {
+		CatHomeRuntimeBootstrap bootstrap = new CatHomeRuntimeBootstrap();
+
+		bootstrap.setAlarmManager(alarmManager);
+		bootstrap.setTaskConsumer(defaultTaskConsumer);
+		bootstrap.setLogviewProcessor(logviewProcessor);
+		bootstrap.setMessageConsumer(messageConsumer);
+		bootstrap.setReportReloadTask(reportReloadTask);
+		bootstrap.setServerConfigManager(serverConfigManager);
+		bootstrap.setServersUpdaterManager(serversUpdaterManager);
+		bootstrap.setTcpSocketReceiver(tcpSocketReceiver);
+		return bootstrap;
 	}
 
 	@Bean
@@ -2068,6 +2151,45 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public MessageProcessorFactory legacyMessageProcessorFactory(BlockDumperManager blockDumperManager,
+			MessageFinderManager messageFinderManager, ServerConfigManager serverConfigManager) {
+		return (hour, index, queue) -> {
+			DefaultMessageProcessor processor = new DefaultMessageProcessor();
+
+			processor.setBlockDumperManager(blockDumperManager);
+			processor.setFinderManager(messageFinderManager);
+			processor.setConfigManager(serverConfigManager);
+			processor.initialize(hour, index, queue);
+			return processor;
+		};
+	}
+
+	@Bean
+	public MessageDumperFactory legacyMessageDumperFactory(BlockDumperManager blockDumperManager,
+			BucketManager localBucketManager, MessageProcessorFactory legacyMessageProcessorFactory,
+			ServerConfigManager serverConfigManager, ServerStatisticManager serverStatisticManager) {
+		return hour -> {
+			DefaultMessageDumper dumper = new DefaultMessageDumper();
+
+			dumper.setBlockDumperManager(blockDumperManager);
+			dumper.setBucketManager(localBucketManager);
+			dumper.setConfigManager(serverConfigManager);
+			dumper.setMessageProcessorFactory(legacyMessageProcessorFactory);
+			dumper.setStatisticManager(serverStatisticManager);
+			dumper.initialize(hour);
+			return dumper;
+		};
+	}
+
+	@Bean(initMethod = "initialize", name = "legacyMessageDumperManager")
+	public MessageDumperManager legacyMessageDumperManager(MessageDumperFactory legacyMessageDumperFactory) {
+		DefaultMessageDumperManager manager = new DefaultMessageDumperManager();
+
+		manager.setMessageDumperFactory(legacyMessageDumperFactory);
+		return manager;
+	}
+
+	@Bean
 	@Primary
 	public BlockDumperManager blockDumperManager(BucketManager localBucketManager,
 			ServerConfigManager serverConfigManager, ServerStatisticManager serverStatisticManager) {
@@ -2076,6 +2198,41 @@ public class CatHomeSpringConfiguration {
 		manager.setBucketManager(localBucketManager);
 		manager.setConfigManager(serverConfigManager);
 		manager.setStatisticManager(serverStatisticManager);
+		return manager;
+	}
+
+	@Bean
+	public BlockWriterFactory legacyBlockWriterFactory(BucketManager localBucketManager,
+			ServerStatisticManager serverStatisticManager) {
+		return (hour, index, queue) -> {
+			DefaultBlockWriter writer = new DefaultBlockWriter();
+
+			writer.setBucketManager(localBucketManager);
+			writer.setStatisticManager(serverStatisticManager);
+			writer.initialize(hour, index, queue);
+			return writer;
+		};
+	}
+
+	@Bean
+	public BlockDumperFactory legacyBlockDumperFactory(BlockWriterFactory legacyBlockWriterFactory,
+			ServerConfigManager serverConfigManager, ServerStatisticManager serverStatisticManager) {
+		return hour -> {
+			DefaultBlockDumper dumper = new DefaultBlockDumper();
+
+			dumper.setBlockWriterFactory(legacyBlockWriterFactory);
+			dumper.setConfigManager(serverConfigManager);
+			dumper.setStatisticManager(serverStatisticManager);
+			dumper.initialize(hour);
+			return dumper;
+		};
+	}
+
+	@Bean(name = "legacyBlockDumperManager")
+	public BlockDumperManager legacyBlockDumperManager(BlockDumperFactory legacyBlockDumperFactory) {
+		DefaultBlockDumperManager manager = new DefaultBlockDumperManager();
+
+		manager.setBlockDumperFactory(legacyBlockDumperFactory);
 		return manager;
 	}
 
@@ -2092,6 +2249,14 @@ public class CatHomeSpringConfiguration {
 		return builder;
 	}
 
+	@Bean
+	public org.unidal.cat.message.storage.PathBuilder hdfsMessagePathBuilder(HdfsSystemManager hdfsSystemManager) {
+		HdfsFileBuilder builder = new HdfsFileBuilder();
+
+		builder.setFileSystemManager(hdfsSystemManager);
+		return builder;
+	}
+
 	@Bean(initMethod = "initialize")
 	public ByteBufCache byteBufCache() {
 		DefaultByteBufCache cache = new DefaultByteBufCache();
@@ -2100,7 +2265,8 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public BucketFactory localMessageBucketFactory(org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
+	public BucketFactory localMessageBucketFactory(
+			@Qualifier("localMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
 			ByteBufCache byteBufCache, ServerConfigManager serverConfigManager) {
 		return new BucketFactory() {
 			@Override
@@ -2116,12 +2282,189 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean("local")
-	public BucketManager localBucketManager(org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
-			BucketFactory localMessageBucketFactory) {
+	public BucketManager localBucketManager(
+			@Qualifier("localMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
+			@Qualifier("localMessageBucketFactory") BucketFactory localMessageBucketFactory) {
 		LocalBucketManager manager = new LocalBucketManager();
 
 		manager.setPathBuilder(localMessagePathBuilder);
 		manager.setBucketFactory(localMessageBucketFactory);
+		return manager;
+	}
+
+	@Bean
+	public TokenMappingFactory localTokenMappingFactory(
+			@Qualifier("localMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder) {
+		return (hour, ip) -> {
+			LocalTokenMapping mapping = new LocalTokenMapping();
+
+			mapping.setPathBuilder(localMessagePathBuilder);
+			mapping.open(hour, ip);
+			return mapping;
+		};
+	}
+
+	@Bean(name = "localTokenMappingManager")
+	public TokenMappingManager localTokenMappingManager(
+			@Qualifier("localTokenMappingFactory") TokenMappingFactory localTokenMappingFactory) {
+		LocalTokenMappingManager manager = new LocalTokenMappingManager();
+
+		manager.setTokenMappingFactory(localTokenMappingFactory);
+		return manager;
+	}
+
+	@Bean
+	public IndexFactory localIndexFactory(
+			@Qualifier("localMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
+			ByteBufCache byteBufCache,
+			@Qualifier("localTokenMappingManager") TokenMappingManager localTokenMappingManager) {
+		return (domain, ip, hour) -> {
+			LocalIndex index = new LocalIndex();
+
+			index.setPathBuilder(localMessagePathBuilder);
+			index.setBufCache(byteBufCache);
+			index.setTokenMappingManager(localTokenMappingManager);
+			index.initialize(domain, ip, hour);
+			return index;
+		};
+	}
+
+	@Bean(name = "localIndexManager")
+	public IndexManager localIndexManager(
+			@Qualifier("localMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
+			@Qualifier("localIndexFactory") IndexFactory localIndexFactory) {
+		LocalIndexManager manager = new LocalIndexManager();
+
+		manager.setPathBuilder(localMessagePathBuilder);
+		manager.setIndexFactory(localIndexFactory);
+		return manager;
+	}
+
+	@Bean
+	public TokenMappingFactory hdfsTokenMappingFactory(
+			@Qualifier("hdfsMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder hdfsMessagePathBuilder,
+			HdfsSystemManager hdfsSystemManager) {
+		return (hour, ip) -> {
+			HdfsTokenMapping mapping = new HdfsTokenMapping();
+
+			mapping.setPathBuilder(hdfsMessagePathBuilder);
+			mapping.setFileSystemManager(hdfsSystemManager);
+			mapping.open(hour, ip);
+			return mapping;
+		};
+	}
+
+	@Bean(name = "hdfsTokenMappingManager")
+	public TokenMappingManager hdfsTokenMappingManager(
+			@Qualifier("hdfsTokenMappingFactory") TokenMappingFactory hdfsTokenMappingFactory) {
+		HdfsTokenMappingManager manager = new HdfsTokenMappingManager();
+
+		manager.setTokenMappingFactory(hdfsTokenMappingFactory);
+		return manager;
+	}
+
+	@Bean
+	public IndexFactory hdfsIndexFactory(
+			@Qualifier("hdfsMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder hdfsMessagePathBuilder,
+			HdfsSystemManager hdfsSystemManager, ServerConfigManager serverConfigManager,
+			@Qualifier("hdfsTokenMappingManager") TokenMappingManager hdfsTokenMappingManager) {
+		return (domain, ip, hour) -> {
+			HdfsIndex index = new HdfsIndex();
+
+			index.setPathBuilder(hdfsMessagePathBuilder);
+			index.setFileSystemManager(hdfsSystemManager);
+			index.setServerConfigManager(serverConfigManager);
+			index.setTokenMappingManager(hdfsTokenMappingManager);
+			index.initialize(domain, ip, hour);
+			return index;
+		};
+	}
+
+	@Bean
+	public MessageConsumerFinder hdfsMessageConsumerFinder(HdfsSystemManager hdfsSystemManager) {
+		HdfsMessageConsumerFinder finder = new HdfsMessageConsumerFinder();
+
+		finder.setFileSystemManager(hdfsSystemManager);
+		return finder;
+	}
+
+	@Bean(initMethod = "initialize")
+	public HdfsIndexManager hdfsIndexManager(ServerConfigManager serverConfigManager, HdfsSystemManager hdfsSystemManager,
+			@Qualifier("hdfsMessageConsumerFinder") MessageConsumerFinder hdfsMessageConsumerFinder,
+			@Qualifier("hdfsIndexFactory") IndexFactory hdfsIndexFactory) {
+		HdfsIndexManager manager = new HdfsIndexManager();
+
+		manager.setConfigManager(serverConfigManager);
+		manager.setFileSystemManager(hdfsSystemManager);
+		manager.setConsumerFinder(hdfsMessageConsumerFinder);
+		manager.setIndexFactory(hdfsIndexFactory);
+		return manager;
+	}
+
+	@Bean
+	public BucketFactory hdfsBucketFactory(
+			@Qualifier("hdfsMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder hdfsMessagePathBuilder,
+			HdfsSystemManager hdfsSystemManager, ServerConfigManager serverConfigManager) {
+		return (domain, ip, hour, writeMode) -> {
+			HdfsBucket bucket = new HdfsBucket();
+
+			bucket.setPathBuilder(hdfsMessagePathBuilder);
+			bucket.setFileSystemManager(hdfsSystemManager);
+			bucket.setServerConfigManager(serverConfigManager);
+			bucket.initialize(domain, ip, hour, writeMode);
+			return bucket;
+		};
+	}
+
+	@Bean(initMethod = "initialize")
+	public HdfsBucketManager hdfsBucketManager(ServerConfigManager serverConfigManager, HdfsSystemManager hdfsSystemManager,
+			@Qualifier("hdfsMessageConsumerFinder") MessageConsumerFinder hdfsMessageConsumerFinder,
+			@Qualifier("hdfsBucketFactory") BucketFactory hdfsBucketFactory) {
+		HdfsBucketManager manager = new HdfsBucketManager();
+
+		manager.setConfigManager(serverConfigManager);
+		manager.setFileSystemManager(hdfsSystemManager);
+		manager.setConsumerFinder(hdfsMessageConsumerFinder);
+		manager.setBucketFactory(hdfsBucketFactory);
+		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public FileSystemManager hdfsLogviewFileSystemManager(ServerConfigManager serverConfigManager) {
+		FileSystemManager manager = new FileSystemManager();
+
+		manager.setConfigManager(serverConfigManager);
+		return manager;
+	}
+
+	@Bean
+	public HdfsMessageBucketFactory hdfsMessageBucketFactory(FileSystemManager hdfsLogviewFileSystemManager) {
+		return (type, dataFile, date) -> {
+			AbstractHdfsMessageBucket bucket;
+
+			if (HdfsMessageBucketManager.HARFS_BUCKET.equals(type)) {
+				bucket = new HarfsMessageBucket();
+			} else if (HdfsMessageBucketManager.HDFS_BUCKET.equals(type)) {
+				bucket = new HdfsMessageBucket();
+			} else {
+				throw new IllegalArgumentException("Unsupported HDFS message bucket type: " + type);
+			}
+			bucket.setFileSystemManager(hdfsLogviewFileSystemManager);
+			bucket.initialize(dataFile, date);
+			return bucket;
+		};
+	}
+
+	@Bean(initMethod = "initialize", name = "hdfsMessageBucketManager")
+	public MessageBucketManager hdfsMessageBucketManager(FileSystemManager hdfsLogviewFileSystemManager,
+			PathBuilder pathBuilder, ServerConfigManager serverConfigManager,
+			HdfsMessageBucketFactory hdfsMessageBucketFactory) {
+		HdfsMessageBucketManager manager = new HdfsMessageBucketManager();
+
+		manager.setFileSystemManager(hdfsLogviewFileSystemManager);
+		manager.setPathBuilder(pathBuilder);
+		manager.setServerConfigManager(serverConfigManager);
+		manager.setBucketFactory(hdfsMessageBucketFactory);
 		return manager;
 	}
 
@@ -2232,12 +2575,8 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public DataSourceManager dataSourceManager() {
-		try {
-			return ContainerLoader.getDefaultContainer().lookup(DataSourceManager.class);
-		} catch (ComponentLookupException e) {
-			throw new IllegalStateException("Unable to resolve DataSourceManager from Unidal container.", e);
-		}
+	public DataSourceManager dataSourceManager(DataSource catDataSource) {
+		return new SpringDataSourceManager(catDataSource);
 	}
 
 	@Bean
@@ -2990,7 +3329,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(initMethod = "initialize")
-	public LocalModelService<String> localMessageService(ServerConfigManager serverConfigManager,
+	public LocalMessageService localMessageService(ServerConfigManager serverConfigManager,
 			MessageFinderManager messageFinderManager, @Qualifier("local") BucketManager localBucketManager,
 			@Qualifier("legacyLocalMessageBucketManager") MessageBucketManager localMessageBucketManager,
 			MessageConsumer messageConsumer) {
@@ -3001,6 +3340,32 @@ public class CatHomeSpringConfiguration {
 		service.setBucketManager(localBucketManager);
 		service.setMessageBucketManager(localMessageBucketManager);
 		service.setConsumer(messageConsumer);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize", name = "historicalMessageService")
+	public ModelService<String> historicalMessageService(ServerConfigManager serverConfigManager,
+			HdfsBucketManager hdfsBucketManager,
+			@Qualifier("hdfsMessageBucketManager") MessageBucketManager hdfsMessageBucketManager) {
+		HistoricalMessageService service = new HistoricalMessageService();
+
+		service.setConfigManager(serverConfigManager);
+		service.setBucketManager(hdfsBucketManager);
+		service.setHdfsBucketManager(hdfsMessageBucketManager);
+		return service;
+	}
+
+	@Bean(initMethod = "initialize", name = "logviewModelService")
+	public ModelService<String> logviewModelService(ServerConfigManager serverConfigManager,
+			RemoteServersManager remoteServersManager,
+			@Qualifier("localMessageService") LocalMessageService localMessageService,
+			@Qualifier("historicalMessageService") ModelService<String> historicalMessageService) {
+		CompositeLogViewService service = new CompositeLogViewService();
+		List<ModelService<String>> services = Arrays.asList(localMessageService, historicalMessageService);
+
+		service.setServices(services);
+		service.setConfigManager(serverConfigManager);
+		service.setServerManager(remoteServersManager);
 		return service;
 	}
 

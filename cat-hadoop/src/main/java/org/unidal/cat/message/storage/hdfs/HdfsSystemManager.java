@@ -119,4 +119,8 @@ public class HdfsSystemManager implements Initializable {
 		}
 	}
 
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
 }

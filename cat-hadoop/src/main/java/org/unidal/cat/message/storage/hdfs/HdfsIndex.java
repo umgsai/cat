@@ -121,6 +121,22 @@ public class HdfsIndex implements Index {
 		throw new RuntimeException("unsupport operation");
 	}
 
+	public void setFileSystemManager(HdfsSystemManager manager) {
+		m_manager = manager;
+	}
+
+	public void setPathBuilder(PathBuilder bulider) {
+		m_bulider = bulider;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
+	}
+
+	public void setTokenMappingManager(TokenMappingManager hdfsTokenManager) {
+		m_hdfsTokenManager = hdfsTokenManager;
+	}
+
 	private class IndexHelper {
 		private static final int BYTE_PER_MESSAGE = 8;
 

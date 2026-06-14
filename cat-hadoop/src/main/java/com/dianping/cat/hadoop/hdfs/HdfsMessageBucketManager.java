@@ -37,13 +37,12 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
-import org.unidal.lookup.ContainerHolder;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HdfsMessageBucketManager extends ContainerHolder implements MessageBucketManager, Initializable {
+public class HdfsMessageBucketManager implements MessageBucketManager, Initializable {
 
 	public static final String ID = "hdfs";
 
@@ -56,6 +55,8 @@ public class HdfsMessageBucketManager extends ContainerHolder implements Message
 	private PathBuilder m_pathBuilder;
 
 	private ServerConfigManager m_serverConfigManager;
+
+	private HdfsMessageBucketFactory m_bucketFactory;
 
 	private Map<String, MessageBucket> m_buckets = new ConcurrentHashMap<String, MessageBucket>();
 
@@ -82,9 +83,7 @@ public class HdfsMessageBucketManager extends ContainerHolder implements Message
 			}
 		}
 		for (String close : closed) {
-			MessageBucket bucket = m_buckets.remove(close);
-
-			release(bucket);
+			m_buckets.remove(close);
 		}
 	}
 
@@ -190,8 +189,7 @@ public class HdfsMessageBucketManager extends ContainerHolder implements Message
 				MessageBucket bucket = m_buckets.get(bKey);
 
 				if (bucket == null) {
-					bucket = lookup(MessageBucket.class, type);
-					bucket.initialize(dataFile, date);
+					bucket = createBucket(type, dataFile, date);
 					m_buckets.put(bKey, bucket);
 				}
 
@@ -207,6 +205,29 @@ public class HdfsMessageBucketManager extends ContainerHolder implements Message
 			}
 		}
 		return null;
+	}
+
+	private MessageBucket createBucket(String type, String dataFile, Date date) throws IOException {
+		if (m_bucketFactory == null) {
+			throw new IllegalStateException("HdfsMessageBucketFactory is required for HDFS logview storage.");
+		}
+		return m_bucketFactory.createBucket(type, dataFile, date);
+	}
+
+	public void setBucketFactory(HdfsMessageBucketFactory bucketFactory) {
+		m_bucketFactory = bucketFactory;
+	}
+
+	public void setFileSystemManager(FileSystemManager manager) {
+		m_manager = manager;
+	}
+
+	public void setPathBuilder(PathBuilder pathBuilder) {
+		m_pathBuilder = pathBuilder;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
 	}
 
 	@Override

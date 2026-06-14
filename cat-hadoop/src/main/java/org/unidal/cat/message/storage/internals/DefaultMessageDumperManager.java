@@ -29,12 +29,13 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.MessageDumper;
+import org.unidal.cat.message.storage.MessageDumperFactory;
 import org.unidal.cat.message.storage.MessageDumperManager;
-import org.unidal.lookup.ContainerHolder;
 
-public class DefaultMessageDumperManager extends ContainerHolder
-						implements MessageDumperManager,	Initializable {
+public class DefaultMessageDumperManager implements MessageDumperManager, Initializable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageDumperManager.class);
+
+	private MessageDumperFactory m_messageDumperFactory;
 
 	private Map<Integer, MessageDumper> m_dumpers = new LinkedHashMap<Integer, MessageDumper>();
 
@@ -46,9 +47,8 @@ public class DefaultMessageDumperManager extends ContainerHolder
 			try {
 				dumper.awaitTermination(hour);
 			} catch (InterruptedException e) {
-				// ignore
+				Thread.currentThread().interrupt();
 			}
-			super.release(dumper);
 		}
 	}
 
@@ -68,8 +68,7 @@ public class DefaultMessageDumperManager extends ContainerHolder
 				if (dumper == null) {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-					dumper = lookup(MessageDumper.class);
-					dumper.initialize(hour);
+					dumper = createDumper(hour);
 
 					m_dumpers.put(hour, dumper);
 					LOGGER.info("create message dumper " + sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
@@ -82,5 +81,16 @@ public class DefaultMessageDumperManager extends ContainerHolder
 
 	@Override
 	public void initialize() throws InitializationException {
+	}
+
+	private MessageDumper createDumper(int hour) {
+		if (m_messageDumperFactory == null) {
+			throw new IllegalStateException("MessageDumperFactory is required.");
+		}
+		return m_messageDumperFactory.createMessageDumper(hour);
+	}
+
+	public void setMessageDumperFactory(MessageDumperFactory messageDumperFactory) {
+		m_messageDumperFactory = messageDumperFactory;
 	}
 }

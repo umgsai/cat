@@ -27,11 +27,13 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.BlockDumper;
+import org.unidal.cat.message.storage.BlockDumperFactory;
 import org.unidal.cat.message.storage.BlockDumperManager;
-import org.unidal.lookup.ContainerHolder;
 
-public class DefaultBlockDumperManager extends ContainerHolder implements BlockDumperManager {
+public class DefaultBlockDumperManager implements BlockDumperManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBlockDumperManager.class);
+
+	private BlockDumperFactory m_blockDumperFactory;
 
 	private Map<Integer, BlockDumper> m_map = new LinkedHashMap<Integer, BlockDumper>();
 
@@ -42,9 +44,8 @@ public class DefaultBlockDumperManager extends ContainerHolder implements BlockD
 		if (dumper != null) {
 			try {
 				dumper.awaitTermination();
-				super.release(dumper);
 			} catch (InterruptedException e) {
-				// ignore it
+				Thread.currentThread().interrupt();
 			}
 		}
 	}
@@ -60,8 +61,7 @@ public class DefaultBlockDumperManager extends ContainerHolder implements BlockD
 				if (dumper == null) {
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-					dumper = lookup(BlockDumper.class);
-					dumper.initialize(hour);
+					dumper = createDumper(hour);
 
 					m_map.put(hour, dumper);
 					LOGGER.info("Create block dumper " + sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
@@ -70,5 +70,16 @@ public class DefaultBlockDumperManager extends ContainerHolder implements BlockD
 		}
 
 		return dumper;
+	}
+
+	private BlockDumper createDumper(int hour) {
+		if (m_blockDumperFactory == null) {
+			throw new IllegalStateException("BlockDumperFactory is required.");
+		}
+		return m_blockDumperFactory.createBlockDumper(hour);
+	}
+
+	public void setBlockDumperFactory(BlockDumperFactory blockDumperFactory) {
+		m_blockDumperFactory = blockDumperFactory;
 	}
 }

@@ -185,4 +185,16 @@ public class DefaultMessageProcessor implements MessageProcessor, MessageFinder 
 			// ignore it
 		}
 	}
+
+	public void setBlockDumperManager(BlockDumperManager blockDumperManager) {
+		m_blockDumperManager = blockDumperManager;
+	}
+
+	public void setConfigManager(ServerConfigManager configManger) {
+		m_configManger = configManger;
+	}
+
+	public void setFinderManager(MessageFinderManager finderManager) {
+		m_finderManager = finderManager;
+	}
 }

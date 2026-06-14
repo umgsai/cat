@@ -33,9 +33,9 @@ import org.unidal.cat.message.storage.BlockDumperManager;
 import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.MessageDumper;
 import org.unidal.cat.message.storage.MessageProcessor;
+import org.unidal.cat.message.storage.MessageProcessorFactory;
 import org.unidal.cat.message.storage.exception.MessageQueueFullException;
 import com.dianping.cat.support.Threads;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
@@ -45,7 +45,7 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
-public class DefaultMessageDumper extends ContainerHolder implements MessageDumper {
+public class DefaultMessageDumper implements MessageDumper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageDumper.class);
 
 	private BlockDumperManager m_blockDumperManager;
@@ -55,6 +55,8 @@ public class DefaultMessageDumper extends ContainerHolder implements MessageDump
 	private ServerStatisticManager m_statisticManager;
 
 	private ServerConfigManager m_configManager;
+
+	private MessageProcessorFactory m_messageProcessorFactory;
 
 	private List<BlockingQueue<MessageTree>> m_queues = new ArrayList<BlockingQueue<MessageTree>>();
 
@@ -104,7 +106,6 @@ public class DefaultMessageDumper extends ContainerHolder implements MessageDump
 
 		for (MessageProcessor processor : m_processors) {
 			processor.shutdown();
-			super.release(processor);
 		}
 	}
 
@@ -118,12 +119,11 @@ public class DefaultMessageDumper extends ContainerHolder implements MessageDump
 
 		for (int i = 0; i < processThreads; i++) {
 			BlockingQueue<MessageTree> queue = new ArrayBlockingQueue<MessageTree>(10000);
-			MessageProcessor processor = lookup(MessageProcessor.class);
+			MessageProcessor processor = createProcessor(hour, i, queue);
 
 			m_queues.add(queue);
 			m_processors.add(processor);
 
-			processor.initialize(hour, i, queue);
 			Threads.forGroup("Cat").start(processor);
 		}
 	}
@@ -155,5 +155,32 @@ public class DefaultMessageDumper extends ContainerHolder implements MessageDump
 				m_statisticManager.addMessageDump(CatConstants.SUCCESS_COUNT);
 			}
 		}
+	}
+
+	private MessageProcessor createProcessor(int hour, int index, BlockingQueue<MessageTree> queue) {
+		if (m_messageProcessorFactory == null) {
+			throw new IllegalStateException("MessageProcessorFactory is required.");
+		}
+		return m_messageProcessorFactory.createMessageProcessor(hour, index, queue);
+	}
+
+	public void setBlockDumperManager(BlockDumperManager blockDumperManager) {
+		m_blockDumperManager = blockDumperManager;
+	}
+
+	public void setBucketManager(BucketManager bucketManager) {
+		m_bucketManager = bucketManager;
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setMessageProcessorFactory(MessageProcessorFactory messageProcessorFactory) {
+		m_messageProcessorFactory = messageProcessorFactory;
+	}
+
+	public void setStatisticManager(ServerStatisticManager statisticManager) {
+		m_statisticManager = statisticManager;
 	}
 }

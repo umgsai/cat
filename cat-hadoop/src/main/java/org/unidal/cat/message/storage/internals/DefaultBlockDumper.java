@@ -30,20 +30,22 @@ import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.Block;
 import org.unidal.cat.message.storage.BlockDumper;
 import org.unidal.cat.message.storage.BlockWriter;
+import org.unidal.cat.message.storage.BlockWriterFactory;
 import org.unidal.cat.message.storage.exception.BlockQueueFullException;
 import com.dianping.cat.support.Threads;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
-public class DefaultBlockDumper extends ContainerHolder implements BlockDumper {
+public class DefaultBlockDumper implements BlockDumper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBlockDumper.class);
 
 	private ServerStatisticManager m_statisticManager;
 
 	private ServerConfigManager m_configManager;
+
+	private BlockWriterFactory m_blockWriterFactory;
 
 	private List<BlockingQueue<Block>> m_queues = new ArrayList<BlockingQueue<Block>>();
 
@@ -76,7 +78,6 @@ public class DefaultBlockDumper extends ContainerHolder implements BlockDumper {
 
 		for (final BlockWriter writer : m_writers) {
 			writer.shutdown();
-			super.release(writer);
 		}
 	}
 
@@ -106,13 +107,31 @@ public class DefaultBlockDumper extends ContainerHolder implements BlockDumper {
 
 		for (int i = 0; i < threads; i++) {
 			BlockingQueue<Block> queue = new ArrayBlockingQueue<Block>(10000);
-			BlockWriter writer = lookup(BlockWriter.class);
+			BlockWriter writer = createWriter(hour, i, queue);
 
 			m_queues.add(queue);
 			m_writers.add(writer);
 
-			writer.initialize(hour, i, queue);
 			Threads.forGroup("Cat").start(writer);
 		}
+	}
+
+	private BlockWriter createWriter(int hour, int index, BlockingQueue<Block> queue) {
+		if (m_blockWriterFactory == null) {
+			throw new IllegalStateException("BlockWriterFactory is required.");
+		}
+		return m_blockWriterFactory.createBlockWriter(hour, index, queue);
+	}
+
+	public void setBlockWriterFactory(BlockWriterFactory blockWriterFactory) {
+		m_blockWriterFactory = blockWriterFactory;
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setStatisticManager(ServerStatisticManager statisticManager) {
+		m_statisticManager = statisticManager;
 	}
 }

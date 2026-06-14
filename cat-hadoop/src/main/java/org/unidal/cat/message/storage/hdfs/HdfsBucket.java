@@ -127,6 +127,18 @@ public class HdfsBucket implements Bucket {
 		return initialize(domain, ip, hour);
 	}
 
+	public void setFileSystemManager(HdfsSystemManager manager) {
+		m_manager = manager;
+	}
+
+	public void setPathBuilder(PathBuilder bulider) {
+		m_bulider = bulider;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
+	}
+
 	private class DataHelper {
 
 		private FSDataInputStream m_dataStream;

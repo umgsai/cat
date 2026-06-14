@@ -39,7 +39,6 @@ import java.util.stream.Stream;
 
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
-import org.unidal.lookup.ContainerHolder;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
@@ -54,7 +53,6 @@ import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.storage.LocalMessageBucket;
 import com.dianping.cat.message.storage.MessageBlock;
-import com.dianping.cat.message.storage.MessageBucket;
 import com.dianping.cat.message.storage.MessageBucketFactory;
 import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.message.tree.MessageId;
@@ -63,8 +61,7 @@ import com.dianping.cat.spring.CatSpringContext;
 
 import io.netty.buffer.ByteBuf;
 
-public class LocalMessageBucketManager extends ContainerHolder
-						implements MessageBucketManager {
+public class LocalMessageBucketManager implements MessageBucketManager {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalMessageBucketManager.class);
 
 	public static final String ID = "local";
@@ -99,8 +96,6 @@ public class LocalMessageBucketManager extends ContainerHolder
 	private List<BlockingQueue<MessageItem>> m_messageQueues = new ArrayList<BlockingQueue<MessageItem>>();
 
 	private BlockingQueue<MessageItem> m_last;
-
-	private boolean m_plexusFallbackLogged;
 
 	@Override
 	public void archive(long startTime) {
@@ -520,32 +515,20 @@ public class LocalMessageBucketManager extends ContainerHolder
 	}
 
 	private LocalMessageBucket createBucket(String dataFile) throws Exception {
-		if (m_bucketFactory != null) {
-			LocalMessageBucket bucket = m_bucketFactory.createBucket(m_baseDir, dataFile);
-
-			m_factoryBuckets.add(bucket);
-			return bucket;
+		if (m_bucketFactory == null) {
+			throw new IllegalStateException("MessageBucketFactory is required for local message storage.");
 		}
+		LocalMessageBucket bucket = m_bucketFactory.createBucket(m_baseDir, dataFile);
 
-		LocalMessageBucket bucket = (LocalMessageBucket) lookup(MessageBucket.class, LocalMessageBucket.ID);
-
-		bucket.setBaseDir(m_baseDir);
-		bucket.initialize(dataFile);
-		if (!m_plexusFallbackLogged) {
-			SLF4J_LOGGER.info("Created local message storage bucket from Plexus fallback, subsequent fallback bucket creations will be silent.");
-			m_plexusFallbackLogged = true;
-		}
+		m_factoryBuckets.add(bucket);
 		return bucket;
 	}
 
 	private void releaseBucket(LocalMessageBucket bucket) {
 		if (m_factoryBuckets.remove(bucket)) {
-			SLF4J_LOGGER.debug("Closed Spring-created local message storage bucket without Plexus release, bucket={}.", bucket);
-		} else if (getContainer() != null) {
-			release(bucket);
+			SLF4J_LOGGER.debug("Closed Spring-created local message storage bucket, bucket={}.", bucket);
 		} else {
-			SLF4J_LOGGER.warn("Skip Plexus release for local message storage bucket because container is unavailable, bucket={}.",
-			      bucket);
+			SLF4J_LOGGER.debug("Closed externally-created local message storage bucket, bucket={}.", bucket);
 		}
 	}
 

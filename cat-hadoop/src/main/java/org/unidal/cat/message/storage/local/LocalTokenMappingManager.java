@@ -27,11 +27,13 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.unidal.cat.message.storage.TokenMapping;
+import org.unidal.cat.message.storage.TokenMappingFactory;
 import org.unidal.cat.message.storage.TokenMappingManager;
-import org.unidal.lookup.ContainerHolder;
 
-public class LocalTokenMappingManager extends ContainerHolder implements TokenMappingManager {
+public class LocalTokenMappingManager implements TokenMappingManager {
 	private Map<Pair<Integer, String>, TokenMapping> m_cache = new HashMap<Pair<Integer, String>, TokenMapping>();
+
+	private TokenMappingFactory m_tokenMappingFactory;
 
 	@Override
 	public void close(int hour) {
@@ -56,7 +58,6 @@ public class LocalTokenMappingManager extends ContainerHolder implements TokenMa
 			if (mapping != null) {
 				mapping.close();
 			}
-			super.release(mapping);
 		}
 	}
 
@@ -70,14 +71,24 @@ public class LocalTokenMappingManager extends ContainerHolder implements TokenMa
 				mapping = m_cache.get(pair);
 
 				if (mapping == null) {
-					mapping = lookup(TokenMapping.class, "local");
-					mapping.open(hour, ip);
+					mapping = createTokenMapping(hour, ip);
 					m_cache.put(pair, mapping);
 				}
 			}
 		}
 
 		return mapping;
+	}
+
+	private TokenMapping createTokenMapping(int hour, String ip) throws IOException {
+		if (m_tokenMappingFactory == null) {
+			throw new IllegalStateException("TokenMappingFactory is required for local token mapping storage.");
+		}
+		return m_tokenMappingFactory.createTokenMapping(hour, ip);
+	}
+
+	public void setTokenMappingFactory(TokenMappingFactory tokenMappingFactory) {
+		m_tokenMappingFactory = tokenMappingFactory;
 	}
 
 }

@@ -46,4 +46,8 @@ public class HdfsFileBuilder implements PathBuilder {
 
 		return m_fileSystemManager.getBaseDir() + path;
 	}
+
+	public void setFileSystemManager(HdfsSystemManager fileSystemManager) {
+		m_fileSystemManager = fileSystemManager;
+	}
 }
