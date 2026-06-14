@@ -23,8 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -32,20 +30,13 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 
-public class DatabaseParser implements LogEnabled {
+public class DatabaseParser {
 
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DatabaseParser.class);
-
-	private Logger m_logger;
 
 	private Set<String> m_errorConnections = new HashSet<String>();
 
 	private Map<String, Database> m_connections = new LinkedHashMap<String, Database>();
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
 
 	public Database parseDatabase(String connection) {
 		Database database = m_connections.get(connection);
@@ -107,11 +98,7 @@ public class DatabaseParser implements LogEnabled {
 	}
 
 	private void logUnrecognizedConnection(String connection) {
-		if (m_logger != null) {
-			m_logger.info("Unrecognized jdbc connection string: " + connection);
-		} else {
-			LOGGER.warn("Unrecognized jdbc connection string: {}", connection);
-		}
+		LOGGER.warn("Unrecognized jdbc connection string: {}", connection);
 	}
 
 	public static class Database {

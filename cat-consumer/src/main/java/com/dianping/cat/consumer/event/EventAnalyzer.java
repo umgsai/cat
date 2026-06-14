@@ -30,14 +30,12 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import com.dianping.cat.support.Threads;
 
 import java.util.List;
 import java.util.Set;
 
-public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> implements LogEnabled {
+public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 
 	public static final String ID = "event";
 
@@ -79,11 +77,6 @@ public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> implemen
 		// report.getIps().addAll(report.getMachines().keySet());
 
 		return report;
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	private EventType findOrCreateType(Machine machine, String type) {

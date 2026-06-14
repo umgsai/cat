@@ -33,15 +33,13 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class DependencyAnalyzer extends AbstractMessageAnalyzer<DependencyReport> implements LogEnabled {
+public class DependencyAnalyzer extends AbstractMessageAnalyzer<DependencyReport> {
 	public static final String ID = "dependency";
 
 	private ReportManager<DependencyReport> m_reportManager;
@@ -62,11 +60,6 @@ public class DependencyAnalyzer extends AbstractMessageAnalyzer<DependencyReport
 		} else {
 			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	private DependencyReport findOrCreateReport(String domain) {

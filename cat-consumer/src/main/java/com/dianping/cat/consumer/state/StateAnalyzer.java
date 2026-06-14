@@ -32,8 +32,6 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.statistic.ServerStatistic.Statistic;
 import com.dianping.cat.statistic.ServerStatisticManager;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 
 import java.util.Date;
 import java.util.List;
@@ -41,7 +39,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> implements LogEnabled {
+public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> {
 	public static final String ID = "state";
 
 	private ReportManager<StateReport> m_reportManager;
@@ -174,11 +172,6 @@ public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> implemen
 				m_serverStateManager.removeState(start);
 			}
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override

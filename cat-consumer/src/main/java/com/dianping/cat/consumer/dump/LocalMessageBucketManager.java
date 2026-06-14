@@ -37,8 +37,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Stream;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import com.dianping.cat.support.Threads;
@@ -67,12 +65,10 @@ import com.dianping.cat.statistic.ServerStatisticManager;
 import io.netty.buffer.ByteBuf;
 
 public class LocalMessageBucketManager extends ContainerHolder
-						implements MessageBucketManager, Initializable,	LogEnabled {
+						implements MessageBucketManager, Initializable {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalMessageBucketManager.class);
 
 	public static final String ID = "local";
-
-	protected Logger m_logger;
 
 	private ServerConfigManager m_configManager;
 
@@ -129,11 +125,6 @@ public class LocalMessageBucketManager extends ContainerHolder
 				Cat.logError(e);
 			}
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	public List<String> findCloseBuckets() {

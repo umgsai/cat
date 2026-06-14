@@ -31,14 +31,12 @@ import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.status.model.StatusInfoHelper;
 import com.dianping.cat.status.model.entity.*;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> implements LogEnabled {
+public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> {
 	public static final String ID = "heartbeat";
 
 	private ReportManager<HeartbeatReport> m_reportManager;
@@ -95,11 +93,6 @@ public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> 
 		} else {
 			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override

@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import com.dianping.cat.support.Threads;
 
 import com.dianping.cat.Cat;
@@ -52,7 +50,7 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 
-public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionReport> implements LogEnabled {
+public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionReport> {
 
 	public static final String ID = "transaction";
 
@@ -215,11 +213,6 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 		} else {
 			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	private TransactionName findOrCreateName(TransactionType type, String name, String domain) {

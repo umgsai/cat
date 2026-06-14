@@ -23,10 +23,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.xml.sax.SAXException;
@@ -45,7 +44,8 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-public class AllReportConfigManager implements Initializable, LogEnabled {
+public class AllReportConfigManager implements Initializable {
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AllReportConfigManager.class);
 
 	private static final String CONFIG_NAME = "all-report-config";
 
@@ -57,14 +57,7 @@ public class AllReportConfigManager implements Initializable, LogEnabled {
 
 	private volatile AllConfig m_config;
 
-	private Logger m_logger;
-
 	private long m_modifyTime;
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
 
 	public AllConfig getConfig() {
 		return m_config;
@@ -127,7 +120,7 @@ public class AllReportConfigManager implements Initializable, LogEnabled {
 			return result;
 		} catch (Exception e) {
 			Cat.logError(e);
-			m_logger.error(e.getMessage(), e);
+			LOGGER.error("Unable to insert all report config.", e);
 			return false;
 		}
 	}

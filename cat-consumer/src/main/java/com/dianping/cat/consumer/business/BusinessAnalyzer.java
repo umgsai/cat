@@ -20,8 +20,7 @@ package com.dianping.cat.consumer.business;
 
 import java.util.List;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
 import com.dianping.cat.analysis.MessageAnalyzer;
@@ -36,7 +35,8 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 
-public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> implements LogEnabled {
+public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> {
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(BusinessAnalyzer.class);
 
 	public static final String ID = "business";
 
@@ -51,11 +51,6 @@ public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> im
 		} else {
 			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override
@@ -134,8 +129,7 @@ public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> im
 			boolean result = m_configManager.insertBusinessConfigIfNotExist(domain, name, config);
 
 			if (!result) {
-				m_logger.error(
-				      String.format("error when insert business config info, domain %s, metricName %s", domain, name));
+				LOGGER.error("error when insert business config info, domain {}, metricName {}", domain, name);
 			}
 		}
 	}

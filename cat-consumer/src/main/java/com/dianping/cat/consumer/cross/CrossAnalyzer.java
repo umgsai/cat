@@ -29,12 +29,13 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class CrossAnalyzer extends AbstractMessageAnalyzer<CrossReport> implements LogEnabled {
+public class CrossAnalyzer extends AbstractMessageAnalyzer<CrossReport> {
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CrossAnalyzer.class);
+
 	public static final String ID = "cross";
 
 	public static final String DEFAULT = "unknown";
@@ -79,15 +80,10 @@ public class CrossAnalyzer extends AbstractMessageAnalyzer<CrossReport> implemen
 		if (atEnd && !isLocalMode()) {
 			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
 
-			m_logger.info("discard server logview count " + m_discardLogs + ", errorAppName " + m_errorAppName);
+			LOGGER.info("discard server logview count {}, errorAppName {}", m_discardLogs, m_errorAppName);
 		} else {
 			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override

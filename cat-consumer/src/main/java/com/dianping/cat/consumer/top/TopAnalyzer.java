@@ -23,9 +23,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
-
 import com.dianping.cat.Constants;
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
 import com.dianping.cat.analysis.MessageAnalyzer;
@@ -37,7 +34,7 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 
-public class TopAnalyzer extends AbstractMessageAnalyzer<TopReport> implements LogEnabled {
+public class TopAnalyzer extends AbstractMessageAnalyzer<TopReport> {
 	public static final String ID = "top";
 
 	private ReportManager<TopReport> m_reportManager;
@@ -55,11 +52,6 @@ public class TopAnalyzer extends AbstractMessageAnalyzer<TopReport> implements L
 		} else {
 			m_reportManager.storeHourlyReports(startTime, StoragePolicy.FILE, m_index);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override

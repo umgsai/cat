@@ -26,8 +26,7 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.statistic.ServerStatisticManager;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.MessageDumper;
 import org.unidal.cat.message.storage.MessageDumperManager;
 import org.unidal.cat.message.storage.MessageFinderManager;
@@ -35,7 +34,9 @@ import com.dianping.cat.support.Threads;
 
 import java.util.concurrent.TimeUnit;
 
-public class DumpAnalyzer extends AbstractMessageAnalyzer<Object> implements LogEnabled {
+public class DumpAnalyzer extends AbstractMessageAnalyzer<Object> {
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DumpAnalyzer.class);
+
 	public static final String ID = "dump";
 
 	private ServerStatisticManager m_serverStateManager;
@@ -43,8 +44,6 @@ public class DumpAnalyzer extends AbstractMessageAnalyzer<Object> implements Log
 	private MessageDumperManager m_dumperManager;
 
 	private MessageFinderManager m_finderManager;
-
-	private Logger m_logger;
 
 	private int m_discradSize = 50000000;
 
@@ -57,7 +56,7 @@ public class DumpAnalyzer extends AbstractMessageAnalyzer<Object> implements Log
 			m_dumperManager.close(hour);
 			t.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
-			m_logger.error(e.getMessage(), e);
+			LOGGER.error("Unable to close message storage, hour={}.", hour, e);
 			t.setStatus(e);
 		} finally {
 			t.complete();
@@ -76,11 +75,6 @@ public class DumpAnalyzer extends AbstractMessageAnalyzer<Object> implements Log
 		} else {
 			closeStorage();
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override
