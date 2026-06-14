@@ -18,9 +18,11 @@
  */
 package com.dianping.cat.config.content;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.Cat;
 
@@ -34,8 +36,8 @@ public class LocalResourceContentFetcher implements ContentFetcher, LogEnabled {
 		String path = PATH + configName + ".xml";
 		String content = "";
 
-		try {
-			content = Files.forIO().readFrom(this.getClass().getResourceAsStream(path), "utf-8");
+		try (InputStream in = getClass().getResourceAsStream(path)) {
+			content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 		} catch (Exception e) {
 			m_logger.warn("can't find local default config " + configName);
 			Cat.logError(configName + " can't find", e);

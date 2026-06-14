@@ -27,7 +27,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.service.IpService.IpInfo;
@@ -123,9 +122,8 @@ public class IpService2 implements Initializable {
 	private void load(String filename) {
 		m_lock.lock();
 
-		try {
-			InputStream is = IpService.class.getClassLoader().getResourceAsStream(filename);
-			m_dataBuffer = ByteBuffer.wrap(Files.forIO().readFrom(is));
+		try (InputStream is = IpService.class.getClassLoader().getResourceAsStream(filename)) {
+			m_dataBuffer = ByteBuffer.wrap(is.readAllBytes());
 			m_dataBuffer.position(0);
 			m_offset = m_dataBuffer.getInt(); // indexLength
 			byte[] indexBytes = new byte[m_offset];

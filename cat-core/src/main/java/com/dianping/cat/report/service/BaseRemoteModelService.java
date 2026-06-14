@@ -23,15 +23,15 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.report.server.RemoteServersManager;
-import org.unidal.helper.Files;
-import org.unidal.helper.Urls;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
@@ -89,8 +89,7 @@ public abstract class BaseRemoteModelService<T> extends ModelServiceWithCalSuppo
 
 			t.addData(url.toString());
 
-			InputStream in = Urls.forIO().connectTimeout(1000).readTimeout(10000).withGzip().openStream(url.toExternalForm());
-			String xml = Files.forIO().readFrom(in, "utf-8");
+			String xml = readUrl(url);
 
 			int len = xml == null ? 0 : xml.length();
 
@@ -135,6 +134,19 @@ public abstract class BaseRemoteModelService<T> extends ModelServiceWithCalSuppo
 	}
 
 	public abstract boolean isServersFixed();
+
+	private String readUrl(URL url) throws IOException {
+		URLConnection connection = url.openConnection();
+
+		connection.setConnectTimeout(1000);
+		connection.setReadTimeout(10000);
+		connection.setRequestProperty("Accept-Encoding", "gzip");
+
+		try (InputStream raw = connection.getInputStream();
+		      InputStream in = "gzip".equalsIgnoreCase(connection.getContentEncoding()) ? new GZIPInputStream(raw) : raw) {
+			return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+		}
+	}
 
 	public void setHost(String host) {
 		m_host = host;

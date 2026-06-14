@@ -36,8 +36,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Splitters;
-import org.unidal.helper.Splitters.StringSplitter;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -190,7 +188,6 @@ public class LocalReportBucket implements ReportBucket, LogEnabled {
 		m_writeLock.lock();
 		try {
 			reader = new BufferedReader(new FileReader(indexFile));
-			StringSplitter splitter = Splitters.by('\t');
 
 			while (true) {
 				String line = reader.readLine();
@@ -199,11 +196,11 @@ public class LocalReportBucket implements ReportBucket, LogEnabled {
 					break;
 				}
 
-				List<String> parts = splitter.split(line);
+				String[] parts = line.split("\t");
 
-				if (parts.size() >= 2) {
-					String id = parts.remove(0);
-					String offset = parts.remove(0);
+				if (parts.length >= 2) {
+					String id = parts[0];
+					String offset = parts[1];
 
 					try {
 						m_idToOffsets.put(id, Long.parseLong(offset));

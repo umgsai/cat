@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.helper.Splitters;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -79,7 +78,7 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 		}
 
 		String remoteServers = m_configManager.getConsoleRemoteServers();
-		List<String> endpoints = Splitters.by(',').noEmptyItem().trim().split(remoteServers);
+		List<String> endpoints = splitEndpoints(remoteServers);
 
 		for (String endpoint : endpoints) {
 			int pos = endpoint.indexOf(':');
@@ -102,6 +101,22 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 			host = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 		}
 		return host;
+	}
+
+	private List<String> splitEndpoints(String remoteServers) {
+		List<String> endpoints = new ArrayList<String>();
+
+		if (remoteServers != null) {
+			for (String endpoint : remoteServers.split(",")) {
+				String value = endpoint.trim();
+
+				if (value.length() > 0) {
+					endpoints.add(value);
+				}
+			}
+		}
+
+		return endpoints;
 	}
 
 	@Override
