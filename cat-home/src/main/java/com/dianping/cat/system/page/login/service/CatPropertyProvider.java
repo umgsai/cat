@@ -22,13 +22,6 @@ package com.dianping.cat.system.page.login.service;
  * 应用属性配置SPI 此为配置的接口和扩展点，如具体应用要扩展，请实现此接口并在应用如下文件中指定实现类<br>
  * /META-INF/services/com.dianping.cat.CatPropertyProvider
  * 
- * <p>
- * Note: This interface has been supported in component lookup.
- * <p>
- * <code>
- * CatPropertyProvider provider = Cat.getBootstrap().getComponentContext().lookup(CatPropertyProvider.class);
- * </code>
- * 
  * @author qxo
  */
 public interface CatPropertyProvider {

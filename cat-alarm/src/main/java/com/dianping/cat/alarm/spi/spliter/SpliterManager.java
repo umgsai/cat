@@ -24,19 +24,17 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class SpliterManager extends ContainerHolder {
+public class SpliterManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpliterManager.class);
 
 	private Map<String, Spliter> m_spliters = new HashMap<String, Spliter>();
 
 	private volatile boolean m_initialized;
 
-	@SuppressWarnings("unchecked")
 	public void initialize() {
 		if (m_initialized) {
 			return;
@@ -46,7 +44,7 @@ public class SpliterManager extends ContainerHolder {
 				return;
 			}
 			if (m_spliters.isEmpty()) {
-				Map<String, Spliter> springSpliters = CatSpringContext.getBeanIfAvailable("alertSpliters", Map.class);
+				Map<String, Spliter> springSpliters = getSpringSpliters();
 
 				if (springSpliters != null && !springSpliters.isEmpty()) {
 					setSpliters(springSpliters);
@@ -55,19 +53,18 @@ public class SpliterManager extends ContainerHolder {
 					m_initialized = true;
 					return;
 				}
-				try {
-					m_spliters = lookupMap(Spliter.class);
-					LOGGER.warn("Initialized alert splitter manager from Plexus fallback, splitterCount={}.",
-					      m_spliters.size());
-				} catch (RuntimeException e) {
-					LOGGER.warn("Unable to initialize alert splitter manager from Plexus fallback, keep empty splitters.", e);
-				}
+				LOGGER.warn("Alert splitter manager has no configured splitters.");
 			} else {
 				LOGGER.info("Initialized alert splitter manager from Spring injection, splitterCount={}.",
 				      m_spliters.size());
 			}
 			m_initialized = true;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Spliter> getSpringSpliters() {
+		return CatSpringContext.getBeanIfAvailable("alertSpliters", Map.class);
 	}
 
 	private void ensureInitialized() {

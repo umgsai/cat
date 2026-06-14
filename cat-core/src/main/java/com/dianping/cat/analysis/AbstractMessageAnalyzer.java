@@ -20,14 +20,12 @@ package com.dianping.cat.analysis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.unidal.lookup.ContainerHolder;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.ReportManager;
 
-public abstract class AbstractMessageAnalyzer<R> extends ContainerHolder implements MessageAnalyzer {
+public abstract class AbstractMessageAnalyzer<R> implements MessageAnalyzer {
 	public static final long MINUTE = 60 * 1000L;
 
 	public static final long ONE_HOUR = 60 * 60 * 1000L;
@@ -87,7 +85,6 @@ public abstract class AbstractMessageAnalyzer<R> extends ContainerHolder impleme
 
 	@Override
 	public void destroy() {
-		super.release(this);
 		ReportManager<?> manager = this.getReportManager();
 
 		if (manager != null) {
@@ -149,6 +146,10 @@ public abstract class AbstractMessageAnalyzer<R> extends ContainerHolder impleme
 
 	public void setIndex(int index) {
 		m_index = index;
+	}
+
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
 	}
 
 	public void shutdown() {

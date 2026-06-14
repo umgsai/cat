@@ -25,13 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.unidal.lookup.ContainerHolder;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class DefaultMessageAnalyzerManager extends ContainerHolder
+public class DefaultMessageAnalyzerManager
 						implements MessageAnalyzerManager {
 	private static final long MINUTE = 60 * 1000L;
 
@@ -171,13 +169,19 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 	private MessageAnalyzer createAnalyzer(String name) {
 		MessageAnalyzerFactory factory = getAnalyzerFactory();
 
-		return factory == null ? lookup(MessageAnalyzer.class, name) : factory.createAnalyzer(name);
+		return factory.createAnalyzer(name);
 	}
 
 	private MessageAnalyzerFactory getAnalyzerFactory() {
 		MessageAnalyzerFactory factory = CatSpringContext.getBeanIfAvailable(MessageAnalyzerFactory.class);
 
-		return factory == null ? m_analyzerFactory : factory;
+		if (factory != null) {
+			return factory;
+		}
+		if (m_analyzerFactory != null) {
+			return m_analyzerFactory;
+		}
+		throw new IllegalStateException("MessageAnalyzerFactory is required for DefaultMessageAnalyzerManager.");
 	}
 
 	private ServerConfigManager getConfigManager() {
@@ -189,13 +193,13 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 		if (m_configManager != null) {
 			return m_configManager;
 		}
-		return lookup(ServerConfigManager.class);
+		throw new IllegalStateException("ServerConfigManager is required for DefaultMessageAnalyzerManager.");
 	}
 
 	private Map<String, MessageAnalyzer> getAnalyzerMap() {
 		MessageAnalyzerFactory factory = getAnalyzerFactory();
 
-		return factory == null ? lookupMap(MessageAnalyzer.class) : factory.getAnalyzerMap();
+		return factory.getAnalyzerMap();
 	}
 
 	public void setAnalyzerFactory(MessageAnalyzerFactory analyzerFactory) {

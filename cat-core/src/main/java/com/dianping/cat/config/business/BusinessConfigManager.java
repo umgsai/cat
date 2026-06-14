@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -43,7 +42,7 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-public class BusinessConfigManager extends ContainerHolder {
+public class BusinessConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessConfigManager.class);
 
 	public final static String BASE_CONFIG = "base";
@@ -135,7 +134,10 @@ public class BusinessConfigManager extends ContainerHolder {
 			serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 		}
 		if (serverConfigManager == null) {
-			serverConfigManager = lookup(ServerConfigManager.class);
+			throw new IllegalStateException("ServerConfigManager is required for BusinessConfigManager.");
+		}
+		if (m_configDao == null) {
+			throw new IllegalStateException("BusinessConfigRepository is required for BusinessConfigManager.");
 		}
 
 		m_alertMachine = serverConfigManager.isAlertMachine();

@@ -185,6 +185,10 @@ public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 		m_reportManager = reportManager;
 	}
 
+	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {
+		m_atomicMessageConfigManager = atomicMessageConfigManager;
+	}
+
 	@Override
 	public void initialize(long startTime, long duration, long extraTime) {
 		super.initialize(startTime, duration, extraTime);

@@ -19,12 +19,11 @@
 package com.dianping.cat.analysis;
 
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class DefaultMessageHandler extends ContainerHolder implements MessageHandler {
+public class DefaultMessageHandler implements MessageHandler {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(DefaultMessageHandler.class);
 
 	private MessageConsumer m_consumer;
@@ -38,8 +37,8 @@ public class DefaultMessageHandler extends ContainerHolder implements MessageHan
 			SLF4J_LOGGER.info("Resolved message consumer from Spring context, consumer={}.", m_consumer);
 		}
 		if (m_consumer == null) {
-			m_consumer = lookup(MessageConsumer.class);
-			SLF4J_LOGGER.info("Resolved message consumer from Plexus fallback, consumer={}.", m_consumer);
+			SLF4J_LOGGER.warn("Message consumer is not configured, drop message tree={}.", tree);
+			return;
 		}
 
 		try {

@@ -28,12 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import org.codehaus.plexus.PlexusContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.initialization.DefaultModuleContext;
-import org.unidal.initialization.ModuleContext;
-import org.unidal.lookup.ContainerLoader;
 
 import com.dianping.cat.system.page.login.service.SigninContext;
 import com.dianping.cat.system.page.login.service.Token;
@@ -67,20 +63,9 @@ public class PermissionFilter implements Filter {
 		refreshSpringBeans();
 
 		if (m_userConfigManager == null || m_resourceConfigManager == null || m_tokenManager == null) {
-			LOGGER.info("PermissionFilter dependencies are incomplete in Spring, falling back to Plexus. userConfig={}, resourceConfig={}, tokenManager={}",
-			      m_userConfigManager != null, m_resourceConfigManager != null, m_tokenManager != null);
-			PlexusContainer container = ContainerLoader.getDefaultContainer();
-			ModuleContext ctx = new DefaultModuleContext(container);
-
-			if (m_userConfigManager == null) {
-				m_userConfigManager = ctx.lookup(UserConfigManager.class);
-			}
-			if (m_resourceConfigManager == null) {
-				m_resourceConfigManager = ctx.lookup(ResourceConfigManager.class);
-			}
-			if (m_tokenManager == null) {
-				m_tokenManager = ctx.lookup(TokenManager.class);
-			}
+			throw new ServletException(String.format(
+			      "PermissionFilter dependencies must be configured by Spring. userConfig=%s, resourceConfig=%s, tokenManager=%s",
+			      m_userConfigManager != null, m_resourceConfigManager != null, m_tokenManager != null));
 		} else {
 			LOGGER.info("PermissionFilter dependencies resolved from Spring.");
 		}
@@ -95,6 +80,11 @@ public class PermissionFilter implements Filter {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 		refreshSpringBeans();
+
+		if (m_userConfigManager == null || m_resourceConfigManager == null || m_tokenManager == null) {
+			throw new ServletException("PermissionFilter dependencies must be configured by Spring.");
+		}
+
 		httpRequest.setCharacterEncoding("utf-8");
 
 		SigninContext ctx = new SigninContext(httpRequest, httpResponse);

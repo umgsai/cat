@@ -21,13 +21,11 @@ package com.dianping.cat.report.service;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.unidal.lookup.ContainerHolder;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.internal.DefaultEvent;
 
-public abstract class ModelServiceWithCalSupport extends ContainerHolder {
+public abstract class ModelServiceWithCalSupport {
 	private Transaction m_current;
 
 	protected void logError(Throwable cause) {

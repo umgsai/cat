@@ -211,6 +211,22 @@ public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> {
 		m_ip = ip;
 	}
 
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setReportManager(ReportManager<StateReport> reportManager) {
+		m_reportManager = reportManager;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		m_serverFilterConfigManager = serverFilterConfigManager;
+	}
+
+	public void setServerStateManager(ServerStatisticManager serverStateManager) {
+		m_serverStateManager = serverStateManager;
+	}
+
 	@Override
 	protected void loadReports() {
 		// do nothing

@@ -45,11 +45,9 @@ public class CatHomeModule extends AbstractModule {
 		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 
 		if (serverConfigManager == null) {
-			serverConfigManager = ctx.lookup(ServerConfigManager.class);
-			LOGGER.info("Resolved ServerConfigManager from Plexus for CatHomeModule.");
-		} else {
-			LOGGER.info("Resolved ServerConfigManager from Spring for CatHomeModule.");
+			throw new IllegalStateException("ServerConfigManager must be configured by Spring for CatHomeModule.");
 		}
+		LOGGER.info("Resolved ServerConfigManager from Spring for CatHomeModule.");
 		ReportReloadTask reportReloadTask = CatSpringContext.getBeanIfAvailable(ReportReloadTask.class);
 
 		if (reportReloadTask == null) {
@@ -59,7 +57,12 @@ public class CatHomeModule extends AbstractModule {
 
 		Threads.forGroup("Cat").start(reportReloadTask);
 
-		lookup(ctx, MessageConsumer.class);
+		MessageConsumer messageConsumer = CatSpringContext.getBeanIfAvailable(MessageConsumer.class);
+
+		if (messageConsumer == null) {
+			throw new IllegalStateException("MessageConsumer must be configured by Spring for CatHomeModule.");
+		}
+		LOGGER.info("Resolved MessageConsumer from Spring for CatHomeModule.");
 
 		if (serverConfigManager.isJobMachine()) {
 			DefaultTaskConsumer taskConsumer = CatSpringContext.getBeanIfAvailable(DefaultTaskConsumer.class);
@@ -74,22 +77,19 @@ public class CatHomeModule extends AbstractModule {
 		AlarmManager alarmManager = CatSpringContext.getBeanIfAvailable(AlarmManager.class);
 
 		if (alarmManager == null) {
-			alarmManager = ctx.lookup(AlarmManager.class);
-			LOGGER.info("Resolved AlarmManager from Plexus for CatHomeModule.");
-		} else {
-			LOGGER.info("Resolved AlarmManager from Spring for CatHomeModule.");
+			throw new IllegalStateException("AlarmManager must be configured by Spring for CatHomeModule.");
 		}
+		LOGGER.info("Resolved AlarmManager from Spring for CatHomeModule.");
 
 		if (serverConfigManager.isAlertMachine()) {
 			alarmManager.startAlarm();
 		}
 
-		final MessageConsumer consumer = lookup(ctx, MessageConsumer.class);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 
 			@Override
 			public void run() {
-				consumer.doCheckpoint();
+				messageConsumer.doCheckpoint();
 			}
 		});
 	}
@@ -101,7 +101,12 @@ public class CatHomeModule extends AbstractModule {
 
 	@Override
 	protected void setup(ModuleContext ctx) throws Exception {
-		final TcpSocketReceiver messageReceiver = lookup(ctx, TcpSocketReceiver.class);
+		final TcpSocketReceiver messageReceiver = CatSpringContext.getBeanIfAvailable(TcpSocketReceiver.class);
+
+		if (messageReceiver == null) {
+			throw new IllegalStateException("TcpSocketReceiver must be configured by Spring for CatHomeModule.");
+		}
+		LOGGER.info("Resolved TcpSocketReceiver from Spring for CatHomeModule.");
 
 		messageReceiver.init();
 
@@ -112,19 +117,5 @@ public class CatHomeModule extends AbstractModule {
 				messageReceiver.destory();
 			}
 		});
-	}
-
-	private <T> T lookup(ModuleContext ctx, Class<T> type) {
-		T bean = CatSpringContext.getBeanIfAvailable(type);
-
-		if (bean != null) {
-			LOGGER.info("Resolved {} from Spring for CatHomeModule.", type.getSimpleName());
-			return bean;
-		}
-
-		T component = ctx.lookup(type);
-
-		LOGGER.info("Resolved {} from Plexus for CatHomeModule.", type.getSimpleName());
-		return component;
 	}
 }

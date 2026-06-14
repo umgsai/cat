@@ -14,6 +14,8 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.unidal.cat.message.storage.Bucket;
 import org.unidal.cat.message.storage.BucketFactory;
 import org.unidal.cat.message.storage.BucketManager;
+import org.unidal.cat.message.storage.BlockDumperManager;
+import org.unidal.cat.message.storage.MessageDumperManager;
 import org.unidal.cat.message.storage.MessageFinderManager;
 import org.unidal.cat.message.storage.StorageConfiguration;
 import org.unidal.cat.message.storage.internals.ByteBufCache;
@@ -28,6 +30,8 @@ import org.unidal.lookup.ContainerLoader;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -36,10 +40,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.DefaultMessageAnalyzerManager;
+import com.dianping.cat.analysis.DefaultMessageHandler;
+import com.dianping.cat.analysis.MessageAnalyzer;
 import com.dianping.cat.analysis.MessageAnalyzerFactory;
 import com.dianping.cat.analysis.MessageAnalyzerManager;
 import com.dianping.cat.analysis.MessageConsumer;
+import com.dianping.cat.analysis.MessageHandler;
 import com.dianping.cat.analysis.RealtimeConsumer;
+import com.dianping.cat.analysis.TcpSocketReceiver;
 import com.dianping.cat.config.AtomicMessageConfigManager;
 import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.config.business.BusinessConfigManager;
@@ -54,10 +62,12 @@ import com.dianping.cat.consumer.business.BusinessDelegate;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.consumer.cross.CrossAnalyzer;
 import com.dianping.cat.consumer.cross.CrossDelegate;
+import com.dianping.cat.consumer.cross.IpConvertManager;
 import com.dianping.cat.consumer.cross.model.entity.CrossReport;
 import com.dianping.cat.consumer.dependency.DependencyAnalyzer;
 import com.dianping.cat.consumer.dependency.DependencyDelegate;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
+import com.dianping.cat.consumer.dump.DumpAnalyzer;
 import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.consumer.event.EventDelegate;
 import com.dianping.cat.consumer.event.model.entity.EventReport;
@@ -69,6 +79,9 @@ import com.dianping.cat.consumer.matrix.MatrixDelegate;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.ProblemDelegate;
+import com.dianping.cat.consumer.problem.DefaultProblemHandler;
+import com.dianping.cat.consumer.problem.LongExecutionProblemHandler;
+import com.dianping.cat.consumer.problem.ProblemHandler;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.StateDelegate;
@@ -100,6 +113,8 @@ import com.dianping.cat.alarm.spi.decorator.DecoratorManager;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
 import com.dianping.cat.alarm.spi.receiver.ContactorManager;
 import com.dianping.cat.alarm.spi.receiver.ProjectContactor;
+import com.dianping.cat.alarm.spi.rule.DataChecker;
+import com.dianping.cat.alarm.spi.rule.DefaultDataChecker;
 import com.dianping.cat.alarm.spi.sender.MailSender;
 import com.dianping.cat.alarm.spi.sender.Sender;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
@@ -135,6 +150,8 @@ import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyRepo
 import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.helper.JsonBuilder;
+import com.dianping.cat.home.spring.storage.SpringBackedBlockDumperManager;
+import com.dianping.cat.home.spring.storage.SpringBackedMessageDumperManager;
 import com.dianping.cat.message.DefaultPathBuilder;
 import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.message.storage.LocalMessageBucket;
@@ -145,16 +162,20 @@ import com.dianping.cat.report.DefaultReportBucketManager;
 import com.dianping.cat.report.DefaultReportManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
+import com.dianping.cat.report.alert.business.BusinessAlert;
 import com.dianping.cat.report.alert.business.BusinessContactor;
 import com.dianping.cat.report.alert.business.BusinessDecorator;
 import com.dianping.cat.report.alert.business.BusinessReportGroupService;
 import com.dianping.cat.report.alert.business.BusinessRuleConfigManager;
+import com.dianping.cat.report.alert.event.EventAlert;
 import com.dianping.cat.report.alert.event.EventContactor;
 import com.dianping.cat.report.alert.event.EventDecorator;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
+import com.dianping.cat.report.alert.exception.ExceptionAlert;
 import com.dianping.cat.report.alert.exception.AlertExceptionBuilder;
 import com.dianping.cat.report.alert.exception.ExceptionContactor;
 import com.dianping.cat.report.alert.exception.ExceptionDecorator;
+import com.dianping.cat.report.alert.heartbeat.HeartbeatAlert;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatContactor;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatDecorator;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
@@ -166,6 +187,7 @@ import com.dianping.cat.report.alert.summary.build.AlterationSummaryBuilder;
 import com.dianping.cat.report.alert.summary.build.FailureSummaryBuilder;
 import com.dianping.cat.report.alert.summary.build.RelatedSummaryBuilder;
 import com.dianping.cat.report.alert.summary.build.SummaryBuilder;
+import com.dianping.cat.report.alert.transaction.TransactionAlert;
 import com.dianping.cat.report.alert.transaction.TransactionContactor;
 import com.dianping.cat.report.alert.transaction.TransactionDecorator;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
@@ -311,7 +333,11 @@ import com.dianping.cat.statistic.ServerStatisticManager;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
+import com.dianping.cat.system.page.login.service.CatPropertyProvider;
 import com.dianping.cat.system.page.login.service.CookieManager;
+import com.dianping.cat.system.page.login.service.DefaultCatPropertyProvider;
+import com.dianping.cat.system.page.login.service.SessionManager;
+import com.dianping.cat.system.page.login.service.SigninService;
 import com.dianping.cat.system.page.login.service.TokenBuilder;
 import com.dianping.cat.system.page.login.service.TokenManager;
 import com.dianping.cat.system.page.permission.ResourceConfigManager;
@@ -355,6 +381,176 @@ public class CatHomeSpringConfiguration {
 		return new ContainerMessageAnalyzerFactory();
 	}
 
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + BusinessAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer businessAnalyzer(
+			@Qualifier(BusinessAnalyzer.ID + "ReportManager") ReportManager<BusinessReport> businessReportManager,
+			BusinessConfigManager businessConfigManager, ServerConfigManager serverConfigManager) {
+		BusinessAnalyzer analyzer = new BusinessAnalyzer();
+
+		analyzer.setReportManager(businessReportManager);
+		analyzer.setConfigManager(businessConfigManager);
+		analyzer.setServerConfigManager(serverConfigManager);
+		return analyzer;
+	}
+
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + TransactionAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer transactionAnalyzer(
+			@Qualifier(TransactionAnalyzer.ID + "ReportManager") ReportManager<TransactionReport> transactionReportManager,
+			ServerFilterConfigManager serverFilterConfigManager, TpValueStatisticConfigManager tpValueStatisticConfigManager,
+			AtomicMessageConfigManager atomicMessageConfigManager, ServerConfigManager serverConfigManager) {
+		TransactionAnalyzer analyzer = new TransactionAnalyzer();
+
+		analyzer.setReportManager(transactionReportManager);
+		analyzer.setFilterConfigManager(serverFilterConfigManager);
+		analyzer.setStatisticManager(tpValueStatisticConfigManager);
+		analyzer.setAtomicMessageConfigManager(atomicMessageConfigManager);
+		analyzer.setServerConfigManager(serverConfigManager);
+		return analyzer;
+	}
+
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + CrossAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer crossAnalyzer(
+			@Qualifier(CrossAnalyzer.ID + "ReportManager") ReportManager<CrossReport> crossReportManager,
+			IpConvertManager ipConvertManager, ServerConfigManager serverConfigManager) {
+		CrossAnalyzer analyzer = new CrossAnalyzer();
+
+		analyzer.setReportManager(crossReportManager);
+		analyzer.setIpConvertManager(ipConvertManager);
+		analyzer.setServerConfigManager(serverConfigManager);
+		return analyzer;
+	}
+
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + DumpAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer dumpAnalyzer(ServerStatisticManager serverStatisticManager,
+			@Qualifier("messageDumperManager") MessageDumperManager messageDumperManager,
+			@Qualifier("messageFinderManager") MessageFinderManager messageFinderManager,
+			ServerConfigManager serverConfigManager) {
+		DumpAnalyzer analyzer = new DumpAnalyzer();
+
+		analyzer.setServerStateManager(serverStatisticManager);
+		analyzer.setDumperManager(messageDumperManager);
+		analyzer.setFinderManager(messageFinderManager);
+		analyzer.setServerConfigManager(serverConfigManager);
+		return analyzer;
+	}
+
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + DependencyAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer dependencyAnalyzer(
+			@Qualifier(DependencyAnalyzer.ID + "ReportManager") ReportManager<DependencyReport> dependencyReportManager,
+			ServerFilterConfigManager serverFilterConfigManager, com.dianping.cat.consumer.DatabaseParser databaseParser,
+			ServerConfigManager serverConfigManager) {
+		DependencyAnalyzer analyzer = new DependencyAnalyzer();
+
+		analyzer.setReportManager(dependencyReportManager);
+		analyzer.setServerFilterConfigManager(serverFilterConfigManager);
+		analyzer.setParser(databaseParser);
+		analyzer.setServerConfigManager(serverConfigManager);
+		return analyzer;
+	}
+
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + EventAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer eventAnalyzer(
+			@Qualifier(EventAnalyzer.ID + "ReportManager") ReportManager<EventReport> eventReportManager,
+			AtomicMessageConfigManager atomicMessageConfigManager, ServerConfigManager serverConfigManager) {
+		EventAnalyzer analyzer = new EventAnalyzer();
+
+		analyzer.setReportManager(eventReportManager);
+		analyzer.setAtomicMessageConfigManager(atomicMessageConfigManager);
+		analyzer.setServerConfigManager(serverConfigManager);
+		return analyzer;
+	}
+
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + HeartbeatAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer heartbeatAnalyzer(
+			@Qualifier(HeartbeatAnalyzer.ID + "ReportManager") ReportManager<HeartbeatReport> heartbeatReportManager,
+			ServerFilterConfigManager serverFilterConfigManager, ServerConfigManager serverConfigManager) {
+		HeartbeatAnalyzer analyzer = new HeartbeatAnalyzer();
+
+		analyzer.setReportManager(heartbeatReportManager);
+		analyzer.setServerFilterConfigManager(serverFilterConfigManager);
+		analyzer.setServerConfigManager(serverConfigManager);
+		return analyzer;
+	}
+
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + MatrixAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer matrixAnalyzer(
+			@Qualifier(MatrixAnalyzer.ID + "ReportManager") ReportManager<MatrixReport> matrixReportManager,
+			ServerConfigManager serverConfigManager) {
+		MatrixAnalyzer analyzer = new MatrixAnalyzer();
+
+		analyzer.setReportManager(matrixReportManager);
+		analyzer.setServerConfigManager(serverConfigManager);
+		return analyzer;
+	}
+
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + ProblemAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer problemAnalyzer(
+			@Qualifier(ProblemAnalyzer.ID + "ReportManager") ReportManager<ProblemReport> problemReportManager,
+			@Qualifier(DefaultProblemHandler.ID) ProblemHandler defaultProblemHandler,
+			@Qualifier(LongExecutionProblemHandler.ID) ProblemHandler longExecutionProblemHandler,
+			ServerConfigManager serverConfigManager) {
+		ProblemAnalyzer analyzer = new ProblemAnalyzer();
+
+		analyzer.setReportManager(problemReportManager);
+		analyzer.setHandlers(List.of(defaultProblemHandler, longExecutionProblemHandler));
+		analyzer.setServerConfigManager(serverConfigManager);
+		return analyzer;
+	}
+
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + StorageAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer storageAnalyzer(
+			@Qualifier(StorageAnalyzer.ID + "ReportManager") ReportManager<StorageReport> storageReportManager,
+			com.dianping.cat.consumer.DatabaseParser databaseParser, StorageReportUpdater storageReportUpdater,
+			ServerConfigManager serverConfigManager) {
+		StorageAnalyzer analyzer = new StorageAnalyzer();
+
+		analyzer.setReportManager(storageReportManager);
+		analyzer.setDatabaseParser(databaseParser);
+		analyzer.setUpdater(storageReportUpdater);
+		analyzer.setServerConfigManager(serverConfigManager);
+		return analyzer;
+	}
+
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + TopAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer topAnalyzer(
+			@Qualifier(TopAnalyzer.ID + "ReportManager") ReportManager<TopReport> topReportManager,
+			ServerFilterConfigManager serverFilterConfigManager, ServerConfigManager serverConfigManager) {
+		TopAnalyzer analyzer = new TopAnalyzer();
+
+		analyzer.setReportManager(topReportManager);
+		analyzer.setServerFilterConfigManager(serverFilterConfigManager);
+		analyzer.setServerConfigManager(serverConfigManager);
+		analyzer.setErrorType("Error,RuntimeException,Exception");
+		return analyzer;
+	}
+
+	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + StateAnalyzer.ID)
+	@Scope("prototype")
+	public MessageAnalyzer stateAnalyzer(
+			@Qualifier(StateAnalyzer.ID + "ReportManager") ReportManager<StateReport> stateReportManager,
+			ServerStatisticManager serverStatisticManager, ServerFilterConfigManager serverFilterConfigManager,
+			ProjectService projectService, ServerConfigManager serverConfigManager) {
+		StateAnalyzer analyzer = new StateAnalyzer();
+
+		analyzer.setReportManager(stateReportManager);
+		analyzer.setServerStateManager(serverStatisticManager);
+		analyzer.setServerFilterConfigManager(serverFilterConfigManager);
+		analyzer.setProjectService(projectService);
+		analyzer.setServerConfigManager(serverConfigManager);
+		return analyzer;
+	}
+
 	@Bean(initMethod = "initialize")
 	public MessageAnalyzerManager messageAnalyzerManager(MessageAnalyzerFactory messageAnalyzerFactory,
 			ServerConfigManager serverConfigManager) {
@@ -373,6 +569,25 @@ public class CatHomeSpringConfiguration {
 		consumer.setAnalyzerManager(messageAnalyzerManager);
 		consumer.setServerStateManager(serverStatisticManager);
 		return consumer;
+	}
+
+	@Bean
+	public MessageHandler messageHandler(MessageConsumer messageConsumer) {
+		DefaultMessageHandler handler = new DefaultMessageHandler();
+
+		handler.setConsumer(messageConsumer);
+		return handler;
+	}
+
+	@Bean
+	public TcpSocketReceiver tcpSocketReceiver(ServerConfigManager serverConfigManager, MessageHandler messageHandler,
+			ServerStatisticManager serverStatisticManager) {
+		TcpSocketReceiver receiver = new TcpSocketReceiver();
+
+		receiver.setServerConfigManager(serverConfigManager);
+		receiver.setHandler(messageHandler);
+		receiver.setServerStateManager(serverStatisticManager);
+		return receiver;
 	}
 
 	@Bean
@@ -1837,6 +2052,33 @@ public class CatHomeSpringConfiguration {
 		return new DefaultMessageFinderManager();
 	}
 
+	@Bean
+	@Primary
+	public MessageDumperManager messageDumperManager(BlockDumperManager blockDumperManager,
+			BucketManager localBucketManager, MessageFinderManager messageFinderManager,
+			ServerConfigManager serverConfigManager, ServerStatisticManager serverStatisticManager) {
+		SpringBackedMessageDumperManager manager = new SpringBackedMessageDumperManager();
+
+		manager.setBlockDumperManager(blockDumperManager);
+		manager.setBucketManager(localBucketManager);
+		manager.setConfigManager(serverConfigManager);
+		manager.setFinderManager(messageFinderManager);
+		manager.setStatisticManager(serverStatisticManager);
+		return manager;
+	}
+
+	@Bean
+	@Primary
+	public BlockDumperManager blockDumperManager(BucketManager localBucketManager,
+			ServerConfigManager serverConfigManager, ServerStatisticManager serverStatisticManager) {
+		SpringBackedBlockDumperManager manager = new SpringBackedBlockDumperManager();
+
+		manager.setBucketManager(localBucketManager);
+		manager.setConfigManager(serverConfigManager);
+		manager.setStatisticManager(serverStatisticManager);
+		return manager;
+	}
+
 	@Bean(initMethod = "initialize")
 	public StorageConfiguration storageConfiguration() {
 		return new DefaultStorageConfiguration();
@@ -2149,14 +2391,145 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize")
+	public com.dianping.cat.alarm.spi.AlertManager spiAlertManager(SpliterManager spliterManager,
+			SenderManager senderManager, com.dianping.cat.alarm.service.AlertService alertService,
+			AlertPolicyManager alertPolicyManager, DecoratorManager decoratorManager, ContactorManager contactorManager,
+			ServerConfigManager serverConfigManager) {
+		com.dianping.cat.alarm.spi.AlertManager manager = new com.dianping.cat.alarm.spi.AlertManager();
+
+		manager.setSplitterManager(spliterManager);
+		manager.setSenderManager(senderManager);
+		manager.setAlertService(alertService);
+		manager.setPolicyManager(alertPolicyManager);
+		manager.setDecoratorManager(decoratorManager);
+		manager.setContactorManager(contactorManager);
+		manager.setConfigManager(serverConfigManager);
+		return manager;
+	}
+
 	@Bean
-	public AlarmManager alarmManager() {
-		return new AlarmManager();
+	public AlarmManager alarmManager(BusinessAlert businessAlert, EventAlert eventAlert, ExceptionAlert exceptionAlert,
+			HeartbeatAlert heartbeatAlert, TransactionAlert transactionAlert) {
+		AlarmManager manager = new AlarmManager();
+
+		manager.setBusinessAlert(businessAlert);
+		manager.setEventAlert(eventAlert);
+		manager.setExceptionAlert(exceptionAlert);
+		manager.setHeartbeatAlert(heartbeatAlert);
+		manager.setTransactionAlert(transactionAlert);
+		return manager;
+	}
+
+	@Bean
+	public DataChecker dataChecker() {
+		return new DefaultDataChecker();
+	}
+
+	@Bean
+	public BusinessAlert businessAlert(BusinessConfigManager businessConfigManager,
+			BusinessRuleConfigManager businessRuleConfigManager, BusinessTagConfigManager businessTagConfigManager,
+			BusinessReportGroupService businessReportGroupService, ProjectService projectService,
+			com.dianping.cat.alarm.spi.AlertManager spiAlertManager, BusinessKeyHelper businessKeyHelper,
+			BaselineService baselineService, DataChecker dataChecker, CustomDataCalculator customDataCalculator,
+			BaseRuleHelper baseRuleHelper) {
+		BusinessAlert alert = new BusinessAlert();
+
+		alert.setConfigManager(businessConfigManager);
+		alert.setAlertConfigManager(businessRuleConfigManager);
+		alert.setTagConfigManager(businessTagConfigManager);
+		alert.setService(businessReportGroupService);
+		alert.setProjectService(projectService);
+		alert.setSendManager(spiAlertManager);
+		alert.setKeyHelper(businessKeyHelper);
+		alert.setBaselineService(baselineService);
+		alert.setDataChecker(dataChecker);
+		alert.setCustomDataCalculator(customDataCalculator);
+		alert.setBaseRuleHelper(baseRuleHelper);
+		return alert;
+	}
+
+	@Bean
+	public EventAlert eventAlert(EventRuleConfigManager eventRuleConfigManager, DataChecker dataChecker,
+			com.dianping.cat.alarm.spi.AlertManager spiAlertManager,
+			@Qualifier("eventModelService") ModelService<EventReport> eventModelService,
+			EventMergeHelper eventMergeHelper) {
+		EventAlert alert = new EventAlert();
+
+		alert.setRuleConfigManager(eventRuleConfigManager);
+		alert.setDataChecker(dataChecker);
+		alert.setSendManager(spiAlertManager);
+		alert.setService(eventModelService);
+		alert.setMergeHelper(eventMergeHelper);
+		return alert;
+	}
+
+	@Bean
+	public ExceptionAlert exceptionAlert(ExceptionRuleConfigManager exceptionRuleConfigManager,
+			AlertExceptionBuilder alertExceptionBuilder,
+			@Qualifier("topModelService") ModelService<TopReport> topModelService,
+			com.dianping.cat.alarm.spi.AlertManager spiAlertManager) {
+		ExceptionAlert alert = new ExceptionAlert();
+
+		alert.setExceptionConfigManager(exceptionRuleConfigManager);
+		alert.setAlertBuilder(alertExceptionBuilder);
+		alert.setTopService(topModelService);
+		alert.setSendManager(spiAlertManager);
+		return alert;
+	}
+
+	@Bean
+	public HeartbeatAlert heartbeatAlert(HeartbeatRuleConfigManager heartbeatRuleConfigManager, DataChecker dataChecker,
+			com.dianping.cat.alarm.spi.AlertManager spiAlertManager,
+			@Qualifier("heartbeatModelService") ModelService<HeartbeatReport> heartbeatModelService,
+			HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager,
+			ServerFilterConfigManager serverFilterConfigManager, ProjectService projectService) {
+		HeartbeatAlert alert = new HeartbeatAlert();
+
+		alert.setRuleConfigManager(heartbeatRuleConfigManager);
+		alert.setDataChecker(dataChecker);
+		alert.setSendManager(spiAlertManager);
+		alert.setHeartbeatService(heartbeatModelService);
+		alert.setDisplayManager(heartbeatDisplayPolicyManager);
+		alert.setServerFilterConfigManager(serverFilterConfigManager);
+		alert.setProjectService(projectService);
+		return alert;
+	}
+
+	@Bean
+	public TransactionAlert transactionAlert(TransactionRuleConfigManager transactionRuleConfigManager,
+			DataChecker dataChecker, com.dianping.cat.alarm.spi.AlertManager spiAlertManager,
+			@Qualifier("transactionModelService") ModelService<TransactionReport> transactionModelService,
+			TransactionMergeHelper transactionMergeHelper) {
+		TransactionAlert alert = new TransactionAlert();
+
+		alert.setRuleConfigManager(transactionRuleConfigManager);
+		alert.setDataChecker(dataChecker);
+		alert.setSendManager(spiAlertManager);
+		alert.setService(transactionModelService);
+		alert.setMergeHelper(transactionMergeHelper);
+		return alert;
 	}
 
 	@Bean
 	public DataExtractor dataExtractor() {
 		return new DataExtractorImpl();
+	}
+
+	@Bean(name = DefaultProblemHandler.ID)
+	public ProblemHandler defaultProblemHandler() {
+		DefaultProblemHandler handler = new DefaultProblemHandler();
+
+		handler.setErrorType("Error,RuntimeException,Exception");
+		return handler;
+	}
+
+	@Bean(name = LongExecutionProblemHandler.ID)
+	public ProblemHandler longExecutionProblemHandler(ServerConfigManager serverConfigManager) {
+		LongExecutionProblemHandler handler = new LongExecutionProblemHandler();
+
+		handler.setConfigManager(serverConfigManager);
+		return handler;
 	}
 
 	@Bean
@@ -2197,7 +2570,12 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public StorageSQLBuilder storageSQLBuilder(com.dianping.cat.consumer.DatabaseParser databaseParser) {
+	public IpConvertManager ipConvertManager() {
+		return new IpConvertManager();
+	}
+
+	@Bean
+	public StorageBuilder storageSQLBuilder(com.dianping.cat.consumer.DatabaseParser databaseParser) {
 		StorageSQLBuilder builder = new StorageSQLBuilder();
 
 		builder.setDatabaseParser(databaseParser);
@@ -2205,18 +2583,19 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public StorageCacheBuilder storageCacheBuilder() {
+	public StorageBuilder storageCacheBuilder() {
 		return new StorageCacheBuilder();
 	}
 
 	@Bean
-	public StorageRPCBuilder storageRPCBuilder() {
+	public StorageBuilder storageRPCBuilder() {
 		return new StorageRPCBuilder();
 	}
 
 	@Bean(initMethod = "initialize")
-	public StorageBuilderManager storageBuilderManager(StorageSQLBuilder storageSQLBuilder,
-			StorageCacheBuilder storageCacheBuilder, StorageRPCBuilder storageRPCBuilder) {
+	public StorageBuilderManager storageBuilderManager(@Qualifier("storageSQLBuilder") StorageBuilder storageSQLBuilder,
+			@Qualifier("storageCacheBuilder") StorageBuilder storageCacheBuilder,
+			@Qualifier("storageRPCBuilder") StorageBuilder storageRPCBuilder) {
 		StorageBuilderManager manager = new StorageBuilderManager();
 		Map<String, StorageBuilder> builders = new LinkedHashMap<String, StorageBuilder>();
 
@@ -2491,124 +2870,137 @@ public class CatHomeSpringConfiguration {
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<ProblemReport> localProblemService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager) {
+			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
 		LocalProblemService service = new LocalProblemService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<EventReport> localEventService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager) {
+			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
 		LocalEventService service = new LocalEventService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<TransactionReport> localTransactionService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager) {
+			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
 		LocalTransactionService service = new LocalTransactionService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<HeartbeatReport> localHeartbeatService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager) {
+			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
 		LocalHeartbeatService service = new LocalHeartbeatService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<CrossReport> localCrossService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager) {
+			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
 		LocalCrossService service = new LocalCrossService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<MatrixReport> localMatrixService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager) {
+			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
 		LocalMatrixService service = new LocalMatrixService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<DependencyReport> localDependencyService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager) {
+			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
 		LocalDependencyService service = new LocalDependencyService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<TopReport> localTopService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager) {
+			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
 		LocalTopService service = new LocalTopService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<StateReport> localStateService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager) {
+			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
 		LocalStateService service = new LocalStateService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<StorageReport> localStorageService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager) {
+			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
 		LocalStorageService service = new LocalStorageService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<BusinessReport> localBusinessService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager) {
+			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
 		LocalBusinessService service = new LocalBusinessService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<String> localMessageService(ServerConfigManager serverConfigManager,
 			MessageFinderManager messageFinderManager, @Qualifier("local") BucketManager localBucketManager,
-			@Qualifier("legacyLocalMessageBucketManager") MessageBucketManager localMessageBucketManager) {
+			@Qualifier("legacyLocalMessageBucketManager") MessageBucketManager localMessageBucketManager,
+			MessageConsumer messageConsumer) {
 		LocalMessageService service = new LocalMessageService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setFinderManager(messageFinderManager);
 		service.setBucketManager(localBucketManager);
 		service.setMessageBucketManager(localMessageBucketManager);
+		service.setConsumer(messageConsumer);
 		return service;
 	}
 
@@ -3204,12 +3596,34 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public CatPropertyProvider catPropertyProvider() {
+		return new DefaultCatPropertyProvider();
+	}
+
+	@Bean
 	public TokenManager tokenManager(CookieManager cookieManager, TokenBuilder tokenBuilder) {
 		TokenManager manager = new TokenManager();
 
 		manager.setCookieManager(cookieManager);
 		manager.setTokenBuilder(tokenBuilder);
 		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public SessionManager sessionManager(CatPropertyProvider catPropertyProvider) {
+		SessionManager manager = new SessionManager();
+
+		manager.setProvider(catPropertyProvider);
+		return manager;
+	}
+
+	@Bean
+	public SigninService signinService(SessionManager sessionManager, TokenManager tokenManager) {
+		SigninService service = new SigninService();
+
+		service.setSessionManager(sessionManager);
+		service.setTokenManager(tokenManager);
+		return service;
 	}
 
 	@Bean(initMethod = "initialize")

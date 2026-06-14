@@ -25,11 +25,10 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.spring.CatSpringContext;
 
-public class StorageBuilderManager extends ContainerHolder {
+public class StorageBuilderManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageBuilderManager.class);
 
 	private Map<String, StorageBuilder> m_storageBuilders;
@@ -67,13 +66,8 @@ public class StorageBuilderManager extends ContainerHolder {
 		refreshSpringBuilders();
 
 		if (m_storageBuilders == null) {
-			try {
-				m_storageBuilders = lookupMap(StorageBuilder.class);
-				LOGGER.info("Loaded storage builders from Plexus fallback, types={}.", m_storageBuilders.keySet());
-			} catch (RuntimeException e) {
-				m_storageBuilders = Collections.emptyMap();
-				LOGGER.warn("Unable to load storage builders from Spring or Plexus, keep empty builder map.", e);
-			}
+			m_storageBuilders = Collections.emptyMap();
+			LOGGER.warn("Unable to load storage builders from Spring, keep empty builder map.");
 		}
 		m_initialized = true;
 	}

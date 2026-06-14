@@ -80,6 +80,18 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 		return m_reportManager;
 	}
 
+	public void setDatabaseParser(DatabaseParser databaseParser) {
+		m_databaseParser = databaseParser;
+	}
+
+	public void setReportManager(ReportManager<StorageReport> reportManager) {
+		m_reportManager = reportManager;
+	}
+
+	public void setUpdater(StorageReportUpdater updater) {
+		m_updater = updater;
+	}
+
 	private void ensureInitialized() {
 		if (!m_initialized) {
 			initialize();
@@ -93,14 +105,8 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 		refreshSpringBuilders();
 
 		if (m_storageBuilders == null) {
-			try {
-				m_storageBuilders = lookupMap(StorageBuilder.class);
-				LOGGER.info("Loaded storage analyzer builders from Plexus fallback, types={}.",
-				      m_storageBuilders.keySet());
-			} catch (RuntimeException e) {
-				m_storageBuilders = Collections.emptyMap();
-				LOGGER.warn("Unable to load storage analyzer builders from Spring or Plexus, keep empty builder map.", e);
-			}
+			m_storageBuilders = Collections.emptyMap();
+			LOGGER.warn("Unable to load storage analyzer builders from Spring, keep empty builder map.");
 		}
 		m_initialized = true;
 	}

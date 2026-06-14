@@ -25,19 +25,17 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class ContactorManager extends ContainerHolder {
+public class ContactorManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContactorManager.class);
 
 	private Map<String, Contactor> m_contactors = new HashMap<String, Contactor>();
 
 	private volatile boolean m_initialized;
 
-	@SuppressWarnings("unchecked")
 	public void initialize() {
 		if (m_initialized) {
 			return;
@@ -47,7 +45,7 @@ public class ContactorManager extends ContainerHolder {
 				return;
 			}
 			if (m_contactors.isEmpty()) {
-				Map<String, Contactor> springContactors = CatSpringContext.getBeanIfAvailable("alertContactors", Map.class);
+				Map<String, Contactor> springContactors = getSpringContactors();
 
 				if (springContactors != null && !springContactors.isEmpty()) {
 					setContactors(springContactors);
@@ -56,20 +54,18 @@ public class ContactorManager extends ContainerHolder {
 					m_initialized = true;
 					return;
 				}
-				try {
-					m_contactors = lookupMap(Contactor.class);
-					LOGGER.warn("Initialized alert contactor manager from Plexus fallback, contactorCount={}.",
-					      m_contactors.size());
-				} catch (RuntimeException e) {
-					LOGGER.warn("Unable to initialize alert contactor manager from Plexus fallback, keep empty contactors.",
-					      e);
-				}
+				LOGGER.warn("Alert contactor manager has no configured contactors.");
 			} else {
 				LOGGER.info("Initialized alert contactor manager from Spring injection, contactorCount={}.",
 				      m_contactors.size());
 			}
 			m_initialized = true;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Contactor> getSpringContactors() {
+		return CatSpringContext.getBeanIfAvailable("alertContactors", Map.class);
 	}
 
 	private void ensureInitialized() {

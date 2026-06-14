@@ -21,11 +21,15 @@ package com.dianping.cat;
 import org.unidal.initialization.AbstractModule;
 import org.unidal.initialization.Module;
 import org.unidal.initialization.ModuleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.report.server.ServersUpdaterManager;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class CatCoreModule extends AbstractModule {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CatCoreModule.class);
+
 	public static final String ID = "cat-core";
 
 	@Override
@@ -34,8 +38,9 @@ public class CatCoreModule extends AbstractModule {
 		ServersUpdaterManager manager = CatSpringContext.getBeanIfAvailable(ServersUpdaterManager.class);
 
 		if (manager == null) {
-			ctx.lookup(ServersUpdaterManager.class);
+			throw new IllegalStateException("ServersUpdaterManager must be configured by Spring for CatCoreModule.");
 		}
+		LOGGER.info("Resolved ServersUpdaterManager from Spring for CatCoreModule.");
 	}
 
 	@Override

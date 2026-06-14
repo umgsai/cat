@@ -27,15 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.unidal.lookup.ContainerLoader;
 import org.unidal.web.mvc.Action;
 import org.unidal.web.mvc.ActionContext;
 import org.unidal.web.mvc.Page;
 import org.unidal.web.mvc.ViewModel;
 
-import com.dianping.cat.Cat;
 import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.sample.entity.Domain;
@@ -46,8 +42,6 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class AbstractReportModel<A extends Action, P extends Page, M extends ActionContext<?>>
 						extends	ViewModel<P, A, M> {
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractReportModel.class);
-
 	private transient Date m_creatTime;
 
 	private transient String m_customDate;
@@ -74,23 +68,18 @@ public abstract class AbstractReportModel<A extends Action, P extends Page, M ex
 
 	public AbstractReportModel(M ctx) {
 		super(ctx);
-		try {
-			m_projectService = resolveService(ProjectService.class);
-			m_sampleConfigManager = resolveService(SampleConfigManager.class);
-			m_hostInfoService = resolveService(HostinfoService.class);
-		} catch (Exception e) {
-			LOGGER.error("Unable to initialize report model services from Spring or Plexus.", e);
-			Cat.logError(e);
-		}
+		m_projectService = resolveService(ProjectService.class);
+		m_sampleConfigManager = resolveService(SampleConfigManager.class);
+		m_hostInfoService = resolveService(HostinfoService.class);
 	}
 
-	private <T> T resolveService(Class<T> type) throws Exception {
+	private <T> T resolveService(Class<T> type) {
 		T service = CatSpringContext.getBeanIfAvailable(type);
 
 		if (service != null) {
 			return service;
 		}
-		return ContainerLoader.getDefaultContainer().lookup(type);
+		throw new IllegalStateException(type.getName() + " must be configured by Spring.");
 	}
 
 	public double getSample() {

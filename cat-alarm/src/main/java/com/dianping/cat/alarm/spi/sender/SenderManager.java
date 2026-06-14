@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.AlertChannel;
@@ -32,7 +31,7 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class SenderManager extends ContainerHolder {
+public class SenderManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SenderManager.class);
 
 	private ServerConfigManager m_configManager;
@@ -41,7 +40,6 @@ public class SenderManager extends ContainerHolder {
 
 	private volatile boolean m_initialized;
 
-	@SuppressWarnings("unchecked")
 	public void initialize() {
 		if (m_initialized) {
 			return;
@@ -51,7 +49,7 @@ public class SenderManager extends ContainerHolder {
 				return;
 			}
 			if (m_senders.isEmpty()) {
-				Map<String, Sender> springSenders = CatSpringContext.getBeanIfAvailable("alertSenders", Map.class);
+				Map<String, Sender> springSenders = getSpringSenders();
 
 				if (springSenders != null && !springSenders.isEmpty()) {
 					setSenders(springSenders);
@@ -60,18 +58,17 @@ public class SenderManager extends ContainerHolder {
 					m_initialized = true;
 					return;
 				}
-				try {
-					m_senders = lookupMap(Sender.class);
-					LOGGER.warn("Initialized alert sender manager from Plexus fallback, senderCount={}.",
-					      m_senders.size());
-				} catch (RuntimeException e) {
-					LOGGER.warn("Unable to initialize alert sender manager from Plexus fallback, keep empty senders.", e);
-				}
+				LOGGER.warn("Alert sender manager has no configured senders.");
 			} else {
 				LOGGER.info("Initialized alert sender manager from Spring injection, senderCount={}.", m_senders.size());
 			}
 			m_initialized = true;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Sender> getSpringSenders() {
+		return CatSpringContext.getBeanIfAvailable("alertSenders", Map.class);
 	}
 
 	private void ensureInitialized() {
@@ -101,12 +98,17 @@ public class SenderManager extends ContainerHolder {
 	public boolean sendAlert(AlertChannel channel, SendMessageEntity message) {
 		ensureInitialized();
 		String channelName = channel.getName();
+		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
 
 		try {
 			boolean result = false;
 			String str = "nosend";
 
-			if (m_configManager.isSendMachine()) {
+			if (m_configManager != null && m_configManager.isSendMachine()) {
 				Sender sender = m_senders.get(channelName);
 
 				if (sender == null) {

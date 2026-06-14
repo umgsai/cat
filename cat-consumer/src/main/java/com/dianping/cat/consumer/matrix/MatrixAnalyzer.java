@@ -144,4 +144,8 @@ public class MatrixAnalyzer extends AbstractMessageAnalyzer<MatrixReport> {
 		}
 	}
 
+	public void setReportManager(ReportManager<MatrixReport> reportManager) {
+		m_reportManager = reportManager;
+	}
+
 }

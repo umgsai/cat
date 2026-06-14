@@ -231,4 +231,16 @@ public class DependencyAnalyzer extends AbstractMessageAnalyzer<DependencyReport
 		}
 	}
 
+	public void setParser(DatabaseParser parser) {
+		m_parser = parser;
+	}
+
+	public void setReportManager(ReportManager<DependencyReport> reportManager) {
+		m_reportManager = reportManager;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		m_serverFilterConfigManager = serverFilterConfigManager;
+	}
+
 }

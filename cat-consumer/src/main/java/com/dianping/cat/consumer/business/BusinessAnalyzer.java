@@ -133,4 +133,12 @@ public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> {
 			}
 		}
 	}
+
+	public void setConfigManager(BusinessConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setReportManager(ReportManager<BusinessReport> reportManager) {
+		m_reportManager = reportManager;
+	}
 }

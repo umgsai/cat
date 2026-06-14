@@ -83,13 +83,8 @@ public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> {
 		refreshSpringHandlers();
 
 		if (m_handlers == null) {
-			try {
-				m_handlers = new ArrayList<ProblemHandler>(lookupMap(ProblemHandler.class).values());
-				LOGGER.info("Loaded problem handlers from Plexus fallback, count={}.", m_handlers.size());
-			} catch (RuntimeException e) {
-				m_handlers = Collections.emptyList();
-				LOGGER.warn("Unable to load problem handlers from Spring or Plexus, keep empty handler list.", e);
-			}
+			m_handlers = Collections.emptyList();
+			LOGGER.warn("Unable to load problem handlers from Spring, keep empty handler list.");
 		} else {
 			// to work around a performance issue within plexus
 			m_handlers = new ArrayList<ProblemHandler>(m_handlers);
@@ -127,6 +122,10 @@ public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> {
 
 	public void setHandlers(List<ProblemHandler> handlers) {
 		m_handlers = handlers;
+	}
+
+	public void setReportManager(ReportManager<ProblemReport> reportManager) {
+		m_reportManager = reportManager;
 	}
 
 }

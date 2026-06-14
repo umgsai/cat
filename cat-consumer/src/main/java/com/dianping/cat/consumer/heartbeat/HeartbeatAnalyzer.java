@@ -212,4 +212,12 @@ public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> 
 		}
 	}
 
+	public void setReportManager(ReportManager<HeartbeatReport> reportManager) {
+		m_reportManager = reportManager;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		m_serverFilterConfigManager = serverFilterConfigManager;
+	}
+
 }

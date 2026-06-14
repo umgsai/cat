@@ -128,6 +128,14 @@ public class DumpAnalyzer extends AbstractMessageAnalyzer<Object> {
 		m_serverStateManager = serverStateManager;
 	}
 
+	public void setDumperManager(MessageDumperManager dumperManager) {
+		m_dumperManager = dumperManager;
+	}
+
+	public void setFinderManager(MessageFinderManager finderManager) {
+		m_finderManager = finderManager;
+	}
+
 	private boolean shouldDiscard(MessageId id) {
 		int index = id.getIndex();
 

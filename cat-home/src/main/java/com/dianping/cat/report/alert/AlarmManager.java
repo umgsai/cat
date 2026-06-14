@@ -21,17 +21,14 @@ package com.dianping.cat.report.alert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.dianping.cat.support.Threads;
-import com.dianping.cat.support.Threads.Task;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.report.alert.business.BusinessAlert;
 import com.dianping.cat.report.alert.event.EventAlert;
 import com.dianping.cat.report.alert.exception.ExceptionAlert;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatAlert;
 import com.dianping.cat.report.alert.transaction.TransactionAlert;
-import com.dianping.cat.spring.CatSpringContext;
 
-public class AlarmManager extends ContainerHolder {
+public class AlarmManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlarmManager.class);
 
 	private BusinessAlert m_businessAlert;
@@ -45,38 +42,12 @@ public class AlarmManager extends ContainerHolder {
 	private TransactionAlert m_transactionAlert;
 
 	public void startAlarm() {
-		BusinessAlert businessAlert = getAlert(BusinessAlert.class, m_businessAlert);
-		ExceptionAlert exceptionAlert = getAlert(ExceptionAlert.class, m_exceptionAlert);
-		HeartbeatAlert heartbeatAlert = getAlert(HeartbeatAlert.class, m_heartbeatAlert);
-		TransactionAlert transactionAlert = getAlert(TransactionAlert.class, m_transactionAlert);
-		EventAlert eventAlert = getAlert(EventAlert.class, m_eventAlert);
-
-		Threads.forGroup("cat").start(businessAlert);
-		Threads.forGroup("cat").start(exceptionAlert);
-		Threads.forGroup("cat").start(heartbeatAlert);
-		Threads.forGroup("cat").start(transactionAlert);
-		Threads.forGroup("cat").start(eventAlert);
-		LOGGER.info("Started alert tasks, springConfigured={}, alerts=[business,exception,heartbeat,transaction,event].",
-		      isSpringConfigured());
-	}
-
-	private <T extends Task> T getAlert(Class<T> type, T configuredAlert) {
-		if (configuredAlert != null) {
-			return configuredAlert;
-		}
-		T springAlert = CatSpringContext.getBeanIfAvailable(type);
-
-		if (springAlert != null) {
-			LOGGER.info("Resolved alert task from Spring context, alertType={}.", type.getName());
-			return springAlert;
-		}
-		LOGGER.info("Resolved alert task from Plexus fallback, alertType={}.", type.getName());
-		return lookup(type);
-	}
-
-	private boolean isSpringConfigured() {
-		return m_businessAlert != null || m_exceptionAlert != null || m_heartbeatAlert != null
-		      || m_transactionAlert != null || m_eventAlert != null;
+		Threads.forGroup("cat").start(m_businessAlert);
+		Threads.forGroup("cat").start(m_exceptionAlert);
+		Threads.forGroup("cat").start(m_heartbeatAlert);
+		Threads.forGroup("cat").start(m_transactionAlert);
+		Threads.forGroup("cat").start(m_eventAlert);
+		LOGGER.info("Started alert tasks, alerts=[business,exception,heartbeat,transaction,event].");
 	}
 
 	public void setBusinessAlert(BusinessAlert businessAlert) {

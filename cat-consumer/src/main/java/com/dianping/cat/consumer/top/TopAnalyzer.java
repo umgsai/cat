@@ -112,4 +112,12 @@ public class TopAnalyzer extends AbstractMessageAnalyzer<TopReport> {
 	public void setErrorType(String type) {
 		m_errorTypes = Stream.of(type.split(",")).map(String::trim).filter(item -> !item.isEmpty()).collect(Collectors.toSet());
 	}
+
+	public void setReportManager(ReportManager<TopReport> reportManager) {
+		m_reportManager = reportManager;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		m_serverFilterConfigManager = serverFilterConfigManager;
+	}
 }

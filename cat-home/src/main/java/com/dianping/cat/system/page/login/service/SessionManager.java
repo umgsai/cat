@@ -30,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.cat.Cat;
 import com.dianping.cat.system.page.login.spi.ISessionManager;
 import com.google.common.base.Function;
 
@@ -42,7 +41,13 @@ public class SessionManager implements ISessionManager<Session, Token, Credentia
 	private Function<Credential, Token> tokenCreator;
 
 	public SessionManager() {
-		m_provider = Cat.getBootstrap().getComponentContext().lookup(CatPropertyProvider.class);
+		m_provider = new DefaultCatPropertyProvider();
+	}
+
+	public void initialize() {
+		if (m_provider == null) {
+			throw new IllegalStateException("CatPropertyProvider must be configured.");
+		}
 
 		AuthType type = AuthType.valueOf(m_provider.getProperty("CAT_AUTH_TYPE", "ADMIN_PWD"));
 
@@ -102,7 +107,6 @@ public class SessionManager implements ISessionManager<Session, Token, Credentia
 						return new Token(account, displayName == null ? account : displayName);
 					} catch (Exception e) {
 						LOGGER.warn("LDAP authentication failed, account={}, ldapUrl={}.", account, ldapUrl, e);
-						Cat.logError(e);
 						return null;
 					}
 				}
@@ -130,7 +134,14 @@ public class SessionManager implements ISessionManager<Session, Token, Credentia
 
 	@Override
 	public Token authenticate(Credential credential) {
+		if (tokenCreator == null) {
+			initialize();
+		}
 		return tokenCreator.apply(credential);
+	}
+
+	public void setProvider(CatPropertyProvider provider) {
+		m_provider = provider;
 	}
 
 	@Override

@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
@@ -46,7 +45,7 @@ import static com.dianping.cat.Constants.HOUR;
 	* Hourly report manager by domain of one report type(such as Transaction, Event, Problem, Heartbeat etc.) produced in one machine
 	* for a couple of hours.
 	*/
-public class DefaultReportManager<T> extends ContainerHolder implements ReportManager<T> {
+public class DefaultReportManager<T> implements ReportManager<T> {
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DefaultReportManager.class);
 
 	private ReportDelegate<T> m_reportDelegate;
@@ -76,7 +75,6 @@ public class DefaultReportManager<T> extends ContainerHolder implements ReportMa
 	}
 
 	public void destory() {
-		super.release(this);
 	}
 
 	@Override

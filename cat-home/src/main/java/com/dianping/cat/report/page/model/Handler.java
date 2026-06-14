@@ -31,28 +31,21 @@ import java.util.zip.GZIPOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.cat.message.storage.BucketManager;
-import org.unidal.cat.message.storage.MessageFinderManager;
-import org.unidal.lookup.ContainerHolder;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.analysis.MessageConsumer;
-import com.dianping.cat.consumer.dump.LocalMessageBucketManager;
-import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.report.ReportPage;
-import com.dianping.cat.report.page.logview.service.LocalMessageService;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.spring.CatSpringContext;
 
 @SuppressWarnings("rawtypes")
-public class Handler extends ContainerHolder implements PageHandler<Context> {
+public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
 	public Map<String, LocalModelService> m_localServices;
@@ -124,7 +117,7 @@ public class Handler extends ContainerHolder implements PageHandler<Context> {
 	public synchronized void initialize() {
 		if (!m_initialized) {
 			if (m_localServices == null || m_localServices.isEmpty()) {
-				initializeFromSpringOrPlexus();
+				initializeFromSpring();
 			} else {
 				LOGGER.info("Initialized model page handler from Spring injection, localServiceCount={}.",
 				      m_localServices.size());
@@ -134,111 +127,18 @@ public class Handler extends ContainerHolder implements PageHandler<Context> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void initializeFromSpringOrPlexus() {
+	private void initializeFromSpring() {
 		Map<String, LocalModelService> springLocalServices = CatSpringContext.getBeanIfAvailable("localModelServices",
 		      Map.class);
 
 		if (springLocalServices != null && !springLocalServices.isEmpty()) {
 			setLocalServices(springLocalServices);
-			mergePlexusLocalServices();
-			configureLogviewDependenciesFromPlexus();
-			configureMessageConsumerFromPlexus();
 			LOGGER.info("Initialized model page handler from Spring context bridge, localServiceCount={}.",
 			      m_localServices.size());
 			return;
 		}
-		try {
-			m_localServices = lookupMap(LocalModelService.class);
-			LOGGER.warn("Initialized model page handler from Plexus fallback, localServiceCount={}.",
-			      m_localServices.size());
-		} catch (RuntimeException e) {
-			m_localServices = new HashMap<String, LocalModelService>();
-			LOGGER.warn("Unable to initialize model page handler from Plexus fallback, keep empty local services.", e);
-		}
-	}
-
-	private void mergePlexusLocalServices() {
-		try {
-			Map<String, LocalModelService> plexusLocalServices = lookupMap(LocalModelService.class);
-			int originalCount = m_localServices.size();
-
-			for (Map.Entry<String, LocalModelService> entry : plexusLocalServices.entrySet()) {
-				if (!m_localServices.containsKey(entry.getKey())) {
-					m_localServices.put(entry.getKey(), entry.getValue());
-				}
-			}
-			LOGGER.info("Merged Plexus local model service fallback, springServiceCount={}, mergedServiceCount={}, keys={}.",
-			      originalCount, m_localServices.size(), m_localServices.keySet());
-		} catch (RuntimeException e) {
-			LOGGER.warn("Unable to merge Plexus local model service fallback.", e);
-		}
-	}
-
-	private void configureLogviewDependenciesFromPlexus() {
-		LocalModelService service = m_localServices.get("logview");
-
-		if (service instanceof LocalMessageService) {
-			try {
-				LocalMessageService localMessageService = (LocalMessageService) service;
-				MessageFinderManager finderManager = lookupSpringOrPlexus(MessageFinderManager.class);
-				BucketManager bucketManager = lookupSpringOrPlexus("local", BucketManager.class);
-				MessageBucketManager messageBucketManager = CatSpringContext.getBeanIfAvailable("legacyLocalMessageBucketManager",
-				      MessageBucketManager.class);
-
-				if (messageBucketManager == null) {
-					messageBucketManager = lookupSpringOrPlexus(LocalMessageBucketManager.ID, MessageBucketManager.class);
-				}
-
-				localMessageService.setFinderManager(finderManager);
-				localMessageService.setBucketManager(bucketManager);
-				localMessageService.setMessageBucketManager(messageBucketManager);
-				LOGGER.info("Configured message storage dependencies for Spring local logview service.");
-			} catch (RuntimeException e) {
-				LOGGER.warn("Unable to configure message storage dependencies for Spring local logview service.", e);
-			}
-		}
-	}
-
-	private void configureMessageConsumerFromPlexus() {
-		try {
-			MessageConsumer consumer = lookupSpringOrPlexus(MessageConsumer.class);
-
-			for (LocalModelService service : m_localServices.values()) {
-				service.setConsumer(consumer);
-			}
-			LOGGER.info("Configured message consumer for Spring local model services, localServiceCount={}.",
-			      m_localServices.size());
-		} catch (RuntimeException e) {
-			LOGGER.warn("Unable to configure message consumer for Spring local model services.", e);
-		}
-	}
-
-	private <T> T lookupSpringOrPlexus(Class<T> type) {
-		T bean = CatSpringContext.getBeanIfAvailable(type);
-
-		if (bean != null) {
-			LOGGER.info("Resolved {} from Spring for model page handler.", type.getSimpleName());
-			return bean;
-		}
-
-		T component = lookup(type);
-
-		LOGGER.info("Resolved {} from Plexus for model page handler.", type.getSimpleName());
-		return component;
-	}
-
-	private <T> T lookupSpringOrPlexus(String name, Class<T> type) {
-		T bean = CatSpringContext.getBeanIfAvailable(name, type);
-
-		if (bean != null) {
-			LOGGER.info("Resolved {}:{} from Spring for model page handler.", type.getSimpleName(), name);
-			return bean;
-		}
-
-		T component = lookup(type, name);
-
-		LOGGER.info("Resolved {}:{} from Plexus for model page handler.", type.getSimpleName(), name);
-		return component;
+		m_localServices = new HashMap<String, LocalModelService>();
+		LOGGER.warn("Unable to initialize model page handler from Spring context bridge, keep empty local services.");
 	}
 
 	public void setLocalServices(Map<String, LocalModelService> localServices) {

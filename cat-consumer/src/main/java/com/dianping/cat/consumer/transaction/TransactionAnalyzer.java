@@ -636,4 +636,20 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 		}
 	}
 
+	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {
+		m_atomicMessageConfigManager = atomicMessageConfigManager;
+	}
+
+	public void setFilterConfigManager(ServerFilterConfigManager filterConfigManager) {
+		m_filterConfigManager = filterConfigManager;
+	}
+
+	public void setReportManager(ReportManager<TransactionReport> reportManager) {
+		m_reportManager = reportManager;
+	}
+
+	public void setStatisticManager(TpValueStatisticConfigManager statisticManager) {
+		m_statisticManager = statisticManager;
+	}
+
 }
