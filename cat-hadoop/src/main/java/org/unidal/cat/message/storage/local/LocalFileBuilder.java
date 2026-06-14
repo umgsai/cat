@@ -24,12 +24,8 @@ import java.util.Date;
 import org.unidal.cat.message.storage.FileType;
 import org.unidal.cat.message.storage.PathBuilder;
 import org.unidal.cat.message.storage.StorageConfiguration;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
-@Named(type = PathBuilder.class, value = "local")
 public class LocalFileBuilder implements PathBuilder {
-	@Inject
 	private StorageConfiguration m_config;
 
 	@Override

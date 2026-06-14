@@ -37,19 +37,15 @@ import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.FileType;
 import org.unidal.cat.message.storage.PathBuilder;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
-@Named(type = BucketManager.class, value = "local")
 public class LocalBucketManager extends ContainerHolder implements BucketManager, LogEnabled {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalBucketManager.class);
 
 	protected Logger m_logger;
 
-	@Inject("local")
 	private PathBuilder m_builder;
 
 	private BucketFactory m_bucketFactory;

@@ -33,16 +33,12 @@ import org.unidal.cat.message.storage.Index;
 import org.unidal.cat.message.storage.IndexManager;
 import org.unidal.cat.message.storage.PathBuilder;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
-@Named(type = IndexManager.class, value = "local")
 public class LocalIndexManager extends ContainerHolder implements IndexManager {
 	protected Logger m_logger;
 
 	private Map<Integer, Map<String, Index>> m_indexes = new LinkedHashMap<Integer, Map<String, Index>>();
 
-	@Inject("local")
 	private PathBuilder m_bulider;
 
 	private boolean bucketFilesExsits(String domain, String ip, int hour) {

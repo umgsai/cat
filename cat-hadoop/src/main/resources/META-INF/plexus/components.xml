@@ -162,12 +162,15 @@
 				<requirement>
 					<role>org.unidal.cat.message.storage.PathBuilder</role>
 					<role-hint>local</role-hint>
+					<field-name>m_builder</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.internals.ByteBufCache</role>
+					<field-name>m_bufCache</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_config</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -179,6 +182,7 @@
 				<requirement>
 					<role>org.unidal.cat.message.storage.PathBuilder</role>
 					<role-hint>local</role-hint>
+					<field-name>m_builder</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -225,13 +229,16 @@
 				<requirement>
 					<role>org.unidal.cat.message.storage.PathBuilder</role>
 					<role-hint>local</role-hint>
+					<field-name>m_bulider</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.TokenMappingManager</role>
 					<role-hint>local</role-hint>
+					<field-name>m_manager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.internals.ByteBufCache</role>
+					<field-name>m_bufCache</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -243,6 +250,7 @@
 				<requirement>
 					<role>org.unidal.cat.message.storage.PathBuilder</role>
 					<role-hint>local</role-hint>
+					<field-name>m_bulider</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -291,6 +299,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.cat.message.storage.StorageConfiguration</role>
+					<field-name>m_config</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -313,6 +322,7 @@
 				<requirement>
 					<role>org.unidal.cat.message.storage.PathBuilder</role>
 					<role-hint>local</role-hint>
+					<field-name>m_bulider</field-name>
 				</requirement>
 			</requirements>
 		</component>

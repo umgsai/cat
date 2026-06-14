@@ -40,23 +40,17 @@ import org.unidal.cat.message.storage.FileType;
 import org.unidal.cat.message.storage.PathBuilder;
 import org.unidal.cat.message.storage.internals.ByteBufCache;
 import org.unidal.cat.message.storage.internals.DefaultBlock;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.tree.MessageId;
 
-@Named(type = Bucket.class, value = "local", instantiationStrategy = Named.PER_LOOKUP)
 public class LocalBucket implements Bucket {
 
-	@Inject("local")
 	private PathBuilder m_builder;
 
-	@Inject
 	private ByteBufCache m_bufCache;
 
-	@Inject
 	private ServerConfigManager m_config;
 
 	private DataHelper m_data = new DataHelper();

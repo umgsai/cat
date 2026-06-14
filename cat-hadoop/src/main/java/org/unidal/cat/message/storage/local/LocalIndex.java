@@ -38,24 +38,18 @@ import org.unidal.cat.message.storage.PathBuilder;
 import org.unidal.cat.message.storage.TokenMapping;
 import org.unidal.cat.message.storage.TokenMappingManager;
 import org.unidal.cat.message.storage.internals.ByteBufCache;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.tree.MessageId;
 
-@Named(type = Index.class, value = "local", instantiationStrategy = Named.PER_LOOKUP)
 public class LocalIndex implements Index {
 	private static final int SEGMENT_SIZE = 32 * 1024;
 
-	@Inject("local")
 	private PathBuilder m_bulider;
 
-	@Inject("local")
 	private TokenMappingManager m_manager;
 
-	@Inject
 	private ByteBufCache m_bufCache;
 
 	private TokenMapping m_mapping;

@@ -32,8 +32,6 @@ import io.netty.buffer.Unpooled;
 import org.unidal.cat.message.storage.FileType;
 import org.unidal.cat.message.storage.PathBuilder;
 import org.unidal.cat.message.storage.TokenMapping;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
@@ -41,13 +39,11 @@ import com.dianping.cat.helper.TimeHelper;
 /**
 	* Supports up to 64K tokens mapping from <code>String</code> to <code>int</code>, or reverse by local file system.
 	*/
-@Named(type = TokenMapping.class, value = "local", instantiationStrategy = Named.PER_LOOKUP)
 public class LocalTokenMapping implements TokenMapping {
 	private static final int BLOCK_SIZE = 32 * 1024;
 
 	private static final String MAGIC_CODE = "TokenMapping"; // token mapping
 
-	@Inject("local")
 	private PathBuilder m_bulider;
 
 	private RandomAccessFile m_file;

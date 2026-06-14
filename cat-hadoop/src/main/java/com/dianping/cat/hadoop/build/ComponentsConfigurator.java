@@ -21,6 +21,8 @@ package com.dianping.cat.hadoop.build;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.unidal.cat.message.storage.Bucket;
+import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.clean.HdfsUploader;
 import org.unidal.cat.message.storage.clean.LogviewProcessor;
 import org.unidal.cat.message.storage.hdfs.HdfsBucket;
@@ -32,6 +34,9 @@ import org.unidal.cat.message.storage.hdfs.HdfsMessageConsumerFinder;
 import org.unidal.cat.message.storage.hdfs.HdfsSystemManager;
 import org.unidal.cat.message.storage.hdfs.HdfsTokenMapping;
 import org.unidal.cat.message.storage.hdfs.HdfsTokenMappingManager;
+import org.unidal.cat.message.storage.Index;
+import org.unidal.cat.message.storage.IndexManager;
+import org.unidal.cat.message.storage.internals.ByteBufCache;
 import org.unidal.cat.message.storage.internals.DefaultBlockDumper;
 import org.unidal.cat.message.storage.internals.DefaultBlockDumperManager;
 import org.unidal.cat.message.storage.internals.DefaultBlockWriter;
@@ -48,6 +53,9 @@ import org.unidal.cat.message.storage.local.LocalIndex;
 import org.unidal.cat.message.storage.local.LocalIndexManager;
 import org.unidal.cat.message.storage.local.LocalTokenMapping;
 import org.unidal.cat.message.storage.local.LocalTokenMappingManager;
+import org.unidal.cat.message.storage.StorageConfiguration;
+import org.unidal.cat.message.storage.TokenMapping;
+import org.unidal.cat.message.storage.TokenMappingManager;
 import org.unidal.initialization.Module;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
@@ -117,21 +125,31 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(A(HdfsMessageConsumerFinder.class));
 
-		all.add(A(LocalBucket.class));
-		all.add(A(LocalBucketManager.class));
+		all.add(C(Bucket.class, "local", LocalBucket.class).is(PER_LOOKUP) //
+								.req(org.unidal.cat.message.storage.PathBuilder.class, "local", "m_builder") //
+								.req(ByteBufCache.class, (String) null, "m_bufCache") //
+								.req(ServerConfigManager.class, (String) null, "m_config"));
+		all.add(C(BucketManager.class, "local", LocalBucketManager.class) //
+								.req(org.unidal.cat.message.storage.PathBuilder.class, "local", "m_builder"));
 		all.add(A(HdfsBucket.class));
 		all.add(A(HdfsBucketManager.class));
 
-		all.add(A(LocalIndex.class));
-		all.add(A(LocalIndexManager.class));
+		all.add(C(Index.class, "local", LocalIndex.class).is(PER_LOOKUP) //
+								.req(org.unidal.cat.message.storage.PathBuilder.class, "local", "m_bulider") //
+								.req(TokenMappingManager.class, "local", "m_manager") //
+								.req(ByteBufCache.class, (String) null, "m_bufCache"));
+		all.add(C(IndexManager.class, "local", LocalIndexManager.class) //
+								.req(org.unidal.cat.message.storage.PathBuilder.class, "local", "m_bulider"));
 		all.add(A(HdfsIndex.class));
 		all.add(A(HdfsIndexManager.class));
 
-		all.add(A(LocalFileBuilder.class));
+		all.add(C(org.unidal.cat.message.storage.PathBuilder.class, "local", LocalFileBuilder.class) //
+								.req(StorageConfiguration.class, (String) null, "m_config"));
 		all.add(A(HdfsFileBuilder.class));
-		all.add(A(LocalTokenMapping.class));
+		all.add(C(TokenMapping.class, "local", LocalTokenMapping.class).is(PER_LOOKUP) //
+								.req(org.unidal.cat.message.storage.PathBuilder.class, "local", "m_bulider"));
 		all.add(A(HdfsTokenMapping.class));
-		all.add(A(LocalTokenMappingManager.class));
+		all.add(C(TokenMappingManager.class, "local", LocalTokenMappingManager.class));
 		all.add(A(HdfsTokenMappingManager.class));
 
 		all.add(A(DefaultStorageConfiguration.class));
