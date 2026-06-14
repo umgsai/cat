@@ -18,7 +18,7 @@
  */
 package com.dianping.cat.system.page.config.processor;
 
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.home.dependency.config.entity.DomainConfig;

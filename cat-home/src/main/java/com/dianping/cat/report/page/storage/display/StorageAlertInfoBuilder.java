@@ -24,7 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.unidal.helper.Splitters;
+import com.google.common.base.Splitter;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
@@ -81,7 +81,7 @@ public class StorageAlertInfoBuilder {
 
 	public void parseAlertEntity(Alert alert, StorageAlertInfo alertInfo) {
 		String name = alert.getDomain();
-		List<String> fields = Splitters.by(";").split(alert.getMetric());
+		List<String> fields = Splitter.on(';').splitToList(alert.getMetric());
 		String ip = fields.get(0);
 		String operation = fields.get(1);
 		String target = queryTargetTitle(fields.get(2));

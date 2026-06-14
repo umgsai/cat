@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;

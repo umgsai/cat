@@ -33,7 +33,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.unidal.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

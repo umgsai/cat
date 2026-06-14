@@ -21,7 +21,7 @@ package com.dianping.cat.system.page.config.processor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.dianping.cat.home.exception.entity.ExceptionExclude;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;

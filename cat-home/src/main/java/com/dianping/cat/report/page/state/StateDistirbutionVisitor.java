@@ -21,7 +21,7 @@ package com.dianping.cat.report.page.state;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.dianping.cat.consumer.state.model.entity.Machine;
 import com.dianping.cat.consumer.state.model.entity.ProcessDomain;
