@@ -32,8 +32,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.unidal.helper.Scanners;
 import org.unidal.helper.Scanners.FileMatcher;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -42,13 +40,10 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
-@Named
 public class LogviewProcessor implements Task, Initializable {
 
-	@Inject
 	private HdfsUploader m_hdfsUploader;
 
-	@Inject
 	private ServerConfigManager m_configManager;
 
 	private File m_baseDir;

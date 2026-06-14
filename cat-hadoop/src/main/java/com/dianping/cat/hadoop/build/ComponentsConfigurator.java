@@ -193,8 +193,12 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(StorageConfiguration.class, DefaultStorageConfiguration.class));
 		all.add(C(ByteBufCache.class, DefaultByteBufCache.class));
 
-		all.add(A(HdfsUploader.class));
-		all.add(A(LogviewProcessor.class));
+		all.add(C(HdfsUploader.class) //
+								.req(HdfsSystemManager.class, (String) null, "m_fileSystemManager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager"));
+		all.add(C(LogviewProcessor.class) //
+								.req(HdfsUploader.class, (String) null, "m_hdfsUploader") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager"));
 
 		return all;
 	}

@@ -40,21 +40,16 @@ import org.unidal.helper.Files;
 import org.unidal.helper.Files.AutoClose;
 import org.unidal.helper.Formats;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
-@Named
 public class HdfsUploader implements LogEnabled, Initializable {
 
-	@Inject
 	private HdfsSystemManager m_fileSystemManager;
 
-	@Inject
 	private ServerConfigManager m_serverConfigManager;
 
 	private ThreadPoolExecutor m_executors;
