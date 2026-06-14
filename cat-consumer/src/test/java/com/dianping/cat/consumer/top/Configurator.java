@@ -21,7 +21,6 @@ package com.dianping.cat.consumer.top;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
@@ -59,7 +58,6 @@ public class Configurator extends AbstractResourceConfigurator {
 	public static class MockTopReportManager extends MockReportManager<TopReport> {
 		private TopReport m_report;
 
-		@Inject
 		private ReportDelegate<TopReport> m_delegate;
 
 		@Override

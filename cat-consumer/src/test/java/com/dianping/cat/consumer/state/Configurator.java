@@ -21,7 +21,6 @@ package com.dianping.cat.consumer.state;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
@@ -64,7 +63,6 @@ public class Configurator extends AbstractResourceConfigurator {
 	public static class MockStateReportManager extends MockReportManager<StateReport> {
 		private StateReport m_report;
 
-		@Inject
 		private ReportDelegate<StateReport> m_delegate;
 
 		@Override

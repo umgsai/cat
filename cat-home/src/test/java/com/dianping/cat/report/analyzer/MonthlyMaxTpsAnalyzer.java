@@ -27,7 +27,6 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.model.entity.Machine;
@@ -45,7 +44,6 @@ public class MonthlyMaxTpsAnalyzer extends ComponentTestCase {
 
 	private SimpleDateFormat m_sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-	@Inject
 	private TransactionReportService m_reportService;
 
 	private Map<String, DomainInfo> m_infos = new LinkedHashMap<String, DomainInfo>();

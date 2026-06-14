@@ -21,7 +21,6 @@ package com.dianping.cat.consumer.performance;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
@@ -61,7 +60,6 @@ public class CrossConfigurator extends AbstractResourceConfigurator {
 	public static class MockCrossReportManager extends MockReportManager<CrossReport> {
 		private CrossReport m_report;
 
-		@Inject
 		private ReportDelegate<CrossReport> m_delegate;
 
 		@Override

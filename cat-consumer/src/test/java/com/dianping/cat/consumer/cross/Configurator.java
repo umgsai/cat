@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
@@ -64,7 +63,6 @@ public class Configurator extends AbstractResourceConfigurator {
 
 		;
 
-		@Inject
 		private ReportDelegate<CrossReport> m_delegate;
 
 		@Override

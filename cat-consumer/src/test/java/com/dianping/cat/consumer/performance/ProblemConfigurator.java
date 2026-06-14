@@ -21,7 +21,6 @@ package com.dianping.cat.consumer.performance;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
@@ -61,7 +60,6 @@ public class ProblemConfigurator extends AbstractResourceConfigurator {
 	public static class MockProblemReportManager extends MockReportManager<ProblemReport> {
 		private ProblemReport m_report;
 
-		@Inject
 		private ReportDelegate<ProblemReport> m_delegate;
 
 		@Override
