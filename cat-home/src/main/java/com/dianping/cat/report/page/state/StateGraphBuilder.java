@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.tuple.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
@@ -87,7 +87,7 @@ public class StateGraphBuilder {
 
 		PieChart piechart = buildPiechart(visitor.getDistribute());
 
-		return new Pair<LineChart, PieChart>(linechart, piechart);
+		return Pair.of(linechart, piechart);
 	}
 
 	private Pair<LineChart, PieChart> buildHourlyGraph(StateReport report, String domain, String key, String ip) {
@@ -106,7 +106,7 @@ public class StateGraphBuilder {
 		Map<String, Double> distributes = visitor.getDistribute();
 		PieChart piechart = buildPiechart(distributes);
 
-		return new Pair<LineChart, PieChart>(linechart, piechart);
+		return Pair.of(linechart, piechart);
 	}
 
 	private PieChart buildPiechart(Map<String, Double> distributes) {

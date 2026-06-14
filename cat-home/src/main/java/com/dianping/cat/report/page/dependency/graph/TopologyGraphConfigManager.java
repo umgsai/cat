@@ -27,7 +27,7 @@ import java.util.Set;
 
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.helper.Files;
-import org.unidal.tuple.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -125,11 +125,7 @@ public class TopologyGraphConfigManager {
 				sb.append(buildDes(type, ERROR_STR, String.valueOf(error))).append(GraphConstrant.ENTER);
 			}
 		}
-		Pair<Integer, String> result = new Pair<Integer, String>();
-
-		result.setKey(errorCode);
-		result.setValue(sb.toString());
-		return result;
+		return Pair.of(errorCode, sb.toString());
 	}
 
 	private String buildErrorDes(String... args) {
@@ -182,11 +178,7 @@ public class TopologyGraphConfigManager {
 			}
 			sb.append(GraphConstrant.ENTER);
 		}
-		Pair<Integer, String> result = new Pair<Integer, String>();
-
-		result.setKey(errorCode);
-		result.setValue(sb.toString());
-		return result;
+		return Pair.of(errorCode, sb.toString());
 	}
 
 	private String buildWarningDes(String... args) {

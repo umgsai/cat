@@ -33,7 +33,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.lang.StringUtils;
-import org.unidal.tuple.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.AlertEntity;
@@ -93,7 +93,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 			}
 		}
 
-		return new Pair<String, Boolean>(title, isPrivilege);
+		return Pair.of(title, isPrivilege);
 	}
 
 	private Map<String, LineChart> buildCharts(final Map<String, double[]> datas, Map<String, double[]> baseLines,

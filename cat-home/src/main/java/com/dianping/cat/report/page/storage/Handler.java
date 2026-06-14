@@ -34,7 +34,7 @@ import java.util.Set;
 
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.apache.commons.lang3.StringUtils;
-import org.unidal.tuple.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.PageHandler;
@@ -187,7 +187,7 @@ public class Handler implements PageHandler<Context> {
 		} else {
 			ops.addAll(defaultValue);
 		}
-		return new Pair<Boolean, Set<String>>(filter, ops);
+		return Pair.of(filter, ops);
 	}
 
 	private String buildOperationStr(List<String> ops) {

@@ -18,7 +18,7 @@
  */
 package com.dianping.cat.report.page.dependency.graph;
 
-import org.unidal.tuple.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.dianping.cat.consumer.dependency.model.entity.Dependency;
 import com.dianping.cat.consumer.dependency.model.entity.Index;
