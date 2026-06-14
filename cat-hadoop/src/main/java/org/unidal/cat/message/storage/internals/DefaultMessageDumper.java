@@ -27,8 +27,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.BlockDumperManager;
 import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.MessageDumper;
@@ -45,7 +45,9 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
-public class DefaultMessageDumper extends ContainerHolder implements MessageDumper, LogEnabled {
+public class DefaultMessageDumper extends ContainerHolder implements MessageDumper {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageDumper.class);
+
 	private BlockDumperManager m_blockDumperManager;
 
 	private BucketManager m_bucketManager;
@@ -60,8 +62,6 @@ public class DefaultMessageDumper extends ContainerHolder implements MessageDump
 
 	private AtomicInteger m_failCount = new AtomicInteger(-1);
 
-	private Logger m_logger;
-
 	private long m_total;
 
 	private int m_processThreads;
@@ -71,17 +71,17 @@ public class DefaultMessageDumper extends ContainerHolder implements MessageDump
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
 		String date = sdf.format(new Date(hour * TimeHelper.ONE_HOUR));
 
-		m_logger.info("starting close message processor " + date);
+		LOGGER.info("starting close message processor " + date);
 		closeMessageProcessor();
-		m_logger.info("end close dumper processor " + date);
+		LOGGER.info("end close dumper processor " + date);
 
-		m_logger.info("starting close dumper manager " + date);
+		LOGGER.info("starting close dumper manager " + date);
 		m_blockDumperManager.close(hour);
-		m_logger.info("end close dumper manager " + date);
+		LOGGER.info("end close dumper manager " + date);
 
-		m_logger.info("starting close bucket manager " + date);
+		LOGGER.info("starting close bucket manager " + date);
 		m_bucketManager.closeBuckets(hour);
-		m_logger.info("end close bucket manager " + date);
+		LOGGER.info("end close bucket manager " + date);
 	}
 
 	private void closeMessageProcessor() throws InterruptedException {
@@ -106,11 +106,6 @@ public class DefaultMessageDumper extends ContainerHolder implements MessageDump
 			processor.shutdown();
 			super.release(processor);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	private int getIndex(String key) {
@@ -150,7 +145,7 @@ public class DefaultMessageDumper extends ContainerHolder implements MessageDump
 			if ((m_failCount.incrementAndGet() % 100) == 0) {
 				Cat.logError(new MessageQueueFullException("Error when adding message to queue, fails: " + m_failCount));
 
-				m_logger.info("message tree queue is full " + m_failCount + " index " + index);
+				LOGGER.info("message tree queue is full " + m_failCount + " index " + index);
 				// tree.getBuffer().release();
 			}
 		} else {

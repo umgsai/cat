@@ -24,25 +24,19 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.netty.util.ReferenceCountUtil;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
-public class DefaultByteBufCache implements ByteBufCache, Initializable, LogEnabled {
+public class DefaultByteBufCache implements ByteBufCache, Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultByteBufCache.class);
 
 	private BlockingQueue<ByteBuffer> m_bufs = new ArrayBlockingQueue<ByteBuffer>(8000);
 
-	private Logger m_logger;
-
 	private AtomicInteger m_count = new AtomicInteger();
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
 
 	public ByteBuffer get() {
 		ByteBuffer buf = m_bufs.poll();
@@ -77,7 +71,7 @@ public class DefaultByteBufCache implements ByteBufCache, Initializable, LogEnab
 			}
 
 			if (m_count.incrementAndGet() % 100 == 0) {
-				m_logger.info("error when put back buf");
+				LOGGER.info("error when put back buf");
 			}
 		}
 	}

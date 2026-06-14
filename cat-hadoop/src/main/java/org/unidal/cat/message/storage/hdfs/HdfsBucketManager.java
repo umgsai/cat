@@ -24,8 +24,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import io.netty.buffer.ByteBuf;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.cat.message.storage.Bucket;
@@ -39,9 +37,7 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 
-public class HdfsBucketManager extends ContainerHolder implements Initializable, LogEnabled {
-
-	protected Logger m_logger;
+public class HdfsBucketManager extends ContainerHolder implements Initializable {
 
 	private ServerConfigManager m_configManager;
 
@@ -58,11 +54,6 @@ public class HdfsBucketManager extends ContainerHolder implements Initializable,
 			return size() > 1000;
 		}
 	};
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
 
 	@Override
 	public void initialize() throws InitializationException {

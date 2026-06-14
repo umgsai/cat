@@ -29,8 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.unidal.cat.message.storage.Bucket;
 import org.unidal.cat.message.storage.BucketFactory;
 import org.unidal.cat.message.storage.BucketManager;
@@ -41,10 +39,8 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
-public class LocalBucketManager extends ContainerHolder implements BucketManager, LogEnabled {
+public class LocalBucketManager extends ContainerHolder implements BucketManager {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalBucketManager.class);
-
-	protected Logger m_logger;
 
 	private PathBuilder m_builder;
 
@@ -98,11 +94,6 @@ public class LocalBucketManager extends ContainerHolder implements BucketManager
 			m_buckets.remove(h);
 		}
 
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	private Map<String, Bucket> findOrCreateMap(Map<Integer, Map<String, Bucket>> map, int hour) {

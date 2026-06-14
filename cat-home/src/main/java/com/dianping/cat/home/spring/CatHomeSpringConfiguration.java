@@ -1842,10 +1842,9 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(initMethod = "initialize")
-	public ByteBufCache byteBufCache(Logger plexusConsoleLogger) {
+	public ByteBufCache byteBufCache() {
 		DefaultByteBufCache cache = new DefaultByteBufCache();
 
-		cache.enableLogging(plexusConsoleLogger.getChildLogger(DefaultByteBufCache.class.getName()));
 		return cache;
 	}
 

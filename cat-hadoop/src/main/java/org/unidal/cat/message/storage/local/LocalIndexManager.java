@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.codehaus.plexus.logging.Logger;
 import org.unidal.cat.message.storage.FileType;
 import org.unidal.cat.message.storage.Index;
 import org.unidal.cat.message.storage.IndexManager;
@@ -35,8 +34,6 @@ import org.unidal.cat.message.storage.PathBuilder;
 import org.unidal.lookup.ContainerHolder;
 
 public class LocalIndexManager extends ContainerHolder implements IndexManager {
-	protected Logger m_logger;
-
 	private Map<Integer, Map<String, Index>> m_indexes = new LinkedHashMap<Integer, Map<String, Index>>();
 
 	private PathBuilder m_bulider;

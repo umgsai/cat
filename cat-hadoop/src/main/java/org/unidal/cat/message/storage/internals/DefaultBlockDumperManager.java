@@ -24,16 +24,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.BlockDumper;
 import org.unidal.cat.message.storage.BlockDumperManager;
 import org.unidal.lookup.ContainerHolder;
 
-public class DefaultBlockDumperManager extends ContainerHolder implements LogEnabled, BlockDumperManager {
-	private Map<Integer, BlockDumper> m_map = new LinkedHashMap<Integer, BlockDumper>();
+public class DefaultBlockDumperManager extends ContainerHolder implements BlockDumperManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBlockDumperManager.class);
 
-	private Logger m_logger;
+	private Map<Integer, BlockDumper> m_map = new LinkedHashMap<Integer, BlockDumper>();
 
 	@Override
 	public void close(int hour) {
@@ -47,11 +47,6 @@ public class DefaultBlockDumperManager extends ContainerHolder implements LogEna
 				// ignore it
 			}
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override
@@ -69,7 +64,7 @@ public class DefaultBlockDumperManager extends ContainerHolder implements LogEna
 					dumper.initialize(hour);
 
 					m_map.put(hour, dumper);
-					m_logger.info("Create block dumper " + sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
+					LOGGER.info("Create block dumper " + sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
 				}
 			}
 		}

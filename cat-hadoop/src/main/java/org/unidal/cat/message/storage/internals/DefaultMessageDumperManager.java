@@ -24,20 +24,19 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.MessageDumper;
 import org.unidal.cat.message.storage.MessageDumperManager;
 import org.unidal.lookup.ContainerHolder;
 
 public class DefaultMessageDumperManager extends ContainerHolder
-						implements LogEnabled, MessageDumperManager,	Initializable {
+						implements MessageDumperManager,	Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageDumperManager.class);
 
 	private Map<Integer, MessageDumper> m_dumpers = new LinkedHashMap<Integer, MessageDumper>();
-
-	private Logger m_logger;
 
 	@Override
 	public synchronized void close(int hour) {
@@ -51,11 +50,6 @@ public class DefaultMessageDumperManager extends ContainerHolder
 			}
 			super.release(dumper);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override
@@ -78,7 +72,7 @@ public class DefaultMessageDumperManager extends ContainerHolder
 					dumper.initialize(hour);
 
 					m_dumpers.put(hour, dumper);
-					m_logger.info("create message dumper " + sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
+					LOGGER.info("create message dumper " + sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
 				}
 			}
 		}

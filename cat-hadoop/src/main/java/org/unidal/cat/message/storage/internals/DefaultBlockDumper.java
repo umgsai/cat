@@ -25,8 +25,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.Block;
 import org.unidal.cat.message.storage.BlockDumper;
 import org.unidal.cat.message.storage.BlockWriter;
@@ -38,7 +38,8 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
-public class DefaultBlockDumper extends ContainerHolder implements BlockDumper, LogEnabled {
+public class DefaultBlockDumper extends ContainerHolder implements BlockDumper {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBlockDumper.class);
 
 	private ServerStatisticManager m_statisticManager;
 
@@ -49,8 +50,6 @@ public class DefaultBlockDumper extends ContainerHolder implements BlockDumper, 
 	private List<BlockWriter> m_writers = new ArrayList<BlockWriter>();
 
 	private int m_failCount = -1;
-
-	private Logger m_logger;
 
 	@Override
 	public void awaitTermination() throws InterruptedException {
@@ -94,16 +93,11 @@ public class DefaultBlockDumper extends ContainerHolder implements BlockDumper, 
 
 			if ((++m_failCount % 100) == 0) {
 				Cat.logError(new BlockQueueFullException("Error when adding block to queue, fails: " + m_failCount));
-				m_logger.info("block dump queue is full " + m_failCount + " index:" + index);
+				LOGGER.info("block dump queue is full " + m_failCount + " index:" + index);
 			}
 		} else {
 			m_statisticManager.addBlockTotal(1);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override

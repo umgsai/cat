@@ -33,10 +33,10 @@ import org.apache.hadoop.hdfs.protocol.AlreadyBeingCreatedException;
 import org.apache.hadoop.ipc.RemoteException;
 import org.apache.hadoop.security.AccessControlException;
 import org.apache.commons.io.IOUtils;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.hdfs.HdfsSystemManager;
 import com.dianping.cat.support.Threads.Task;
 
@@ -45,7 +45,8 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
-public class HdfsUploader implements LogEnabled, Initializable {
+public class HdfsUploader implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HdfsUploader.class);
 
 	private HdfsSystemManager m_fileSystemManager;
 
@@ -55,8 +56,6 @@ public class HdfsUploader implements LogEnabled, Initializable {
 
 	private File m_localBaseDir;
 
-	private Logger m_logger;
-
 	private void deleteFile(String path) {
 		File file = new File(m_localBaseDir, path);
 		File parent = file.getParentFile();
@@ -64,11 +63,6 @@ public class HdfsUploader implements LogEnabled, Initializable {
 		file.delete();
 		parent.delete();
 		parent.getParentFile().delete();
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override
@@ -170,17 +164,17 @@ public class HdfsUploader implements LogEnabled, Initializable {
 				t.setStatus(e);
 
 				deleteFile(path);
-				m_logger.error(String.format("Already being created (%s)!", path), e);
+				LOGGER.error(String.format("Already being created (%s)!", path), e);
 			} catch (AccessControlException e) {
 				Cat.logError(e);
 				t.setStatus(e);
 
 				deleteFile(path);
-				m_logger.error(String.format("No permission to create HDFS file(%s)!", path), e);
+				LOGGER.error(String.format("No permission to create HDFS file(%s)!", path), e);
 			} catch (Exception e) {
 				Cat.logError(e);
 				t.setStatus(e);
-				m_logger.error(String.format("Uploading file(%s) to HDFS(%s) failed!", file, path), e);
+				LOGGER.error(String.format("Uploading file(%s) to HDFS(%s) failed!", file, path), e);
 			} finally {
 				t.complete();
 			}
