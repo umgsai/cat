@@ -20,6 +20,7 @@ package com.dianping.cat.config.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,13 +35,14 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.helper.Files;
-import org.unidal.helper.Splitters;
 import org.unidal.helper.Threads;
-import org.unidal.tuple.Pair;
 import org.xml.sax.SAXException;
+
+import com.google.common.base.Splitter;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -127,7 +129,7 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 
 	public List<Pair<String, Integer>> getConsoleEndpoints() {
 		String remoteServers = getProperty(REMOTE_SERVERS, "");
-		List<String> endpoints = Splitters.by(',').noEmptyItem().trim().split(remoteServers);
+		List<String> endpoints = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(remoteServers);
 		List<Pair<String, Integer>> pairs = new ArrayList<Pair<String, Integer>>(endpoints.size());
 
 		for (String endpoint : endpoints) {
@@ -135,7 +137,7 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 			String host = (pos > 0 ? endpoint.substring(0, pos) : endpoint);
 			int port = (pos > 0 ? Integer.parseInt(endpoint.substring(pos + 1)) : 2281);
 
-			pairs.add(new Pair<String, Integer>(host, port));
+			pairs.add(Pair.of(host, port));
 		}
 
 		return pairs;
@@ -475,7 +477,7 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 		if (configFile != null && configFile.canRead()) {
 			m_logger.info(String.format("Loading configuration file(%s) ...", configFile.getCanonicalPath()));
 
-			String xml = Files.forIO().readFrom(configFile, "utf-8");
+			String xml = FileUtils.readFileToString(configFile, StandardCharsets.UTF_8);
 			m_config = DefaultSaxParser.parse(xml);
 			SLF4J_LOGGER.info("Loaded server config from local file, path={}.", configFile.getCanonicalPath());
 		} else {
@@ -600,7 +602,8 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 		m_server = defaultServer;
 
 		String forcedStatisticTypePrefixStr = getProperty("forced-statistic-type-prefixes", "Cellar.,Squirrel.");
-		List<String> forcedStatisticTypePrefixes = Splitters.by(",").noEmptyItem().split(forcedStatisticTypePrefixStr);
+		List<String> forcedStatisticTypePrefixes = Splitter.on(',').omitEmptyStrings()
+				.splitToList(forcedStatisticTypePrefixStr);
 		m_forcedStatisticTypePrefixes = new HashSet<>(forcedStatisticTypePrefixes);
 		SLF4J_LOGGER.info("Refreshed server runtime config, localIp={}, forcedStatisticTypePrefixes={}.", ip,
 				m_forcedStatisticTypePrefixes);
