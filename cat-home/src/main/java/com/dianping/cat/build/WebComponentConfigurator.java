@@ -47,11 +47,24 @@ import org.unidal.web.mvc.view.model.ModelHandler;
 import org.unidal.web.mvc.view.model.XmlModelBuilder;
 
 import com.dianping.cat.report.ReportModule;
+import com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator;
+import com.dianping.cat.config.business.BusinessConfigManager;
 import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
+import com.dianping.cat.core.mybatis.repository.config.modification.ConfigModificationRepository;
+import com.dianping.cat.report.alert.business.BusinessRuleConfigManager;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.SystemModule;
+import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
+import com.dianping.cat.system.page.config.processor.AlertConfigProcessor;
+import com.dianping.cat.system.page.config.processor.DependencyConfigProcessor;
+import com.dianping.cat.system.page.config.processor.EventConfigProcessor;
+import com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor;
+import com.dianping.cat.system.page.config.processor.GlobalConfigProcessor;
+import com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor;
+import com.dianping.cat.system.page.config.processor.StorageConfigProcessor;
+import com.dianping.cat.system.page.config.processor.TransactionConfigProcessor;
 import com.dianping.cat.system.page.login.service.SigninService;
 import com.dianping.cat.system.page.permission.ResourceConfigManager;
 import com.dianping.cat.system.page.permission.UserConfigManager;
@@ -101,6 +114,8 @@ class WebComponentConfigurator extends AbstractWebComponentsConfigurator {
 		removeComponent(all, com.dianping.cat.system.page.project.Handler.class);
 		removeComponent(all, com.dianping.cat.system.page.permission.Handler.class);
 		removeComponent(all, com.dianping.cat.system.page.router.Handler.class);
+		removeComponent(all, com.dianping.cat.system.page.business.Handler.class);
+		removeComponent(all, com.dianping.cat.system.page.config.Handler.class);
 
 		all.add(C(com.dianping.cat.system.page.login.Handler.class) //
 								.req(com.dianping.cat.system.page.login.JspViewer.class, (String) null, "m_jspViewer") //
@@ -125,6 +140,28 @@ class WebComponentConfigurator extends AbstractWebComponentsConfigurator {
 								.req(SampleConfigManager.class, (String) null, "m_sampleConfigManager") //
 								.req(ServerFilterConfigManager.class, (String) null, "m_filterManager") //
 								.req(RouterConfigHandler.class, (String) null, "m_routerConfigHandler"));
+		all.add(C(com.dianping.cat.system.page.business.Handler.class) //
+								.req(RuleFTLDecorator.class, (String) null, "m_ruleDecorator") //
+								.req(com.dianping.cat.system.page.business.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(ProjectService.class, (String) null, "m_projectService") //
+								.req(BusinessConfigManager.class, (String) null, "m_configManager") //
+								.req(BusinessTagConfigManager.class, (String) null, "m_tagConfigManger") //
+								.req(BusinessRuleConfigManager.class, (String) null, "m_alertConfigManager") //
+								.req(ConfigHtmlParser.class, (String) null, "m_configHtmlParser"));
+		all.add(C(com.dianping.cat.system.page.business.JspViewer.class).req(ModelHandler.class));
+		all.add(C(BusinessTagConfigManager.class));
+		all.add(C(com.dianping.cat.system.page.config.Handler.class) //
+								.req(com.dianping.cat.system.page.config.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(GlobalConfigProcessor.class, (String) null, "m_globalConfigProcessor") //
+								.req(DependencyConfigProcessor.class, (String) null, "m_topologyConfigProcessor") //
+								.req(ExceptionConfigProcessor.class, (String) null, "m_exceptionConfigProcessor") //
+								.req(HeartbeatConfigProcessor.class, (String) null, "m_heartbeatConfigProcessor") //
+								.req(AlertConfigProcessor.class, (String) null, "m_alertConfigProcessor") //
+								.req(TransactionConfigProcessor.class, (String) null, "m_transactionConfigProcessor") //
+								.req(EventConfigProcessor.class, (String) null, "m_eventConfigProcessor") //
+								.req(StorageConfigProcessor.class, (String) null, "m_storageConfigProcessor") //
+								.req(ConfigModificationRepository.class, (String) null, "m_configModificationDao"));
+		all.add(C(com.dianping.cat.system.page.config.JspViewer.class).req(ModelHandler.class));
 	}
 
 	private void removeComponent(List<Component> all, Class<?> role) {

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -52,25 +51,18 @@ import com.dianping.cat.system.page.config.ConfigHtmlParser;
 
 public class Handler implements PageHandler<Context> {
 
-	@Inject
 	protected RuleFTLDecorator m_ruleDecorator;
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private ProjectService m_projectService;
 
-	@Inject
 	private BusinessConfigManager m_configManager;
 
-	@Inject
 	private BusinessTagConfigManager m_tagConfigManger;
 
-	@Inject
 	private BusinessRuleConfigManager m_alertConfigManager;
 
-	@Inject
 	private ConfigHtmlParser m_configHtmlParser;
 
 	@Override

@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.Date;
 
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -47,34 +46,24 @@ import com.dianping.cat.system.page.config.processor.TransactionConfigProcessor;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private GlobalConfigProcessor m_globalConfigProcessor;
 
-	@Inject
 	private DependencyConfigProcessor m_topologyConfigProcessor;
 
-	@Inject
 	private ExceptionConfigProcessor m_exceptionConfigProcessor;
 
-	@Inject
 	private HeartbeatConfigProcessor m_heartbeatConfigProcessor;
 
-	@Inject
 	private AlertConfigProcessor m_alertConfigProcessor;
 
-	@Inject
 	private TransactionConfigProcessor m_transactionConfigProcessor;
 
-	@Inject
 	private EventConfigProcessor m_eventConfigProcessor;
 
-	@Inject
 	private StorageConfigProcessor m_storageConfigProcessor;
 
-	@Inject
 	private ConfigModificationRepository m_configModificationDao;
 
 	@Override
