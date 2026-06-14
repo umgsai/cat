@@ -24,14 +24,12 @@ import java.util.Map;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
-public abstract class SummaryBuilder implements Initializable {
+public abstract class SummaryBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SummaryBuilder.class);
 
 	public Configuration m_configuration;
@@ -43,7 +41,7 @@ public abstract class SummaryBuilder implements Initializable {
 		StringWriter sw = new StringWriter(5000);
 
 		try {
-			Template t = m_configuration.getTemplate(getTemplateAddress());
+			Template t = getConfiguration().getTemplate(getTemplateAddress());
 			t.process(dataMap, sw);
 		} catch (Exception e) {
 			LOGGER.error("Unable to generate alert summary html, builder={}, template={}, domain={}, date={}.",
@@ -53,8 +51,17 @@ public abstract class SummaryBuilder implements Initializable {
 		return sw.toString();
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private Configuration getConfiguration() {
+		if (m_configuration == null) {
+			initialize();
+		}
+		return m_configuration;
+	}
+
+	public void initialize() {
+		if (m_configuration != null) {
+			return;
+		}
 		m_configuration = new Configuration();
 		m_configuration.setDefaultEncoding("UTF-8");
 

@@ -31,8 +31,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.apache.commons.io.FileUtils;
@@ -63,7 +61,7 @@ import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-public class ServerConfigManager implements LogEnabled, Initializable {
+public class ServerConfigManager implements Initializable {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(ServerConfigManager.class);
 
 	public static final String DUMP_DIR = "dump";
@@ -102,14 +100,7 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 
 	private volatile Server m_server;
 
-	private Logger m_logger;
-
 	private Set<String> m_forcedStatisticTypePrefixes = new HashSet<>();
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
 
 	public void setConfigDao(ConfigRepository configDao) {
 		m_configDao = configDao;
@@ -420,12 +411,10 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 				SLF4J_LOGGER.info("Initialized server config from default content, configId={}.", m_configId);
 			} catch (Exception ex) {
 				SLF4J_LOGGER.error("Unable to initialize server config from default content.", ex);
-				m_logger.error("Failed to initialize server config from database fallback.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
 			SLF4J_LOGGER.error("Unable to load server config from repository.", e);
-			m_logger.error("Failed to load server config from database.", e);
 			Cat.logError(e);
 		}
 
@@ -433,11 +422,10 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 			try {
 				File localServerFile = new File(Cat.getCatHome(), "server.xml");
 
-				m_logger.info("init cat server with cat server xml " + localServerFile);
+				SLF4J_LOGGER.info("init cat server with cat server xml {}", localServerFile);
 				initialize(localServerFile);
 			} catch (Exception e) {
 				SLF4J_LOGGER.error("Unable to initialize server config from local server.xml.", e);
-				m_logger.error("Failed to initialize server config from local server.xml.", e);
 				Cat.logError(e);
 			}
 		}
@@ -453,7 +441,6 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 			refreshServer();
 		} catch (Exception e) {
 			SLF4J_LOGGER.error("Unable to refresh local server config view.", e);
-			m_logger.error("Failed to refresh server config.", e);
 			Cat.logError(e);
 		}
 
@@ -475,14 +462,13 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 
 	public void initialize(File configFile) throws Exception {
 		if (configFile != null && configFile.canRead()) {
-			m_logger.info(String.format("Loading configuration file(%s) ...", configFile.getCanonicalPath()));
+			SLF4J_LOGGER.info("Loading configuration file({}) ...", configFile.getCanonicalPath());
 
 			String xml = FileUtils.readFileToString(configFile, StandardCharsets.UTF_8);
 			m_config = DefaultSaxParser.parse(xml);
 			SLF4J_LOGGER.info("Loaded server config from local file, path={}.", configFile.getCanonicalPath());
 		} else {
 			if (configFile != null) {
-				m_logger.warn(String.format("Configuration file(%s) not found, IGNORED.", configFile.getCanonicalPath()));
 				SLF4J_LOGGER.warn("Server config local file is not readable, path={}.", configFile.getCanonicalPath());
 			}
 
@@ -553,14 +539,14 @@ public class ServerConfigManager implements LogEnabled, Initializable {
 
 	private void prepare() {
 		if (isLocalMode()) {
-			m_logger.warn("CAT server is running in LOCAL mode! No HDFS or MySQL will be accessed!");
+			SLF4J_LOGGER.warn("CAT server is running in LOCAL mode! No HDFS or MySQL will be accessed!");
 		}
-		m_logger.info("CAT server is running with hdfs," + isHdfsOn());
-		m_logger.info("CAT server is running with alert," + isAlertMachine());
-		m_logger.info("CAT server is running with job," + isJobMachine());
+		SLF4J_LOGGER.info("CAT server is running with hdfs,{}", isHdfsOn());
+		SLF4J_LOGGER.info("CAT server is running with alert,{}", isAlertMachine());
+		SLF4J_LOGGER.info("CAT server is running with job,{}", isJobMachine());
 
 		if (m_server != null) {
-			m_logger.info(m_server.toString());
+			SLF4J_LOGGER.info("{}", m_server);
 
 			if (isLocalMode()) {
 				m_threadPool = Threads.forPool().getFixedThreadPool("Cat-ModelService", 5);

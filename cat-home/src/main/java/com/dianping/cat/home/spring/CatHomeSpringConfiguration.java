@@ -8,8 +8,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
@@ -347,11 +345,6 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 })
 public class CatHomeSpringConfiguration {
 	@Bean
-	public Logger plexusConsoleLogger() {
-		return new ConsoleLogger(Logger.LEVEL_INFO, "spring-managed");
-	}
-
-	@Bean
 	public MessageAnalyzerFactory messageAnalyzerFactory() {
 		return new ContainerMessageAnalyzerFactory();
 	}
@@ -501,8 +494,7 @@ public class CatHomeSpringConfiguration {
 	@Bean(name = BusinessAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	public ReportManager<BusinessReport> businessReportManager(ReportDelegate<BusinessReport> businessDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
-			Logger plexusConsoleLogger) {
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<BusinessReport> manager = new DefaultReportManager<BusinessReport>();
 
 		manager.setReportDelegate(businessDelegate);
@@ -511,7 +503,6 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(BusinessAnalyzer.ID);
-		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
 
@@ -519,7 +510,7 @@ public class CatHomeSpringConfiguration {
 	public ReportManager<TransactionReport> transactionReportManager(
 			ReportDelegate<TransactionReport> transactionDelegate, ReportBucketManager reportBucketManager,
 			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			DomainValidator domainValidator, Logger plexusConsoleLogger) {
+			DomainValidator domainValidator) {
 		DefaultReportManager<TransactionReport> manager = new DefaultReportManager<TransactionReport>();
 
 		manager.setReportDelegate(transactionDelegate);
@@ -528,15 +519,13 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(TransactionAnalyzer.ID);
-		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
 
 	@Bean(name = CrossAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	public ReportManager<CrossReport> crossReportManager(ReportDelegate<CrossReport> crossDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
-			Logger plexusConsoleLogger) {
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<CrossReport> manager = new DefaultReportManager<CrossReport>();
 
 		manager.setReportDelegate(crossDelegate);
@@ -545,7 +534,6 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(CrossAnalyzer.ID);
-		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
 
@@ -553,7 +541,7 @@ public class CatHomeSpringConfiguration {
 	public ReportManager<DependencyReport> dependencyReportManager(
 			ReportDelegate<DependencyReport> dependencyDelegate, ReportBucketManager reportBucketManager,
 			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			DomainValidator domainValidator, Logger plexusConsoleLogger) {
+			DomainValidator domainValidator) {
 		DefaultReportManager<DependencyReport> manager = new DefaultReportManager<DependencyReport>();
 
 		manager.setReportDelegate(dependencyDelegate);
@@ -562,15 +550,13 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(DependencyAnalyzer.ID);
-		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
 
 	@Bean(name = EventAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	public ReportManager<EventReport> eventReportManager(ReportDelegate<EventReport> eventDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
-			Logger plexusConsoleLogger) {
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<EventReport> manager = new DefaultReportManager<EventReport>();
 
 		manager.setReportDelegate(eventDelegate);
@@ -579,15 +565,13 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(EventAnalyzer.ID);
-		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
 
 	@Bean(name = HeartbeatAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	public ReportManager<HeartbeatReport> heartbeatReportManager(ReportDelegate<HeartbeatReport> heartbeatDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
-			Logger plexusConsoleLogger) {
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<HeartbeatReport> manager = new DefaultReportManager<HeartbeatReport>();
 
 		manager.setReportDelegate(heartbeatDelegate);
@@ -596,15 +580,13 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(HeartbeatAnalyzer.ID);
-		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
 
 	@Bean(name = MatrixAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	public ReportManager<MatrixReport> matrixReportManager(ReportDelegate<MatrixReport> matrixDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
-			Logger plexusConsoleLogger) {
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<MatrixReport> manager = new DefaultReportManager<MatrixReport>();
 
 		manager.setReportDelegate(matrixDelegate);
@@ -613,15 +595,13 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(MatrixAnalyzer.ID);
-		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
 
 	@Bean(name = ProblemAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	public ReportManager<ProblemReport> problemReportManager(ReportDelegate<ProblemReport> problemDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
-			Logger plexusConsoleLogger) {
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<ProblemReport> manager = new DefaultReportManager<ProblemReport>();
 
 		manager.setReportDelegate(problemDelegate);
@@ -630,15 +610,13 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(ProblemAnalyzer.ID);
-		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
 
 	@Bean(name = StorageAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	public ReportManager<StorageReport> storageReportManager(ReportDelegate<StorageReport> storageDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
-			Logger plexusConsoleLogger) {
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<StorageReport> manager = new DefaultReportManager<StorageReport>();
 
 		manager.setReportDelegate(storageDelegate);
@@ -647,15 +625,13 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(StorageAnalyzer.ID);
-		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
 
 	@Bean(name = TopAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	public ReportManager<TopReport> topReportManager(ReportDelegate<TopReport> topDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
-			Logger plexusConsoleLogger) {
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<TopReport> manager = new DefaultReportManager<TopReport>();
 
 		manager.setReportDelegate(topDelegate);
@@ -664,15 +640,13 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(TopAnalyzer.ID);
-		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
 
 	@Bean(name = StateAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	public ReportManager<StateReport> stateReportManager(ReportDelegate<StateReport> stateDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator,
-			Logger plexusConsoleLogger) {
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<StateReport> manager = new DefaultReportManager<StateReport>();
 
 		manager.setReportDelegate(stateDelegate);
@@ -681,7 +655,6 @@ public class CatHomeSpringConfiguration {
 		manager.setReportContentDao(hourlyReportContentRepository);
 		manager.setValidator(domainValidator);
 		manager.setName(StateAnalyzer.ID);
-		manager.enableLogging(plexusConsoleLogger);
 		return manager;
 	}
 
@@ -1807,13 +1780,11 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(initMethod = "initialize")
-	public ServerConfigManager serverConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher,
-			Logger plexusConsoleLogger) {
+	public ServerConfigManager serverConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
 		ServerConfigManager manager = new ServerConfigManager();
 
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
-		manager.enableLogging(plexusConsoleLogger.getChildLogger(ServerConfigManager.class.getName()));
 		return manager;
 	}
 
@@ -2734,15 +2705,13 @@ public class CatHomeSpringConfiguration {
 
 	@Bean(initMethod = "initialize")
 	public RouterConfigManager routerConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher,
-			DailyReportRepository dailyReportRepository, DailyReportContentRepository dailyReportContentRepository,
-			Logger plexusConsoleLogger) {
+			DailyReportRepository dailyReportRepository, DailyReportContentRepository dailyReportContentRepository) {
 		RouterConfigManager manager = new RouterConfigManager();
 
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
 		manager.setDailyReportDao(dailyReportRepository);
 		manager.setDailyReportContentDao(dailyReportContentRepository);
-		manager.enableLogging(plexusConsoleLogger.getChildLogger(RouterConfigManager.class.getName()));
 		return manager;
 	}
 

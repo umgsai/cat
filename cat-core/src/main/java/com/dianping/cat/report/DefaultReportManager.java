@@ -28,9 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
@@ -48,7 +47,9 @@ import static com.dianping.cat.Constants.HOUR;
 	* Hourly report manager by domain of one report type(such as Transaction, Event, Problem, Heartbeat etc.) produced in one machine
 	* for a couple of hours.
 	*/
-public class DefaultReportManager<T> extends ContainerHolder implements ReportManager<T>, Initializable, LogEnabled {
+public class DefaultReportManager<T> extends ContainerHolder implements ReportManager<T>, Initializable {
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DefaultReportManager.class);
+
 	private ReportDelegate<T> m_reportDelegate;
 
 	private ReportBucketManager m_bucketManager;
@@ -62,8 +63,6 @@ public class DefaultReportManager<T> extends ContainerHolder implements ReportMa
 	private String m_name;
 
 	private Map<Long, Map<String, T>> m_reports = new ConcurrentHashMap<Long, Map<String, T>>();
-
-	private Logger m_logger;
 
 	public void cleanup(long time) {
 		List<Long> startTimes = new ArrayList<Long>(m_reports.keySet());
@@ -79,11 +78,6 @@ public class DefaultReportManager<T> extends ContainerHolder implements ReportMa
 
 	public void destory() {
 		super.release(this);
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override
@@ -182,7 +176,7 @@ public class DefaultReportManager<T> extends ContainerHolder implements ReportMa
 		} catch (Throwable e) {
 			t.setStatus(e);
 			Cat.logError(e);
-			m_logger.error(String.format("Error when loading %s reports of %s!", m_name, new Date(startTime)), e);
+			LOGGER.error("Error when loading {} reports of {}.", m_name, new Date(startTime), e);
 		} finally {
 			t.complete();
 
@@ -317,7 +311,7 @@ public class DefaultReportManager<T> extends ContainerHolder implements ReportMa
 					reports.remove(domain);
 				}
 				if (!errorDomains.isEmpty()) {
-					m_logger.info("error domain:" + errorDomains);
+					LOGGER.info("error domain:{}", errorDomains);
 				}
 
 				m_reportDelegate.beforeSave(reports);
@@ -340,7 +334,7 @@ public class DefaultReportManager<T> extends ContainerHolder implements ReportMa
 		} catch (Throwable e) {
 			Cat.logError(e);
 			t.setStatus(e);
-			m_logger.error(String.format("Error when storing %s reports of %s!", m_name, new Date(startTime)), e);
+			LOGGER.error("Error when storing {} reports of {}.", m_name, new Date(startTime), e);
 		} finally {
 			cleanup(startTime);
 			t.complete();

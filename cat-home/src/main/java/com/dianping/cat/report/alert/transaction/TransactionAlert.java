@@ -41,8 +41,6 @@ import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
@@ -56,7 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class TransactionAlert implements Task, LogEnabled {
+public class TransactionAlert implements Task {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TransactionAlert.class);
 
 	private static final long DURATION = TimeHelper.ONE_MINUTE;
@@ -76,8 +74,6 @@ public class TransactionAlert implements Task, LogEnabled {
 	protected DataChecker m_dataChecker;
 
 	protected AlertManager m_sendManager;
-
-	protected Logger m_logger;
 
 	private ModelService<TransactionReport> m_service;
 
@@ -195,11 +191,6 @@ public class TransactionAlert implements Task, LogEnabled {
 			}
 		}
 		return results;
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	private TransactionReport fetchTransactionReport(String domain, ModelPeriod period, Map<String, String> pars) {

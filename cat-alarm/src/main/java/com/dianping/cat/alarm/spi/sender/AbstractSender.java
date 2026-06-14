@@ -25,25 +25,16 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
 import com.dianping.cat.spring.CatSpringContext;
 
-public abstract class AbstractSender implements Sender, LogEnabled {
+public abstract class AbstractSender implements Sender {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractSender.class);
 
     protected SenderConfigManager m_senderConfigManager;
-
-    protected Logger m_logger;
-
-    @Override
-    public void enableLogging(Logger logger) {
-        m_logger = logger;
-    }
 
     public void setSenderConfigManager(SenderConfigManager senderConfigManager) {
         m_senderConfigManager = senderConfigManager;
@@ -75,9 +66,6 @@ public abstract class AbstractSender implements Sender, LogEnabled {
             }
         } catch (Exception e) {
             LOGGER.error("Unable to send alert by HTTP GET, urlPrefix={}, urlPars={}.", urlPrefix, urlPars, e);
-            if (m_logger != null) {
-                m_logger.error(e.getMessage(), e);
-            }
             return false;
         } finally {
             try {
@@ -127,9 +115,6 @@ public abstract class AbstractSender implements Sender, LogEnabled {
         } catch (Exception e) {
             LOGGER.error("Unable to send alert by HTTP POST, urlPrefix={}, contentLength={}.", urlPrefix,
                     content == null ? 0 : content.length(), e);
-            if (m_logger != null) {
-                m_logger.error(e.getMessage(), e);
-            }
             return false;
         } finally {
             try {

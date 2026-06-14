@@ -38,8 +38,6 @@ import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 import org.apache.commons.net.util.SubnetUtils;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.apache.commons.lang3.tuple.Pair;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.LoggerFactory;
@@ -51,7 +49,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class RouterConfigManager implements Initializable, LogEnabled {
+public class RouterConfigManager implements Initializable {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RouterConfigManager.class);
 
 	public static final String DEFAULT = "default";
@@ -69,8 +67,6 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 	private int m_configId;
 
 	private volatile RouterConfig m_routerConfig;
-
-	private Logger m_logger;
 
 	private long m_modifyTime;
 
@@ -94,11 +90,6 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 			}
 		}
 		servers.add(server);
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	public RouterConfig getRouterConfig() {
@@ -203,7 +194,6 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 		} catch (Exception e) {
 			SLF4J_LOGGER.error("Unable to insert router config, xmlLength={}.", xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
-			m_logger.error(e.getMessage(), e);
 			return false;
 		}
 	}

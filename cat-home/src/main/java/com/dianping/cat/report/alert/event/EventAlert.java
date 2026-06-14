@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
@@ -57,7 +55,7 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
-public class EventAlert implements Task, LogEnabled {
+public class EventAlert implements Task {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(EventAlert.class);
 
 	protected static final long DURATION = TimeHelper.ONE_MINUTE;
@@ -77,8 +75,6 @@ public class EventAlert implements Task, LogEnabled {
 	protected DataChecker m_dataChecker;
 
 	protected AlertManager m_sendManager;
-
-	protected Logger m_logger;
 
 	private ModelService<EventReport> m_service;
 
@@ -188,11 +184,6 @@ public class EventAlert implements Task, LogEnabled {
 			}
 		}
 		return results;
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	private EventReport fetchEventReport(String domain, ModelPeriod period, Map<String, String> pars) {

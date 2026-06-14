@@ -26,8 +26,6 @@ import java.util.Map;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +36,7 @@ import com.dianping.cat.alarm.spi.decorator.ProjectDecorator;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class ExceptionDecorator extends ProjectDecorator implements Initializable {
+public class ExceptionDecorator extends ProjectDecorator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionDecorator.class);
 
 	public static final String ID = AlertType.Exception.getName();
@@ -71,7 +69,7 @@ public class ExceptionDecorator extends ProjectDecorator implements Initializabl
 		StringWriter sw = new StringWriter(5000);
 
 		try {
-			Template t = m_configuration.getTemplate("exceptionAlert.ftl");
+			Template t = getConfiguration().getTemplate("exceptionAlert.ftl");
 			t.process(dataMap, sw);
 		} catch (Exception e) {
 			LOGGER.error("Unable to build exception alert content, group={}, date={}, content={}.", alert.getGroup(),
@@ -125,8 +123,17 @@ public class ExceptionDecorator extends ProjectDecorator implements Initializabl
 		return ID;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private Configuration getConfiguration() {
+		if (m_configuration == null) {
+			initialize();
+		}
+		return m_configuration;
+	}
+
+	public void initialize() {
+		if (m_configuration != null) {
+			return;
+		}
 		m_configuration = new Configuration();
 		m_configuration.setDefaultEncoding("UTF-8");
 		try {

@@ -26,16 +26,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
-
 import com.dianping.cat.alarm.spi.AlertManager;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.spring.CatSpringContext;
 
-public abstract class AbstractGraphCreator implements LogEnabled {
+public abstract class AbstractGraphCreator {
 	protected BaselineService m_baselineService;
 
 	protected DataExtractor m_dataExtractor;
@@ -45,8 +42,6 @@ public abstract class AbstractGraphCreator implements LogEnabled {
 	protected int m_lastMinute = 6;
 
 	protected int m_extraTime = 1;
-
-	protected Logger m_logger;
 
 	protected void addLastMinuteData(Map<Long, Double> current, Map<Long, Double> all, int minute, Date end) {
 		int step = m_dataExtractor.getStep();
@@ -142,11 +137,6 @@ public abstract class AbstractGraphCreator implements LogEnabled {
 			map.put(startTime + step * i * TimeHelper.ONE_MINUTE, data[i]);
 		}
 		return map;
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	private boolean isCurrentMode(Date date) {

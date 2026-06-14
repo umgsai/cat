@@ -26,8 +26,6 @@ import java.util.Map;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +34,7 @@ import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
 
-public class EventDecorator extends Decorator implements Initializable {
+public class EventDecorator extends Decorator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EventDecorator.class);
 
 	public static final String ID = AlertType.Event.getName();
@@ -60,7 +58,7 @@ public class EventDecorator extends Decorator implements Initializable {
 		StringWriter sw = new StringWriter(5000);
 
 		try {
-			Template t = m_configuration.getTemplate("eventAlert.ftl");
+			Template t = getConfiguration().getTemplate("eventAlert.ftl");
 			t.process(datas, sw);
 		} catch (Exception e) {
 			LOGGER.error("Unable to build event alert content, group={}, metric={}, date={}.", alert.getGroup(),
@@ -84,8 +82,17 @@ public class EventDecorator extends Decorator implements Initializable {
 		return ID;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private Configuration getConfiguration() {
+		if (m_configuration == null) {
+			initialize();
+		}
+		return m_configuration;
+	}
+
+	public void initialize() {
+		if (m_configuration != null) {
+			return;
+		}
 		m_configuration = new Configuration();
 		m_configuration.setDefaultEncoding("UTF-8");
 		try {

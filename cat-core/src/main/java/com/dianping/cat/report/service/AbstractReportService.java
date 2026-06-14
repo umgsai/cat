@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 
@@ -57,7 +55,7 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.spring.CatSpringContext;
 
-public abstract class AbstractReportService<T> implements LogEnabled, ReportService<T> {
+public abstract class AbstractReportService<T> implements ReportService<T> {
 
 	public static final int s_hourly = 1;
 
@@ -84,8 +82,6 @@ public abstract class AbstractReportService<T> implements LogEnabled, ReportServ
 	protected MonthlyReportRepository m_monthlyReportDao;
 
 	protected MonthlyReportContentRepository m_monthlyReportContentDao;
-
-	protected Logger m_logger;
 
 	private Map<String, Set<String>> m_domains = new LinkedHashMap<String, Set<String>>() {
 
@@ -119,11 +115,6 @@ public abstract class AbstractReportService<T> implements LogEnabled, ReportServ
 			return s_monthly;
 		}
 		return s_customer;
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override

@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.unidal.dal.jdbc.DalException;
@@ -52,7 +50,7 @@ import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class ProjectUpdateTask implements Task, LogEnabled {
+public class ProjectUpdateTask implements Task {
 
 	private static final String CMDB_DOMAIN_URL = "http://api.cmdb.dp/api/v0.1/projects/s?private_ip=%s";
 
@@ -63,8 +61,6 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 	private static final String CMDB_PRODUCT_URL = "http://api.cmdb.dp/api/v0.1/projects/%s/product";
 
 	private static final String CMDB_HOSTNAME_URL = "http://api.cmdb.dp/api/v0.1/ci/s?q=_type:(vserver;server;tx-vserver),private_ip:%s&fl=hostname";
-
-	protected Logger m_logger;
 
 	private HostinfoService m_hostInfoService;
 
@@ -120,11 +116,6 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 		} catch (DalException e) {
 			Cat.logError(e);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override

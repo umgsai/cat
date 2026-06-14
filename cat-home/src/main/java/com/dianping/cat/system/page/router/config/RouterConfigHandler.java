@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
@@ -50,10 +48,8 @@ import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.system.page.router.service.RouterConfigService;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
-public class RouterConfigHandler implements LogEnabled {
+public class RouterConfigHandler {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RouterConfigHandler.class);
-
-	protected Logger m_logger;
 
 	private StateReportService m_stateReportService;
 
@@ -117,11 +113,6 @@ public class RouterConfigHandler implements LogEnabled {
 	private boolean checkDomainConfig(String group, Domain defaultDomainConfig) {
 		return defaultDomainConfig == null || defaultDomainConfig.findGroup(group) == null	|| defaultDomainConfig
 								.findGroup(group).getServers().isEmpty();
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	private Map<String, Map<Server, Long>> findAvaliableGpToSvrs() {
