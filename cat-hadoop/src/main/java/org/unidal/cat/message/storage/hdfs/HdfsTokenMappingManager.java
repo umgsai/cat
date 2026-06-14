@@ -28,10 +28,8 @@ import java.util.Set;
 import org.unidal.cat.message.storage.TokenMapping;
 import org.unidal.cat.message.storage.TokenMappingManager;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
-@Named(type = TokenMappingManager.class, value = "hdfs")
 public class HdfsTokenMappingManager extends ContainerHolder implements TokenMappingManager {
 	private Map<Pair<Integer, String>, TokenMapping> m_cache = new LinkedHashMap<Pair<Integer, String>, TokenMapping>() {
 

@@ -30,6 +30,7 @@ import org.unidal.cat.message.storage.hdfs.HdfsBucketManager;
 import org.unidal.cat.message.storage.hdfs.HdfsFileBuilder;
 import org.unidal.cat.message.storage.hdfs.HdfsIndex;
 import org.unidal.cat.message.storage.hdfs.HdfsIndexManager;
+import org.unidal.cat.message.storage.hdfs.MessageConsumerFinder;
 import org.unidal.cat.message.storage.hdfs.HdfsMessageConsumerFinder;
 import org.unidal.cat.message.storage.hdfs.HdfsSystemManager;
 import org.unidal.cat.message.storage.hdfs.HdfsTokenMapping;
@@ -121,9 +122,11 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(A(DefaultBlockDumper.class));
 		all.add(A(DefaultBlockWriter.class));
 
-		all.add(A(HdfsSystemManager.class));
+		all.add(C(HdfsSystemManager.class) //
+								.req(ServerConfigManager.class, (String) null, "m_configManager"));
 
-		all.add(A(HdfsMessageConsumerFinder.class));
+		all.add(C(MessageConsumerFinder.class, "hdfs", HdfsMessageConsumerFinder.class) //
+								.req(HdfsSystemManager.class, (String) null, "m_fileSystemManager"));
 
 		all.add(C(Bucket.class, "local", LocalBucket.class).is(PER_LOOKUP) //
 								.req(org.unidal.cat.message.storage.PathBuilder.class, "local", "m_builder") //
@@ -131,8 +134,14 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ServerConfigManager.class, (String) null, "m_config"));
 		all.add(C(BucketManager.class, "local", LocalBucketManager.class) //
 								.req(org.unidal.cat.message.storage.PathBuilder.class, "local", "m_builder"));
-		all.add(A(HdfsBucket.class));
-		all.add(A(HdfsBucketManager.class));
+		all.add(C(Bucket.class, HdfsBucket.ID, HdfsBucket.class).is(PER_LOOKUP) //
+								.req(HdfsSystemManager.class, (String) null, "m_manager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager") //
+								.req(org.unidal.cat.message.storage.PathBuilder.class, "hdfs", "m_bulider"));
+		all.add(C(HdfsBucketManager.class) //
+								.req(ServerConfigManager.class, (String) null, "m_configManager") //
+								.req(HdfsSystemManager.class, (String) null, "m_fileSystemManager") //
+								.req(MessageConsumerFinder.class, "hdfs", "m_consumerFinder"));
 
 		all.add(C(Index.class, "local", LocalIndex.class).is(PER_LOOKUP) //
 								.req(org.unidal.cat.message.storage.PathBuilder.class, "local", "m_bulider") //
@@ -140,17 +149,27 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 								.req(ByteBufCache.class, (String) null, "m_bufCache"));
 		all.add(C(IndexManager.class, "local", LocalIndexManager.class) //
 								.req(org.unidal.cat.message.storage.PathBuilder.class, "local", "m_bulider"));
-		all.add(A(HdfsIndex.class));
-		all.add(A(HdfsIndexManager.class));
+		all.add(C(Index.class, HdfsBucket.ID, HdfsIndex.class).is(PER_LOOKUP) //
+								.req(HdfsSystemManager.class, (String) null, "m_manager") //
+								.req(ServerConfigManager.class, (String) null, "m_serverConfigManager") //
+								.req(org.unidal.cat.message.storage.PathBuilder.class, "hdfs", "m_bulider") //
+								.req(TokenMappingManager.class, "hdfs", "m_hdfsTokenManager"));
+		all.add(C(HdfsIndexManager.class) //
+								.req(ServerConfigManager.class, (String) null, "m_configManager") //
+								.req(HdfsSystemManager.class, (String) null, "m_fileSystemManager") //
+								.req(MessageConsumerFinder.class, "hdfs", "m_consumerFinder"));
 
 		all.add(C(org.unidal.cat.message.storage.PathBuilder.class, "local", LocalFileBuilder.class) //
 								.req(StorageConfiguration.class, (String) null, "m_config"));
-		all.add(A(HdfsFileBuilder.class));
+		all.add(C(org.unidal.cat.message.storage.PathBuilder.class, "hdfs", HdfsFileBuilder.class) //
+								.req(HdfsSystemManager.class, (String) null, "m_fileSystemManager"));
 		all.add(C(TokenMapping.class, "local", LocalTokenMapping.class).is(PER_LOOKUP) //
 								.req(org.unidal.cat.message.storage.PathBuilder.class, "local", "m_bulider"));
-		all.add(A(HdfsTokenMapping.class));
+		all.add(C(TokenMapping.class, "hdfs", HdfsTokenMapping.class).is(PER_LOOKUP) //
+								.req(HdfsSystemManager.class, (String) null, "m_manager") //
+								.req(org.unidal.cat.message.storage.PathBuilder.class, "hdfs", "m_bulider"));
 		all.add(C(TokenMappingManager.class, "local", LocalTokenMappingManager.class));
-		all.add(A(HdfsTokenMappingManager.class));
+		all.add(C(TokenMappingManager.class, "hdfs", HdfsTokenMappingManager.class));
 
 		all.add(A(DefaultStorageConfiguration.class));
 		all.add(A(DefaultByteBufCache.class));

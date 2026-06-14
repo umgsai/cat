@@ -33,8 +33,6 @@ import org.apache.hadoop.fs.Path;
 import org.unidal.cat.message.storage.FileType;
 import org.unidal.cat.message.storage.PathBuilder;
 import org.unidal.cat.message.storage.TokenMapping;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
@@ -42,16 +40,13 @@ import com.dianping.cat.helper.TimeHelper;
 /**
 	* Supports up to 64K tokens mapping from <code>String</code> to <code>int</code>, or reverse by local file system.
 	*/
-@Named(type = TokenMapping.class, value = "hdfs", instantiationStrategy = Named.PER_LOOKUP)
 public class HdfsTokenMapping implements TokenMapping {
 	private static final int BLOCK_SIZE = 32 * 1024;
 
 	private static final String MAGIC_CODE = "TokenMapping"; // token mapping
 
-	@Inject
 	protected HdfsSystemManager m_manager;
 
-	@Inject("hdfs")
 	private PathBuilder m_bulider;
 
 	private FSDataInputStream m_file;

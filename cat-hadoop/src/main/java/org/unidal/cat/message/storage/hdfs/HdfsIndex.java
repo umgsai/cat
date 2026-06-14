@@ -33,28 +33,21 @@ import org.unidal.cat.message.storage.Index;
 import org.unidal.cat.message.storage.PathBuilder;
 import org.unidal.cat.message.storage.TokenMapping;
 import org.unidal.cat.message.storage.TokenMappingManager;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.tree.MessageId;
 
-@Named(type = Index.class, value = HdfsBucket.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class HdfsIndex implements Index {
 	public static final String ID = "hdfs";
 
 	private static final int SEGMENT_SIZE = 32 * 1024;
 
-	@Inject
 	protected HdfsSystemManager m_manager;
 
-	@Inject
 	private ServerConfigManager m_serverConfigManager;
 
-	@Inject("hdfs")
 	private PathBuilder m_bulider;
 
-	@Inject("hdfs")
 	private TokenMappingManager m_hdfsTokenManager;
 
 	private TokenMapping m_mapping;

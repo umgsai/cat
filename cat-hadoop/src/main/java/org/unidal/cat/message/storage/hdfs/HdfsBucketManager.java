@@ -30,8 +30,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.cat.message.storage.Bucket;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -41,18 +39,14 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 
-@Named
 public class HdfsBucketManager extends ContainerHolder implements Initializable, LogEnabled {
 
 	protected Logger m_logger;
 
-	@Inject
 	private ServerConfigManager m_configManager;
 
-	@Inject
 	private HdfsSystemManager m_fileSystemManager;
 
-	@Inject(value = "hdfs")
 	private MessageConsumerFinder m_consumerFinder;
 
 	private Map<String, HdfsBucket> m_buckets = new LinkedHashMap<String, HdfsBucket>() {

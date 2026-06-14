@@ -140,6 +140,7 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -150,6 +151,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.cat.message.storage.hdfs.HdfsSystemManager</role>
+					<field-name>m_fileSystemManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -194,13 +196,16 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.cat.message.storage.hdfs.HdfsSystemManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_serverConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.PathBuilder</role>
 					<role-hint>hdfs</role-hint>
+					<field-name>m_bulider</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -210,13 +215,16 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.hdfs.HdfsSystemManager</role>
+					<field-name>m_fileSystemManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.hdfs.MessageConsumerFinder</role>
 					<role-hint>hdfs</role-hint>
+					<field-name>m_consumerFinder</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -262,17 +270,21 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.cat.message.storage.hdfs.HdfsSystemManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_serverConfigManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.PathBuilder</role>
 					<role-hint>hdfs</role-hint>
+					<field-name>m_bulider</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.TokenMappingManager</role>
 					<role-hint>hdfs</role-hint>
+					<field-name>m_hdfsTokenManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -282,13 +294,16 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.hdfs.HdfsSystemManager</role>
+					<field-name>m_fileSystemManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.hdfs.MessageConsumerFinder</role>
 					<role-hint>hdfs</role-hint>
+					<field-name>m_consumerFinder</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -310,6 +325,7 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.cat.message.storage.hdfs.HdfsSystemManager</role>
+					<field-name>m_fileSystemManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -334,10 +350,12 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.cat.message.storage.hdfs.HdfsSystemManager</role>
+					<field-name>m_manager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.PathBuilder</role>
 					<role-hint>hdfs</role-hint>
+					<field-name>m_bulider</field-name>
 				</requirement>
 			</requirements>
 		</component>

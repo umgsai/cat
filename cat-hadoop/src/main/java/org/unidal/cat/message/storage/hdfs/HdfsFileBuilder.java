@@ -23,13 +23,9 @@ import java.util.Date;
 
 import org.unidal.cat.message.storage.FileType;
 import org.unidal.cat.message.storage.PathBuilder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
-@Named(type = PathBuilder.class, value = "hdfs")
 public class HdfsFileBuilder implements PathBuilder {
 
-	@Inject
 	private HdfsSystemManager m_fileSystemManager;
 
 	@Override

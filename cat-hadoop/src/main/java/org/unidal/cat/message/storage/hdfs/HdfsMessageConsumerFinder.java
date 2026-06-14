@@ -29,16 +29,12 @@ import java.util.Set;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
 
-@Named(type = MessageConsumerFinder.class, value = "hdfs")
 public class HdfsMessageConsumerFinder implements MessageConsumerFinder {
 
-	@Inject
 	private HdfsSystemManager m_fileSystemManager;
 
 	private Map<String, Set<String>> m_caches = new HashMap<String, Set<String>>();

@@ -33,26 +33,20 @@ import org.unidal.cat.message.storage.Bucket;
 import org.unidal.cat.message.storage.FileType;
 import org.unidal.cat.message.storage.PathBuilder;
 import org.unidal.cat.message.storage.internals.DefaultBlock;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.tree.MessageId;
 
-@Named(type = Bucket.class, value = HdfsBucket.ID, instantiationStrategy = Named.PER_LOOKUP)
 public class HdfsBucket implements Bucket {
 	public static final String ID = "hdfs";
 
 	private static final int SEGMENT_SIZE = 32 * 1024;
 
-	@Inject
 	protected HdfsSystemManager m_manager;
 
-	@Inject
 	private ServerConfigManager m_serverConfigManager;
 
-	@Inject("hdfs")
 	private PathBuilder m_bulider;
 
 	private DataHelper m_data = new DataHelper();
