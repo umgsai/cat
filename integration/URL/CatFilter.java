@@ -3,6 +3,7 @@ package com.dianping.cat.servlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -12,9 +13,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.unidal.helper.Joiners;
-import org.unidal.helper.Joiners.IBuilder;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
@@ -90,16 +88,16 @@ public class CatFilter implements Filter {
 				if (m_servers == null) {
 					DefaultMessageManager manager = (DefaultMessageManager) Cat.getManager();
 					List<Server> servers = manager.getConfigManager().getServers();
+					StringJoiner joiner = new StringJoiner(",");
 
-					m_servers = Joiners.by(',').join(servers, new IBuilder<Server>() {
-						@Override
-						public String asString(Server server) {
-							String ip = server.getIp();
-							Integer httpPort = server.getHttpPort();
+					for (Server server : servers) {
+						String ip = server.getIp();
+						Integer httpPort = server.getHttpPort();
 
-							return ip + ":" + httpPort;
-						}
-					});
+						joiner.add(ip + ":" + httpPort);
+					}
+
+					m_servers = joiner.toString();
 				}
 
 				return m_servers;
