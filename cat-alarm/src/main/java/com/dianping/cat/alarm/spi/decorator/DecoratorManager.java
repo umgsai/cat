@@ -24,10 +24,10 @@ import java.util.Map;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.tuple.Pair;
 
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
@@ -46,7 +46,7 @@ public class DecoratorManager extends ContainerHolder implements Initializable {
 			String title = decorator.generateTitle(alert);
 			String content = decorator.generateContent(alert);
 
-			return new Pair<String, String>(title, content);
+			return Pair.of(title, content);
 		} else {
 			LOGGER.error("Alert decorator is not configured, alertType={}, availableDecorators={}.", alertType.getName(),
 			      m_decorators.keySet());

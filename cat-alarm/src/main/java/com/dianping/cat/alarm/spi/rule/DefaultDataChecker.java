@@ -21,9 +21,9 @@ package com.dianping.cat.alarm.spi.rule;
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.rule.entity.Condition;
 import com.dianping.cat.alarm.rule.entity.SubCondition;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,18 +93,18 @@ public class DefaultDataChecker implements DataChecker {
 				Pair<Boolean, String> subResult = rule.executeRule(value, baseline, subCondition.getText());
 
 				if (!subResult.getKey()) {
-					return new Pair<Boolean, String>(false, "");
+					return Pair.of(false, "");
 				}
 				builder.append(subResult.getValue()).append("<br/>");
 			} catch (Exception ex) {
 				LOGGER.error("Unable to check alert rule condition, condition={}, subCondition={}.", condition,
 				      subCondition, ex);
 				Cat.logError(condition.toString(), ex);
-				return new Pair<Boolean, String>(false, "");
+				return Pair.of(false, "");
 			}
 		}
 
-		return new Pair<Boolean, String>(true, builder.toString());
+		return Pair.of(true, builder.toString());
 	}
 
 	public List<DataCheckEntity> checkDataForApp(double[] value, List<Condition> conditions) {

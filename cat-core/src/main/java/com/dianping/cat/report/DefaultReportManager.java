@@ -250,6 +250,7 @@ public class DefaultReportManager<T> extends ContainerHolder implements ReportMa
 
 	private void storeDatabase(long startTime, Map<String, T> reports) {
 		Date period = new Date(startTime);
+		Date creationDate = new Date();
 		String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 
 		for (T report : reports.values()) {
@@ -262,6 +263,7 @@ public class DefaultReportManager<T> extends ContainerHolder implements ReportMa
 				r.setPeriod(period);
 				r.setIp(ip);
 				r.setType(1);
+				r.setCreationDate(creationDate);
 
 				m_reportDao.insert(r);
 
@@ -272,6 +274,7 @@ public class DefaultReportManager<T> extends ContainerHolder implements ReportMa
 				content.setReportId(id);
 				content.setContent(binaryContent);
 				content.setPeriod(period);
+				content.setCreationDate(creationDate);
 				m_reportContentDao.insert(content);
 				m_reportDelegate.createHourlyTask(report);
 			} catch (Throwable e) {

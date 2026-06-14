@@ -21,7 +21,7 @@ package com.dianping.cat.alarm.spi.rule;
 import com.dianping.cat.Cat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.tuple.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -74,11 +74,11 @@ public enum RuleType {
 
 			for (int i = 0; i < length; i++) {
 				if (baselines[i] <= 0 || values[i] / baselines[i] > (1 - ruleValue / 100)) {
-					return new Pair<Boolean, String>(false, "");
+					return Pair.of(false, "");
 				}
 			}
 
-			return new Pair<Boolean, String>(true, buildRuleMessage(values, baselines, ruleValue));
+			return Pair.of(true, buildRuleMessage(values, baselines, ruleValue));
 		}
 
 		@Override
@@ -122,11 +122,11 @@ public enum RuleType {
 
 			for (int i = 0; i < length; i++) {
 				if (baselines[i] - values[i] < ruleValue) {
-					return new Pair<Boolean, String>(false, "");
+					return Pair.of(false, "");
 				}
 			}
 
-			return new Pair<Boolean, String>(true, buildRuleMessage(values, baselines, ruleValue));
+			return Pair.of(true, buildRuleMessage(values, baselines, ruleValue));
 		}
 
 		@Override
@@ -169,11 +169,11 @@ public enum RuleType {
 
 			for (int i = 0; i < length; i++) {
 				if (baselines[i] <= 0 || values[i] / baselines[i] < (1 + ruleValue / 100)) {
-					return new Pair<Boolean, String>(false, "");
+					return Pair.of(false, "");
 				}
 			}
 
-			return new Pair<Boolean, String>(true, buildRuleMessage(values, baselines, ruleValue));
+			return Pair.of(true, buildRuleMessage(values, baselines, ruleValue));
 		}
 
 		@Override
@@ -216,11 +216,11 @@ public enum RuleType {
 
 			for (int i = 0; i < length; i++) {
 				if (values[i] - baselines[i] < ruleValue) {
-					return new Pair<Boolean, String>(false, "");
+					return Pair.of(false, "");
 				}
 			}
 
-			return new Pair<Boolean, String>(true, buildRuleMessage(values, baselines, ruleValue));
+			return Pair.of(true, buildRuleMessage(values, baselines, ruleValue));
 		}
 
 		@Override
@@ -249,11 +249,11 @@ public enum RuleType {
 
 			for (int i = 0; i < length; i++) {
 				if (values[i] < ruleValue) {
-					return new Pair<Boolean, String>(false, "");
+					return Pair.of(false, "");
 				}
 			}
 
-			return new Pair<Boolean, String>(true, buildRuleMessage(values, baselines, ruleValue));
+			return Pair.of(true, buildRuleMessage(values, baselines, ruleValue));
 		}
 
 		@Override
@@ -282,11 +282,11 @@ public enum RuleType {
 
 			for (int i = 0; i < length; i++) {
 				if (values[i] > ruleValue) {
-					return new Pair<Boolean, String>(false, "");
+					return Pair.of(false, "");
 				}
 			}
 
-			return new Pair<Boolean, String>(true, buildRuleMessage(values, baselines, ruleValue));
+			return Pair.of(true, buildRuleMessage(values, baselines, ruleValue));
 		}
 
 		@Override
@@ -328,18 +328,18 @@ public enum RuleType {
 			int length = values.length;
 
 			if (length <= 1) {
-				return new Pair<Boolean, String>(false, "");
+				return Pair.of(false, "");
 			}
 
 			double baseVal = values[length - 1];
 
 			for (int i = 0; i <= length - 2; i++) {
 				if (baseVal / values[i] - 1 < ruleValue / 100) {
-					return new Pair<Boolean, String>(false, "");
+					return Pair.of(false, "");
 				}
 			}
 
-			return new Pair<Boolean, String>(true, buildRuleMessage(values, baselines, ruleValue));
+			return Pair.of(true, buildRuleMessage(values, baselines, ruleValue));
 		}
 
 		@Override
@@ -381,18 +381,18 @@ public enum RuleType {
 			int length = values.length;
 
 			if (length <= 1) {
-				return new Pair<Boolean, String>(false, "");
+				return Pair.of(false, "");
 			}
 
 			double baseVal = values[length - 1];
 
 			for (int i = 0; i <= length - 2; i++) {
 				if (1 - baseVal / values[i] < ruleValue / 100) {
-					return new Pair<Boolean, String>(false, "");
+					return Pair.of(false, "");
 				}
 			}
 
-			return new Pair<Boolean, String>(true, buildRuleMessage(values, baselines, ruleValue));
+			return Pair.of(true, buildRuleMessage(values, baselines, ruleValue));
 		}
 
 		@Override
@@ -421,10 +421,10 @@ public enum RuleType {
 			double totalVal = calSum(values);
 
 			if (totalVal < ruleValue) {
-				return new Pair<Boolean, String>(false, "");
+				return Pair.of(false, "");
 			}
 
-			return new Pair<Boolean, String>(true, buildRuleMessage(values, baselines, ruleValue));
+			return Pair.of(true, buildRuleMessage(values, baselines, ruleValue));
 		}
 
 		@Override
@@ -453,10 +453,10 @@ public enum RuleType {
 			double totalVal = calSum(values);
 
 			if (totalVal > ruleValue) {
-				return new Pair<Boolean, String>(false, "");
+				return Pair.of(false, "");
 			}
 
-			return new Pair<Boolean, String>(true, buildRuleMessage(values, baselines, ruleValue));
+			return Pair.of(true, buildRuleMessage(values, baselines, ruleValue));
 		}
 
 		@Override
@@ -496,7 +496,7 @@ public enum RuleType {
 					LOGGER.error("Unable to generate user defined alert rule, rawValueLength={}.",
 					      rawValue == null ? 0 : rawValue.length(), e);
 					Cat.logError("generate user defined rule error: " + rawValue, e);
-					return new Pair<Boolean, String>(false, "");
+					return Pair.of(false, "");
 				}
 			}
 			return instance.checkData(values, baselines);
@@ -519,7 +519,7 @@ public enum RuleType {
 			} finally {
 				output.close();
 			}
-			return new Pair<File, File>(userDefinedFolder, userDefinedClassFile);
+			return Pair.of(userDefinedFolder, userDefinedClassFile);
 		}
 
 		@Override

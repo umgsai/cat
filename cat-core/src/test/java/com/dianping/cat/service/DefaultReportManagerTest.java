@@ -136,6 +136,8 @@ public class DefaultReportManagerTest {
 		Assert.assertEquals(3, m_reportContentDao.count);
 		Assert.assertEquals(3, m_hourlyReportDao.count);
 		Assert.assertEquals(3, m_bucketInsertCount);
+		Assert.assertNotNull(m_hourlyReportDao.creationDate);
+		Assert.assertNotNull(m_reportContentDao.creationDate);
 	}
 
 	public class MockBucketManager implements ReportBucketManager {
@@ -159,8 +161,11 @@ public class DefaultReportManagerTest {
 
 		public int count;
 
+		public Date creationDate;
+
 		@Override
 		public int insert(HourlyReport proto) throws DalException {
+			creationDate = proto.getCreationDate();
 			return count++;
 		}
 
@@ -170,8 +175,11 @@ public class DefaultReportManagerTest {
 
 		public int count;
 
+		public Date creationDate;
+
 		@Override
 		public int insert(HourlyReportContent proto) throws DalException {
+			creationDate = proto.getCreationDate();
 			return count++;
 		}
 

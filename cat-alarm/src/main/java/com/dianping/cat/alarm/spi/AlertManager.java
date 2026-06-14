@@ -29,13 +29,13 @@ import com.dianping.cat.alarm.spi.spliter.SpliterManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
+import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
-import org.unidal.tuple.Pair;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
