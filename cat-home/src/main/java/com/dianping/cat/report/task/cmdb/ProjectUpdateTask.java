@@ -19,6 +19,9 @@
 package com.dianping.cat.report.task.cmdb;
 
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,11 +32,10 @@ import java.util.Set;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.helper.Files;
 import org.unidal.helper.Threads.Task;
-import org.unidal.helper.Urls;
-import org.unidal.lookup.util.StringUtils;
 import org.unidal.webres.json.JsonArray;
 import org.unidal.webres.json.JsonObject;
 
@@ -238,8 +240,7 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 
 		try {
 			String cmdb = String.format(CMDB_DOMAIN_URL, ip);
-			InputStream in = Urls.forIO().readTimeout(1000).connectTimeout(1000).openStream(cmdb);
-			String content = Files.forIO().readFrom(in, "utf-8");
+			String content = readFrom(cmdb);
 
 			t.setStatus(Transaction.SUCCESS);
 			t.addData(content);
@@ -256,8 +257,7 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 		Transaction t = Cat.newTransaction("CMDB", "queryHostname");
 		try {
 			String cmdb = String.format(CMDB_HOSTNAME_URL, ip);
-			InputStream in = Urls.forIO().readTimeout(1000).connectTimeout(1000).openStream(cmdb);
-			String content = Files.forIO().readFrom(in, "utf-8");
+			String content = readFrom(cmdb);
 
 			t.setStatus(Transaction.SUCCESS);
 			t.addData(content);
@@ -285,8 +285,7 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 		Transaction t = Cat.newTransaction("CMDB", "queryProjectInfo");
 		try {
 			String cmdb = String.format(CMDB_INFO_URL, cmdbDomain);
-			InputStream in = Urls.forIO().readTimeout(1000).connectTimeout(1000).openStream(cmdb);
-			String content = Files.forIO().readFrom(in, "utf-8");
+			String content = readFrom(cmdb);
 
 			t.setStatus(Transaction.SUCCESS);
 			t.addData(content);
@@ -302,8 +301,7 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 	private String queryProjectInfoFromCMDB(String url, String jsonName, String attrName) {
 		Transaction t = Cat.newTransaction("CMDB", "queryProjectInfo");
 		try {
-			InputStream in = Urls.forIO().readTimeout(1000).connectTimeout(1000).openStream(url);
-			String content = Files.forIO().readFrom(in, "utf-8");
+			String content = readFrom(url);
 
 			t.setStatus(Transaction.SUCCESS);
 			t.addData(content);
@@ -314,6 +312,17 @@ public class ProjectUpdateTask implements Task, LogEnabled {
 			t.complete();
 		}
 		return null;
+	}
+
+	private String readFrom(String url) throws Exception {
+		URLConnection connection = new URL(url).openConnection();
+
+		connection.setConnectTimeout(1000);
+		connection.setReadTimeout(1000);
+
+		try (InputStream in = connection.getInputStream()) {
+			return IOUtils.toString(in, StandardCharsets.UTF_8);
+		}
 	}
 
 	@Override
