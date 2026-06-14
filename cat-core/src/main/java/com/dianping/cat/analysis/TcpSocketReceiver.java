@@ -20,8 +20,6 @@ package com.dianping.cat.analysis;
 
 import java.util.List;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.CatConstants;
@@ -47,7 +45,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
-public final class TcpSocketReceiver implements LogEnabled {
+public final class TcpSocketReceiver {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TcpSocketReceiver.class);
 
 	protected ServerConfigManager m_serverConfigManager;
@@ -61,8 +59,6 @@ public final class TcpSocketReceiver implements LogEnabled {
 	private EventLoopGroup m_bossGroup;
 
 	private EventLoopGroup m_workerGroup;
-
-	private Logger m_logger;
 
 	private final int m_port = Integer.getInteger("cat.tcp.port", 2280); // default port number from phone, C:2, A:2, T:8
 
@@ -82,11 +78,6 @@ public final class TcpSocketReceiver implements LogEnabled {
 		} catch (Exception e) {
 			warn(e.getMessage(), e);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	protected boolean getOSMatches(String osNamePrefix) {
@@ -157,27 +148,15 @@ public final class TcpSocketReceiver implements LogEnabled {
 	}
 
 	private void error(String message, Throwable cause) {
-		if (m_logger != null) {
-			m_logger.error(message, cause);
-		} else {
-			SLF4J_LOGGER.error(message, cause);
-		}
+		SLF4J_LOGGER.error(message, cause);
 	}
 
 	private void info(String message) {
-		if (m_logger != null) {
-			m_logger.info(message);
-		} else {
-			SLF4J_LOGGER.info(message);
-		}
+		SLF4J_LOGGER.info(message);
 	}
 
 	private void warn(String message, Throwable cause) {
-		if (m_logger != null) {
-			m_logger.warn(message, cause);
-		} else {
-			SLF4J_LOGGER.warn(message, cause);
-		}
+		SLF4J_LOGGER.warn(message, cause);
 	}
 
 	private class MessageDecoder extends ByteToMessageDecoder {

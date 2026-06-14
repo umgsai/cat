@@ -18,25 +18,16 @@
  */
 package com.dianping.cat.analysis;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class DefaultMessageHandler extends ContainerHolder implements MessageHandler, LogEnabled {
+public class DefaultMessageHandler extends ContainerHolder implements MessageHandler {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(DefaultMessageHandler.class);
 
 	private MessageConsumer m_consumer;
-
-	private Logger m_logger;
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
 
 	@Override
 	public void handle(MessageTree tree) {
@@ -54,11 +45,7 @@ public class DefaultMessageHandler extends ContainerHolder implements MessageHan
 		try {
 			m_consumer.consume(tree);
 		} catch (Throwable e) {
-			if (m_logger != null) {
-				m_logger.error("Error when consuming message in " + m_consumer + "! tree: " + tree, e);
-			} else {
-				SLF4J_LOGGER.error("Error when consuming message, consumer={}, tree={}.", m_consumer, tree, e);
-			}
+			SLF4J_LOGGER.error("Error when consuming message, consumer={}, tree={}.", m_consumer, tree, e);
 		}
 	}
 

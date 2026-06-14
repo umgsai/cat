@@ -21,15 +21,14 @@ package com.dianping.cat.config.content;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
-public class LocalResourceContentFetcher implements ContentFetcher, LogEnabled {
-	private final String PATH = "/config/";
+public class LocalResourceContentFetcher implements ContentFetcher {
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(LocalResourceContentFetcher.class);
 
-	private Logger m_logger;
+	private final String PATH = "/config/";
 
 	@Override
 	public String getConfigContent(String configName) {
@@ -39,18 +38,9 @@ public class LocalResourceContentFetcher implements ContentFetcher, LogEnabled {
 		try (InputStream in = getClass().getResourceAsStream(path)) {
 			content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 		} catch (Exception e) {
-			m_logger.warn("can't find local default config " + configName);
+			LOGGER.warn("can't find local default config {}", configName);
 			Cat.logError(configName + " can't find", e);
 		}
 		return content;
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
-
-	public void setLogger(Logger logger) {
-		m_logger = logger;
 	}
 }

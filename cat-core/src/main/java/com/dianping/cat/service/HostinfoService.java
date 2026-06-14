@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.LoggerFactory;
@@ -43,12 +41,10 @@ import com.dianping.cat.core.dal.HostinfoEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class HostinfoService implements Initializable, LogEnabled {
+public class HostinfoService implements Initializable {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(HostinfoService.class);
 
 	public static final String UNKNOWN_PROJECT = "UnknownProject";
-
-	protected Logger m_logger;
 
 	private HostinfoRepository m_hostinfoDao;
 
@@ -60,11 +56,6 @@ public class HostinfoService implements Initializable, LogEnabled {
 
 	public Hostinfo createLocal() {
 		return m_hostinfoDao.createLocal();
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	public List<Hostinfo> findAll() throws DalException {

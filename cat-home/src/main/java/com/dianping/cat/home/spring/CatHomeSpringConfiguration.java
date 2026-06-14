@@ -1791,10 +1791,9 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public ContentFetcher contentFetcher(Logger plexusConsoleLogger) {
+	public ContentFetcher contentFetcher() {
 		LocalResourceContentFetcher fetcher = new LocalResourceContentFetcher();
 
-		fetcher.setLogger(plexusConsoleLogger.getChildLogger(LocalResourceContentFetcher.class.getName()));
 		return fetcher;
 	}
 

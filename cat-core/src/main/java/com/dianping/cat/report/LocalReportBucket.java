@@ -33,15 +33,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.PathBuilder;
 
-public class LocalReportBucket implements ReportBucket, LogEnabled {
+public class LocalReportBucket implements ReportBucket {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalReportBucket.class);
 
 	private PathBuilder m_pathBuilder;
@@ -68,8 +66,6 @@ public class LocalReportBucket implements ReportBucket, LogEnabled {
 
 	private OutputStream m_writeIndexFile;
 
-	private Logger m_logger;
-
 	private String m_logicalPath;
 
 	@Override
@@ -85,11 +81,6 @@ public class LocalReportBucket implements ReportBucket, LogEnabled {
 		} finally {
 			m_writeLock.unlock();
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	@Override
@@ -109,11 +100,7 @@ public class LocalReportBucket implements ReportBucket, LogEnabled {
 
 				return new String(bytes, "utf-8");
 			} catch (Exception e) {
-				if (m_logger != null) {
-					m_logger.error(String.format("Error when reading file(%s)!", m_readDataFile), e);
-				} else {
-					SLF4J_LOGGER.error("Error when reading report bucket file, file={}.", m_readDataFile, e);
-				}
+				SLF4J_LOGGER.error("Error when reading report bucket file, file={}.", m_readDataFile, e);
 			} finally {
 				m_readLock.unlock();
 			}
