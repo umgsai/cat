@@ -32,14 +32,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.helper.Splitters;
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
+
+import com.google.common.base.Splitter;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
@@ -108,7 +109,7 @@ public class Handler implements PageHandler<Context> {
 
 		switch (action) {
 		case ALERT:
-			List<String> receivers = Splitters.by(",").noEmptyItem().split(payload.getReceivers());
+			List<String> receivers = Splitter.on(',').omitEmptyStrings().splitToList(payload.getReceivers());
 			if (receivers == null || receivers.size() == 0) {
 				LOGGER.warn("Manual alert send request lacks receivers, channel={}, type={}, group={}.",
 				      payload.getChannel(), payload.getType(), payload.getGroup());

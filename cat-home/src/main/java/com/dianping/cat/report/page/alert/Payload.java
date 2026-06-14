@@ -25,11 +25,12 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Splitters;
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.unidal.web.mvc.ActionContext;
 import org.unidal.web.mvc.ActionPayload;
 import org.unidal.web.mvc.payload.annotation.FieldMeta;
+
+import com.google.common.base.Splitter;
 
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.ReportPage;
@@ -132,7 +133,7 @@ public class Payload implements ActionPayload<ReportPage, Action> {
 	}
 
 	public String[] getAlertTypeArray() {
-		List<String> typeList = Splitters.by(",").noEmptyItem().split(m_alertType);
+		List<String> typeList = Splitter.on(',').omitEmptyStrings().splitToList(m_alertType);
 		String[] typeArray = new String[typeList.size()];
 
 		return typeList.toArray(typeArray);

@@ -28,8 +28,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.unidal.lookup.util.StringUtils;
-import org.unidal.tuple.Pair;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -258,7 +258,7 @@ public class Handler implements PageHandler<Context> {
 			start = payload.getHistoryStartDate();
 			end = payload.getHistoryEndDate();
 		}
-		return new Pair<Date, Date>(start, end);
+		return Pair.of(start, end);
 	}
 
 	private UtilizationReport queryUtilizationReport(Payload payload) {

@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.tuple.Pair;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.dianping.cat.alarm.spi.AlertLevel;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;
@@ -86,7 +87,7 @@ public class AlertExceptionBuilder {
 
 	private Pair<Double, Double> queryDomainExceptionLimit(String domain, String exceptionName) {
 		ExceptionLimit exceptionLimit = m_exceptionConfigManager.queryExceptionLimit(domain, exceptionName);
-		Pair<Double, Double> limits = new Pair<Double, Double>();
+		MutablePair<Double, Double> limits = new MutablePair<Double, Double>();
 		double warnLimit = -1;
 		double errorLimit = -1;
 
@@ -98,15 +99,15 @@ public class AlertExceptionBuilder {
 			warnLimit = exceptionLimit.getWarning();
 			errorLimit = exceptionLimit.getError();
 		}
-		limits.setKey(warnLimit);
-		limits.setValue(errorLimit);
+		limits.setLeft(warnLimit);
+		limits.setRight(errorLimit);
 
 		return limits;
 	}
 
 	private Pair<Double, Double> queryDomainTotalLimit(String domain) {
 		ExceptionLimit totalExceptionLimit = m_exceptionConfigManager.queryTotalLimitByDomain(domain);
-		Pair<Double, Double> limits = new Pair<Double, Double>();
+		MutablePair<Double, Double> limits = new MutablePair<Double, Double>();
 		double totalWarnLimit = -1;
 		double totalErrorLimit = -1;
 
@@ -118,8 +119,8 @@ public class AlertExceptionBuilder {
 			totalWarnLimit = totalExceptionLimit.getWarning();
 			totalErrorLimit = totalExceptionLimit.getError();
 		}
-		limits.setKey(totalWarnLimit);
-		limits.setValue(totalErrorLimit);
+		limits.setLeft(totalWarnLimit);
+		limits.setRight(totalErrorLimit);
 
 		return limits;
 	}
