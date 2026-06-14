@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.configuration.server.entity.Domain;
@@ -32,8 +32,11 @@ import com.dianping.cat.consumer.problem.model.entity.Machine;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.spring.CatSpringContext;
 
-public class LongExecutionProblemHandler extends ProblemHandler implements Initializable {
+public class LongExecutionProblemHandler extends ProblemHandler {
+	private static final Logger LOGGER = LoggerFactory.getLogger(LongExecutionProblemHandler.class);
+
 	public static final String ID = "long-execution";
 
 	private ServerConfigManager m_configManager;
@@ -58,6 +61,8 @@ public class LongExecutionProblemHandler extends ProblemHandler implements Initi
 
 	private Map<String, Integer> m_longCacheThresholds = new HashMap<String, Integer>();
 
+	private volatile boolean m_initialized;
+
 	public int computeLongDuration(long duration, String domain, int[] defaultLongDuration,
 							Map<String, Integer> longThresholds) {
 		int[] messageDuration = defaultLongDuration;
@@ -79,6 +84,8 @@ public class LongExecutionProblemHandler extends ProblemHandler implements Initi
 
 	@Override
 	public void handle(Machine machine, MessageTree tree) {
+		ensureInitialized();
+
 		Message message = tree.getMessage();
 
 		if (message instanceof Transaction) {
@@ -88,9 +95,28 @@ public class LongExecutionProblemHandler extends ProblemHandler implements Initi
 		}
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		refreshSpringBeans();
+
+		if (m_configManager == null) {
+			LOGGER.warn("Server config manager is not configured for long execution problem handler.");
+			m_initialized = true;
+			return;
+		}
 		Map<String, Domain> domains = m_configManager.getLongConfigDomains();
+
+		m_longServiceThresholds.clear();
+		m_longUrlThresholds.clear();
+		m_longSqlThresholds.clear();
 
 		for (Domain domain : domains.values()) {
 			Integer serviceThreshold = domain.getServiceThreshold();
@@ -107,6 +133,7 @@ public class LongExecutionProblemHandler extends ProblemHandler implements Initi
 				m_longSqlThresholds.put(domain.getName(), sqlThreshold);
 			}
 		}
+		m_initialized = true;
 	}
 
 	private void processLongCache(Machine machine, Transaction transaction, MessageTree tree) {
@@ -201,6 +228,18 @@ public class LongExecutionProblemHandler extends ProblemHandler implements Initi
 				processTransaction(machine, (Transaction) message, tree);
 			}
 		}
+	}
+
+	private void refreshSpringBeans() {
+		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
+	}
+
+	public void setConfigManager(ServerConfigManager configManager) {
+		m_configManager = configManager;
 	}
 
 }

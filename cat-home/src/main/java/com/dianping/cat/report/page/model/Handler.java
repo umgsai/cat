@@ -29,8 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.BucketManager;
@@ -54,10 +52,12 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.spring.CatSpringContext;
 
 @SuppressWarnings("rawtypes")
-public class Handler extends ContainerHolder implements Initializable, PageHandler<Context> {
+public class Handler extends ContainerHolder implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
 	public Map<String, LocalModelService> m_localServices;
+
+	private volatile boolean m_initialized;
 
 	private byte[] compress(String str) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream(1024 * 32);
@@ -77,6 +77,8 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 	@Override
 	@OutboundActionMeta(name = "model")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		initialize();
+
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		HttpServletResponse httpResponse = ctx.getHttpServletResponse();
@@ -119,13 +121,15 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 		}
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
-		if (m_localServices == null || m_localServices.isEmpty()) {
-			initializeFromSpringOrPlexus();
-		} else {
-			LOGGER.info("Initialized model page handler from Spring injection, localServiceCount={}.",
-			      m_localServices.size());
+	public synchronized void initialize() {
+		if (!m_initialized) {
+			if (m_localServices == null || m_localServices.isEmpty()) {
+				initializeFromSpringOrPlexus();
+			} else {
+				LOGGER.info("Initialized model page handler from Spring injection, localServiceCount={}.",
+				      m_localServices.size());
+			}
+			m_initialized = true;
 		}
 	}
 

@@ -18,22 +18,29 @@
  */
 package com.dianping.cat.system.page.router.service;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.home.router.entity.RouterConfig;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-public class CachedRouterConfigService implements Initializable {
+public class CachedRouterConfigService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CachedRouterConfigService.class);
 
 	private RouterConfigService m_routerConfigService;
 
 	private volatile RouterConfig m_routerConfig;
 
-	@Override
-	public void initialize() throws InitializationException {
+	private volatile boolean m_initialized;
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		refresh();
 
 		TimerSyncTask.getInstance().register(new SyncHandler() {
@@ -48,14 +55,33 @@ public class CachedRouterConfigService implements Initializable {
 				refresh();
 			}
 		});
+		m_initialized = true;
+		LOGGER.info("Initialized cached router config service.");
 	}
 
 	public RouterConfig queryLastRouterConfig() {
+		initialize();
+
 		return m_routerConfig;
 	}
 
 	public void refresh() {
-		m_routerConfig = m_routerConfigService.queryLastReport(Constants.CAT);
+		RouterConfigService routerConfigService = getRouterConfigService();
+
+		if (routerConfigService == null) {
+			LOGGER.warn("Skip router config refresh because RouterConfigService is unavailable.");
+			return;
+		}
+		m_routerConfig = routerConfigService.queryLastReport(Constants.CAT);
+	}
+
+	private RouterConfigService getRouterConfigService() {
+		RouterConfigService routerConfigService = CatSpringContext.getBeanIfAvailable(RouterConfigService.class);
+
+		if (routerConfigService != null) {
+			m_routerConfigService = routerConfigService;
+		}
+		return m_routerConfigService;
 	}
 
 	public void setRouterConfigService(RouterConfigService routerConfigService) {

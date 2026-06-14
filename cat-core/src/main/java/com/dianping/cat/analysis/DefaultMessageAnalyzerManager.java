@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
@@ -34,7 +32,7 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class DefaultMessageAnalyzerManager extends ContainerHolder
-						implements MessageAnalyzerManager, Initializable {
+						implements MessageAnalyzerManager {
 	private static final long MINUTE = 60 * 1000L;
 
 	private long m_duration = 60 * MINUTE;
@@ -49,8 +47,12 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 
 	private final Map<Long, Map<String, List<MessageAnalyzer>>> m_analyzers = new HashMap<Long, Map<String, List<MessageAnalyzer>>>();
 
+	private volatile boolean m_initialized;
+
 	@Override
 	public List<MessageAnalyzer> getAnalyzer(String name, long startTime) {
+		initialize();
+
 		// remove last two hour analyzer
 		try {
 			Map<String, List<MessageAnalyzer>> temp = m_analyzers.remove(startTime - m_duration * 2);
@@ -113,11 +115,16 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 
 	@Override
 	public List<String> getAnalyzerNames() {
+		initialize();
+
 		return m_analyzerNames;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		Map<String, MessageAnalyzer> map = getAnalyzerMap();
 
 		for (MessageAnalyzer analyzer : map.values()) {
@@ -158,6 +165,7 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 		for (String name : disables) {
 			m_analyzerNames.remove(name);
 		}
+		m_initialized = true;
 	}
 
 	private MessageAnalyzer createAnalyzer(String name) {

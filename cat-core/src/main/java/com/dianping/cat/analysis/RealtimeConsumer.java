@@ -21,18 +21,16 @@ package com.dianping.cat.analysis;
 import java.util.List;
 
 import org.slf4j.LoggerFactory;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import com.dianping.cat.support.Threads;
-import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
-public class RealtimeConsumer extends ContainerHolder implements MessageConsumer, Initializable {
+public class RealtimeConsumer implements MessageConsumer {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RealtimeConsumer.class);
 
 	public static final long MINUTE = 60 * 1000L;
@@ -45,12 +43,11 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 
 	private PeriodManager m_periodManager;
 
+	private volatile boolean m_initialized;
+
 	@Override
 	public void consume(MessageTree tree) {
-		if (m_periodManager == null) {
-			SLF4J_LOGGER.error("Realtime consumer is not initialized, tree={}.", tree);
-			return;
-		}
+		initialize();
 
 		long timestamp = getTimestamp(tree);
 		Period period = m_periodManager.findPeriod(timestamp);
@@ -64,6 +61,8 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 	}
 
 	public void doCheckpoint() {
+		initialize();
+
 		info("starting do checkpoint.");
 		Transaction t = Cat.newTransaction("Checkpoint", getClass().getSimpleName());
 
@@ -103,6 +102,8 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 
 	@Override
 	public List<MessageAnalyzer> getCurrentAnalyzer(String name) {
+		initialize();
+
 		long currentStartTime = getCurrentStartTime();
 		Period period = m_periodManager.findPeriod(currentStartTime);
 
@@ -121,6 +122,8 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 
 	@Override
 	public List<MessageAnalyzer> getLastAnalyzer(String name) {
+		initialize();
+
 		long lastStartTime = getCurrentStartTime() - HOUR;
 		Period period = m_periodManager.findPeriod(lastStartTime);
 
@@ -139,23 +142,41 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 		}
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		refreshSpringBeans();
+
 		if (m_analyzerManager == null) {
-			throw new InitializationException("MessageAnalyzerManager is required for RealtimeConsumer.");
+			throw new IllegalStateException("MessageAnalyzerManager is required for RealtimeConsumer.");
 		}
 		if (m_serverStateManager == null) {
-			throw new InitializationException("ServerStatisticManager is required for RealtimeConsumer.");
+			throw new IllegalStateException("ServerStatisticManager is required for RealtimeConsumer.");
 		}
 
 		m_periodManager = new PeriodManager(HOUR, m_analyzerManager, m_serverStateManager);
 		m_periodManager.init();
 
 		Threads.forGroup("Cat").start(m_periodManager);
+		m_initialized = true;
+		SLF4J_LOGGER.info("Initialized realtime consumer.");
 	}
 
 	private void info(String message) {
 		SLF4J_LOGGER.info(message);
+	}
+
+	private void refreshSpringBeans() {
+		MessageAnalyzerManager analyzerManager = CatSpringContext.getBeanIfAvailable(MessageAnalyzerManager.class);
+		ServerStatisticManager serverStateManager = CatSpringContext.getBeanIfAvailable(ServerStatisticManager.class);
+
+		if (analyzerManager != null) {
+			m_analyzerManager = analyzerManager;
+		}
+		if (serverStateManager != null) {
+			m_serverStateManager = serverStateManager;
+		}
 	}
 
 	public void setAnalyzerManager(MessageAnalyzerManager analyzerManager) {

@@ -31,15 +31,15 @@ public class DefaultMessageHandler extends ContainerHolder implements MessageHan
 
 	@Override
 	public void handle(MessageTree tree) {
-		if (m_consumer == null) {
-			m_consumer = CatSpringContext.getBeanIfAvailable(MessageConsumer.class);
+		MessageConsumer springConsumer = CatSpringContext.getBeanIfAvailable(MessageConsumer.class);
 
-			if (m_consumer == null) {
-				m_consumer = lookup(MessageConsumer.class);
-				SLF4J_LOGGER.info("Resolved message consumer from Plexus fallback, consumer={}.", m_consumer);
-			} else {
-				SLF4J_LOGGER.info("Resolved message consumer from Spring context, consumer={}.", m_consumer);
-			}
+		if (springConsumer != null && m_consumer != springConsumer) {
+			m_consumer = springConsumer;
+			SLF4J_LOGGER.info("Resolved message consumer from Spring context, consumer={}.", m_consumer);
+		}
+		if (m_consumer == null) {
+			m_consumer = lookup(MessageConsumer.class);
+			SLF4J_LOGGER.info("Resolved message consumer from Plexus fallback, consumer={}.", m_consumer);
 		}
 
 		try {

@@ -19,12 +19,14 @@
 package com.dianping.cat.consumer.storage;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
 import com.dianping.cat.analysis.MessageAnalyzer;
@@ -37,8 +39,10 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
+import com.dianping.cat.spring.CatSpringContext;
 
-public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> implements Initializable {
+public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(StorageAnalyzer.class);
 
 	public static final String ID = "storage";
 
@@ -49,6 +53,8 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> impl
 	private StorageReportUpdater m_updater;
 
 	private Map<String, StorageBuilder> m_storageBuilders;
+
+	private volatile boolean m_initialized;
 
 	@Override
 	public synchronized void doCheckpoint(boolean atEnd) {
@@ -74,9 +80,29 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> impl
 		return m_reportManager;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
-		m_storageBuilders = lookupMap(StorageBuilder.class);
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		refreshSpringBuilders();
+
+		if (m_storageBuilders == null) {
+			try {
+				m_storageBuilders = lookupMap(StorageBuilder.class);
+				LOGGER.info("Loaded storage analyzer builders from Plexus fallback, types={}.",
+				      m_storageBuilders.keySet());
+			} catch (RuntimeException e) {
+				m_storageBuilders = Collections.emptyMap();
+				LOGGER.warn("Unable to load storage analyzer builders from Spring or Plexus, keep empty builder map.", e);
+			}
+		}
+		m_initialized = true;
 	}
 
 	@Override
@@ -95,6 +121,8 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> impl
 
 	@Override
 	protected void process(MessageTree tree) {
+		ensureInitialized();
+
 		List<Transaction> transactions = tree.getTransactions();
 
 		for (Transaction t : transactions) {
@@ -116,6 +144,20 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> impl
 					}
 				}
 			}
+		}
+	}
+
+	private void refreshSpringBuilders() {
+		Map<String, StorageBuilder> springBuilders = CatSpringContext.getBeansIfAvailable(StorageBuilder.class);
+
+		if (!springBuilders.isEmpty()) {
+			Map<String, StorageBuilder> builders = new LinkedHashMap<String, StorageBuilder>();
+
+			for (StorageBuilder builder : springBuilders.values()) {
+				builders.put(builder.getType(), builder);
+			}
+			m_storageBuilders = builders;
+			LOGGER.info("Loaded storage analyzer builders from Spring, types={}.", m_storageBuilders.keySet());
 		}
 	}
 

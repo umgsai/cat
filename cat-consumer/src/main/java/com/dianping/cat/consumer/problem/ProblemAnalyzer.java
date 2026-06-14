@@ -18,6 +18,15 @@
  */
 package com.dianping.cat.consumer.problem;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
 import com.dianping.cat.analysis.MessageAnalyzer;
 import com.dianping.cat.consumer.problem.model.entity.Machine;
@@ -25,19 +34,18 @@ import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import com.dianping.cat.spring.CatSpringContext;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProblemAnalyzer.class);
 
-public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> implements Initializable {
 	public static final String ID = "problem";
 
 	private ReportManager<ProblemReport> m_reportManager;
 
 	private List<ProblemHandler> m_handlers;
+
+	private volatile boolean m_initialized;
 
 	@Override
 	public synchronized void doCheckpoint(boolean atEnd) {
@@ -62,10 +70,31 @@ public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> impl
 		return m_reportManager;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
-		// to work around a performance issue within plexus
-		m_handlers = new ArrayList<ProblemHandler>(m_handlers);
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		refreshSpringHandlers();
+
+		if (m_handlers == null) {
+			try {
+				m_handlers = new ArrayList<ProblemHandler>(lookupMap(ProblemHandler.class).values());
+				LOGGER.info("Loaded problem handlers from Plexus fallback, count={}.", m_handlers.size());
+			} catch (RuntimeException e) {
+				m_handlers = Collections.emptyList();
+				LOGGER.warn("Unable to load problem handlers from Spring or Plexus, keep empty handler list.", e);
+			}
+		} else {
+			// to work around a performance issue within plexus
+			m_handlers = new ArrayList<ProblemHandler>(m_handlers);
+		}
+		m_initialized = true;
 	}
 
 	protected void loadReports() {
@@ -74,6 +103,8 @@ public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> impl
 
 	@Override
 	public void process(MessageTree tree) {
+		ensureInitialized();
+
 		String domain = tree.getDomain();
 		ProblemReport report = m_reportManager.getHourlyReport(getStartTime(), domain, true);
 
@@ -83,6 +114,19 @@ public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> impl
 		for (ProblemHandler handler : m_handlers) {
 			handler.handle(machine, tree);
 		}
+	}
+
+	private void refreshSpringHandlers() {
+		Map<String, ProblemHandler> handlers = CatSpringContext.getBeansIfAvailable(ProblemHandler.class);
+
+		if (!handlers.isEmpty()) {
+			m_handlers = new ArrayList<ProblemHandler>(handlers.values());
+			LOGGER.info("Loaded problem handlers from Spring, count={}.", m_handlers.size());
+		}
+	}
+
+	public void setHandlers(List<ProblemHandler> handlers) {
+		m_handlers = handlers;
 	}
 
 }

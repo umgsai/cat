@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
 
@@ -47,7 +46,7 @@ import static com.dianping.cat.Constants.HOUR;
 	* Hourly report manager by domain of one report type(such as Transaction, Event, Problem, Heartbeat etc.) produced in one machine
 	* for a couple of hours.
 	*/
-public class DefaultReportManager<T> extends ContainerHolder implements ReportManager<T>, Initializable {
+public class DefaultReportManager<T> extends ContainerHolder implements ReportManager<T> {
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DefaultReportManager.class);
 
 	private ReportDelegate<T> m_reportDelegate;

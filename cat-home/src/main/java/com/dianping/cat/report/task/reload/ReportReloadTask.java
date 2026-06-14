@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.dianping.cat.support.Threads.Task;
@@ -33,7 +31,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.helper.TimeHelper;
 
-public class ReportReloadTask implements Initializable, Task {
+public class ReportReloadTask implements Task {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReportReloadTask.class);
 
 	private static final long DURATION = TimeHelper.ONE_HOUR;
@@ -49,8 +47,7 @@ public class ReportReloadTask implements Initializable, Task {
 		return getClass().getSimpleName();
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		if (m_reloaders == null || m_reloaders.size() < EXPECTED_RELOADER_COUNT) {
 			String message = String.format(
 					"Report reload task requires %s Spring reloaders but found %s, reloaders=%s.",
@@ -58,7 +55,7 @@ public class ReportReloadTask implements Initializable, Task {
 					m_reloaders == null ? java.util.Collections.emptySet() : m_reloaders.keySet());
 
 			LOGGER.error(message);
-			throw new InitializationException(message);
+			throw new IllegalStateException(message);
 		}
 
 		LOGGER.info("Initialized report reload task from Spring, reloaderCount={}, reloaders={}.", m_reloaders.size(),

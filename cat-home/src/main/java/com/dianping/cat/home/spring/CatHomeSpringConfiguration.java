@@ -38,6 +38,8 @@ import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.DefaultMessageAnalyzerManager;
 import com.dianping.cat.analysis.MessageAnalyzerFactory;
 import com.dianping.cat.analysis.MessageAnalyzerManager;
+import com.dianping.cat.analysis.MessageConsumer;
+import com.dianping.cat.analysis.RealtimeConsumer;
 import com.dianping.cat.config.AtomicMessageConfigManager;
 import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.config.business.BusinessConfigManager;
@@ -361,6 +363,16 @@ public class CatHomeSpringConfiguration {
 		manager.setAnalyzerFactory(messageAnalyzerFactory);
 		manager.setConfigManager(serverConfigManager);
 		return manager;
+	}
+
+	@Bean(initMethod = "initialize")
+	public MessageConsumer messageConsumer(MessageAnalyzerManager messageAnalyzerManager,
+			ServerStatisticManager serverStatisticManager) {
+		RealtimeConsumer consumer = new RealtimeConsumer();
+
+		consumer.setAnalyzerManager(messageAnalyzerManager);
+		consumer.setServerStateManager(serverStatisticManager);
+		return consumer;
 	}
 
 	@Bean

@@ -31,8 +31,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
@@ -61,7 +59,7 @@ import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-public class ServerConfigManager implements Initializable {
+public class ServerConfigManager {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(ServerConfigManager.class);
 
 	public static final String DUMP_DIR = "dump";
@@ -102,6 +100,10 @@ public class ServerConfigManager implements Initializable {
 
 	private Set<String> m_forcedStatisticTypePrefixes = new HashSet<>();
 
+	private volatile boolean m_initialized;
+
+	private volatile boolean m_initializing;
+
 	public void setConfigDao(ConfigRepository configDao) {
 		m_configDao = configDao;
 	}
@@ -111,6 +113,8 @@ public class ServerConfigManager implements Initializable {
 	}
 
 	public ServerConfig getConfig() {
+		initialize();
+
 		return m_config;
 	}
 
@@ -335,6 +339,10 @@ public class ServerConfigManager implements Initializable {
 	}
 
 	public String getProperty(String name, String defaultValue) {
+		if (!m_initialized && !m_initializing) {
+			initialize();
+		}
+
 		if (m_server != null) {
 			Property property = m_server.findProperty(name);
 
@@ -358,6 +366,8 @@ public class ServerConfigManager implements Initializable {
 	}
 
 	public ServerConfig getServerConfig() {
+		initialize();
+
 		return m_config;
 	}
 
@@ -385,94 +395,113 @@ public class ServerConfigManager implements Initializable {
 		return Integer.parseInt(getProperty(name + "-analyzer-threads", "2"));
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
-		try {
-			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
-			String content = config.getContent();
-
-			m_configId = config.getId();
-			m_modifyTime = config.getModifyDate().getTime();
-			m_config = DefaultSaxParser.parse(content);
-			SLF4J_LOGGER.info("Loaded server config from repository, configId={}, modifyTime={}.", m_configId,
-					m_modifyTime);
-		} catch (DalNotFoundException e) {
-			SLF4J_LOGGER.warn("Server config is missing in repository, loading default content from fetcher.", e);
-
-			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
-
-				config.setName(CONFIG_NAME);
-				config.setContent(content);
-				m_configDao.insert(config);
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
-				SLF4J_LOGGER.info("Initialized server config from default content, configId={}.", m_configId);
-			} catch (Exception ex) {
-				SLF4J_LOGGER.error("Unable to initialize server config from default content.", ex);
-				Cat.logError(ex);
-			}
-		} catch (Exception e) {
-			SLF4J_LOGGER.error("Unable to load server config from repository.", e);
-			Cat.logError(e);
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
 		}
+		m_initializing = true;
 
-		if (m_config == null) {
+		try {
 			try {
-				File localServerFile = new File(Cat.getCatHome(), "server.xml");
+				Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+				String content = config.getContent();
 
-				SLF4J_LOGGER.info("init cat server with cat server xml {}", localServerFile);
-				initialize(localServerFile);
+				m_configId = config.getId();
+				m_modifyTime = config.getModifyDate().getTime();
+				m_config = DefaultSaxParser.parse(content);
+				SLF4J_LOGGER.info("Loaded server config from repository, configId={}, modifyTime={}.", m_configId,
+						m_modifyTime);
+			} catch (DalNotFoundException e) {
+				SLF4J_LOGGER.warn("Server config is missing in repository, loading default content from fetcher.", e);
+
+				try {
+					String content = m_fetcher.getConfigContent(CONFIG_NAME);
+					Config config = m_configDao.createLocal();
+
+					config.setName(CONFIG_NAME);
+					config.setContent(content);
+					m_configDao.insert(config);
+					m_configId = config.getId();
+					m_config = DefaultSaxParser.parse(content);
+					SLF4J_LOGGER.info("Initialized server config from default content, configId={}.", m_configId);
+				} catch (Exception ex) {
+					SLF4J_LOGGER.error("Unable to initialize server config from default content.", ex);
+					Cat.logError(ex);
+				}
 			} catch (Exception e) {
-				SLF4J_LOGGER.error("Unable to initialize server config from local server.xml.", e);
+				SLF4J_LOGGER.error("Unable to load server config from repository.", e);
 				Cat.logError(e);
 			}
-		}
 
-		if (m_config == null) {
-			m_config = new ServerConfig();
-			SLF4J_LOGGER.warn("Server config is empty after initialization, using a new empty config.");
-		}
+			if (m_config == null) {
+				try {
+					File localServerFile = new File(Cat.getCatHome(), "server.xml");
 
-		m_config.accept(new ServerConfigValidator());
-
-		try {
-			refreshServer();
-		} catch (Exception e) {
-			SLF4J_LOGGER.error("Unable to refresh local server config view.", e);
-			Cat.logError(e);
-		}
-
-		prepare();
-
-		TimerSyncTask.getInstance().register(new SyncHandler() {
-
-			@Override
-			public String getName() {
-				return CONFIG_NAME;
+					SLF4J_LOGGER.info("init cat server with cat server xml {}", localServerFile);
+					initialize(localServerFile);
+				} catch (Exception e) {
+					SLF4J_LOGGER.error("Unable to initialize server config from local server.xml.", e);
+					Cat.logError(e);
+				}
 			}
 
-			@Override
-			public void handle() throws Exception {
-				refreshConfig();
+			if (m_config == null) {
+				m_config = new ServerConfig();
+				SLF4J_LOGGER.warn("Server config is empty after initialization, using a new empty config.");
 			}
-		});
+
+			m_config.accept(new ServerConfigValidator());
+
+			try {
+				refreshServer();
+			} catch (Exception e) {
+				SLF4J_LOGGER.error("Unable to refresh local server config view.", e);
+				Cat.logError(e);
+			}
+
+			prepare();
+
+			TimerSyncTask.getInstance().register(new SyncHandler() {
+
+				@Override
+				public String getName() {
+					return CONFIG_NAME;
+				}
+
+				@Override
+				public void handle() throws Exception {
+					refreshConfig();
+				}
+			});
+			m_initialized = true;
+		} finally {
+			m_initializing = false;
+		}
 	}
 
 	public void initialize(File configFile) throws Exception {
-		if (configFile != null && configFile.canRead()) {
-			SLF4J_LOGGER.info("Loading configuration file({}) ...", configFile.getCanonicalPath());
+		m_initializing = true;
 
-			String xml = FileUtils.readFileToString(configFile, StandardCharsets.UTF_8);
-			m_config = DefaultSaxParser.parse(xml);
-			SLF4J_LOGGER.info("Loaded server config from local file, path={}.", configFile.getCanonicalPath());
-		} else {
-			if (configFile != null) {
-				SLF4J_LOGGER.warn("Server config local file is not readable, path={}.", configFile.getCanonicalPath());
+		try {
+			if (configFile != null && configFile.canRead()) {
+				SLF4J_LOGGER.info("Loading configuration file({}) ...", configFile.getCanonicalPath());
+
+				String xml = FileUtils.readFileToString(configFile, StandardCharsets.UTF_8);
+				m_config = DefaultSaxParser.parse(xml);
+				SLF4J_LOGGER.info("Loaded server config from local file, path={}.", configFile.getCanonicalPath());
+			} else {
+				if (configFile != null) {
+					SLF4J_LOGGER.warn("Server config local file is not readable, path={}.", configFile.getCanonicalPath());
+				}
+
+				m_config = new ServerConfig();
 			}
-
-			m_config = new ServerConfig();
+			m_config.accept(new ServerConfigValidator());
+			refreshServer();
+			prepare();
+			m_initialized = true;
+		} finally {
+			m_initializing = false;
 		}
 	}
 

@@ -19,18 +19,26 @@
 package com.dianping.cat.consumer.storage.builder;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
 
-public class StorageBuilderManager extends ContainerHolder implements Initializable {
+import com.dianping.cat.spring.CatSpringContext;
+
+public class StorageBuilderManager extends ContainerHolder {
+	private static final Logger LOGGER = LoggerFactory.getLogger(StorageBuilderManager.class);
 
 	private Map<String, StorageBuilder> m_storageBuilders;
 
+	private volatile boolean m_initialized;
+
 	public List<String> getDefaultMethods(String type) {
+		ensureInitialized();
+
 		StorageBuilder storageBuilder = m_storageBuilders.get(type);
 
 		if (storageBuilder != null) {
@@ -41,13 +49,46 @@ public class StorageBuilderManager extends ContainerHolder implements Initializa
 	}
 
 	public StorageBuilder getStorageBuilder(String type) {
+		ensureInitialized();
+
 		return m_storageBuilders.get(type);
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		refreshSpringBuilders();
+
 		if (m_storageBuilders == null) {
-			m_storageBuilders = lookupMap(StorageBuilder.class);
+			try {
+				m_storageBuilders = lookupMap(StorageBuilder.class);
+				LOGGER.info("Loaded storage builders from Plexus fallback, types={}.", m_storageBuilders.keySet());
+			} catch (RuntimeException e) {
+				m_storageBuilders = Collections.emptyMap();
+				LOGGER.warn("Unable to load storage builders from Spring or Plexus, keep empty builder map.", e);
+			}
+		}
+		m_initialized = true;
+	}
+
+	private void refreshSpringBuilders() {
+		Map<String, StorageBuilder> springBuilders = CatSpringContext.getBeansIfAvailable(StorageBuilder.class);
+
+		if (!springBuilders.isEmpty()) {
+			Map<String, StorageBuilder> builders = new LinkedHashMap<String, StorageBuilder>();
+
+			for (StorageBuilder builder : springBuilders.values()) {
+				builders.put(builder.getType(), builder);
+			}
+			m_storageBuilders = builders;
+			LOGGER.info("Loaded storage builders from Spring, types={}.", m_storageBuilders.keySet());
 		}
 	}
 

@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
@@ -44,7 +42,7 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class DefaultReportBucketManager extends ContainerHolder implements ReportBucketManager, Initializable {
+public class DefaultReportBucketManager extends ContainerHolder implements ReportBucketManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultReportBucketManager.class);
 
 	private ServerConfigManager m_configManager;
@@ -56,10 +54,13 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 
 	private File m_reportBaseDir;
 
+	private volatile boolean m_initialized;
+
 	private boolean m_plexusFallbackLogged;
 
 	@Override
 	public void clearOldReports() {
+		initialize();
 		refreshSpringBeans();
 
 		Transaction t = Cat.newTransaction("System", "DeleteReport");
@@ -107,6 +108,8 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 
 	@Override
 	public ReportBucket getReportBucket(long timestamp, String name, int index) throws IOException {
+		initialize();
+
 		Date date = new Date(timestamp);
 		ReportBucket bucket = null;
 
@@ -125,12 +128,14 @@ public class DefaultReportBucketManager extends ContainerHolder implements Repor
 		return bucket;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
-		refreshSpringBeans();
-		m_reportBaseDir = new File(Cat.getCatHome(), "bucket/report");
-		LOGGER.info("Initialized report bucket manager, baseDir={}, springBucketFactoryConfigured={}.",
-		      m_reportBaseDir.getAbsolutePath(), m_bucketFactory != null);
+	public synchronized void initialize() {
+		if (!m_initialized) {
+			refreshSpringBeans();
+			m_reportBaseDir = new File(Cat.getCatHome(), "bucket/report");
+			LOGGER.info("Initialized report bucket manager, baseDir={}, springBucketFactoryConfigured={}.",
+			      m_reportBaseDir.getAbsolutePath(), m_bucketFactory != null);
+			m_initialized = true;
+		}
 	}
 
 	private Set<String> queryValidPath(int day) {
