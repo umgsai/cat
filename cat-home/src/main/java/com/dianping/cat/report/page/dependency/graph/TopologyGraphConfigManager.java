@@ -20,13 +20,14 @@ package com.dianping.cat.report.page.dependency.graph;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.helper.Files;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.dianping.cat.Cat;
@@ -247,7 +248,7 @@ public class TopologyGraphConfigManager {
 
 		if (m_fileName != null) {
 			try {
-				String content = Files.forIO().readFrom(new File(m_fileName), "utf-8");
+				String content = FileUtils.readFileToString(new File(m_fileName), StandardCharsets.UTF_8);
 				m_config = DefaultSaxParser.parse(content);
 			} catch (Exception e) {
 				Cat.logError(e);
@@ -372,7 +373,7 @@ public class TopologyGraphConfigManager {
 
 		if (m_fileName != null) {
 			try {
-				Files.forIO().writeTo(new File(m_fileName), m_config.toString());
+				FileUtils.writeStringToFile(new File(m_fileName), m_config.toString(), StandardCharsets.UTF_8);
 			} catch (IOException e) {
 				Cat.logError(e);
 				return false;

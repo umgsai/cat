@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.tuple.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +62,7 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 				DailyReport report = m_dailyReportDao.findByDomainNamePeriod(domain, name, start, DailyReportEntity.READSET_FULL);
 				RouterConfig config = queryFromDailyBinary(report.getId());
 
-				routerConfigs.put(time, new Pair<RouterConfig, Long>(config, report.getCreationDate().getTime()));
+				routerConfigs.put(time, Pair.of(config, report.getCreationDate().getTime()));
 				return config;
 			} catch (DalNotFoundException e) {
 				// ignore

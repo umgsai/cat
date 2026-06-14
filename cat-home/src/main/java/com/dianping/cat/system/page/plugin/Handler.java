@@ -22,14 +22,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.lang.StringUtils;
-import org.unidal.helper.Files;
-import org.unidal.helper.Files.AutoClose;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -61,10 +61,12 @@ public class Handler implements PageHandler<Context> {
 		for (String path : paths) {
 			ZipEntry entry = new ZipEntry(path);
 			String resource = baseDir + "/" + path;
-			byte[] data = Files.forIO().readFrom(getClass().getResourceAsStream(resource));
 
 			zos.putNextEntry(entry);
-			zos.write(data);
+			try (InputStream in = getClass().getResourceAsStream(resource)) {
+				IOUtils.copy(in, zos);
+			}
+			zos.closeEntry();
 		}
 	}
 
@@ -90,7 +92,7 @@ public class Handler implements PageHandler<Context> {
 
 			sb.append('}');
 
-			byte[] content = sb.toString().getBytes("utf-8");
+			byte[] content = sb.toString().getBytes(StandardCharsets.UTF_8);
 
 			res.setContentType("application/json; charset=utf-8");
 			res.setContentLength(content.length);
@@ -108,7 +110,9 @@ public class Handler implements PageHandler<Context> {
 			res.setContentType("application/octet-stream");
 			res.addHeader("Content-Disposition", "attachment;filename=cat.crx");
 
-			Files.forIO().copy(is, res.getOutputStream(), AutoClose.INPUT);
+			try (InputStream in = is) {
+				IOUtils.copy(in, res.getOutputStream());
+			}
 		}
 
 		ctx.stopProcess();
@@ -158,7 +162,9 @@ public class Handler implements PageHandler<Context> {
 			res.setContentType("application/octet-stream");
 			res.addHeader("Content-Disposition", "attachment;filename=" + file);
 
-			Files.forIO().copy(is, res.getOutputStream(), AutoClose.INPUT);
+			try (InputStream in = is) {
+				IOUtils.copy(in, res.getOutputStream());
+			}
 		}
 
 		ctx.stopProcess();

@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.helper.Splitters;
+import com.google.common.base.Splitter;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -72,7 +72,7 @@ public class RouterConfigAdjustor {
 		StateReport report = m_stateReportService.queryHourlyReport(Constants.CAT, period, end);
 
 		String remoteServers = m_serverConfigManager.getConsoleRemoteServers();
-		List<String> servers = Splitters.by(",").noEmptyItem().split(remoteServers);
+		List<String> servers = Splitter.on(',').omitEmptyStrings().splitToList(remoteServers);
 
 		AdjustStateReportVisitor visitor = new AdjustStateReportVisitor(m_configManager, servers);
 

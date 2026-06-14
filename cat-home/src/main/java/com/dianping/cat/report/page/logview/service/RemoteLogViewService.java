@@ -21,10 +21,11 @@ package com.dianping.cat.report.page.logview.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
-import org.unidal.helper.Files;
-import org.unidal.helper.Urls;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -63,8 +64,7 @@ public class RemoteLogViewService extends BaseRemoteModelService<String> {
 
 			t.addData(url.toString());
 
-			InputStream in = Urls.forIO().connectTimeout(1000).readTimeout(5000).withGzip().openStream(url.toExternalForm());
-			String xml = Files.forIO().readFrom(in, "utf-8");
+			String xml = readFrom(url);
 
 			int len = xml == null ? 0 : xml.length();
 
@@ -84,6 +84,25 @@ public class RemoteLogViewService extends BaseRemoteModelService<String> {
 			t.complete();
 		}
 		return response;
+	}
+
+	private String readFrom(URL url) throws IOException {
+		URLConnection connection = url.openConnection();
+
+		connection.setConnectTimeout(1000);
+		connection.setReadTimeout(5000);
+		connection.setRequestProperty("Accept-Encoding", "gzip");
+
+		try (InputStream raw = connection.getInputStream();
+				InputStream in = isGzip(connection) ? new GZIPInputStream(raw) : raw) {
+			return IOUtils.toString(in, StandardCharsets.UTF_8);
+		}
+	}
+
+	private boolean isGzip(URLConnection connection) {
+		String encoding = connection.getContentEncoding();
+
+		return encoding != null && "gzip".equalsIgnoreCase(encoding);
 	}
 
 	@Override

@@ -37,6 +37,7 @@ import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 import org.apache.commons.net.util.SubnetUtils;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
+import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
@@ -44,7 +45,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.tuple.Pair;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -385,7 +385,7 @@ public class RouterConfigManager implements Initializable, LogEnabled {
 					      DailyReportContentEntity.READSET_FULL);
 					RouterConfig routerConfig = DefaultNativeParser.parse(reportContent.getContent());
 
-					m_routerConfigs.put(time, new Pair<RouterConfig, Long>(routerConfig, modifyTime));
+					m_routerConfigs.put(time, Pair.of(routerConfig, modifyTime));
 					Cat.logEvent("ReloadConfig", "router");
 				} catch (DalNotFoundException ignored) {
 					SLF4J_LOGGER.warn("Router report content not found while refreshing report cache, reportId={}.",
