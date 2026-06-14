@@ -25,13 +25,14 @@ import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.service.IpService.IpInfo;
 
-public class IpService2 implements Initializable {
+public class IpService2 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(IpService2.class);
 
 	private int m_offset;
 
@@ -42,6 +43,8 @@ public class IpService2 implements Initializable {
 	private ByteBuffer m_indexBuffer;
 
 	private ReentrantLock m_lock = new ReentrantLock();
+
+	private volatile boolean m_initialized;
 
 	private long bytesToLong(byte a, byte b, byte c, byte d) {
 		return int2long((((a & 0xff) << 24) | ((b & 0xff) << 16) | ((c & 0xff) << 8) | (d & 0xff)));
@@ -84,6 +87,8 @@ public class IpService2 implements Initializable {
 	}
 
 	public IpInfo findIpInfoByString(String ip) {
+		ensureInitialized();
+
 		String[] infos = find(ip);
 
 		if (infos.length >= 7) {
@@ -102,9 +107,19 @@ public class IpService2 implements Initializable {
 		return null;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		load("ip/ipdata.datx");
+		m_initialized = true;
 	}
 
 	private long int2long(int i) {
@@ -137,7 +152,8 @@ public class IpService2 implements Initializable {
 				}
 			}
 			m_indexBuffer.order(ByteOrder.BIG_ENDIAN);
-		} catch (IOException e) {
+		} catch (Exception e) {
+			LOGGER.error("Unable to load ip data, filename={}.", filename, e);
 			Cat.logError(e);
 		} finally {
 			m_lock.unlock();

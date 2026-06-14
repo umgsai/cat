@@ -84,6 +84,7 @@ import com.dianping.cat.consumer.top.TopAnalyzer;
 import com.dianping.cat.consumer.top.TopDelegate;
 import com.dianping.cat.consumer.top.model.entity.TopReport;
 import com.dianping.cat.consumer.config.AllReportConfigManager;
+import com.dianping.cat.consumer.dump.LocalMessageBucketManager;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionDelegate;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
@@ -134,6 +135,9 @@ import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.message.DefaultPathBuilder;
 import com.dianping.cat.message.PathBuilder;
+import com.dianping.cat.message.storage.LocalMessageBucket;
+import com.dianping.cat.message.storage.MessageBucketFactory;
+import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.mvc.PayloadNormalizer;
 import com.dianping.cat.report.DefaultReportBucketManager;
 import com.dianping.cat.report.DefaultReportManager;
@@ -1794,6 +1798,29 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public MessageBucketFactory legacyMessageBucketFactory() {
+		return (baseDir, dataFile) -> {
+			LocalMessageBucket bucket = new LocalMessageBucket();
+
+			bucket.setBaseDir(baseDir);
+			bucket.initialize(dataFile);
+			return bucket;
+		};
+	}
+
+	@Bean(initMethod = "initialize", name = "legacyLocalMessageBucketManager")
+	public MessageBucketManager localMessageBucketManager(ServerConfigManager serverConfigManager, PathBuilder pathBuilder,
+			ServerStatisticManager serverStatisticManager, MessageBucketFactory legacyMessageBucketFactory) {
+		LocalMessageBucketManager manager = new LocalMessageBucketManager();
+
+		manager.setConfigManager(serverConfigManager);
+		manager.setPathBuilder(pathBuilder);
+		manager.setServerStateManager(serverStatisticManager);
+		manager.setBucketFactory(legacyMessageBucketFactory);
+		return manager;
+	}
+
+	@Bean
 	public MessageFinderManager messageFinderManager() {
 		return new DefaultMessageFinderManager();
 	}
@@ -2562,12 +2589,14 @@ public class CatHomeSpringConfiguration {
 
 	@Bean(initMethod = "initialize")
 	public LocalModelService<String> localMessageService(ServerConfigManager serverConfigManager,
-			MessageFinderManager messageFinderManager, @Qualifier("local") BucketManager localBucketManager) {
+			MessageFinderManager messageFinderManager, @Qualifier("local") BucketManager localBucketManager,
+			@Qualifier("legacyLocalMessageBucketManager") MessageBucketManager localMessageBucketManager) {
 		LocalMessageService service = new LocalMessageService();
 
 		service.setConfigManager(serverConfigManager);
 		service.setFinderManager(messageFinderManager);
 		service.setBucketManager(localBucketManager);
+		service.setMessageBucketManager(localMessageBucketManager);
 		return service;
 	}
 

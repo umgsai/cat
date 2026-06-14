@@ -18,22 +18,21 @@
  */
 package com.dianping.cat.report.service;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalSupport
-						implements ModelService<T>,	Initializable {
+						implements ModelService<T> {
 
 	protected ServerConfigManager m_configManager;
 
 	private boolean m_localMode = true;
 
 	private String m_name;
+
+	private volatile boolean m_initialized;
 
 	public BaseHistoricalModelService(String name) {
 		m_name = name;
@@ -46,18 +45,30 @@ public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalS
 		return m_name;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 
 		if (configManager != null) {
 			m_configManager = configManager;
 		}
 		m_localMode = m_configManager.isLocalMode();
+		m_initialized = true;
 	}
 
 	@Override
 	public ModelResponse<T> invoke(ModelRequest request) {
+		ensureInitialized();
+
 		ModelResponse<T> response = new ModelResponse<T>();
 		Transaction t = newTransaction("ModelService", getClass().getSimpleName());
 		t.addData("thread", Thread.currentThread());
@@ -80,6 +91,8 @@ public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalS
 
 	@Override
 	public boolean isEligable(ModelRequest request) {
+		ensureInitialized();
+
 		return request.getPeriod().isHistorical();
 	}
 

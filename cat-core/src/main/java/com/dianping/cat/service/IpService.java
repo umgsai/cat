@@ -25,14 +25,12 @@ import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
-public class IpService implements Initializable {
+public class IpService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(IpService.class);
 
 	private static final String OTHER = "其他";
@@ -56,6 +54,8 @@ public class IpService implements Initializable {
 	private long[] m_foreignEnds;
 
 	private long[] m_foreignStarts;
+
+	private volatile boolean m_initialized;
 
 	private String FOREIGN_OTHER = "国外其他";
 
@@ -147,6 +147,8 @@ public class IpService implements Initializable {
 	}
 
 	public IpInfo findIpInfoByString(String ip) {
+		ensureInitialized();
+
 		try {
 			String[] segments = ip.split("\\.");
 			if (segments.length != 4) {
@@ -162,6 +164,12 @@ public class IpService implements Initializable {
 		} catch (Exception e) {
 			LOGGER.warn("Unable to parse ip string, ip={}.", ip, e);
 			return null;
+		}
+	}
+
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
 		}
 	}
 
@@ -278,8 +286,11 @@ public class IpService implements Initializable {
 		}
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		InputStream areaFile = IpService.class.getClassLoader().getResourceAsStream("ip/area_china");
 		InputStream corpFile = IpService.class.getClassLoader().getResourceAsStream("ip/corp_china");
 		InputStream ipFile = IpService.class.getClassLoader().getResourceAsStream("ip/iptable_china");
@@ -293,6 +304,7 @@ public class IpService implements Initializable {
 
 		initForeignAreaMap(foreignAreaFile);
 		initForeignIpTable(foreignIpFile);
+		m_initialized = true;
 		LOGGER.info("IpService initialized.");
 	}
 

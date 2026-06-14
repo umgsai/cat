@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +39,7 @@ import com.dianping.cat.home.business.entity.Tag;
 import com.dianping.cat.home.business.transform.DefaultSaxParser;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class BusinessTagConfigManager implements Initializable {
+public class BusinessTagConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessTagConfigManager.class);
 
 	public final static String TAG_CONFIG = "tag";
@@ -52,19 +50,27 @@ public class BusinessTagConfigManager implements Initializable {
 
 	private BusinessTagConfig m_tagConfig = new BusinessTagConfig();
 
+	private volatile boolean m_initialized;
+
 	public void setConfigDao(BusinessConfigRepository configDao) {
 		m_configDao = configDao;
 	}
 
 	public Set<String> findAllTags() {
+		ensureInitialized();
+
 		return m_tagConfig.getTags().keySet();
 	}
 
 	public Tag findTag(String id) {
+		ensureInitialized();
+
 		return m_tagConfig.findTag(id);
 	}
 
 	public Map<String, Set<String>> findTagByDomain(String domain) {
+		ensureInitialized();
+
 		Map<String, Set<String>> domainTags = new HashMap<String, Set<String>>();
 		Map<String, Tag> tags = m_tagConfig.getTags();
 
@@ -89,11 +95,21 @@ public class BusinessTagConfigManager implements Initializable {
 	}
 
 	public BusinessTagConfig getConfig() {
+		ensureInitialized();
 		return m_tagConfig;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		refreshSpringBeans();
 
 		try {
@@ -124,9 +140,12 @@ public class BusinessTagConfigManager implements Initializable {
 			LOGGER.error("Unable to initialize business tag config.", e);
 			Cat.logError(e);
 		}
+		m_initialized = true;
 	}
 
 	public boolean store(String xml) {
+		ensureInitialized();
+
 		try {
 			m_tagConfig = DefaultSaxParser.parse(xml);
 

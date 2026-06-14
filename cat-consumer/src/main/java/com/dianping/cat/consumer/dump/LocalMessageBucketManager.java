@@ -37,8 +37,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Stream;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
 import org.unidal.lookup.ContainerHolder;
@@ -61,11 +59,12 @@ import com.dianping.cat.message.storage.MessageBucketFactory;
 import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.statistic.ServerStatisticManager;
+import com.dianping.cat.spring.CatSpringContext;
 
 import io.netty.buffer.ByteBuf;
 
 public class LocalMessageBucketManager extends ContainerHolder
-						implements MessageBucketManager, Initializable {
+						implements MessageBucketManager {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalMessageBucketManager.class);
 
 	public static final String ID = "local";
@@ -105,6 +104,8 @@ public class LocalMessageBucketManager extends ContainerHolder
 
 	@Override
 	public void archive(long startTime) {
+		ensureInitialized();
+
 		String path = m_pathBuilder.getLogviewPath(new Date(startTime), "");
 		List<String> keys = new ArrayList<String>();
 
@@ -128,6 +129,8 @@ public class LocalMessageBucketManager extends ContainerHolder
 	}
 
 	public List<String> findCloseBuckets() {
+		ensureInitialized();
+
 		final Set<String> paths = new HashSet<String>();
 
 		for (String path : listRelativeFiles(m_baseDir)) {
@@ -144,8 +147,20 @@ public class LocalMessageBucketManager extends ContainerHolder
 		return new ArrayList<String>(paths);
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	private volatile boolean m_initialized;
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		refreshSpringBeans();
+
 		if (!m_configManager.isUseNewStorage()) {
 			m_baseDir = new File(m_configManager.getHdfsLocalBaseDir(ServerConfigManager.DUMP_DIR));
 
@@ -164,10 +179,13 @@ public class LocalMessageBucketManager extends ContainerHolder
 			}
 			m_last = m_messageQueues.get(m_gzipThreads - 1);
 		}
+		m_initialized = true;
 	}
 
 	@Override
 	public MessageTree loadMessage(String messageId) {
+		ensureInitialized();
+
 		Transaction t = Cat.newTransaction("BucketService", getClass().getSimpleName());
 
 		t.setStatus(Message.SUCCESS);
@@ -301,6 +319,26 @@ public class LocalMessageBucketManager extends ContainerHolder
 		m_serverStateManager = serverStateManager;
 	}
 
+	private void refreshSpringBeans() {
+		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+		ServerStatisticManager serverStateManager = CatSpringContext.getBeanIfAvailable(ServerStatisticManager.class);
+		PathBuilder pathBuilder = CatSpringContext.getBeanIfAvailable(PathBuilder.class);
+		MessageBucketFactory bucketFactory = CatSpringContext.getBeanIfAvailable(MessageBucketFactory.class);
+
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
+		if (serverStateManager != null) {
+			m_serverStateManager = serverStateManager;
+		}
+		if (pathBuilder != null) {
+			m_pathBuilder = pathBuilder;
+		}
+		if (bucketFactory != null) {
+			m_bucketFactory = bucketFactory;
+		}
+	}
+
 	private boolean shouldUpload(String path) {
 		long current = System.currentTimeMillis();
 		long currentHour = current - current % TimeHelper.ONE_HOUR;
@@ -323,6 +361,8 @@ public class LocalMessageBucketManager extends ContainerHolder
 
 	@Override
 	public void storeMessage(final MessageTree tree, final MessageId id) {
+		ensureInitialized();
+
 		boolean errorFlag = true;
 		int hash = Math.abs((id.getDomain() + '-' + id.getIpAddress()).hashCode());
 		int index = (int) (hash % m_gzipThreads);

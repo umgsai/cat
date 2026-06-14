@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +33,7 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.mvc.ApiPayload;
 import com.dianping.cat.spring.CatSpringContext;
 
-public abstract class LocalModelService<T> implements Initializable {
+public abstract class LocalModelService<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LocalModelService.class);
 
 	public static final int DEFAULT_SIZE = 32 * 1024;
@@ -49,6 +47,8 @@ public abstract class LocalModelService<T> implements Initializable {
 	private String m_defaultDomain = Constants.CAT;
 
 	private String m_name;
+
+	private volatile boolean m_initialized;
 
 	public LocalModelService(String name) {
 		m_name = name;
@@ -67,6 +67,8 @@ public abstract class LocalModelService<T> implements Initializable {
 
 	@SuppressWarnings("unchecked")
 	protected List<T> getReport(ModelPeriod period, String domain) throws Exception {
+		ensureInitialized();
+
 		List<MessageAnalyzer> analyzers = null;
 
 		if (domain == null || domain.length() == 0) {
@@ -97,6 +99,8 @@ public abstract class LocalModelService<T> implements Initializable {
 	}
 
 	public String getReport(ModelRequest request, ModelPeriod period, String domain, ApiPayload payload)	throws Exception {
+		ensureInitialized();
+
 		try {
 			return buildReport(request, period, domain, payload);
 		} catch (ConcurrentModificationException e) {
@@ -104,8 +108,17 @@ public abstract class LocalModelService<T> implements Initializable {
 		}
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 		MessageConsumer consumer = CatSpringContext.getBeanIfAvailable(MessageConsumer.class);
 
@@ -117,6 +130,7 @@ public abstract class LocalModelService<T> implements Initializable {
 		}
 		m_defaultDomain = m_configManager.getConsoleDefaultDomain();
 		m_analyzerCount = m_configManager.getThreadsOfRealtimeAnalyzer(m_name);
+		m_initialized = true;
 	}
 
 	public void setConfigManager(ServerConfigManager configManager) {

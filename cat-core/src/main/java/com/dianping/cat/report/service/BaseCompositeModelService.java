@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
@@ -37,7 +34,7 @@ import com.dianping.cat.report.server.RemoteServersManager;
 import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSupport
-						implements ModelService<T>,	Initializable {
+						implements ModelService<T> {
 
 	protected ServerConfigManager m_configManager;
 
@@ -48,6 +45,8 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 	private List<ModelService<T>> m_allServices = new ArrayList<ModelService<T>>();
 
 	private String m_name;
+
+	private volatile boolean m_initialized;
 
 	public BaseCompositeModelService(String name) {
 		m_name = name;
@@ -60,8 +59,17 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 		return m_name;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 		RemoteServersManager serverManager = CatSpringContext.getBeanIfAvailable(RemoteServersManager.class);
 
@@ -92,6 +100,7 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 			remote.setRemoteServersManager(m_serverManager);
 			m_allServices.add(remote);
 		}
+		m_initialized = true;
 	}
 
 	private String buildHost(String endpoint, int pos) {
@@ -121,6 +130,8 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 
 	@Override
 	public ModelResponse<T> invoke(final ModelRequest request) {
+		ensureInitialized();
+
 		int requireSize = 0;
 		final List<ModelResponse<T>> responses = Collections.synchronizedList(new ArrayList<ModelResponse<T>>());
 		final Semaphore semaphore = new Semaphore(0);
@@ -192,6 +203,8 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 
 	@Override
 	public boolean isEligable(ModelRequest request) {
+		ensureInitialized();
+
 		for (ModelService<T> service : m_allServices) {
 			if (service.isEligable(request)) {
 				return true;

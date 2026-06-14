@@ -38,8 +38,6 @@ import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 import org.apache.commons.net.util.SubnetUtils;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.apache.commons.lang3.tuple.Pair;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
@@ -49,7 +47,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class RouterConfigManager implements Initializable {
+public class RouterConfigManager {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RouterConfigManager.class);
 
 	public static final String DEFAULT = "default";
@@ -83,6 +81,8 @@ public class RouterConfigManager implements Initializable {
 		}
 	};
 
+	private volatile boolean m_initialized;
+
 	private void addServerList(List<Server> servers, Server server) {
 		for (Server s : servers) {
 			if (s.getId().equals(server.getId())) {
@@ -93,10 +93,12 @@ public class RouterConfigManager implements Initializable {
 	}
 
 	public RouterConfig getRouterConfig() {
+		ensureInitialized();
 		return m_routerConfig;
 	}
 
 	public Map<Long, Pair<RouterConfig, Long>> getRouterConfigs() {
+		ensureInitialized();
 		return m_routerConfigs;
 	}
 
@@ -116,8 +118,17 @@ public class RouterConfigManager implements Initializable {
 		m_fetcher = fetcher;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		refreshSpringBeans();
 
 		try {
@@ -172,9 +183,12 @@ public class RouterConfigManager implements Initializable {
 				refreshReportInfo();
 			}
 		});
+		m_initialized = true;
 	}
 
 	public boolean insert(String xml) {
+		ensureInitialized();
+
 		try {
 			RouterConfig routerConfig = DefaultSaxParser.parse(xml);
 
@@ -199,21 +213,29 @@ public class RouterConfigManager implements Initializable {
 	}
 
 	public boolean notCustomizedDomains(String group, Domain domainConfig) {
+		ensureInitialized();
+
 		return domainConfig == null || domainConfig.findGroup(group) == null
 		      || domainConfig.findGroup(group).getServers().isEmpty();
 	}
 
 	public boolean notCustomizedDomains(String group, String domain) {
+		ensureInitialized();
+
 		Domain domainConfig = m_routerConfig.findDomain(domain);
 
 		return notCustomizedDomains(group, domainConfig);
 	}
 
 	public Server queryBackUpServer() {
+		ensureInitialized();
+
 		return new Server().setId(m_routerConfig.getBackupServer()).setPort(m_routerConfig.getBackupServerPort());
 	}
 
 	public Map<String, Server> queryEnableServers() {
+		ensureInitialized();
+
 		return queryEnableServers(m_routerConfig);
 	}
 
@@ -251,6 +273,8 @@ public class RouterConfigManager implements Initializable {
 	}
 
 	public DefaultServer queryServerByIp(String ip) {
+		ensureInitialized();
+
 		DefaultServer server = m_routerConfig.getDefaultServers().get(ip);
 
 		if (server != null) {
@@ -260,6 +284,8 @@ public class RouterConfigManager implements Initializable {
 	}
 
 	public String queryServerGroupByIp(String ip) {
+		ensureInitialized();
+
 		String group = m_ipToGroupInfo.get(ip);
 
 		if (group == null) {
@@ -275,6 +301,8 @@ public class RouterConfigManager implements Initializable {
 	}
 
 	public List<Server> queryServersByDomain(String group, String domain) {
+		ensureInitialized();
+
 		Domain domainConfig = m_routerConfig.findDomain(domain);
 		List<Server> result = new ArrayList<Server>();
 		boolean noExist = notCustomizedDomains(group, domainConfig);
@@ -388,6 +416,8 @@ public class RouterConfigManager implements Initializable {
 	}
 
 	public boolean shouldBlock(String ip) {
+		ensureInitialized();
+
 		String group = queryServerGroupByIp(ip);
 		NetworkPolicy networkPolicy = m_routerConfig.findNetworkPolicy(group);
 

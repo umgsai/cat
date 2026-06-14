@@ -23,8 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
@@ -44,7 +42,7 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-public class AllReportConfigManager implements Initializable {
+public class AllReportConfigManager {
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AllReportConfigManager.class);
 
 	private static final String CONFIG_NAME = "all-report-config";
@@ -59,12 +57,24 @@ public class AllReportConfigManager implements Initializable {
 
 	private long m_modifyTime;
 
+	private volatile boolean m_initialized;
+
 	public AllConfig getConfig() {
+		ensureInitialized();
 		return m_config;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		refreshSpringBeans();
 
 		try {
@@ -110,9 +120,12 @@ public class AllReportConfigManager implements Initializable {
 				return CONFIG_NAME;
 			}
 		});
+		m_initialized = true;
 	}
 
 	public boolean insert(String xml) {
+		ensureInitialized();
+
 		try {
 			m_config = DefaultSaxParser.parse(xml);
 			boolean result = storeConfig();
@@ -161,6 +174,8 @@ public class AllReportConfigManager implements Initializable {
 	}
 
 	public boolean validate(String reportName, String type) {
+		ensureInitialized();
+
 		Report report = m_config.getReports().get(reportName);
 
 		if (report != null) {
@@ -173,6 +188,8 @@ public class AllReportConfigManager implements Initializable {
 	}
 
 	public boolean validate(String reportName, String type, String name) {
+		ensureInitialized();
+
 		Report report = m_config.getReports().get(reportName);
 
 		if (report != null) {

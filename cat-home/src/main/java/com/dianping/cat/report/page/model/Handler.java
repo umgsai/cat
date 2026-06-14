@@ -178,8 +178,12 @@ public class Handler extends ContainerHolder implements Initializable, PageHandl
 				LocalMessageService localMessageService = (LocalMessageService) service;
 				MessageFinderManager finderManager = lookupSpringOrPlexus(MessageFinderManager.class);
 				BucketManager bucketManager = lookupSpringOrPlexus("local", BucketManager.class);
-				MessageBucketManager messageBucketManager = lookupSpringOrPlexus(LocalMessageBucketManager.ID,
+				MessageBucketManager messageBucketManager = CatSpringContext.getBeanIfAvailable("legacyLocalMessageBucketManager",
 				      MessageBucketManager.class);
+
+				if (messageBucketManager == null) {
+					messageBucketManager = lookupSpringOrPlexus(LocalMessageBucketManager.ID, MessageBucketManager.class);
+				}
 
 				localMessageService.setFinderManager(finderManager);
 				localMessageService.setBucketManager(bucketManager);

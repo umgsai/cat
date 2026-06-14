@@ -23,8 +23,6 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.core.mybatis.repository.project.ProjectRepository;
 import com.dianping.cat.core.dal.ProjectEntity;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
@@ -33,7 +31,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProjectService implements Initializable {
+public class ProjectService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectService.class);
 
 	public static final String DEFAULT = "Default";
@@ -48,7 +46,11 @@ public class ProjectService implements Initializable {
 
 	private ConcurrentHashMap<String, Project> m_cmdbToProjects = new ConcurrentHashMap<String, Project>();
 
+	private volatile boolean m_initialized;
+
 	public boolean contains(String domain) {
+		ensureInitialized();
+
 		return m_domains.containsKey(domain);
 	}
 
@@ -57,6 +59,8 @@ public class ProjectService implements Initializable {
 	}
 
 	public boolean delete(Project project) {
+		ensureInitialized();
+
 		int id = project.getId();
 		String domainName = null;
 
@@ -92,14 +96,20 @@ public class ProjectService implements Initializable {
 	}
 
 	public List<Project> findAll() throws DalException {
+		ensureInitialized();
+
 		return new ArrayList<Project>(m_domainToProjects.values());
 	}
 
 	public Set<String> findAllDomains() {
+		ensureInitialized();
+
 		return m_domains.keySet();
 	}
 
 	public Project findByDomain(String domainName) {
+		ensureInitialized();
+
 		Project project = m_domainToProjects.get(domainName);
 
 		if (project != null) {
@@ -121,6 +131,8 @@ public class ProjectService implements Initializable {
 	}
 
 	public Map<String, Department> findDepartments(Collection<String> domains) {
+		ensureInitialized();
+
 		Map<String, Department> departments = new TreeMap<String, Department>();
 
 		for (String domain : domains) {
@@ -148,6 +160,8 @@ public class ProjectService implements Initializable {
 	}
 
 	public Project findProject(String domain) {
+		ensureInitialized();
+
 		Project project = m_domainToProjects.get(domain);
 
 		if (project == null) {
@@ -156,14 +170,24 @@ public class ProjectService implements Initializable {
 		return project;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		if (!m_manager.isLocalMode()) {
 			LOGGER.info("Initializing ProjectService in remote mode.");
 			refresh();
 		} else {
 			LOGGER.info("Initializing ProjectService in local mode; skip database refresh.");
 		}
+		m_initialized = true;
 	}
 
 	public void setProjectDao(ProjectRepository projectDao) {
@@ -175,6 +199,8 @@ public class ProjectService implements Initializable {
 	}
 
 	public boolean insert(Project project) {
+		ensureInitialized();
+
 		m_domainToProjects.put(project.getDomain(), project);
 
 		try {
@@ -196,6 +222,8 @@ public class ProjectService implements Initializable {
 	}
 
 	public boolean insert(String domain) {
+		ensureInitialized();
+
 		Project project = create();
 
 		project.setDomain(domain);
@@ -245,6 +273,8 @@ public class ProjectService implements Initializable {
 	}
 
 	public boolean update(Project project) {
+		ensureInitialized();
+
 		m_domainToProjects.put(project.getDomain(), project);
 
 		try {
