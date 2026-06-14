@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
 import org.unidal.helper.Urls;
@@ -68,7 +67,7 @@ public class TestHttp {
 						InputStream in = Urls.forIO().readTimeout(3000).connectTimeout(3000)
 												.openStream("http://cat.qa.dianpingoa.com/cat/r/");
 
-						String content = Files.forIO().readFrom(in, "utf-8");
+						String content = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 						System.out.println(" id:" + m_index + " seq" + i + " length:" + content.length());
 					} catch (Exception e) {
 						e.printStackTrace();

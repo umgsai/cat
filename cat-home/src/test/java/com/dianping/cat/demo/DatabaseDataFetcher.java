@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
 import org.unidal.webres.json.JsonArray;
 import org.unidal.webres.json.JsonObject;
@@ -42,7 +41,7 @@ public class DatabaseDataFetcher {
 		for (int n = 2; n < 7; n++) {
 			try {
 				InputStream stream = Urls.forIO().connectTimeout(5000).readTimeout(10000).openStream(String.format(url, n));
-				String result = Files.forIO().readFrom(stream, "utf-8");
+				String result = new String(stream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 				JsonObject jo = new JsonObject(result);
 				JsonArray array = jo.getJSONArray("lineCharts");
 				Map<Long, Double> datas = new LinkedHashMap<Long, Double>();

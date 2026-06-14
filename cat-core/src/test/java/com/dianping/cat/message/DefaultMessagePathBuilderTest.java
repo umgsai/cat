@@ -21,17 +21,17 @@ package com.dianping.cat.message;
 import java.text.Format;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Splitters;
 
 public class DefaultMessagePathBuilderTest {
 	private String convertToHex(String ip) {
-		List<String> items = Splitters.by(".").noEmptyItem().split(ip);
+		List<String> items = Arrays.asList(ip.split("\\."));
 		byte[] bytes = new byte[4];
 
 		for (int i = 0; i < 4; i++) {
@@ -61,7 +61,7 @@ public class DefaultMessagePathBuilderTest {
 		String path = "20120807/14/Cat-Cat-192.168.64.153";
 		Object[] objects = format.parse(path);
 		Date timestamp = (Date) objects[0];
-		List<String> parts = Splitters.by('-').split((String) objects[1]);
+		List<String> parts = Arrays.asList(((String) objects[1]).split("-"));
 		String domain = parts.get(1);
 		String ip = parts.get(2);
 		String id = domain + "-" + convertToHex(ip) + "-" + timestamp.getTime() / 3600000L + "-0";

@@ -43,7 +43,7 @@ public class TestApi {
 	private String fetchContent(String url) throws Exception {
 		InputStream in = Urls.forIO().readTimeout(3000).connectTimeout(3000).openStream(url);
 
-		return Files.forIO().readFrom(in, "utf-8");
+		return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 	}
 
 	private Pair<Integer, Double> parse(String content) throws ParseException {

@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.transaction.model.entity.Machine;

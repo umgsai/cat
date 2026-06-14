@@ -23,7 +23,6 @@ import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
@@ -71,7 +70,7 @@ public class ProblemAnalyzerTest extends ComponentTestCase {
 
 		ProblemReport report = m_analyzer.getReport(m_domain);
 
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("problem_analyzer.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("problem_analyzer.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		ProblemReport expected4report =  com.dianping.cat.consumer.problem.model.transform.DefaultSaxParser.parse(expected);
 		
 		Assert.assertTrue(TestHelper.isEquals(expected4report,report));

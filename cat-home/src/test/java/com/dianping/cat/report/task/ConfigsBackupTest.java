@@ -25,7 +25,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.helper.Files;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.core.config.Config;
@@ -57,7 +56,7 @@ public class ConfigsBackupTest extends ComponentTestCase {
 			File backupFile = new File(filePath);
 
 			try {
-				Files.forIO().writeTo(backupFile, context);
+				java.nio.file.Files.writeString(backupFile.toPath(), context, java.nio.charset.StandardCharsets.UTF_8);
 			} catch (IOException e) {
 				return false;
 			}

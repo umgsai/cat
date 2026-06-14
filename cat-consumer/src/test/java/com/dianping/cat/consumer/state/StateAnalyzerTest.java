@@ -25,7 +25,6 @@ import java.util.TimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
@@ -55,7 +54,7 @@ public class StateAnalyzerTest extends ComponentTestCase {
 	public void testProcess() throws Exception {
 		StateReport report = m_analyzer.getReport(m_domain);
 
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("state_analyzer.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("state_analyzer.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
 		Assert.assertEquals(expected.replaceAll("\r", ""), report.toString().replaceAll("\r", ""));
 	}

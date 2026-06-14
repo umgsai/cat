@@ -20,7 +20,6 @@ package com.dianping.cat.report.page.cross;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.cross.CrossReportMerger;
 import com.dianping.cat.consumer.cross.model.entity.CrossReport;
@@ -29,11 +28,11 @@ import com.dianping.cat.consumer.cross.model.transform.DefaultSaxParser;
 public class CrossReportMergerTest {
 	@Test
 	public void testCrossReportMerge() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("CrossReportOld.xml"), "utf-8");
-		String newXml = Files.forIO().readFrom(getClass().getResourceAsStream("CrossReportNew.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("CrossReportOld.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String newXml = new String(getClass().getResourceAsStream("CrossReportNew.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		CrossReport reportOld = DefaultSaxParser.parse(oldXml);
 		CrossReport reportNew = DefaultSaxParser.parse(newXml);
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("CrossReportMergeResult.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("CrossReportMergeResult.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		CrossReportMerger merger = new CrossReportMerger(new CrossReport(reportOld.getDomain()));
 
 		reportOld.accept(merger);

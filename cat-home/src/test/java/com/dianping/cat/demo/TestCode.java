@@ -54,7 +54,7 @@ public class TestCode {
 			for (int j = 0; j < 5; j++) {
 				String url = String.format(format, time, "database" + j);
 				InputStream in = Urls.forIO().readTimeout(1000).connectTimeout(1000).openStream(url);
-				Files.forIO().readFrom(in, "utf-8");
+				new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 			}
 		}
 	}

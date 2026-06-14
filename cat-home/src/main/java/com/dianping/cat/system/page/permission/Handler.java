@@ -21,7 +21,7 @@ package com.dianping.cat.system.page.permission;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;

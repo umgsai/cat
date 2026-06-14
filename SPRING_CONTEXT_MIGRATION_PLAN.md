@@ -1160,6 +1160,191 @@ mvn -pl cat-home -am -DskipTests compile
 mvn -pl cat-boot -am package -DskipTests "-Dmaven.javadoc.skip=true"
 ```
 
+## 19. 终极目标：移除 Unidal / Plexus 相关依赖的后续路线
+
+本节记录 2026-06-14 之后的后续操作计划。当前 `@Named` / `@Inject` lookup 注解已经基本清空，但项目距离彻底移除 Unidal / Plexus 依赖仍有明显距离。后续重点需要从“注解迁移”切换到“依赖拆解”。
+
+### 19.1 当前依赖面分层
+
+当前剩余依赖大致分为四层：
+
+1. 构建期依赖
+
+```text
+org.unidal.maven.plugins:codegen-maven-plugin
+org.unidal.maven.plugins:plexus-maven-plugin
+```
+
+这两类插件仍负责生成 DAL model、DAL JDBC 代码，以及 `META-INF/plexus/components.xml`。在 DAL、MVC、运行时容器完全替换前，不应直接删除。
+
+2. 运行时容器和 descriptor
+
+```text
+META-INF/plexus/components.xml
+org.unidal.lookup.*
+org.codehaus.plexus.*
+```
+
+这部分仍承载旧容器的组件注册、`lookup(...)`、`lookupMap(...)`、生命周期初始化和 fallback 链路。当前不能一次性删除。
+
+3. Web MVC 依赖
+
+```text
+org.unidal.web.mvc.*
+org.unidal.web.MVC
+BaseJspViewer
+PageHandler
+ActionContext
+PayloadMeta / ModelMeta / FieldMeta
+```
+
+这部分影响 `/cat/r/*`、`/cat/s/*` 路由、页面 handler、payload、model、JSP viewer 和 servlet 初始化链路，属于高风险迁移项，应放在中后期。
+
+4. 工具类 / 辅助类 / 测试基建
+
+```text
+org.unidal.helper.*
+org.unidal.tuple.Pair
+org.unidal.lookup.util.StringUtils
+org.codehaus.plexus.util.StringUtils
+org.unidal.lookup.ComponentTestCase
+lookup(...) in tests
+```
+
+这部分风险相对低，适合作为下一阶段的入口，用小批量替换逐步缩小 Unidal 依赖面。
+
+### 19.2 推荐拆除顺序
+
+后续建议按以下顺序推进：
+
+1. 建立依赖清单和防回归检查。
+2. 替换低风险工具类和辅助类。
+3. 清理测试中的 `ComponentTestCase` / `lookup(...)`。
+4. 迁移剩余 `lookupMap(...)` 扩展点管理器。
+5. 替换或隔离 Unidal Web MVC。
+6. 替换或隔离 Unidal DAL / codegen。
+7. 移除 `plexus-maven-plugin` 和 `components.xml` 生成链路。
+8. 最后移除根 POM 中 Unidal / Plexus 相关依赖和仓库配置。
+
+### 19.3 下一步具体执行项
+
+下一步不建议直接删除 POM 依赖，而是先做“依赖清单 + 第一批低风险替换”。
+
+执行项如下：
+
+1. 生成按模块统计的源码引用清单：
+
+```powershell
+rg -n "org\.unidal\.lookup|org\.unidal\.web\.mvc|org\.unidal\.dal\.jdbc|org\.unidal\.helper|org\.unidal\.tuple|org\.codehaus\.plexus" --glob "**/src/**/*.{java,scala,xml}" .
+```
+
+输出需要按模块分组，区分：
+
+```text
+cat-client
+cat-core
+cat-consumer
+cat-hadoop
+cat-alarm
+cat-home
+cat-boot
+integration
+```
+
+2. 先替换低风险工具类：
+
+```text
+org.codehaus.plexus.util.StringUtils
+org.unidal.lookup.util.StringUtils
+org.unidal.tuple.Pair
+org.unidal.helper.Files
+org.unidal.helper.Splitters
+org.unidal.helper.Urls
+```
+
+替换原则：
+
+```text
+StringUtils -> JDK / Spring / Apache Commons Lang 中已存在能力
+Pair -> Java record / Map.Entry / Spring Pair / 局部小对象
+Files -> java.nio.file.Files
+Urls -> java.net.URI / URL / URLEncoder / UriComponentsBuilder
+Splitters -> JDK String split / Pattern / Stream
+```
+
+每一批只替换一个工具类族，避免同时改动业务语义和依赖边界。
+
+3. 优先选择不影响启动链路的目录：
+
+```text
+cat-home/src/main/java/com/dianping/cat/report/page/*/transform
+cat-home/src/main/java/com/dianping/cat/report/page/*/graph
+cat-home/src/main/java/com/dianping/cat/report/page/*/display
+cat-consumer/src/test/java
+cat-core/src/test/java
+```
+
+暂缓目录：
+
+```text
+cat-home/src/main/java/com/dianping/cat/*/Handler.java
+cat-home/src/main/java/com/dianping/cat/*/Payload.java
+cat-home/src/main/java/com/dianping/cat/*/Model.java
+cat-home/src/main/java/com/dianping/cat/*/JspViewer.java
+CatServlet / CatHomeModule / Web MVC 初始化链路
+DAL repository / DAO / codegen 生成类
+```
+
+4. 替换后执行精确扫描：
+
+```powershell
+rg -n "org\.unidal\.lookup\.util\.StringUtils|org\.codehaus\.plexus\.util\.StringUtils|org\.unidal\.tuple\.Pair|org\.unidal\.helper\.(Files|Splitters|Urls)" --glob "**/src/**/*.{java,scala}" .
+```
+
+5. 执行 Maven 验证：
+
+```powershell
+mvn validate
+mvn -pl cat-home -am -DskipTests compile
+mvn -pl cat-boot -am package -DskipTests "-Dmaven.javadoc.skip=true"
+```
+
+如果只改测试代码，则至少执行：
+
+```powershell
+mvn -pl cat-consumer,cat-home -am -DskipTests test-compile
+```
+
+### 19.4 暂时不要做的事
+
+在完成工具类、测试基建、`lookupMap(...)` 和 Web MVC 替换前，暂时不要执行以下操作：
+
+1. 不要删除根 POM 中的 `org.unidal.framework` 依赖。
+2. 不要删除 `org.unidal.maven.plugins:codegen-maven-plugin`。
+3. 不要删除 `org.unidal.maven.plugins:plexus-maven-plugin`。
+4. 不要删除任何 `META-INF/plexus/components.xml`。
+5. 不要全量替换 `org.unidal.web.mvc.*`。
+6. 不要一次性重写 DAL / DAO / Repository 层。
+7. 不要因为看到第三方 `@Inject` 就全局禁用 `@Inject`；当前只应禁止 `org.unidal.lookup.annotation.Inject` 和 `org.unidal.lookup.annotation.Named`。
+
+### 19.5 当前已加入的防回归检查
+
+已在父 `pom.xml` 中加入 validate 阶段检查，禁止源码重新引入：
+
+```text
+import org.unidal.lookup.annotation.Inject;
+import org.unidal.lookup.annotation.Named;
+```
+
+该检查不会误伤以下第三方注入：
+
+```text
+org.elasticsearch.common.inject.Inject
+javax.inject.Inject
+```
+
+后续可以逐步扩展防回归规则，但每次只能禁止已经完成替换并验证通过的依赖族。
+
 ### 当前阶段判断
 
 项目仍然不能直接移除 Plexus / Unidal 依赖。当前大致完成度约为：

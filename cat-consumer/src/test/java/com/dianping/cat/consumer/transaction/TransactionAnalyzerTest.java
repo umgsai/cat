@@ -24,7 +24,6 @@ import java.util.Date;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
@@ -81,7 +80,7 @@ public class TransactionAnalyzerTest extends ComponentTestCase {
 
 		report.accept(new TransactionStatisticsComputer());
 
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("transaction_analyzer.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("transaction_analyzer.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		Assert.assertTrue( TestHelper.isEquals(com.dianping.cat.consumer.transaction.model.transform.DefaultSaxParser.parse(expected), report));
 	}
 

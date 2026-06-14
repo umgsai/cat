@@ -19,11 +19,14 @@
 package com.dianping.cat.consumer.dump;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.unidal.cat.message.storage.StorageConfiguration;
-import org.unidal.helper.Files;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Cat;
@@ -38,12 +41,22 @@ public class StoragePerformanceTest extends ComponentTestCase {
 	private MessageCodec m_codec = new PlainTextMessageCodec();
 
 	@Before
-	public void before() {
+	public void before() throws IOException {
 		File baseDir = new File(Cat.getCatHome(),"bucket/dump/20160415");
 
-		Files.forDir().delete(new File(baseDir, "dump"), true);
+		deleteDirectory(new File(baseDir, "dump").toPath());
 
 		lookup(StorageConfiguration.class).setBaseDataDir(baseDir);
+	}
+
+	private void deleteDirectory(Path path) throws IOException {
+		if (!Files.exists(path)) {
+			return;
+		}
+
+		try (java.util.stream.Stream<Path> stream = Files.walk(path)) {
+			stream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+		}
 	}
 
 	@Test

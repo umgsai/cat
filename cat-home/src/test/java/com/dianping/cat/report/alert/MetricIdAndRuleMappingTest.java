@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.report.alert.spi.config.BaseRuleConfigManager;
 
@@ -45,7 +44,7 @@ public class MetricIdAndRuleMappingTest {
 
 	private List<String> buildPatternList(String path) {
 		try {
-			String content = Files.forIO().readFrom(this.getClass().getResourceAsStream(path), "utf-8");
+			String content = new String(this.getClass().getResourceAsStream(path).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 			return Arrays.asList(content.split("[\r\n]+"));
 		} catch (IOException e) {
 			return null;

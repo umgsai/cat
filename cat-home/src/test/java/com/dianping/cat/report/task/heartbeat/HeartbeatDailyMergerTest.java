@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.heartbeat.model.transform.DefaultSaxParser;
@@ -34,12 +33,12 @@ public class HeartbeatDailyMergerTest {
 
 	@Test
 	public void test() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("heartbeat.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("heartbeat.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		HeartbeatReport report1 = DefaultSaxParser.parse(oldXml);
 		report1.setStartTime(m_sdf.parse("2015-02-26 00:00:00"));
 		HeartbeatReport report2 = DefaultSaxParser.parse(oldXml);
 		report2.setStartTime(m_sdf.parse("2015-02-26 05:00:00"));
-		String result = Files.forIO().readFrom(getClass().getResourceAsStream("dailyReport.xml"), "utf-8");
+		String result = new String(getClass().getResourceAsStream("dailyReport.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
 		HeartbeatDailyMerger merger = new HeartbeatDailyMerger(new HeartbeatReport("cat"),
 								m_sdf.parse("2015-02-26 00:00:00").getTime());

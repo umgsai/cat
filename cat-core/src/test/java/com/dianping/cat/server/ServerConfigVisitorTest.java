@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.xml.sax.SAXException;
 
 import com.dianping.cat.config.server.ServerConfigVisitor;
@@ -34,7 +33,7 @@ public class ServerConfigVisitorTest {
 
 	@Test
 	public void test() throws IOException, SAXException {
-		String server = Files.forIO().readFrom(getClass().getResourceAsStream("server.xml"), "utf-8");
+		String server = readResource("server.xml");
 		ServerConfig serverConfig01 = DefaultSaxParser.parse(server);
 		ServerConfig serverConfig02 = DefaultSaxParser.parse(server);
 
@@ -49,11 +48,14 @@ public class ServerConfigVisitorTest {
 		ServerConfigVisitor visitor02 = new ServerConfigVisitor(server02);
 		visitor02.visitServer(default02);
 
-		String expected01 = Files.forIO().readFrom(getClass().getResourceAsStream("server01.xml"), "utf-8");
+		String expected01 = readResource("server01.xml");
 		Assert.assertEquals(expected01.replace("\r", ""), default01.toString().replace("\r", ""));
 
-		String expected02 = Files.forIO().readFrom(getClass().getResourceAsStream("server02.xml"), "utf-8");
+		String expected02 = readResource("server02.xml");
 		Assert.assertEquals(expected02.replace("\r", ""), default02.toString().replace("\r", ""));
 	}
 
+	private String readResource(String name) throws IOException {
+		return new String(getClass().getResourceAsStream(name).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+	}
 }

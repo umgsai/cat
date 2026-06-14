@@ -20,7 +20,6 @@ package com.dianping.cat.report.task.transaction;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.TestHelper;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
@@ -31,11 +30,11 @@ public class HistoryTransactionMergerTest {
 
 	@Test
 	public void testMerge() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("HistoryTransaction.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("HistoryTransaction.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		TransactionReport report1 = DefaultSaxParser.parse(oldXml);
 		TransactionReport report2 = DefaultSaxParser.parse(oldXml);
-		String expected = Files.forIO()
-								.readFrom(getClass().getResourceAsStream("HistoryTransactionMergeResult.xml"),	"utf-8");
+		String expected = new String(getClass().getResourceAsStream("HistoryTransactionMergeResult.xml")
+								.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		HistoryTransactionReportMerger merger = new HistoryTransactionReportMerger(new TransactionReport(report1.getDomain()))
 								.setDuration(2);
 

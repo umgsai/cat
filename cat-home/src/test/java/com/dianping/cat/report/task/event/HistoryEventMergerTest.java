@@ -20,7 +20,6 @@ package com.dianping.cat.report.task.event;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.TestHelper;
 import com.dianping.cat.consumer.event.EventReportMerger;
@@ -31,10 +30,10 @@ import com.dianping.cat.report.page.event.task.HistoryEventReportMerger;
 public class HistoryEventMergerTest {
 	@Test
 	public void testMerge() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("HistoryBaseEvent.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("HistoryBaseEvent.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		EventReport report1 = DefaultSaxParser.parse(oldXml);
 		EventReport report2 = DefaultSaxParser.parse(oldXml);
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("HistoryEventMergerDaily.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("HistoryEventMergerDaily.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		EventReportMerger merger = new HistoryEventReportMerger(new EventReport(report1.getDomain()));
 
 		EventReport report3 = DefaultSaxParser.parse(expected);

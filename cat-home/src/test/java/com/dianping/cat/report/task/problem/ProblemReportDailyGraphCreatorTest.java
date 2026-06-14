@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.problem.model.transform.DefaultSaxParser;
@@ -33,13 +32,13 @@ public class ProblemReportDailyGraphCreatorTest {
 
 	@Test
 	public void test() throws Exception {
-		String oldXml1 = Files.forIO().readFrom(getClass().getResourceAsStream("BaseDailyProblemReport1.xml"),	"utf-8");
-		String oldXml2 = Files.forIO().readFrom(getClass().getResourceAsStream("BaseDailyProblemReport2.xml"),	"utf-8");
+		String oldXml1 = new String(getClass().getResourceAsStream("BaseDailyProblemReport1.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String oldXml2 = new String(getClass().getResourceAsStream("BaseDailyProblemReport2.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
 		ProblemReport report1 = DefaultSaxParser.parse(oldXml1);
 		ProblemReport report2 = DefaultSaxParser.parse(oldXml2);
-		String expected = Files.forIO()
-								.readFrom(getClass().getResourceAsStream("ProblemReportDailyGraphResult.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("ProblemReportDailyGraphResult.xml")
+								.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
 		ProblemReport result = new ProblemReport(report1.getDomain());
 

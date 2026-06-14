@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.event.model.entity.EventReport;
 import com.dianping.cat.consumer.event.model.transform.DefaultSaxParser;
@@ -33,7 +32,7 @@ public class EventTrendGraphBuilderTest {
 
 	@Test
 	public void testVisitName() throws Exception {
-		String xml = Files.forIO().readFrom(getClass().getResourceAsStream("EventReportDailyGraph.xml"),	"utf-8");
+		String xml = new String(getClass().getResourceAsStream("EventReportDailyGraph.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		EventReport report = DefaultSaxParser.parse(xml);
 
 		EventReportVisitor visitor = new EventTrendGraphBuilder().new EventReportVisitor("10.1.77.193", "URL", "ClientInfo");
@@ -46,7 +45,7 @@ public class EventTrendGraphBuilderTest {
 
 	@Test
 	public void testVisitType() throws Exception {
-		String xml = Files.forIO().readFrom(getClass().getResourceAsStream("EventReportDailyGraph.xml"),	"utf-8");
+		String xml = new String(getClass().getResourceAsStream("EventReportDailyGraph.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		EventReport report = DefaultSaxParser.parse(xml);
 
 		EventReportVisitor visitor = new EventTrendGraphBuilder().new EventReportVisitor("10.1.77.193", "URL", "");

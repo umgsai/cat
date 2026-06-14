@@ -20,7 +20,6 @@ package com.dianping.cat.report.task.utilization;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.home.utilization.entity.UtilizationReport;
 import com.dianping.cat.home.utilization.transform.DefaultSaxParser;
@@ -29,11 +28,11 @@ import com.dianping.cat.report.page.statistics.task.utilization.UtilizationRepor
 public class UtilizationReportMergerTest {
 	@Test
 	public void testUtilizationReportMerge() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("UtilizationReportOld.xml"), "utf-8");
-		String newXml = Files.forIO().readFrom(getClass().getResourceAsStream("UtilizationReportNew.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("UtilizationReportOld.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String newXml = new String(getClass().getResourceAsStream("UtilizationReportNew.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		UtilizationReport reportOld = DefaultSaxParser.parse(oldXml);
 		UtilizationReport reportNew = DefaultSaxParser.parse(newXml);
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("UtilizationReportResult.xml"),	"utf-8");
+		String expected = new String(getClass().getResourceAsStream("UtilizationReportResult.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		UtilizationReportMerger merger = new UtilizationReportMerger(new UtilizationReport(reportOld.getDomain()));
 
 		reportOld.accept(merger);

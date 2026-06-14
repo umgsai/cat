@@ -20,7 +20,6 @@ package com.dianping.cat.consumer.problem;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.problem.model.transform.DefaultSaxParser;
@@ -30,8 +29,8 @@ public class ProblemFilterTest {
 	@Test
 	public void test() throws Exception {
 		ProblemReportFilter problemReportURLFilter = new ProblemReportFilter(5);
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("problemURLFilter.xml"), "utf-8");
-		String resultXml = Files.forIO().readFrom(getClass().getResourceAsStream("problemURLFilterResult.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("problemURLFilter.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String resultXml = new String(getClass().getResourceAsStream("problemURLFilterResult.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		ProblemReport report = DefaultSaxParser.parse(oldXml);
 		problemReportURLFilter.visitProblemReport(report);
 

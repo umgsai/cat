@@ -22,7 +22,6 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.consumer.transaction.model.transform.DefaultSaxParser;
@@ -32,7 +31,7 @@ import com.dianping.cat.report.page.transaction.transform.TransactionTrendGraphB
 public class TransactionTrendGraphBuilderTest {
 	@Test
 	public void testVisitName() throws Exception {
-		String xml = Files.forIO().readFrom(getClass().getResourceAsStream("TransactionReportDailyGraph.xml"), "utf-8");
+		String xml = new String(getClass().getResourceAsStream("TransactionReportDailyGraph.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		TransactionReport report = DefaultSaxParser.parse(xml);
 
 		TransactionReportVisitor visitor = new TransactionTrendGraphBuilder().new TransactionReportVisitor("10.1.77.193",
@@ -47,7 +46,7 @@ public class TransactionTrendGraphBuilderTest {
 
 	@Test
 	public void testVisitType() throws Exception {
-		String xml = Files.forIO().readFrom(getClass().getResourceAsStream("TransactionReportDailyGraph.xml"), "utf-8");
+		String xml = new String(getClass().getResourceAsStream("TransactionReportDailyGraph.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		TransactionReport report = DefaultSaxParser.parse(xml);
 
 		TransactionReportVisitor visitor = new TransactionTrendGraphBuilder().new TransactionReportVisitor("10.1.77.193",

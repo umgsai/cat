@@ -20,7 +20,6 @@ package com.dianping.cat.consumer.transaction;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.TestHelper;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
@@ -29,12 +28,12 @@ import com.dianping.cat.consumer.transaction.model.transform.DefaultSaxParser;
 public class TransactionReportMergerTest {
 	@Test
 	public void testTransactionReportMerge() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("transaction_report_old.xml"), "utf-8");
-		String newXml = Files.forIO().readFrom(getClass().getResourceAsStream("transaction_report_new.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("transaction_report_old.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String newXml = new String(getClass().getResourceAsStream("transaction_report_new.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		TransactionReport reportOld = DefaultSaxParser.parse(oldXml);
 		TransactionReport reportNew = DefaultSaxParser.parse(newXml);
-		String expected = Files.forIO()
-								.readFrom(getClass().getResourceAsStream("transaction_report_mergeResult.xml"),	"utf-8");
+		String expected = new String(getClass().getResourceAsStream("transaction_report_mergeResult.xml")
+								.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		
 		TransactionReport reportExpected = DefaultSaxParser.parse(expected);
 		

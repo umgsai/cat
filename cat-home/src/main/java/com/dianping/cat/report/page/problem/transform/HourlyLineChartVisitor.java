@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.problem.model.entity.Entity;

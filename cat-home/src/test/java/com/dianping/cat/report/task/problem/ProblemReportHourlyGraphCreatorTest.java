@@ -20,7 +20,6 @@ package com.dianping.cat.report.task.problem;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.problem.model.transform.DefaultSaxParser;
@@ -31,11 +30,11 @@ public class ProblemReportHourlyGraphCreatorTest {
 
 	@Test
 	public void testGraph() throws Exception {
-		String newXml = Files.forIO().readFrom(getClass().getResourceAsStream("problemModel.xml"), "utf-8");
+		String newXml = new String(getClass().getResourceAsStream("problemModel.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		ProblemReport report1 = DefaultSaxParser.parse(newXml);
 		ProblemReport report2 = DefaultSaxParser.parse(newXml);
-		String expected = Files.forIO()
-								.readFrom(getClass().getResourceAsStream("ProblemReportHourlyGraphResult.xml"),	"utf-8");
+		String expected = new String(getClass().getResourceAsStream("ProblemReportHourlyGraphResult.xml")
+								.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
 		ProblemReport result = new ProblemReport(report1.getDomain());
 

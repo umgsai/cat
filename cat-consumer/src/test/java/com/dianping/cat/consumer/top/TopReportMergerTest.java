@@ -20,7 +20,6 @@ package com.dianping.cat.consumer.top;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.top.model.entity.TopReport;
 import com.dianping.cat.consumer.top.model.transform.DefaultSaxParser;
@@ -28,11 +27,11 @@ import com.dianping.cat.consumer.top.model.transform.DefaultSaxParser;
 public class TopReportMergerTest {
 	@Test
 	public void testTopReportMerge() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("top_analyzer_old.xml"), "utf-8");
-		String newXml = Files.forIO().readFrom(getClass().getResourceAsStream("top_analyzer_old.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("top_analyzer_old.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String newXml = new String(getClass().getResourceAsStream("top_analyzer_old.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		TopReport reportOld = DefaultSaxParser.parse(oldXml);
 		TopReport reportNew = DefaultSaxParser.parse(newXml);
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("top_analyzer_merger.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("top_analyzer_merger.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		TopReportMerger merger = new TopReportMerger(new TopReport(reportOld.getDomain()));
 
 		reportOld.accept(merger);

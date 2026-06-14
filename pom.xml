@@ -456,9 +456,52 @@ org.eclipse.jdt.core.compiler.compliance=21
 					<artifactId>maven-enforcer-plugin</artifactId>
 					<version>${maven-enforcer-plugin.version}</version>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>${maven-antrun-plugin.version}</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<inherited>false</inherited>
+				<executions>
+					<execution>
+						<id>ban-unidal-lookup-annotations</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<pathconvert property="unidal.lookup.annotation.files" pathsep=", ">
+									<fileset dir="${maven.multiModuleProjectDirectory}">
+										<include name="**/src/**/*.java" />
+										<include name="**/src/**/*.scala" />
+										<exclude name="**/target/**" />
+										<containsregexp expression="import[ \t]+org\.unidal\.lookup\.annotation\.(Inject|Named);" />
+									</fileset>
+								</pathconvert>
+								<condition property="unidal.lookup.annotations.present">
+									<resourcecount when="greater" count="0">
+										<fileset dir="${maven.multiModuleProjectDirectory}">
+											<include name="**/src/**/*.java" />
+											<include name="**/src/**/*.scala" />
+											<exclude name="**/target/**" />
+											<containsregexp expression="import[ \t]+org\.unidal\.lookup\.annotation\.(Inject|Named);" />
+										</fileset>
+									</resourcecount>
+								</condition>
+								<fail if="unidal.lookup.annotations.present"
+									message="Unidal lookup annotations are not allowed in source files: ${unidal.lookup.annotation.files}" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
@@ -528,6 +571,7 @@ org.eclipse.jdt.core.compiler.compliance=21
 		<maven-source-plugin.version>3.3.1</maven-source-plugin.version>
 		<maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
 		<maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
+		<maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
 		<slf4j.version>2.0.17</slf4j.version>
 		<logback.version>1.5.34</logback.version>
 		<fastjson2.version>2.0.62</fastjson2.version>

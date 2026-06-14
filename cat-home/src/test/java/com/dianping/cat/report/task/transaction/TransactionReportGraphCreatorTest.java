@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.TestHelper;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
@@ -34,11 +33,11 @@ public class TransactionReportGraphCreatorTest {
 
 	@Test
 	public void testMergeHourlyGraph() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("BaseTransactionReportForGraph.xml"),	"utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("BaseTransactionReportForGraph.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		TransactionReport report1 = DefaultSaxParser.parse(oldXml);
 		TransactionReport report2 = DefaultSaxParser.parse(oldXml);
-		String expected = Files.forIO()
-								.readFrom(getClass().getResourceAsStream("TransactionReportHourlyGraphResult.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("TransactionReportHourlyGraphResult.xml")
+								.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
 		TransactionReport result = new TransactionReport(report1.getDomain());
 
@@ -53,13 +52,13 @@ public class TransactionReportGraphCreatorTest {
 
 	@Test
 	public void testMergeDailyGraph() throws Exception {
-		String oldXml1 = Files.forIO().readFrom(getClass().getResourceAsStream("BaseDailyTransactionReport1.xml"),	"utf-8");
-		String oldXml2 = Files.forIO().readFrom(getClass().getResourceAsStream("BaseDailyTransactionReport2.xml"),	"utf-8");
+		String oldXml1 = new String(getClass().getResourceAsStream("BaseDailyTransactionReport1.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String oldXml2 = new String(getClass().getResourceAsStream("BaseDailyTransactionReport2.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
 		TransactionReport report1 = DefaultSaxParser.parse(oldXml1);
 		TransactionReport report2 = DefaultSaxParser.parse(oldXml2);
-		String expected = Files.forIO()
-								.readFrom(getClass().getResourceAsStream("TransactionReportDailyGraphResult.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("TransactionReportDailyGraphResult.xml")
+								.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
 		TransactionReport result = new TransactionReport(report1.getDomain());
 

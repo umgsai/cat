@@ -32,7 +32,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.unidal.tuple.Pair;
 
 import com.dianping.cat.Cat;

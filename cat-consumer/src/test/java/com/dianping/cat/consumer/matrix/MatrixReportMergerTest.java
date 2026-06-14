@@ -20,7 +20,6 @@ package com.dianping.cat.consumer.matrix;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.matrix.model.transform.DefaultSaxParser;
@@ -28,11 +27,11 @@ import com.dianping.cat.consumer.matrix.model.transform.DefaultSaxParser;
 public class MatrixReportMergerTest {
 	@Test
 	public void testMatrixReportMerge() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("matrix_analyzer.xml"), "utf-8");
-		String newXml = Files.forIO().readFrom(getClass().getResourceAsStream("matrix_analyzer.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("matrix_analyzer.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String newXml = new String(getClass().getResourceAsStream("matrix_analyzer.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		MatrixReport reportOld = DefaultSaxParser.parse(oldXml);
 		MatrixReport reportNew = DefaultSaxParser.parse(newXml);
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("matrix_analyzer_merger.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("matrix_analyzer_merger.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		MatrixReportMerger merger = new MatrixReportMerger(new MatrixReport(reportOld.getDomain()));
 
 		reportOld.accept(merger);

@@ -18,7 +18,7 @@
  */
 package com.dianping.cat.report.page.transaction.transform;
 
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;

@@ -20,7 +20,7 @@ package com.dianping.cat.report.page.event.task;
 
 import java.util.Date;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.dianping.cat.consumer.GraphTrendUtil;
 import com.dianping.cat.consumer.event.model.entity.EventName;

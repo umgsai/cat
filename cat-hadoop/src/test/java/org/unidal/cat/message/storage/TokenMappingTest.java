@@ -20,12 +20,14 @@ package org.unidal.cat.message.storage;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.ComponentTestCase;
@@ -33,14 +35,24 @@ import org.unidal.lookup.ComponentTestCase;
 public class TokenMappingTest extends ComponentTestCase {
 
 	@Before
-	public void before() {
+	public void before() throws IOException {
 		File baseDir = new File("target");
 
-		Files.forDir().delete(new File(baseDir, "dump"), true);
+		deleteDirectory(new File(baseDir, "dump").toPath());
 
 		StorageConfiguration config = lookup(StorageConfiguration.class);
 
 		config.setBaseDataDir(baseDir);
+	}
+
+	private void deleteDirectory(Path path) throws IOException {
+		if (!Files.exists(path)) {
+			return;
+		}
+
+		try (java.util.stream.Stream<Path> stream = Files.walk(path)) {
+			stream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+		}
 	}
 
 	@Test

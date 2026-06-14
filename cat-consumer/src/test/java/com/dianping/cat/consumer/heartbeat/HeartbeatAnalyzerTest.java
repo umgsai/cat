@@ -25,7 +25,6 @@ import java.util.Date;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
@@ -71,7 +70,7 @@ public class HeartbeatAnalyzerTest extends ComponentTestCase {
 
 		HeartbeatReport report = m_analyzer.getReport(m_domain);
 
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("heartbeat_analyzer.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("heartbeat_analyzer.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		Assert.assertEquals(expected.replaceAll("\r", ""), report.toString().replaceAll("\r", ""));
 	}
 
@@ -104,7 +103,7 @@ public class HeartbeatAnalyzerTest extends ComponentTestCase {
 		heartbeat.setTimestamp(timestamp);
 
 		if (m_status == null) {
-			m_status = Files.forIO().readFrom(getClass().getResourceAsStream("status_info.xml"), "utf-8");
+			m_status = new String(getClass().getResourceAsStream("status_info.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		}
 
 		heartbeat.addData(m_status);

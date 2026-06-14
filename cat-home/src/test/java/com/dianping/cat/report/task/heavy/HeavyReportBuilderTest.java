@@ -20,7 +20,6 @@ package com.dianping.cat.report.task.heavy;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.home.heavy.entity.HeavyReport;
@@ -31,11 +30,11 @@ public class HeavyReportBuilderTest extends ComponentTestCase {
 
 	@Test
 	public void testMerge() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("old.xml"), "utf-8");
-		String newXml = Files.forIO().readFrom(getClass().getResourceAsStream("new.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("old.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String newXml = new String(getClass().getResourceAsStream("new.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		HeavyReport reportOld = DefaultSaxParser.parse(oldXml);
 		HeavyReport reportNew = DefaultSaxParser.parse(newXml);
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("result.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("result.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		HeavyReportMerger merger = new HeavyReportMerger(new HeavyReport(reportOld.getDomain()));
 
 		reportOld.accept(merger);

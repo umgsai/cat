@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.unidal.helper.Files;
 import org.unidal.helper.Files.AutoClose;
 import org.unidal.web.mvc.PageHandler;

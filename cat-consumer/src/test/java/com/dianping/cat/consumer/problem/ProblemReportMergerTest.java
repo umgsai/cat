@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.problem.model.transform.DefaultSaxParser;
@@ -31,11 +30,11 @@ import com.dianping.cat.consumer.problem.model.transform.DefaultSaxParser;
 public class ProblemReportMergerTest {
 	@Test
 	public void testProblemReportMerge() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("ProblemReportOld.xml"), "utf-8");
-		String newXml = Files.forIO().readFrom(getClass().getResourceAsStream("ProblemReportNew.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("ProblemReportOld.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String newXml = new String(getClass().getResourceAsStream("ProblemReportNew.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		ProblemReport reportOld = DefaultSaxParser.parse(oldXml);
 		ProblemReport reportNew = DefaultSaxParser.parse(newXml);
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("ProblemReportMergeResult.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("ProblemReportMergeResult.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		ProblemReportMerger merger = new ProblemReportMerger(new ProblemReport(reportOld.getDomain()));
 
 		reportOld.accept(merger);

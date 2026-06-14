@@ -20,7 +20,7 @@ package com.dianping.cat.report.page.transaction.task;
 
 import java.util.Calendar;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.dianping.cat.consumer.GraphTrendUtil;
 import com.dianping.cat.consumer.transaction.model.entity.GraphTrend;

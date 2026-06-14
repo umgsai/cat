@@ -24,7 +24,6 @@ import java.util.Date;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
@@ -69,7 +68,7 @@ public class EventAnalyzerTest extends ComponentTestCase {
 
 		EventReport report = m_analyzer.getReport(m_domain);
 
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("event_analyzer.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("event_analyzer.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		
 		EventReport expected4report = com.dianping.cat.consumer.event.model.transform.DefaultSaxParser.parse(expected);
 		

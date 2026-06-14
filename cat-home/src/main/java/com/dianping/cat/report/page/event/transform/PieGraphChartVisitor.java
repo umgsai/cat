@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.event.model.entity.EventName;

@@ -20,7 +20,6 @@ package com.dianping.cat.consumer.heartbeat;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.heartbeat.model.transform.DefaultSaxParser;
@@ -28,11 +27,11 @@ import com.dianping.cat.consumer.heartbeat.model.transform.DefaultSaxParser;
 public class HeartbeatReportMergerTest {
 	@Test
 	public void testHeartbeatReportMerge() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("heartbeat_analyzer_old.xml"), "utf-8");
-		String newXml = Files.forIO().readFrom(getClass().getResourceAsStream("heartbeat_analyzer_old.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("heartbeat_analyzer_old.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String newXml = new String(getClass().getResourceAsStream("heartbeat_analyzer_old.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		HeartbeatReport reportOld = DefaultSaxParser.parse(oldXml);
 		HeartbeatReport reportNew = DefaultSaxParser.parse(newXml);
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("heartbeat_analyzer_merge.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("heartbeat_analyzer_merge.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		HeartbeatReportMerger merger = new HeartbeatReportMerger(new HeartbeatReport(reportOld.getDomain()));
 
 		reportOld.accept(merger);

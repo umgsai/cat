@@ -81,7 +81,7 @@ public class Api {
 
 	private static String fetchContent(String url) throws IOException {
 		InputStream in = Urls.forIO().readTimeout(1000).connectTimeout(1000).openStream(url);
-		String content = Files.forIO().readFrom(in, "utf-8");
+		String content = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		return content;
 	}
 

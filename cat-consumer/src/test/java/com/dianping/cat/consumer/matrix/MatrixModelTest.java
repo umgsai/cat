@@ -20,7 +20,6 @@ package com.dianping.cat.consumer.matrix;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.matrix.model.transform.DefaultSaxParser;
@@ -28,13 +27,13 @@ import com.dianping.cat.consumer.matrix.model.transform.DefaultSaxParser;
 public class MatrixModelTest {
 	@Test
 	public void testModel() throws Exception {
-		String source = Files.forIO().readFrom(getClass().getResourceAsStream("matrix.xml"), "utf-8");
+		String source = new String(getClass().getResourceAsStream("matrix.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		MatrixReport report = DefaultSaxParser.parse(source);
 		MatrixReportFilter filter = new MatrixReportFilter();
 
 		filter.setMaxSize(10);
 		report.accept(filter);
-		String expected1 = Files.forIO().readFrom(getClass().getResourceAsStream("matrix_result.xml"), "utf-8");
+		String expected1 = new String(getClass().getResourceAsStream("matrix_result.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
 		Assert.assertEquals(expected1.replaceAll("\r", ""), report.toString().replaceAll("\r", ""));
 	}

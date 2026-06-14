@@ -25,7 +25,6 @@ import java.util.TimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
@@ -70,11 +69,11 @@ public class CrossAnalyzerTest extends ComponentTestCase {
 		}
 
 		CrossReport report = m_analyzer.getReport(m_domain);
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("cross_analyzer.xml"), "utf-8");
+		String expected = new String(getClass().getResourceAsStream("cross_analyzer.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		Assert.assertEquals(expected.replaceAll("\r", ""), report.toString().replaceAll("\r", ""));
 
 		CrossReport reportCaller = m_analyzer.getReport("server");
-		String expectedCaller = Files.forIO().readFrom(getClass().getResourceAsStream("cross_analyzer_caller.xml"),	"utf-8");
+		String expectedCaller = new String(getClass().getResourceAsStream("cross_analyzer_caller.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		Assert.assertEquals(expectedCaller.replaceAll("\r", ""), reportCaller.toString().replaceAll("\r", ""));
 	}
 

@@ -20,7 +20,6 @@ package com.dianping.cat.report.page.event;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.TestHelper;
 import com.dianping.cat.consumer.event.model.entity.EventReport;
@@ -30,16 +29,16 @@ import com.dianping.cat.report.page.event.service.LocalEventService.EventReportF
 public class EventReportFilterTest {
 	@Test
 	public void test() throws Exception {
-		String source = Files.forIO().readFrom(getClass().getResourceAsStream("event_filter.xml"), "utf-8");
+		String source = new String(getClass().getResourceAsStream("event_filter.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		EventReport report = DefaultSaxParser.parse(source);
 
 		EventReportFilter f1 = new EventReportFilter(null, null, null);
-		String expected1 = Files.forIO().readFrom(getClass().getResourceAsStream("event_filter_type.xml"), "utf-8");
+		String expected1 = new String(getClass().getResourceAsStream("event_filter_type.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
 		Assert.assertTrue(TestHelper.isEquals(DefaultSaxParser.parse(expected1), DefaultSaxParser.parse(f1.buildXml(report))));
 
 		EventReportFilter f2 = new EventReportFilter("URL", null, null);
-		String expected2 = Files.forIO().readFrom(getClass().getResourceAsStream("event_filter_name.xml"), "utf-8");
+		String expected2 = new String(getClass().getResourceAsStream("event_filter_name.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
 		Assert.assertTrue(TestHelper.isEquals(DefaultSaxParser.parse(expected2), DefaultSaxParser.parse(f2.buildXml(report))));
 	}

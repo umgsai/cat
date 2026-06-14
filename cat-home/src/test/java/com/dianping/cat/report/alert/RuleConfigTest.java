@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.rule.entity.Condition;
@@ -75,7 +74,7 @@ public class RuleConfigTest {
 
 	private MonitorRules buildMonitorRuleFromFile(String path) {
 		try {
-			String content = Files.forIO().readFrom(this.getClass().getResourceAsStream(path), "utf-8");
+			String content = new String(this.getClass().getResourceAsStream(path).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 			return DefaultSaxParser.parse(content);
 		} catch (Exception ex) {
 			Cat.logError(ex);

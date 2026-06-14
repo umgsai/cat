@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.consumer.problem.ProblemReportMerger;
 import com.dianping.cat.consumer.problem.model.entity.Entry;
@@ -35,11 +34,11 @@ public class ProblemReportMergerTest {
 
 	@Test
 	public void testProblemReportMergeAll() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("ProblemReportOld.xml"), "utf-8");
-		String newXml = Files.forIO().readFrom(getClass().getResourceAsStream("ProblemReportNew.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("ProblemReportOld.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		String newXml = new String(getClass().getResourceAsStream("ProblemReportNew.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		ProblemReport reportOld = DefaultSaxParser.parse(oldXml);
 		ProblemReport reportNew = DefaultSaxParser.parse(newXml);
-		String expected = Files.forIO().readFrom(getClass().getResourceAsStream("ProblemReportMergeAllResult.xml"),	"utf-8");
+		String expected = new String(getClass().getResourceAsStream("ProblemReportMergeAllResult.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		ProblemReportMerger merger = new HistoryProblemReportMerger(new ProblemReport(reportOld.getDomain()));
 
 		reportOld.accept(merger);
@@ -55,7 +54,7 @@ public class ProblemReportMergerTest {
 
 	@Test
 	public void testProblemReportMergerSize() throws Exception {
-		String oldXml = Files.forIO().readFrom(getClass().getResourceAsStream("ProblemMobile.xml"), "utf-8");
+		String oldXml = new String(getClass().getResourceAsStream("ProblemMobile.xml").readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		ProblemReport reportOld = DefaultSaxParser.parse(oldXml);
 		ProblemReportMerger merger = new HistoryProblemReportMerger(new ProblemReport(reportOld.getDomain()));
 

@@ -22,7 +22,6 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 
 import org.junit.Test;
-import org.unidal.helper.Files;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.home.dependency.graph.entity.TopologyGraph;
@@ -56,7 +55,7 @@ public class TopologyGraphTest extends ComponentTestCase {
 				if (!file.exists()) {
 					file.createNewFile();
 				}
-				Files.forIO().writeTo(file, graph.toString());
+				java.nio.file.Files.writeString(file.toPath(), graph.toString(), java.nio.charset.StandardCharsets.UTF_8);
 			} else {
 				System.err.println(date + " is null1");
 			}
