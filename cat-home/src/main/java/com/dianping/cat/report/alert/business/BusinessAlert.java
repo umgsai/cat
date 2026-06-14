@@ -29,7 +29,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.helper.Threads.Task;
-import org.unidal.tuple.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.rule.entity.Condition;

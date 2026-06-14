@@ -26,11 +26,12 @@ import java.util.Map.Entry;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Splitters;
 import org.unidal.helper.Threads.Task;
-import org.unidal.tuple.Pair;
+
+import com.google.common.base.Splitter;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -233,7 +234,7 @@ public class EventAlert implements Task, LogEnabled {
 	}
 
 	private void processRule(Rule rule) {
-		List<String> fields = Splitters.by(";").split(rule.getId());
+		List<String> fields = Splitter.on(';').splitToList(rule.getId());
 		String domain = fields.get(0);
 		String type = fields.get(1);
 		String name = fields.get(2);

@@ -26,7 +26,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Splitters;
+
+import com.google.common.base.Splitter;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.AlertChannel;
@@ -74,7 +75,7 @@ public class AlertSummaryExecutor {
 		List<String> result = new ArrayList<String>();
 
 		if (str != null) {
-			result.addAll(Splitters.by(",").noEmptyItem().split(str));
+			result.addAll(Splitter.on(',').omitEmptyStrings().splitToList(str));
 		}
 
 		return result;

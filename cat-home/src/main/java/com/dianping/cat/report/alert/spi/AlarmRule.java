@@ -25,7 +25,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.unidal.lookup.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.dianping.cat.alarm.rule.entity.Condition;
 import com.dianping.cat.alarm.rule.entity.Config;
