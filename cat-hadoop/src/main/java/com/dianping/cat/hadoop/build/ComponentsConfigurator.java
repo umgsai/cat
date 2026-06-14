@@ -23,6 +23,9 @@ import java.util.List;
 
 import org.unidal.cat.message.storage.Bucket;
 import org.unidal.cat.message.storage.BucketManager;
+import org.unidal.cat.message.storage.BlockDumper;
+import org.unidal.cat.message.storage.BlockDumperManager;
+import org.unidal.cat.message.storage.BlockWriter;
 import org.unidal.cat.message.storage.clean.HdfsUploader;
 import org.unidal.cat.message.storage.clean.LogviewProcessor;
 import org.unidal.cat.message.storage.hdfs.HdfsBucket;
@@ -54,6 +57,10 @@ import org.unidal.cat.message.storage.local.LocalIndex;
 import org.unidal.cat.message.storage.local.LocalIndexManager;
 import org.unidal.cat.message.storage.local.LocalTokenMapping;
 import org.unidal.cat.message.storage.local.LocalTokenMappingManager;
+import org.unidal.cat.message.storage.MessageDumper;
+import org.unidal.cat.message.storage.MessageDumperManager;
+import org.unidal.cat.message.storage.MessageFinderManager;
+import org.unidal.cat.message.storage.MessageProcessor;
 import org.unidal.cat.message.storage.StorageConfiguration;
 import org.unidal.cat.message.storage.TokenMapping;
 import org.unidal.cat.message.storage.TokenMappingManager;
@@ -70,6 +77,7 @@ import com.dianping.cat.hadoop.hdfs.bucket.HdfsMessageBucket;
 import com.dianping.cat.message.PathBuilder;
 import com.dianping.cat.message.storage.MessageBucket;
 import com.dianping.cat.message.storage.MessageBucketManager;
+import com.dianping.cat.statistic.ServerStatisticManager;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 	public static void main(String[] args) {
@@ -114,13 +122,24 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 	public List<Component> defineLocalComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(A(DefaultMessageDumperManager.class));
-		all.add(A(DefaultMessageFinderManager.class));
-		all.add(A(DefaultMessageDumper.class));
-		all.add(A(DefaultMessageProcessor.class));
-		all.add(A(DefaultBlockDumperManager.class));
-		all.add(A(DefaultBlockDumper.class));
-		all.add(A(DefaultBlockWriter.class));
+		all.add(C(MessageDumperManager.class, DefaultMessageDumperManager.class));
+		all.add(C(MessageFinderManager.class, DefaultMessageFinderManager.class));
+		all.add(C(MessageDumper.class, DefaultMessageDumper.class).is(PER_LOOKUP) //
+								.req(BlockDumperManager.class, (String) null, "m_blockDumperManager") //
+								.req(BucketManager.class, "local", "m_bucketManager") //
+								.req(ServerStatisticManager.class, (String) null, "m_statisticManager") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager"));
+		all.add(C(MessageProcessor.class, DefaultMessageProcessor.class).is(PER_LOOKUP) //
+								.req(BlockDumperManager.class, (String) null, "m_blockDumperManager") //
+								.req(MessageFinderManager.class, (String) null, "m_finderManager") //
+								.req(ServerConfigManager.class, (String) null, "m_configManger"));
+		all.add(C(BlockDumperManager.class, DefaultBlockDumperManager.class));
+		all.add(C(BlockDumper.class, DefaultBlockDumper.class).is(PER_LOOKUP) //
+								.req(ServerStatisticManager.class, (String) null, "m_statisticManager") //
+								.req(ServerConfigManager.class, (String) null, "m_configManager"));
+		all.add(C(BlockWriter.class, DefaultBlockWriter.class).is(PER_LOOKUP) //
+								.req(BucketManager.class, "local", "m_bucketManager") //
+								.req(ServerStatisticManager.class, (String) null, "m_statisticManager"));
 
 		all.add(C(HdfsSystemManager.class) //
 								.req(ServerConfigManager.class, (String) null, "m_configManager"));
@@ -171,8 +190,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(TokenMappingManager.class, "local", LocalTokenMappingManager.class));
 		all.add(C(TokenMappingManager.class, "hdfs", HdfsTokenMappingManager.class));
 
-		all.add(A(DefaultStorageConfiguration.class));
-		all.add(A(DefaultByteBufCache.class));
+		all.add(C(StorageConfiguration.class, DefaultStorageConfiguration.class));
+		all.add(C(ByteBufCache.class, DefaultByteBufCache.class));
 
 		all.add(A(HdfsUploader.class));
 		all.add(A(LogviewProcessor.class));

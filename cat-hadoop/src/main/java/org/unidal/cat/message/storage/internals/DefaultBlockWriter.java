@@ -29,21 +29,16 @@ import org.unidal.cat.message.storage.Block;
 import org.unidal.cat.message.storage.BlockWriter;
 import org.unidal.cat.message.storage.Bucket;
 import org.unidal.cat.message.storage.BucketManager;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
-@Named(type = BlockWriter.class, instantiationStrategy = Named.PER_LOOKUP)
 public class DefaultBlockWriter implements BlockWriter {
 
-	@Inject("local")
 	private BucketManager m_bucketManager;
 
-	@Inject
 	private ServerStatisticManager m_statisticManager;
 
 	private int m_index;

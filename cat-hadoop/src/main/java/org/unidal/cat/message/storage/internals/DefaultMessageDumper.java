@@ -36,8 +36,6 @@ import org.unidal.cat.message.storage.MessageProcessor;
 import org.unidal.cat.message.storage.exception.MessageQueueFullException;
 import org.unidal.helper.Threads;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
@@ -47,18 +45,13 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
-@Named(type = MessageDumper.class, instantiationStrategy = Named.PER_LOOKUP)
 public class DefaultMessageDumper extends ContainerHolder implements MessageDumper, LogEnabled {
-	@Inject
 	private BlockDumperManager m_blockDumperManager;
 
-	@Inject("local")
 	private BucketManager m_bucketManager;
 
-	@Inject
 	private ServerStatisticManager m_statisticManager;
 
-	@Inject
 	private ServerConfigManager m_configManager;
 
 	private List<BlockingQueue<MessageTree>> m_queues = new ArrayList<BlockingQueue<MessageTree>>();

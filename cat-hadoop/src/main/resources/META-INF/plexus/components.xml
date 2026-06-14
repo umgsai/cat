@@ -74,16 +74,20 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.cat.message.storage.BlockDumperManager</role>
+					<field-name>m_blockDumperManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.BucketManager</role>
 					<role-hint>local</role-hint>
+					<field-name>m_bucketManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.statistic.ServerStatisticManager</role>
+					<field-name>m_statisticManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -94,12 +98,15 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.cat.message.storage.BlockDumperManager</role>
+					<field-name>m_blockDumperManager</field-name>
 				</requirement>
 				<requirement>
 					<role>org.unidal.cat.message.storage.MessageFinderManager</role>
+					<field-name>m_finderManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManger</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -114,9 +121,11 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.cat.statistic.ServerStatisticManager</role>
+					<field-name>m_statisticManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.config.server.ServerConfigManager</role>
+					<field-name>m_configManager</field-name>
 				</requirement>
 			</requirements>
 		</component>
@@ -128,9 +137,11 @@
 				<requirement>
 					<role>org.unidal.cat.message.storage.BucketManager</role>
 					<role-hint>local</role-hint>
+					<field-name>m_bucketManager</field-name>
 				</requirement>
 				<requirement>
 					<role>com.dianping.cat.statistic.ServerStatisticManager</role>
+					<field-name>m_statisticManager</field-name>
 				</requirement>
 			</requirements>
 		</component>

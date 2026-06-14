@@ -31,9 +31,7 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.unidal.cat.message.storage.MessageDumper;
 import org.unidal.cat.message.storage.MessageDumperManager;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Named;
 
-@Named(type = MessageDumperManager.class)
 public class DefaultMessageDumperManager extends ContainerHolder
 						implements LogEnabled, MessageDumperManager,	Initializable {
 

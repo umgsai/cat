@@ -33,20 +33,15 @@ import org.unidal.cat.message.storage.BlockWriter;
 import org.unidal.cat.message.storage.exception.BlockQueueFullException;
 import org.unidal.helper.Threads;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
-@Named(type = BlockDumper.class, instantiationStrategy = Named.PER_LOOKUP)
 public class DefaultBlockDumper extends ContainerHolder implements BlockDumper, LogEnabled {
 
-	@Inject
 	private ServerStatisticManager m_statisticManager;
 
-	@Inject
 	private ServerConfigManager m_configManager;
 
 	private List<BlockingQueue<Block>> m_queues = new ArrayList<BlockingQueue<Block>>();

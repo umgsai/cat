@@ -28,11 +28,9 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 
-@Named(type = ByteBufCache.class)
 public class DefaultByteBufCache implements ByteBufCache, Initializable, LogEnabled {
 
 	private BlockingQueue<ByteBuffer> m_bufs = new ArrayBlockingQueue<ByteBuffer>(8000);

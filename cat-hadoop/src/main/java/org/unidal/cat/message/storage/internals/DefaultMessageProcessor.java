@@ -35,8 +35,6 @@ import org.unidal.cat.message.storage.BlockDumperManager;
 import org.unidal.cat.message.storage.MessageFinder;
 import org.unidal.cat.message.storage.MessageFinderManager;
 import org.unidal.cat.message.storage.MessageProcessor;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.lookup.annotation.Named;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -44,15 +42,11 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 
-@Named(type = MessageProcessor.class, instantiationStrategy = Named.PER_LOOKUP)
 public class DefaultMessageProcessor implements MessageProcessor, MessageFinder {
-	@Inject
 	private BlockDumperManager m_blockDumperManager;
 
-	@Inject
 	private MessageFinderManager m_finderManager;
 
-	@Inject
 	private ServerConfigManager m_configManger;
 
 	private BlockDumper m_dumper;
