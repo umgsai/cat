@@ -20,8 +20,6 @@ package com.dianping.cat.analysis;
 
 import java.util.List;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
@@ -34,7 +32,7 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
-public class RealtimeConsumer extends ContainerHolder implements MessageConsumer, Initializable, LogEnabled {
+public class RealtimeConsumer extends ContainerHolder implements MessageConsumer, Initializable {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RealtimeConsumer.class);
 
 	public static final long MINUTE = 60 * 1000L;
@@ -46,8 +44,6 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 	private ServerStatisticManager m_serverStateManager;
 
 	private PeriodManager m_periodManager;
-
-	private Logger m_logger;
 
 	@Override
 	public void consume(MessageTree tree) {
@@ -106,11 +102,6 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 	}
 
 	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
-
-	@Override
 	public List<MessageAnalyzer> getCurrentAnalyzer(String name) {
 		long currentStartTime = getCurrentStartTime();
 		Period period = m_periodManager.findPeriod(currentStartTime);
@@ -157,18 +148,14 @@ public class RealtimeConsumer extends ContainerHolder implements MessageConsumer
 			throw new InitializationException("ServerStatisticManager is required for RealtimeConsumer.");
 		}
 
-		m_periodManager = new PeriodManager(HOUR, m_analyzerManager, m_serverStateManager, m_logger);
+		m_periodManager = new PeriodManager(HOUR, m_analyzerManager, m_serverStateManager);
 		m_periodManager.init();
 
 		Threads.forGroup("Cat").start(m_periodManager);
 	}
 
 	private void info(String message) {
-		if (m_logger != null) {
-			m_logger.info(message);
-		} else {
-			SLF4J_LOGGER.info(message);
-		}
+		SLF4J_LOGGER.info(message);
 	}
 
 	public void setAnalyzerManager(MessageAnalyzerManager analyzerManager) {

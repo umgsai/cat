@@ -20,7 +20,6 @@ package com.dianping.cat.analysis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.ContainerHolder;
 
 import com.dianping.cat.Cat;
@@ -40,8 +39,6 @@ public abstract class AbstractMessageAnalyzer<R> extends ContainerHolder impleme
 	protected long m_startTime;
 
 	protected long m_duration;
-
-	protected Logger m_logger;
 
 	protected int m_index;
 

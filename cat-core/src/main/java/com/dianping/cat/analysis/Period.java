@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 import com.dianping.cat.support.Threads;
 
 import com.dianping.cat.Cat;
@@ -34,6 +34,8 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
 public class Period {
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Period.class);
+
 	private static final int QUEUE_SIZE = 30000;
 
 	private long m_startTime;
@@ -46,15 +48,12 @@ public class Period {
 
 	private ServerStatisticManager m_serverStateManager;
 
-	private Logger m_logger;
-
 	public Period(long startTime, long endTime, MessageAnalyzerManager analyzerManager,
-							ServerStatisticManager serverStateManager, Logger logger) {
+							ServerStatisticManager serverStateManager) {
 		m_startTime = startTime;
 		m_endTime = endTime;
 		m_analyzerManager = analyzerManager;
 		m_serverStateManager = serverStateManager;
-		m_logger = logger;
 
 		List<String> names = m_analyzerManager.getAnalyzerNames();
 
@@ -65,8 +64,6 @@ public class Period {
 			for (MessageAnalyzer analyzer : messageAnalyzers) {
 				MessageQueue queue = new DefaultMessageQueue(QUEUE_SIZE);
 				PeriodTask task = new PeriodTask(analyzer, queue, startTime);
-
-				task.enableLogging(m_logger);
 
 				List<PeriodTask> analyzerTasks = m_tasks.get(name);
 
@@ -122,8 +119,7 @@ public class Period {
 		Date startDate = new Date(m_startTime);
 		Date endDate = new Date(m_endTime - 1);
 
-		m_logger.info(String
-								.format("Finishing %s tasks in period [%s, %s]", m_tasks.size(), df.format(startDate),	df.format(endDate)));
+		LOGGER.info("Finishing {} tasks in period [{}, {}]", m_tasks.size(), df.format(startDate), df.format(endDate));
 
 		try {
 			for (Entry<String, List<PeriodTask>> tasks : m_tasks.entrySet()) {
@@ -134,8 +130,7 @@ public class Period {
 		} catch (Throwable e) {
 			Cat.logError(e);
 		} finally {
-			m_logger.info(String
-									.format("Finished %s tasks in period [%s, %s]", m_tasks.size(), df.format(startDate),	df.format(endDate)));
+			LOGGER.info("Finished {} tasks in period [{}, {}]", m_tasks.size(), df.format(startDate), df.format(endDate));
 		}
 	}
 
@@ -174,8 +169,8 @@ public class Period {
 	public void start() {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-		m_logger.info(String.format("Starting %s tasks in period [%s, %s]", m_tasks.size(),	df.format(new Date(m_startTime)),
-								df.format(new Date(m_endTime - 1))));
+		LOGGER.info("Starting {} tasks in period [{}, {}]", m_tasks.size(), df.format(new Date(m_startTime)),
+		      df.format(new Date(m_endTime - 1)));
 
 		for (Entry<String, List<PeriodTask>> tasks : m_tasks.entrySet()) {
 			List<PeriodTask> taskList = tasks.getValue();

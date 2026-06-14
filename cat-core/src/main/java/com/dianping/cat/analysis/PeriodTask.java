@@ -22,15 +22,15 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
+import org.slf4j.LoggerFactory;
 import com.dianping.cat.support.Threads.Task;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.spi.MessageTree;
 
-public class PeriodTask implements Task, LogEnabled {
+public class PeriodTask implements Task {
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PeriodTask.class);
 
 	private MessageAnalyzer m_analyzer;
 
@@ -39,8 +39,6 @@ public class PeriodTask implements Task, LogEnabled {
 	private long m_startTime;
 
 	private int m_queueOverflow;
-
-	private Logger m_logger;
 
 	private int m_index;
 
@@ -54,11 +52,6 @@ public class PeriodTask implements Task, LogEnabled {
 		m_index = index;
 	}
 
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
-	}
-
 	public boolean enqueue(MessageTree tree) {
 		if (m_analyzer.isEligable(tree)) {
 			boolean result = m_queue.offer(tree);
@@ -69,9 +62,8 @@ public class PeriodTask implements Task, LogEnabled {
 				if (m_queueOverflow % (10 * CatConstants.ERROR_COUNT) == 0) {
 					String date = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date(m_analyzer.getStartTime()));
 
-					m_logger
-											.warn(m_analyzer.getClass().getSimpleName() + " queue overflow number " + m_queueOverflow	+ " analyzer time:"
-																	+ date);
+					LOGGER.warn("{} queue overflow number {} analyzer time:{}", m_analyzer.getClass().getSimpleName(),
+					      m_queueOverflow, date);
 				}
 			}
 			return result;

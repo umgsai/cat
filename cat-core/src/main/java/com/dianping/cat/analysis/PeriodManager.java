@@ -21,7 +21,6 @@ package com.dianping.cat.analysis;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.plexus.logging.Logger;
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
 
@@ -41,15 +40,11 @@ public class PeriodManager implements Task {
 
 	private ServerStatisticManager m_serverStateManager;
 
-	private Logger m_logger;
-
-	public PeriodManager(long duration, MessageAnalyzerManager analyzerManager,	ServerStatisticManager serverStateManager,
-							Logger logger) {
+	public PeriodManager(long duration, MessageAnalyzerManager analyzerManager,	ServerStatisticManager serverStateManager) {
 		m_strategy = new PeriodStrategy(duration, EXTRATIME, EXTRATIME);
 		m_active = true;
 		m_analyzerManager = analyzerManager;
 		m_serverStateManager = serverStateManager;
-		m_logger = logger;
 	}
 
 	private void endPeriod(long startTime) {
@@ -119,7 +114,7 @@ public class PeriodManager implements Task {
 
 	private void startPeriod(long startTime) {
 		long endTime = startTime + m_strategy.getDuration();
-		Period period = new Period(startTime, endTime, m_analyzerManager, m_serverStateManager, m_logger);
+		Period period = new Period(startTime, endTime, m_analyzerManager, m_serverStateManager);
 
 		m_periods.add(period);
 		period.start();

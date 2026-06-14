@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.ContainerHolder;
@@ -36,10 +34,8 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.spring.CatSpringContext;
 
 public class DefaultMessageAnalyzerManager extends ContainerHolder
-						implements MessageAnalyzerManager, Initializable,	LogEnabled {
+						implements MessageAnalyzerManager, Initializable {
 	private static final long MINUTE = 60 * 1000L;
-
-	protected Logger m_logger;
 
 	private long m_duration = 60 * MINUTE;
 
@@ -162,11 +158,6 @@ public class DefaultMessageAnalyzerManager extends ContainerHolder
 		for (String name : disables) {
 			m_analyzerNames.remove(name);
 		}
-	}
-
-	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
 	}
 
 	private MessageAnalyzer createAnalyzer(String name) {
