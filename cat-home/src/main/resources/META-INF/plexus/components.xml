@@ -3727,27 +3727,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.cat.system.page.router.Handler</role>
-			<implementation>com.dianping.cat.system.page.router.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.system.page.router.service.CachedRouterConfigService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.system.page.router.config.RouterConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.sample.SampleConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.system.page.router.config.RouterConfigHandler</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.dianping.cat.system.page.business.Handler</role>
 			<implementation>com.dianping.cat.system.page.business.Handler</implementation>
 			<requirements>
@@ -3786,33 +3765,6 @@
 		<component>
 			<role>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</role>
 			<implementation>com.dianping.cat.system.page.business.config.BusinessTagConfigManager</implementation>
-		</component>
-		<component>
-			<role>com.dianping.cat.system.page.permission.Handler</role>
-			<implementation>com.dianping.cat.system.page.permission.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.cat.system.page.permission.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.system.page.permission.UserConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.system.page.permission.ResourceConfigManager</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.cat.system.page.config.ConfigHtmlParser</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.cat.system.page.permission.JspViewer</role>
-			<implementation>com.dianping.cat.system.page.permission.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.cat.system.page.login.Handler</role>
@@ -3876,6 +3828,63 @@
 			<requirements>
 				<requirement>
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.system.page.permission.Handler</role>
+			<implementation>com.dianping.cat.system.page.permission.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.system.page.permission.JspViewer</role>
+					<field-name>m_jspViewer</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.system.page.permission.UserConfigManager</role>
+					<field-name>m_userConfigManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.system.page.permission.ResourceConfigManager</role>
+					<field-name>m_resourceConfigManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.system.page.config.ConfigHtmlParser</role>
+					<field-name>m_configHtmlParser</field-name>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.system.page.permission.JspViewer</role>
+			<implementation>com.dianping.cat.system.page.permission.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.cat.system.page.router.Handler</role>
+			<implementation>com.dianping.cat.system.page.router.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.cat.system.page.router.service.CachedRouterConfigService</role>
+					<field-name>m_cachedReportService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.system.page.router.config.RouterConfigManager</role>
+					<field-name>m_configManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.sample.SampleConfigManager</role>
+					<field-name>m_sampleConfigManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.config.server.ServerFilterConfigManager</role>
+					<field-name>m_filterManager</field-name>
+				</requirement>
+				<requirement>
+					<role>com.dianping.cat.system.page.router.config.RouterConfigHandler</role>
+					<field-name>m_routerConfigHandler</field-name>
 				</requirement>
 			</requirements>
 		</component>

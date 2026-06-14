@@ -47,9 +47,17 @@ import org.unidal.web.mvc.view.model.ModelHandler;
 import org.unidal.web.mvc.view.model.XmlModelBuilder;
 
 import com.dianping.cat.report.ReportModule;
+import com.dianping.cat.config.sample.SampleConfigManager;
+import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.SystemModule;
+import com.dianping.cat.system.page.config.ConfigHtmlParser;
 import com.dianping.cat.system.page.login.service.SigninService;
+import com.dianping.cat.system.page.permission.ResourceConfigManager;
+import com.dianping.cat.system.page.permission.UserConfigManager;
+import com.dianping.cat.system.page.router.config.RouterConfigHandler;
+import com.dianping.cat.system.page.router.config.RouterConfigManager;
+import com.dianping.cat.system.page.router.service.CachedRouterConfigService;
 
 class WebComponentConfigurator extends AbstractWebComponentsConfigurator {
 	@SuppressWarnings("unchecked")
@@ -59,7 +67,7 @@ class WebComponentConfigurator extends AbstractWebComponentsConfigurator {
 
 		defineWebMvcComponents(all);
 		defineModuleRegistry(all, ReportModule.class, ReportModule.class, SystemModule.class);
-		replaceSmallSystemPageHandlers(all);
+		replaceSystemPageHandlers(all);
 
 		return all;
 	}
@@ -87,10 +95,12 @@ class WebComponentConfigurator extends AbstractWebComponentsConfigurator {
 		all.add(A(JsonModelBuilder.class));
 	}
 
-	private void replaceSmallSystemPageHandlers(List<Component> all) {
+	private void replaceSystemPageHandlers(List<Component> all) {
 		removeComponent(all, com.dianping.cat.system.page.login.Handler.class);
 		removeComponent(all, com.dianping.cat.system.page.plugin.Handler.class);
 		removeComponent(all, com.dianping.cat.system.page.project.Handler.class);
+		removeComponent(all, com.dianping.cat.system.page.permission.Handler.class);
+		removeComponent(all, com.dianping.cat.system.page.router.Handler.class);
 
 		all.add(C(com.dianping.cat.system.page.login.Handler.class) //
 								.req(com.dianping.cat.system.page.login.JspViewer.class, (String) null, "m_jspViewer") //
@@ -103,6 +113,18 @@ class WebComponentConfigurator extends AbstractWebComponentsConfigurator {
 								.req(ProjectService.class, (String) null, "m_projectService") //
 								.req(com.dianping.cat.system.page.project.JspViewer.class, (String) null, "m_jspViewer"));
 		all.add(C(com.dianping.cat.system.page.project.JspViewer.class).req(ModelHandler.class));
+		all.add(C(com.dianping.cat.system.page.permission.Handler.class) //
+								.req(com.dianping.cat.system.page.permission.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(UserConfigManager.class, (String) null, "m_userConfigManager") //
+								.req(ResourceConfigManager.class, (String) null, "m_resourceConfigManager") //
+								.req(ConfigHtmlParser.class, (String) null, "m_configHtmlParser"));
+		all.add(C(com.dianping.cat.system.page.permission.JspViewer.class).req(ModelHandler.class));
+		all.add(C(com.dianping.cat.system.page.router.Handler.class) //
+								.req(CachedRouterConfigService.class, (String) null, "m_cachedReportService") //
+								.req(RouterConfigManager.class, (String) null, "m_configManager") //
+								.req(SampleConfigManager.class, (String) null, "m_sampleConfigManager") //
+								.req(ServerFilterConfigManager.class, (String) null, "m_filterManager") //
+								.req(RouterConfigHandler.class, (String) null, "m_routerConfigHandler"));
 	}
 
 	private void removeComponent(List<Component> all, Class<?> role) {

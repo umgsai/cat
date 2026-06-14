@@ -22,7 +22,6 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 import org.codehaus.plexus.util.StringUtils;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -34,16 +33,12 @@ import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private UserConfigManager m_userConfigManager;
 
-	@Inject
 	private ResourceConfigManager m_resourceConfigManager;
 
-	@Inject
 	private ConfigHtmlParser m_configHtmlParser;
 
 	@Override

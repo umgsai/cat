@@ -29,7 +29,6 @@ import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -50,19 +49,14 @@ import com.dianping.cat.spring.CatSpringContext;
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	@Inject
 	private CachedRouterConfigService m_cachedReportService;
 
-	@Inject
 	private RouterConfigManager m_configManager;
 
-	@Inject
 	private SampleConfigManager m_sampleConfigManager;
 
-	@Inject
 	private ServerFilterConfigManager m_filterManager;
 
-	@Inject
 	private RouterConfigHandler m_routerConfigHandler;
 
 	private String buildRouterInfo(String ip, String domain, RouterConfig config) {
