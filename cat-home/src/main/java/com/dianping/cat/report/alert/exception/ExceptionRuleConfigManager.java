@@ -21,8 +21,6 @@ package com.dianping.cat.report.alert.exception;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
@@ -38,7 +36,7 @@ import com.dianping.cat.home.exception.entity.ExceptionRuleConfig;
 import com.dianping.cat.home.exception.transform.DefaultSaxParser;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class ExceptionRuleConfigManager implements Initializable {
+public class ExceptionRuleConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionRuleConfigManager.class);
 
 	private static final String CONFIG_NAME = "exceptionRuleConfig";
@@ -54,6 +52,8 @@ public class ExceptionRuleConfigManager implements Initializable {
 	private int m_configId;
 
 	private ExceptionRuleConfig m_exceptionRuleConfig;
+
+	private volatile boolean m_initialized;
 
 	public void setConfigDao(ConfigRepository configDao) {
 		m_configDao = configDao;
@@ -75,44 +75,59 @@ public class ExceptionRuleConfigManager implements Initializable {
 		return storeConfig();
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
-		refreshSpringBeans();
+	public void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		synchronized (this) {
+			if (m_initialized) {
+				return;
+			}
+			refreshSpringBeans();
 
-		LOGGER.info("Initializing exception rule config manager, configName={}.", CONFIG_NAME);
-		try {
-			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
-			String content = config.getContent();
-			m_configId = config.getId();
-			m_exceptionRuleConfig = DefaultSaxParser.parse(content);
-		} catch (DalNotFoundException e) {
-			LOGGER.warn("Exception rule config not found in repository, loading default content, configName={}.",
-			      CONFIG_NAME);
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
-
-				config.setName(CONFIG_NAME);
-				config.setContent(content);
-				m_configDao.insert(config);
-
+				LOGGER.info("Initializing exception rule config manager, configName={}.", CONFIG_NAME);
+				Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+				String content = config.getContent();
 				m_configId = config.getId();
 				m_exceptionRuleConfig = DefaultSaxParser.parse(content);
-			} catch (Exception ex) {
-				LOGGER.error("Unable to create default exception rule config, configName={}.", CONFIG_NAME, ex);
-				Cat.logError(ex);
+			} catch (DalNotFoundException e) {
+				LOGGER.warn("Exception rule config not found in repository, loading default content, configName={}.",
+				      CONFIG_NAME);
+				try {
+					String content = m_fetcher.getConfigContent(CONFIG_NAME);
+					Config config = m_configDao.createLocal();
+
+					config.setName(CONFIG_NAME);
+					config.setContent(content);
+					m_configDao.insert(config);
+
+					m_configId = config.getId();
+					m_exceptionRuleConfig = DefaultSaxParser.parse(content);
+				} catch (Exception ex) {
+					LOGGER.error("Unable to create default exception rule config, configName={}.", CONFIG_NAME, ex);
+					Cat.logError(ex);
+				}
+			} catch (Exception e) {
+				LOGGER.error("Unable to initialize exception rule config, configName={}.", CONFIG_NAME, e);
+				Cat.logError(e);
 			}
-		} catch (Exception e) {
-			LOGGER.error("Unable to initialize exception rule config, configName={}.", CONFIG_NAME, e);
-			Cat.logError(e);
+			if (m_exceptionRuleConfig == null) {
+				LOGGER.warn("Exception rule config is empty after initialization, using an empty config.");
+				m_exceptionRuleConfig = new ExceptionRuleConfig();
+			}
+			m_initialized = true;
 		}
-		if (m_exceptionRuleConfig == null) {
-			LOGGER.warn("Exception rule config is empty after initialization, using an empty config.");
-			m_exceptionRuleConfig = new ExceptionRuleConfig();
+	}
+
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
 		}
 	}
 
 	public boolean isExcluded(String domain, String exceptionName) {
+		ensureInitialized();
 		boolean excluded = false;
 		ExceptionExclude result = queryExceptionExclude(domain, exceptionName);
 
@@ -123,6 +138,7 @@ public class ExceptionRuleConfigManager implements Initializable {
 	}
 
 	public boolean insertExceptionExclude(ExceptionExclude exclude) {
+		ensureInitialized();
 		String id = exclude.getDomain() + ":" + exclude.getName();
 
 		m_exceptionRuleConfig.getExceptionExcludes().put(id, exclude);
@@ -130,6 +146,7 @@ public class ExceptionRuleConfigManager implements Initializable {
 	}
 
 	public boolean insertExceptionLimit(ExceptionLimit limit) {
+		ensureInitialized();
 		String id = limit.getDomain() + ":" + limit.getName();
 
 		m_exceptionRuleConfig.getExceptionLimits().put(id, limit);
@@ -137,14 +154,17 @@ public class ExceptionRuleConfigManager implements Initializable {
 	}
 
 	public List<ExceptionExclude> queryAllExceptionExcludes() {
+		ensureInitialized();
 		return new ArrayList<ExceptionExclude>(m_exceptionRuleConfig.getExceptionExcludes().values());
 	}
 
 	public List<ExceptionLimit> queryAllExceptionLimits() {
+		ensureInitialized();
 		return new ArrayList<ExceptionLimit>(m_exceptionRuleConfig.getExceptionLimits().values());
 	}
 
 	public ExceptionExclude queryExceptionExclude(String domain, String exceptionName) {
+		ensureInitialized();
 		ExceptionExclude exceptionExclude = m_exceptionRuleConfig.findExceptionExclude(domain + ":" + exceptionName);
 
 		if (exceptionExclude == null) {
@@ -154,6 +174,7 @@ public class ExceptionRuleConfigManager implements Initializable {
 	}
 
 	public ExceptionLimit queryExceptionLimit(String domain, String exceptionName) {
+		ensureInitialized();
 		ExceptionLimit exceptionLimit = m_exceptionRuleConfig.findExceptionLimit(domain + ":" + exceptionName);
 
 		if (exceptionLimit == null) {

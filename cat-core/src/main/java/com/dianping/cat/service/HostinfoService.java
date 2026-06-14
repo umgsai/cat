@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
@@ -41,7 +39,7 @@ import com.dianping.cat.core.dal.HostinfoEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class HostinfoService implements Initializable {
+public class HostinfoService {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(HostinfoService.class);
 
 	public static final String UNKNOWN_PROJECT = "UnknownProject";
@@ -54,15 +52,21 @@ public class HostinfoService implements Initializable {
 
 	private Map<String, Hostinfo> m_hostinfos = new ConcurrentHashMap<String, Hostinfo>();
 
+	private volatile boolean m_initialized;
+
 	public Hostinfo createLocal() {
 		return m_hostinfoDao.createLocal();
 	}
 
 	public List<Hostinfo> findAll() throws DalException {
+		ensureInitialized();
+
 		return new ArrayList<Hostinfo>(m_hostinfos.values());
 	}
 
 	public Hostinfo findByIp(String ip) {
+		ensureInitialized();
+
 		Hostinfo hostinfo = m_hostinfos.get(ip);
 
 		if (hostinfo != null) {
@@ -87,8 +91,17 @@ public class HostinfoService implements Initializable {
 		}
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		HostinfoRepository hostinfoDao = CatSpringContext.getBeanIfAvailable(HostinfoRepository.class);
 		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 
@@ -101,6 +114,7 @@ public class HostinfoService implements Initializable {
 			SLF4J_LOGGER.info("HostinfoService refreshed Spring ServerConfigManager dependency.");
 		}
 		Threads.forGroup("Cat").start(new RefreshHost());
+		m_initialized = true;
 		SLF4J_LOGGER.info("HostinfoService started refresh task.");
 	}
 
@@ -116,6 +130,8 @@ public class HostinfoService implements Initializable {
 	}
 
 	public boolean insert(String domain, String ip) {
+		ensureInitialized();
+
 		try {
 			Hostinfo info = createLocal();
 
@@ -133,6 +149,8 @@ public class HostinfoService implements Initializable {
 	}
 
 	public String queryDomainByIp(String ip) {
+		ensureInitialized();
+
 		String project = m_ipDomains.get(ip);
 
 		if (project == null) {
@@ -142,6 +160,8 @@ public class HostinfoService implements Initializable {
 	}
 
 	public String queryHostnameByIp(String ip) {
+		ensureInitialized();
+
 		try {
 			if (validateIp(ip)) {
 				Hostinfo info = m_hostinfos.get(ip);
@@ -173,6 +193,8 @@ public class HostinfoService implements Initializable {
 	}
 
 	public List<String> queryIpsByDomain(String domain) {
+		ensureInitialized();
+
 		List<String> ips = new ArrayList<String>();
 		if (domain == null) {
 			return ips;
@@ -211,6 +233,8 @@ public class HostinfoService implements Initializable {
 	}
 
 	public boolean update(int id, String domain, String ip) {
+		ensureInitialized();
+
 		Hostinfo info = createLocal();
 
 		info.setId(id);
@@ -223,6 +247,8 @@ public class HostinfoService implements Initializable {
 	}
 
 	public boolean updateHostinfo(Hostinfo hostinfo) {
+		ensureInitialized();
+
 		m_hostinfos.put(hostinfo.getIp(), hostinfo);
 
 		try {

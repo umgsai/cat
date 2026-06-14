@@ -22,22 +22,28 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-public class ServersUpdaterManager implements Initializable {
+public class ServersUpdaterManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServersUpdaterManager.class);
 
 	private ServersUpdater m_remoteServerUpdater;
 
 	private RemoteServersManager m_remoteServersManager;
 
-	@Override
-	public void initialize() throws InitializationException {
+	private volatile boolean m_initialized;
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		TimerSyncTask.getInstance().register(new SyncHandler() {
 
 			@Override
@@ -58,10 +64,12 @@ public class ServersUpdaterManager implements Initializable {
 
 					m_remoteServersManager.setLastServers(lastServers);
 				} catch (Exception e) {
+					LOGGER.error("Unable to update remote server cache.", e);
 					Cat.logError(e);
 				}
 			}
 		});
+		m_initialized = true;
 	}
 
 	public void setRemoteServerUpdater(ServersUpdater remoteServerUpdater) {

@@ -22,8 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
@@ -34,33 +32,51 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class SenderManager extends ContainerHolder implements Initializable {
+public class SenderManager extends ContainerHolder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SenderManager.class);
 
 	private ServerConfigManager m_configManager;
 
 	private Map<String, Sender> m_senders = new HashMap<String, Sender>();
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public void initialize() throws InitializationException {
-		if (m_senders.isEmpty()) {
-			Map<String, Sender> springSenders = CatSpringContext.getBeanIfAvailable("alertSenders", Map.class);
+	private volatile boolean m_initialized;
 
-			if (springSenders != null && !springSenders.isEmpty()) {
-				setSenders(springSenders);
-				LOGGER.info("Initialized alert sender manager from Spring context bridge, senderCount={}.",
-				      m_senders.size());
+	@SuppressWarnings("unchecked")
+	public void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		synchronized (this) {
+			if (m_initialized) {
 				return;
 			}
-			try {
-				m_senders = lookupMap(Sender.class);
-				LOGGER.warn("Initialized alert sender manager from Plexus fallback, senderCount={}.", m_senders.size());
-			} catch (RuntimeException e) {
-				LOGGER.warn("Unable to initialize alert sender manager from Plexus fallback, keep empty senders.", e);
+			if (m_senders.isEmpty()) {
+				Map<String, Sender> springSenders = CatSpringContext.getBeanIfAvailable("alertSenders", Map.class);
+
+				if (springSenders != null && !springSenders.isEmpty()) {
+					setSenders(springSenders);
+					LOGGER.info("Initialized alert sender manager from Spring context bridge, senderCount={}.",
+					      m_senders.size());
+					m_initialized = true;
+					return;
+				}
+				try {
+					m_senders = lookupMap(Sender.class);
+					LOGGER.warn("Initialized alert sender manager from Plexus fallback, senderCount={}.",
+					      m_senders.size());
+				} catch (RuntimeException e) {
+					LOGGER.warn("Unable to initialize alert sender manager from Plexus fallback, keep empty senders.", e);
+				}
+			} else {
+				LOGGER.info("Initialized alert sender manager from Spring injection, senderCount={}.", m_senders.size());
 			}
-		} else {
-			LOGGER.info("Initialized alert sender manager from Spring injection, senderCount={}.", m_senders.size());
+			m_initialized = true;
+		}
+	}
+
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
 		}
 	}
 
@@ -78,10 +94,12 @@ public class SenderManager extends ContainerHolder implements Initializable {
 	}
 
 	public Map<String, Sender> getSenders() {
+		ensureInitialized();
 		return Collections.unmodifiableMap(m_senders);
 	}
 
 	public boolean sendAlert(AlertChannel channel, SendMessageEntity message) {
+		ensureInitialized();
 		String channelName = channel.getName();
 
 		try {

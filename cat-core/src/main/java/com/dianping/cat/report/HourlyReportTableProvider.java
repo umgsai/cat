@@ -20,11 +20,9 @@ package com.dianping.cat.report;
 
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.dal.jdbc.mapping.TableProvider;
 
-public class HourlyReportTableProvider implements TableProvider, Initializable {
+public class HourlyReportTableProvider implements TableProvider {
 
 	public final static String LOGIC_TABLE_NAME = "report";
 
@@ -35,10 +33,6 @@ public class HourlyReportTableProvider implements TableProvider, Initializable {
 	@Override
 	public String getDataSourceName(Map<String, Object> hints, String logicalTableName) {
 		return m_dataSourceName;
-	}
-
-	@Override
-	public void initialize() throws InitializationException {
 	}
 
 	public void setLogicalTableName(String logicalTableName) {

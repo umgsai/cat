@@ -30,8 +30,6 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
 import org.apache.commons.lang3.tuple.Pair;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.dianping.cat.support.Threads;
@@ -47,10 +45,12 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-public class AlertManager implements Initializable {
+public class AlertManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertManager.class);
 
 	private static final int MILLIS1MINUTE = 60 * 1000;
+
+	private volatile boolean m_initialized;
 
 	protected SpliterManager m_splitterManager;
 
@@ -75,6 +75,8 @@ public class AlertManager implements Initializable {
 	private ConcurrentHashMap<AlertEntity, Long> m_alertMap = new ConcurrentHashMap<AlertEntity, Long>();
 
 	public boolean addAlert(AlertEntity entity) {
+		ensureInitialized();
+
 		m_alertMap.put(entity, entity.getDate().getTime());
 
 		String group = entity.getGroup();
@@ -95,11 +97,21 @@ public class AlertManager implements Initializable {
 		}
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		LOGGER.info("Initializing alert manager executors.");
 		Threads.forGroup("Cat").start(new SendExecutor());
 		Threads.forGroup("Cat").start(new RecoveryAnnouncer());
+		m_initialized = true;
 	}
 
 	public boolean isSuspend(String alertKey, int suspendMinute) {

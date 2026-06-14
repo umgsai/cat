@@ -18,8 +18,6 @@
  */
 package com.dianping.cat.config;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
@@ -35,7 +33,7 @@ import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 
-public class AtomicMessageConfigManager implements Initializable {
+public class AtomicMessageConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AtomicMessageConfigManager.class);
 
 	private static final String CONFIG_NAME = "atomic-message-config";
@@ -52,12 +50,24 @@ public class AtomicMessageConfigManager implements Initializable {
 
 	private AtomicMessageConfig m_config;
 
+	private volatile boolean m_initialized;
+
 	public AtomicMessageConfig getConfig() {
+		ensureInitialized();
 		return m_config;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -105,9 +115,12 @@ public class AtomicMessageConfigManager implements Initializable {
 				refreshConfig();
 			}
 		});
+		m_initialized = true;
 	}
 
 	public boolean insert(String xml) {
+		ensureInitialized();
+
 		try {
 			m_config = DefaultSaxParser.parse(xml);
 
@@ -121,6 +134,8 @@ public class AtomicMessageConfigManager implements Initializable {
 	}
 
 	public String queryAtomicMatchTypes(String domain) {
+		ensureInitialized();
+
 		Domain d = m_config.findDomain(domain);
 
 		if (d == null) {
@@ -135,6 +150,8 @@ public class AtomicMessageConfigManager implements Initializable {
 	}
 
 	public String queryAtomicStartTypes(String domain) {
+		ensureInitialized();
+
 		Domain d = m_config.findDomain(domain);
 
 		if (d == null) {
@@ -149,6 +166,8 @@ public class AtomicMessageConfigManager implements Initializable {
 	}
 
 	public String queryMaxMetricTagValues(String domain) {
+		ensureInitialized();
+
 		Domain d = m_config.findDomain(domain);
 
 		if (d == null) {
@@ -175,6 +194,8 @@ public class AtomicMessageConfigManager implements Initializable {
 	}
 
 	public int getPropertyValue(String domain, String propertyName, int defaultValue) {
+		ensureInitialized();
+
 		int result = defaultValue;
 		Domain d = m_config.findDomain(domain);
 

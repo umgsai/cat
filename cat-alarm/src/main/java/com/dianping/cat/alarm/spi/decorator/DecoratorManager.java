@@ -22,8 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,12 +31,15 @@ import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class DecoratorManager extends ContainerHolder implements Initializable {
+public class DecoratorManager extends ContainerHolder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DecoratorManager.class);
 
 	private Map<String, Decorator> m_decorators = new HashMap<String, Decorator>();
 
+	private volatile boolean m_initialized;
+
 	public Pair<String, String> generateTitleAndContent(AlertEntity alert) {
+		ensureInitialized();
 		AlertType alertType = alert.getType();
 		Decorator decorator = m_decorators.get(alertType.getName());
 
@@ -54,30 +55,45 @@ public class DecoratorManager extends ContainerHolder implements Initializable {
 		}
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
-	public void initialize() throws InitializationException {
-		if (m_decorators.isEmpty()) {
-			Map<String, Decorator> springDecorators = CatSpringContext.getBeanIfAvailable("alertDecorators", Map.class);
-
-			if (springDecorators != null && !springDecorators.isEmpty()) {
-				setDecorators(springDecorators);
-				mergePlexusDecoratorsIfMissing();
-				LOGGER.info("Initialized alert decorator manager from Spring context bridge, decoratorCount={}.",
-				      m_decorators.size());
+	public void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		synchronized (this) {
+			if (m_initialized) {
 				return;
 			}
-			try {
-				m_decorators = lookupMap(Decorator.class);
-				LOGGER.warn("Initialized alert decorator manager from Plexus fallback, decoratorCount={}.",
+			if (m_decorators.isEmpty()) {
+				Map<String, Decorator> springDecorators = CatSpringContext.getBeanIfAvailable("alertDecorators", Map.class);
+
+				if (springDecorators != null && !springDecorators.isEmpty()) {
+					setDecorators(springDecorators);
+					mergePlexusDecoratorsIfMissing();
+					LOGGER.info("Initialized alert decorator manager from Spring context bridge, decoratorCount={}.",
+					      m_decorators.size());
+					m_initialized = true;
+					return;
+				}
+				try {
+					m_decorators = lookupMap(Decorator.class);
+					LOGGER.warn("Initialized alert decorator manager from Plexus fallback, decoratorCount={}.",
+					      m_decorators.size());
+				} catch (RuntimeException e) {
+					LOGGER.warn("Unable to initialize alert decorator manager from Plexus fallback, keep empty decorators.",
+					      e);
+				}
+			} else {
+				LOGGER.info("Initialized alert decorator manager from Spring injection, decoratorCount={}.",
 				      m_decorators.size());
-			} catch (RuntimeException e) {
-				LOGGER.warn("Unable to initialize alert decorator manager from Plexus fallback, keep empty decorators.",
-				      e);
 			}
-		} else {
-			LOGGER.info("Initialized alert decorator manager from Spring injection, decoratorCount={}.",
-			      m_decorators.size());
+			m_initialized = true;
+		}
+	}
+
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
 		}
 	}
 
@@ -91,6 +107,7 @@ public class DecoratorManager extends ContainerHolder implements Initializable {
 	}
 
 	public Map<String, Decorator> getDecorators() {
+		ensureInitialized();
 		return Collections.unmodifiableMap(m_decorators);
 	}
 

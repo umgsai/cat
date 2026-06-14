@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
@@ -75,6 +74,8 @@ public abstract class BaseRuleConfigManager {
 
 	private long m_modifyTime;
 
+	private volatile boolean m_initialized;
+
 	public void setConfigDao(ConfigRepository configDao) {
 		m_configDao = configDao;
 	}
@@ -91,45 +92,60 @@ public abstract class BaseRuleConfigManager {
 		m_manager = manager;
 	}
 
-	public void initialize() throws InitializationException {
-		refreshSpringBeans();
+	public void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		synchronized (this) {
+			if (m_initialized) {
+				return;
+			}
+			refreshSpringBeans();
 
-		LOGGER.info("Initializing alert rule config manager, configName={}.", getConfigName());
-		try {
-			com.dianping.cat.core.config.Config config = m_configDao.findByName(getConfigName(),
-			      ConfigEntity.READSET_FULL);
-			String content = config.getContent();
-
-			m_configId = config.getId();
-			m_config = DefaultSaxParser.parse(content);
-		} catch (DalNotFoundException e) {
-			LOGGER.warn("Alert rule config not found in repository, loading default content, configName={}.",
-			      getConfigName());
+			LOGGER.info("Initializing alert rule config manager, configName={}.", getConfigName());
 			try {
-				String content = m_fetcher.getConfigContent(getConfigName());
-				com.dianping.cat.core.config.Config config = m_configDao.createLocal();
-
-				config.setName(getConfigName());
-				config.setContent(content);
-				m_configDao.insert(config);
+				com.dianping.cat.core.config.Config config = m_configDao.findByName(getConfigName(),
+				      ConfigEntity.READSET_FULL);
+				String content = config.getContent();
 
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
-			} catch (Exception ex) {
-				LOGGER.error("Unable to create default alert rule config, configName={}.", getConfigName(), ex);
-				Cat.logError(ex);
-			}
-		} catch (Exception e) {
-			LOGGER.error("Unable to initialize alert rule config, configName={}.", getConfigName(), e);
-			Cat.logError(e);
-		}
-		if (m_config == null) {
-			LOGGER.warn("Alert rule config is empty after initialization, using an empty config, configName={}.",
-			      getConfigName());
-			m_config = new MonitorRules();
-		}
+			} catch (DalNotFoundException e) {
+				LOGGER.warn("Alert rule config not found in repository, loading default content, configName={}.",
+				      getConfigName());
+				try {
+					String content = m_fetcher.getConfigContent(getConfigName());
+					com.dianping.cat.core.config.Config config = m_configDao.createLocal();
 
-		registerHandler();
+					config.setName(getConfigName());
+					config.setContent(content);
+					m_configDao.insert(config);
+
+					m_configId = config.getId();
+					m_config = DefaultSaxParser.parse(content);
+				} catch (Exception ex) {
+					LOGGER.error("Unable to create default alert rule config, configName={}.", getConfigName(), ex);
+					Cat.logError(ex);
+				}
+			} catch (Exception e) {
+				LOGGER.error("Unable to initialize alert rule config, configName={}.", getConfigName(), e);
+				Cat.logError(e);
+			}
+			if (m_config == null) {
+				LOGGER.warn("Alert rule config is empty after initialization, using an empty config, configName={}.",
+				      getConfigName());
+				m_config = new MonitorRules();
+			}
+
+			registerHandler();
+			m_initialized = true;
+		}
+	}
+
+	protected void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
 	}
 
 	private void registerHandler() {
@@ -178,6 +194,7 @@ public abstract class BaseRuleConfigManager {
 	}
 
 	public Pair<Integer, List<Condition>> convertConditions(List<Config> configs) {
+		ensureInitialized();
 		return m_helper.convertConditions(configs);
 	}
 
@@ -281,6 +298,7 @@ public abstract class BaseRuleConfigManager {
 	}
 
 	public String deleteRule(String key) {
+		ensureInitialized();
 		Rule rule = m_config.getRules().get(key);
 
 		if (rule != null) {
@@ -361,10 +379,12 @@ public abstract class BaseRuleConfigManager {
 	}
 
 	public MonitorRules getMonitorRules() {
+		ensureInitialized();
 		return m_config;
 	}
 
 	public boolean insert(String xml) {
+		ensureInitialized();
 		try {
 			m_config = DefaultSaxParser.parse(xml);
 
@@ -378,6 +398,7 @@ public abstract class BaseRuleConfigManager {
 	}
 
 	public AlarmRule queryConfigs(String product) {
+		ensureInitialized();
 		Map<String, Map<Integer, Map<MetricType, List<Config>>>> configs = new HashMap<String, Map<Integer, Map<MetricType, List<Config>>>>();
 
 		for (Rule rule : m_config.getRules().values()) {
@@ -389,6 +410,7 @@ public abstract class BaseRuleConfigManager {
 	}
 
 	public Rule queryRule(String key) {
+		ensureInitialized();
 		Rule rule = m_config.getRules().get(key);
 
 		if (rule != null) {
@@ -441,6 +463,7 @@ public abstract class BaseRuleConfigManager {
 	}
 
 	public String updateRule(String id, String metricsStr, String configsStr) throws Exception {
+		ensureInitialized();
 		Rule rule = new Rule(id);
 		List<MetricItem> metricItems = DefaultJsonParser.parseArray(MetricItem.class, metricsStr);
 		List<Config> configs = DefaultJsonParser.parseArray(Config.class, configsStr);
@@ -457,6 +480,7 @@ public abstract class BaseRuleConfigManager {
 
 	public String updateRule(String id, String metricsStr, String configsStr,
 							 Boolean available) throws Exception {
+		ensureInitialized();
 		Rule rule = new Rule(id);
 		rule.setAvailable(available);
 		List<MetricItem> metricItems = DefaultJsonParser.parseArray(MetricItem.class, metricsStr);

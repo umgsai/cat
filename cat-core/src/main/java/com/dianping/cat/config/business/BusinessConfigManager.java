@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalException;
@@ -45,7 +43,7 @@ import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-public class BusinessConfigManager extends ContainerHolder implements Initializable {
+public class BusinessConfigManager extends ContainerHolder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessConfigManager.class);
 
 	public final static String BASE_CONFIG = "base";
@@ -60,6 +58,8 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 
 	private boolean m_alertMachine;
 
+	private volatile boolean m_initialized;
+
 	private BusinessItemConfig buildBusinessItemConfig(String key, ConfigItem item) {
 		BusinessItemConfig config = new BusinessItemConfig();
 
@@ -73,6 +73,8 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 	}
 
 	public boolean deleteBusinessItem(String domain, String key) {
+		ensureInitialized();
+
 		try {
 			BusinessConfig config = m_configDao.findByNameDomain(BASE_CONFIG, domain, BusinessConfigEntity.READSET_FULL);
 			BusinessReportConfig businessReportConfig = DefaultSaxParser.parse(config.getContent());
@@ -95,6 +97,8 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 	}
 
 	public boolean deleteCustomItem(String domain, String key) {
+		ensureInitialized();
+
 		try {
 			BusinessConfig config = m_configDao.findByNameDomain(BASE_CONFIG, domain, BusinessConfigEntity.READSET_FULL);
 			BusinessReportConfig businessReportConfig = DefaultSaxParser.parse(config.getContent());
@@ -114,8 +118,17 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 		return true;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		ServerConfigManager serverConfigManager = m_serverConfigManager;
 
 		if (serverConfigManager == null) {
@@ -142,6 +155,7 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 				return BASE_CONFIG;
 			}
 		});
+		m_initialized = true;
 	}
 
 	public void setConfigDao(BusinessConfigRepository configDao) {
@@ -187,6 +201,8 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 	}
 
 	public boolean insertBusinessConfigIfNotExist(String domain, String key, ConfigItem item) {
+		ensureInitialized();
+
 		try {
 			if (!m_domains.containsKey(domain)) {
 				BusinessReportConfig config = new BusinessReportConfig();
@@ -235,6 +251,8 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 	}
 
 	public BusinessReportConfig queryConfigByDomain(String domain) {
+		ensureInitialized();
+
 		BusinessReportConfig businessReportConfig = null;
 
 		try {
@@ -259,6 +277,8 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 	}
 
 	public boolean updateConfigByDomain(BusinessReportConfig config) {
+		ensureInitialized();
+
 		BusinessConfig proto = m_configDao.createLocal();
 		String domain = config.getId();
 
@@ -280,6 +300,8 @@ public class BusinessConfigManager extends ContainerHolder implements Initializa
 	}
 
 	public boolean insertConfigByDomain(BusinessReportConfig config) {
+		ensureInitialized();
+
 		BusinessConfig proto = m_configDao.createLocal();
 		String domain = config.getId();
 

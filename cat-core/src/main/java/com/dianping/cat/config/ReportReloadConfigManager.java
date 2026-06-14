@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
@@ -42,7 +40,7 @@ import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-public class ReportReloadConfigManager implements Initializable {
+public class ReportReloadConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReportReloadConfigManager.class);
 
 	private static final String CONFIG_NAME = "report-reload-config";
@@ -59,12 +57,24 @@ public class ReportReloadConfigManager implements Initializable {
 
 	private ReportReloadConfig m_config;
 
+	private volatile boolean m_initialized;
+
 	public ReportReloadConfig getConfig() {
+		ensureInitialized();
 		return m_config;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -112,9 +122,12 @@ public class ReportReloadConfigManager implements Initializable {
 				refreshConfig();
 			}
 		});
+		m_initialized = true;
 	}
 
 	public boolean insert(String xml) {
+		ensureInitialized();
+
 		try {
 			m_config = DefaultSaxParser.parse(xml);
 
@@ -128,6 +141,8 @@ public class ReportReloadConfigManager implements Initializable {
 	}
 
 	public List<Date> queryByReportType(String type) {
+		ensureInitialized();
+
 		ReportType reportType = m_config.findReportType(type);
 		ArrayList<Date> results = new ArrayList<Date>();
 

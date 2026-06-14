@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.lookup.ContainerHolder;
@@ -32,38 +30,56 @@ import org.unidal.lookup.ContainerHolder;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class ContactorManager extends ContainerHolder implements Initializable {
+public class ContactorManager extends ContainerHolder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContactorManager.class);
 
 	private Map<String, Contactor> m_contactors = new HashMap<String, Contactor>();
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public void initialize() throws InitializationException {
-		if (m_contactors.isEmpty()) {
-			Map<String, Contactor> springContactors = CatSpringContext.getBeanIfAvailable("alertContactors", Map.class);
+	private volatile boolean m_initialized;
 
-			if (springContactors != null && !springContactors.isEmpty()) {
-				setContactors(springContactors);
-				LOGGER.info("Initialized alert contactor manager from Spring context bridge, contactorCount={}.",
-				      m_contactors.size());
+	@SuppressWarnings("unchecked")
+	public void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		synchronized (this) {
+			if (m_initialized) {
 				return;
 			}
-			try {
-				m_contactors = lookupMap(Contactor.class);
-				LOGGER.warn("Initialized alert contactor manager from Plexus fallback, contactorCount={}.",
+			if (m_contactors.isEmpty()) {
+				Map<String, Contactor> springContactors = CatSpringContext.getBeanIfAvailable("alertContactors", Map.class);
+
+				if (springContactors != null && !springContactors.isEmpty()) {
+					setContactors(springContactors);
+					LOGGER.info("Initialized alert contactor manager from Spring context bridge, contactorCount={}.",
+					      m_contactors.size());
+					m_initialized = true;
+					return;
+				}
+				try {
+					m_contactors = lookupMap(Contactor.class);
+					LOGGER.warn("Initialized alert contactor manager from Plexus fallback, contactorCount={}.",
+					      m_contactors.size());
+				} catch (RuntimeException e) {
+					LOGGER.warn("Unable to initialize alert contactor manager from Plexus fallback, keep empty contactors.",
+					      e);
+				}
+			} else {
+				LOGGER.info("Initialized alert contactor manager from Spring injection, contactorCount={}.",
 				      m_contactors.size());
-			} catch (RuntimeException e) {
-				LOGGER.warn("Unable to initialize alert contactor manager from Plexus fallback, keep empty contactors.",
-				      e);
 			}
-		} else {
-			LOGGER.info("Initialized alert contactor manager from Spring injection, contactorCount={}.",
-			      m_contactors.size());
+			m_initialized = true;
+		}
+	}
+
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
 		}
 	}
 
 	public List<String> queryReceivers(String group, AlertChannel channel, String type) {
+		ensureInitialized();
 		Contactor contactor = m_contactors.get(type);
 
 		if (contactor == null) {
@@ -95,6 +111,7 @@ public class ContactorManager extends ContainerHolder implements Initializable {
 	}
 
 	public Map<String, Contactor> getContactors() {
+		ensureInitialized();
 		return Collections.unmodifiableMap(m_contactors);
 	}
 

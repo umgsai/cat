@@ -21,8 +21,6 @@ package com.dianping.cat.config.transaction;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
@@ -36,7 +34,7 @@ import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 
-public class TpValueStatisticConfigManager implements Initializable {
+public class TpValueStatisticConfigManager {
 
 	public static final String DEFAULT = "default";
 
@@ -54,12 +52,24 @@ public class TpValueStatisticConfigManager implements Initializable {
 
 	private TpValueStatisticConfig m_config;
 
+	private volatile boolean m_initialized;
+
 	public TpValueStatisticConfig getConfig() {
+		ensureInitialized();
 		return m_config;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -100,9 +110,12 @@ public class TpValueStatisticConfigManager implements Initializable {
 			}
 
 		});
+		m_initialized = true;
 	}
 
 	public boolean insert(String xml) {
+		ensureInitialized();
+
 		try {
 			m_config = DefaultSaxParser.parse(xml);
 
@@ -141,11 +154,15 @@ public class TpValueStatisticConfigManager implements Initializable {
 	}
 
 	private boolean defaultContainsType(String type) {
+		ensureInitialized();
+
 		Domain d = m_config.findDomain("default");
 		return d.getTransactionTypes().contains(type);
 	}
 
 	private boolean domainContainsType(String type, String domain) {
+		ensureInitialized();
+
 		Domain d = m_config.findDomain(domain);
 		return d != null && d.getTransactionTypes().contains(type);
 	}
@@ -186,6 +203,8 @@ public class TpValueStatisticConfigManager implements Initializable {
 	}
 
 	public Set<String> findTransactionTypesByDomain(String domain) {
+		ensureInitialized();
+
 		Domain d = m_config.findDomain(domain);
 
 		if (d != null) {

@@ -24,17 +24,15 @@ import java.util.Map;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
-public class RuleFTLDecorator implements Initializable {
+public class RuleFTLDecorator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RuleFTLDecorator.class);
 
-	public Configuration m_configuration;
+	public volatile Configuration m_configuration;
 
 	public String generateConfigsHtml(String templateValue) {
 		Map<Object, Object> dataMap = new HashMap<Object, Object>();
@@ -42,7 +40,7 @@ public class RuleFTLDecorator implements Initializable {
 
 		dataMap.put("configs", templateValue);
 		try {
-			Template configsTemplate = m_configuration.getTemplate("rule_configs.ftl");
+			Template configsTemplate = getConfiguration().getTemplate("rule_configs.ftl");
 			configsTemplate.process(dataMap, sw);
 		} catch (Exception e) {
 			LOGGER.error("Unable to render alert rule config html, template=rule_configs.ftl.", e);
@@ -51,12 +49,24 @@ public class RuleFTLDecorator implements Initializable {
 		return sw.toString();
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
-		m_configuration = new Configuration();
-		m_configuration.setDefaultEncoding("UTF-8");
+	private Configuration getConfiguration() {
+		if (m_configuration == null) {
+			initialize();
+		}
+		return m_configuration;
+	}
+
+	public void initialize() {
+		if (m_configuration != null) {
+			return;
+		}
+
+		Configuration configuration = new Configuration();
+
+		configuration.setDefaultEncoding("UTF-8");
 		try {
-			m_configuration.setClassForTemplateLoading(this.getClass(), "/freemaker");
+			configuration.setClassForTemplateLoading(this.getClass(), "/freemaker");
+			m_configuration = configuration;
 		} catch (Exception e) {
 			LOGGER.error("Unable to initialize alert rule FTL decorator template loading.", e);
 			Cat.logError(e);

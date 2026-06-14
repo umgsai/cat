@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.xml.sax.SAXException;
@@ -39,7 +37,7 @@ import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-public class ServerFilterConfigManager implements Initializable {
+public class ServerFilterConfigManager {
 
 	private static final String CONFIG_NAME = "serverFilter";
 
@@ -53,7 +51,11 @@ public class ServerFilterConfigManager implements Initializable {
 
 	private long m_modifyTime;
 
+	private volatile boolean m_initialized;
+
 	public boolean discardTransaction(String type, String name) {
+		ensureInitialized();
+
 		if ("Cache.web".equals(type) || "ABTest".equals(type)) {
 			return true;
 		}
@@ -64,6 +66,8 @@ public class ServerFilterConfigManager implements Initializable {
 	}
 
 	public String getAtomicMatchTypes() {
+		ensureInitialized();
+
 		AtomicTreeConfig atomicTreeConfig = m_config.getAtomicTreeConfig();
 
 		if (atomicTreeConfig != null) {
@@ -74,6 +78,8 @@ public class ServerFilterConfigManager implements Initializable {
 	}
 
 	public String getAtomicStartTypes() {
+		ensureInitialized();
+
 		AtomicTreeConfig atomicTreeConfig = m_config.getAtomicTreeConfig();
 
 		if (atomicTreeConfig != null) {
@@ -84,18 +90,30 @@ public class ServerFilterConfigManager implements Initializable {
 	}
 
 	public ServerFilterConfig getConfig() {
+		ensureInitialized();
 		return m_config;
 	}
 
 	public Set<String> getUnusedDomains() {
+		ensureInitialized();
+
 		Set<String> unusedDomains = new HashSet<String>();
 
 		unusedDomains.addAll(m_config.getDomains());
 		return unusedDomains;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -134,6 +152,7 @@ public class ServerFilterConfigManager implements Initializable {
 				return CONFIG_NAME;
 			}
 		});
+		m_initialized = true;
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
@@ -145,6 +164,8 @@ public class ServerFilterConfigManager implements Initializable {
 	}
 
 	public boolean insert(String xml) {
+		ensureInitialized();
+
 		try {
 			m_config = DefaultSaxParser.parse(xml);
 
@@ -171,6 +192,8 @@ public class ServerFilterConfigManager implements Initializable {
 	}
 
 	public boolean storeConfig() {
+		ensureInitialized();
+
 		try {
 			Config config = m_configDao.createLocal();
 
@@ -187,6 +210,8 @@ public class ServerFilterConfigManager implements Initializable {
 	}
 
 	public boolean validateDomain(String domain) {
+		ensureInitialized();
+
 		return !m_config.getDomains().contains(domain) && !m_config.getCrashLogDomains().containsKey(domain);
 	}
 

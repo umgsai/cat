@@ -28,9 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 
-public class HeartbeatRuleConfigManager extends BaseRuleConfigManager implements Initializable {
+public class HeartbeatRuleConfigManager extends BaseRuleConfigManager {
 
 	private static final String CONFIG_NAME = "heartbeatRuleConfig";
 
@@ -80,6 +79,7 @@ public class HeartbeatRuleConfigManager extends BaseRuleConfigManager implements
 	}
 
 	public Map<String, List<com.dianping.cat.alarm.rule.entity.Config>> queryConfigsByDomain(String domain) {
+		ensureInitialized();
 		Map<String, Map<Integer, List<Rule>>> rules = new HashMap<String, Map<Integer, List<Rule>>>();
 
 		for (Rule rule : m_config.getRules().values()) {

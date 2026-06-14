@@ -20,8 +20,6 @@ package com.dianping.cat.alarm.spi.config;
 
 import java.util.List;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
@@ -37,7 +35,7 @@ import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.spring.CatSpringContext;
 
-public class SenderConfigManager implements Initializable {
+public class SenderConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SenderConfigManager.class);
 
 	private static final String CONFIG_NAME = "senderConfig";
@@ -50,6 +48,8 @@ public class SenderConfigManager implements Initializable {
 
 	private SenderConfig m_senderConfig;
 
+	private volatile boolean m_initialized;
+
 	public void setConfigDao(ConfigRepository configDao) {
 		m_configDao = configDao;
 	}
@@ -59,55 +59,72 @@ public class SenderConfigManager implements Initializable {
 	}
 
 	public SenderConfig getConfig() {
+		ensureInitialized();
 		return m_senderConfig;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
-		refreshSpringBeans();
-
-		try {
-			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
-			String content = config.getContent();
-
-			m_senderConfig = DefaultSaxParser.parse(content);
-			m_configId = config.getId();
-			LOGGER.info("Loaded sender config from repository, configId={}.", m_configId);
-		} catch (DalNotFoundException e) {
-			LOGGER.warn("Sender config is missing in repository, loading default content from fetcher.", e);
+	public void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		synchronized (this) {
+			if (m_initialized) {
+				return;
+			}
+			refreshSpringBeans();
 
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
-
-				config.setName(CONFIG_NAME);
-				config.setContent(content);
-				m_configDao.insert(config);
+				Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+				String content = config.getContent();
 
 				m_senderConfig = DefaultSaxParser.parse(content);
 				m_configId = config.getId();
-				LOGGER.info("Initialized sender config from default content, configId={}.", m_configId);
-			} catch (Exception ex) {
-				LOGGER.error("Unable to initialize sender config from default content.", ex);
-				Cat.logError(ex);
+				LOGGER.info("Loaded sender config from repository, configId={}.", m_configId);
+			} catch (DalNotFoundException e) {
+				LOGGER.warn("Sender config is missing in repository, loading default content from fetcher.", e);
+
+				try {
+					String content = m_fetcher.getConfigContent(CONFIG_NAME);
+					Config config = m_configDao.createLocal();
+
+					config.setName(CONFIG_NAME);
+					config.setContent(content);
+					m_configDao.insert(config);
+
+					m_senderConfig = DefaultSaxParser.parse(content);
+					m_configId = config.getId();
+					LOGGER.info("Initialized sender config from default content, configId={}.", m_configId);
+				} catch (Exception ex) {
+					LOGGER.error("Unable to initialize sender config from default content.", ex);
+					Cat.logError(ex);
+				}
+			} catch (Exception e) {
+				LOGGER.error("Unable to load sender config from repository.", e);
+				Cat.logError(e);
 			}
-		} catch (Exception e) {
-			LOGGER.error("Unable to load sender config from repository.", e);
-			Cat.logError(e);
+			if (m_senderConfig == null) {
+				m_senderConfig = new SenderConfig();
+				LOGGER.warn("Sender config is empty after initialization, using a new empty config.");
+			}
+			m_initialized = true;
 		}
-		if (m_senderConfig == null) {
-			m_senderConfig = new SenderConfig();
-			LOGGER.warn("Sender config is empty after initialization, using a new empty config.");
+	}
+
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
 		}
 	}
 
 	public boolean insert(Sender sender) {
+		ensureInitialized();
 		m_senderConfig.getSenders().put(sender.getId(), sender);
 
 		return storeConfig();
 	}
 
 	public boolean insert(String xml) {
+		ensureInitialized();
 		try {
 			m_senderConfig = DefaultSaxParser.parse(xml);
 
@@ -148,10 +165,12 @@ public class SenderConfigManager implements Initializable {
 	}
 
 	public Sender querySender(String id) {
+		ensureInitialized();
 		return m_senderConfig.getSenders().get(id);
 	}
 
 	public boolean remove(String id) {
+		ensureInitialized();
 		m_senderConfig.removeSender(id);
 
 		return storeConfig();

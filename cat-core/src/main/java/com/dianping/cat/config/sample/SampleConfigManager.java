@@ -18,8 +18,8 @@
  */
 package com.dianping.cat.config.sample;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
@@ -32,7 +32,8 @@ import com.dianping.cat.sample.transform.DefaultSaxParser;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
-public class SampleConfigManager implements Initializable {
+public class SampleConfigManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SampleConfigManager.class);
 
 	private static final String CONFIG_NAME = "sampleConfig";
 
@@ -46,12 +47,24 @@ public class SampleConfigManager implements Initializable {
 
 	private SampleConfig m_config;
 
+	private volatile boolean m_initialized;
+
 	public SampleConfig getConfig() {
+		ensureInitialized();
 		return m_config;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
+		}
+	}
+
+	public synchronized void initialize() {
+		if (m_initialized) {
+			return;
+		}
+
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -59,7 +72,11 @@ public class SampleConfigManager implements Initializable {
 			m_configId = config.getId();
 			m_modifyTime = config.getModifyDate().getTime();
 			m_config = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded sample config from repository, configId={}, modifyTime={}.", m_configId,
+					m_modifyTime);
 		} catch (DalNotFoundException e) {
+			LOGGER.warn("Sample config is missing in repository, loading default content from fetcher.", e);
+
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -69,14 +86,18 @@ public class SampleConfigManager implements Initializable {
 				m_configDao.insert(config);
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized sample config from default content, configId={}.", m_configId);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to initialize sample config from default content.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to load sample config from repository.", e);
 			Cat.logError(e);
 		}
 		if (m_config == null) {
 			m_config = new SampleConfig();
+			LOGGER.warn("Sample config is empty after initialization, using a new empty config.");
 		}
 
 		TimerSyncTask.getInstance().register(new SyncHandler() {
@@ -91,6 +112,7 @@ public class SampleConfigManager implements Initializable {
 				return CONFIG_NAME;
 			}
 		});
+		m_initialized = true;
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
@@ -102,11 +124,15 @@ public class SampleConfigManager implements Initializable {
 	}
 
 	public boolean insert(String xml) {
+		ensureInitialized();
+
 		try {
 			m_config = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse sample config xml for insert. xmlLength={}.", xml == null ? 0 : xml.length(),
+					e);
 			Cat.logError(e);
 			return false;
 		}
@@ -122,6 +148,7 @@ public class SampleConfigManager implements Initializable {
 
 				m_config = DefaultSaxParser.parse(content);
 				m_modifyTime = modifyTime;
+				LOGGER.info("Refreshed sample config, configId={}, modifyTime={}.", m_configId, m_modifyTime);
 			}
 		}
 	}
@@ -136,7 +163,9 @@ public class SampleConfigManager implements Initializable {
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
 				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				LOGGER.info("Stored sample config, configId={}.", m_configId);
 			} catch (Exception e) {
+				LOGGER.error("Unable to store sample config, configId={}.", m_configId, e);
 				Cat.logError(e);
 				return false;
 			}

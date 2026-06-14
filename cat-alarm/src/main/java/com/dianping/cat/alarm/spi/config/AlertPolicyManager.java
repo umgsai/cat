@@ -21,8 +21,6 @@ package com.dianping.cat.alarm.spi.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.dal.jdbc.DalNotFoundException;
@@ -38,8 +36,9 @@ import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
+import com.dianping.cat.spring.CatSpringContext;
 
-public class AlertPolicyManager implements Initializable {
+public class AlertPolicyManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertPolicyManager.class);
 
 	private static final String CONFIG_NAME = "alertPolicy";
@@ -56,6 +55,8 @@ public class AlertPolicyManager implements Initializable {
 
 	private AlertPolicy m_config;
 
+	private volatile boolean m_initialized;
+
 	public void setConfigDao(ConfigRepository configDao) {
 		m_configDao = configDao;
 	}
@@ -65,47 +66,65 @@ public class AlertPolicyManager implements Initializable {
 	}
 
 	public AlertPolicy getAlertPolicy() {
+		ensureInitialized();
 		return m_config;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
-		try {
-			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
-			String content = config.getContent();
-
-			m_configId = config.getId();
-			m_config = DefaultSaxParser.parse(content);
-			LOGGER.info("Loaded alert policy from repository, configId={}.", m_configId);
-		} catch (DalNotFoundException e) {
-			LOGGER.warn("Alert policy is missing in repository, loading default content from fetcher.", e);
+	public void initialize() {
+		if (m_initialized) {
+			return;
+		}
+		synchronized (this) {
+			if (m_initialized) {
+				return;
+			}
+			refreshSpringBeans();
 
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
-
-				config.setName(CONFIG_NAME);
-				config.setContent(content);
-				m_configDao.insert(config);
+				Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+				String content = config.getContent();
 
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
-				LOGGER.info("Initialized alert policy from default content, configId={}.", m_configId);
-			} catch (Exception ex) {
-				LOGGER.error("Unable to initialize alert policy from default content.", ex);
-				Cat.logError(ex);
+				LOGGER.info("Loaded alert policy from repository, configId={}.", m_configId);
+			} catch (DalNotFoundException e) {
+				LOGGER.warn("Alert policy is missing in repository, loading default content from fetcher.", e);
+
+				try {
+					String content = m_fetcher.getConfigContent(CONFIG_NAME);
+					Config config = m_configDao.createLocal();
+
+					config.setName(CONFIG_NAME);
+					config.setContent(content);
+					m_configDao.insert(config);
+
+					m_configId = config.getId();
+					m_config = DefaultSaxParser.parse(content);
+					LOGGER.info("Initialized alert policy from default content, configId={}.", m_configId);
+				} catch (Exception ex) {
+					LOGGER.error("Unable to initialize alert policy from default content.", ex);
+					Cat.logError(ex);
+				}
+			} catch (Exception e) {
+				LOGGER.error("Unable to load alert policy from repository.", e);
+				Cat.logError(e);
 			}
-		} catch (Exception e) {
-			LOGGER.error("Unable to load alert policy from repository.", e);
-			Cat.logError(e);
+			if (m_config == null) {
+				m_config = new AlertPolicy();
+				LOGGER.warn("Alert policy is empty after initialization, using a new empty policy.");
+			}
+			m_initialized = true;
 		}
-		if (m_config == null) {
-			m_config = new AlertPolicy();
-			LOGGER.warn("Alert policy is empty after initialization, using a new empty policy.");
+	}
+
+	private void ensureInitialized() {
+		if (!m_initialized) {
+			initialize();
 		}
 	}
 
 	public boolean insert(String xml) {
+		ensureInitialized();
 		try {
 			m_config = DefaultSaxParser.parse(xml);
 
@@ -118,6 +137,7 @@ public class AlertPolicyManager implements Initializable {
 	}
 
 	public List<AlertChannel> queryChannels(String typeName, String groupName, String levelName) {
+		ensureInitialized();
 		try {
 			Level level = queryLevel(typeName, groupName, levelName);
 			if (level == null) {
@@ -145,6 +165,7 @@ public class AlertPolicyManager implements Initializable {
 }
 
 	private Level queryLevel(String typeName, String groupName, String levelName) {
+		ensureInitialized();
 		Type type = m_config.findType(typeName);
 
 		if (type == null) {
@@ -161,6 +182,7 @@ public class AlertPolicyManager implements Initializable {
 	}
 
 	public int queryRecoverMinute(String typeName, String groupName, String levelName) {
+		ensureInitialized();
 		try {
 			Level level = queryLevel(typeName, groupName, levelName);
 
@@ -177,6 +199,7 @@ public class AlertPolicyManager implements Initializable {
 }
 
 	public int querySuspendMinute(String typeName, String groupName, String levelName) {
+		ensureInitialized();
 		try {
 			Level level = queryLevel(typeName, groupName, levelName);
 
@@ -210,6 +233,18 @@ public class AlertPolicyManager implements Initializable {
 			}
 		}
 		return true;
+	}
+
+	private void refreshSpringBeans() {
+		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
+		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
+
+		if (configDao != null) {
+			m_configDao = configDao;
+		}
+		if (fetcher != null) {
+			m_fetcher = fetcher;
+		}
 	}
 
 }
