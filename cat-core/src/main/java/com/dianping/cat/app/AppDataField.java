@@ -18,8 +18,6 @@
  */
 package com.dianping.cat.app;
 
-import org.unidal.lookup.util.StringUtils;
-
 public enum AppDataField {
 	OPERATOR("operator", "运营商"),
 
@@ -47,7 +45,7 @@ public enum AppDataField {
 	}
 
 	public static AppDataField getByName(String name, AppDataField defaultField) {
-		if (StringUtils.isNotEmpty(name)) {
+		if (isNotEmpty(name)) {
 			for (AppDataField field : AppDataField.values()) {
 				if (field.getName().equals(name)) {
 					return field;
@@ -58,7 +56,7 @@ public enum AppDataField {
 	}
 
 	public static AppDataField getByTitle(String title) {
-		if (StringUtils.isNotEmpty(title)) {
+		if (isNotEmpty(title)) {
 			for (AppDataField field : AppDataField.values()) {
 				if (field.getTitle().equals(title)) {
 					return field;
@@ -66,6 +64,10 @@ public enum AppDataField {
 			}
 		}
 		return null;
+	}
+
+	private static boolean isNotEmpty(String value) {
+		return value != null && value.length() > 0;
 	}
 
 	public String getName() {

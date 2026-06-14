@@ -34,7 +34,6 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
-import org.unidal.lookup.util.StringUtils;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -160,7 +159,7 @@ public class HostinfoService implements Initializable, LogEnabled {
 				if (info != null) {
 					hostname = info.getHostname();
 
-					if (StringUtils.isNotEmpty(hostname)) {
+					if (isNotEmpty(hostname)) {
 						return hostname;
 					}
 				}
@@ -260,6 +259,10 @@ public class HostinfoService implements Initializable, LogEnabled {
 		Pattern pattern = Pattern.compile(
 		      "^((\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5]|[*])\\.){3}(\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5]|[*])$");
 		return pattern.matcher(str).matches();
+	}
+
+	private boolean isNotEmpty(String value) {
+		return value != null && value.length() > 0;
 	}
 
 	public class RefreshHost implements Task {

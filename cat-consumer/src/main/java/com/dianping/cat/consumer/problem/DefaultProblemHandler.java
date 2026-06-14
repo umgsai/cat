@@ -18,11 +18,10 @@
  */
 package com.dianping.cat.consumer.problem;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.unidal.helper.Splitters;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.dianping.cat.consumer.problem.model.entity.Entity;
 import com.dianping.cat.consumer.problem.model.entity.Machine;
@@ -96,7 +95,7 @@ public class DefaultProblemHandler extends ProblemHandler {
 	}
 
 	public void setErrorType(String type) {
-		m_errorTypes = new HashSet<String>(Splitters.by(',').noEmptyItem().split(type));
+		m_errorTypes = Stream.of(type.split(",")).map(String::trim).filter(item -> !item.isEmpty()).collect(Collectors.toSet());
 	}
 
 }

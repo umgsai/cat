@@ -23,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.unidal.lookup.util.StringUtils;
 import org.unidal.web.mvc.Action;
 import org.unidal.web.mvc.ActionPayload;
 import org.unidal.web.mvc.Page;
@@ -186,7 +185,7 @@ public abstract class AbstractReportPayload<A extends Action, P extends Page> im
 	}
 
 	public void setDomain(String domain) {
-		if (StringUtils.isNotEmpty(domain)) {
+		if (isNotEmpty(domain)) {
 			m_domain = domain;
 		}
 	}
@@ -242,7 +241,7 @@ public abstract class AbstractReportPayload<A extends Action, P extends Page> im
 	}
 
 	public void setIpAddress(String ipAddress) {
-		if (StringUtils.isNotEmpty(ipAddress)) {
+		if (isNotEmpty(ipAddress)) {
 			m_ipAddress = ipAddress;
 		}
 	}
@@ -269,7 +268,7 @@ public abstract class AbstractReportPayload<A extends Action, P extends Page> im
 	}
 
 	public void setReportType(String reportType) {
-		if (StringUtils.isNotEmpty(reportType)) {
+		if (isNotEmpty(reportType)) {
 			m_reportType = reportType;
 		}
 	}
@@ -288,6 +287,10 @@ public abstract class AbstractReportPayload<A extends Action, P extends Page> im
 
 	public void setCustomStart(String customStart) {
 		m_customStart = customStart;
+	}
+
+	private boolean isNotEmpty(String value) {
+		return value != null && value.length() > 0;
 	}
 
 }

@@ -20,11 +20,11 @@ package com.dianping.cat.message.codec;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
 import io.netty.buffer.ByteBuf;
-import org.unidal.helper.Splitters;
 
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
@@ -286,7 +286,7 @@ public class WaterfallMessageCodec {
 				str = data.substring(3, pos);
 			}
 
-			List<String> parts = Splitters.by(',').split(str);
+			List<String> parts = Arrays.asList(str.split(","));
 			int len = parts.size();
 			int[] segments = new int[len];
 
@@ -311,7 +311,7 @@ public class WaterfallMessageCodec {
 				str = data.substring(3, pos);
 			}
 
-			List<String> parts = Splitters.by(',').split(str);
+			List<String> parts = Arrays.asList(str.split(","));
 			int len = parts.size();
 			int[] segments = new int[len];
 

@@ -18,13 +18,13 @@
  */
 package com.dianping.cat.consumer.top;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.helper.Splitters;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
@@ -118,6 +118,6 @@ public class TopAnalyzer extends AbstractMessageAnalyzer<TopReport> implements L
 	}
 
 	public void setErrorType(String type) {
-		m_errorTypes = new HashSet<String>(Splitters.by(',').noEmptyItem().split(type));
+		m_errorTypes = Stream.of(type.split(",")).map(String::trim).filter(item -> !item.isEmpty()).collect(Collectors.toSet());
 	}
 }

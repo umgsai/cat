@@ -21,8 +21,6 @@ package com.dianping.cat.alarm.spi.receiver;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.unidal.helper.Splitters;
-
 import com.dianping.cat.alarm.receiver.entity.Receiver;
 
 public abstract class DefaultContactor {
@@ -67,7 +65,13 @@ public abstract class DefaultContactor {
 		List<String> result = new ArrayList<String>();
 
 		if (str != null) {
-			result.addAll(Splitters.by(",").noEmptyItem().trim().split(str));
+			for (String item : str.split(",")) {
+				String value = item.trim();
+
+				if (value.length() > 0) {
+					result.add(value);
+				}
+			}
 		}
 
 		return result;

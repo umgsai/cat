@@ -19,10 +19,8 @@
 package com.dianping.cat.server;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
-
-import org.unidal.helper.Splitters;
-import org.unidal.lookup.util.StringUtils;
 
 public class QueryParameter {
 
@@ -99,13 +97,27 @@ public class QueryParameter {
 
 	public String getSqlTags() {
 		String tag = "";
-		List<String> tags = Splitters.by(";").noEmptyItem().split(m_tags);
+		List<String> tags = splitTags();
 
 		if (!tags.isEmpty()) {
-			tag = StringUtils.join(tags, " AND ") + " AND ";
+			tag = String.join(" AND ", tags) + " AND ";
 		}
 
 		return tag;
+	}
+
+	private List<String> splitTags() {
+		List<String> tags = new LinkedList<String>();
+
+		if (m_tags != null) {
+			for (String item : m_tags.split(";")) {
+				if (item.length() > 0) {
+					tags.add(item);
+				}
+			}
+		}
+
+		return tags;
 	}
 
 	public Date getStart() {

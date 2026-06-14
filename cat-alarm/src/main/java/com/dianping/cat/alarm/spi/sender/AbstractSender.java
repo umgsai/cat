@@ -23,11 +23,11 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.helper.Files;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
@@ -63,15 +63,14 @@ public abstract class AbstractSender implements Sender, LogEnabled {
             conn.setReadTimeout(3000);
 
             in = conn.getInputStream();
-            StringBuilder sb = new StringBuilder();
-            sb.append(Files.forIO().readFrom(in, "utf-8")).append("");
+            String response = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 
-            if (sb.toString().contains(successCode)) {
+            if (response.contains(successCode)) {
                 sendSuccess = true;
                 return true;
             } else {
                 LOGGER.warn("Alert HTTP GET returned unexpected response, urlPrefix={}, successCode={}, response={}.",
-                        urlPrefix, successCode, sb);
+                        urlPrefix, successCode, response);
                 return false;
             }
         } catch (Exception e) {
@@ -116,15 +115,13 @@ public abstract class AbstractSender implements Sender, LogEnabled {
             writer.flush();
 
             in = conn.getInputStream();
-            StringBuilder sb = new StringBuilder();
-
-            sb.append(Files.forIO().readFrom(in, "utf-8")).append("");
-            if (sb.toString().contains(successCode)) {
+            String response = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            if (response.contains(successCode)) {
                 sendSuccess = true;
                 return true;
             } else {
                 LOGGER.warn("Alert HTTP POST returned unexpected response, urlPrefix={}, successCode={}, response={}.",
-                        urlPrefix, successCode, sb);
+                        urlPrefix, successCode, response);
                 return false;
             }
         } catch (Exception e) {
