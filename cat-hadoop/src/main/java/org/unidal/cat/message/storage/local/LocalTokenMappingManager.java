@@ -25,10 +25,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.unidal.cat.message.storage.TokenMapping;
 import org.unidal.cat.message.storage.TokenMappingManager;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.tuple.Pair;
 
 public class LocalTokenMappingManager extends ContainerHolder implements TokenMappingManager {
 	private Map<Pair<Integer, String>, TokenMapping> m_cache = new HashMap<Pair<Integer, String>, TokenMapping>();
@@ -62,7 +62,7 @@ public class LocalTokenMappingManager extends ContainerHolder implements TokenMa
 
 	@Override
 	public TokenMapping getTokenMapping(int hour, String ip) throws IOException {
-		Pair<Integer, String> pair = new Pair<Integer, String>(hour, ip);
+		Pair<Integer, String> pair = Pair.of(hour, ip);
 		TokenMapping mapping = m_cache.get(pair);
 
 		if (mapping == null) {

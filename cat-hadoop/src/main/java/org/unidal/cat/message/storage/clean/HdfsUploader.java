@@ -31,13 +31,12 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.protocol.AlreadyBeingCreatedException;
 import org.apache.hadoop.ipc.RemoteException;
 import org.apache.hadoop.security.AccessControlException;
+import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.cat.message.storage.hdfs.HdfsSystemManager;
-import org.unidal.helper.Files;
-import org.unidal.helper.Files.AutoClose;
 import org.unidal.helper.Formats;
 import org.unidal.helper.Threads.Task;
 
@@ -106,15 +105,14 @@ public class HdfsUploader implements LogEnabled, Initializable {
 			Transaction t = Cat.newTransaction("System", "UploadDump");
 			t.addData("file", path);
 
-			FSDataOutputStream fdos = null;
-			FileInputStream fis = null;
 			try {
-				fdos = makeHdfsOutputStream(path);
-				fis = new FileInputStream(file);
+				long start;
 
-				long start = System.currentTimeMillis();
-
-				Files.forIO().copy(fis, fdos, AutoClose.INPUT_OUTPUT);
+				try (FSDataOutputStream fdos = makeHdfsOutputStream(path);
+				      FileInputStream fis = new FileInputStream(file)) {
+					start = System.currentTimeMillis();
+					IOUtils.copy(fis, fdos);
+				}
 
 				double sec = (System.currentTimeMillis() - start) / 1000d;
 				String size = Formats.forNumber().format(file.length(), "0.#", "B");
@@ -143,15 +141,7 @@ public class HdfsUploader implements LogEnabled, Initializable {
 				t.setStatus(e);
 				m_logger.error(String.format("Uploading file(%s) to HDFS(%s) failed!", file, path), e);
 			} finally {
-				try {
-					if (fdos != null) {
-						fdos.close();
-					}
-				} catch (Exception e) {
-					Cat.logError(e);
-				} finally {
-					t.complete();
-				}
+				t.complete();
 			}
 		}
 		return false;

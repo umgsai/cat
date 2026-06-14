@@ -30,11 +30,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.HarFileSystem;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
-import org.unidal.tuple.Pair;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -89,7 +90,7 @@ public class HarConnectionPool implements Initializable {
 
 					try {
 						harfs.initialize(uri, harfs.getConf());
-						har = new Pair<HarFileSystem, Long>(harfs, current);
+						har = MutablePair.of(harfs, current);
 
 						m_hars.put(harUri, har);
 					} catch (IOException e) {

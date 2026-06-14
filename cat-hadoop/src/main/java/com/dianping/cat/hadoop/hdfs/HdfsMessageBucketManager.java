@@ -32,12 +32,12 @@ import com.dianping.cat.message.tree.MessageId;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
+import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.helper.Threads;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.tuple.Pair;
 
 import java.io.IOException;
 import java.util.*;
@@ -125,7 +125,7 @@ public class HdfsMessageBucketManager extends ContainerHolder implements Message
 		FileSystem fs = m_manager.getHarFileSystem(ServerConfigManager.DUMP_DIR, date);
 		List<String> paths = filterFiles(fs, id, ".", "");
 
-		return new Pair<List<String>, String>(paths, HARFS_BUCKET);
+		return Pair.of(paths, HARFS_BUCKET);
 	}
 
 	private Pair<List<String>, String> loadFileFromHdfs(MessageId id, Date date) throws IOException {
@@ -135,7 +135,7 @@ public class HdfsMessageBucketManager extends ContainerHolder implements Message
 
 		List<String> paths = filterFiles(fs, id, sb.toString(), p);
 
-		return new Pair<List<String>, String>(paths, HDFS_BUCKET);
+		return Pair.of(paths, HDFS_BUCKET);
 	}
 
 	@Override
