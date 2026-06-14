@@ -19,7 +19,7 @@
 package com.dianping.cat.demo;
 
 import org.junit.Test;
-import org.unidal.helper.Threads;
+import com.dianping.cat.support.Threads;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;

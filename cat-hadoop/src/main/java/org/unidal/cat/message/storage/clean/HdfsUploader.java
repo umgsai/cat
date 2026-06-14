@@ -21,6 +21,7 @@ package org.unidal.cat.message.storage.clean;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +38,6 @@ import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.cat.message.storage.hdfs.HdfsSystemManager;
-import org.unidal.helper.Formats;
 import com.dianping.cat.support.Threads.Task;
 
 import com.dianping.cat.Cat;
@@ -80,6 +80,47 @@ public class HdfsUploader implements LogEnabled, Initializable {
 								new ThreadPoolExecutor.CallerRunsPolicy());
 	}
 
+	private String formatBytes(Number data, String pattern, String suffix) {
+		if (pattern == null || pattern.length() == 0 || data == null) {
+			return "";
+		}
+
+		StringBuilder builder = new StringBuilder(32);
+		double value = data.doubleValue();
+		long base = 1024;
+		long scale = 1;
+		boolean positive = value > 0;
+
+		if (!positive) {
+			value = -value;
+		}
+
+		while (value >= base) {
+			scale *= base;
+			value /= base;
+		}
+
+		builder.append("{0,number,").append(pattern).append('}');
+
+		if (scale == base) {
+			builder.append('K');
+		} else if (scale == base * base) {
+			builder.append('M');
+		} else if (scale == base * base * base) {
+			builder.append('G');
+		} else if (scale == base * base * base * base) {
+			builder.append('T');
+		} else if (scale == base * base * base * base * base) {
+			builder.append('P');
+		}
+
+		if (suffix != null) {
+			builder.append(suffix);
+		}
+
+		return new MessageFormat(builder.toString()).format(new Object[] { positive ? value : -value });
+	}
+
 	private FSDataOutputStream makeHdfsOutputStream(String path) throws IOException {
 		FileSystem fs = m_fileSystemManager.getFileSystem();
 		String baseDir = m_fileSystemManager.getBaseDir();
@@ -115,8 +156,8 @@ public class HdfsUploader implements LogEnabled, Initializable {
 				}
 
 				double sec = (System.currentTimeMillis() - start) / 1000d;
-				String size = Formats.forNumber().format(file.length(), "0.#", "B");
-				String speed = sec <= 0 ? "N/A" : Formats.forNumber().format(file.length() / sec, "0.0", "B/s");
+				String size = formatBytes(file.length(), "0.#", "B");
+				String speed = sec <= 0 ? "N/A" : formatBytes(file.length() / sec, "0.0", "B/s");
 
 				t.addData("size", size);
 				t.addData("speed", speed);

@@ -26,8 +26,8 @@ import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
-import org.unidal.helper.Threads;
-import org.unidal.helper.Threads.Task;
+import com.dianping.cat.support.Threads;
+import com.dianping.cat.support.Threads.Task;
 
 public class TestHttp {
 

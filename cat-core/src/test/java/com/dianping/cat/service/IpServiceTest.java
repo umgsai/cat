@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.unidal.helper.Threads;
+import com.dianping.cat.support.Threads;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.service.IpService.IpInfo;

@@ -20,7 +20,7 @@ package com.dianping.cat.analysis;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.helper.Threads;
+import com.dianping.cat.support.Threads;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.message.spi.DefaultMessageTree;
