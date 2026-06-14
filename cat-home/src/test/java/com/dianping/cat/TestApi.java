@@ -19,14 +19,14 @@
 package com.dianping.cat;
 
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
-import org.unidal.helper.Urls;
-import org.unidal.tuple.Pair;
-import org.unidal.webres.helper.Files;
 import org.unidal.webres.json.JsonArray;
 import org.unidal.webres.json.JsonObject;
 
@@ -41,9 +41,13 @@ public class TestApi {
 	}
 
 	private String fetchContent(String url) throws Exception {
-		InputStream in = Urls.forIO().readTimeout(3000).connectTimeout(3000).openStream(url);
+		URLConnection connection = new URL(url).openConnection();
 
-		return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		connection.setReadTimeout(3000);
+		connection.setConnectTimeout(3000);
+		try (InputStream in = connection.getInputStream()) {
+			return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		}
 	}
 
 	private Pair<Integer, Double> parse(String content) throws ParseException {
@@ -51,7 +55,7 @@ public class TestApi {
 		JsonArray array = obj.getJSONArray("lineChartDetails");
 		JsonObject chart = (JsonObject) array.get(0);
 
-		return new Pair<Integer, Double>(chart.getInt("accessNumberSum"), chart.getDouble("successRatio"));
+		return Pair.of(chart.getInt("accessNumberSum"), chart.getDouble("successRatio"));
 	}
 
 	@Test

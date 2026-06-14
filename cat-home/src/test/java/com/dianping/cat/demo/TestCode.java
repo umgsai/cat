@@ -19,10 +19,10 @@
 package com.dianping.cat.demo;
 
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 import org.junit.Test;
-import org.unidal.helper.Urls;
-import org.unidal.webres.helper.Files;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
@@ -53,8 +53,13 @@ public class TestCode {
 		for (int i = 0; i < 1000; i++) {
 			for (int j = 0; j < 5; j++) {
 				String url = String.format(format, time, "database" + j);
-				InputStream in = Urls.forIO().readTimeout(1000).connectTimeout(1000).openStream(url);
-				new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+				URLConnection connection = new URL(url).openConnection();
+
+				connection.setReadTimeout(1000);
+				connection.setConnectTimeout(1000);
+				try (InputStream in = connection.getInputStream()) {
+					new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+				}
 			}
 		}
 	}

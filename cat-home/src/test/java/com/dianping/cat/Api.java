@@ -20,9 +20,9 @@ package com.dianping.cat;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
-import org.unidal.helper.Urls;
-import org.unidal.webres.helper.Files;
 import org.unidal.webres.json.JsonArray;
 import org.unidal.webres.json.JsonObject;
 
@@ -80,9 +80,13 @@ public class Api {
 	}
 
 	private static String fetchContent(String url) throws IOException {
-		InputStream in = Urls.forIO().readTimeout(1000).connectTimeout(1000).openStream(url);
-		String content = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-		return content;
+		URLConnection connection = new URL(url).openConnection();
+
+		connection.setReadTimeout(1000);
+		connection.setConnectTimeout(1000);
+		try (InputStream in = connection.getInputStream()) {
+			return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		}
 	}
 
 }
