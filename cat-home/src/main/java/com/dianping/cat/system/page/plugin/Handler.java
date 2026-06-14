@@ -30,7 +30,6 @@ import java.util.zip.ZipOutputStream;
 import org.codehaus.plexus.util.StringUtils;
 import org.unidal.helper.Files;
 import org.unidal.helper.Files.AutoClose;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -39,7 +38,6 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 import com.dianping.cat.system.SystemPage;
 
 public class Handler implements PageHandler<Context> {
-	@Inject
 	private JspViewer m_jspViewer;
 
 	// TODO make it configurable in database

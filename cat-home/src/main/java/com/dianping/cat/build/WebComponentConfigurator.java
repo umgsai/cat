@@ -43,10 +43,13 @@ import org.unidal.web.mvc.payload.MultipartParameterProvider;
 import org.unidal.web.mvc.payload.UrlEncodedParameterProvider;
 import org.unidal.web.mvc.view.model.DefaultModelHandler;
 import org.unidal.web.mvc.view.model.JsonModelBuilder;
+import org.unidal.web.mvc.view.model.ModelHandler;
 import org.unidal.web.mvc.view.model.XmlModelBuilder;
 
 import com.dianping.cat.report.ReportModule;
+import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.SystemModule;
+import com.dianping.cat.system.page.login.service.SigninService;
 
 class WebComponentConfigurator extends AbstractWebComponentsConfigurator {
 	@SuppressWarnings("unchecked")
@@ -56,6 +59,7 @@ class WebComponentConfigurator extends AbstractWebComponentsConfigurator {
 
 		defineWebMvcComponents(all);
 		defineModuleRegistry(all, ReportModule.class, ReportModule.class, SystemModule.class);
+		replaceSmallSystemPageHandlers(all);
 
 		return all;
 	}
@@ -81,5 +85,29 @@ class WebComponentConfigurator extends AbstractWebComponentsConfigurator {
 		all.add(A(DefaultModelHandler.class));
 		all.add(A(XmlModelBuilder.class));
 		all.add(A(JsonModelBuilder.class));
+	}
+
+	private void replaceSmallSystemPageHandlers(List<Component> all) {
+		removeComponent(all, com.dianping.cat.system.page.login.Handler.class);
+		removeComponent(all, com.dianping.cat.system.page.plugin.Handler.class);
+		removeComponent(all, com.dianping.cat.system.page.project.Handler.class);
+
+		all.add(C(com.dianping.cat.system.page.login.Handler.class) //
+								.req(com.dianping.cat.system.page.login.JspViewer.class, (String) null, "m_jspViewer") //
+								.req(SigninService.class, (String) null, "m_signinService"));
+		all.add(C(com.dianping.cat.system.page.login.JspViewer.class).req(ModelHandler.class));
+		all.add(C(com.dianping.cat.system.page.plugin.Handler.class) //
+								.req(com.dianping.cat.system.page.plugin.JspViewer.class, (String) null, "m_jspViewer"));
+		all.add(C(com.dianping.cat.system.page.plugin.JspViewer.class).req(ModelHandler.class));
+		all.add(C(com.dianping.cat.system.page.project.Handler.class) //
+								.req(ProjectService.class, (String) null, "m_projectService") //
+								.req(com.dianping.cat.system.page.project.JspViewer.class, (String) null, "m_jspViewer"));
+		all.add(C(com.dianping.cat.system.page.project.JspViewer.class).req(ModelHandler.class));
+	}
+
+	private void removeComponent(List<Component> all, Class<?> role) {
+		String roleName = role.getName();
+
+		all.removeIf(component -> roleName.equals(component.getModel().getRole()));
 	}
 }

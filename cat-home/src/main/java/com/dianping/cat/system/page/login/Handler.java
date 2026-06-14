@@ -27,7 +27,6 @@ import java.util.Enumeration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.jsp.function.CodecFunction;
 import org.unidal.web.mvc.ActionContext;
 import org.unidal.web.mvc.ErrorObject;
@@ -48,10 +47,8 @@ import com.dianping.cat.system.page.login.service.SigninService;
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	@Inject
 	private JspViewer m_jspViewer;
 
-	@Inject
 	private SigninService m_signinService;
 
 	private SigninContext createSigninContext(Context ctx) {
