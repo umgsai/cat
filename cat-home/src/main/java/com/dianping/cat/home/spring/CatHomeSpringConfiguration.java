@@ -3609,6 +3609,11 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(initMethod = "initialize")
+	public com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator ruleFTLDecorator() {
+		return new com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator();
+	}
+
+	@Bean(initMethod = "initialize")
 	public RouterConfigManager routerConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher,
 			DailyReportRepository dailyReportRepository, DailyReportContentRepository dailyReportContentRepository) {
 		RouterConfigManager manager = new RouterConfigManager();
@@ -3776,6 +3781,30 @@ public class CatHomeSpringConfiguration {
 
 		manager.setConfigDao(businessConfigRepository);
 		return manager;
+	}
+
+	@Bean
+	public com.dianping.cat.system.page.business.JspViewer systemBusinessJspViewer() {
+		return new com.dianping.cat.system.page.business.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.system.page.business.Handler systemBusinessHandler(
+			com.dianping.cat.system.page.business.JspViewer systemBusinessJspViewer,
+			ProjectService projectService, BusinessConfigManager businessConfigManager,
+			BusinessTagConfigManager businessTagConfigManager, BusinessRuleConfigManager businessRuleConfigManager,
+			ConfigHtmlParser configHtmlParser,
+			com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator ruleFTLDecorator) {
+		com.dianping.cat.system.page.business.Handler handler = new com.dianping.cat.system.page.business.Handler();
+
+		handler.setJspViewer(systemBusinessJspViewer);
+		handler.setProjectService(projectService);
+		handler.setConfigManager(businessConfigManager);
+		handler.setTagConfigManager(businessTagConfigManager);
+		handler.setAlertConfigManager(businessRuleConfigManager);
+		handler.setConfigHtmlParser(configHtmlParser);
+		handler.setRuleDecorator(ruleFTLDecorator);
+		return handler;
 	}
 
 	@Bean
@@ -4092,6 +4121,26 @@ public class CatHomeSpringConfiguration {
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
 		return manager;
+	}
+
+	@Bean
+	public com.dianping.cat.system.page.permission.JspViewer systemPermissionJspViewer() {
+		return new com.dianping.cat.system.page.permission.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.system.page.permission.Handler systemPermissionHandler(
+			com.dianping.cat.system.page.permission.JspViewer systemPermissionJspViewer,
+			UserConfigManager userConfigManager, ResourceConfigManager resourceConfigManager,
+			ConfigHtmlParser configHtmlParser) {
+		com.dianping.cat.system.page.permission.Handler handler =
+		      new com.dianping.cat.system.page.permission.Handler();
+
+		handler.setJspViewer(systemPermissionJspViewer);
+		handler.setUserConfigManager(userConfigManager);
+		handler.setResourceConfigManager(resourceConfigManager);
+		handler.setConfigHtmlParser(configHtmlParser);
+		return handler;
 	}
 
 	@Bean

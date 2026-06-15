@@ -161,6 +161,7 @@ public class Handler implements PageHandler<Context> {
 		BusinessTagConfigManager tagConfigManager = CatSpringContext.getBeanIfAvailable(BusinessTagConfigManager.class);
 		BusinessRuleConfigManager alertConfigManager = CatSpringContext.getBeanIfAvailable(BusinessRuleConfigManager.class);
 		ConfigHtmlParser configHtmlParser = CatSpringContext.getBeanIfAvailable(ConfigHtmlParser.class);
+		RuleFTLDecorator ruleDecorator = CatSpringContext.getBeanIfAvailable(RuleFTLDecorator.class);
 
 		if (projectService != null) {
 			m_projectService = projectService;
@@ -176,6 +177,9 @@ public class Handler implements PageHandler<Context> {
 		}
 		if (configHtmlParser != null) {
 			m_configHtmlParser = configHtmlParser;
+		}
+		if (ruleDecorator != null) {
+			m_ruleDecorator = ruleDecorator;
 		}
 	}
 
@@ -285,6 +289,34 @@ public class Handler implements PageHandler<Context> {
 		}
 
 		model.setOpState(result);
+	}
+
+	public void setAlertConfigManager(BusinessRuleConfigManager alertConfigManager) {
+		m_alertConfigManager = alertConfigManager;
+	}
+
+	public void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
+		m_configHtmlParser = configHtmlParser;
+	}
+
+	public void setConfigManager(BusinessConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
+
+	public void setRuleDecorator(RuleFTLDecorator ruleDecorator) {
+		m_ruleDecorator = ruleDecorator;
+	}
+
+	public void setTagConfigManager(BusinessTagConfigManager tagConfigManager) {
+		m_tagConfigManger = tagConfigManager;
 	}
 
 }

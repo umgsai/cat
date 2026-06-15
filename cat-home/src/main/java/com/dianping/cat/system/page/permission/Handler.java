@@ -86,6 +86,7 @@ public class Handler implements PageHandler<Context> {
 	private void refreshSpringBeans() {
 		UserConfigManager userConfigManager = CatSpringContext.getBeanIfAvailable(UserConfigManager.class);
 		ResourceConfigManager resourceConfigManager = CatSpringContext.getBeanIfAvailable(ResourceConfigManager.class);
+		ConfigHtmlParser configHtmlParser = CatSpringContext.getBeanIfAvailable(ConfigHtmlParser.class);
 
 		if (userConfigManager != null) {
 			m_userConfigManager = userConfigManager;
@@ -93,5 +94,24 @@ public class Handler implements PageHandler<Context> {
 		if (resourceConfigManager != null) {
 			m_resourceConfigManager = resourceConfigManager;
 		}
+		if (configHtmlParser != null) {
+			m_configHtmlParser = configHtmlParser;
+		}
+	}
+
+	public void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
+		m_configHtmlParser = configHtmlParser;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setResourceConfigManager(ResourceConfigManager resourceConfigManager) {
+		m_resourceConfigManager = resourceConfigManager;
+	}
+
+	public void setUserConfigManager(UserConfigManager userConfigManager) {
+		m_userConfigManager = userConfigManager;
 	}
 }
