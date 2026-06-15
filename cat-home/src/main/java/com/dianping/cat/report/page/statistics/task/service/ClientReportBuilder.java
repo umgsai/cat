@@ -38,7 +38,6 @@ import com.dianping.cat.report.page.transaction.service.TransactionReportService
 import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.service.ProjectService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class ClientReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClientReportBuilder.class);
@@ -57,7 +56,6 @@ public class ClientReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building client daily report, name={}, domain={}, period={}.", name, domain, period);
 
 		ClientReport clientReport = buildClientReport(period);
@@ -75,8 +73,6 @@ public class ClientReportBuilder implements TaskBuilder {
 	}
 
 	private ClientReport buildClientReport(Date startTime) {
-		refreshSpringBeans();
-
 		Date endTime = TimeHelper.addDays(startTime, 1);
 		Set<String> domains = m_projectService.findAllDomains();
 		ClientReportStatistics statistics = new ClientReportStatistics();
@@ -113,30 +109,6 @@ public class ClientReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		throw new RuntimeException("Service client report don't support weekly report!");
-	}
-
-	private void refreshSpringBeans() {
-		ClientReportService reportService = CatSpringContext.getBeanIfAvailable(ClientReportService.class);
-		TransactionReportService transactionReportService = CatSpringContext.getBeanIfAvailable(TransactionReportService.class);
-		ServerFilterConfigManager configManger = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
-		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
-		TransactionMergeHelper mergeHelper = CatSpringContext.getBeanIfAvailable(TransactionMergeHelper.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (transactionReportService != null) {
-			m_transactionReportService = transactionReportService;
-		}
-		if (configManger != null) {
-			m_configManger = configManger;
-		}
-		if (projectService != null) {
-			m_projectService = projectService;
-		}
-		if (mergeHelper != null) {
-			m_mergeHelper = mergeHelper;
-		}
 	}
 
 	public void setConfigManager(ServerFilterConfigManager configManger) {

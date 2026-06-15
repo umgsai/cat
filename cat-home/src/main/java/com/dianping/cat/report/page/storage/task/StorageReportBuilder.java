@@ -41,7 +41,6 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class StorageReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageReportBuilder.class);
@@ -54,7 +53,6 @@ public class StorageReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String reportId, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building storage daily report, name={}, reportId={}, period={}.", name, reportId, period);
 		try {
 			StorageReport storageReport = queryHourlyReportsByDuration(reportId, period, TaskHelper.tomorrowZero(period));
@@ -84,7 +82,6 @@ public class StorageReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String reportId, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building storage monthly report, name={}, reportId={}, period={}.", name, reportId, period);
 		Date end = null;
 
@@ -109,7 +106,6 @@ public class StorageReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String reportId, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building storage weekly report, name={}, reportId={}, period={}.", name, reportId, period);
 		Date end = null;
 
@@ -182,7 +178,6 @@ public class StorageReportBuilder implements TaskBuilder {
 	}
 
 	public void initialize() {
-		refreshSpringBeans();
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
 			@Override
@@ -212,18 +207,6 @@ public class StorageReportBuilder implements TaskBuilder {
 				return ID;
 			}
 		});
-	}
-
-	private void refreshSpringBeans() {
-		StorageReportService reportService = CatSpringContext.getBeanIfAvailable(StorageReportService.class);
-		StorageMergeHelper storageMergerHelper = CatSpringContext.getBeanIfAvailable(StorageMergeHelper.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (storageMergerHelper != null) {
-			m_storageMergerHelper = storageMergerHelper;
-		}
 	}
 
 	public void setReportService(StorageReportService reportService) {

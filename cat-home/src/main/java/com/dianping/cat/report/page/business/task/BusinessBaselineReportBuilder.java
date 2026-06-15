@@ -39,7 +39,6 @@ import com.dianping.cat.report.page.metric.task.BaselineConfig;
 import com.dianping.cat.report.page.metric.task.BaselineConfigManager;
 import com.dianping.cat.report.page.metric.task.BaselineCreator;
 import com.dianping.cat.report.task.TaskBuilder;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class BusinessBaselineReportBuilder implements TaskBuilder {
 
@@ -63,8 +62,6 @@ public class BusinessBaselineReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
-
 		Map<String, BusinessReport> reports = new HashMap<String, BusinessReport>();
 
 		BusinessReportConfig config = m_configManager.queryConfigByDomain(domain);
@@ -152,38 +149,6 @@ public class BusinessBaselineReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		throw new RuntimeException("Business base line report don't support weekly report!");
-	}
-
-	private void refreshSpringBeans() {
-		BusinessConfigManager configManager = CatSpringContext.getBeanIfAvailable(BusinessConfigManager.class);
-		BaselineService baselineService = CatSpringContext.getBeanIfAvailable(BaselineService.class);
-		BusinessKeyHelper keyHelper = CatSpringContext.getBeanIfAvailable(BusinessKeyHelper.class);
-		BaselineConfigManager baselineConfigManager = CatSpringContext.getBeanIfAvailable(BaselineConfigManager.class);
-		BusinessPointParser parser = CatSpringContext.getBeanIfAvailable(BusinessPointParser.class);
-		BaselineCreator baselineCreator = CatSpringContext.getBeanIfAvailable(BaselineCreator.class);
-		BusinessReportService reportService = CatSpringContext.getBeanIfAvailable(BusinessReportService.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-		if (baselineService != null) {
-			m_baselineService = baselineService;
-		}
-		if (keyHelper != null) {
-			m_keyHelper = keyHelper;
-		}
-		if (baselineConfigManager != null) {
-			m_baselineConfigManager = baselineConfigManager;
-		}
-		if (parser != null) {
-			m_parser = parser;
-		}
-		if (baselineCreator != null) {
-			m_baselineCreator = baselineCreator;
-		}
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
 	}
 
 	public void setBaselineConfigManager(BaselineConfigManager baselineConfigManager) {

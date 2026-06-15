@@ -30,7 +30,6 @@ import com.dianping.cat.alarm.spi.AlertManager;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.page.metric.service.BaselineService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class AbstractGraphCreator {
 	protected BaselineService m_baselineService;
@@ -191,7 +190,6 @@ public abstract class AbstractGraphCreator {
 	}
 
 	protected double[] queryBaseline(String name, String key, Date start, Date end) {
-		refreshSpringBeans();
 		int size = (int) ((end.getTime() - start.getTime()) / TimeHelper.ONE_MINUTE);
 		double[] result = new double[size];
 		int index = 0;
@@ -209,14 +207,6 @@ public abstract class AbstractGraphCreator {
 			index++;
 		}
 		return result;
-	}
-
-	private void refreshSpringBeans() {
-		BaselineService baselineService = CatSpringContext.getBeanIfAvailable(BaselineService.class);
-
-		if (baselineService != null) {
-			m_baselineService = baselineService;
-		}
 	}
 
 	public Map<String, double[]> removeFutureData(Date endDate, final Map<String, double[]> allCurrentValues) {

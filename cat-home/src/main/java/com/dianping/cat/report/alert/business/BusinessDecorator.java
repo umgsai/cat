@@ -21,36 +21,18 @@ package com.dianping.cat.report.alert.business;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.alarm.spi.decorator.ProjectDecorator;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class BusinessDecorator extends ProjectDecorator {
-	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessDecorator.class);
-
 	public static final String ID = AlertType.Business.getName();
 
 	private AlertSummaryExecutor m_executor;
 
 	public void setExecutor(AlertSummaryExecutor executor) {
 		m_executor = executor;
-	}
-
-	private AlertSummaryExecutor getExecutor() {
-		if (m_executor == null) {
-			AlertSummaryExecutor executor = CatSpringContext.getBeanIfAvailable(AlertSummaryExecutor.class);
-
-			if (executor != null) {
-				m_executor = executor;
-				LOGGER.info("BusinessDecorator refreshed Spring AlertSummaryExecutor dependency.");
-			}
-		}
-		return m_executor;
 	}
 
 	@Override
@@ -65,7 +47,7 @@ public class BusinessDecorator extends ProjectDecorator {
 		sb.append(alert.getContent());
 		sb.append(buildContactInfo(alert.getDomain()));
 
-		AlertSummaryExecutor executor = getExecutor();
+		AlertSummaryExecutor executor = m_executor;
 		String summaryContext = executor == null ? null : executor.execute(alert.getDomain(), alertDate);
 		if (summaryContext != null) {
 			sb.append("<br/>").append(summaryContext);

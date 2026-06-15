@@ -32,7 +32,6 @@ import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
 import com.dianping.cat.home.dal.report.AlterationEntity;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class AlterationSummaryBuilder extends SummaryBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlterationSummaryBuilder.class);
@@ -41,19 +40,12 @@ public class AlterationSummaryBuilder extends SummaryBuilder {
 
 	private AlterationRepository m_alterationDao;
 
-	private AlterationRepository getAlterationDao() {
-		if (m_alterationDao == null) {
-			m_alterationDao = CatSpringContext.getBeanIfAvailable(AlterationRepository.class);
-		}
-		return m_alterationDao;
-	}
-
 	@Override
 	public Map<Object, Object> generateModel(String domain, Date date) {
 		Map<Object, Object> dataMap = new HashMap<Object, Object>();
 
 		try {
-			AlterationRepository alterationDao = getAlterationDao();
+			AlterationRepository alterationDao = m_alterationDao;
 
 			if (alterationDao == null) {
 				LOGGER.warn("Alteration repository is not configured for alert alteration summary, domain={}, date={}.",

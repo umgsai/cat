@@ -37,7 +37,6 @@ import com.dianping.cat.home.dependency.graph.transform.DefaultNativeBuilder;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder;
 import com.dianping.cat.report.page.dependency.service.DependencyReportService;
 import com.dianping.cat.report.task.TaskBuilder;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class DependencyReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DependencyReportBuilder.class);
@@ -57,7 +56,6 @@ public class DependencyReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String reportDomain, Date reportPeriod) {
-		refreshSpringBeans();
 		LOGGER.info("Building dependency hourly topology graph, name={}, reportDomain={}, period={}.", name, reportDomain,
 				reportPeriod);
 
@@ -107,22 +105,6 @@ public class DependencyReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String reportDomain, Date reportPeriod) {
 		throw new UnsupportedOperationException("no week report builder for dependency!");
-	}
-
-	private void refreshSpringBeans() {
-		DependencyReportService reportService = CatSpringContext.getBeanIfAvailable(DependencyReportService.class);
-		TopologyGraphRepository topologyGraphDao = CatSpringContext.getBeanIfAvailable(TopologyGraphRepository.class);
-		TopologyGraphBuilder graphBuilder = CatSpringContext.getBeanIfAvailable(TopologyGraphBuilder.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (topologyGraphDao != null) {
-			m_topologyGraphDao = topologyGraphDao;
-		}
-		if (graphBuilder != null) {
-			m_graphBuilder = graphBuilder;
-		}
 	}
 
 	public void setGraphBuilder(TopologyGraphBuilder graphBuilder) {

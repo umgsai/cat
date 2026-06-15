@@ -45,7 +45,6 @@ import com.dianping.cat.home.jar.transform.DefaultNativeBuilder;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.page.statistics.service.JarReportService;
 import com.dianping.cat.report.task.TaskBuilder;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class JarReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JarReportBuilder.class);
@@ -70,7 +69,6 @@ public class JarReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building jar hourly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date end = new Date(period.getTime() + TimeHelper.ONE_HOUR);
@@ -109,22 +107,6 @@ public class JarReportBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		throw new RuntimeException(ID + " don't support weekly update");
-	}
-
-	private void refreshSpringBeans() {
-		JarReportService reportService = CatSpringContext.getBeanIfAvailable(JarReportService.class);
-		HeartbeatReportService heartbeatReportService = CatSpringContext.getBeanIfAvailable(HeartbeatReportService.class);
-		ServerFilterConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (heartbeatReportService != null) {
-			m_heartbeatReportService = heartbeatReportService;
-		}
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
 	}
 
 	public void setConfigManager(ServerFilterConfigManager configManager) {

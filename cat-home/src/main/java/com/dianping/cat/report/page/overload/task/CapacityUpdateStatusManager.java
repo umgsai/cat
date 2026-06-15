@@ -28,7 +28,6 @@ import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 import com.dianping.cat.home.dal.report.OverloadEntity;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class CapacityUpdateStatusManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CapacityUpdateStatusManager.class);
@@ -91,8 +90,6 @@ public class CapacityUpdateStatusManager {
 	}
 
 	public void initialize() {
-		refreshSpringBeans();
-
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -127,8 +124,6 @@ public class CapacityUpdateStatusManager {
 
 	private boolean storeConfig() {
 		synchronized (this) {
-			refreshSpringBeans();
-
 			try {
 				Config config = m_configDao.createLocal();
 
@@ -165,17 +160,4 @@ public class CapacityUpdateStatusManager {
 		this.m_weeklyStatus = weeklyStatus;
 		storeConfig();
 	}
-
-	private void refreshSpringBeans() {
-		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
-		OverloadRepository overloadDao = CatSpringContext.getBeanIfAvailable(OverloadRepository.class);
-
-		if (configDao != null) {
-			m_configDao = configDao;
-		}
-		if (overloadDao != null) {
-			m_overloadDao = overloadDao;
-		}
-	}
-
 }

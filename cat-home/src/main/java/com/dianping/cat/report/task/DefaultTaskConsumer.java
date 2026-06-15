@@ -34,7 +34,6 @@ import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
 import com.dianping.cat.core.dal.TaskEntity;
 import com.dianping.cat.message.Transaction;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class DefaultTaskConsumer extends TaskConsumer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTaskConsumer.class);
@@ -45,7 +44,6 @@ public class DefaultTaskConsumer extends TaskConsumer {
 
 	@Override
 	protected Task findDoingTask(String ip) {
-		refreshSpringBeans();
 		Task task = null;
 		try {
 			task = m_taskDao.findByStatusConsumer(STATUS_DOING, ip, TaskEntity.READSET_FULL);
@@ -57,7 +55,6 @@ public class DefaultTaskConsumer extends TaskConsumer {
 
 	@Override
 	protected Task findTodoTask() {
-		refreshSpringBeans();
 		Task task = null;
 		try {
 			task = m_taskDao.findByStatusConsumer(STATUS_TODO, null, TaskEntity.READSET_FULL);
@@ -116,7 +113,6 @@ public class DefaultTaskConsumer extends TaskConsumer {
 
 	@Override
 	protected boolean updateDoingToDone(Task doing) {
-		refreshSpringBeans();
 		doing.setStatus(STATUS_DONE);
 		doing.setEndDate(new Date());
 
@@ -132,7 +128,6 @@ public class DefaultTaskConsumer extends TaskConsumer {
 
 	@Override
 	protected boolean updateDoingToFailure(Task doing) {
-		refreshSpringBeans();
 		doing.setStatus(STATUS_FAIL);
 		doing.setEndDate(new Date());
 
@@ -148,7 +143,6 @@ public class DefaultTaskConsumer extends TaskConsumer {
 
 	@Override
 	protected boolean updateTodoToDoing(Task todo) {
-		refreshSpringBeans();
 		todo.setStatus(STATUS_DOING);
 		todo.setConsumer(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		todo.setStartDate(new Date());
@@ -161,14 +155,6 @@ public class DefaultTaskConsumer extends TaskConsumer {
 					todo.getConsumer(), e);
 			Cat.logError(e);
 			return false;
-		}
-	}
-
-	private void refreshSpringBeans() {
-		TaskRepository taskDao = CatSpringContext.getBeanIfAvailable(TaskRepository.class);
-
-		if (taskDao != null) {
-			m_taskDao = taskDao;
 		}
 	}
 

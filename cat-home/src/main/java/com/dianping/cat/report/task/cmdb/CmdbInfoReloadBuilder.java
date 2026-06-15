@@ -26,7 +26,6 @@ import com.dianping.cat.support.Threads;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.report.task.TaskBuilder;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class CmdbInfoReloadBuilder implements TaskBuilder {
 
@@ -43,8 +42,6 @@ public class CmdbInfoReloadBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
-
 		if (m_projectUpdateTask == null) {
 			LOGGER.warn("Project update task is not available, skip cmdb reload task, name={}, domain={}, period={}.",
 					name, domain, period);
@@ -62,14 +59,6 @@ public class CmdbInfoReloadBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		throw new RuntimeException("project builder don't support weekly task");
-	}
-
-	private void refreshSpringBeans() {
-		ProjectUpdateTask projectUpdateTask = CatSpringContext.getBeanIfAvailable(ProjectUpdateTask.class);
-
-		if (projectUpdateTask != null) {
-			m_projectUpdateTask = projectUpdateTask;
-		}
 	}
 
 	public void setProjectUpdateTask(ProjectUpdateTask projectUpdateTask) {

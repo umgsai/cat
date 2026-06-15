@@ -36,7 +36,6 @@ import com.dianping.cat.home.heartbeat.entity.Group;
 import com.dianping.cat.home.heartbeat.entity.HeartbeatDisplayPolicy;
 import com.dianping.cat.home.heartbeat.entity.Metric;
 import com.dianping.cat.home.heartbeat.transform.DefaultSaxParser;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class HeartbeatDisplayPolicyManager {
 
@@ -67,8 +66,6 @@ public class HeartbeatDisplayPolicyManager {
 	}
 
 	public void initialize() {
-		refreshSpringBeans();
-
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -264,7 +261,6 @@ public class HeartbeatDisplayPolicyManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			ensureInitialized();
-			refreshSpringBeans();
 
 			try {
 				Config config = m_configDao.createLocal();
@@ -281,17 +277,4 @@ public class HeartbeatDisplayPolicyManager {
 		}
 		return true;
 	}
-
-	private void refreshSpringBeans() {
-		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
-		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
-
-		if (configDao != null) {
-			m_configDao = configDao;
-		}
-		if (fetcher != null) {
-			m_fetcher = fetcher;
-		}
-	}
-
 }

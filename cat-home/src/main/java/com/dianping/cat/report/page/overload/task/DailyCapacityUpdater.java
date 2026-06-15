@@ -34,7 +34,6 @@ import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class DailyCapacityUpdater implements CapacityUpdater {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DailyCapacityUpdater.class);
@@ -56,8 +55,6 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 
 	@Override
 	public void updateDBCapacity() throws DalException {
-		refreshSpringBeans();
-
 		int maxId = m_manager.getDailyStatus();
 		LOGGER.info("Starting daily report capacity scan, startMaxId={}.", maxId);
 
@@ -104,27 +101,6 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 		}
 		m_manager.updateDailyStatus(maxId);
 		LOGGER.info("Finished daily report capacity scan, finalMaxId={}.", maxId);
-	}
-
-	private void refreshSpringBeans() {
-		DailyReportContentRepository dailyReportContentDao = CatSpringContext
-		      .getBeanIfAvailable(DailyReportContentRepository.class);
-		DailyReportRepository dailyReportDao = CatSpringContext.getBeanIfAvailable(DailyReportRepository.class);
-		OverloadRepository overloadDao = CatSpringContext.getBeanIfAvailable(OverloadRepository.class);
-		CapacityUpdateStatusManager manager = CatSpringContext.getBeanIfAvailable(CapacityUpdateStatusManager.class);
-
-		if (dailyReportContentDao != null) {
-			m_dailyReportContentDao = dailyReportContentDao;
-		}
-		if (dailyReportDao != null) {
-			m_dailyReportDao = dailyReportDao;
-		}
-		if (overloadDao != null) {
-			m_overloadDao = overloadDao;
-		}
-		if (manager != null) {
-			m_manager = manager;
-		}
 	}
 
 	public void setDailyReportContentDao(DailyReportContentRepository dailyReportContentDao) {

@@ -51,7 +51,6 @@ import com.dianping.cat.report.page.transaction.service.TransactionReportService
 import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class UtilizationReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UtilizationReportBuilder.class);
@@ -72,7 +71,6 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building utilization daily report, name={}, domain={}, period={}.", name, domain, period);
 
 		UtilizationReport utilizationReport = queryHourlyReportsByDuration(name, domain, period,
@@ -92,7 +90,6 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date start) {
-		refreshSpringBeans();
 		LOGGER.info("Building utilization hourly report, name={}, domain={}, period={}.", name, domain, start);
 
 		UtilizationReport utilizationReport = new UtilizationReport(Constants.CAT);
@@ -168,7 +165,6 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building utilization monthly report, name={}, domain={}, period={}.", name, domain, period);
 
 		UtilizationReport utilizationReport = queryDailyReportsByDuration(domain, period,	TaskHelper.nextMonthStart(period));
@@ -187,7 +183,6 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building utilization weekly report, name={}, domain={}, period={}.", name, domain, period);
 
 		UtilizationReport utilizationReport = queryDailyReportsByDuration(domain, period,
@@ -206,8 +201,6 @@ public class UtilizationReportBuilder implements TaskBuilder {
 	}
 
 	private UtilizationReport queryDailyReportsByDuration(String domain, Date start, Date end) {
-		refreshSpringBeans();
-
 		long startTime = start.getTime();
 		long endTime = end.getTime();
 		UtilizationReportMerger merger = new UtilizationReportMerger(new UtilizationReport(domain));
@@ -231,8 +224,6 @@ public class UtilizationReportBuilder implements TaskBuilder {
 	}
 
 	private UtilizationReport queryHourlyReportsByDuration(String name, String domain, Date start, Date end) {
-		refreshSpringBeans();
-
 		long startTime = start.getTime();
 		long endTime = end.getTime();
 		UtilizationReportMerger merger = new UtilizationReportMerger(new UtilizationReport(domain));
@@ -253,34 +244,6 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 	private boolean validataService(String projectName) {
 		return projectName.equalsIgnoreCase(ProjectInfo.ALL_SERVER) || projectName.equalsIgnoreCase("UnknownProject");
-	}
-
-	private void refreshSpringBeans() {
-		UtilizationReportService reportService = CatSpringContext.getBeanIfAvailable(UtilizationReportService.class);
-		TransactionReportService transactionReportService = CatSpringContext.getBeanIfAvailable(TransactionReportService.class);
-		HeartbeatReportService heartbeatReportService = CatSpringContext.getBeanIfAvailable(HeartbeatReportService.class);
-		CrossReportService crossReportService = CatSpringContext.getBeanIfAvailable(CrossReportService.class);
-		TransactionMergeHelper mergeHelper = CatSpringContext.getBeanIfAvailable(TransactionMergeHelper.class);
-		ServerFilterConfigManager configManger = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (transactionReportService != null) {
-			m_transactionReportService = transactionReportService;
-		}
-		if (heartbeatReportService != null) {
-			m_heartbeatReportService = heartbeatReportService;
-		}
-		if (crossReportService != null) {
-			m_crossReportService = crossReportService;
-		}
-		if (mergeHelper != null) {
-			m_mergeHelper = mergeHelper;
-		}
-		if (configManger != null) {
-			m_configManger = configManger;
-		}
 	}
 
 	public void setConfigManager(ServerFilterConfigManager configManger) {

@@ -43,7 +43,6 @@ import com.dianping.cat.home.dependency.config.entity.EdgeConfig;
 import com.dianping.cat.home.dependency.config.entity.NodeConfig;
 import com.dianping.cat.home.dependency.config.entity.TopologyGraphConfig;
 import com.dianping.cat.home.dependency.config.transform.DefaultSaxParser;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class TopologyGraphConfigManager {
 	private static final String AVG_STR = Chinese.RESPONSE_TIME;
@@ -244,8 +243,6 @@ public class TopologyGraphConfigManager {
 	}
 
 	public void initialize() {
-		refreshSpringBeans();
-
 		if (m_fileName != null) {
 			try {
 				String content = FileUtils.readFileToString(new File(m_fileName), StandardCharsets.UTF_8);
@@ -379,8 +376,6 @@ public class TopologyGraphConfigManager {
 				return false;
 			}
 		} else {
-			refreshSpringBeans();
-
 			try {
 				Config config = m_configDao.createLocal();
 				config.setId(m_configId);
@@ -396,17 +391,4 @@ public class TopologyGraphConfigManager {
 
 		return true;
 	}
-
-	private void refreshSpringBeans() {
-		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
-		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
-
-		if (configDao != null) {
-			m_configDao = configDao;
-		}
-		if (fetcher != null) {
-			m_fetcher = fetcher;
-		}
-	}
-
 }

@@ -32,10 +32,8 @@ import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.matrix.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.report.ReportManager;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
-import com.dianping.cat.report.task.reload.ReportReloader;
 
 public class MatrixReportReloader extends AbstractReportReloader {
 
@@ -68,8 +66,6 @@ public class MatrixReportReloader extends AbstractReportReloader {
 
 	@Override
 	public List<ReportReloadEntity> loadReport(long time) {
-		refreshSpringBeans();
-
 		List<ReportReloadEntity> results = new ArrayList<ReportReloadEntity>();
 		Map<String, List<MatrixReport>> mergedReports = new HashMap<String, List<MatrixReport>>();
 
@@ -108,15 +104,6 @@ public class MatrixReportReloader extends AbstractReportReloader {
 			results.add(entity);
 		}
 		return results;
-	}
-
-	private void refreshSpringBeans() {
-		ReportManager<MatrixReport> reportManager = CatSpringContext.getBeanIfAvailable(
-		      MatrixAnalyzer.ID + "ReportManager", ReportManager.class);
-
-		if (reportManager != null) {
-			m_reportManager = reportManager;
-		}
 	}
 
 	public void setReportManager(ReportManager<MatrixReport> reportManager) {

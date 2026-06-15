@@ -35,11 +35,7 @@ import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Transaction;
-import com.dianping.cat.report.alert.summary.build.AlterationSummaryBuilder;
-import com.dianping.cat.report.alert.summary.build.FailureSummaryBuilder;
-import com.dianping.cat.report.alert.summary.build.RelatedSummaryBuilder;
 import com.dianping.cat.report.alert.summary.build.SummaryBuilder;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class AlertSummaryExecutor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryExecutor.class);
@@ -55,21 +51,6 @@ public class AlertSummaryExecutor {
 	private SummaryBuilder m_alterationBuilder;
 
 	private SenderManager m_sendManager;
-
-	private void refreshSpringBeans() {
-		if (m_relatedBuilder == null) {
-			m_relatedBuilder = CatSpringContext.getBeanIfAvailable(RelatedSummaryBuilder.ID, SummaryBuilder.class);
-		}
-		if (m_failureBuilder == null) {
-			m_failureBuilder = CatSpringContext.getBeanIfAvailable(FailureSummaryBuilder.ID, SummaryBuilder.class);
-		}
-		if (m_alterationBuilder == null) {
-			m_alterationBuilder = CatSpringContext.getBeanIfAvailable(AlterationSummaryBuilder.ID, SummaryBuilder.class);
-		}
-		if (m_sendManager == null) {
-			m_sendManager = CatSpringContext.getBeanIfAvailable(SenderManager.class);
-		}
-	}
 
 	private List<String> builderReceivers(String str) {
 		List<String> result = new ArrayList<String>();
@@ -95,7 +76,6 @@ public class AlertSummaryExecutor {
 
 		date = normalizeDate(date);
 		try {
-			refreshSpringBeans();
 			LOGGER.info("Generating alert summary, domain={}, date={}.", domain, date);
 			StringBuilder builder = new StringBuilder();
 
@@ -136,7 +116,6 @@ public class AlertSummaryExecutor {
 			if (receivers.size() > 0) {
 				LOGGER.info("Sending alert summary mail, domain={}, date={}, receiverCount={}.", domain, date,
 						receivers.size());
-				refreshSpringBeans();
 
 				if (m_sendManager == null) {
 					LOGGER.warn("Alert summary sender manager is not configured, skip summary mail, domain={}, date={}.",

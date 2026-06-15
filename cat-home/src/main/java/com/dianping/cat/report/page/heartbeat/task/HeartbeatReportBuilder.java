@@ -33,7 +33,6 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class HeartbeatReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatReportBuilder.class);
@@ -44,8 +43,6 @@ public class HeartbeatReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
-
 		try {
 			Date end = TaskHelper.tomorrowZero(period);
 			HeartbeatReport heartbeatReport = queryDailyHeartbeatReport(name, domain, period, end);
@@ -103,14 +100,6 @@ public class HeartbeatReportBuilder implements TaskBuilder {
 		heartbeatReport.setEndTime(new Date(end.getTime() - 1));
 
 		return heartbeatReport;
-	}
-
-	private void refreshSpringBeans() {
-		HeartbeatReportService reportService = CatSpringContext.getBeanIfAvailable(HeartbeatReportService.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
 	}
 
 	public void setReportService(HeartbeatReportService reportService) {

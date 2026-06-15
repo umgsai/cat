@@ -41,7 +41,6 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class EventReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EventReportBuilder.class);
@@ -56,8 +55,6 @@ public class EventReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
-
 		try {
 			EventReport eventReport = queryHourlyReportsByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
 
@@ -85,7 +82,6 @@ public class EventReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building event monthly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date end = null;
@@ -111,7 +107,6 @@ public class EventReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building event weekly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date end = null;
@@ -136,8 +131,6 @@ public class EventReportBuilder implements TaskBuilder {
 	}
 
 	public void initialize() {
-		refreshSpringBeans();
-
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
 			@Override
@@ -219,23 +212,6 @@ public class EventReportBuilder implements TaskBuilder {
 								.visitEventReport(dailyReport);
 
 		return dailyReport;
-	}
-
-	private void refreshSpringBeans() {
-		EventReportService reportService = CatSpringContext.getBeanIfAvailable(EventReportService.class);
-		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-		AtomicMessageConfigManager atomicMessageConfigManager = CatSpringContext
-		      .getBeanIfAvailable(AtomicMessageConfigManager.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (serverConfigManager != null) {
-			m_serverConfigManager = serverConfigManager;
-		}
-		if (atomicMessageConfigManager != null) {
-			m_atomicMessageConfigManager = atomicMessageConfigManager;
-		}
 	}
 
 	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {

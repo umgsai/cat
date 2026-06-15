@@ -40,7 +40,6 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class TransactionReportBuilder implements TaskBuilder {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TransactionReportBuilder.class);
@@ -55,8 +54,6 @@ public class TransactionReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
-
 		try {
 			Date end = TaskHelper.tomorrowZero(period);
 			TransactionReport transactionReport = queryHourlyReportsByDuration(name, domain, period, end);
@@ -86,7 +83,6 @@ public class TransactionReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		SLF4J_LOGGER.info("Building transaction monthly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date end = null;
@@ -111,7 +107,6 @@ public class TransactionReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		SLF4J_LOGGER.info("Building transaction weekly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date end = null;
@@ -137,8 +132,6 @@ public class TransactionReportBuilder implements TaskBuilder {
 	}
 
 	public void initialize() {
-		refreshSpringBeans();
-
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
 			@Override
@@ -224,23 +217,6 @@ public class TransactionReportBuilder implements TaskBuilder {
 								.visitTransactionReport(dailyreport);
 
 		return dailyreport;
-	}
-
-	private void refreshSpringBeans() {
-		TransactionReportService reportService = CatSpringContext.getBeanIfAvailable(TransactionReportService.class);
-		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-		AtomicMessageConfigManager atomicMessageConfigManager = CatSpringContext
-		      .getBeanIfAvailable(AtomicMessageConfigManager.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (serverConfigManager != null) {
-			m_serverConfigManager = serverConfigManager;
-		}
-		if (atomicMessageConfigManager != null) {
-			m_atomicMessageConfigManager = atomicMessageConfigManager;
-		}
 	}
 
 	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {

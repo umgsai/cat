@@ -32,10 +32,8 @@ import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.consumer.transaction.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.report.ReportManager;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
-import com.dianping.cat.report.task.reload.ReportReloader;
 
 public class TransactionReportReloader extends AbstractReportReloader {
 
@@ -68,8 +66,6 @@ public class TransactionReportReloader extends AbstractReportReloader {
 
 	@Override
 	public List<ReportReloadEntity> loadReport(long time) {
-		refreshSpringBeans();
-
 		List<ReportReloadEntity> results = new ArrayList<ReportReloadEntity>();
 		Map<String, List<TransactionReport>> mergedReports = new HashMap<String, List<TransactionReport>>();
 
@@ -108,15 +104,6 @@ public class TransactionReportReloader extends AbstractReportReloader {
 			results.add(entity);
 		}
 		return results;
-	}
-
-	private void refreshSpringBeans() {
-		ReportManager<TransactionReport> reportManager = CatSpringContext.getBeanIfAvailable(
-		      TransactionAnalyzer.ID + "ReportManager", ReportManager.class);
-
-		if (reportManager != null) {
-			m_reportManager = reportManager;
-		}
 	}
 
 	public void setReportManager(ReportManager<TransactionReport> reportManager) {

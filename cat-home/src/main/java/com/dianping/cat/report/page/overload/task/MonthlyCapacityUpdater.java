@@ -34,7 +34,6 @@ import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportReposit
 import com.dianping.cat.core.dal.MonthlyReportEntity;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class MonthlyCapacityUpdater implements CapacityUpdater {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MonthlyCapacityUpdater.class);
@@ -56,8 +55,6 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 
 	@Override
 	public void updateDBCapacity() throws DalException {
-		refreshSpringBeans();
-
 		int maxId = m_manager.getMonthlyStatus();
 		LOGGER.info("Starting monthly report capacity scan, startMaxId={}.", maxId);
 
@@ -104,27 +101,6 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 		}
 		m_manager.updateMonthlyStatus(maxId);
 		LOGGER.info("Finished monthly report capacity scan, finalMaxId={}.", maxId);
-	}
-
-	private void refreshSpringBeans() {
-		MonthlyReportRepository monthlyReportDao = CatSpringContext.getBeanIfAvailable(MonthlyReportRepository.class);
-		MonthlyReportContentRepository monthlyReportContentDao = CatSpringContext
-		      .getBeanIfAvailable(MonthlyReportContentRepository.class);
-		OverloadRepository overloadDao = CatSpringContext.getBeanIfAvailable(OverloadRepository.class);
-		CapacityUpdateStatusManager manager = CatSpringContext.getBeanIfAvailable(CapacityUpdateStatusManager.class);
-
-		if (monthlyReportDao != null) {
-			m_monthlyReportDao = monthlyReportDao;
-		}
-		if (monthlyReportContentDao != null) {
-			m_monthlyReportContentDao = monthlyReportContentDao;
-		}
-		if (overloadDao != null) {
-			m_overloadDao = overloadDao;
-		}
-		if (manager != null) {
-			m_manager = manager;
-		}
 	}
 
 	public void setMonthlyReportDao(MonthlyReportRepository monthlyReportDao) {

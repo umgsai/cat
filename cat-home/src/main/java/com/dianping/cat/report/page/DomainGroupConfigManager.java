@@ -35,7 +35,6 @@ import com.dianping.cat.home.group.entity.Domain;
 import com.dianping.cat.home.group.entity.DomainGroup;
 import com.dianping.cat.home.group.entity.Group;
 import com.dianping.cat.home.group.transform.DefaultSaxParser;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class DomainGroupConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DomainGroupConfigManager.class);
@@ -65,8 +64,6 @@ public class DomainGroupConfigManager {
 	}
 
 	public void initialize() {
-		refreshSpringBeans();
-
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -191,8 +188,6 @@ public class DomainGroupConfigManager {
 
 	private boolean storeConfig() {
 		synchronized (this) {
-			refreshSpringBeans();
-
 			try {
 				Config config = m_configDao.createLocal();
 
@@ -210,19 +205,5 @@ public class DomainGroupConfigManager {
 			}
 		}
 		return true;
-	}
-
-	private void refreshSpringBeans() {
-		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
-		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
-
-		if (configDao != null) {
-			m_configDao = configDao;
-			LOGGER.info("DomainGroupConfigManager refreshed Spring ConfigRepository dependency.");
-		}
-		if (fetcher != null) {
-			m_fetcher = fetcher;
-			LOGGER.info("DomainGroupConfigManager refreshed Spring ContentFetcher dependency.");
-		}
 	}
 }

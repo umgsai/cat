@@ -47,7 +47,6 @@ import com.dianping.cat.report.page.cross.service.CrossReportService;
 import com.dianping.cat.report.page.statistics.service.ServiceReportService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class ServiceReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceReportBuilder.class);
@@ -64,7 +63,6 @@ public class ServiceReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building service daily report, name={}, domain={}, period={}.", name, domain, period);
 
 		ServiceReport serviceReport = queryHourlyReportsByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
@@ -83,7 +81,6 @@ public class ServiceReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date start) {
-		refreshSpringBeans();
 		LOGGER.info("Building service hourly report, name={}, domain={}, period={}.", name, domain, start);
 
 		ServiceReport serviceReport = new ServiceReport(Constants.CAT);
@@ -136,7 +133,6 @@ public class ServiceReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building service weekly report, name={}, domain={}, period={}.", name, domain, period);
 
 		ServiceReport serviceReport = queryDailyReportsByDuration(domain, period,
@@ -165,8 +161,6 @@ public class ServiceReportBuilder implements TaskBuilder {
 	}
 
 	private ServiceReport queryDailyReportsByDuration(String domain, Date start, Date end) {
-		refreshSpringBeans();
-
 		long startTime = start.getTime();
 		long endTime = end.getTime();
 		ServiceReportMerger merger = new ServiceReportMerger(new ServiceReport(domain));
@@ -190,8 +184,6 @@ public class ServiceReportBuilder implements TaskBuilder {
 	}
 
 	private ServiceReport queryHourlyReportsByDuration(String name, String domain, Date start, Date end) {
-		refreshSpringBeans();
-
 		long startTime = start.getTime();
 		long endTime = end.getTime();
 		ServiceReportMerger merger = new ServiceReportMerger(new ServiceReport(domain));
@@ -214,22 +206,6 @@ public class ServiceReportBuilder implements TaskBuilder {
 	private boolean validataService(TypeDetailInfo typeInfo) {
 		return typeInfo.getProjectName().equalsIgnoreCase(ProjectInfo.ALL_SERVER)	|| typeInfo.getProjectName()
 								.equalsIgnoreCase("UnknownProject");
-	}
-
-	private void refreshSpringBeans() {
-		ServiceReportService reportService = CatSpringContext.getBeanIfAvailable(ServiceReportService.class);
-		CrossReportService crossReportService = CatSpringContext.getBeanIfAvailable(CrossReportService.class);
-		ServerFilterConfigManager configManger = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (crossReportService != null) {
-			m_crossReportService = crossReportService;
-		}
-		if (configManger != null) {
-			m_configManger = configManger;
-		}
 	}
 
 	public void setConfigManager(ServerFilterConfigManager configManger) {

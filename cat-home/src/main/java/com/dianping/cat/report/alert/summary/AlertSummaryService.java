@@ -25,7 +25,6 @@ import org.unidal.dal.jdbc.DalException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.dal.report.AlertSummary;
 import com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class AlertSummaryService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryService.class);
@@ -33,7 +32,6 @@ public class AlertSummaryService {
 	private AlertSummaryRepository m_alertSummaryDao;
 
 	public void insert(com.dianping.cat.home.alert.summary.entity.AlertSummary alertSummary) {
-		refreshSpringBeans();
 		AlertSummary summary = new AlertSummary();
 		String content = alertSummary.toString();
 
@@ -47,14 +45,6 @@ public class AlertSummaryService {
 			LOGGER.error("Unable to insert alert summary, domain={}, alertTime={}.", alertSummary.getDomain(),
 					alertSummary.getAlertDate(), e);
 			Cat.logError("insert alert summary error: " + content, e);
-		}
-	}
-
-	private void refreshSpringBeans() {
-		AlertSummaryRepository alertSummaryDao = CatSpringContext.getBeanIfAvailable(AlertSummaryRepository.class);
-
-		if (alertSummaryDao != null) {
-			m_alertSummaryDao = alertSummaryDao;
 		}
 	}
 

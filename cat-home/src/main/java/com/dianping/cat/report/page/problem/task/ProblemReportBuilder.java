@@ -40,7 +40,6 @@ import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class ProblemReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProblemReportBuilder.class);
@@ -51,7 +50,6 @@ public class ProblemReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		try {
 			ProblemReport problemReport = queryHourlyReportsByDuration(name, domain, period,	TaskHelper.tomorrowZero(period));
 
@@ -80,7 +78,6 @@ public class ProblemReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building problem monthly report, name={}, domain={}, period={}.", name, domain, period);
 		ProblemReport problemReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 
@@ -100,7 +97,6 @@ public class ProblemReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building problem weekly report, name={}, domain={}, period={}.", name, domain, period);
 		ProblemReport problemReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
@@ -117,7 +113,6 @@ public class ProblemReportBuilder implements TaskBuilder {
 	}
 
 	public void initialize() {
-		refreshSpringBeans();
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
 			@Override
@@ -189,14 +184,6 @@ public class ProblemReportBuilder implements TaskBuilder {
 		dailyReport.setStartTime(TaskHelper.todayZero(date));
 		dailyReport.setEndTime(end);
 		return dailyReport;
-	}
-
-	private void refreshSpringBeans() {
-		ProblemReportService reportService = CatSpringContext.getBeanIfAvailable(ProblemReportService.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
 	}
 
 	public void setReportService(ProblemReportService reportService) {

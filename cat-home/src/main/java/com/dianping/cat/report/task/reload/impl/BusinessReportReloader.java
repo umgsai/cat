@@ -34,8 +34,6 @@ import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
-import com.dianping.cat.report.task.reload.ReportReloader;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class BusinessReportReloader extends AbstractReportReloader {
 
@@ -68,8 +66,6 @@ public class BusinessReportReloader extends AbstractReportReloader {
 
 	@Override
 	public List<ReportReloadEntity> loadReport(long time) {
-		refreshSpringBeans();
-
 		List<ReportReloadEntity> results = new ArrayList<ReportReloadEntity>();
 		Map<String, List<BusinessReport>> mergedReports = new HashMap<String, List<BusinessReport>>();
 
@@ -108,16 +104,6 @@ public class BusinessReportReloader extends AbstractReportReloader {
 			results.add(entity);
 		}
 		return results;
-	}
-
-	@SuppressWarnings("unchecked")
-	private void refreshSpringBeans() {
-		ReportManager<BusinessReport> reportManager = CatSpringContext.getBeanIfAvailable(
-		      BusinessAnalyzer.ID + "ReportManager", ReportManager.class);
-
-		if (reportManager != null) {
-			m_reportManager = reportManager;
-		}
 	}
 
 	public void setReportManager(ReportManager<BusinessReport> reportManager) {

@@ -34,7 +34,6 @@ import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.alarm.spi.decorator.ProjectDecorator;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class ExceptionDecorator extends ProjectDecorator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionDecorator.class);
@@ -49,18 +48,6 @@ public class ExceptionDecorator extends ProjectDecorator {
 
 	public void setExecutor(AlertSummaryExecutor executor) {
 		m_executor = executor;
-	}
-
-	private AlertSummaryExecutor getExecutor() {
-		if (m_executor == null) {
-			AlertSummaryExecutor executor = CatSpringContext.getBeanIfAvailable(AlertSummaryExecutor.class);
-
-			if (executor != null) {
-				m_executor = executor;
-				LOGGER.info("ExceptionDecorator refreshed Spring AlertSummaryExecutor dependency.");
-			}
-		}
-		return m_executor;
 	}
 
 	@Override
@@ -81,7 +68,7 @@ public class ExceptionDecorator extends ProjectDecorator {
 		String summaryContext = "";
 
 		try {
-			AlertSummaryExecutor executor = getExecutor();
+			AlertSummaryExecutor executor = m_executor;
 
 			summaryContext = executor == null ? null : executor.execute(alert.getGroup(), alert.getDate());
 		} catch (Exception e) {

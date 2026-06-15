@@ -29,7 +29,6 @@ import org.apache.commons.jexl3.JexlExpression;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class CustomDataCalculator {
 
@@ -48,8 +47,6 @@ public class CustomDataCalculator {
 	}
 
 	public List<CustomInfo> translatePattern(String pattern) {
-		refreshSpringBeans();
-
 		List<CustomInfo> infos = new ArrayList<CustomInfo>();
 		boolean result = true;
 		int length = pattern.length();
@@ -92,8 +89,6 @@ public class CustomDataCalculator {
 
 	public double[] calculate(String pattern, List<CustomInfo> customInfos, Map<String, double[]> businessItemData,
 							int totalSize) {
-		refreshSpringBeans();
-
 		double[] result = new double[totalSize];
 
 		for (int i = 0; i < totalSize; i++) {
@@ -124,14 +119,6 @@ public class CustomDataCalculator {
 		JexlExpression e = jexl.createExpression(pattern);
 		Number result = (Number) e.evaluate(null);
 		return result.doubleValue();
-	}
-
-	private void refreshSpringBeans() {
-		BusinessKeyHelper keyHelper = CatSpringContext.getBeanIfAvailable(BusinessKeyHelper.class);
-
-		if (keyHelper != null) {
-			m_keyHelper = keyHelper;
-		}
 	}
 
 }

@@ -46,7 +46,6 @@ import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class StateReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StateReportBuilder.class);
@@ -65,7 +64,6 @@ public class StateReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building state daily report, name={}, domain={}, period={}.", name, domain, period);
 
 		StateReport stateReport = queryHourlyReportsByDuration(domain, period, TaskHelper.tomorrowZero(period));
@@ -83,7 +81,6 @@ public class StateReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building state hourly report side effects, name={}, domain={}, period={}.", name, domain, period);
 
 		StateReport stateReport = m_reportService
@@ -96,7 +93,6 @@ public class StateReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building state monthly report, name={}, domain={}, period={}.", name, domain, period);
 
 		StateReport stateReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
@@ -114,7 +110,6 @@ public class StateReportBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
 		LOGGER.info("Building state weekly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date start = period;
@@ -134,8 +129,6 @@ public class StateReportBuilder implements TaskBuilder {
 	}
 
 	public void initialize() {
-		refreshSpringBeans();
-
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
 			@Override
@@ -204,8 +197,6 @@ public class StateReportBuilder implements TaskBuilder {
 	}
 
 	private void updateProjectAndHost(String domain, String ip) {
-		refreshSpringBeans();
-
 		if (m_serverFilterConfigManager.validateDomain(domain)) {
 			if (!m_projectService.contains(domain)) {
 				LOGGER.info("State report discovered new project domain, domain={}, ip={}.", domain, ip);
@@ -226,31 +217,6 @@ public class StateReportBuilder implements TaskBuilder {
 					m_hostinfoService.update(info.getId(), domain, ip);
 				}
 			}
-		}
-	}
-
-	private void refreshSpringBeans() {
-		StateReportService reportService = CatSpringContext.getBeanIfAvailable(StateReportService.class);
-		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
-		      .getBeanIfAvailable(ServerFilterConfigManager.class);
-		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
-		HostinfoService hostinfoService = CatSpringContext.getBeanIfAvailable(HostinfoService.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (serverConfigManager != null) {
-			m_serverConfigManager = serverConfigManager;
-		}
-		if (serverFilterConfigManager != null) {
-			m_serverFilterConfigManager = serverFilterConfigManager;
-		}
-		if (projectService != null) {
-			m_projectService = projectService;
-		}
-		if (hostinfoService != null) {
-			m_hostinfoService = hostinfoService;
 		}
 	}
 

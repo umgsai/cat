@@ -54,7 +54,6 @@ import com.dianping.cat.report.graph.metric.AbstractGraphCreator;
 import com.dianping.cat.report.page.business.service.CachedBusinessReportService;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.service.ProjectService;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
 public class BusinessGraphCreator extends AbstractGraphCreator {
@@ -161,7 +160,6 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 	}
 
 	public Map<String, LineChart> buildGraphByDomain(Date start, Date end, String domain) {
-		refreshSpringBeans();
 		LOGGER.info("Building business graph by domain, domain={}, start={}, end={}.", domain, start, end);
 
 		BusinessReportConfig config = m_configManager.queryConfigByDomain(domain);
@@ -188,7 +186,6 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 	}
 
 	public Map<String, LineChart> buildGraphByTag(Date start, Date end, String tag) {
-		refreshSpringBeans();
 		LOGGER.info("Building business graph by tag, tag={}, start={}, end={}.", tag, start, end);
 
 		Tag tagConfig = m_tagManager.findTag(tag);
@@ -441,38 +438,6 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 			}
 		}
 		return customDatas;
-	}
-
-	private void refreshSpringBeans() {
-		BusinessConfigManager configManager = CatSpringContext.getBeanIfAvailable(BusinessConfigManager.class);
-		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
-		BusinessTagConfigManager tagManager = CatSpringContext.getBeanIfAvailable(BusinessTagConfigManager.class);
-		BusinessDataFetcher dataFetcher = CatSpringContext.getBeanIfAvailable(BusinessDataFetcher.class);
-		BusinessKeyHelper keyHelper = CatSpringContext.getBeanIfAvailable(BusinessKeyHelper.class);
-		CustomDataCalculator customDataCalculator = CatSpringContext.getBeanIfAvailable(CustomDataCalculator.class);
-		CachedBusinessReportService reportService = CatSpringContext.getBeanIfAvailable(CachedBusinessReportService.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-		if (projectService != null) {
-			m_projectService = projectService;
-		}
-		if (tagManager != null) {
-			m_tagManager = tagManager;
-		}
-		if (dataFetcher != null) {
-			m_dataFetcher = dataFetcher;
-		}
-		if (keyHelper != null) {
-			m_keyHelper = keyHelper;
-		}
-		if (customDataCalculator != null) {
-			m_customDataCalculator = customDataCalculator;
-		}
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
 	}
 
 	public void setConfigManager(BusinessConfigManager configManager) {
