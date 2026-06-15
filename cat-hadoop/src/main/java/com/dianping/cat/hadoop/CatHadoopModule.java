@@ -18,22 +18,22 @@
  */
 package com.dianping.cat.hadoop;
 
-import org.unidal.cat.message.storage.clean.LogviewProcessor;
-import com.dianping.cat.support.Threads;
 import org.unidal.initialization.AbstractModule;
 import org.unidal.initialization.Module;
 import org.unidal.initialization.ModuleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.CatCoreModule;
 
 public class CatHadoopModule extends AbstractModule {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CatHadoopModule.class);
+
 	public static final String ID = "cat-hadoop";
 
 	@Override
 	protected void execute(ModuleContext ctx) {
-		LogviewProcessor processor = ctx.lookup(LogviewProcessor.class);
-
-		Threads.forGroup("Cat").start(processor);
+		LOGGER.info("Skipping legacy CAT hadoop module startup; logview processor is managed by Spring.");
 	}
 
 	@Override
