@@ -1314,6 +1314,47 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public com.dianping.cat.report.page.home.JspViewer homeJspViewer() {
+		return new com.dianping.cat.report.page.home.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.home.Handler homeHandler(
+			com.dianping.cat.report.page.home.JspViewer homeJspViewer, MessageConsumer messageConsumer,
+			TcpSocketReceiver tcpSocketReceiver) {
+		com.dianping.cat.report.page.home.Handler handler = new com.dianping.cat.report.page.home.Handler();
+
+		handler.setJspViewer(homeJspViewer);
+		handler.setRealtimeConsumer(messageConsumer);
+		handler.setReceiver(tcpSocketReceiver);
+		return handler;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.monitor.JspViewer monitorJspViewer() {
+		return new com.dianping.cat.report.page.monitor.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.monitor.Handler monitorHandler() {
+		return new com.dianping.cat.report.page.monitor.Handler();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.model.JspViewer modelJspViewer() {
+		return new com.dianping.cat.report.page.model.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.model.Handler modelHandler(
+			@Qualifier("localModelServices") Map<String, LocalModelService> localModelServices) {
+		com.dianping.cat.report.page.model.Handler handler = new com.dianping.cat.report.page.model.Handler();
+
+		handler.setLocalServices(localModelServices);
+		return handler;
+	}
+
+	@Bean
 	public com.dianping.cat.report.page.alteration.JspViewer alterationJspViewer() {
 		return new com.dianping.cat.report.page.alteration.JspViewer();
 	}
@@ -1634,6 +1675,24 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public com.dianping.cat.report.page.dependency.JspViewer dependencyJspViewer() {
 		return new com.dianping.cat.report.page.dependency.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.dependency.Handler dependencyHandler(
+			@Qualifier("dependencyModelService") ModelService<DependencyReport> dependencyModelService,
+			com.dianping.cat.report.page.dependency.JspViewer dependencyJspViewer,
+			TopologyGraphManager topologyGraphManager, ExternalInfoBuilder externalInfoBuilder,
+			PayloadNormalizer payloadNormalizer, TopoGraphFormatConfigManager topoGraphFormatConfigManager) {
+		com.dianping.cat.report.page.dependency.Handler handler =
+		      new com.dianping.cat.report.page.dependency.Handler();
+
+		handler.setDependencyService(dependencyModelService);
+		handler.setJspViewer(dependencyJspViewer);
+		handler.setGraphManager(topologyGraphManager);
+		handler.setExternalInfoBuilder(externalInfoBuilder);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setFormatConfigManager(topoGraphFormatConfigManager);
+		return handler;
 	}
 
 	@Bean
@@ -3561,6 +3620,21 @@ public class CatHomeSpringConfiguration {
 		return manager;
 	}
 
+	@Bean
+	public com.dianping.cat.system.page.router.Handler systemRouterHandler(
+			CachedRouterConfigService cachedRouterConfigService, RouterConfigManager routerConfigManager,
+			SampleConfigManager sampleConfigManager, ServerFilterConfigManager serverFilterConfigManager,
+			RouterConfigHandler routerConfigHandler) {
+		com.dianping.cat.system.page.router.Handler handler = new com.dianping.cat.system.page.router.Handler();
+
+		handler.setCachedReportService(cachedRouterConfigService);
+		handler.setConfigManager(routerConfigManager);
+		handler.setSampleConfigManager(sampleConfigManager);
+		handler.setFilterManager(serverFilterConfigManager);
+		handler.setRouterConfigHandler(routerConfigHandler);
+		return handler;
+	}
+
 	@Bean(initMethod = "initialize")
 	public DomainGroupConfigManager domainGroupConfigManager(ConfigRepository configRepository,
 			ContentFetcher contentFetcher) {
@@ -4061,6 +4135,35 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean
+	public com.dianping.cat.system.page.login.JspViewer systemLoginJspViewer() {
+		return new com.dianping.cat.system.page.login.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.system.page.login.Handler systemLoginHandler(
+			com.dianping.cat.system.page.login.JspViewer systemLoginJspViewer, SigninService signinService) {
+		com.dianping.cat.system.page.login.Handler handler = new com.dianping.cat.system.page.login.Handler();
+
+		handler.setJspViewer(systemLoginJspViewer);
+		handler.setSigninService(signinService);
+		return handler;
+	}
+
+	@Bean
+	public com.dianping.cat.system.page.plugin.JspViewer systemPluginJspViewer() {
+		return new com.dianping.cat.system.page.plugin.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.system.page.plugin.Handler systemPluginHandler(
+			com.dianping.cat.system.page.plugin.JspViewer systemPluginJspViewer) {
+		com.dianping.cat.system.page.plugin.Handler handler = new com.dianping.cat.system.page.plugin.Handler();
+
+		handler.setJspViewer(systemPluginJspViewer);
+		return handler;
+	}
+
 	@Bean(initMethod = "initialize")
 	public ProjectService projectService(ProjectRepository projectRepository, ServerConfigManager serverConfigManager) {
 		ProjectService service = new ProjectService();
@@ -4068,6 +4171,21 @@ public class CatHomeSpringConfiguration {
 		service.setProjectDao(projectRepository);
 		service.setServerConfigManager(serverConfigManager);
 		return service;
+	}
+
+	@Bean
+	public com.dianping.cat.system.page.project.JspViewer systemProjectJspViewer() {
+		return new com.dianping.cat.system.page.project.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.system.page.project.Handler systemProjectHandler(
+			com.dianping.cat.system.page.project.JspViewer systemProjectJspViewer, ProjectService projectService) {
+		com.dianping.cat.system.page.project.Handler handler = new com.dianping.cat.system.page.project.Handler();
+
+		handler.setJspViewer(systemProjectJspViewer);
+		handler.setProjectService(projectService);
+		return handler;
 	}
 
 	@Bean

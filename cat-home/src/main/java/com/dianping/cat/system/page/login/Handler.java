@@ -224,4 +224,12 @@ public class Handler implements PageHandler<Context> {
 		ctx.redirect(url);
 		ctx.stopProcess();
 	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setSigninService(SigninService signinService) {
+		m_signinService = signinService;
+	}
 }

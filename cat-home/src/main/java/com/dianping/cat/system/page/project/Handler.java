@@ -113,4 +113,12 @@ public class Handler implements PageHandler<Context> {
 			m_projectService = projectService;
 		}
 	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setProjectService(ProjectService projectService) {
+		m_projectService = projectService;
+	}
 }

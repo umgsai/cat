@@ -169,4 +169,8 @@ public class Handler implements PageHandler<Context> {
 
 		ctx.stopProcess();
 	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
 }

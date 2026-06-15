@@ -192,4 +192,24 @@ public class Handler implements PageHandler<Context> {
 
 		return kvs;
 	}
+
+	public void setCachedReportService(CachedRouterConfigService cachedReportService) {
+		m_cachedReportService = cachedReportService;
+	}
+
+	public void setConfigManager(RouterConfigManager configManager) {
+		m_configManager = configManager;
+	}
+
+	public void setFilterManager(ServerFilterConfigManager filterManager) {
+		m_filterManager = filterManager;
+	}
+
+	public void setRouterConfigHandler(RouterConfigHandler routerConfigHandler) {
+		m_routerConfigHandler = routerConfigHandler;
+	}
+
+	public void setSampleConfigManager(SampleConfigManager sampleConfigManager) {
+		m_sampleConfigManager = sampleConfigManager;
+	}
 }
