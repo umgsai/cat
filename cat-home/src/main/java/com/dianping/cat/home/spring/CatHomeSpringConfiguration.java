@@ -244,6 +244,7 @@ import com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphManager;
 import com.dianping.cat.report.page.business.graph.BusinessDataFetcher;
+import com.dianping.cat.report.page.business.graph.BusinessGraphCreator;
 import com.dianping.cat.report.page.business.graph.CustomDataCalculator;
 import com.dianping.cat.report.page.business.service.CachedBusinessReportService;
 import com.dianping.cat.report.page.business.service.CompositeBusinessService;
@@ -384,6 +385,7 @@ import com.dianping.cat.system.page.permission.UserConfigManager;
 import com.dianping.cat.system.page.router.config.RouterConfigAdjustor;
 import com.dianping.cat.system.page.router.config.RouterConfigHandler;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
+import com.dianping.cat.system.page.router.service.CachedRouterConfigService;
 import com.dianping.cat.system.page.router.service.RouterConfigService;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
@@ -1228,6 +1230,14 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
+	@Bean(initMethod = "initialize")
+	public CachedRouterConfigService cachedRouterConfigService(RouterConfigService routerConfigService) {
+		CachedRouterConfigService service = new CachedRouterConfigService();
+
+		service.setRouterConfigService(routerConfigService);
+		return service;
+	}
+
 	@Bean
 	public HeartbeatReportService heartbeatReportService(HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
@@ -1473,6 +1483,44 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public com.dianping.cat.report.page.top.JspViewer topJspViewer() {
 		return new com.dianping.cat.report.page.top.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.business.JspViewer businessJspViewer() {
+		return new com.dianping.cat.report.page.business.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.business.Handler businessHandler(
+			com.dianping.cat.report.page.business.JspViewer businessJspViewer, PayloadNormalizer payloadNormalizer,
+			ProjectService projectService, BusinessGraphCreator businessGraphCreator,
+			BusinessTagConfigManager businessTagConfigManager) {
+		com.dianping.cat.report.page.business.Handler handler = new com.dianping.cat.report.page.business.Handler();
+
+		handler.setJspViewer(businessJspViewer);
+		handler.setNormalizePayload(payloadNormalizer);
+		handler.setProjectService(projectService);
+		handler.setGraphCreator(businessGraphCreator);
+		handler.setTagConfigManager(businessTagConfigManager);
+		return handler;
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.logview.JspViewer logviewJspViewer() {
+		return new com.dianping.cat.report.page.logview.JspViewer();
+	}
+
+	@Bean
+	public com.dianping.cat.report.page.logview.Handler logviewHandler(
+			com.dianping.cat.report.page.logview.JspViewer logviewJspViewer,
+			@Qualifier("logviewModelService") ModelService<String> logviewModelService,
+			ServerConfigManager serverConfigManager) {
+		com.dianping.cat.report.page.logview.Handler handler = new com.dianping.cat.report.page.logview.Handler();
+
+		handler.setJspViewer(logviewJspViewer);
+		handler.setService(logviewModelService);
+		handler.setConfigManager(serverConfigManager);
+		return handler;
 	}
 
 	@Bean
@@ -3667,6 +3715,28 @@ public class CatHomeSpringConfiguration {
 
 		fetcher.setKeyHelper(businessKeyHelper);
 		return fetcher;
+	}
+
+	@Bean
+	public BusinessGraphCreator businessGraphCreator(CachedBusinessReportService cachedBusinessReportService,
+			BusinessConfigManager businessConfigManager, BusinessDataFetcher businessDataFetcher,
+			ProjectService projectService, BusinessTagConfigManager businessTagConfigManager,
+			BusinessKeyHelper businessKeyHelper, CustomDataCalculator customDataCalculator,
+			BaselineService baselineService, DataExtractor dataExtractor,
+			com.dianping.cat.alarm.spi.AlertManager spiAlertManager) {
+		BusinessGraphCreator creator = new BusinessGraphCreator();
+
+		creator.setReportService(cachedBusinessReportService);
+		creator.setConfigManager(businessConfigManager);
+		creator.setDataFetcher(businessDataFetcher);
+		creator.setProjectService(projectService);
+		creator.setTagManager(businessTagConfigManager);
+		creator.setKeyHelper(businessKeyHelper);
+		creator.setCustomDataCalculator(customDataCalculator);
+		creator.setBaselineService(baselineService);
+		creator.setDataExtractor(dataExtractor);
+		creator.setAlertManager(spiAlertManager);
+		return creator;
 	}
 
 	@Bean

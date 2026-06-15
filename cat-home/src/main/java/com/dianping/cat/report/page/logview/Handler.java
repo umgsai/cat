@@ -153,9 +153,13 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private void refreshSpringBeans() {
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
 		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
 		ModelService<String> service = CatSpringContext.getBeanIfAvailable("logviewModelService", ModelService.class);
 
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
 		if (configManager != null) {
 			m_configManager = configManager;
 		}

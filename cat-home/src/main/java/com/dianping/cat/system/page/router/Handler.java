@@ -157,14 +157,27 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private void refreshSpringBeans() {
+		CachedRouterConfigService cachedReportService = CatSpringContext
+		      .getBeanIfAvailable(CachedRouterConfigService.class);
+		RouterConfigManager configManager = CatSpringContext.getBeanIfAvailable(RouterConfigManager.class);
 		SampleConfigManager sampleConfigManager = CatSpringContext.getBeanIfAvailable(SampleConfigManager.class);
 		ServerFilterConfigManager filterManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
+		RouterConfigHandler routerConfigHandler = CatSpringContext.getBeanIfAvailable(RouterConfigHandler.class);
 
+		if (cachedReportService != null) {
+			m_cachedReportService = cachedReportService;
+		}
+		if (configManager != null) {
+			m_configManager = configManager;
+		}
 		if (sampleConfigManager != null) {
 			m_sampleConfigManager = sampleConfigManager;
 		}
 		if (filterManager != null) {
 			m_filterManager = filterManager;
+		}
+		if (routerConfigHandler != null) {
+			m_routerConfigHandler = routerConfigHandler;
 		}
 	}
 

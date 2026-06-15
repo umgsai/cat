@@ -32,7 +32,7 @@
 	</servlet>
 	<servlet>
 		<servlet-name>mvc-servlet</servlet-name>
-		<servlet-class>org.unidal.web.MVC</servlet-class>
+		<servlet-class>com.dianping.cat.mvc.SpringMvcServlet</servlet-class>
 		<init-param>
 			<param-name>cat-client-xml</param-name>
 			<param-value>client.xml</param-value>
