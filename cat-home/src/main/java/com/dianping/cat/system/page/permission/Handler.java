@@ -29,7 +29,6 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import com.dianping.cat.system.SystemPage;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 
@@ -51,8 +50,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "permission")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
@@ -80,22 +77,6 @@ public class Handler implements PageHandler<Context> {
 		}
 		if (!ctx.isProcessStopped()) {
 			m_jspViewer.view(ctx, model);
-		}
-	}
-
-	private void refreshSpringBeans() {
-		UserConfigManager userConfigManager = CatSpringContext.getBeanIfAvailable(UserConfigManager.class);
-		ResourceConfigManager resourceConfigManager = CatSpringContext.getBeanIfAvailable(ResourceConfigManager.class);
-		ConfigHtmlParser configHtmlParser = CatSpringContext.getBeanIfAvailable(ConfigHtmlParser.class);
-
-		if (userConfigManager != null) {
-			m_userConfigManager = userConfigManager;
-		}
-		if (resourceConfigManager != null) {
-			m_resourceConfigManager = resourceConfigManager;
-		}
-		if (configHtmlParser != null) {
-			m_configHtmlParser = configHtmlParser;
 		}
 	}
 

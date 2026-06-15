@@ -27,7 +27,6 @@ import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.home.router.entity.RouterConfig;
 import com.dianping.cat.home.router.transform.DefaultNativeBuilder;
 import com.dianping.cat.report.task.TaskBuilder;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.router.config.RouterConfigAdjustor;
 import com.dianping.cat.system.page.router.config.RouterConfigHandler;
 import com.dianping.cat.system.page.router.service.RouterConfigService;
@@ -46,8 +45,6 @@ public class RouterConfigBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
-
 		RouterConfig routerConfig = m_routerConfigHandler.buildRouterConfig(domain, period);
 		DailyReport dailyReport = new DailyReport();
 
@@ -65,8 +62,6 @@ public class RouterConfigBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
-		refreshSpringBeans();
-
 		if (m_serverConfigManager.isRouterAdjustEnabled()) {
 			m_routerAdjustor.Adjust(period);
 		}
@@ -81,14 +76,6 @@ public class RouterConfigBuilder implements TaskBuilder {
 	@Override
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		throw new RuntimeException("router builder doesn't support weekly task");
-	}
-
-	private void refreshSpringBeans() {
-		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-
-		if (serverConfigManager != null) {
-			m_serverConfigManager = serverConfigManager;
-		}
 	}
 
 	public void setReportService(RouterConfigService reportService) {

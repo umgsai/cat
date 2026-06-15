@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.home.router.entity.RouterConfig;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -66,22 +65,11 @@ public class CachedRouterConfigService {
 	}
 
 	public void refresh() {
-		RouterConfigService routerConfigService = getRouterConfigService();
-
-		if (routerConfigService == null) {
+		if (m_routerConfigService == null) {
 			LOGGER.warn("Skip router config refresh because RouterConfigService is unavailable.");
 			return;
 		}
-		m_routerConfig = routerConfigService.queryLastReport(Constants.CAT);
-	}
-
-	private RouterConfigService getRouterConfigService() {
-		RouterConfigService routerConfigService = CatSpringContext.getBeanIfAvailable(RouterConfigService.class);
-
-		if (routerConfigService != null) {
-			m_routerConfigService = routerConfigService;
-		}
-		return m_routerConfigService;
+		m_routerConfig = m_routerConfigService.queryLastReport(Constants.CAT);
 	}
 
 	public void setRouterConfigService(RouterConfigService routerConfigService) {

@@ -26,7 +26,6 @@ import com.dianping.cat.system.page.config.Action;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
 import com.dianping.cat.system.page.config.Model;
 import com.dianping.cat.system.page.config.Payload;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class AlertConfigProcessor {
 
@@ -37,8 +36,6 @@ public class AlertConfigProcessor {
 	private ConfigHtmlParser m_configHtmlParser;
 
 	public void process(Action action, Payload payload, Model model) {
-		refreshSpringBeans();
-
 		switch (action) {
 		case ALERT_DEFAULT_RECEIVERS:
 			String alertDefaultReceivers = payload.getContent();
@@ -64,22 +61,6 @@ public class AlertConfigProcessor {
 			break;
 		default:
 			throw new RuntimeException("Error action name " + action.getName());
-		}
-	}
-
-	public void refreshSpringBeans() {
-		AlertConfigManager alertConfigManager = CatSpringContext.getBeanIfAvailable(AlertConfigManager.class);
-		AlertPolicyManager alertPolicyManager = CatSpringContext.getBeanIfAvailable(AlertPolicyManager.class);
-		ConfigHtmlParser configHtmlParser = CatSpringContext.getBeanIfAvailable(ConfigHtmlParser.class);
-
-		if (alertConfigManager != null) {
-			m_alertConfigManager = alertConfigManager;
-		}
-		if (alertPolicyManager != null) {
-			m_alertPolicyManager = alertPolicyManager;
-		}
-		if (configHtmlParser != null) {
-			m_configHtmlParser = configHtmlParser;
 		}
 	}
 

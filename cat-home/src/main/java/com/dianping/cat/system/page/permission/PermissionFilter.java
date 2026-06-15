@@ -30,11 +30,12 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
+import com.dianping.cat.home.spring.CatHomeSpringContextListener;
 import com.dianping.cat.system.page.login.service.SigninContext;
 import com.dianping.cat.system.page.login.service.Token;
 import com.dianping.cat.system.page.login.service.TokenManager;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class PermissionFilter implements Filter {
 
@@ -60,7 +61,7 @@ public class PermissionFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		refreshSpringBeans();
+		resolveSpringBeans(filterConfig);
 
 		if (m_userConfigManager == null || m_resourceConfigManager == null || m_tokenManager == null) {
 			throw new ServletException(String.format(
@@ -79,7 +80,6 @@ public class PermissionFilter implements Filter {
 							throws IOException,	ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
-		refreshSpringBeans();
 
 		if (m_userConfigManager == null || m_resourceConfigManager == null || m_tokenManager == null) {
 			throw new ServletException("PermissionFilter dependencies must be configured by Spring.");
@@ -126,20 +126,16 @@ public class PermissionFilter implements Filter {
 	public void destroy() {
 	}
 
-	private void refreshSpringBeans() {
-		UserConfigManager userConfigManager = CatSpringContext.getBeanIfAvailable(UserConfigManager.class);
-		ResourceConfigManager resourceConfigManager = CatSpringContext.getBeanIfAvailable(ResourceConfigManager.class);
-		TokenManager tokenManager = CatSpringContext.getBeanIfAvailable(TokenManager.class);
+	private void resolveSpringBeans(FilterConfig filterConfig) throws ServletException {
+		ApplicationContext context = (ApplicationContext) filterConfig.getServletContext()
+		      .getAttribute(CatHomeSpringContextListener.ATTRIBUTE_NAME);
 
-		if (userConfigManager != null) {
-			m_userConfigManager = userConfigManager;
+		if (context == null) {
+			throw new ServletException("CAT home Spring context is not initialized.");
 		}
-		if (resourceConfigManager != null) {
-			m_resourceConfigManager = resourceConfigManager;
-		}
-		if (tokenManager != null) {
-			m_tokenManager = tokenManager;
-		}
+		m_userConfigManager = context.getBean(UserConfigManager.class);
+		m_resourceConfigManager = context.getBean(ResourceConfigManager.class);
+		m_tokenManager = context.getBean(TokenManager.class);
 	}
 
 }

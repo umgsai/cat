@@ -44,7 +44,6 @@ import com.dianping.cat.home.router.entity.Server;
 import com.dianping.cat.system.page.router.config.RouterConfigHandler;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 import com.dianping.cat.system.page.router.service.CachedRouterConfigService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
@@ -121,8 +120,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "router")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
@@ -154,31 +151,6 @@ public class Handler implements PageHandler<Context> {
 		}
 
 		ctx.getHttpServletResponse().getWriter().write(model.getContent());
-	}
-
-	private void refreshSpringBeans() {
-		CachedRouterConfigService cachedReportService = CatSpringContext
-		      .getBeanIfAvailable(CachedRouterConfigService.class);
-		RouterConfigManager configManager = CatSpringContext.getBeanIfAvailable(RouterConfigManager.class);
-		SampleConfigManager sampleConfigManager = CatSpringContext.getBeanIfAvailable(SampleConfigManager.class);
-		ServerFilterConfigManager filterManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
-		RouterConfigHandler routerConfigHandler = CatSpringContext.getBeanIfAvailable(RouterConfigHandler.class);
-
-		if (cachedReportService != null) {
-			m_cachedReportService = cachedReportService;
-		}
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-		if (sampleConfigManager != null) {
-			m_sampleConfigManager = sampleConfigManager;
-		}
-		if (filterManager != null) {
-			m_filterManager = filterManager;
-		}
-		if (routerConfigHandler != null) {
-			m_routerConfigHandler = routerConfigHandler;
-		}
 	}
 
 	private Map<String, String> buildKvs(RouterConfig report, String domain, String ip) {

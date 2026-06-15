@@ -21,6 +21,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.unidal.web.lifecycle.ActionResolver;
 import org.unidal.web.lifecycle.DefaultActionResolver;
+import org.unidal.web.lifecycle.DefaultUrlMapping;
 import org.unidal.web.lifecycle.UrlMapping;
 import org.unidal.web.mvc.ActionContext;
 import org.unidal.web.mvc.ActionException;
@@ -289,6 +290,21 @@ final class SpringMvcRuntime {
 		return context;
 	}
 
+	private RequestContext createPreActionRequestContext(RequestContext parentContext, InboundActionModel preAction) {
+		DefaultUrlMapping urlMapping = new DefaultUrlMapping(parentContext.getUrlMapping());
+		RequestContext context = new RequestContext();
+
+		urlMapping.setAction(preAction.getActionName());
+		context.setActionResolver(m_actionResolver);
+		context.setParameterProvider(parentContext.getParameterProvider());
+		context.setUrlMapping(urlMapping);
+		context.setModule(parentContext.getModule());
+		context.setInboundAction(preAction);
+		context.setTransition(parentContext.getModule().findTransition(preAction.getTransitionName()));
+		context.setError(parentContext.getModule().findError(preAction.getErrorActionName()));
+		return context;
+	}
+
 	private <T> T getBeanOrCreate(Class<T> type) {
 		try {
 			return m_applicationContext.getBean(type);
@@ -434,7 +450,8 @@ final class SpringMvcRuntime {
 		if (inboundAction.getPreActionNames() != null) {
 			for (String actionName : inboundAction.getPreActionNames()) {
 				InboundActionModel action = module.getInbounds().get(actionName);
-				ActionContext<?> ctx = createActionContext(request, response, requestContext, action);
+				RequestContext preActionContext = createPreActionRequestContext(requestContext, action);
+				ActionContext<?> ctx = createActionContext(request, response, preActionContext, action);
 
 				ctx.setParent(actionContext);
 

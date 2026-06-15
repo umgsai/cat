@@ -26,7 +26,6 @@ import com.dianping.cat.system.page.config.Action;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
 import com.dianping.cat.system.page.config.Model;
 import com.dianping.cat.system.page.config.Payload;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class HeartbeatConfigProcessor extends BaseProcesser {
 
@@ -37,8 +36,6 @@ public class HeartbeatConfigProcessor extends BaseProcesser {
 	private ConfigHtmlParser m_configHtmlParser;
 
 	public void process(Action action, Payload payload, Model model) {
-		refreshSpringBeans();
-
 		switch (action) {
 		case HEARTBEAT_RULE_CONFIG_LIST:
 			generateRuleItemList(m_heartbeatRuleConfigManager, model);
@@ -68,27 +65,6 @@ public class HeartbeatConfigProcessor extends BaseProcesser {
 			break;
 		default:
 			throw new RuntimeException("Error action name " + action.getName());
-		}
-	}
-
-	@Override
-	protected void refreshSpringBeans() {
-		super.refreshSpringBeans();
-
-		HeartbeatRuleConfigManager heartbeatRuleConfigManager = CatSpringContext
-		      .getBeanIfAvailable(HeartbeatRuleConfigManager.class);
-		HeartbeatDisplayPolicyManager displayPolicyManager = CatSpringContext
-		      .getBeanIfAvailable(HeartbeatDisplayPolicyManager.class);
-		ConfigHtmlParser configHtmlParser = CatSpringContext.getBeanIfAvailable(ConfigHtmlParser.class);
-
-		if (heartbeatRuleConfigManager != null) {
-			m_heartbeatRuleConfigManager = heartbeatRuleConfigManager;
-		}
-		if (displayPolicyManager != null) {
-			m_displayPolicyManager = displayPolicyManager;
-		}
-		if (configHtmlParser != null) {
-			m_configHtmlParser = configHtmlParser;
 		}
 	}
 

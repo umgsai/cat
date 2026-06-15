@@ -36,9 +36,6 @@ public class BaseProcesser {
 
 	protected RuleFTLDecorator m_ruleDecorator;
 
-	protected void refreshSpringBeans() {
-	}
-
 	public void setRuleDecorator(RuleFTLDecorator ruleDecorator) {
 		m_ruleDecorator = ruleDecorator;
 	}

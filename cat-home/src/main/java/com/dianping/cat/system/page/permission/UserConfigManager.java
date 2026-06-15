@@ -30,7 +30,6 @@ import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.home.user.entity.User;
 import com.dianping.cat.home.user.entity.UserConfig;
 import com.dianping.cat.home.user.transform.DefaultSaxParser;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -78,8 +77,6 @@ public class UserConfigManager {
 	}
 
 	public void initialize() {
-		refreshSpringBeans();
-
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 			String content = config.getContent();
@@ -130,8 +127,6 @@ public class UserConfigManager {
 	}
 
 	private void refreshConfig() throws Exception {
-		refreshSpringBeans();
-
 		Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 		long modifyTime = config.getModifyDate().getTime();
 
@@ -172,8 +167,6 @@ public class UserConfigManager {
 
 	private boolean storeConfig() {
 		synchronized (this) {
-			refreshSpringBeans();
-
 			try {
 				Config config = m_configDao.createLocal();
 
@@ -190,20 +183,6 @@ public class UserConfigManager {
 			}
 		}
 		return true;
-	}
-
-	private void refreshSpringBeans() {
-		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
-		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
-
-		if (configDao != null) {
-			m_configDao = configDao;
-			LOGGER.info("UserConfigManager refreshed Spring ConfigRepository dependency.");
-		}
-		if (fetcher != null) {
-			m_fetcher = fetcher;
-			LOGGER.info("UserConfigManager refreshed Spring ContentFetcher dependency.");
-		}
 	}
 
 }

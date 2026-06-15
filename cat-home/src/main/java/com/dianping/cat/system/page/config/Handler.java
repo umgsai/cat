@@ -43,7 +43,6 @@ import com.dianping.cat.system.page.config.processor.GlobalConfigProcessor;
 import com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor;
 import com.dianping.cat.system.page.config.processor.StorageConfigProcessor;
 import com.dianping.cat.system.page.config.processor.TransactionConfigProcessor;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private JspViewer m_jspViewer;
@@ -78,7 +77,6 @@ public class Handler implements PageHandler<Context> {
 	@PreInboundActionMeta("login")
 	@OutboundActionMeta(name = "config")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 
@@ -168,7 +166,6 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	public void store(String userName, String accountName, Payload payload) {
-		refreshSpringBeans();
 		ConfigModification modification = m_configModificationDao.createLocal();
 
 		modification.setUserName(userName);
@@ -181,56 +178,6 @@ public class Handler implements PageHandler<Context> {
 			m_configModificationDao.insert(modification);
 		} catch (Exception ex) {
 			Cat.logError(ex);
-		}
-	}
-
-	private void refreshSpringBeans() {
-		AlertConfigProcessor alertConfigProcessor = CatSpringContext.getBeanIfAvailable(AlertConfigProcessor.class);
-		ConfigModificationRepository configModificationDao = CatSpringContext
-								.getBeanIfAvailable(ConfigModificationRepository.class);
-		DependencyConfigProcessor topologyConfigProcessor = CatSpringContext
-		      .getBeanIfAvailable(DependencyConfigProcessor.class);
-		EventConfigProcessor eventConfigProcessor = CatSpringContext.getBeanIfAvailable(EventConfigProcessor.class);
-		ExceptionConfigProcessor exceptionConfigProcessor = CatSpringContext
-		      .getBeanIfAvailable(ExceptionConfigProcessor.class);
-		GlobalConfigProcessor globalConfigProcessor = CatSpringContext.getBeanIfAvailable(GlobalConfigProcessor.class);
-		HeartbeatConfigProcessor heartbeatConfigProcessor = CatSpringContext
-		      .getBeanIfAvailable(HeartbeatConfigProcessor.class);
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		StorageConfigProcessor storageConfigProcessor = CatSpringContext
-		      .getBeanIfAvailable(StorageConfigProcessor.class);
-		TransactionConfigProcessor transactionConfigProcessor = CatSpringContext
-		      .getBeanIfAvailable(TransactionConfigProcessor.class);
-
-		if (alertConfigProcessor != null) {
-			m_alertConfigProcessor = alertConfigProcessor;
-		}
-		if (configModificationDao != null) {
-			m_configModificationDao = configModificationDao;
-		}
-		if (topologyConfigProcessor != null) {
-			m_topologyConfigProcessor = topologyConfigProcessor;
-		}
-		if (eventConfigProcessor != null) {
-			m_eventConfigProcessor = eventConfigProcessor;
-		}
-		if (exceptionConfigProcessor != null) {
-			m_exceptionConfigProcessor = exceptionConfigProcessor;
-		}
-		if (globalConfigProcessor != null) {
-			m_globalConfigProcessor = globalConfigProcessor;
-		}
-		if (heartbeatConfigProcessor != null) {
-			m_heartbeatConfigProcessor = heartbeatConfigProcessor;
-		}
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (storageConfigProcessor != null) {
-			m_storageConfigProcessor = storageConfigProcessor;
-		}
-		if (transactionConfigProcessor != null) {
-			m_transactionConfigProcessor = transactionConfigProcessor;
 		}
 	}
 

@@ -25,26 +25,12 @@ import com.dianping.cat.report.alert.event.EventRuleConfigManager;
 import com.dianping.cat.system.page.config.Action;
 import com.dianping.cat.system.page.config.Model;
 import com.dianping.cat.system.page.config.Payload;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class EventConfigProcessor extends BaseProcesser {
 
 	private EventRuleConfigManager m_configManager;
 
-	@Override
-	protected void refreshSpringBeans() {
-		super.refreshSpringBeans();
-
-		EventRuleConfigManager configManager = CatSpringContext.getBeanIfAvailable(EventRuleConfigManager.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-	}
-
 	public void process(Action action, Payload payload, Model model) {
-		refreshSpringBeans();
-
 		switch (action) {
 		case EVENT_RULE:
 			Map<String, Rule> ruleMap = m_configManager.getMonitorRules().getRules();

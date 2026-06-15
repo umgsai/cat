@@ -25,26 +25,12 @@ import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
 import com.dianping.cat.system.page.config.Action;
 import com.dianping.cat.system.page.config.Model;
 import com.dianping.cat.system.page.config.Payload;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class TransactionConfigProcessor extends BaseProcesser {
 
 	private TransactionRuleConfigManager m_configManager;
 
-	@Override
-	protected void refreshSpringBeans() {
-		super.refreshSpringBeans();
-
-		TransactionRuleConfigManager configManager = CatSpringContext.getBeanIfAvailable(TransactionRuleConfigManager.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-	}
-
 	public void process(Action action, Payload payload, Model model) {
-		refreshSpringBeans();
-
 		switch (action) {
 		case TRANSACTION_RULE:
 			Map<String, Rule> ruleMap = m_configManager.getMonitorRules().getRules();

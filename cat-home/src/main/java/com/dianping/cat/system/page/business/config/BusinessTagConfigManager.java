@@ -37,7 +37,6 @@ import com.dianping.cat.home.business.entity.BusinessItem;
 import com.dianping.cat.home.business.entity.BusinessTagConfig;
 import com.dianping.cat.home.business.entity.Tag;
 import com.dianping.cat.home.business.transform.DefaultSaxParser;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class BusinessTagConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessTagConfigManager.class);
@@ -110,8 +109,6 @@ public class BusinessTagConfigManager {
 			return;
 		}
 
-		refreshSpringBeans();
-
 		try {
 			List<BusinessConfig> result = m_configDao.findByName(TAG_CONFIG, BusinessConfigEntity.READSET_FULL);
 
@@ -160,14 +157,13 @@ public class BusinessTagConfigManager {
 
 	private boolean storeConfig() {
 		synchronized (this) {
-			refreshSpringBeans();
-
 			try {
 				BusinessConfig config = m_configDao.createLocal();
 
 				config.setId(m_configId);
 				config.setKeyId(m_configId);
 				config.setName(TAG_CONFIG);
+				config.setDomain(Constants.CAT);
 				config.setContent(m_tagConfig.toString());
 				config.setUpdatetime(new Date());
 				m_configDao.updateByPK(config, BusinessConfigEntity.UPDATESET_FULL);
@@ -180,15 +176,6 @@ public class BusinessTagConfigManager {
 			}
 		}
 		return true;
-	}
-
-	private void refreshSpringBeans() {
-		BusinessConfigRepository configDao = CatSpringContext.getBeanIfAvailable(BusinessConfigRepository.class);
-
-		if (configDao != null) {
-			m_configDao = configDao;
-			LOGGER.info("BusinessTagConfigManager refreshed Spring BusinessConfigRepository dependency.");
-		}
 	}
 
 }
