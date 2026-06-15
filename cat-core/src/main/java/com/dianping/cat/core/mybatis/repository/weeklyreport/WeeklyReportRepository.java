@@ -28,7 +28,6 @@ import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.mybatis.generated.weeklyreport.dao.WeeklyreportMapper;
 import com.dianping.cat.core.mybatis.generated.weeklyreport.dao.data.WeeklyreportDO;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class WeeklyReportRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WeeklyReportRepository.class);
@@ -39,6 +38,10 @@ public class WeeklyReportRepository {
 
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 	private DataSourceManager m_dataSourceManager;
+
+	private SqlSessionTemplate m_sqlSessionTemplate;
+
+	private TransactionTemplate m_transactionTemplate;
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;
 
@@ -214,7 +217,7 @@ public class WeeklyReportRepository {
 	}
 
 	private WeeklyreportMapper springMapper() {
-		SqlSessionTemplate sqlSessionTemplate = CatSpringContext.getBean(SqlSessionTemplate.class);
+		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
 
 		if (sqlSessionTemplate == null) {
 			return null;
@@ -228,7 +231,15 @@ public class WeeklyReportRepository {
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		return CatSpringContext.getBean(TransactionTemplate.class);
+		return m_transactionTemplate;
+	}
+
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		m_sqlSessionTemplate = sqlSessionTemplate;
+	}
+
+	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+		m_transactionTemplate = transactionTemplate;
 	}
 
 	private WeeklyReport requireFound(WeeklyreportDO record, String field, String value) throws DalNotFoundException {

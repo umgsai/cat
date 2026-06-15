@@ -31,7 +31,6 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.report.server.RemoteServersManager;
-import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSupport
 						implements ModelService<T> {
@@ -70,14 +69,11 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 			return;
 		}
 
-		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-		RemoteServersManager serverManager = CatSpringContext.getBeanIfAvailable(RemoteServersManager.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
+		if (m_configManager == null) {
+			throw new IllegalStateException("ServerConfigManager is required for " + getClass().getSimpleName() + ".");
 		}
-		if (serverManager != null) {
-			m_serverManager = serverManager;
+		if (m_serverManager == null) {
+			throw new IllegalStateException("RemoteServersManager is required for " + getClass().getSimpleName() + ".");
 		}
 		m_allServices.clear();
 

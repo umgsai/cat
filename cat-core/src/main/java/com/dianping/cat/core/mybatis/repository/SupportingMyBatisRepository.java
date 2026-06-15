@@ -3,7 +3,6 @@ package com.dianping.cat.core.mybatis.repository;
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.Connection;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.sql.DataSource;
 
@@ -14,12 +13,7 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
-import org.mybatis.spring.SqlSessionTemplate;
-import org.slf4j.Logger;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.unidal.dal.jdbc.datasource.DataSourceManager;
-
-import com.dianping.cat.spring.CatSpringContext;
 
 public final class SupportingMyBatisRepository {
 	private static final String DATA_SOURCE_NAME = "cat";
@@ -35,24 +29,6 @@ public final class SupportingMyBatisRepository {
 		configuration.addMapper(mapperClass);
 		loadMapperXml(configuration, mapperResource);
 		return new SqlSessionFactoryBuilder().build(configuration);
-	}
-
-	public static <T> T springMapper(Class<T> mapperClass, Logger logger, AtomicBoolean logged, String message) {
-		SqlSessionTemplate sqlSessionTemplate = CatSpringContext.getBean(SqlSessionTemplate.class);
-
-		if (sqlSessionTemplate == null) {
-			return null;
-		}
-
-		if (logged.compareAndSet(false, true)) {
-			logger.info(message);
-		}
-
-		return sqlSessionTemplate.getMapper(mapperClass);
-	}
-
-	public static TransactionTemplate springTransactionTemplate() {
-		return CatSpringContext.getBean(TransactionTemplate.class);
 	}
 
 	private static void loadMapperXml(Configuration configuration, String mapperResource) {

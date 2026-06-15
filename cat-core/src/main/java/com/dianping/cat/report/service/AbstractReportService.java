@@ -53,7 +53,6 @@ import com.dianping.cat.core.dal.WeeklyReportEntity;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
-import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class AbstractReportService<T> implements ReportService<T> {
 
@@ -119,7 +118,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 
 	@Override
 	public boolean insertDailyReport(DailyReport report, byte[] content) {
-		refreshSpringRepositories();
+		ensureReportRepositories();
 		try {
 			m_dailyReportDao.insert(report);
 
@@ -138,7 +137,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 
 	@Override
 	public boolean insertHourlyReport(HourlyReport report, byte[] content) {
-		refreshSpringRepositories();
+		ensureReportRepositories();
 		try {
 			m_hourlyReportDao.insert(report);
 
@@ -158,7 +157,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 
 	@Override
 	public boolean insertMonthlyReport(MonthlyReport report, byte[] content) {
-		refreshSpringRepositories();
+		ensureReportRepositories();
 		try {
 			MonthlyReport monthReport = m_monthlyReportDao
 									.findReportByDomainNamePeriod(report.getPeriod(),	report.getDomain(), report.getName(),
@@ -196,7 +195,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 
 	@Override
 	public boolean insertWeeklyReport(WeeklyReport report, byte[] content) {
-		refreshSpringRepositories();
+		ensureReportRepositories();
 		try {
 			WeeklyReport weeklyReport = m_weeklyReportDao
 									.findReportByDomainNamePeriod(report.getPeriod(),	report.getDomain(), report.getName(),
@@ -234,7 +233,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	public abstract T makeReport(String domain, Date start, Date end);
 
 	public Set<String> queryAllDomainNames(Date start, Date end, String name) {
-		refreshSpringRepositories();
+		ensureReportRepositories();
 		Set<String> domains = new HashSet<String>();
 		long startTime = start.getTime();
 		long endTime = end.getTime();
@@ -279,7 +278,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	public abstract T queryMonthlyReport(String domain, Date start);
 
 	public T queryReport(String domain, Date start, Date end) {
-		refreshSpringRepositories();
+		ensureReportRepositories();
 		int type = computeQueryType(start, end);
 		T report = null;
 
@@ -303,43 +302,12 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	@Override
 	public abstract T queryWeeklyReport(String domain, Date start);
 
-	protected void refreshSpringRepositories() {
-		HourlyReportRepository hourlyReportRepository = CatSpringContext.getBeanIfAvailable(HourlyReportRepository.class);
-		HourlyReportContentRepository hourlyReportContentRepository = CatSpringContext
-								.getBeanIfAvailable(HourlyReportContentRepository.class);
-		DailyReportRepository dailyReportRepository = CatSpringContext.getBeanIfAvailable(DailyReportRepository.class);
-		DailyReportContentRepository dailyReportContentRepository = CatSpringContext
-								.getBeanIfAvailable(DailyReportContentRepository.class);
-		WeeklyReportRepository weeklyReportRepository = CatSpringContext.getBeanIfAvailable(WeeklyReportRepository.class);
-		WeeklyReportContentRepository weeklyReportContentRepository = CatSpringContext
-								.getBeanIfAvailable(WeeklyReportContentRepository.class);
-		MonthlyReportRepository monthlyReportRepository = CatSpringContext.getBeanIfAvailable(MonthlyReportRepository.class);
-		MonthlyReportContentRepository monthlyReportContentRepository = CatSpringContext
-								.getBeanIfAvailable(MonthlyReportContentRepository.class);
-
-		if (hourlyReportRepository != null) {
-			m_hourlyReportDao = hourlyReportRepository;
-		}
-		if (hourlyReportContentRepository != null) {
-			m_hourlyReportContentDao = hourlyReportContentRepository;
-		}
-		if (dailyReportRepository != null) {
-			m_dailyReportDao = dailyReportRepository;
-		}
-		if (dailyReportContentRepository != null) {
-			m_dailyReportContentDao = dailyReportContentRepository;
-		}
-		if (weeklyReportRepository != null) {
-			m_weeklyReportDao = weeklyReportRepository;
-		}
-		if (weeklyReportContentRepository != null) {
-			m_weeklyReportContentDao = weeklyReportContentRepository;
-		}
-		if (monthlyReportRepository != null) {
-			m_monthlyReportDao = monthlyReportRepository;
-		}
-		if (monthlyReportContentRepository != null) {
-			m_monthlyReportContentDao = monthlyReportContentRepository;
+	protected void ensureReportRepositories() {
+		if (m_hourlyReportDao == null || m_hourlyReportContentDao == null || m_dailyReportDao == null
+								|| m_dailyReportContentDao == null || m_weeklyReportDao == null
+								|| m_weeklyReportContentDao == null || m_monthlyReportDao == null
+								|| m_monthlyReportContentDao == null) {
+			throw new IllegalStateException("Report repositories are required for " + getClass().getSimpleName() + ".");
 		}
 	}
 

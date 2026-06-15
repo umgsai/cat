@@ -30,7 +30,6 @@ import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.report.daily.dao.DailyReportMapper;
 import com.dianping.cat.core.report.daily.dao.data.DailyReportDO;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class DailyReportRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DailyReportRepository.class);
@@ -42,6 +41,10 @@ public class DailyReportRepository {
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 
 	private DataSourceManager m_dataSourceManager;
+
+	private SqlSessionTemplate m_sqlSessionTemplate;
+
+	private TransactionTemplate m_transactionTemplate;
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;
 
@@ -234,7 +237,7 @@ public class DailyReportRepository {
 	}
 
 	private DailyReportMapper springMapper() {
-		SqlSessionTemplate sqlSessionTemplate = CatSpringContext.getBean(SqlSessionTemplate.class);
+		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
 
 		if (sqlSessionTemplate == null) {
 			return null;
@@ -248,7 +251,15 @@ public class DailyReportRepository {
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		return CatSpringContext.getBean(TransactionTemplate.class);
+		return m_transactionTemplate;
+	}
+
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		m_sqlSessionTemplate = sqlSessionTemplate;
+	}
+
+	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+		m_transactionTemplate = transactionTemplate;
 	}
 
 	private DailyReport requireFound(DailyReportDO report, String field, String value) throws DalNotFoundException {

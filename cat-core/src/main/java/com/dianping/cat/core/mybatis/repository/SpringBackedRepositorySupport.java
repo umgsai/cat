@@ -49,15 +49,11 @@ public abstract class SpringBackedRepositorySupport<T> {
 			}
 			return sqlSessionTemplate.getMapper(m_mapperClass);
 		}
-		return SupportingMyBatisRepository.springMapper(m_mapperClass, logger, m_springMapperLogged,
-				m_springMapperMessage);
+		return null;
 	}
 
 	protected TransactionTemplate springTransactionTemplate() {
-		if (m_transactionTemplate != null) {
-			return m_transactionTemplate;
-		}
-		return SupportingMyBatisRepository.springTransactionTemplate();
+		return m_transactionTemplate;
 	}
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {

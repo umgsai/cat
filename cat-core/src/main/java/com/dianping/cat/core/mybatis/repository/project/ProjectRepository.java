@@ -30,7 +30,6 @@ import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.core.mybatis.generated.project.dao.ProjectMapper;
 import com.dianping.cat.core.mybatis.generated.project.dao.data.ProjectDO;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class ProjectRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectRepository.class);
@@ -240,10 +239,6 @@ public class ProjectRepository {
 		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
 
 		if (sqlSessionTemplate == null) {
-			sqlSessionTemplate = CatSpringContext.getBean(SqlSessionTemplate.class);
-		}
-
-		if (sqlSessionTemplate == null) {
 			return null;
 		}
 
@@ -255,11 +250,7 @@ public class ProjectRepository {
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		if (m_transactionTemplate != null) {
-			return m_transactionTemplate;
-		}
-
-		return CatSpringContext.getBean(TransactionTemplate.class);
+		return m_transactionTemplate;
 	}
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {

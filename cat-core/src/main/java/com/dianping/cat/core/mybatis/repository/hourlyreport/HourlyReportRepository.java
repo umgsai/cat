@@ -30,7 +30,6 @@ import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.mybatis.generated.hourlyreport.dao.HourlyreportMapper;
 import com.dianping.cat.core.mybatis.generated.hourlyreport.dao.data.HourlyreportDO;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class HourlyReportRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HourlyReportRepository.class);
@@ -41,6 +40,10 @@ public class HourlyReportRepository {
 
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 	private DataSourceManager m_dataSourceManager;
+
+	private SqlSessionTemplate m_sqlSessionTemplate;
+
+	private TransactionTemplate m_transactionTemplate;
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;
 
@@ -212,7 +215,7 @@ public class HourlyReportRepository {
 	}
 
 	private HourlyreportMapper springMapper() {
-		SqlSessionTemplate sqlSessionTemplate = CatSpringContext.getBean(SqlSessionTemplate.class);
+		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
 
 		if (sqlSessionTemplate == null) {
 			return null;
@@ -226,7 +229,15 @@ public class HourlyReportRepository {
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		return CatSpringContext.getBean(TransactionTemplate.class);
+		return m_transactionTemplate;
+	}
+
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		m_sqlSessionTemplate = sqlSessionTemplate;
+	}
+
+	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+		m_transactionTemplate = transactionTemplate;
 	}
 
 	private HourlyReport requireFound(HourlyreportDO record, String field, String value) throws DalNotFoundException {

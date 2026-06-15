@@ -588,7 +588,7 @@ org.eclipse.jdt.core.compiler.compliance=21
 		<mybatis.version>3.5.19</mybatis.version>
 		<mybatis-spring.version>4.0.0</mybatis-spring.version>
 		<lombok.version>1.18.46</lombok.version>
-		<spring-boot.version>4.0.2</spring-boot.version>
+		<spring-boot.version>4.1.0</spring-boot.version>
 		<spring-framework.version>7.0.3</spring-framework.version>
 		<tomcat9.version>9.0.112</tomcat9.version>
 		<deploy.autoRelease>false</deploy.autoRelease>

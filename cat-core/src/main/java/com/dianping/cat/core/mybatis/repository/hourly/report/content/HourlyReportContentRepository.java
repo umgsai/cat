@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -27,6 +28,10 @@ public class HourlyReportContentRepository {
 
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 	private DataSourceManager m_dataSourceManager;
+
+	private SqlSessionTemplate m_sqlSessionTemplate;
+
+	private TransactionTemplate m_transactionTemplate;
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;
 
@@ -152,12 +157,25 @@ public class HourlyReportContentRepository {
 	}
 
 	private HourlyReportContentMapper springMapper() {
-		return SupportingMyBatisRepository.springMapper(HourlyReportContentMapper.class, LOGGER, SPRING_MAPPER_LOGGED,
-				"HourlyReportContentRepository is using Spring managed HourlyReportContentMapper.");
+		if (m_sqlSessionTemplate == null) {
+			return null;
+		}
+		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
+			LOGGER.info("HourlyReportContentRepository is using Spring managed HourlyReportContentMapper.");
+		}
+		return m_sqlSessionTemplate.getMapper(HourlyReportContentMapper.class);
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		return SupportingMyBatisRepository.springTransactionTemplate();
+		return m_transactionTemplate;
+	}
+
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		m_sqlSessionTemplate = sqlSessionTemplate;
+	}
+
+	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+		m_transactionTemplate = transactionTemplate;
 	}
 
 	private HourlyReportContent requireFound(HourlyReportContentDO record, String field, String value)

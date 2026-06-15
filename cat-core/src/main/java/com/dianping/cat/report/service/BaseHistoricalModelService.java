@@ -21,7 +21,6 @@ package com.dianping.cat.report.service;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
-import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalSupport
 						implements ModelService<T> {
@@ -56,10 +55,8 @@ public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalS
 			return;
 		}
 
-		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
+		if (m_configManager == null) {
+			throw new IllegalStateException("ServerConfigManager is required for " + getClass().getSimpleName() + ".");
 		}
 		m_localMode = m_configManager.isLocalMode();
 		m_initialized = true;

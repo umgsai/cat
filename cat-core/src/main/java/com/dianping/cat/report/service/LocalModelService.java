@@ -31,7 +31,6 @@ import com.dianping.cat.analysis.MessageAnalyzer;
 import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.mvc.ApiPayload;
-import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class LocalModelService<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LocalModelService.class);
@@ -119,14 +118,11 @@ public abstract class LocalModelService<T> {
 			return;
 		}
 
-		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-		MessageConsumer consumer = CatSpringContext.getBeanIfAvailable(MessageConsumer.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
+		if (m_configManager == null) {
+			throw new IllegalStateException("ServerConfigManager is required for " + getClass().getSimpleName() + ".");
 		}
-		if (consumer != null) {
-			m_consumer = consumer;
+		if (m_consumer == null) {
+			throw new IllegalStateException("MessageConsumer is required for " + getClass().getSimpleName() + ".");
 		}
 		m_defaultDomain = m_configManager.getConsoleDefaultDomain();
 		m_analyzerCount = m_configManager.getThreadsOfRealtimeAnalyzer(m_name);

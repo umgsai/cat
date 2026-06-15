@@ -1336,8 +1336,11 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public PayloadNormalizer payloadNormalizer() {
-		return new PayloadNormalizer();
+	public PayloadNormalizer payloadNormalizer(ServerConfigManager serverConfigManager) {
+		PayloadNormalizer normalizer = new PayloadNormalizer();
+
+		normalizer.setManager(serverConfigManager);
+		return normalizer;
 	}
 
 	@Bean
@@ -2732,66 +2735,90 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public DailyReportRepository dailyReportRepository(DataSourceManager dataSourceManager) {
+	public DailyReportRepository dailyReportRepository(DataSourceManager dataSourceManager,
+			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
 		DailyReportRepository repository = new DailyReportRepository();
 
 		repository.setDataSourceManager(dataSourceManager);
+		repository.setSqlSessionTemplate(sqlSessionTemplate);
+		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public DailyReportContentRepository dailyReportContentRepository(DataSourceManager dataSourceManager) {
+	public DailyReportContentRepository dailyReportContentRepository(DataSourceManager dataSourceManager,
+			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
 		DailyReportContentRepository repository = new DailyReportContentRepository();
 
 		repository.setDataSourceManager(dataSourceManager);
+		repository.setSqlSessionTemplate(sqlSessionTemplate);
+		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public HourlyReportRepository hourlyReportRepository(DataSourceManager dataSourceManager) {
+	public HourlyReportRepository hourlyReportRepository(DataSourceManager dataSourceManager,
+			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
 		HourlyReportRepository repository = new HourlyReportRepository();
 
 		repository.setDataSourceManager(dataSourceManager);
+		repository.setSqlSessionTemplate(sqlSessionTemplate);
+		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public HourlyReportContentRepository hourlyReportContentRepository(DataSourceManager dataSourceManager) {
+	public HourlyReportContentRepository hourlyReportContentRepository(DataSourceManager dataSourceManager,
+			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
 		HourlyReportContentRepository repository = new HourlyReportContentRepository();
 
 		repository.setDataSourceManager(dataSourceManager);
+		repository.setSqlSessionTemplate(sqlSessionTemplate);
+		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public WeeklyReportRepository weeklyReportRepository(DataSourceManager dataSourceManager) {
+	public WeeklyReportRepository weeklyReportRepository(DataSourceManager dataSourceManager,
+			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
 		WeeklyReportRepository repository = new WeeklyReportRepository();
 
 		repository.setDataSourceManager(dataSourceManager);
+		repository.setSqlSessionTemplate(sqlSessionTemplate);
+		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public WeeklyReportContentRepository weeklyReportContentRepository(DataSourceManager dataSourceManager) {
+	public WeeklyReportContentRepository weeklyReportContentRepository(DataSourceManager dataSourceManager,
+			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
 		WeeklyReportContentRepository repository = new WeeklyReportContentRepository();
 
 		repository.setDataSourceManager(dataSourceManager);
+		repository.setSqlSessionTemplate(sqlSessionTemplate);
+		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public MonthlyReportRepository monthlyReportRepository(DataSourceManager dataSourceManager) {
+	public MonthlyReportRepository monthlyReportRepository(DataSourceManager dataSourceManager,
+			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
 		MonthlyReportRepository repository = new MonthlyReportRepository();
 
 		repository.setDataSourceManager(dataSourceManager);
+		repository.setSqlSessionTemplate(sqlSessionTemplate);
+		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public MonthlyReportContentRepository monthlyReportContentRepository(DataSourceManager dataSourceManager) {
+	public MonthlyReportContentRepository monthlyReportContentRepository(DataSourceManager dataSourceManager,
+			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
 		MonthlyReportContentRepository repository = new MonthlyReportContentRepository();
 
 		repository.setDataSourceManager(dataSourceManager);
+		repository.setSqlSessionTemplate(sqlSessionTemplate);
+		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
@@ -2826,8 +2853,12 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public TaskRepository taskRepository() {
-		return new TaskRepository();
+	public TaskRepository taskRepository(SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
+		TaskRepository repository = new TaskRepository();
+
+		repository.setSqlSessionTemplate(sqlSessionTemplate);
+		repository.setTransactionTemplate(transactionTemplate);
+		return repository;
 	}
 
 	@Bean
@@ -3024,8 +3055,17 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public ProblemReportService problemReportService() {
-		return new ProblemReportService();
+	public ProblemReportService problemReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		ProblemReportService service = new ProblemReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
 	}
 
 	@Bean(initMethod = "initialize")
@@ -4075,8 +4115,17 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public BusinessReportService businessReportService() {
-		return new BusinessReportService();
+	public BusinessReportService businessReportService(HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
+			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
+			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
+			MonthlyReportContentRepository monthlyReportContentRepository) {
+		BusinessReportService service = new BusinessReportService();
+
+		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
+				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
+				monthlyReportContentRepository);
+		return service;
 	}
 
 	@Bean(initMethod = "initialize")

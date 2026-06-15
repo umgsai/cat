@@ -209,16 +209,11 @@ public class BusinessConfigRepository {
 			return m_sqlSessionTemplate.getMapper(BusinessConfigMapper.class);
 		}
 
-		return SupportingMyBatisRepository.springMapper(BusinessConfigMapper.class, LOGGER, SPRING_MAPPER_LOGGED,
-				"BusinessConfigRepository is using Spring managed BusinessConfigMapper.");
+		return null;
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		if (m_transactionTemplate != null) {
-			return m_transactionTemplate;
-		}
-
-		return SupportingMyBatisRepository.springTransactionTemplate();
+		return m_transactionTemplate;
 	}
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {

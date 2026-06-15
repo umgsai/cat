@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -26,6 +27,10 @@ public class TaskRepository {
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 
 	private DataSourceManager m_dataSourceManager;
+
+	private SqlSessionTemplate m_sqlSessionTemplate;
+
+	private TransactionTemplate m_transactionTemplate;
 
 	private volatile SqlSessionFactory m_sqlSessionFactory;
 
@@ -242,12 +247,25 @@ public class TaskRepository {
 	}
 
 	private TaskMapper springMapper() {
-		return SupportingMyBatisRepository.springMapper(TaskMapper.class, LOGGER, SPRING_MAPPER_LOGGED,
-				"TaskRepository is using Spring managed TaskMapper.");
+		if (m_sqlSessionTemplate == null) {
+			return null;
+		}
+		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
+			LOGGER.info("TaskRepository is using Spring managed TaskMapper.");
+		}
+		return m_sqlSessionTemplate.getMapper(TaskMapper.class);
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		return SupportingMyBatisRepository.springTransactionTemplate();
+		return m_transactionTemplate;
+	}
+
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		m_sqlSessionTemplate = sqlSessionTemplate;
+	}
+
+	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+		m_transactionTemplate = transactionTemplate;
 	}
 
 	private Task requireFound(TaskDO record, String field, String value) throws DalNotFoundException {
