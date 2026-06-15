@@ -185,11 +185,52 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private void refreshSpringBeans() {
+		AlertConfigProcessor alertConfigProcessor = CatSpringContext.getBeanIfAvailable(AlertConfigProcessor.class);
 		ConfigModificationRepository configModificationDao = CatSpringContext
 								.getBeanIfAvailable(ConfigModificationRepository.class);
+		DependencyConfigProcessor topologyConfigProcessor = CatSpringContext
+		      .getBeanIfAvailable(DependencyConfigProcessor.class);
+		EventConfigProcessor eventConfigProcessor = CatSpringContext.getBeanIfAvailable(EventConfigProcessor.class);
+		ExceptionConfigProcessor exceptionConfigProcessor = CatSpringContext
+		      .getBeanIfAvailable(ExceptionConfigProcessor.class);
+		GlobalConfigProcessor globalConfigProcessor = CatSpringContext.getBeanIfAvailable(GlobalConfigProcessor.class);
+		HeartbeatConfigProcessor heartbeatConfigProcessor = CatSpringContext
+		      .getBeanIfAvailable(HeartbeatConfigProcessor.class);
+		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
+		StorageConfigProcessor storageConfigProcessor = CatSpringContext
+		      .getBeanIfAvailable(StorageConfigProcessor.class);
+		TransactionConfigProcessor transactionConfigProcessor = CatSpringContext
+		      .getBeanIfAvailable(TransactionConfigProcessor.class);
 
+		if (alertConfigProcessor != null) {
+			m_alertConfigProcessor = alertConfigProcessor;
+		}
 		if (configModificationDao != null) {
 			m_configModificationDao = configModificationDao;
+		}
+		if (topologyConfigProcessor != null) {
+			m_topologyConfigProcessor = topologyConfigProcessor;
+		}
+		if (eventConfigProcessor != null) {
+			m_eventConfigProcessor = eventConfigProcessor;
+		}
+		if (exceptionConfigProcessor != null) {
+			m_exceptionConfigProcessor = exceptionConfigProcessor;
+		}
+		if (globalConfigProcessor != null) {
+			m_globalConfigProcessor = globalConfigProcessor;
+		}
+		if (heartbeatConfigProcessor != null) {
+			m_heartbeatConfigProcessor = heartbeatConfigProcessor;
+		}
+		if (jspViewer != null) {
+			m_jspViewer = jspViewer;
+		}
+		if (storageConfigProcessor != null) {
+			m_storageConfigProcessor = storageConfigProcessor;
+		}
+		if (transactionConfigProcessor != null) {
+			m_transactionConfigProcessor = transactionConfigProcessor;
 		}
 	}
 
@@ -214,6 +255,46 @@ public class Handler implements PageHandler<Context> {
 				Cat.logError("store cookie fail:" + cookieValue, new RuntimeException());
 			}
 		}
+	}
+
+	public void setAlertConfigProcessor(AlertConfigProcessor alertConfigProcessor) {
+		m_alertConfigProcessor = alertConfigProcessor;
+	}
+
+	public void setConfigModificationDao(ConfigModificationRepository configModificationDao) {
+		m_configModificationDao = configModificationDao;
+	}
+
+	public void setEventConfigProcessor(EventConfigProcessor eventConfigProcessor) {
+		m_eventConfigProcessor = eventConfigProcessor;
+	}
+
+	public void setExceptionConfigProcessor(ExceptionConfigProcessor exceptionConfigProcessor) {
+		m_exceptionConfigProcessor = exceptionConfigProcessor;
+	}
+
+	public void setGlobalConfigProcessor(GlobalConfigProcessor globalConfigProcessor) {
+		m_globalConfigProcessor = globalConfigProcessor;
+	}
+
+	public void setHeartbeatConfigProcessor(HeartbeatConfigProcessor heartbeatConfigProcessor) {
+		m_heartbeatConfigProcessor = heartbeatConfigProcessor;
+	}
+
+	public void setJspViewer(JspViewer jspViewer) {
+		m_jspViewer = jspViewer;
+	}
+
+	public void setStorageConfigProcessor(StorageConfigProcessor storageConfigProcessor) {
+		m_storageConfigProcessor = storageConfigProcessor;
+	}
+
+	public void setTopologyConfigProcessor(DependencyConfigProcessor topologyConfigProcessor) {
+		m_topologyConfigProcessor = topologyConfigProcessor;
+	}
+
+	public void setTransactionConfigProcessor(TransactionConfigProcessor transactionConfigProcessor) {
+		m_transactionConfigProcessor = transactionConfigProcessor;
 	}
 
 }

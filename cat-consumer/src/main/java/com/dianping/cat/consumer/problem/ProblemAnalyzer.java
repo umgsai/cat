@@ -86,7 +86,7 @@ public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> {
 			m_handlers = Collections.emptyList();
 			LOGGER.warn("Unable to load problem handlers from Spring, keep empty handler list.");
 		} else {
-			// to work around a performance issue within plexus
+			// Copy the container-provided list before it is read on the hot path.
 			m_handlers = new ArrayList<ProblemHandler>(m_handlers);
 		}
 		m_initialized = true;
