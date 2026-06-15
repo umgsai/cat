@@ -1,12 +1,12 @@
 package com.dianping.cat.mvc;
 
-import static org.unidal.lookup.util.StringUtils.isEmpty;
-import static org.unidal.lookup.util.StringUtils.isNotEmpty;
-
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
-import org.unidal.lookup.util.ReflectUtils;
 import org.unidal.web.lifecycle.ActionResolver;
 import org.unidal.web.lifecycle.DefaultActionResolver;
 import org.unidal.web.lifecycle.UrlMapping;
@@ -280,7 +279,7 @@ final class SpringMvcRuntime {
 
 	private ActionContext<?> createActionContext(HttpServletRequest request, HttpServletResponse response,
 	      RequestContext requestContext, InboundActionModel inboundAction) {
-		ActionContext<?> context = ReflectUtils.createInstance(inboundAction.getContextClass());
+		ActionContext<?> context = (ActionContext<?>) createInstance(inboundAction.getContextClass());
 
 		context.initialize(request, response);
 		context.setRequestContext(requestContext);
@@ -295,7 +294,7 @@ final class SpringMvcRuntime {
 			return m_applicationContext.getBean(type);
 		} catch (NoSuchBeanDefinitionException e) {
 			LOGGER.warn("No Spring bean found for {}, creating a plain instance.", type.getName());
-			return ReflectUtils.createInstance(type);
+			return type.cast(createInstance(type));
 		}
 	}
 
@@ -332,7 +331,7 @@ final class SpringMvcRuntime {
 		if (error != null) {
 			try {
 				actionContext.setException(e);
-				ReflectUtils.invokeMethod(error.getMethod(), error.getModuleInstance(), actionContext);
+				invokeMethod(error.getMethod(), error.getModuleInstance(), actionContext);
 				actionContext.setException(null);
 			} catch (RuntimeException re) {
 				Cat.logError(re);
@@ -408,7 +407,7 @@ final class SpringMvcRuntime {
 		InboundActionModel inboundAction = actionContext.getRequestContext().getInboundAction();
 
 		try {
-			ReflectUtils.invokeMethod(inboundAction.getActionMethod(), inboundAction.getModuleInstance(), actionContext);
+			invokeMethod(inboundAction.getActionMethod(), inboundAction.getModuleInstance(), actionContext);
 		} catch (RuntimeException e) {
 			throw new ActionException("Error occured during handling inbound action(" + inboundAction.getActionName()
 			      + ")!", e);
@@ -424,7 +423,7 @@ final class SpringMvcRuntime {
 		}
 
 		try {
-			ReflectUtils.invokeMethod(outboundAction.getMethod(), outboundAction.getModuleInstance(), actionContext);
+			invokeMethod(outboundAction.getMethod(), outboundAction.getModuleInstance(), actionContext);
 		} catch (RuntimeException e) {
 			throw new ActionException("Error occured during handling outbound action(" + outboundActionName + ")", e);
 		}
@@ -503,7 +502,7 @@ final class SpringMvcRuntime {
 		TransitionModel transition = actionContext.getRequestContext().getTransition();
 
 		try {
-			ReflectUtils.invokeMethod(transition.getMethod(), transition.getModuleInstance(), actionContext);
+			invokeMethod(transition.getMethod(), transition.getModuleInstance(), actionContext);
 		} catch (RuntimeException e) {
 			throw new ActionException("Error occured during handling transition(" + transition.getTransitionName() + ")", e);
 		}
@@ -514,7 +513,7 @@ final class SpringMvcRuntime {
 		Class<?> payloadClass = inboundAction.getPayloadClass();
 
 		if (payloadClass != null && ctx.getPayload() == null) {
-			ActionPayload payload = ReflectUtils.createInstance(payloadClass);
+			ActionPayload payload = (ActionPayload) createInstance(payloadClass);
 			PayloadProvider provider = getPayloadProvider(payloadClass);
 
 			payload.setPage(ctx.getRequestContext().getAction());
@@ -531,6 +530,54 @@ final class SpringMvcRuntime {
 			} catch (Exception e) {
 				throw new RuntimeException("Error occured during validating " + validatorClass.getName(), e);
 			}
+		}
+	}
+
+	private Object createInstance(Class<?> type) {
+		try {
+			Constructor<?> constructor = type.getDeclaredConstructor();
+
+			constructor.setAccessible(true);
+			return constructor.newInstance();
+		} catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+
+			if (cause instanceof RuntimeException) {
+				throw (RuntimeException) cause;
+			} else if (cause instanceof Error) {
+				throw (Error) cause;
+			}
+			throw new RuntimeException("Unable to create instance: " + type.getName(), cause);
+		} catch (ReflectiveOperationException e) {
+			throw new RuntimeException("Unable to create instance: " + type.getName(), e);
+		}
+	}
+
+	private static boolean isEmpty(String value) {
+		return value == null || value.length() == 0;
+	}
+
+	private static boolean isNotEmpty(String value) {
+		return !isEmpty(value);
+	}
+
+	private Object invokeMethod(Method method, Object instance, Object... args) {
+		try {
+			method.setAccessible(true);
+			return method.invoke(instance, args);
+		} catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+
+			if (cause instanceof RuntimeException) {
+				throw (RuntimeException) cause;
+			} else if (cause instanceof Error) {
+				throw (Error) cause;
+			}
+			throw new RuntimeException("Error occured during invoking method: " + method + " with parameters("
+			      + Arrays.toString(args) + ")", cause);
+		} catch (ReflectiveOperationException e) {
+			throw new RuntimeException("Error occured during invoking method: " + method + " with parameters("
+			      + Arrays.toString(args) + ")", e);
 		}
 	}
 
