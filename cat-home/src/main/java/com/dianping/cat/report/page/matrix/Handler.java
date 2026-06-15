@@ -35,7 +35,6 @@ import com.dianping.cat.report.page.matrix.service.MatrixReportService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 
@@ -73,8 +72,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = MatrixAnalyzer.ID)
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 
@@ -112,27 +109,6 @@ public class Handler implements PageHandler<Context> {
 		matrixReport.setEndTime(end);
 		model.setReport(matrixReport);
 		model.setMatrix(new DisplayMatrix(matrixReport).setSortBy(payload.getSortBy()));
-	}
-
-	@SuppressWarnings("unchecked")
-	private void refreshSpringBeans() {
-		MatrixReportService reportService = CatSpringContext.getBeanIfAvailable(MatrixReportService.class);
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
-		ModelService<MatrixReport> service = CatSpringContext.getBeanIfAvailable("matrixModelService", ModelService.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (normalizer != null) {
-			m_normalizePayload = normalizer;
-		}
-		if (service != null) {
-			m_service = service;
-		}
 	}
 
 	public void setJspViewer(JspViewer jspViewer) {

@@ -42,7 +42,6 @@ import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
-import com.dianping.cat.spring.CatSpringContext;
 
 @SuppressWarnings("rawtypes")
 public class Handler implements PageHandler<Context> {
@@ -117,28 +116,14 @@ public class Handler implements PageHandler<Context> {
 	public synchronized void initialize() {
 		if (!m_initialized) {
 			if (m_localServices == null || m_localServices.isEmpty()) {
-				initializeFromSpring();
+				m_localServices = new HashMap<String, LocalModelService>();
+				LOGGER.warn("Model page handler has no local model services configured.");
 			} else {
 				LOGGER.info("Initialized model page handler from Spring injection, localServiceCount={}.",
 				      m_localServices.size());
 			}
 			m_initialized = true;
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private void initializeFromSpring() {
-		Map<String, LocalModelService> springLocalServices = CatSpringContext.getBeanIfAvailable("localModelServices",
-		      Map.class);
-
-		if (springLocalServices != null && !springLocalServices.isEmpty()) {
-			setLocalServices(springLocalServices);
-			LOGGER.info("Initialized model page handler from Spring context bridge, localServiceCount={}.",
-			      m_localServices.size());
-			return;
-		}
-		m_localServices = new HashMap<String, LocalModelService>();
-		LOGGER.warn("Unable to initialize model page handler from Spring context bridge, keep empty local services.");
 	}
 
 	public void setLocalServices(Map<String, LocalModelService> localServices) {

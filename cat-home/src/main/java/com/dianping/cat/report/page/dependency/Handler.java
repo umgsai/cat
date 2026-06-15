@@ -38,7 +38,6 @@ import com.dianping.cat.report.page.dependency.graph.TopologyGraphManager;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import com.dianping.cat.spring.CatSpringContext;
 import org.apache.commons.lang3.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -181,8 +180,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = DependencyAnalyzer.ID)
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		if (validate(ctx)) {
 			Model model = new Model(ctx);
 			Payload payload = ctx.getPayload();
@@ -245,8 +242,6 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private DependencyReport queryDependencyReport(Payload payload) {
-		refreshSpringBeans();
-
 		String domain = payload.getDomain();
 		ModelRequest request = new ModelRequest(domain, payload.getDate());
 
@@ -269,36 +264,6 @@ public class Handler implements PageHandler<Context> {
 		String actionUrl = url.split("\\?")[0];
 
 		return NORMAL_URLS.contains(actionUrl);
-	}
-
-	private void refreshSpringBeans() {
-		ModelService<DependencyReport> dependencyService = CatSpringContext.getBeanIfAvailable(DependencyAnalyzer.ID,
-		      ModelService.class);
-		TopologyGraphManager graphManager = CatSpringContext.getBeanIfAvailable(TopologyGraphManager.class);
-		ExternalInfoBuilder externalInfoBuilder = CatSpringContext.getBeanIfAvailable(ExternalInfoBuilder.class);
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		PayloadNormalizer normalizePayload = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
-		TopoGraphFormatConfigManager formatConfigManager = CatSpringContext
-		      .getBeanIfAvailable(TopoGraphFormatConfigManager.class);
-
-		if (dependencyService != null) {
-			m_dependencyService = dependencyService;
-		}
-		if (graphManager != null) {
-			m_graphManager = graphManager;
-		}
-		if (externalInfoBuilder != null) {
-			m_externalInfoBuilder = externalInfoBuilder;
-		}
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (normalizePayload != null) {
-			m_normalizePayload = normalizePayload;
-		}
-		if (formatConfigManager != null) {
-			m_formatConfigManager = formatConfigManager;
-		}
 	}
 
 	public void setDependencyService(ModelService<DependencyReport> dependencyService) {

@@ -31,7 +31,6 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 import com.dianping.cat.Cat;
 import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.report.page.overload.task.TableCapacityService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
@@ -50,8 +49,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "overload")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
@@ -73,18 +70,6 @@ public class Handler implements PageHandler<Context> {
 
 		if (!ctx.isProcessStopped()) {
 			m_jspViewer.view(ctx, model);
-		}
-	}
-
-	private void refreshSpringBeans() {
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		TableCapacityService tableCapacityService = CatSpringContext.getBeanIfAvailable(TableCapacityService.class);
-
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (tableCapacityService != null) {
-			m_tableCapacityService = tableCapacityService;
 		}
 	}
 

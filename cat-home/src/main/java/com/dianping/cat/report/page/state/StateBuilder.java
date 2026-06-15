@@ -33,7 +33,6 @@ import com.dianping.cat.home.router.entity.DefaultServer;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 
 public class StateBuilder {
@@ -49,8 +48,6 @@ public class StateBuilder {
 	}
 
 	public String buildStateMessage(long date, String ip) {
-		refreshSpringBeans();
-
 		StateReport report = queryHourlyReport(date, ip);
 
 		if (report != null) {
@@ -114,19 +111,6 @@ public class StateBuilder {
 			return response.getModel();
 		} else {
 			throw new RuntimeException("Internal error: no eligable sql service registered for " + request + "!");
-		}
-	}
-
-	private void refreshSpringBeans() {
-		RouterConfigManager routerManager = CatSpringContext.getBeanIfAvailable(RouterConfigManager.class);
-		ModelService<StateReport> stateService = CatSpringContext.getBeanIfAvailable("stateModelService",
-		      ModelService.class);
-
-		if (routerManager != null) {
-			m_routerManager = routerManager;
-		}
-		if (stateService != null) {
-			m_stateService = stateService;
 		}
 	}
 

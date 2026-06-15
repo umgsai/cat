@@ -72,7 +72,6 @@ import com.dianping.cat.report.page.storage.transform.StorageOperationFilter;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
@@ -230,8 +229,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "storage")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		normalize(model, payload);
@@ -453,55 +450,6 @@ public class Handler implements PageHandler<Context> {
 
 				return Integer.parseInt(end) - Integer.parseInt(first);
 			}
-		}
-	}
-
-	private void refreshSpringBeans() {
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		StorageReportService reportService = CatSpringContext.getBeanIfAvailable(StorageReportService.class);
-		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
-		ModelService<StorageReport> service = CatSpringContext.getBeanIfAvailable("storageModelService", ModelService.class);
-		StorageMergeHelper mergeHelper = CatSpringContext.getBeanIfAvailable(StorageMergeHelper.class);
-		StorageGroupConfigManager storageGroupConfigManager = CatSpringContext
-		      .getBeanIfAvailable(StorageGroupConfigManager.class);
-		JsonBuilder jsonBuilder = CatSpringContext.getBeanIfAvailable(JsonBuilder.class);
-		AlterationRepository alterationRepository = CatSpringContext.getBeanIfAvailable(AlterationRepository.class);
-		AlertService alertService = CatSpringContext.getBeanIfAvailable(AlertService.class);
-		StorageAlertInfoBuilder alertInfoBuilder = CatSpringContext.getBeanIfAvailable(StorageAlertInfoBuilder.class);
-		StorageBuilderManager storageBuilderManager = CatSpringContext.getBeanIfAvailable(StorageBuilderManager.class);
-
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (normalizer != null) {
-			m_normalizePayload = normalizer;
-		}
-		if (service != null) {
-			m_service = service;
-		}
-		if (mergeHelper != null) {
-			m_mergeHelper = mergeHelper;
-		}
-		if (storageGroupConfigManager != null) {
-			m_storageGroupConfigManager = storageGroupConfigManager;
-		}
-		if (jsonBuilder != null) {
-			m_jsonBuilder = jsonBuilder;
-		}
-		if (alterationRepository != null) {
-			m_alterationDao = alterationRepository;
-		}
-		if (alertService != null) {
-			m_alertService = alertService;
-		}
-		if (alertInfoBuilder != null) {
-			m_alertInfoBuilder = alertInfoBuilder;
-		}
-		if (storageBuilderManager != null) {
-			m_storageBuilderManager = storageBuilderManager;
 		}
 	}
 

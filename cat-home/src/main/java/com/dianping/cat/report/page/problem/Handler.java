@@ -54,7 +54,6 @@ import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 
@@ -77,8 +76,6 @@ public class Handler implements PageHandler<Context> {
 	private JsonBuilder m_jsonBuilder;
 
 	private void buildDefaultThreshold(Model model, Payload payload) {
-		refreshSpringBeans();
-
 		Map<String, Domain> domains = m_manager.getLongConfigDomains();
 		Domain d = domains.get(payload.getDomain());
 
@@ -184,8 +181,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "p")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		normalize(model, payload);
@@ -390,39 +385,6 @@ public class Handler implements PageHandler<Context> {
 		TYPE,
 		TOTAL_COUNT,
 		DETAIL
-	}
-
-	private void refreshSpringBeans() {
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-		ProblemReportService reportService = CatSpringContext.getBeanIfAvailable(ProblemReportService.class);
-		ModelService<ProblemReport> service = CatSpringContext.getBeanIfAvailable("problemModelService",
-		      ModelService.class);
-		DomainGroupConfigManager configManager = CatSpringContext.getBeanIfAvailable(DomainGroupConfigManager.class);
-		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
-		JsonBuilder jsonBuilder = CatSpringContext.getBeanIfAvailable(JsonBuilder.class);
-
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (manager != null) {
-			m_manager = manager;
-		}
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (service != null) {
-			m_service = service;
-		}
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-		if (normalizer != null) {
-			m_normalizePayload = normalizer;
-		}
-		if (jsonBuilder != null) {
-			m_jsonBuilder = jsonBuilder;
-		}
 	}
 
 	public void setConfigManager(DomainGroupConfigManager configManager) {

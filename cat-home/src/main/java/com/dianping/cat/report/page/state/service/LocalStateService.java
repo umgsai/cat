@@ -32,7 +32,6 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class LocalStateService extends LocalModelService<StateReport> {
 
@@ -108,9 +107,6 @@ public class LocalStateService extends LocalModelService<StateReport> {
 	}
 
 	private ReportBucketManager getBucketManager() {
-		if (m_bucketManager == null) {
-			m_bucketManager = CatSpringContext.getBeanIfAvailable(ReportBucketManager.class);
-		}
 		return m_bucketManager;
 	}
 

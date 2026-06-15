@@ -37,7 +37,6 @@ import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
@@ -49,8 +48,6 @@ public class Handler implements PageHandler<Context> {
 	private ServerConfigManager m_configManager;
 
 	private boolean checkStorageTime(MessageId msg) {
-		refreshSpringBeans();
-
 		long time = msg.getTimestamp();
 		long current = TimeHelper.getCurrentDay().getTime();
 
@@ -109,8 +106,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "m")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 
@@ -150,22 +145,6 @@ public class Handler implements PageHandler<Context> {
 		}
 
 		m_jspViewer.view(ctx, model);
-	}
-
-	private void refreshSpringBeans() {
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-		ModelService<String> service = CatSpringContext.getBeanIfAvailable("logviewModelService", ModelService.class);
-
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-		if (service != null) {
-			m_service = service;
-		}
 	}
 
 	public void setConfigManager(ServerConfigManager configManager) {

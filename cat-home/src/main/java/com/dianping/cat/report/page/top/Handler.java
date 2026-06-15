@@ -61,7 +61,6 @@ import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
@@ -132,7 +131,6 @@ public class Handler implements PageHandler<Context> {
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
 
-		refreshSpringBeans();
 		LOGGER.info("Handling top report outbound, action={}, domain={}, ip={}, date={}, minute={}, minuteCounts={}.",
 				action, payload.getDomain(), payload.getIpAddress(), payload.getDate(), payload.getMinute(),
 				payload.getMinuteCounts());
@@ -311,56 +309,6 @@ public class Handler implements PageHandler<Context> {
 			return report;
 		} else {
 			throw new RuntimeException("Internal error: no eligible problem service registered for " + request + "!");
-		}
-	}
-
-	private void refreshSpringBeans() {
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
-		ExternalInfoBuilder externalInfoBuilder = CatSpringContext.getBeanIfAvailable(ExternalInfoBuilder.class);
-		StateBuilder stateBuilder = CatSpringContext.getBeanIfAvailable(StateBuilder.class);
-		ModelService<TopReport> topService = CatSpringContext.getBeanIfAvailable("topModelService", ModelService.class);
-		ModelService<TransactionReport> transactionService = CatSpringContext.getBeanIfAvailable("transactionModelService",
-		      ModelService.class);
-		ModelService<ProblemReport> problemService = CatSpringContext.getBeanIfAvailable("problemModelService",
-		      ModelService.class);
-		TopReportService topReportService = CatSpringContext.getBeanIfAvailable(TopReportService.class);
-		TransactionMergeHelper mergeHelper = CatSpringContext.getBeanIfAvailable(TransactionMergeHelper.class);
-		ExceptionRuleConfigManager configManager = CatSpringContext.getBeanIfAvailable(ExceptionRuleConfigManager.class);
-		JsonBuilder builder = CatSpringContext.getBeanIfAvailable(JsonBuilder.class);
-
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (normalizer != null) {
-			m_normalizePayload = normalizer;
-		}
-		if (externalInfoBuilder != null) {
-			m_externalInfoBuilder = externalInfoBuilder;
-		}
-		if (stateBuilder != null) {
-			m_stateBuilder = stateBuilder;
-		}
-		if (topService != null) {
-			m_topService = topService;
-		}
-		if (transactionService != null) {
-			m_transactionService = transactionService;
-		}
-		if (problemService != null) {
-			m_problemService = problemService;
-		}
-		if (topReportService != null) {
-			m_topReportService = topReportService;
-		}
-		if (mergeHelper != null) {
-			m_mergeHelper = mergeHelper;
-		}
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-		if (builder != null) {
-			m_builder = builder;
 		}
 	}
 

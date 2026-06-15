@@ -40,7 +40,6 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.HostinfoService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private JspViewer m_jspViewer;
@@ -88,8 +87,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = CrossAnalyzer.ID)
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 
@@ -212,31 +209,6 @@ public class Handler implements PageHandler<Context> {
 			if (payload.getAction() == Action.HISTORY_METHOD) {
 				payload.setAction("history");
 			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private void refreshSpringBeans() {
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		CrossReportService reportService = CatSpringContext.getBeanIfAvailable(CrossReportService.class);
-		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
-		HostinfoService hostinfoService = CatSpringContext.getBeanIfAvailable(HostinfoService.class);
-		ModelService<CrossReport> service = CatSpringContext.getBeanIfAvailable("crossModelService", ModelService.class);
-
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (normalizer != null) {
-			m_normalizePayload = normalizer;
-		}
-		if (hostinfoService != null) {
-			m_hostinfoService = hostinfoService;
-		}
-		if (service != null) {
-			m_service = service;
 		}
 	}
 

@@ -36,7 +36,6 @@ import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.page.business.graph.BusinessGraphCreator;
 import com.dianping.cat.service.ProjectService;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
 public class Handler implements PageHandler<Context> {
@@ -62,8 +61,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "business")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
@@ -93,30 +90,6 @@ public class Handler implements PageHandler<Context> {
 		}
 		if (!ctx.isProcessStopped()) {
 			m_jspViewer.view(ctx, model);
-		}
-	}
-
-	private void refreshSpringBeans() {
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
-		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
-		BusinessGraphCreator graphCreator = CatSpringContext.getBeanIfAvailable(BusinessGraphCreator.class);
-		BusinessTagConfigManager tagConfigManager = CatSpringContext.getBeanIfAvailable(BusinessTagConfigManager.class);
-
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (normalizer != null) {
-			m_normalizePayload = normalizer;
-		}
-		if (projectService != null) {
-			m_projectService = projectService;
-		}
-		if (graphCreator != null) {
-			m_graphCreator = graphCreator;
-		}
-		if (tagConfigManager != null) {
-			m_tagConfigManager = tagConfigManager;
 		}
 	}
 

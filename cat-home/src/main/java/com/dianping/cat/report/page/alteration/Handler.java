@@ -48,7 +48,6 @@ import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
 import com.dianping.cat.home.dal.report.AlterationEntity;
 import com.dianping.cat.report.ReportPage;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
@@ -127,7 +126,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "alteration")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
@@ -279,14 +277,6 @@ public class Handler implements PageHandler<Context> {
 			model.setInsertResult("{\"status\":500}");
 		} else if (status == 2) {
 			model.setInsertResult("{\"status\":500, \"errorMessage\":\"lack args\"}");
-		}
-	}
-
-	private void refreshSpringBeans() {
-		AlterationRepository alterationDao = CatSpringContext.getBeanIfAvailable(AlterationRepository.class);
-
-		if (alterationDao != null) {
-			m_alterationDao = alterationDao;
 		}
 	}
 

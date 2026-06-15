@@ -30,7 +30,6 @@ import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class CachedBusinessReportService {
 
@@ -49,8 +48,6 @@ public class CachedBusinessReportService {
 	private ModelService<BusinessReport> m_service;
 
 	public BusinessReport queryBusinessReport(String domain, Date start) {
-		refreshSpringBeans();
-
 		long time = start.getTime();
 		ModelPeriod period = ModelPeriod.getByTime(time);
 
@@ -85,18 +82,6 @@ public class CachedBusinessReportService {
 			m_businessReports.put(key, result);
 		}
 		return result;
-	}
-
-	private void refreshSpringBeans() {
-		BusinessReportService reportService = CatSpringContext.getBeanIfAvailable(BusinessReportService.class);
-		ModelService<BusinessReport> service = CatSpringContext.getBeanIfAvailable("businessModelService", ModelService.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (service != null) {
-			m_service = service;
-		}
 	}
 
 	public void setModelService(ModelService<BusinessReport> service) {

@@ -45,7 +45,6 @@ import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
@@ -65,8 +64,6 @@ public class Handler implements PageHandler<Context> {
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
 	private void buildDisplayInfo(Model model, Payload payload, StateReport report) {
-		refreshSpringBeans();
-
 		report = ensureReport(report, payload);
 		StateDisplay display = new StateDisplay(payload.getIpAddress(), m_serverFilterConfigManager.getUnusedDomains());
 
@@ -124,8 +121,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = StateAnalyzer.ID)
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
@@ -173,39 +168,6 @@ public class Handler implements PageHandler<Context> {
 			payload.setIpAddress(Constants.ALL);
 		}
 		m_normalizePayload.normalize(model, payload);
-	}
-
-	private void refreshSpringBeans() {
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		StateReportService reportService = CatSpringContext.getBeanIfAvailable(StateReportService.class);
-		StateGraphBuilder stateGraphs = CatSpringContext.getBeanIfAvailable(StateGraphBuilder.class);
-		StateBuilder stateBuilder = CatSpringContext.getBeanIfAvailable(StateBuilder.class);
-		ModelService<StateReport> service = CatSpringContext.getBeanIfAvailable("stateModelService", ModelService.class);
-		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
-		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
-		      .getBeanIfAvailable(ServerFilterConfigManager.class);
-
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (stateGraphs != null) {
-			m_stateGraphs = stateGraphs;
-		}
-		if (stateBuilder != null) {
-			m_stateBuilder = stateBuilder;
-		}
-		if (service != null) {
-			m_service = service;
-		}
-		if (normalizer != null) {
-			m_normalizePayload = normalizer;
-		}
-		if (serverFilterConfigManager != null) {
-			m_serverFilterConfigManager = serverFilterConfigManager;
-		}
 	}
 
 	public void setJspViewer(JspViewer jspViewer) {

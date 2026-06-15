@@ -25,7 +25,6 @@ import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.BaseHistoricalModelService;
 import com.dianping.cat.report.service.ModelRequest;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class HistoricalBusinessService extends BaseHistoricalModelService<BusinessReport> {
 
@@ -45,17 +44,7 @@ public class HistoricalBusinessService extends BaseHistoricalModelService<Busine
 	}
 
 	private BusinessReport getReportFromDatabase(long date, String domain) {
-		refreshSpringBeans();
-
 		return m_reportService.queryReport(domain, new Date(date), new Date(date + TimeHelper.ONE_HOUR));
-	}
-
-	private void refreshSpringBeans() {
-		BusinessReportService reportService = CatSpringContext.getBeanIfAvailable(BusinessReportService.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
 	}
 
 	public void setReportService(BusinessReportService reportService) {

@@ -38,7 +38,6 @@ import com.dianping.cat.home.storage.alert.entity.Storage;
 import com.dianping.cat.home.storage.alert.entity.StorageAlertInfo;
 import com.dianping.cat.home.storage.alert.entity.Target;
 import com.dianping.cat.report.page.storage.StorageConstants;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class StorageAlertInfoBuilder {
 
@@ -52,8 +51,6 @@ public class StorageAlertInfoBuilder {
 
 	public Map<String, StorageAlertInfo> buildStorageAlertInfos(Date start, Date end, int minuteCounts, String type,
 							List<Alert> alerts) {
-		refreshSpringBeans();
-
 		Map<String, StorageAlertInfo> results = prepareBlankAlert(start.getTime(), end.getTime(), minuteCounts, type);
 
 		for (Alert alert : alerts) {
@@ -126,14 +123,6 @@ public class StorageAlertInfoBuilder {
 			return "错误率";
 		} else {
 			return target;
-		}
-	}
-
-	private void refreshSpringBeans() {
-		AlertService alertService = CatSpringContext.getBeanIfAvailable(AlertService.class);
-
-		if (alertService != null) {
-			m_alertService = alertService;
 		}
 	}
 

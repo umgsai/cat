@@ -33,7 +33,6 @@ import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.graph.PieChart;
 import com.dianping.cat.report.graph.PieChart.Item;
 import com.dianping.cat.report.page.state.service.StateReportService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class StateGraphBuilder {
 
@@ -42,8 +41,6 @@ public class StateGraphBuilder {
 	private ServerFilterConfigManager m_serverFilterConfigManager;
 
 	public Pair<LineChart, PieChart> buildGraph(Payload payload, String key) {
-		refreshSpringBeans();
-
 		String domain = payload.getDomain();
 		Date start = payload.getHistoryStartDate();
 		Date end = payload.getHistoryEndDate();
@@ -53,8 +50,6 @@ public class StateGraphBuilder {
 	}
 
 	public Pair<LineChart, PieChart> buildGraph(Payload payload, String key, StateReport report) {
-		refreshSpringBeans();
-
 		String domain = payload.getDomain();
 		String ips = payload.getIpAddress();
 
@@ -122,19 +117,6 @@ public class StateGraphBuilder {
 
 		chart.addItems(items);
 		return chart;
-	}
-
-	private void refreshSpringBeans() {
-		StateReportService reportService = CatSpringContext.getBeanIfAvailable(StateReportService.class);
-		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
-		      .getBeanIfAvailable(ServerFilterConfigManager.class);
-
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (serverFilterConfigManager != null) {
-			m_serverFilterConfigManager = serverFilterConfigManager;
-		}
 	}
 
 	public void setReportService(StateReportService reportService) {

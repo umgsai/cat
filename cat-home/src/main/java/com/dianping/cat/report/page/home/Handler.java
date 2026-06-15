@@ -33,7 +33,6 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.analysis.TcpSocketReceiver;
 import com.dianping.cat.report.ReportPage;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private JspViewer m_jspViewer;
@@ -51,8 +50,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "home")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
-
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 
@@ -110,22 +107,6 @@ public class Handler implements PageHandler<Context> {
 		sb.append("</pre>");
 
 		model.setContent(sb.toString());
-	}
-
-	private void refreshSpringBeans() {
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		TcpSocketReceiver receiver = CatSpringContext.getBeanIfAvailable(TcpSocketReceiver.class);
-		MessageConsumer realtimeConsumer = CatSpringContext.getBeanIfAvailable(MessageConsumer.class);
-
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (receiver != null) {
-			m_receiver = receiver;
-		}
-		if (realtimeConsumer != null) {
-			m_realtimeConsumer = realtimeConsumer;
-		}
 	}
 
 	public void setJspViewer(JspViewer jspViewer) {

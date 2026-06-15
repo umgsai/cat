@@ -53,7 +53,6 @@ import com.dianping.cat.report.page.event.transform.PieGraphChartVisitor;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 
@@ -189,7 +188,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "e")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
 		Cat.logMetricForCount("http-request-event");
 
 		Model model = new Model(ctx);
@@ -324,38 +322,6 @@ public class Handler implements PageHandler<Context> {
 
 		if (StringUtils.isEmpty(payload.getType())) {
 			payload.setType(null);
-		}
-	}
-
-	private void refreshSpringBeans() {
-		GraphBuilder builder = CatSpringContext.getBeanIfAvailable(GraphBuilder.class);
-		JspViewer jspViewer = CatSpringContext.getBeanIfAvailable(JspViewer.class);
-		EventReportService reportService = CatSpringContext.getBeanIfAvailable(EventReportService.class);
-		EventMergeHelper mergeHelper = CatSpringContext.getBeanIfAvailable(EventMergeHelper.class);
-		ModelService<EventReport> service = CatSpringContext.getBeanIfAvailable("eventModelService", ModelService.class);
-		PayloadNormalizer normalizer = CatSpringContext.getBeanIfAvailable(PayloadNormalizer.class);
-		DomainGroupConfigManager configManager = CatSpringContext.getBeanIfAvailable(DomainGroupConfigManager.class);
-
-		if (builder != null) {
-			m_builder = builder;
-		}
-		if (jspViewer != null) {
-			m_jspViewer = jspViewer;
-		}
-		if (reportService != null) {
-			m_reportService = reportService;
-		}
-		if (mergeHelper != null) {
-			m_mergeHelper = mergeHelper;
-		}
-		if (service != null) {
-			m_service = service;
-		}
-		if (normalizer != null) {
-			m_normalizePayload = normalizer;
-		}
-		if (configManager != null) {
-			m_configManager = configManager;
 		}
 	}
 

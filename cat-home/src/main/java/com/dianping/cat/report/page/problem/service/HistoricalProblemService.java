@@ -25,7 +25,6 @@ import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.BaseHistoricalModelService;
 import com.dianping.cat.report.service.ModelRequest;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class HistoricalProblemService extends BaseHistoricalModelService<ProblemReport> {
 
@@ -53,9 +52,6 @@ public class HistoricalProblemService extends BaseHistoricalModelService<Problem
 	}
 
 	private ProblemReportService getReportService() {
-		if (m_reportService == null) {
-			m_reportService = CatSpringContext.getBeanIfAvailable(ProblemReportService.class);
-		}
 		return m_reportService;
 	}
 

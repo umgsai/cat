@@ -50,7 +50,6 @@ import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
 import com.dianping.cat.report.ReportPage;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
@@ -102,7 +101,6 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "alert")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		refreshSpringBeans();
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
@@ -209,18 +207,6 @@ public class Handler implements PageHandler<Context> {
 		case 5:
 			model.setAlertResult("{\"status\":500}");
 			break;
-		}
-	}
-
-	private void refreshSpringBeans() {
-		AlertRepository alertDao = CatSpringContext.getBeanIfAvailable(AlertRepository.class);
-		SenderManager senderManager = CatSpringContext.getBeanIfAvailable(SenderManager.class);
-
-		if (alertDao != null) {
-			m_alertDao = alertDao;
-		}
-		if (senderManager != null) {
-			m_senderManager = senderManager;
 		}
 	}
 
