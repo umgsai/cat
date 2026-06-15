@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
-import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class AbstractSender implements Sender {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractSender.class);
@@ -146,20 +145,9 @@ public abstract class AbstractSender implements Sender {
     }
 
     public com.dianping.cat.alarm.sender.entity.Sender querySender() {
-        refreshSpringBeans();
-
         String id = getId();
 
         return m_senderConfigManager.querySender(id);
-    }
-
-    private void refreshSpringBeans() {
-        SenderConfigManager senderConfigManager = CatSpringContext.getBeanIfAvailable(SenderConfigManager.class);
-
-        if (senderConfigManager != null) {
-            m_senderConfigManager = senderConfigManager;
-            LOGGER.info("Alert sender refreshed Spring SenderConfigManager dependency, senderId={}.", getId());
-        }
     }
 
     private void recordSendLog(String urlPrefix, String paras) {

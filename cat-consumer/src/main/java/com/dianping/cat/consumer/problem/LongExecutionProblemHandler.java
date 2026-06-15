@@ -32,7 +32,6 @@ import com.dianping.cat.consumer.problem.model.entity.Machine;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class LongExecutionProblemHandler extends ProblemHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LongExecutionProblemHandler.class);
@@ -105,8 +104,6 @@ public class LongExecutionProblemHandler extends ProblemHandler {
 		if (m_initialized) {
 			return;
 		}
-		refreshSpringBeans();
-
 		if (m_configManager == null) {
 			LOGGER.warn("Server config manager is not configured for long execution problem handler.");
 			m_initialized = true;
@@ -227,14 +224,6 @@ public class LongExecutionProblemHandler extends ProblemHandler {
 			if (message instanceof Transaction) {
 				processTransaction(machine, (Transaction) message, tree);
 			}
-		}
-	}
-
-	private void refreshSpringBeans() {
-		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
 		}
 	}
 

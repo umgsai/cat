@@ -22,7 +22,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
-import com.dianping.cat.spring.CatSpringContext;
 import org.unidal.dal.jdbc.DalException;
 
 import java.util.Calendar;
@@ -47,7 +46,7 @@ public class TaskManager {
 	private TaskRepository m_taskDao;
 
 	public boolean createTask(Date period, String domain, String name, TaskCreationPolicy prolicy) {
-		refreshSpringBeans();
+		ensureTaskDao();
 		try {
 			if (prolicy.shouldCreateHourlyTask()) {
 				insertToDatabase(period, domain, name, REPORT_HOUR);
@@ -86,7 +85,7 @@ public class TaskManager {
 	}
 
 	protected void insertToDatabase(Date period, String domain, String name, int reportType) throws DalException {
-		refreshSpringBeans();
+		ensureTaskDao();
 		Task task = m_taskDao.createLocal();
 
 		task.setCreationDate(new Date());
@@ -99,11 +98,9 @@ public class TaskManager {
 		m_taskDao.insert(task);
 	}
 
-	private void refreshSpringBeans() {
-		TaskRepository taskDao = CatSpringContext.getBeanIfAvailable(TaskRepository.class);
-
-		if (taskDao != null) {
-			m_taskDao = taskDao;
+	private void ensureTaskDao() {
+		if (m_taskDao == null) {
+			throw new IllegalStateException("TaskRepository is required for TaskManager.");
 		}
 	}
 

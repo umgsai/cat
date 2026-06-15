@@ -38,7 +38,6 @@ import com.dianping.cat.configuration.business.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.BusinessConfig;
 import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
 import com.dianping.cat.core.config.BusinessConfigEntity;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -128,19 +127,14 @@ public class BusinessConfigManager {
 			return;
 		}
 
-		ServerConfigManager serverConfigManager = m_serverConfigManager;
-
-		if (serverConfigManager == null) {
-			serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-		}
-		if (serverConfigManager == null) {
+		if (m_serverConfigManager == null) {
 			throw new IllegalStateException("ServerConfigManager is required for BusinessConfigManager.");
 		}
 		if (m_configDao == null) {
 			throw new IllegalStateException("BusinessConfigRepository is required for BusinessConfigManager.");
 		}
 
-		m_alertMachine = serverConfigManager.isAlertMachine();
+		m_alertMachine = m_serverConfigManager.isAlertMachine();
 		LOGGER.info("Initializing business config manager, alertMachine={}.", m_alertMachine);
 
 		loadData();

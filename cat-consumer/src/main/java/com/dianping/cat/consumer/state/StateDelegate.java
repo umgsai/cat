@@ -25,7 +25,6 @@ import com.dianping.cat.consumer.state.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.state.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.ReportDelegate;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
@@ -59,8 +58,6 @@ public class StateDelegate implements ReportDelegate<StateReport> {
 
 	@Override
 	public boolean createHourlyTask(StateReport report) {
-		refreshSpringBeans();
-
 		Date startTime = report.getStartTime();
 		String domain = report.getDomain();
 
@@ -120,18 +117,6 @@ public class StateDelegate implements ReportDelegate<StateReport> {
 	@Override
 	public StateReport parseXml(String xml) throws Exception {
 		return DefaultSaxParser.parse(xml);
-	}
-
-	private void refreshSpringBeans() {
-		TaskManager taskManager = CatSpringContext.getBeanIfAvailable(TaskManager.class);
-		ReportBucketManager bucketManager = CatSpringContext.getBeanIfAvailable(ReportBucketManager.class);
-
-		if (taskManager != null) {
-			m_taskManager = taskManager;
-		}
-		if (bucketManager != null) {
-			m_bucketManager = bucketManager;
-		}
 	}
 
 	public void setTaskManager(TaskManager taskManager) {

@@ -39,7 +39,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class DefaultReportBucketManager implements ReportBucketManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultReportBucketManager.class);
@@ -58,7 +57,6 @@ public class DefaultReportBucketManager implements ReportBucketManager {
 	@Override
 	public void clearOldReports() {
 		initialize();
-		refreshSpringBeans();
 
 		Transaction t = Cat.newTransaction("System", "DeleteReport");
 		try {
@@ -118,7 +116,12 @@ public class DefaultReportBucketManager implements ReportBucketManager {
 
 	public synchronized void initialize() {
 		if (!m_initialized) {
-			refreshSpringBeans();
+			if (m_configManager == null) {
+				throw new IllegalStateException("ServerConfigManager is required for report bucket manager.");
+			}
+			if (m_bucketFactory == null) {
+				throw new IllegalStateException("ReportBucketFactory is required for report bucket manager.");
+			}
 			m_reportBaseDir = new File(Cat.getCatHome(), "bucket/report");
 			LOGGER.info("Initialized report bucket manager, baseDir={}, springBucketFactoryConfigured={}.",
 			      m_reportBaseDir.getAbsolutePath(), m_bucketFactory != null);
@@ -189,14 +192,6 @@ public class DefaultReportBucketManager implements ReportBucketManager {
 				} catch (Exception e) {
 				}
 			}
-		}
-	}
-
-	private void refreshSpringBeans() {
-		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
 		}
 	}
 

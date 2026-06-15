@@ -21,7 +21,6 @@ package com.dianping.cat.consumer.problem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -34,7 +33,6 @@ import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProblemAnalyzer.class);
@@ -80,11 +78,9 @@ public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> {
 		if (m_initialized) {
 			return;
 		}
-		refreshSpringHandlers();
-
 		if (m_handlers == null) {
 			m_handlers = Collections.emptyList();
-			LOGGER.warn("Unable to load problem handlers from Spring, keep empty handler list.");
+			LOGGER.warn("Problem analyzer has no configured handlers, keep empty handler list.");
 		} else {
 			// Copy the container-provided list before it is read on the hot path.
 			m_handlers = new ArrayList<ProblemHandler>(m_handlers);
@@ -108,15 +104,6 @@ public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> {
 
 		for (ProblemHandler handler : m_handlers) {
 			handler.handle(machine, tree);
-		}
-	}
-
-	private void refreshSpringHandlers() {
-		Map<String, ProblemHandler> handlers = CatSpringContext.getBeansIfAvailable(ProblemHandler.class);
-
-		if (!handlers.isEmpty()) {
-			m_handlers = new ArrayList<ProblemHandler>(handlers.values());
-			LOGGER.info("Loaded problem handlers from Spring, count={}.", m_handlers.size());
 		}
 	}
 

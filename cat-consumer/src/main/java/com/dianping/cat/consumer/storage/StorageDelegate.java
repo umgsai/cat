@@ -24,7 +24,6 @@ import com.dianping.cat.consumer.storage.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.consumer.storage.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.storage.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 import org.slf4j.Logger;
@@ -48,8 +47,6 @@ public class StorageDelegate implements ReportDelegate<StorageReport> {
 
 	@Override
 	public void beforeSave(Map<String, StorageReport> reports) {
-		refreshSpringBeans();
-
 		for (StorageReport report : reports.values()) {
 
 			m_reportUpdater.updateStorageIds(report.getId(), reports.keySet(), report);
@@ -68,8 +65,6 @@ public class StorageDelegate implements ReportDelegate<StorageReport> {
 
 	@Override
 	public boolean createHourlyTask(StorageReport report) {
-		refreshSpringBeans();
-
 		String id = report.getId();
 
 		if (m_configManager.validateDomain(id)) {
@@ -120,22 +115,6 @@ public class StorageDelegate implements ReportDelegate<StorageReport> {
 	@Override
 	public StorageReport parseXml(String xml) throws Exception {
 		return DefaultSaxParser.parse(xml);
-	}
-
-	private void refreshSpringBeans() {
-		TaskManager taskManager = CatSpringContext.getBeanIfAvailable(TaskManager.class);
-		ServerFilterConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
-		StorageReportUpdater reportUpdater = CatSpringContext.getBeanIfAvailable(StorageReportUpdater.class);
-
-		if (taskManager != null) {
-			m_taskManager = taskManager;
-		}
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-		if (reportUpdater != null) {
-			m_reportUpdater = reportUpdater;
-		}
 	}
 
 	public void setTaskManager(TaskManager taskManager) {

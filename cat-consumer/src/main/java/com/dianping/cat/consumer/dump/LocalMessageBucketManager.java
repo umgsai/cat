@@ -57,7 +57,6 @@ import com.dianping.cat.message.storage.MessageBucketFactory;
 import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.statistic.ServerStatisticManager;
-import com.dianping.cat.spring.CatSpringContext;
 
 import io.netty.buffer.ByteBuf;
 
@@ -154,7 +153,18 @@ public class LocalMessageBucketManager implements MessageBucketManager {
 		if (m_initialized) {
 			return;
 		}
-		refreshSpringBeans();
+		if (m_configManager == null) {
+			throw new IllegalStateException("ServerConfigManager is required for local message bucket manager.");
+		}
+		if (m_serverStateManager == null) {
+			throw new IllegalStateException("ServerStatisticManager is required for local message bucket manager.");
+		}
+		if (m_pathBuilder == null) {
+			throw new IllegalStateException("PathBuilder is required for local message bucket manager.");
+		}
+		if (m_bucketFactory == null) {
+			throw new IllegalStateException("MessageBucketFactory is required for local message bucket manager.");
+		}
 
 		if (!m_configManager.isUseNewStorage()) {
 			m_baseDir = new File(m_configManager.getHdfsLocalBaseDir(ServerConfigManager.DUMP_DIR));
@@ -312,26 +322,6 @@ public class LocalMessageBucketManager implements MessageBucketManager {
 
 	public void setServerStateManager(ServerStatisticManager serverStateManager) {
 		m_serverStateManager = serverStateManager;
-	}
-
-	private void refreshSpringBeans() {
-		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-		ServerStatisticManager serverStateManager = CatSpringContext.getBeanIfAvailable(ServerStatisticManager.class);
-		PathBuilder pathBuilder = CatSpringContext.getBeanIfAvailable(PathBuilder.class);
-		MessageBucketFactory bucketFactory = CatSpringContext.getBeanIfAvailable(MessageBucketFactory.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-		if (serverStateManager != null) {
-			m_serverStateManager = serverStateManager;
-		}
-		if (pathBuilder != null) {
-			m_pathBuilder = pathBuilder;
-		}
-		if (bucketFactory != null) {
-			m_bucketFactory = bucketFactory;
-		}
 	}
 
 	private boolean shouldUpload(String path) {

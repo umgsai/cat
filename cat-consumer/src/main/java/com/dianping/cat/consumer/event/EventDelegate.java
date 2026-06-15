@@ -29,7 +29,6 @@ import com.dianping.cat.consumer.event.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.consumer.event.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.event.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
@@ -70,8 +69,6 @@ public class EventDelegate implements ReportDelegate<EventReport> {
 
 	@Override
 	public String buildXml(EventReport report) {
-		refreshSpringBeans();
-
 		report.accept(m_computer);
 
 		new EventReportCountFilter(m_serverConfigManager.getMaxTypeThreshold(),
@@ -82,8 +79,6 @@ public class EventDelegate implements ReportDelegate<EventReport> {
 	}
 
 	public EventReport createAggregatedReport(Map<String, EventReport> reports) {
-		refreshSpringBeans();
-
 		if (reports.size() > 0) {
 			EventReport first = reports.values().iterator().next();
 			EventReport all = makeReport(Constants.ALL, first.getStartTime().getTime(), Constants.HOUR);
@@ -110,8 +105,6 @@ public class EventDelegate implements ReportDelegate<EventReport> {
 
 	@Override
 	public boolean createHourlyTask(EventReport report) {
-		refreshSpringBeans();
-
 		String domain = report.getDomain();
 
 		if (domain.equals(Constants.ALL) || m_configManager.validateDomain(domain)) {
@@ -152,31 +145,6 @@ public class EventDelegate implements ReportDelegate<EventReport> {
 	@Override
 	public EventReport parseXml(String xml) throws Exception {
 		return DefaultSaxParser.parse(xml);
-	}
-
-	private void refreshSpringBeans() {
-		TaskManager taskManager = CatSpringContext.getBeanIfAvailable(TaskManager.class);
-		ServerFilterConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
-		AllReportConfigManager allManager = CatSpringContext.getBeanIfAvailable(AllReportConfigManager.class);
-		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-		AtomicMessageConfigManager atomicMessageConfigManager = CatSpringContext
-		      .getBeanIfAvailable(AtomicMessageConfigManager.class);
-
-		if (taskManager != null) {
-			m_taskManager = taskManager;
-		}
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-		if (allManager != null) {
-			m_allManager = allManager;
-		}
-		if (serverConfigManager != null) {
-			m_serverConfigManager = serverConfigManager;
-		}
-		if (atomicMessageConfigManager != null) {
-			m_atomicMessageConfigManager = atomicMessageConfigManager;
-		}
 	}
 
 	public void setTaskManager(TaskManager taskManager) {

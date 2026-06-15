@@ -20,7 +20,6 @@ package com.dianping.cat.consumer.storage;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +38,6 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageAnalyzer.class);
@@ -92,6 +90,10 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 		m_updater = updater;
 	}
 
+	public void setStorageBuilders(Map<String, StorageBuilder> storageBuilders) {
+		m_storageBuilders = storageBuilders;
+	}
+
 	private void ensureInitialized() {
 		if (!m_initialized) {
 			initialize();
@@ -102,11 +104,9 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 		if (m_initialized) {
 			return;
 		}
-		refreshSpringBuilders();
-
 		if (m_storageBuilders == null) {
 			m_storageBuilders = Collections.emptyMap();
-			LOGGER.warn("Unable to load storage analyzer builders from Spring, keep empty builder map.");
+			LOGGER.warn("Storage analyzer has no configured builders, keep empty builder map.");
 		}
 		m_initialized = true;
 	}
@@ -150,20 +150,6 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 					}
 				}
 			}
-		}
-	}
-
-	private void refreshSpringBuilders() {
-		Map<String, StorageBuilder> springBuilders = CatSpringContext.getBeansIfAvailable(StorageBuilder.class);
-
-		if (!springBuilders.isEmpty()) {
-			Map<String, StorageBuilder> builders = new LinkedHashMap<String, StorageBuilder>();
-
-			for (StorageBuilder builder : springBuilders.values()) {
-				builders.put(builder.getType(), builder);
-			}
-			m_storageBuilders = builders;
-			LOGGER.info("Loaded storage analyzer builders from Spring, types={}.", m_storageBuilders.keySet());
 		}
 	}
 

@@ -19,14 +19,11 @@
 package com.dianping.cat.consumer.storage.builder;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.dianping.cat.spring.CatSpringContext;
 
 public class StorageBuilderManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageBuilderManager.class);
@@ -63,27 +60,11 @@ public class StorageBuilderManager {
 		if (m_initialized) {
 			return;
 		}
-		refreshSpringBuilders();
-
 		if (m_storageBuilders == null) {
 			m_storageBuilders = Collections.emptyMap();
-			LOGGER.warn("Unable to load storage builders from Spring, keep empty builder map.");
+			LOGGER.warn("Storage builder manager has no configured builders, keep empty builder map.");
 		}
 		m_initialized = true;
-	}
-
-	private void refreshSpringBuilders() {
-		Map<String, StorageBuilder> springBuilders = CatSpringContext.getBeansIfAvailable(StorageBuilder.class);
-
-		if (!springBuilders.isEmpty()) {
-			Map<String, StorageBuilder> builders = new LinkedHashMap<String, StorageBuilder>();
-
-			for (StorageBuilder builder : springBuilders.values()) {
-				builders.put(builder.getType(), builder);
-			}
-			m_storageBuilders = builders;
-			LOGGER.info("Loaded storage builders from Spring, types={}.", m_storageBuilders.keySet());
-		}
 	}
 
 	public void setStorageBuilders(Map<String, StorageBuilder> storageBuilders) {

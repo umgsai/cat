@@ -23,14 +23,12 @@ import org.unidal.dal.jdbc.DalException;
 import com.dianping.cat.alarm.UserDefineRule;
 import com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleRepository;
 import com.dianping.cat.alarm.UserDefineRuleEntity;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class UserDefinedRuleManager {
 
 	private UserDefineRuleRepository m_dao;
 
 	public String addUserDefineText(String userDefinedText) throws DalException {
-		refreshSpringBeans();
 		UserDefineRule item = m_dao.findMaxId(UserDefineRuleEntity.READSET_MAXID);
 		int id = 1;
 		if (item != null) {
@@ -46,7 +44,6 @@ public class UserDefinedRuleManager {
 	}
 
 	public String getUserDefineText(String idStr) throws DalException {
-		refreshSpringBeans();
 		int id = Integer.parseInt(idStr);
 
 		UserDefineRule item = m_dao.findByPK(id, UserDefineRuleEntity.READSET_FULL);
@@ -54,19 +51,10 @@ public class UserDefinedRuleManager {
 	}
 
 	public void removeById(String id) throws DalException {
-		refreshSpringBeans();
 		UserDefineRule item = m_dao.createLocal();
 
 		item.setId(Integer.parseInt(id));
 		m_dao.deleteByPK(item);
-	}
-
-	private void refreshSpringBeans() {
-		UserDefineRuleRepository dao = CatSpringContext.getBeanIfAvailable(UserDefineRuleRepository.class);
-
-		if (dao != null) {
-			m_dao = dao;
-		}
 	}
 
 	public void setDao(UserDefineRuleRepository dao) {

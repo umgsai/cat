@@ -24,7 +24,6 @@ import com.dianping.cat.consumer.heartbeat.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.consumer.heartbeat.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.heartbeat.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
@@ -57,8 +56,6 @@ public class HeartbeatDelegate implements ReportDelegate<HeartbeatReport> {
 
 	@Override
 	public boolean createHourlyTask(HeartbeatReport report) {
-		refreshSpringBeans();
-
 		String domain = report.getDomain();
 
 		if (m_manager.validateDomain(domain)) {
@@ -99,18 +96,6 @@ public class HeartbeatDelegate implements ReportDelegate<HeartbeatReport> {
 	@Override
 	public HeartbeatReport parseXml(String xml) throws Exception {
 		return DefaultSaxParser.parse(xml);
-	}
-
-	private void refreshSpringBeans() {
-		TaskManager taskManager = CatSpringContext.getBeanIfAvailable(TaskManager.class);
-		ServerFilterConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
-
-		if (taskManager != null) {
-			m_taskManager = taskManager;
-		}
-		if (manager != null) {
-			m_manager = manager;
-		}
 	}
 
 	public void setTaskManager(TaskManager taskManager) {

@@ -33,7 +33,6 @@ import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class SenderConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SenderConfigManager.class);
@@ -71,8 +70,6 @@ public class SenderConfigManager {
 			if (m_initialized) {
 				return;
 			}
-			refreshSpringBeans();
-
 			try {
 				Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
 				String content = config.getContent();
@@ -178,8 +175,6 @@ public class SenderConfigManager {
 
 	private boolean storeConfig() {
 		synchronized (this) {
-			refreshSpringBeans();
-
 			try {
 				Config config = m_configDao.createLocal();
 
@@ -199,17 +194,4 @@ public class SenderConfigManager {
 		return true;
 	}
 
-	private void refreshSpringBeans() {
-		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
-		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
-
-		if (configDao != null) {
-			m_configDao = configDao;
-			LOGGER.info("SenderConfigManager refreshed Spring ConfigRepository dependency.");
-		}
-		if (fetcher != null) {
-			m_fetcher = fetcher;
-			LOGGER.info("SenderConfigManager refreshed Spring ContentFetcher dependency.");
-		}
-	}
 }

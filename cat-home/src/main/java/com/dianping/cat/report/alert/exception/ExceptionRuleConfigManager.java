@@ -34,7 +34,6 @@ import com.dianping.cat.home.exception.entity.ExceptionExclude;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;
 import com.dianping.cat.home.exception.entity.ExceptionRuleConfig;
 import com.dianping.cat.home.exception.transform.DefaultSaxParser;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class ExceptionRuleConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionRuleConfigManager.class);
@@ -83,7 +82,6 @@ public class ExceptionRuleConfigManager {
 			if (m_initialized) {
 				return;
 			}
-			refreshSpringBeans();
 
 			try {
 				LOGGER.info("Initializing exception rule config manager, configName={}.", CONFIG_NAME);
@@ -185,8 +183,6 @@ public class ExceptionRuleConfigManager {
 
 	private boolean storeConfig() {
 		synchronized (this) {
-			refreshSpringBeans();
-
 			try {
 				Config config = m_configDao.createLocal();
 
@@ -207,18 +203,6 @@ public class ExceptionRuleConfigManager {
 
 	public ExceptionLimit queryTotalLimitByDomain(String domain) {
 		return queryExceptionLimit(domain, TOTAL_STRING);
-	}
-
-	private void refreshSpringBeans() {
-		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
-		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
-
-		if (configDao != null) {
-			m_configDao = configDao;
-		}
-		if (fetcher != null) {
-			m_fetcher = fetcher;
-		}
 	}
 
 }

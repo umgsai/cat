@@ -24,7 +24,6 @@ import com.dianping.cat.consumer.dependency.model.transform.DefaultNativeBuilder
 import com.dianping.cat.consumer.dependency.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.dependency.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
@@ -55,8 +54,6 @@ public class DependencyDelegate implements ReportDelegate<DependencyReport> {
 
 	@Override
 	public boolean createHourlyTask(DependencyReport report) {
-		refreshSpringBeans();
-
 		return m_taskManager.createTask(report.getStartTime(), Constants.CAT, DependencyAnalyzer.ID, TaskProlicy.HOULY);
 	}
 
@@ -91,14 +88,6 @@ public class DependencyDelegate implements ReportDelegate<DependencyReport> {
 	@Override
 	public DependencyReport parseXml(String xml) throws Exception {
 		return DefaultSaxParser.parse(xml);
-	}
-
-	private void refreshSpringBeans() {
-		TaskManager taskManager = CatSpringContext.getBeanIfAvailable(TaskManager.class);
-
-		if (taskManager != null) {
-			m_taskManager = taskManager;
-		}
 	}
 
 	public void setTaskManager(TaskManager taskManager) {

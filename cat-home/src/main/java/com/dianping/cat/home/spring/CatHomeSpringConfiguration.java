@@ -553,12 +553,16 @@ public class CatHomeSpringConfiguration {
 	public MessageAnalyzer storageAnalyzer(
 			@Qualifier(StorageAnalyzer.ID + "ReportManager") ReportManager<StorageReport> storageReportManager,
 			com.dianping.cat.consumer.DatabaseParser databaseParser, StorageReportUpdater storageReportUpdater,
-			ServerConfigManager serverConfigManager) {
+			ServerConfigManager serverConfigManager,
+			@Qualifier("storageSQLBuilder") StorageBuilder storageSQLBuilder,
+			@Qualifier("storageCacheBuilder") StorageBuilder storageCacheBuilder,
+			@Qualifier("storageRPCBuilder") StorageBuilder storageRPCBuilder) {
 		StorageAnalyzer analyzer = new StorageAnalyzer();
 
 		analyzer.setReportManager(storageReportManager);
 		analyzer.setDatabaseParser(databaseParser);
 		analyzer.setUpdater(storageReportUpdater);
+		analyzer.setStorageBuilders(storageBuilders(storageSQLBuilder, storageCacheBuilder, storageRPCBuilder));
 		analyzer.setServerConfigManager(serverConfigManager);
 		return analyzer;
 	}
@@ -3084,12 +3088,8 @@ public class CatHomeSpringConfiguration {
 			@Qualifier("storageCacheBuilder") StorageBuilder storageCacheBuilder,
 			@Qualifier("storageRPCBuilder") StorageBuilder storageRPCBuilder) {
 		StorageBuilderManager manager = new StorageBuilderManager();
-		Map<String, StorageBuilder> builders = new LinkedHashMap<String, StorageBuilder>();
 
-		builders.put(storageSQLBuilder.getType(), storageSQLBuilder);
-		builders.put(storageCacheBuilder.getType(), storageCacheBuilder);
-		builders.put(storageRPCBuilder.getType(), storageRPCBuilder);
-		manager.setStorageBuilders(builders);
+		manager.setStorageBuilders(storageBuilders(storageSQLBuilder, storageCacheBuilder, storageRPCBuilder));
 		return manager;
 	}
 
@@ -4456,6 +4456,16 @@ public class CatHomeSpringConfiguration {
 			AlertConfigManager alertConfigManager) {
 		contactor.setProjectService(projectService);
 		contactor.setConfigManager(alertConfigManager);
+	}
+
+	private Map<String, StorageBuilder> storageBuilders(StorageBuilder storageSQLBuilder,
+			StorageBuilder storageCacheBuilder, StorageBuilder storageRPCBuilder) {
+		Map<String, StorageBuilder> builders = new LinkedHashMap<String, StorageBuilder>();
+
+		builders.put(storageSQLBuilder.getType(), storageSQLBuilder);
+		builders.put(storageCacheBuilder.getType(), storageCacheBuilder);
+		builders.put(storageRPCBuilder.getType(), storageRPCBuilder);
+		return builders;
 	}
 
 	private <T extends SpringBackedRepositorySupport<?>> T configureSpringBackedRepository(T repository,

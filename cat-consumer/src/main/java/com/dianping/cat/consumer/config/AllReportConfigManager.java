@@ -38,7 +38,6 @@ import com.dianping.cat.consumer.all.config.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -74,8 +73,6 @@ public class AllReportConfigManager {
 		if (m_initialized) {
 			return;
 		}
-
-		refreshSpringBeans();
 
 		try {
 			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
@@ -155,8 +152,6 @@ public class AllReportConfigManager {
 
 	private boolean storeConfig() {
 		synchronized (this) {
-			refreshSpringBeans();
-
 			try {
 				Config config = m_configDao.createLocal();
 
@@ -209,18 +204,6 @@ public class AllReportConfigManager {
 			}
 		}
 		return false;
-	}
-
-	private void refreshSpringBeans() {
-		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
-		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
-
-		if (configDao != null) {
-			m_configDao = configDao;
-		}
-		if (fetcher != null) {
-			m_fetcher = fetcher;
-		}
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {

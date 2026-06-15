@@ -53,7 +53,6 @@ import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
 import com.dianping.cat.report.alert.spi.AlarmRule;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -100,7 +99,6 @@ public abstract class BaseRuleConfigManager {
 			if (m_initialized) {
 				return;
 			}
-			refreshSpringBeans();
 
 			LOGGER.info("Initializing alert rule config manager, configName={}.", getConfigName());
 			try {
@@ -165,8 +163,6 @@ public abstract class BaseRuleConfigManager {
 	}
 
 	private void refreshConfig() throws DalException, SAXException, IOException {
-		refreshSpringBeans();
-
 		com.dianping.cat.core.config.Config config = m_configDao.findByName(getConfigName(), ConfigEntity.READSET_FULL);
 
 		long modifyTime = config.getModifyDate().getTime();
@@ -422,8 +418,6 @@ public abstract class BaseRuleConfigManager {
 
 	protected boolean storeConfig() {
 		synchronized (this) {
-			refreshSpringBeans();
-
 			try {
 				com.dianping.cat.core.config.Config config = m_configDao.createLocal();
 
@@ -440,26 +434,6 @@ public abstract class BaseRuleConfigManager {
 			}
 		}
 		return true;
-	}
-
-	protected void refreshSpringBeans() {
-		ConfigRepository configDao = CatSpringContext.getBeanIfAvailable(ConfigRepository.class);
-		ContentFetcher fetcher = CatSpringContext.getBeanIfAvailable(ContentFetcher.class);
-		UserDefinedRuleManager manager = CatSpringContext.getBeanIfAvailable(UserDefinedRuleManager.class);
-		BaseRuleHelper helper = CatSpringContext.getBeanIfAvailable(BaseRuleHelper.class);
-
-		if (configDao != null) {
-			m_configDao = configDao;
-		}
-		if (fetcher != null) {
-			m_fetcher = fetcher;
-		}
-		if (manager != null) {
-			m_manager = manager;
-		}
-		if (helper != null) {
-			m_helper = helper;
-		}
 	}
 
 	public String updateRule(String id, String metricsStr, String configsStr) throws Exception {

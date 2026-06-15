@@ -27,7 +27,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
 public class RealtimeConsumer implements MessageConsumer {
@@ -146,7 +145,6 @@ public class RealtimeConsumer implements MessageConsumer {
 		if (m_initialized) {
 			return;
 		}
-		refreshSpringBeans();
 
 		if (m_analyzerManager == null) {
 			throw new IllegalStateException("MessageAnalyzerManager is required for RealtimeConsumer.");
@@ -165,18 +163,6 @@ public class RealtimeConsumer implements MessageConsumer {
 
 	private void info(String message) {
 		SLF4J_LOGGER.info(message);
-	}
-
-	private void refreshSpringBeans() {
-		MessageAnalyzerManager analyzerManager = CatSpringContext.getBeanIfAvailable(MessageAnalyzerManager.class);
-		ServerStatisticManager serverStateManager = CatSpringContext.getBeanIfAvailable(ServerStatisticManager.class);
-
-		if (analyzerManager != null) {
-			m_analyzerManager = analyzerManager;
-		}
-		if (serverStateManager != null) {
-			m_serverStateManager = serverStateManager;
-		}
 	}
 
 	public void setAnalyzerManager(MessageAnalyzerManager analyzerManager) {

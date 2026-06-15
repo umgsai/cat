@@ -37,7 +37,6 @@ import com.dianping.cat.core.dal.Hostinfo;
 import com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository;
 import com.dianping.cat.core.dal.HostinfoEntity;
 import com.dianping.cat.helper.TimeHelper;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class HostinfoService {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(HostinfoService.class);
@@ -102,17 +101,13 @@ public class HostinfoService {
 			return;
 		}
 
-		HostinfoRepository hostinfoDao = CatSpringContext.getBeanIfAvailable(HostinfoRepository.class);
-		ServerConfigManager manager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
+		if (m_hostinfoDao == null) {
+			throw new IllegalStateException("HostinfoRepository is required for HostinfoService.");
+		}
+		if (m_manager == null) {
+			throw new IllegalStateException("ServerConfigManager is required for HostinfoService.");
+		}
 
-		if (hostinfoDao != null) {
-			m_hostinfoDao = hostinfoDao;
-			SLF4J_LOGGER.info("HostinfoService refreshed Spring HostinfoRepository dependency.");
-		}
-		if (manager != null) {
-			m_manager = manager;
-			SLF4J_LOGGER.info("HostinfoService refreshed Spring ServerConfigManager dependency.");
-		}
 		Threads.forGroup("Cat").start(new RefreshHost());
 		m_initialized = true;
 		SLF4J_LOGGER.info("HostinfoService started refresh task.");

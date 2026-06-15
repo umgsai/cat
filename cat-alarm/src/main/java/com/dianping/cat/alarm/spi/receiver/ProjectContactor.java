@@ -27,7 +27,6 @@ import com.dianping.cat.alarm.receiver.entity.Receiver;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.service.ProjectService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class ProjectContactor extends DefaultContactor implements Contactor {
 
@@ -36,16 +35,10 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 	protected AlertConfigManager m_configManager;
 
 	private AlertConfigManager getConfigManager() {
-		if (m_configManager == null) {
-			m_configManager = CatSpringContext.getBeanIfAvailable(AlertConfigManager.class);
-		}
 		return m_configManager;
 	}
 
 	private ProjectService getProjectService() {
-		if (m_projectService == null) {
-			m_projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
-		}
 		return m_projectService;
 	}
 

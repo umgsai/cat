@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.alarm.spi.AlertChannel;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class ContactorManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContactorManager.class);
@@ -45,15 +44,6 @@ public class ContactorManager {
 				return;
 			}
 			if (m_contactors.isEmpty()) {
-				Map<String, Contactor> springContactors = getSpringContactors();
-
-				if (springContactors != null && !springContactors.isEmpty()) {
-					setContactors(springContactors);
-					LOGGER.info("Initialized alert contactor manager from Spring context bridge, contactorCount={}.",
-					      m_contactors.size());
-					m_initialized = true;
-					return;
-				}
 				LOGGER.warn("Alert contactor manager has no configured contactors.");
 			} else {
 				LOGGER.info("Initialized alert contactor manager from Spring injection, contactorCount={}.",
@@ -61,11 +51,6 @@ public class ContactorManager {
 			}
 			m_initialized = true;
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private Map<String, Contactor> getSpringContactors() {
-		return CatSpringContext.getBeanIfAvailable("alertContactors", Map.class);
 	}
 
 	private void ensureInitialized() {

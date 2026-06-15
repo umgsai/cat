@@ -42,7 +42,6 @@ import com.dianping.cat.core.config.BusinessConfig;
 import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
 import com.dianping.cat.core.config.BusinessConfigEntity;
 import com.dianping.cat.helper.MetricType;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -124,7 +123,6 @@ public class BusinessRuleConfigManager {
 			if (m_initialized) {
 				return;
 			}
-			refreshSpringBeans();
 
 			LOGGER.info("Initializing business alert rule config manager.");
 			loadData();
@@ -152,8 +150,6 @@ public class BusinessRuleConfigManager {
 	}
 
 	private void loadData() {
-		refreshSpringBeans();
-
 		try {
 			List<BusinessConfig> configs = m_configDao.findByName(ALERT_CONFIG, BusinessConfigEntity.READSET_FULL);
 			Map<String, MonitorRules> rules = new ConcurrentHashMap<String, MonitorRules>();
@@ -209,8 +205,6 @@ public class BusinessRuleConfigManager {
 	public void updateRule(String domain, String key, String configsStr, String type) {
 		ensureInitialized();
 		try {
-			refreshSpringBeans();
-
 			Rule rule = new Rule(generateRuleId(key, type));
 			List<Config> configs = DefaultJsonParser.parseArray(Config.class, configsStr);
 
@@ -247,13 +241,5 @@ public class BusinessRuleConfigManager {
 			Cat.logError(e);
 		}
 
-	}
-
-	private void refreshSpringBeans() {
-		BusinessConfigRepository configDao = CatSpringContext.getBeanIfAvailable(BusinessConfigRepository.class);
-
-		if (configDao != null) {
-			m_configDao = configDao;
-		}
 	}
 }

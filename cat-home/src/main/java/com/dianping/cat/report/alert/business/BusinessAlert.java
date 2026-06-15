@@ -54,7 +54,6 @@ import com.dianping.cat.report.page.business.graph.CustomInfo;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.service.ProjectService;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
 public class BusinessAlert implements Task {
@@ -237,8 +236,6 @@ public class BusinessAlert implements Task {
 	}
 
 	private void processDomain(String domain) {
-		refreshSpringBeans();
-
 		BusinessReportConfig businessReportConfig = m_configManager.queryConfigByDomain(domain);
 		AlarmRule monitorConfigs = buildMonitorConfigs(domain, businessReportConfig);
 		int minute = calAlreadyMinute();
@@ -297,13 +294,9 @@ public class BusinessAlert implements Task {
 
 	@Override
 	public void run() {
-		refreshSpringBeans();
-
 		boolean active = TimeHelper.sleepToNextMinute();
 
 		while (active) {
-			refreshSpringBeans();
-
 			Transaction t = Cat.newTransaction("AlertBusiness", TimeHelper.getMinuteStr());
 			long current = System.currentTimeMillis();
 
@@ -403,38 +396,6 @@ public class BusinessAlert implements Task {
 
 	public void setTagConfigManager(BusinessTagConfigManager tagConfigManager) {
 		m_tagConfigManager = tagConfigManager;
-	}
-
-	private void refreshSpringBeans() {
-		BusinessConfigManager configManager = CatSpringContext.getBeanIfAvailable(BusinessConfigManager.class);
-		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
-		BusinessRuleConfigManager alertConfigManager = CatSpringContext.getBeanIfAvailable(BusinessRuleConfigManager.class);
-		BusinessTagConfigManager tagConfigManager = CatSpringContext.getBeanIfAvailable(BusinessTagConfigManager.class);
-		BaseRuleHelper baseRuleHelper = CatSpringContext.getBeanIfAvailable(BaseRuleHelper.class);
-		BusinessKeyHelper keyHelper = CatSpringContext.getBeanIfAvailable(BusinessKeyHelper.class);
-		CustomDataCalculator customDataCalculator = CatSpringContext.getBeanIfAvailable(CustomDataCalculator.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-		if (projectService != null) {
-			m_projectService = projectService;
-		}
-		if (alertConfigManager != null) {
-			m_alertConfigManager = alertConfigManager;
-		}
-		if (tagConfigManager != null) {
-			m_tagConfigManager = tagConfigManager;
-		}
-		if (baseRuleHelper != null) {
-			m_baseRuleHelper = baseRuleHelper;
-		}
-		if (keyHelper != null) {
-			m_keyHelper = keyHelper;
-		}
-		if (customDataCalculator != null) {
-			m_customDataCalculator = customDataCalculator;
-		}
 	}
 
 }

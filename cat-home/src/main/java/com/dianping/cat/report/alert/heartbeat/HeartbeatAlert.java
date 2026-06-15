@@ -55,7 +55,6 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class HeartbeatAlert implements Task {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatAlert.class);
@@ -244,8 +243,6 @@ public class HeartbeatAlert implements Task {
 	}
 
 	private void processDomain(String domain) {
-		refreshSpringBeans();
-
 		int minute = calAlreadyMinute();
 		Map<String, List<Config>> configsMap = m_ruleConfigManager.queryConfigsByDomain(domain);
 		if (null == configsMap) {
@@ -366,13 +363,9 @@ public class HeartbeatAlert implements Task {
 
 	@Override
 	public void run() {
-		refreshSpringBeans();
-
 		boolean active = TimeHelper.sleepToNextMinute();
 
 		while (active) {
-			refreshSpringBeans();
-
 			Transaction t = Cat.newTransaction("AlertHeartbeat", TimeHelper.getMinuteStr());
 			long current = System.currentTimeMillis();
 
@@ -441,19 +434,6 @@ public class HeartbeatAlert implements Task {
 
 	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
 		m_serverFilterConfigManager = serverFilterConfigManager;
-	}
-
-	private void refreshSpringBeans() {
-		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext
-		      .getBeanIfAvailable(ServerFilterConfigManager.class);
-		ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
-
-		if (serverFilterConfigManager != null) {
-			m_serverFilterConfigManager = serverFilterConfigManager;
-		}
-		if (projectService != null) {
-			m_projectService = projectService;
-		}
 	}
 
 }

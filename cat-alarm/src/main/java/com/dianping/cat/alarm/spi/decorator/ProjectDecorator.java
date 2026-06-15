@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.service.ProjectService;
-import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class ProjectDecorator extends Decorator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectDecorator.class);
@@ -37,14 +36,6 @@ public abstract class ProjectDecorator extends Decorator {
 	}
 
 	private ProjectService getProjectService() {
-		if (m_projectService == null) {
-			ProjectService projectService = CatSpringContext.getBeanIfAvailable(ProjectService.class);
-
-			if (projectService != null) {
-				m_projectService = projectService;
-				LOGGER.info("ProjectDecorator refreshed Spring ProjectService dependency.");
-			}
-		}
 		return m_projectService;
 	}
 

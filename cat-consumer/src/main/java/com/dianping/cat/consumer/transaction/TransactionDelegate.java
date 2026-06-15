@@ -28,7 +28,6 @@ import com.dianping.cat.consumer.transaction.model.transform.DefaultNativeBuilde
 import com.dianping.cat.consumer.transaction.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.transaction.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
@@ -64,8 +63,6 @@ public class TransactionDelegate implements ReportDelegate<TransactionReport> {
 
 	@Override
 	public String buildXml(TransactionReport report) {
-		refreshSpringBeans();
-
 		report.accept(m_computer);
 
 		new TransactionReportCountFilter(m_serverConfigManager.getMaxTypeThreshold(),
@@ -77,8 +74,6 @@ public class TransactionDelegate implements ReportDelegate<TransactionReport> {
 
 	@Override
 	public boolean createHourlyTask(TransactionReport report) {
-		refreshSpringBeans();
-
 		String domain = report.getDomain();
 
 		if (domain.equals(Constants.ALL) || m_configManager.validateDomain(domain)) {
@@ -120,31 +115,6 @@ public class TransactionDelegate implements ReportDelegate<TransactionReport> {
 	@Override
 	public TransactionReport parseXml(String xml) throws Exception {
 		return DefaultSaxParser.parse(xml);
-	}
-
-	private void refreshSpringBeans() {
-		TaskManager taskManager = CatSpringContext.getBeanIfAvailable(TaskManager.class);
-		ServerFilterConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerFilterConfigManager.class);
-		AllReportConfigManager transactionManager = CatSpringContext.getBeanIfAvailable(AllReportConfigManager.class);
-		ServerConfigManager serverConfigManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-		AtomicMessageConfigManager atomicMessageConfigManager = CatSpringContext
-		      .getBeanIfAvailable(AtomicMessageConfigManager.class);
-
-		if (taskManager != null) {
-			m_taskManager = taskManager;
-		}
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
-		if (transactionManager != null) {
-			m_transactionManager = transactionManager;
-		}
-		if (serverConfigManager != null) {
-			m_serverConfigManager = serverConfigManager;
-		}
-		if (atomicMessageConfigManager != null) {
-			m_atomicMessageConfigManager = atomicMessageConfigManager;
-		}
 	}
 
 	public void setTaskManager(TaskManager taskManager) {

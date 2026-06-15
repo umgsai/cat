@@ -29,7 +29,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Event;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class SenderManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SenderManager.class);
@@ -49,26 +48,12 @@ public class SenderManager {
 				return;
 			}
 			if (m_senders.isEmpty()) {
-				Map<String, Sender> springSenders = getSpringSenders();
-
-				if (springSenders != null && !springSenders.isEmpty()) {
-					setSenders(springSenders);
-					LOGGER.info("Initialized alert sender manager from Spring context bridge, senderCount={}.",
-					      m_senders.size());
-					m_initialized = true;
-					return;
-				}
 				LOGGER.warn("Alert sender manager has no configured senders.");
 			} else {
 				LOGGER.info("Initialized alert sender manager from Spring injection, senderCount={}.", m_senders.size());
 			}
 			m_initialized = true;
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private Map<String, Sender> getSpringSenders() {
-		return CatSpringContext.getBeanIfAvailable("alertSenders", Map.class);
 	}
 
 	private void ensureInitialized() {
@@ -98,11 +83,6 @@ public class SenderManager {
 	public boolean sendAlert(AlertChannel channel, SendMessageEntity message) {
 		ensureInitialized();
 		String channelName = channel.getName();
-		ServerConfigManager configManager = CatSpringContext.getBeanIfAvailable(ServerConfigManager.class);
-
-		if (configManager != null) {
-			m_configManager = configManager;
-		}
 
 		try {
 			boolean result = false;

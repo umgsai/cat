@@ -24,7 +24,6 @@ import com.dianping.cat.consumer.cross.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.consumer.cross.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.cross.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
-import com.dianping.cat.spring.CatSpringContext;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
@@ -57,8 +56,6 @@ public class CrossDelegate implements ReportDelegate<CrossReport> {
 
 	@Override
 	public boolean createHourlyTask(CrossReport report) {
-		refreshSpringBeans();
-
 		String domain = report.getDomain();
 
 		if (m_serverFilterConfigManager.validateDomain(domain)) {
@@ -99,19 +96,6 @@ public class CrossDelegate implements ReportDelegate<CrossReport> {
 	@Override
 	public CrossReport parseXml(String xml) throws Exception {
 		return DefaultSaxParser.parse(xml);
-	}
-
-	private void refreshSpringBeans() {
-		TaskManager taskManager = CatSpringContext.getBeanIfAvailable(TaskManager.class);
-		ServerFilterConfigManager serverFilterConfigManager = CatSpringContext.getBeanIfAvailable(
-		      ServerFilterConfigManager.class);
-
-		if (taskManager != null) {
-			m_taskManager = taskManager;
-		}
-		if (serverFilterConfigManager != null) {
-			m_serverFilterConfigManager = serverFilterConfigManager;
-		}
 	}
 
 	public void setTaskManager(TaskManager taskManager) {

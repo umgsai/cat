@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.alarm.spi.AlertChannel;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class SpliterManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpliterManager.class);
@@ -44,15 +43,6 @@ public class SpliterManager {
 				return;
 			}
 			if (m_spliters.isEmpty()) {
-				Map<String, Spliter> springSpliters = getSpringSpliters();
-
-				if (springSpliters != null && !springSpliters.isEmpty()) {
-					setSpliters(springSpliters);
-					LOGGER.info("Initialized alert splitter manager from Spring context bridge, splitterCount={}.",
-					      m_spliters.size());
-					m_initialized = true;
-					return;
-				}
 				LOGGER.warn("Alert splitter manager has no configured splitters.");
 			} else {
 				LOGGER.info("Initialized alert splitter manager from Spring injection, splitterCount={}.",
@@ -60,11 +50,6 @@ public class SpliterManager {
 			}
 			m_initialized = true;
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private Map<String, Spliter> getSpringSpliters() {
-		return CatSpringContext.getBeanIfAvailable("alertSpliters", Map.class);
 	}
 
 	private void ensureInitialized() {

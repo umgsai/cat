@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class DecoratorManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DecoratorManager.class);
@@ -63,15 +62,6 @@ public class DecoratorManager {
 				return;
 			}
 			if (m_decorators.isEmpty()) {
-				Map<String, Decorator> springDecorators = getSpringDecorators();
-
-				if (springDecorators != null && !springDecorators.isEmpty()) {
-					setDecorators(springDecorators);
-					LOGGER.info("Initialized alert decorator manager from Spring context bridge, decoratorCount={}.",
-					      m_decorators.size());
-					m_initialized = true;
-					return;
-				}
 				LOGGER.warn("Alert decorator manager has no configured decorators.");
 			} else {
 				LOGGER.info("Initialized alert decorator manager from Spring injection, decoratorCount={}.",
@@ -79,11 +69,6 @@ public class DecoratorManager {
 			}
 			m_initialized = true;
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private Map<String, Decorator> getSpringDecorators() {
-		return CatSpringContext.getBeanIfAvailable("alertDecorators", Map.class);
 	}
 
 	private void ensureInitialized() {

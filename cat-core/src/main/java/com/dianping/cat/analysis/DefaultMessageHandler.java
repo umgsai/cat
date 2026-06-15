@@ -21,7 +21,6 @@ package com.dianping.cat.analysis;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.message.spi.MessageTree;
-import com.dianping.cat.spring.CatSpringContext;
 
 public class DefaultMessageHandler implements MessageHandler {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(DefaultMessageHandler.class);
@@ -30,12 +29,6 @@ public class DefaultMessageHandler implements MessageHandler {
 
 	@Override
 	public void handle(MessageTree tree) {
-		MessageConsumer springConsumer = CatSpringContext.getBeanIfAvailable(MessageConsumer.class);
-
-		if (springConsumer != null && m_consumer != springConsumer) {
-			m_consumer = springConsumer;
-			SLF4J_LOGGER.info("Resolved message consumer from Spring context, consumer={}.", m_consumer);
-		}
 		if (m_consumer == null) {
 			SLF4J_LOGGER.warn("Message consumer is not configured, drop message tree={}.", tree);
 			return;
