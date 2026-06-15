@@ -6,7 +6,6 @@ import javax.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.unidal.lookup.ContainerLoader;
 
 import com.dianping.cat.spring.CatSpringContext;
 
@@ -22,9 +21,6 @@ public class CatHomeSpringContextListener implements ServletContextListener {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
 		try {
-			ContainerLoader.destroy();
-			ContainerLoader.getDefaultContainer();
-			LOGGER.info("Unidal default container initialized from CAT home webapp classloader.");
 			context.register(CatHomeSpringConfiguration.class);
 			CatSpringContext.setContext(context);
 			context.refresh();
@@ -48,7 +44,5 @@ public class CatHomeSpringContextListener implements ServletContextListener {
 			m_context.close();
 			LOGGER.info("CAT home Spring context closed.");
 		}
-		ContainerLoader.destroy();
-		LOGGER.info("Unidal default container destroyed.");
 	}
 }
