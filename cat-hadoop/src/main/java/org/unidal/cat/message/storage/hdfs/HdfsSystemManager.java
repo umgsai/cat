@@ -26,13 +26,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 
-public class HdfsSystemManager implements Initializable {
+public class HdfsSystemManager {
 	public static final String DUMP = "dump";
 
 	private ServerConfigManager m_configManager;
@@ -105,8 +103,7 @@ public class HdfsSystemManager implements Initializable {
 		}
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		if (m_configManager.isHdfsOn()) {
 			try {
 				m_config = getHdfsConfiguration();

@@ -29,13 +29,11 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.HarFileSystem;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 
-public class FileSystemManager implements Initializable {
+public class FileSystemManager {
 	private ServerConfigManager m_configManager;
 
 	private String m_defaultBaseDir;
@@ -90,13 +88,8 @@ public class FileSystemManager implements Initializable {
 		if (harPool == null) {
 			harPool = new HarConnectionPool(m_configManager);
 
-			try {
-				harPool.initialize();
-				m_harConnPools.put(id, harPool);
-			} catch (InitializationException e) {
-				Cat.logError(e);
-				return null;
-			}
+			harPool.initialize();
+			m_harConnPools.put(id, harPool);
 		}
 
 		return harPool.getHarfsConnection(id, date, fs);
@@ -142,8 +135,7 @@ public class FileSystemManager implements Initializable {
 		}
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		m_defaultBaseDir = m_configManager.getHdfsLocalBaseDir("hdfs");
 
 		if (m_configManager.isHdfsOn()) {

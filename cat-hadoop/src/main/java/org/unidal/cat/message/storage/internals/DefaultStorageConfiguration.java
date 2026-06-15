@@ -20,13 +20,11 @@ package org.unidal.cat.message.storage.internals;
 
 import java.io.File;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.cat.message.storage.StorageConfiguration;
 
 import com.dianping.cat.Cat;
 
-public class DefaultStorageConfiguration implements Initializable, StorageConfiguration {
+public class DefaultStorageConfiguration implements StorageConfiguration {
 	private String m_baseDataDir;
 
 	@Override
@@ -39,8 +37,7 @@ public class DefaultStorageConfiguration implements Initializable, StorageConfig
 		m_baseDataDir = baseDataDir;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		setBaseDataDir(new File(Cat.getCatHome(),"bucket"));
 	}
 

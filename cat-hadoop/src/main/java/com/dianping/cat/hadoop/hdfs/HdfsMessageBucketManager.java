@@ -33,8 +33,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.commons.lang3.tuple.Pair;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
 
@@ -42,7 +40,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HdfsMessageBucketManager implements MessageBucketManager, Initializable {
+public class HdfsMessageBucketManager implements MessageBucketManager {
 
 	public static final String ID = "hdfs";
 
@@ -113,8 +111,7 @@ public class HdfsMessageBucketManager implements MessageBucketManager, Initializ
 		return paths;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		if (m_serverConfigManager.isHdfsOn()) {
 			Threads.forGroup("cat").start(new IdleChecker());
 		}

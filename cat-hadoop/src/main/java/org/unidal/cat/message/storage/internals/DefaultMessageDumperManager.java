@@ -24,15 +24,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.MessageDumper;
 import org.unidal.cat.message.storage.MessageDumperFactory;
 import org.unidal.cat.message.storage.MessageDumperManager;
 
-public class DefaultMessageDumperManager implements MessageDumperManager, Initializable {
+public class DefaultMessageDumperManager implements MessageDumperManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageDumperManager.class);
 
 	private MessageDumperFactory m_messageDumperFactory;
@@ -79,8 +77,7 @@ public class DefaultMessageDumperManager implements MessageDumperManager, Initia
 		return dumper;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 	}
 
 	private MessageDumper createDumper(int hour) {

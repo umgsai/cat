@@ -24,14 +24,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.netty.util.ReferenceCountUtil;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 
-public class DefaultByteBufCache implements ByteBufCache, Initializable {
+public class DefaultByteBufCache implements ByteBufCache {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultByteBufCache.class);
 
 	private BlockingQueue<ByteBuffer> m_bufs = new ArrayBlockingQueue<ByteBuffer>(8000);
@@ -48,8 +46,7 @@ public class DefaultByteBufCache implements ByteBufCache, Initializable {
 		return buf;
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 	}
 
 	public void put(ByteBuffer buf) {

@@ -24,8 +24,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import io.netty.buffer.ByteBuf;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -35,7 +33,7 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 
-public class HdfsBucketManager implements Initializable {
+public class HdfsBucketManager {
 
 	private ServerConfigManager m_configManager;
 
@@ -55,8 +53,7 @@ public class HdfsBucketManager implements Initializable {
 		}
 	};
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 	}
 
 	public MessageTree loadMessage(MessageId id) {

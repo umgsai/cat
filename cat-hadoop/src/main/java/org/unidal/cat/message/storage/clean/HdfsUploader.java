@@ -33,8 +33,6 @@ import org.apache.hadoop.hdfs.protocol.AlreadyBeingCreatedException;
 import org.apache.hadoop.ipc.RemoteException;
 import org.apache.hadoop.security.AccessControlException;
 import org.apache.commons.io.IOUtils;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.cat.message.storage.hdfs.HdfsSystemManager;
@@ -45,7 +43,7 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
-public class HdfsUploader implements Initializable {
+public class HdfsUploader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HdfsUploader.class);
 
 	private HdfsSystemManager m_fileSystemManager;
@@ -65,8 +63,7 @@ public class HdfsUploader implements Initializable {
 		parent.getParentFile().delete();
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		int thread = m_serverConfigManager.getHdfsUploadThreadsCount();
 
 		m_localBaseDir = new File(m_serverConfigManager.getHdfsLocalBaseDir(HdfsSystemManager.DUMP));

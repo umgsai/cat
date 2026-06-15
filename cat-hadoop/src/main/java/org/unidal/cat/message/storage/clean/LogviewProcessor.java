@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import com.dianping.cat.support.Threads.Task;
 
 import com.dianping.cat.Cat;
@@ -42,7 +40,7 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
-public class LogviewProcessor implements Task, Initializable {
+public class LogviewProcessor implements Task {
 
 	private HdfsUploader m_hdfsUploader;
 
@@ -103,8 +101,7 @@ public class LogviewProcessor implements Task, Initializable {
 		return getClass().getSimpleName();
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		m_baseDir = new File(m_configManager.getHdfsLocalBaseDir("dump"));
 	}
 

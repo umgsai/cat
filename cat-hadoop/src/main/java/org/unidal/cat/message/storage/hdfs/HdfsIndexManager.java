@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.cat.message.storage.IndexFactory;
 
 import com.dianping.cat.Cat;
@@ -33,7 +31,7 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.tree.MessageId;
 
-public class HdfsIndexManager implements Initializable {
+public class HdfsIndexManager {
 
 	private ServerConfigManager m_configManager;
 
@@ -53,8 +51,7 @@ public class HdfsIndexManager implements Initializable {
 		}
 	};
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 	}
 
 	public MessageId loadMessage(MessageId id) {

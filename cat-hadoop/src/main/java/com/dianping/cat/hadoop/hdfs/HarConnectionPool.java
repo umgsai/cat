@@ -32,8 +32,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.HarFileSystem;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
 
@@ -41,7 +39,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.helper.TimeHelper;
 
-public class HarConnectionPool implements Initializable {
+public class HarConnectionPool {
 
 	private ServerConfigManager m_serverConfigManager;
 
@@ -108,8 +106,7 @@ public class HarConnectionPool implements Initializable {
 		}
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
+	public void initialize() {
 		Threads.forGroup("cat").start(new IdleChecker());
 	}
 
