@@ -60,6 +60,7 @@ import org.unidal.cat.message.storage.clean.HdfsUploader;
 import org.unidal.cat.message.storage.clean.LogviewProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -391,6 +392,7 @@ import com.dianping.cat.system.page.router.service.RouterConfigService;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
 @Configuration
+@Import(SpringMvcMigrationConfiguration.class)
 @MapperScan(basePackages = {
 		"com.dianping.cat.core.config.dao",
 		"com.dianping.cat.core.report.daily.dao",

@@ -43,6 +43,11 @@
 		</init-param>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
+	<servlet>
+		<servlet-name>spring-mvc-migration-servlet</servlet-name>
+		<servlet-class>com.dianping.cat.home.spring.web.SpringMvcMigrationServlet</servlet-class>
+		<load-on-startup>3</load-on-startup>
+	</servlet>
 	<filter-mapping>
 		<filter-name>cat-filter</filter-name>
 		<url-pattern>/r/*</url-pattern>
@@ -80,6 +85,10 @@
 	<servlet-mapping>
 		<servlet-name>mvc-servlet</servlet-name>
 		<url-pattern>/s/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>spring-mvc-migration-servlet</servlet-name>
+		<url-pattern>/mvc/*</url-pattern>
 	</servlet-mapping>
 	<jsp-config>
 		<taglib>
