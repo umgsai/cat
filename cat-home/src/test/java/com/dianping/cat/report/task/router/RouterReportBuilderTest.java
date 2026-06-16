@@ -23,15 +23,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.home.router.entity.RouterConfig;
+import com.dianping.cat.report.task.SpringTaskTestSupport;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.system.page.router.config.RouterConfigHandler;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
-public class RouterReportBuilderTest extends ComponentTestCase {
+public class RouterReportBuilderTest extends SpringTaskTestSupport {
 
 	@Test
 	public void test() throws ParseException {

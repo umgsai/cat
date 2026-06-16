@@ -16,29 +16,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.dianping.cat.report.graph;
+package com.dianping.cat.report.task;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import com.dianping.cat.SpringCatHomeTestSupport;
 
-import com.dianping.cat.report.graph.svg.DefaultValueTranslater;
-
-@RunWith(JUnit4.class)
-public class ValueTranslaterTest {
-	@Test
-	public void test() throws Exception {
-		check(1000, 123, 456, 247, 473, 976, 236);
-		check(5, 1, 3, 5);
-		check(0.5, 0.1, 0.3, 0.4);
-		check(0.25, 0.01, 0.2, 0.1);
-
-	}
-
-	void check(double expected, double... values) throws Exception {
-		DefaultValueTranslater translater = new DefaultValueTranslater();
-
-		Assert.assertEquals(expected, translater.getMaxValue(values), 1e-6);
-	}
+public abstract class SpringTaskTestSupport extends SpringCatHomeTestSupport {
 }

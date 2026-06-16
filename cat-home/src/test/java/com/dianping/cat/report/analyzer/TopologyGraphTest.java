@@ -22,12 +22,12 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
+import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.home.dependency.graph.entity.TopologyGraph;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphManager;
 
-public class TopologyGraphTest extends ComponentTestCase {
+public class TopologyGraphTest extends SpringCatHomeTestSupport {
 
 	@Test
 	public void test() throws Exception {

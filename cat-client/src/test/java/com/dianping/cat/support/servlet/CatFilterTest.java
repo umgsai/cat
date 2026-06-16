@@ -45,7 +45,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.Cat.PropertyConsumer;
 import com.dianping.cat.Cat.PropertyContext;
 import com.dianping.cat.CatClientConstants;
-import com.dianping.cat.ComponentTestCase;
+import com.dianping.cat.CatClientTestSupport;
 import com.dianping.cat.message.MessageAssert;
 import com.dianping.cat.message.MessageAssert.HeaderAssert;
 import com.dianping.cat.message.MessageAssert.TransactionAssert;
@@ -57,7 +57,7 @@ import com.github.netty.StartupServer;
 import com.github.netty.protocol.HttpServletProtocol;
 import com.github.netty.protocol.servlet.ServletContext;
 
-public class CatFilterTest extends ComponentTestCase {
+public class CatFilterTest extends CatClientTestSupport {
 	private HttpServer m_server;
 
 	@After
@@ -68,7 +68,7 @@ public class CatFilterTest extends ComponentTestCase {
 
 	@Before
 	public void before() {
-		MessageAssert.intercept(Cat.getBootstrap().getComponentContext());
+		MessageAssert.intercept(componentContext());
 
 		Cat.getBootstrap().initializeByDomain("mockApp");
 

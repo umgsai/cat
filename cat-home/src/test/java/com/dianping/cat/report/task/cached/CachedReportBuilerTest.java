@@ -23,17 +23,17 @@ import java.util.Date;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.helper.TimeHelper;
+import com.dianping.cat.report.task.SpringTaskTestSupport;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.current.CurrentReportBuilder;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 
-public class CachedReportBuilerTest extends ComponentTestCase {
+public class CachedReportBuilerTest extends SpringTaskTestSupport {
 
 	private int m_index = 0;
 

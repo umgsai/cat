@@ -23,11 +23,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
+import com.dianping.cat.report.task.SpringTaskTestSupport;
 import com.dianping.cat.system.page.router.config.RouterConfigAdjustor;
 
-public class RouterReportAdjustTest extends ComponentTestCase {
+public class RouterReportAdjustTest extends SpringTaskTestSupport {
 
 	@Test
 	public void test() throws ParseException {

@@ -22,8 +22,8 @@ import java.util.Date;
 
 import org.junit.Test;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.ComponentTestCase;
 
+import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportDao;
@@ -33,7 +33,7 @@ import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.dal.WeeklyReportDao;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 
-public class ReportDaoTest extends ComponentTestCase {
+public class ReportDaoTest extends SpringCatHomeTestSupport {
 
 	@Test
 	public void test() throws DalException {

@@ -22,13 +22,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.report.page.problem.task.ProblemReportBuilder;
+import com.dianping.cat.report.task.SpringTaskTestSupport;
 import com.dianping.cat.report.task.TaskBuilder;
 
-public class ProblemReportBuilderTest extends ComponentTestCase {
+public class ProblemReportBuilderTest extends SpringTaskTestSupport {
 
 	@Test
 	public void testDailyTask() {

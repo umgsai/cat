@@ -21,14 +21,14 @@ package com.dianping.cat.report.task.service;
 import java.text.SimpleDateFormat;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.report.page.statistics.task.service.ServiceReportBuilder;
+import com.dianping.cat.report.task.SpringTaskTestSupport;
 import com.dianping.cat.service.HostinfoService;
 
-public class ServiceBuilderTest extends ComponentTestCase {
+public class ServiceBuilderTest extends SpringTaskTestSupport {
 
 	@Test
 	public void testHourlyReport() throws Exception {

@@ -23,15 +23,15 @@ import java.util.Date;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
+import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.Constants;
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.home.router.entity.RouterConfig;
 import com.dianping.cat.report.task.ReportFacade;
 import com.dianping.cat.system.page.router.service.RouterConfigService;
 
-public class RouterBuilderTest extends ComponentTestCase {
+public class RouterBuilderTest extends SpringCatHomeTestSupport {
 
 	public String day1 = "2014-11-10";
 

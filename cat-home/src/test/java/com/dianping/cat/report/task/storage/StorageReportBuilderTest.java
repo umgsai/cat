@@ -18,13 +18,12 @@
  */
 package com.dianping.cat.report.task.storage;
 
-import org.unidal.lookup.ComponentTestCase;
-
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.page.storage.task.StorageReportBuilder;
+import com.dianping.cat.report.task.SpringTaskTestSupport;
 import com.dianping.cat.report.task.TaskBuilder;
 
-public class StorageReportBuilderTest extends ComponentTestCase {
+public class StorageReportBuilderTest extends SpringTaskTestSupport {
 
 	// @Test
 	public void testDailyTask() {

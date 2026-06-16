@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.dianping.cat.configuration.ConfigureManager;
 
-public class CatBootstrapTest extends ComponentTestCase {
+public class CatBootstrapTest extends CatClientTestSupport {
 	@After
 	public void after() {
 	}
@@ -20,7 +20,7 @@ public class CatBootstrapTest extends ComponentTestCase {
 	public void testInitializeByDomain() {
 		Cat.getBootstrap().initializeByDomain("MyDomain");
 
-		ConfigureManager manager = context().lookup(ConfigureManager.class);
+		ConfigureManager manager = componentContext().lookup(ConfigureManager.class);
 
 		Assert.assertEquals("MyDomain", manager.getDomain());
 	}
@@ -29,7 +29,7 @@ public class CatBootstrapTest extends ComponentTestCase {
 	public void testInitializeByDomainAndServers() {
 		Cat.getBootstrap().initializeByDomain("MyDomain", "server1", "server2");
 
-		ConfigureManager manager = context().lookup(ConfigureManager.class);
+		ConfigureManager manager = componentContext().lookup(ConfigureManager.class);
 
 		Assert.assertEquals("MyDomain", manager.getDomain());
 		Assert.assertEquals(2, manager.getServers().size());
@@ -41,7 +41,7 @@ public class CatBootstrapTest extends ComponentTestCase {
 	public void testInitializeByServers() {
 		Cat.getBootstrap().initialize("server1", "server2");
 
-		ConfigureManager manager = context().lookup(ConfigureManager.class);
+		ConfigureManager manager = componentContext().lookup(ConfigureManager.class);
 
 		Assert.assertEquals(2, manager.getServers().size());
 		Assert.assertEquals("server1", manager.getServers().get(0).getIp());

@@ -25,13 +25,12 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;
 
-public class ConfigsBackupTest extends ComponentTestCase {
+public class ConfigsBackupTest extends SpringTaskTestSupport {
 
 	@Test
 	public void backupConfigsTest() {

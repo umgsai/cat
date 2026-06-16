@@ -7,13 +7,9 @@ import com.dianping.cat.component.ComponentContext;
 import com.dianping.cat.message.context.MetricContextHelper;
 import com.dianping.cat.message.context.TraceContextHelper;
 
-public abstract class ComponentTestCase {
-	protected ComponentContext context() {
+public abstract class CatClientTestSupport {
+	protected ComponentContext componentContext() {
 		return Cat.getBootstrap().getComponentContext();
-	}
-
-	protected <T> T lookup(Class<T> componentType) {
-		return context().lookup(componentType);
 	}
 
 	@Before

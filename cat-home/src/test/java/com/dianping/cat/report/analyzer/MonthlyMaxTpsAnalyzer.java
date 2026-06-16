@@ -26,8 +26,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
+import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.model.entity.Machine;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
@@ -36,7 +36,7 @@ import com.dianping.cat.consumer.transaction.model.transform.BaseVisitor;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.page.transaction.service.TransactionReportService;
 
-public class MonthlyMaxTpsAnalyzer extends ComponentTestCase {
+public class MonthlyMaxTpsAnalyzer extends SpringCatHomeTestSupport {
 
 	private String m_start = "2013-08-23 16:00";
 

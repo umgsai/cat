@@ -3,17 +3,17 @@ package com.dianping.cat.message.pipeline;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.cat.ComponentTestCase;
+import com.dianping.cat.CatClientTestSupport;
 import com.dianping.cat.message.internal.DefaultMessageTree;
 
-public class MessagePipelineTest extends ComponentTestCase {
+public class MessagePipelineTest extends CatClientTestSupport {
 	private int m_count;
 
 	@Test
 	public void test() {
-		context().registerComponent(MessageHandler.class, new CounterHandler());
+		componentContext().registerComponent(MessageHandler.class, new CounterHandler());
 
-		MessagePipeline pipeline = lookup(MessagePipeline.class);
+		MessagePipeline pipeline = componentContext().lookup(MessagePipeline.class);
 		DefaultMessageTree tree = new DefaultMessageTree(null);
 		MessageHandlerContext ctx = pipeline.headContext(tree);
 

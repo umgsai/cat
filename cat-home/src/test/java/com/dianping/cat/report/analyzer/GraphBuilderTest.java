@@ -22,8 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
+import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
@@ -40,7 +40,7 @@ import com.dianping.cat.report.page.state.task.StateReportBuilder.ClearDetailInf
 import com.dianping.cat.report.page.statistics.task.utilization.UtilizationReportBuilder;
 import com.dianping.cat.report.page.transaction.task.TransactionReportBuilder;
 
-public class GraphBuilderTest extends ComponentTestCase {
+public class GraphBuilderTest extends SpringCatHomeTestSupport {
 
 	@Test
 	public void test() throws Exception {

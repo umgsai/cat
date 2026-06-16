@@ -23,8 +23,8 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
+import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.alarm.spi.sender.MailSender;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
@@ -32,7 +32,7 @@ import com.dianping.cat.alarm.spi.sender.Sender;
 import com.dianping.cat.alarm.spi.sender.SmsSender;
 import com.dianping.cat.alarm.spi.sender.WeixinSender;
 
-public class SenderTest extends ComponentTestCase {
+public class SenderTest extends SpringCatHomeTestSupport {
 
 	@Test
 	public void test() {

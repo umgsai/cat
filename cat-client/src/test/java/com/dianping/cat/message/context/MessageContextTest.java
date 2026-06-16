@@ -2,14 +2,25 @@ package com.dianping.cat.message.context;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.dianping.cat.ComponentTestCase;
 import com.dianping.cat.message.Transaction;
 
-public class MessageContextTest extends ComponentTestCase {
+public class MessageContextTest {
+	@Before
+	public void setUp() {
+		TraceContextHelper.reset();
+	}
+
+	@After
+	public void tearDown() {
+		TraceContextHelper.reset();
+	}
+
 	@Test
 	public void testInstrument() {
 		int index = 1;

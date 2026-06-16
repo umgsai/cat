@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
+import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
 
-public class SenderManagerTest extends ComponentTestCase {
+public class SenderManagerTest extends SpringCatHomeTestSupport {
 
 	@Test
 	public void test() {

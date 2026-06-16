@@ -5,10 +5,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.ComponentTestCase;
+import com.dianping.cat.CatClientTestSupport;
 import com.dianping.cat.message.Metric.Kind;
 
-public class MetricTest extends ComponentTestCase {
+public class MetricTest extends CatClientTestSupport {
 	@After
 	public void after() {
 		MetricAssert.reset();
@@ -18,7 +18,7 @@ public class MetricTest extends ComponentTestCase {
 	public void before() throws Exception {
 		Cat.getBootstrap().testMode();
 
-		MetricAssert.intercept(context());
+		MetricAssert.intercept(componentContext());
 	}
 
 	@Test

@@ -22,12 +22,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.report.page.business.task.BusinessBaselineReportBuilder;
+import com.dianping.cat.report.task.SpringTaskTestSupport;
 import com.dianping.cat.report.task.TaskBuilder;
 
-public class BusinessBaseLineCreatorTest extends ComponentTestCase {
+public class BusinessBaseLineCreatorTest extends SpringTaskTestSupport {
 
 	@Test
 	public void testCreateData() throws ParseException {

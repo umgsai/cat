@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dianping.cat.ComponentTestCase;
+import com.dianping.cat.CatClientTestSupport;
 import com.dianping.cat.configuration.ConfigureManager;
 import com.dianping.cat.configuration.ConfigureProperty;
 import com.dianping.cat.configuration.DefaultConfigureManager;
@@ -23,17 +23,17 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-public class ClientTransportManagerTest extends ComponentTestCase {
+public class ClientTransportManagerTest extends CatClientTestSupport {
 	private List<Integer> m_ports = new ArrayList<>();
 
 	@Before
 	public void before() {
-		context().registerComponent(ConfigureManager.class, new MockConfigureManager());
+		componentContext().registerComponent(ConfigureManager.class, new MockConfigureManager());
 	}
 
 	@Test
 	public void testReconfigure() throws Exception {
-		ClientTransportManager manager = lookup(ClientTransportManager.class);
+		ClientTransportManager manager = componentContext().lookup(ClientTransportManager.class);
 		Server s2290 = new Server(manager, 2290);
 		Server s2291 = new Server(manager, 2291);
 		Server s2292 = new Server(manager, 2292);

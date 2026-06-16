@@ -19,11 +19,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.cat.ComponentTestCase;
 import com.dianping.cat.support.Files;
 import com.dianping.cat.support.Threads;
 
-public class MessageIdFactoryTest extends ComponentTestCase {
+public class MessageIdFactoryTest {
 	/**
 	 * Run it multiple times in console to simulate multiple processes scenario,
 	 * 

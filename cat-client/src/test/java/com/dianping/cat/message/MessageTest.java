@@ -18,14 +18,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.ComponentTestCase;
+import com.dianping.cat.CatClientTestSupport;
 import com.dianping.cat.message.MessageAssert.TransactionAssert;
 import com.dianping.cat.message.context.MessageIdFactory;
 import com.dianping.cat.message.context.TraceContextHelper;
 import com.dianping.cat.message.internal.DefaultForkedTransaction;
 import com.dianping.cat.message.internal.DefaultTransaction;
 
-public class MessageTest extends ComponentTestCase {
+public class MessageTest extends CatClientTestSupport {
 	private static AtomicInteger s_index = new AtomicInteger();
 
 	private static AtomicInteger s_count = new AtomicInteger();
@@ -41,9 +41,9 @@ public class MessageTest extends ComponentTestCase {
 	public void before() throws Exception {
 		Cat.getBootstrap().testMode();
 
-		MessageAssert.intercept(context());
+		MessageAssert.intercept(componentContext());
 
-		context().registerComponent(MessageIdFactory.class, new MockMessageIdFactory());
+		componentContext().registerComponent(MessageIdFactory.class, new MockMessageIdFactory());
 	}
 
 	private void checkMessageIdUsed(int expected) throws InterruptedException {

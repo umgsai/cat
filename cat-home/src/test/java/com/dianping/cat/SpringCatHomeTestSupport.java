@@ -16,29 +16,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.dianping.cat.report.graph;
+package com.dianping.cat;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import java.util.Map;
 
-import com.dianping.cat.report.graph.svg.DefaultValueTranslater;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-@RunWith(JUnit4.class)
-public class ValueTranslaterTest {
-	@Test
-	public void test() throws Exception {
-		check(1000, 123, 456, 247, 473, 976, 236);
-		check(5, 1, 3, 5);
-		check(0.5, 0.1, 0.3, 0.4);
-		check(0.25, 0.01, 0.2, 0.1);
+import com.dianping.cat.home.spring.CatHomeSpringConfiguration;
 
+public abstract class SpringCatHomeTestSupport {
+	private static final AnnotationConfigApplicationContext CONTEXT = new AnnotationConfigApplicationContext(
+			CatHomeSpringConfiguration.class);
+
+	protected <T> T lookup(Class<T> componentType) {
+		return CONTEXT.getBean(componentType);
 	}
 
-	void check(double expected, double... values) throws Exception {
-		DefaultValueTranslater translater = new DefaultValueTranslater();
+	protected <T> T lookup(Class<T> componentType, String componentHint) {
+		return CONTEXT.getBean(componentHint, componentType);
+	}
 
-		Assert.assertEquals(expected, translater.getMaxValue(values), 1e-6);
+	protected <T> Map<String, T> lookupMap(Class<T> componentType) {
+		return CONTEXT.getBeansOfType(componentType);
 	}
 }

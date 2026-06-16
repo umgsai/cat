@@ -23,13 +23,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
+import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertManager;
 import com.dianping.cat.alarm.spi.AlertType;
 
-public class SuspendTest extends ComponentTestCase {
+public class SuspendTest extends SpringCatHomeTestSupport {
 
 	@Test
 	public void test() {

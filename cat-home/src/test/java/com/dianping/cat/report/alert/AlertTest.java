@@ -22,14 +22,14 @@ import java.io.File;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatAlert;
 import com.dianping.cat.report.alert.transaction.TransactionAlert;
 
-public class AlertTest extends ComponentTestCase {
+public class AlertTest extends SpringCatHomeTestSupport {
 
 	@Before
 	public void before() throws Exception {

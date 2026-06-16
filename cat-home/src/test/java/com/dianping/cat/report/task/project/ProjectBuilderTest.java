@@ -23,14 +23,14 @@ import java.text.ParseException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.report.task.SpringTaskTestSupport;
 import com.dianping.cat.report.task.cmdb.ProjectUpdateTask;
 import com.dianping.cat.service.ProjectService;
 
-public class ProjectBuilderTest extends ComponentTestCase {
+public class ProjectBuilderTest extends SpringTaskTestSupport {
 
 	@Before
 	public void before() throws Exception {
