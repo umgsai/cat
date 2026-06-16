@@ -22,11 +22,15 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcHealthController m_healthController;
 
+	private SpringMvcBusinessController m_businessController;
+
 	private SpringMvcHomeController m_homeController;
 
 	private SpringMvcLoginController m_loginController;
 
 	private SpringMvcPluginController m_pluginController;
+
+	private SpringMvcProjectController m_projectController;
 
 	private SpringMvcRouterController m_routerController;
 
@@ -42,10 +46,12 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		if (context == null) {
 			throw new ServletException("CAT home Spring context is not initialized.");
 		}
+		m_businessController = context.getBean(SpringMvcBusinessController.class);
 		m_healthController = context.getBean(SpringMvcHealthController.class);
 		m_homeController = context.getBean(SpringMvcHomeController.class);
 		m_loginController = context.getBean(SpringMvcLoginController.class);
 		m_pluginController = context.getBean(SpringMvcPluginController.class);
+		m_projectController = context.getBean(SpringMvcProjectController.class);
 		m_routerController = context.getBean(SpringMvcRouterController.class);
 		m_routes = buildRoutes();
 	}
@@ -67,8 +73,10 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/health", (request, response) -> writeJson(response, m_healthController.health()));
 		register(routes, "GET", "/r/home", m_homeController::home);
 		register(routes, "GET", "/s/login", m_loginController::login);
+		register(routes, "GET", "/s/business", m_businessController::business);
 		register(routes, "GET", "/s/plugin", m_pluginController::plugin);
 		register(routes, "GET", "/s/plugin/chrome", m_pluginController::chrome);
+		register(routes, "GET", "/s/project", m_projectController::project);
 		register(routes, "GET", "/s/router", m_routerController::router);
 		register(routes, "POST", "/s/login", m_loginController::submit);
 
