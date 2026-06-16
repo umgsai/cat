@@ -1,68 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.generated.weeklyreport.dao.WeeklyreportMapper">
+<mapper namespace="com.dianping.cat.core.mybatis.weeklyreport.dao.WeeklyreportMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.weeklyreport.dao.data.WeeklyreportDO">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="ip" property="ip"/>
+        <result column="domain" property="domain"/>
+        <result column="period" property="period"/>
+        <result column="type" property="type"/>
+        <result column="creation_date" property="creationDate"/>
+    </resultMap>
 
-	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.weeklyreport.dao.data.WeeklyreportDO">
-		<id column="id" property="id"/>
-		<result column="name" property="name"/>
-		<result column="ip" property="ip"/>
-		<result column="domain" property="domain"/>
-		<result column="period" property="period"/>
-		<result column="type" property="type"/>
-		<result column="creation_date" property="creationDate"/>
-	</resultMap>
+    <sql id="Base_Column_List">
+        id ,
+        name ,
+        ip ,
+        domain ,
+        period ,
+        type ,
+        creation_date
+    </sql>
 
-	<sql id="Base_Column_List">
-		id,
-		name,
-		ip,
-		domain,
-		period,
-		type,
-		creation_date
-	</sql>
+    <sql id="setField">
+        <set>
+            <if test="id != null">id = #{id} ,</if>
+            <if test="name != null">name = #{name} ,</if>
+            <if test="ip != null">ip = #{ip} ,</if>
+            <if test="domain != null">domain = #{domain} ,</if>
+            <if test="period != null">period = #{period} ,</if>
+            <if test="type != null">type = #{type} ,</if>
+            <if test="creationDate != null">creation_date = #{creationDate}</if>
+        </set>
+    </sql>
 
-	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.weeklyreport.dao.data.WeeklyreportDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		INSERT INTO weeklyreport
-			(name, ip, domain, period, type, creation_date)
-		VALUES
-			(#{name}, #{ip}, #{domain}, #{period}, #{type}, #{creationDate})
-	</insert>
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id"
+            parameterType="com.dianping.cat.core.mybatis.weeklyreport.dao.data.WeeklyreportDO" keyProperty="id">
+        INSERT INTO weeklyreport
+        <include refid="setField"/>
+    </insert>
 
-	<select id="findByPrimaryKey" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM weeklyreport
-		WHERE id = #{id}
-	</select>
+    <select id="findByPrimaryKey" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from weeklyreport where id = #{id}
+    </select>
 
-	<select id="queryAll" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM weeklyreport
-	</select>
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from weeklyreport
+    </select>
 
-	<delete id="deleteByPrimaryKey">
-		DELETE FROM weeklyreport
-		WHERE id = #{id}
-	</delete>
+    <delete id="deleteByPrimaryKey">
+        delete from weeklyreport where id = #{id}
+    </delete>
 
-	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.weeklyreport.dao.data.WeeklyreportDO">
-		UPDATE weeklyreport
-		SET name = #{name},
-			ip = #{ip},
-			domain = #{domain},
-			period = #{period},
-			type = #{type},
-			creation_date = #{creationDate}
-		WHERE id = #{id}
-	</update>
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.weeklyreport.dao.data.WeeklyreportDO">
+        UPDATE weeklyreport
+        <include refid="setField"/>
+        WHERE id = #{id}
+    </update>
 
-	<select id="findReportByDomainNamePeriod" resultMap="BaseResultMap">
-		SELECT id, name, ip, domain, period, type, creation_date FROM weeklyreport WHERE period = #{record.period} AND domain = #{record.domain} AND name = #{record.name} AND binary(domain) = binary(#{record.domain})
-	</select>
+    <select id="findReportByDomainNamePeriod" resultMap="BaseResultMap">
+        select id, name, ip, domain, period, type, creation_date from weeklyreport where period = #{record.period} and domain = #{record.domain} and name = #{record.name} and binary(domain) = binary(#{record.domain})
+    </select>
 
-	<delete id="deleteReportByDomainNamePeriod">
-		DELETE FROM weeklyreport WHERE period = #{record.period} AND domain = #{record.domain} AND name = #{record.name}
-	</delete>
+    <delete id="deleteReportByDomainNamePeriod">
+        DELETE from weeklyreport where period = #{record.period} and domain = #{record.domain} and name = #{record.name}
+    </delete>
+
 </mapper>

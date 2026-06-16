@@ -1,8 +1,8 @@
 package com.dianping.cat.core.mybatis.repository.metric.graph;
 
 import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
-import com.dianping.cat.core.mybatis.generated.metric.graph.dao.MetricGraphMapper;
-import com.dianping.cat.core.mybatis.generated.metric.graph.dao.data.MetricGraphDO;
+import com.dianping.cat.core.mybatis.metric.graph.dao.MetricGraphMapper;
+import com.dianping.cat.core.mybatis.metric.graph.dao.data.MetricGraphDO;
 import com.dianping.cat.home.dal.report.MetricGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

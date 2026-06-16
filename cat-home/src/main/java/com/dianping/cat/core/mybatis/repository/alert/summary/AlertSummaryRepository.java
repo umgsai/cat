@@ -1,8 +1,8 @@
 package com.dianping.cat.core.mybatis.repository.alert.summary;
 
 import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
-import com.dianping.cat.core.mybatis.generated.alert.summary.dao.AlertSummaryMapper;
-import com.dianping.cat.core.mybatis.generated.alert.summary.dao.data.AlertSummaryDO;
+import com.dianping.cat.core.mybatis.alert.summary.dao.AlertSummaryMapper;
+import com.dianping.cat.core.mybatis.alert.summary.dao.data.AlertSummaryDO;
 import com.dianping.cat.home.dal.report.AlertSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

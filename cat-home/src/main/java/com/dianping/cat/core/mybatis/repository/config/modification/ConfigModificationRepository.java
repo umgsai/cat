@@ -1,8 +1,8 @@
 package com.dianping.cat.core.mybatis.repository.config.modification;
 
 import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
-import com.dianping.cat.core.mybatis.generated.config.modification.dao.ConfigModificationMapper;
-import com.dianping.cat.core.mybatis.generated.config.modification.dao.data.ConfigModificationDO;
+import com.dianping.cat.core.mybatis.config.modification.dao.ConfigModificationMapper;
+import com.dianping.cat.core.mybatis.config.modification.dao.data.ConfigModificationDO;
 import com.dianping.cat.home.dal.report.ConfigModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -11,8 +11,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.mybatis.generated.daily.report.content.dao.DailyReportContentMapper;
-import com.dianping.cat.core.mybatis.generated.daily.report.content.dao.data.DailyReportContentDO;
+import com.dianping.cat.core.mybatis.daily.report.content.dao.DailyReportContentMapper;
+import com.dianping.cat.core.mybatis.daily.report.content.dao.data.DailyReportContentDO;
 
 public class DailyReportContentRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DailyReportContentRepository.class);

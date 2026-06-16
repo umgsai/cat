@@ -9,8 +9,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.mybatis.generated.monthreport.dao.MonthreportMapper;
-import com.dianping.cat.core.mybatis.generated.monthreport.dao.data.MonthreportDO;
+import com.dianping.cat.core.mybatis.monthreport.dao.MonthreportMapper;
+import com.dianping.cat.core.mybatis.monthreport.dao.data.MonthreportDO;
 
 public class MonthlyReportRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MonthlyReportRepository.class);

@@ -1,8 +1,8 @@
 package com.dianping.cat.core.mybatis.repository.server.alarm.rule;
 
 import com.dianping.cat.alarm.ServerAlarmRule;
-import com.dianping.cat.core.mybatis.generated.server.alarm.rule.dao.ServerAlarmRuleMapper;
-import com.dianping.cat.core.mybatis.generated.server.alarm.rule.dao.data.ServerAlarmRuleDO;
+import com.dianping.cat.core.mybatis.server.alarm.rule.dao.ServerAlarmRuleMapper;
+import com.dianping.cat.core.mybatis.server.alarm.rule.dao.data.ServerAlarmRuleDO;
 import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -11,8 +11,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.MonthlyReportContent;
-import com.dianping.cat.core.mybatis.generated.monthly.report.content.dao.MonthlyReportContentMapper;
-import com.dianping.cat.core.mybatis.generated.monthly.report.content.dao.data.MonthlyReportContentDO;
+import com.dianping.cat.core.mybatis.monthly.report.content.dao.MonthlyReportContentMapper;
+import com.dianping.cat.core.mybatis.monthly.report.content.dao.data.MonthlyReportContentDO;
 
 public class MonthlyReportContentRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MonthlyReportContentRepository.class);

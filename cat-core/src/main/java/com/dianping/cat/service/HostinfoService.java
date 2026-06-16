@@ -112,10 +112,10 @@ public class HostinfoService {
 	}
 
 	private boolean insert(Hostinfo hostinfo) {
-		m_hostinfos.put(hostinfo.getIp(), hostinfo);
-
 		int result = m_hostinfoDao.insert(hostinfo);
+
 		if (result == 1) {
+			m_hostinfos.put(hostinfo.getIp(), hostinfo);
 			return true;
 		} else {
 			return false;
@@ -130,10 +130,13 @@ public class HostinfoService {
 
 			info.setDomain(domain);
 			info.setIp(ip);
-			insert(info);
-			m_hostinfos.put(ip, info);
-			SLF4J_LOGGER.info("Inserted hostinfo, domain={}, ip={}.", domain, ip);
-			return true;
+			boolean inserted = insert(info);
+
+			if (inserted) {
+				SLF4J_LOGGER.info("Inserted hostinfo, domain={}, ip={}.", domain, ip);
+				return true;
+			}
+			SLF4J_LOGGER.warn("Hostinfo insert affected no rows, domain={}, ip={}.", domain, ip);
 		} catch (RuntimeException e) {
 			SLF4J_LOGGER.error("Unable to insert hostinfo, domain={}, ip={}.", domain, ip, e);
 			Cat.logError(e);

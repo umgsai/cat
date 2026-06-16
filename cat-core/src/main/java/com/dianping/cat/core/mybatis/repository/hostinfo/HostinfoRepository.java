@@ -1,5 +1,6 @@
 package com.dianping.cat.core.mybatis.repository.hostinfo;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -11,8 +12,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.Hostinfo;
-import com.dianping.cat.core.mybatis.generated.hostinfo.dao.HostinfoMapper;
-import com.dianping.cat.core.mybatis.generated.hostinfo.dao.data.HostinfoDO;
+import com.dianping.cat.core.mybatis.hostinfo.dao.HostinfoMapper;
+import com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO;
 
 public class HostinfoRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HostinfoRepository.class);
@@ -59,6 +60,15 @@ public class HostinfoRepository {
 
 	public int insert(Hostinfo proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		Date now = new Date();
+
+		if (proto.getCreationDate() == null) {
+			proto.setCreationDate(now);
+		}
+		if (proto.getLastModifiedDate() == null) {
+			proto.setLastModifiedDate(now);
+		}
 
 		HostinfoDO record = toRecord(proto);
 		int count = transactionTemplate.execute(status -> springMapper().insert(record));

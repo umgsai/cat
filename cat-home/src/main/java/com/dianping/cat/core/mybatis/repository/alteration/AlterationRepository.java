@@ -1,8 +1,8 @@
 package com.dianping.cat.core.mybatis.repository.alteration;
 
 import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
-import com.dianping.cat.core.mybatis.generated.alteration.dao.AlterationMapper;
-import com.dianping.cat.core.mybatis.generated.alteration.dao.data.AlterationDO;
+import com.dianping.cat.core.mybatis.alteration.dao.AlterationMapper;
+import com.dianping.cat.core.mybatis.alteration.dao.data.AlterationDO;
 import com.dianping.cat.home.dal.report.Alteration;
 import java.util.List;
 import java.util.stream.Collectors;

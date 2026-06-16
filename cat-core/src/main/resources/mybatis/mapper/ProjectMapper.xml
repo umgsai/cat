@@ -1,84 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.generated.project.dao.ProjectMapper">
+<mapper namespace="com.dianping.cat.core.mybatis.project.dao.ProjectMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.project.dao.data.ProjectDO">
+        <result column="id" property="id"/>
+        <result column="domain" property="domain"/>
+        <result column="cmdb_domain" property="cmdbDomain"/>
+        <result column="level" property="level"/>
+        <result column="bu" property="bu"/>
+        <result column="cmdb_productline" property="cmdbProductline"/>
+        <result column="owner" property="owner"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="creation_date" property="creationDate"/>
+        <result column="modify_date" property="modifyDate"/>
+    </resultMap>
 
-	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.project.dao.data.ProjectDO">
-		<id column="id" property="id"/>
-		<result column="domain" property="domain"/>
-		<result column="cmdb_domain" property="cmdbDomain"/>
-		<result column="level" property="level"/>
-		<result column="bu" property="bu"/>
-		<result column="cmdb_productline" property="cmdbProductline"/>
-		<result column="owner" property="owner"/>
-		<result column="email" property="email"/>
-		<result column="phone" property="phone"/>
-		<result column="creation_date" property="creationDate"/>
-		<result column="modify_date" property="modifyDate"/>
-	</resultMap>
+    <sql id="Base_Column_List">
+        id ,
+        domain ,
+        cmdb_domain ,
+        level ,
+        bu ,
+        cmdb_productline ,
+        owner ,
+        email ,
+        phone ,
+        creation_date ,
+        modify_date
+    </sql>
 
-	<sql id="Base_Column_List">
-		id,
-		domain,
-		cmdb_domain,
-		level,
-		bu,
-		cmdb_productline,
-		owner,
-		email,
-		phone,
-		creation_date,
-		modify_date
-	</sql>
+    <sql id="setField">
+        <set>
+            <if test="id != null">id = #{id} ,</if>
+            <if test="domain != null">domain = #{domain} ,</if>
+            <if test="cmdbDomain != null">cmdb_domain = #{cmdbDomain} ,</if>
+            <if test="level != null">level = #{level} ,</if>
+            <if test="bu != null">bu = #{bu} ,</if>
+            <if test="cmdbProductline != null">cmdb_productline = #{cmdbProductline} ,</if>
+            <if test="owner != null">owner = #{owner} ,</if>
+            <if test="email != null">email = #{email} ,</if>
+            <if test="phone != null">phone = #{phone} ,</if>
+            <if test="creationDate != null">creation_date = #{creationDate} ,</if>
+            <if test="modifyDate != null">modify_date = #{modifyDate}</if>
+        </set>
+    </sql>
 
-	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.project.dao.data.ProjectDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		INSERT INTO project
-			(domain, cmdb_domain, level, bu, cmdb_productline, owner, email, phone, creation_date, modify_date)
-		VALUES
-			(#{domain}, #{cmdbDomain}, #{level}, #{bu}, #{cmdbProductline}, #{owner}, #{email}, #{phone}, #{creationDate}, #{modifyDate})
-	</insert>
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id"
+            parameterType="com.dianping.cat.core.mybatis.project.dao.data.ProjectDO" keyProperty="id">
+        INSERT INTO project
+        <include refid="setField"/>
+    </insert>
 
-	<select id="findByPrimaryKey" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM project
-		WHERE id = #{id}
-	</select>
+    <select id="findByPrimaryKey" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project where id = #{id}
+    </select>
 
-	<select id="queryAll" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM project
-	</select>
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project
+    </select>
 
-	<delete id="deleteByPrimaryKey">
-		DELETE FROM project
-		WHERE id = #{id}
-	</delete>
+    <delete id="deleteByPrimaryKey">
+        delete from project where id = #{id}
+    </delete>
 
-	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.project.dao.data.ProjectDO">
-		UPDATE project
-		SET domain = #{domain},
-			cmdb_domain = #{cmdbDomain},
-			level = #{level},
-			bu = #{bu},
-			cmdb_productline = #{cmdbProductline},
-			owner = #{owner},
-			email = #{email},
-			phone = #{phone},
-			creation_date = #{creationDate},
-			modify_date = #{modifyDate}
-		WHERE id = #{id}
-	</update>
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.project.dao.data.ProjectDO">
+        UPDATE project
+        <include refid="setField"/>
+        WHERE id = #{id}
+    </update>
 
-	<select id="findAll" resultMap="BaseResultMap">
-		SELECT id, domain, cmdb_domain, level, bu, cmdb_productline, owner, email, phone, creation_date, modify_date FROM project
-	</select>
+    <select id="findAll" resultMap="BaseResultMap">
+        select id, domain, cmdb_domain, level, bu, cmdb_productline, owner, email, phone, creation_date, modify_date from project
+    </select>
 
-	<select id="findByDomain" resultMap="BaseResultMap">
-		SELECT id, domain, cmdb_domain, level, bu, cmdb_productline, owner, email, phone, creation_date, modify_date FROM project WHERE binary(domain) = binary(#{record.domain})
-	</select>
+    <select id="findByDomain" resultMap="BaseResultMap">
+        select id, domain, cmdb_domain, level, bu, cmdb_productline, owner, email, phone, creation_date, modify_date from project where binary(domain) = binary(#{record.domain})
+    </select>
 
-	<select id="findByCmdbDomain" resultMap="BaseResultMap">
-		SELECT id, domain, cmdb_domain, level, bu, cmdb_productline, owner, email, phone, creation_date, modify_date FROM project WHERE binary(cmdb_domain) = binary(#{record.domain})
-	</select>
+    <select id="findByCmdbDomain" resultMap="BaseResultMap">
+        select id, domain, cmdb_domain, level, bu, cmdb_productline, owner, email, phone, creation_date, modify_date from project where binary(cmdb_domain) = binary(#{record.domain})
+    </select>
+
 </mapper>

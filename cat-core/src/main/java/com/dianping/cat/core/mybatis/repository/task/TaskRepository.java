@@ -9,8 +9,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.Task;
-import com.dianping.cat.core.mybatis.generated.task.dao.TaskMapper;
-import com.dianping.cat.core.mybatis.generated.task.dao.data.TaskDO;
+import com.dianping.cat.core.mybatis.task.dao.TaskMapper;
+import com.dianping.cat.core.mybatis.task.dao.data.TaskDO;
 
 public class TaskRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TaskRepository.class);

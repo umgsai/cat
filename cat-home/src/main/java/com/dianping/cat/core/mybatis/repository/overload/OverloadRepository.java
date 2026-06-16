@@ -1,8 +1,8 @@
 package com.dianping.cat.core.mybatis.repository.overload;
 
 import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
-import com.dianping.cat.core.mybatis.generated.overload.dao.OverloadMapper;
-import com.dianping.cat.core.mybatis.generated.overload.dao.data.OverloadDO;
+import com.dianping.cat.core.mybatis.overload.dao.OverloadMapper;
+import com.dianping.cat.core.mybatis.overload.dao.data.OverloadDO;
 import com.dianping.cat.home.dal.report.Overload;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,62 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dianping.cat.core.config.dao.ConfigMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.config.dao.data.ConfigDO">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="content" property="content"/>
+        <result column="creation_date" property="creationDate"/>
+        <result column="modify_date" property="modifyDate"/>
+    </resultMap>
 
-	<resultMap id="BaseResultMap" type="com.dianping.cat.core.config.dao.data.ConfigDO">
-		<id column="id" property="id"/>
-		<result column="name" property="name"/>
-		<result column="content" property="content"/>
-		<result column="creation_date" property="creationDate"/>
-		<result column="modify_date" property="modifyDate"/>
-	</resultMap>
+    <sql id="Base_Column_List">
+        id ,
+        name ,
+        content ,
+        creation_date ,
+        modify_date
+    </sql>
 
-	<sql id="Base_Column_List">
-		id,
-		name,
-		content,
-		creation_date,
-		modify_date
-	</sql>
+    <sql id="setField">
+        <set>
+            <if test="id != null">id = #{id} ,</if>
+            <if test="name != null">name = #{name} ,</if>
+            <if test="content != null">content = #{content} ,</if>
+            <if test="creationDate != null">creation_date = #{creationDate} ,</if>
+            <if test="modifyDate != null">modify_date = #{modifyDate}</if>
+        </set>
+    </sql>
 
-	<insert id="insert" parameterType="com.dianping.cat.core.config.dao.data.ConfigDO"
-			useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		INSERT INTO config
-			(name, content, creation_date, modify_date)
-		VALUES
-			(#{name}, #{content}, NOW(), NOW())
-	</insert>
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id"
+            parameterType="com.dianping.cat.core.config.dao.data.ConfigDO" keyProperty="id">
+        INSERT INTO config
+        <include refid="setField"/>
+    </insert>
 
-	<select id="findById" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM config
-		WHERE id = #{id}
-	</select>
+    <select id="findById" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from config where id = #{id}
+    </select>
 
-	<select id="findByName" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM config
-		WHERE name = #{name}
-	</select>
+    <select id="findByName" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from config
+        where name = #{name}
+    </select>
 
-	<select id="queryAll" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM config
-	</select>
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from config
+    </select>
 
-	<delete id="deleteById">
-		DELETE FROM config
-		WHERE id = #{id}
-	</delete>
+    <delete id="deleteById">
+        delete from config where id = #{id}
+    </delete>
 
-	<update id="updateById" parameterType="com.dianping.cat.core.config.dao.data.ConfigDO">
-		UPDATE config
-		SET name = #{name},
-			content = #{content},
-			modify_date = NOW()
-		WHERE id = #{id}
-	</update>
+    <update id="updateById" parameterType="com.dianping.cat.core.config.dao.data.ConfigDO">
+        UPDATE config
+        <include refid="setField"/>
+        WHERE id = #{id}
+    </update>
 
 </mapper>

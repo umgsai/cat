@@ -1,8 +1,8 @@
 package com.dianping.cat.core.mybatis.repository.topologygraph;
 
 import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
-import com.dianping.cat.core.mybatis.generated.topologygraph.dao.TopologyGraphMapper;
-import com.dianping.cat.core.mybatis.generated.topologygraph.dao.data.TopologyGraphDO;
+import com.dianping.cat.core.mybatis.topologygraph.dao.TopologyGraphMapper;
+import com.dianping.cat.core.mybatis.topologygraph.dao.data.TopologyGraphDO;
 import com.dianping.cat.home.dal.report.TopologyGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,5 +1,6 @@
 package com.dianping.cat.core.config.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -53,6 +54,14 @@ public class ConfigRepository {
 
 	public int insert(Config proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
+		Date now = new Date();
+
+		if (proto.getCreationDate() == null) {
+			proto.setCreationDate(now);
+		}
+		if (proto.getModifyDate() == null) {
+			proto.setModifyDate(now);
+		}
 
 		ConfigDO config = toConfigDO(proto);
 		int count = transactionTemplate.execute(status -> springMapper().insert(config));
@@ -65,6 +74,7 @@ public class ConfigRepository {
 	public int updateByPK(Config proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
+		proto.setModifyDate(new Date());
 		return transactionTemplate.execute(status -> springMapper().updateById(toConfigDO(proto)));
 	}
 

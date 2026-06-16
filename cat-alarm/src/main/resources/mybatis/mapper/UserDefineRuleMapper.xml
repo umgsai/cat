@@ -1,53 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.generated.user.define.rule.dao.UserDefineRuleMapper">
+<mapper namespace="com.dianping.cat.core.mybatis.user.define.rule.dao.UserDefineRuleMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.user.define.rule.dao.data.UserDefineRuleDO">
+        <result column="id" property="id"/>
+        <result column="content" property="content"/>
+        <result column="creation_date" property="creationDate"/>
+        <result column="max_id" property="maxId"/>
+    </resultMap>
 
-	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.user.define.rule.dao.data.UserDefineRuleDO">
-		<id column="id" property="id"/>
-		<result column="content" property="content"/>
-		<result column="creation_date" property="creationDate"/>
-		<result column="max_id" property="maxId"/>
-	</resultMap>
+    <sql id="Base_Column_List">
+        id ,
+        content ,
+        creation_date
+    </sql>
 
-	<sql id="Base_Column_List">
-		id,
-		content,
-		creation_date
-	</sql>
+    <sql id="setField">
+        <set>
+            <if test="id != null">id = #{id} ,</if>
+            <if test="content != null">content = #{content} ,</if>
+            <if test="creationDate != null">creation_date = #{creationDate}</if>
+        </set>
+    </sql>
 
-	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.user.define.rule.dao.data.UserDefineRuleDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		INSERT INTO user_define_rule
-			(content, creation_date)
-		VALUES
-			(#{content}, #{creationDate})
-	</insert>
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id"
+            parameterType="com.dianping.cat.core.mybatis.user.define.rule.dao.data.UserDefineRuleDO" keyProperty="id">
+        INSERT INTO user_define_rule
+        <include refid="setField"/>
+    </insert>
 
-	<select id="findByPrimaryKey" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM user_define_rule
-		WHERE id = #{id}
-	</select>
+    <select id="findByPrimaryKey" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from user_define_rule where id = #{id}
+    </select>
 
-	<select id="queryAll" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM user_define_rule
-	</select>
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from user_define_rule
+    </select>
 
-	<delete id="deleteByPrimaryKey">
-		DELETE FROM user_define_rule
-		WHERE id = #{id}
-	</delete>
+    <delete id="deleteByPrimaryKey">
+        delete from user_define_rule where id = #{id}
+    </delete>
 
-	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.user.define.rule.dao.data.UserDefineRuleDO">
-		UPDATE user_define_rule
-		SET content = #{content},
-			creation_date = #{creationDate}
-		WHERE id = #{id}
-	</update>
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.user.define.rule.dao.data.UserDefineRuleDO">
+        UPDATE user_define_rule
+        <include refid="setField"/>
+        WHERE id = #{id}
+    </update>
 
-	<select id="findMaxId" resultMap="BaseResultMap">
-		SELECT id, content, creation_date, max(id) AS max_id FROM user_define_rule
-	</select>
+    <select id="findMaxId" resultMap="BaseResultMap">
+        select id, content, creation_date, max(id) AS max_id from user_define_rule
+    </select>
+
 </mapper>

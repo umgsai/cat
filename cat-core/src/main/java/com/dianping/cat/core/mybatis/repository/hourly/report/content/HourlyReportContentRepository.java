@@ -11,8 +11,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.mybatis.generated.hourly.report.content.dao.HourlyReportContentMapper;
-import com.dianping.cat.core.mybatis.generated.hourly.report.content.dao.data.HourlyReportContentDO;
+import com.dianping.cat.core.mybatis.hourly.report.content.dao.HourlyReportContentMapper;
+import com.dianping.cat.core.mybatis.hourly.report.content.dao.data.HourlyReportContentDO;
 
 public class HourlyReportContentRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HourlyReportContentRepository.class);

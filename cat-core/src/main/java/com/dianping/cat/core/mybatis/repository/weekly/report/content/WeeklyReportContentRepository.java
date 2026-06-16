@@ -11,8 +11,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.WeeklyReportContent;
-import com.dianping.cat.core.mybatis.generated.weekly.report.content.dao.WeeklyReportContentMapper;
-import com.dianping.cat.core.mybatis.generated.weekly.report.content.dao.data.WeeklyReportContentDO;
+import com.dianping.cat.core.mybatis.weekly.report.content.dao.WeeklyReportContentMapper;
+import com.dianping.cat.core.mybatis.weekly.report.content.dao.data.WeeklyReportContentDO;
 
 public class WeeklyReportContentRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WeeklyReportContentRepository.class);

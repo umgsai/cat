@@ -1,94 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.generated.alteration.dao.AlterationMapper">
+<mapper namespace="com.dianping.cat.core.mybatis.alteration.dao.AlterationMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.alteration.dao.data.AlterationDO">
+        <result column="id" property="id"/>
+        <result column="type" property="type"/>
+        <result column="title" property="title"/>
+        <result column="domain" property="domain"/>
+        <result column="hostname" property="hostname"/>
+        <result column="ip" property="ip"/>
+        <result column="date" property="date"/>
+        <result column="user" property="user"/>
+        <result column="alt_group" property="altGroup"/>
+        <result column="content" property="content"/>
+        <result column="url" property="url"/>
+        <result column="status" property="status"/>
+        <result column="creation_date" property="creationDate"/>
+    </resultMap>
 
-	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.alteration.dao.data.AlterationDO">
-		<id column="id" property="id"/>
-		<result column="type" property="type"/>
-		<result column="title" property="title"/>
-		<result column="domain" property="domain"/>
-		<result column="hostname" property="hostname"/>
-		<result column="ip" property="ip"/>
-		<result column="date" property="date"/>
-		<result column="user" property="user"/>
-		<result column="alt_group" property="altGroup"/>
-		<result column="content" property="content"/>
-		<result column="url" property="url"/>
-		<result column="status" property="status"/>
-		<result column="creation_date" property="creationDate"/>
-	</resultMap>
+    <sql id="Base_Column_List">
+        id ,
+        type ,
+        title ,
+        domain ,
+        hostname ,
+        ip ,
+        date ,
+        user ,
+        alt_group ,
+        content ,
+        url ,
+        status ,
+        creation_date
+    </sql>
 
-	<sql id="Base_Column_List">
-		id,
-		type,
-		title,
-		domain,
-		hostname,
-		ip,
-		date,
-		user,
-		alt_group,
-		content,
-		url,
-		status,
-		creation_date
-	</sql>
+    <sql id="setField">
+        <set>
+            <if test="id != null">id = #{id} ,</if>
+            <if test="type != null">type = #{type} ,</if>
+            <if test="title != null">title = #{title} ,</if>
+            <if test="domain != null">domain = #{domain} ,</if>
+            <if test="hostname != null">hostname = #{hostname} ,</if>
+            <if test="ip != null">ip = #{ip} ,</if>
+            <if test="date != null">date = #{date} ,</if>
+            <if test="user != null">user = #{user} ,</if>
+            <if test="altGroup != null">alt_group = #{altGroup} ,</if>
+            <if test="content != null">content = #{content} ,</if>
+            <if test="url != null">url = #{url} ,</if>
+            <if test="status != null">status = #{status} ,</if>
+            <if test="creationDate != null">creation_date = #{creationDate}</if>
+        </set>
+    </sql>
 
-	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.alteration.dao.data.AlterationDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		INSERT INTO alteration
-			(type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date)
-		VALUES
-			(#{type}, #{title}, #{domain}, #{hostname}, #{ip}, #{date}, #{user}, #{altGroup}, #{content}, #{url}, #{status}, #{creationDate})
-	</insert>
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id"
+            parameterType="com.dianping.cat.core.mybatis.alteration.dao.data.AlterationDO" keyProperty="id">
+        INSERT INTO alteration
+        <include refid="setField"/>
+    </insert>
 
-	<select id="findByPrimaryKey" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM alteration
-		WHERE id = #{id}
-	</select>
+    <select id="findByPrimaryKey" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from alteration where id = #{id}
+    </select>
 
-	<select id="queryAll" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM alteration
-	</select>
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from alteration
+    </select>
 
-	<delete id="deleteByPrimaryKey">
-		DELETE FROM alteration
-		WHERE id = #{id}
-	</delete>
+    <delete id="deleteByPrimaryKey">
+        delete from alteration where id = #{id}
+    </delete>
 
-	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.alteration.dao.data.AlterationDO">
-		UPDATE alteration
-		SET type = #{type},
-			title = #{title},
-			domain = #{domain},
-			hostname = #{hostname},
-			ip = #{ip},
-			date = #{date},
-			user = #{user},
-			alt_group = #{altGroup},
-			content = #{content},
-			url = #{url},
-			status = #{status},
-			creation_date = #{creationDate}
-		WHERE id = #{id}
-	</update>
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.alteration.dao.data.AlterationDO">
+        UPDATE alteration
+        <include refid="setField"/>
+        WHERE id = #{id}
+    </update>
 
-	<select id="findByTypeDruation" resultMap="BaseResultMap">
-		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date &lt;= #{record.endTime} <if test="record.type != null"> AND type = #{record.type} </if> ORDER BY date desc
-	</select>
+    <select id="findByTypeDruation" resultMap="BaseResultMap">
+        select id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date from alteration where date >= #{record.startTime} and date &lt;= #{record.endTime} <if test="record.type != null"> and type = #{record.type} </if> order by date desc
+    </select>
 
-	<select id="findByDtdh" resultMap="BaseResultMap">
-		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date &lt;= #{record.endTime} <if test="record.type != null"> AND type = #{record.type} </if> <if test="record.domain != null"> AND domain = #{record.domain} </if> <if test="record.hostname != null"> AND hostname = #{record.hostname} </if> ORDER BY date desc
-	</select>
+    <select id="findByDtdh" resultMap="BaseResultMap">
+        select id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date from alteration where date >= #{record.startTime} and date &lt;= #{record.endTime} <if test="record.type != null"> and type = #{record.type} </if> <if test="record.domain != null"> and domain = #{record.domain} </if> <if test="record.hostname != null"> and hostname = #{record.hostname} </if> order by date desc
+    </select>
 
-	<select id="findByDtdhTypes" resultMap="BaseResultMap">
-		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date &lt;= #{record.endTime} <if test="record.type != null"> AND type = #{record.type} </if> <if test="record.domain != null"> AND domain = #{record.domain} </if> <if test="record.hostname != null"> AND hostname = #{record.hostname} </if> AND type in <foreach collection="record.types" item="item" open="(" close=")" separator=",">#{item}</foreach> ORDER BY date desc
-	</select>
+    <select id="findByDtdhTypes" resultMap="BaseResultMap">
+        select id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date from alteration where date >= #{record.startTime} and date &lt;= #{record.endTime} <if test="record.type != null"> and type = #{record.type} </if> <if test="record.domain != null"> and domain = #{record.domain} </if> <if test="record.hostname != null"> and hostname = #{record.hostname} </if> and type in <foreach collection="record.types" item="item" open="(" close=")" separator=",">#{item}</foreach> order by date desc
+    </select>
 
-	<select id="findByDomainAndTime" resultMap="BaseResultMap">
-		SELECT id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date FROM alteration WHERE date >= #{record.startTime} AND date &lt;= #{record.endTime} <if test="record.domain != null"> AND domain = #{record.domain} </if> ORDER BY date desc
-	</select>
+    <select id="findByDomainAndTime" resultMap="BaseResultMap">
+        select id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date from alteration where date >= #{record.startTime} and date &lt;= #{record.endTime} <if test="record.domain != null"> and domain = #{record.domain} </if> order by date desc
+    </select>
+
 </mapper>

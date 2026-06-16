@@ -1,61 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.generated.baseline.dao.BaselineMapper">
+<mapper namespace="com.dianping.cat.core.mybatis.baseline.dao.BaselineMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.baseline.dao.data.BaselineDO">
+        <result column="id" property="id"/>
+        <result column="report_name" property="reportName"/>
+        <result column="index_key" property="indexKey"/>
+        <result column="report_period" property="reportPeriod"/>
+        <result column="data" property="data"/>
+        <result column="creation_date" property="creationDate"/>
+    </resultMap>
 
-	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.baseline.dao.data.BaselineDO">
-		<id column="id" property="id"/>
-		<result column="report_name" property="reportName"/>
-		<result column="index_key" property="indexKey"/>
-		<result column="report_period" property="reportPeriod"/>
-		<result column="data" property="data"/>
-		<result column="creation_date" property="creationDate"/>
-	</resultMap>
+    <sql id="Base_Column_List">
+        id ,
+        report_name ,
+        index_key ,
+        report_period ,
+        data ,
+        creation_date
+    </sql>
 
-	<sql id="Base_Column_List">
-		id,
-		report_name,
-		index_key,
-		report_period,
-		data,
-		creation_date
-	</sql>
+    <sql id="setField">
+        <set>
+            <if test="id != null">id = #{id} ,</if>
+            <if test="reportName != null">report_name = #{reportName} ,</if>
+            <if test="indexKey != null">index_key = #{indexKey} ,</if>
+            <if test="reportPeriod != null">report_period = #{reportPeriod} ,</if>
+            <if test="data != null">data = #{data} ,</if>
+            <if test="creationDate != null">creation_date = #{creationDate}</if>
+        </set>
+    </sql>
 
-	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.baseline.dao.data.BaselineDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		INSERT INTO baseline
-			(report_name, index_key, report_period, data, creation_date)
-		VALUES
-			(#{reportName}, #{indexKey}, #{reportPeriod}, #{data}, #{creationDate})
-	</insert>
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id"
+            parameterType="com.dianping.cat.core.mybatis.baseline.dao.data.BaselineDO" keyProperty="id">
+        INSERT INTO baseline
+        <include refid="setField"/>
+    </insert>
 
-	<select id="findByPrimaryKey" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM baseline
-		WHERE id = #{id}
-	</select>
+    <select id="findByPrimaryKey" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from baseline where id = #{id}
+    </select>
 
-	<select id="queryAll" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM baseline
-	</select>
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from baseline
+    </select>
 
-	<delete id="deleteByPrimaryKey">
-		DELETE FROM baseline
-		WHERE id = #{id}
-	</delete>
+    <delete id="deleteByPrimaryKey">
+        delete from baseline where id = #{id}
+    </delete>
 
-	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.baseline.dao.data.BaselineDO">
-		UPDATE baseline
-		SET report_name = #{reportName},
-			index_key = #{indexKey},
-			report_period = #{reportPeriod},
-			data = #{data},
-			creation_date = #{creationDate}
-		WHERE id = #{id}
-	</update>
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.baseline.dao.data.BaselineDO">
+        UPDATE baseline
+        <include refid="setField"/>
+        WHERE id = #{id}
+    </update>
 
-	<select id="findByReportNameKeyTime" resultMap="BaseResultMap">
-		SELECT id, report_name, index_key, report_period, data, creation_date FROM baseline WHERE report_period = #{record.reportPeriod} AND report_name = #{record.reportName} AND index_key = #{record.indexKey}
-	</select>
+    <select id="findByReportNameKeyTime" resultMap="BaseResultMap">
+        select id, report_name, index_key, report_period, data, creation_date from baseline where report_period = #{record.reportPeriod} and report_name = #{record.reportName} and index_key = #{record.indexKey}
+    </select>
+
 </mapper>

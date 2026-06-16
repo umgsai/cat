@@ -1,65 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.generated.hostinfo.dao.HostinfoMapper">
+<mapper namespace="com.dianping.cat.core.mybatis.hostinfo.dao.HostinfoMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO">
+        <result column="id" property="id"/>
+        <result column="ip" property="ip"/>
+        <result column="domain" property="domain"/>
+        <result column="hostname" property="hostname"/>
+        <result column="creation_date" property="creationDate"/>
+        <result column="last_modified_date" property="lastModifiedDate"/>
+    </resultMap>
 
-	<resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.generated.hostinfo.dao.data.HostinfoDO">
-		<id column="id" property="id"/>
-		<result column="ip" property="ip"/>
-		<result column="domain" property="domain"/>
-		<result column="hostname" property="hostname"/>
-		<result column="creation_date" property="creationDate"/>
-		<result column="last_modified_date" property="lastModifiedDate"/>
-	</resultMap>
+    <sql id="Base_Column_List">
+        id ,
+        ip ,
+        domain ,
+        hostname ,
+        creation_date ,
+        last_modified_date
+    </sql>
 
-	<sql id="Base_Column_List">
-		id,
-		ip,
-		domain,
-		hostname,
-		creation_date,
-		last_modified_date
-	</sql>
+    <sql id="setField">
+        <set>
+            <if test="id != null">id = #{id} ,</if>
+            <if test="ip != null">ip = #{ip} ,</if>
+            <if test="domain != null">domain = #{domain} ,</if>
+            <if test="hostname != null">hostname = #{hostname} ,</if>
+            <if test="creationDate != null">creation_date = #{creationDate} ,</if>
+            <if test="lastModifiedDate != null">last_modified_date = #{lastModifiedDate}</if>
+        </set>
+    </sql>
 
-	<insert id="insert" parameterType="com.dianping.cat.core.mybatis.generated.hostinfo.dao.data.HostinfoDO" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		INSERT INTO hostinfo
-			(ip, domain, hostname, creation_date, last_modified_date)
-		VALUES
-			(#{ip}, #{domain}, #{hostname}, #{creationDate}, #{lastModifiedDate})
-	</insert>
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id"
+            parameterType="com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO" keyProperty="id">
+        INSERT INTO hostinfo
+        <include refid="setField"/>
+    </insert>
 
-	<select id="findByPrimaryKey" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM hostinfo
-		WHERE id = #{id}
-	</select>
+    <select id="findByPrimaryKey" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from hostinfo where id = #{id}
+    </select>
 
-	<select id="queryAll" resultMap="BaseResultMap">
-		SELECT
-		<include refid="Base_Column_List"/>
-		FROM hostinfo
-	</select>
+    <select id="queryAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from hostinfo
+    </select>
 
-	<delete id="deleteByPrimaryKey">
-		DELETE FROM hostinfo
-		WHERE id = #{id}
-	</delete>
+    <delete id="deleteByPrimaryKey">
+        delete from hostinfo where id = #{id}
+    </delete>
 
-	<update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.generated.hostinfo.dao.data.HostinfoDO">
-		UPDATE hostinfo
-		SET ip = #{ip},
-			domain = #{domain},
-			hostname = #{hostname},
-			creation_date = #{creationDate},
-			last_modified_date = #{lastModifiedDate}
-		WHERE id = #{id}
-	</update>
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO">
+        UPDATE hostinfo
+        <include refid="setField"/>
+        WHERE id = #{id}
+    </update>
 
-	<select id="findByIp" resultMap="BaseResultMap">
-		SELECT id, ip, domain, hostname, creation_date, last_modified_date FROM hostinfo WHERE ip = #{record.ip}
-	</select>
+    <select id="findByIp" resultMap="BaseResultMap">
+        select id, ip, domain, hostname, creation_date, last_modified_date from hostinfo where ip = #{record.ip}
+    </select>
 
-	<select id="findAllIp" resultMap="BaseResultMap">
-		SELECT id, ip, domain, hostname, creation_date, last_modified_date FROM hostinfo
-	</select>
+    <select id="findAllIp" resultMap="BaseResultMap">
+        select id, ip, domain, hostname, creation_date, last_modified_date from hostinfo
+    </select>
+
 </mapper>

@@ -1,8 +1,8 @@
 package com.dianping.cat.core.mybatis.repository.baseline;
 
 import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
-import com.dianping.cat.core.mybatis.generated.baseline.dao.BaselineMapper;
-import com.dianping.cat.core.mybatis.generated.baseline.dao.data.BaselineDO;
+import com.dianping.cat.core.mybatis.baseline.dao.BaselineMapper;
+import com.dianping.cat.core.mybatis.baseline.dao.data.BaselineDO;
 import com.dianping.cat.home.dal.report.Baseline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
