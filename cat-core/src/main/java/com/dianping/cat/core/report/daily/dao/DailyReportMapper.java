@@ -11,12 +11,12 @@ public interface DailyReportMapper {
 	int deleteByDomainNamePeriod(@Param("domain") String domain, @Param("name") String name,
 			@Param("period") Date period);
 
-	int deleteById(@Param("id") Integer id);
+	int deleteById(@Param("id") Long id);
 
 	DailyReportDO findByDomainNamePeriod(@Param("domain") String domain, @Param("name") String name,
 			@Param("period") Date period);
 
-	DailyReportDO findById(@Param("id") Integer id);
+	DailyReportDO findById(@Param("id") Long id);
 
 	int insert(DailyReportDO report);
 

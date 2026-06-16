@@ -116,7 +116,7 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 		return convert(transactionReport);
 	}
 
-	private TransactionReport queryFromDailyBinary(int id, String domain) {
+	private TransactionReport queryFromDailyBinary(long id, String domain) {
 		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {

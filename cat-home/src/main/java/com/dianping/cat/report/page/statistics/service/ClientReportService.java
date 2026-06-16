@@ -66,7 +66,7 @@ public class ClientReportService extends AbstractReportService<ClientReport> {
 		return report;
 	}
 
-	private ClientReport queryFromDailyBinary(int id, String domain) {
+	private ClientReport queryFromDailyBinary(long id, String domain) {
 		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {

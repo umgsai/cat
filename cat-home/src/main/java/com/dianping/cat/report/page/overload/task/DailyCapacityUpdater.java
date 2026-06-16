@@ -52,7 +52,7 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 
 	@Override
 	public void updateDBCapacity() {
-		int maxId = m_manager.getDailyStatus();
+		long maxId = m_manager.getDailyStatus();
 		LOGGER.info("Starting daily report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
@@ -61,13 +61,17 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 
 			for (DailyReportContent content : reports) {
 				try {
-					int reportId = content.getReportId();
+					long reportId = content.getReportId();
 					double contentLength = content.getContentLength();
 
 					if (contentLength >= CapacityUpdater.CAPACITY) {
+						if (reportId > Integer.MAX_VALUE) {
+							LOGGER.warn("Daily report id exceeds overload table capacity, reportId={}.", reportId);
+							continue;
+						}
 						Overload overload = m_overloadDao.createLocal();
 
-						overload.setReportId(reportId);
+						overload.setReportId((int) reportId);
 						overload.setReportSize(contentLength);
 						overload.setReportType(CapacityUpdater.DAILY_TYPE);
 
@@ -96,7 +100,7 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 				maxId = reports.get(size - 1).getReportId();
 			}
 		}
-		m_manager.updateDailyStatus(maxId);
+		m_manager.updateDailyStatus((int) Math.min(maxId, Integer.MAX_VALUE));
 		LOGGER.info("Finished daily report capacity scan, finalMaxId={}.", maxId);
 	}
 

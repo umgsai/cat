@@ -2,19 +2,19 @@ package com.dianping.cat.core.dal;
 
 
 public class DailyReportContent {
-   private int m_reportId;
+   private long m_reportId;
 
    private byte[] m_content;
 
    private java.util.Date m_creationDate;
 
-   private int m_keyReportId;
+   private long m_keyReportId;
 
    private double m_contentLength;
 
-   private int m_startId;
+   private long m_startId;
 
-   private int m_endId;
+   private long m_endId;
 
    private double m_capacity;
    public void afterLoad() {
@@ -37,19 +37,19 @@ public class DailyReportContent {
       return m_creationDate;
    }
 
-   public int getEndId() {
+   public long getEndId() {
       return m_endId;
    }
 
-   public int getKeyReportId() {
+   public long getKeyReportId() {
       return m_keyReportId;
    }
 
-   public int getReportId() {
+   public long getReportId() {
       return m_reportId;
    }
 
-   public int getStartId() {
+   public long getStartId() {
       return m_startId;
    }
 
@@ -73,23 +73,23 @@ public class DailyReportContent {
       return this;
    }
 
-   public DailyReportContent setEndId(int endId) {
+   public DailyReportContent setEndId(long endId) {
       m_endId = endId;
       return this;
    }
 
-   public DailyReportContent setKeyReportId(int keyReportId) {
+   public DailyReportContent setKeyReportId(long keyReportId) {
       m_keyReportId = keyReportId;
       return this;
    }
 
-   public DailyReportContent setReportId(int reportId) {
+   public DailyReportContent setReportId(long reportId) {
       m_reportId = reportId;
       m_keyReportId = reportId;
       return this;
    }
 
-   public DailyReportContent setStartId(int startId) {
+   public DailyReportContent setStartId(long startId) {
       m_startId = startId;
       return this;
    }

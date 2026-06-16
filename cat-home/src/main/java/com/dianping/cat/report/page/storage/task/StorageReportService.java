@@ -109,7 +109,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 		return storageReport;
 	}
 
-	private StorageReport queryFromDailyBinary(int id, String domain) {
+	private StorageReport queryFromDailyBinary(long id, String domain) {
 		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {

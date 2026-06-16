@@ -8,7 +8,7 @@
         <result column="domain" property="domain"/>
         <result column="period" property="period"/>
         <result column="type" property="type"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -18,7 +18,7 @@
         domain ,
         period ,
         type ,
-        creation_date
+        create_time
     </sql>
 
     <sql id="setField">
@@ -29,26 +29,26 @@
             <if test="domain != null">domain = #{domain} ,</if>
             <if test="period != null">period = #{period} ,</if>
             <if test="type != null">type = #{type} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.report.daily.dao.data.DailyReportDO" keyProperty="id">
-        INSERT INTO dailyreport
+        INSERT INTO t_daily_report
         <include refid="setField"/>
     </insert>
 
     <select id="findById" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from dailyreport where id = #{id}
+        from t_daily_report where id = #{id}
     </select>
 
     <select id="findByDomainNamePeriod" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from dailyreport
+        from t_daily_report
         where period = #{period}
         and domain = #{domain}
         and name = #{name}
@@ -58,7 +58,7 @@
     <select id="queryLatestReportsByDomainName" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from dailyreport
+        from t_daily_report
         where domain = #{domain}
         and name = #{name}
         and BINARY(domain) = BINARY(#{domain})
@@ -67,11 +67,11 @@
     </select>
 
     <delete id="deleteById">
-        delete from dailyreport where id = #{id}
+        delete from t_daily_report where id = #{id}
     </delete>
 
     <delete id="deleteByDomainNamePeriod">
-        DELETE from dailyreport
+        DELETE from t_daily_report
         where period = #{period}
         and domain = #{domain}
         and name = #{name}
@@ -79,7 +79,7 @@
     </delete>
 
     <update id="updateById" parameterType="com.dianping.cat.core.report.daily.dao.data.DailyReportDO">
-        UPDATE dailyreport
+        UPDATE t_daily_report
         <include refid="setField"/>
         WHERE id = #{id}
     </update>

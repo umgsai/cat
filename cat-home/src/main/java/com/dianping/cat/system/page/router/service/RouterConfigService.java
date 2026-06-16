@@ -74,7 +74,7 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 		}
 	}
 
-	private RouterConfig queryFromDailyBinary(int id) {
+	private RouterConfig queryFromDailyBinary(long id) {
 		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {

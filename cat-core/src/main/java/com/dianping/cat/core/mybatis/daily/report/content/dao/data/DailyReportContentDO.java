@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class DailyReportContentDO {
-	private Integer reportId;
+	private Long reportId;
 
 	private byte[] content;
 
@@ -16,11 +16,11 @@ public class DailyReportContentDO {
 
 	private Double contentLength;
 
-	private Integer keyReportId;
+	private Long keyReportId;
 
-	private Integer startId;
+	private Long startId;
 
-	private Integer endId;
+	private Long endId;
 
 	private Double capacity;
 }

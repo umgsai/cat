@@ -37,7 +37,7 @@ public class DailyReportContentRepository {
 		}
 	}
 
-	public List<DailyReportContent> findOverloadReport(int startId) {
+	public List<DailyReportContent> findOverloadReport(long startId) {
 		DailyReportContentMapper mapper = springMapper();
 		DailyReportContentDO record = new DailyReportContentDO();
 
@@ -49,7 +49,7 @@ public class DailyReportContentRepository {
 		}
 	}
 
-	public DailyReportContent findByPK(int keyReportId) {
+	public DailyReportContent findByPK(long keyReportId) {
 		DailyReportContentMapper mapper = springMapper();
 
 		try {

@@ -82,7 +82,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 		return serviceReport;
 	}
 
-	private ServiceReport queryFromDailyBinary(int id, String domain) {
+	private ServiceReport queryFromDailyBinary(long id, String domain) {
 		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {

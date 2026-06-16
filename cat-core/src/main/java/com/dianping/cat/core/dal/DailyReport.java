@@ -2,7 +2,7 @@ package com.dianping.cat.core.dal;
 
 
 public class DailyReport {
-   private int m_id;
+   private long m_id;
 
    private String m_name;
 
@@ -14,9 +14,9 @@ public class DailyReport {
 
    private int m_type;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private int m_keyId;
+   private long m_keyId;
 
    private int m_count;
 
@@ -34,7 +34,11 @@ public class DailyReport {
    }
 
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public String getDomain() {
@@ -45,7 +49,7 @@ public class DailyReport {
       return m_endDate;
    }
 
-   public int getId() {
+   public long getId() {
       return m_id;
    }
 
@@ -53,7 +57,7 @@ public class DailyReport {
       return m_ip;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
    }
 
@@ -83,7 +87,12 @@ public class DailyReport {
    }
 
    public DailyReport setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public DailyReport setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
@@ -97,7 +106,7 @@ public class DailyReport {
       return this;
    }
 
-   public DailyReport setId(int id) {
+   public DailyReport setId(long id) {
       m_id = id;
       m_keyId = id;
       return this;
@@ -108,7 +117,7 @@ public class DailyReport {
       return this;
    }
 
-   public DailyReport setKeyId(int keyId) {
+   public DailyReport setKeyId(long keyId) {
       m_keyId = keyId;
       return this;
    }
@@ -144,7 +153,7 @@ public class DailyReport {
 
       sb.append("DailyReport[");
       sb.append("count: ").append(m_count);
-      sb.append(", creation-date: ").append(m_creationDate);
+      sb.append(", create-time: ").append(m_createTime);
       sb.append(", domain: ").append(m_domain);
       sb.append(", end-date: ").append(m_endDate);
       sb.append(", id: ").append(m_id);

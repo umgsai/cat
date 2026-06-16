@@ -82,7 +82,7 @@ public class HeavyReportService extends AbstractReportService<HeavyReport> {
 		return heavyReport;
 	}
 
-	private HeavyReport queryFromDailyBinary(int id, String domain) {
+	private HeavyReport queryFromDailyBinary(long id, String domain) {
 		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {

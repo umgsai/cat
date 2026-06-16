@@ -1,14 +1,19 @@
-CREATE TABLE `dailyreport` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(20) NOT NULL COMMENT '报表名称, transaction, problem...',
-  `ip` varchar(50) NOT NULL COMMENT '报表来自于哪台cat-consumer机器',
-  `domain` varchar(50) NOT NULL COMMENT '报表处理的Domain信息',
-  `period` datetime NOT NULL  COMMENT '报表时间段',
-  `type` tinyint(4) NOT NULL COMMENT '报表数据格式, 1/xml, 2/json, 默认1',
-  `creation_date` datetime NOT NULL COMMENT '报表创建时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `period` (`period`,`domain`,`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='天报表';
+CREATE TABLE `t_daily_report`
+(
+    `id`          bigint      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `name`        varchar(20) NOT NULL DEFAULT '' COMMENT '报表名称, transaction, problem...',
+    `ip`          varchar(50) NOT NULL DEFAULT '' COMMENT '报表来自于哪台cat-consumer机器',
+    `domain`      varchar(50) NOT NULL DEFAULT '' COMMENT '报表处理的Domain信息',
+    `period`      datetime    NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '报表时间段',
+    `type`        tinyint(4) NOT NULL DEFAULT '1' COMMENT '报表数据格式, 1/xml, 2/json, 默认1',
+    `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '报表创建时间',
+    `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_period_domain_name` (`period`,`domain`,`name`),
+    KEY           `idx_domain_name` (`domain`,`name`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='天报表';
 
 CREATE TABLE `weeklyreport` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -69,7 +74,7 @@ CREATE TABLE `hourly_report_content` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED COMMENT='小时报表二进制内容';
 
 CREATE TABLE `daily_report_content` (
-  `report_id` int(11) NOT NULL COMMENT '报表ID',
+  `report_id` bigint NOT NULL COMMENT '报表ID',
   `content` longblob NOT NULL COMMENT '二进制报表内容',
   `period` datetime  COMMENT '报表时间段',
   `creation_date` datetime NOT NULL COMMENT '创建时间',
@@ -114,9 +119,9 @@ CREATE TABLE `task` (
   `consumer`      varchar(20) NULL COMMENT '任务执行者ip',
   `failure_count` tinyint(4) NOT NULL COMMENT '任务失败次数',
   `report_name`   varchar(20) NOT NULL COMMENT '报表名称, transaction, problem...',
-  `report_domain` varchar(50) NOT NULL COMMENT '报表处理的Domain信息',  
+  `report_domain` varchar(50) NOT NULL COMMENT '报表处理的Domain信息',
   `report_period` datetime NOT NULL  COMMENT '报表时间',
-  `status`        tinyint(4) NOT NULL COMMENT '执行状态: 1/todo, 2/doing, 3/done 4/failed',  
+  `status`        tinyint(4) NOT NULL COMMENT '执行状态: 1/todo, 2/doing, 3/done 4/failed',
   `task_type`     tinyint(4) NOT NULL DEFAULT '1' COMMENT '0表示小时任务，1表示天任务',
   `creation_date` datetime NOT NULL  COMMENT '任务创建时间',
   `start_date`    datetime NULL  COMMENT '开始时间, 这次执行开始时间',
@@ -129,7 +134,7 @@ CREATE TABLE `project` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `domain` varchar(200) NOT NULL COMMENT '项目名称',
   `cmdb_domain` varchar(200) DEFAULT  NULL COMMENT 'cmdb项目名称',
-  `level` int(5) DEFAULT NULL COMMENT '项目级别',  
+  `level` int(5) DEFAULT NULL COMMENT '项目级别',
   `bu` varchar(50) DEFAULT NULL COMMENT 'CMDB事业部',
   `cmdb_productline` varchar(50) DEFAULT NULL COMMENT 'CMDB产品线',
   `owner` varchar(50)  DEFAULT NULL COMMENT '项目负责人',

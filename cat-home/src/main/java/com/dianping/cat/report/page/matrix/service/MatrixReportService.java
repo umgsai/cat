@@ -82,7 +82,7 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 		return matrixReport;
 	}
 
-	private MatrixReport queryFromDailyBinary(int id, String domain) {
+	private MatrixReport queryFromDailyBinary(long id, String domain) {
 		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {

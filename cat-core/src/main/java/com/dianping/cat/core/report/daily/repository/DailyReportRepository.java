@@ -47,7 +47,7 @@ public class DailyReportRepository {
 				domain + "/" + name + "/" + period);
 	}
 
-	public DailyReport findByPK(int keyId) {
+	public DailyReport findByPK(long keyId) {
 		DailyReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findById(keyId), "id", String.valueOf(keyId));
@@ -124,7 +124,7 @@ public class DailyReportRepository {
 		report.setDomain(reportDO.getDomain());
 		report.setPeriod(reportDO.getPeriod());
 		report.setType(reportDO.getType());
-		report.setCreationDate(reportDO.getCreationDate());
+		report.setCreateTime(reportDO.getCreateTime());
 		report.afterLoad();
 		return report;
 	}
@@ -138,7 +138,7 @@ public class DailyReportRepository {
 		reportDO.setDomain(report.getDomain());
 		reportDO.setPeriod(report.getPeriod());
 		reportDO.setType(report.getType());
-		reportDO.setCreationDate(report.getCreationDate());
+		reportDO.setCreateTime(report.getCreateTime());
 		return reportDO;
 	}
 

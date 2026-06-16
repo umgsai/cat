@@ -111,7 +111,7 @@ public class EventReportService extends AbstractReportService<EventReport> {
 		return convert(eventReport);
 	}
 
-	private EventReport queryFromDailyBinary(int id, String domain) {
+	private EventReport queryFromDailyBinary(long id, String domain) {
 		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {

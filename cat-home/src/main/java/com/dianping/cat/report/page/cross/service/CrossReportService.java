@@ -82,7 +82,7 @@ public class CrossReportService extends AbstractReportService<CrossReport> {
 		return crossReport;
 	}
 
-	private CrossReport queryFromDailyBinary(int id, String domain) {
+	private CrossReport queryFromDailyBinary(long id, String domain) {
 		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {
