@@ -19,22 +19,25 @@
 package com.dianping.cat.consumer.performance;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.Constants;
+import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
+import com.dianping.cat.consumer.problem.ProblemDelegate;
+import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.internal.DefaultEvent;
 import com.dianping.cat.message.internal.MockMessageBuilder;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.report.ReportDelegate;
 
-public class ProblemPerformanceTest extends ComponentTestCase {
+public class ProblemPerformanceTest {
 
 	@Test
 	public void test() throws Exception {
-		ProblemAnalyzer analyzer = (ProblemAnalyzer) lookup(MessageAnalyzer.class, ProblemAnalyzer.ID);
+		ProblemAnalyzer analyzer = createAnalyzer();
 		MessageTree tree = buildMessage();
 
 		long current = System.currentTimeMillis();
@@ -50,7 +53,7 @@ public class ProblemPerformanceTest extends ComponentTestCase {
 
 	@Test
 	public void test2() throws Exception {
-		ProblemAnalyzer analyzer = (ProblemAnalyzer) lookup(MessageAnalyzer.class, ProblemAnalyzer.ID);
+		ProblemAnalyzer analyzer = createAnalyzer();
 		MessageTree tree = buildMessage();
 
 		long current = System.currentTimeMillis();
@@ -108,6 +111,32 @@ public class ProblemPerformanceTest extends ComponentTestCase {
 		tree.setThreadName("test");
 		tree.setMessage(message);
 		return tree;
+	}
+
+	private ProblemAnalyzer createAnalyzer() {
+		ProblemAnalyzer analyzer = new ProblemAnalyzer();
+
+		analyzer.setReportManager(new MockProblemReportManager());
+		return analyzer;
+	}
+
+	private static class MockProblemReportManager extends MockReportManager<ProblemReport> {
+		private final ReportDelegate<ProblemReport> m_delegate = new ProblemDelegate();
+
+		private ProblemReport m_report;
+
+		@Override
+		public ProblemReport getHourlyReport(long startTime, String domain, boolean createIfNotExist) {
+			if (m_report == null) {
+				m_report = m_delegate.makeReport(domain, startTime, Constants.HOUR);
+			}
+
+			return m_report;
+		}
+
+		@Override
+		public void destory() {
+		}
 	}
 
 }

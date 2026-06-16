@@ -20,7 +20,6 @@ package com.dianping.cat.consumer.cross;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.cross.CrossAnalyzer.CrossInfo;
@@ -30,7 +29,7 @@ import com.dianping.cat.message.internal.DefaultTransaction;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
 
-public class CrossInfoTest extends ComponentTestCase {
+public class CrossInfoTest {
 	public MessageTree buildMockMessageTree() {
 		MessageTree tree = new DefaultMessageTree();
 		tree.setMessageId("Cat-c0a80746-373452-6");// 192.168.7.70 machine logview
@@ -40,10 +39,7 @@ public class CrossInfoTest extends ComponentTestCase {
 
 	@Test
 	public void testParseOtherTransaction() throws Exception {
-		CrossAnalyzer analyzer = new CrossAnalyzer();
-
-		analyzer.setServerConfigManager(lookup(ServerConfigManager.class));
-		analyzer.setIpConvertManager(new IpConvertManager());
+		CrossAnalyzer analyzer = createAnalyzer();
 
 		DefaultTransaction t = new DefaultTransaction("Other", "method1");
 		MessageTree tree = buildMockMessageTree();
@@ -54,10 +50,7 @@ public class CrossInfoTest extends ComponentTestCase {
 
 	@Test
 	public void testParsePigeonClientTransaction() throws Exception {
-		CrossAnalyzer analyzer = new CrossAnalyzer();
-
-		analyzer.setServerConfigManager(lookup(ServerConfigManager.class));
-		analyzer.setIpConvertManager(new IpConvertManager());
+		CrossAnalyzer analyzer = createAnalyzer();
 
 		DefaultTransaction t = new DefaultTransaction("PigeonCall", "method1");
 		MessageTree tree = buildMockMessageTree();
@@ -82,10 +75,7 @@ public class CrossInfoTest extends ComponentTestCase {
 
 	@Test
 	public void testParsePigeonServerTransaction() throws Exception {
-		CrossAnalyzer analyzer = new CrossAnalyzer();
-
-		analyzer.setServerConfigManager(lookup(ServerConfigManager.class));
-		analyzer.setIpConvertManager(new IpConvertManager());
+		CrossAnalyzer analyzer = createAnalyzer();
 
 		DefaultTransaction t = new DefaultTransaction("PigeonService", "method1");
 		MessageTree tree = buildMockMessageTree();
@@ -109,10 +99,7 @@ public class CrossInfoTest extends ComponentTestCase {
 
 	@Test
 	public void testParsePigeonServerTransactionWithPort() throws Exception {
-		CrossAnalyzer analyzer = new CrossAnalyzer();
-
-		analyzer.setServerConfigManager(lookup(ServerConfigManager.class));
-		analyzer.setIpConvertManager(new IpConvertManager());
+		CrossAnalyzer analyzer = createAnalyzer();
 
 		DefaultTransaction t = new DefaultTransaction("PigeonService", "method1");
 		MessageTree tree = buildMockMessageTree();
@@ -130,5 +117,26 @@ public class CrossInfoTest extends ComponentTestCase {
 		Assert.assertEquals(info.getDetailType(), "PigeonService");
 		Assert.assertEquals(info.getRemoteRole(), "Pigeon.Client");
 		Assert.assertEquals(info.getApp(), "myDomain");
+	}
+
+	private CrossAnalyzer createAnalyzer() {
+		CrossAnalyzer analyzer = new CrossAnalyzer();
+
+		analyzer.setServerConfigManager(new MockServerConfigManager());
+		analyzer.setIpConvertManager(new IpConvertManager());
+		return analyzer;
+	}
+
+	private static class MockServerConfigManager extends ServerConfigManager {
+
+		@Override
+		public boolean isRpcClient(String type) {
+			return "PigeonCall".equals(type) || "Call".equals(type);
+		}
+
+		@Override
+		public boolean isRpcServer(String type) {
+			return "PigeonService".equals(type) || "Service".equals(type);
+		}
 	}
 }

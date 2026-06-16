@@ -19,28 +19,33 @@
 package com.dianping.cat.consumer.performance;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
+import org.unidal.cat.message.storage.MessageDumper;
+import org.unidal.cat.message.storage.MessageDumperManager;
+import org.unidal.cat.message.storage.MessageFinder;
+import org.unidal.cat.message.storage.MessageFinderManager;
 
-import com.dianping.cat.analysis.MessageAnalyzer;
 import com.dianping.cat.consumer.dump.DumpAnalyzer;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.context.MessageIdFactory;
 import com.dianping.cat.message.internal.MockMessageBuilder;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.message.tree.MessageId;
+import com.dianping.cat.statistic.ServerStatisticManager;
 
-public class DumpPerformanceTest extends ComponentTestCase {
+import io.netty.buffer.ByteBuf;
+
+public class DumpPerformanceTest {
 
 	private MessageIdFactory m_factory = new MessageIdFactory();
 
 	public void setUp() throws Exception {
-		super.setUp();
 		m_factory.initialize("test");
 	}
 
 	@Test
 	public void test() throws Exception {
-		DumpAnalyzer analyzer = (DumpAnalyzer) lookup(MessageAnalyzer.class, DumpAnalyzer.ID);
+		DumpAnalyzer analyzer = createAnalyzer();
 
 		MessageTree tree = buildMessage();
 
@@ -111,6 +116,65 @@ public class DumpPerformanceTest extends ComponentTestCase {
 
 		tree.setMessageId(m_factory.getNextId());
 		return tree;
+	}
+
+	private DumpAnalyzer createAnalyzer() {
+		DumpAnalyzer analyzer = new DumpAnalyzer();
+
+		analyzer.setDumperManager(new MockMessageDumperManager());
+		analyzer.setFinderManager(new MockMessageFinderManager());
+		analyzer.setServerStateManager(new ServerStatisticManager());
+		analyzer.initialize(System.currentTimeMillis(), 60 * 60 * 1000L, 5 * 60 * 1000L);
+		return analyzer;
+	}
+
+	private static class MockMessageDumper implements MessageDumper {
+
+		@Override
+		public void awaitTermination(int hour) throws InterruptedException {
+		}
+
+		@Override
+		public void initialize(int hour) {
+		}
+
+		@Override
+		public void process(MessageTree tree) {
+		}
+	}
+
+	private static class MockMessageDumperManager implements MessageDumperManager {
+		private final MessageDumper m_dumper = new MockMessageDumper();
+
+		@Override
+		public void close(int hour) {
+		}
+
+		@Override
+		public MessageDumper find(int hour) {
+			return m_dumper;
+		}
+
+		@Override
+		public MessageDumper findOrCreate(int hour) {
+			return m_dumper;
+		}
+	}
+
+	private static class MockMessageFinderManager implements MessageFinderManager {
+
+		@Override
+		public void close(int hour) {
+		}
+
+		@Override
+		public ByteBuf find(MessageId id) {
+			return null;
+		}
+
+		@Override
+		public void register(int hour, MessageFinder finder) {
+		}
 	}
 
 }

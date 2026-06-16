@@ -23,10 +23,9 @@ import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.TestHelper;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.message.Event;
@@ -37,10 +36,11 @@ import com.dianping.cat.message.internal.DefaultHeartbeat;
 import com.dianping.cat.message.internal.DefaultTransaction;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.report.ReportDelegate;
 
 import org.junit.Assert;
 
-public class ProblemAnalyzerTest extends ComponentTestCase {
+public class ProblemAnalyzerTest {
 
 	private long m_timestamp;
 
@@ -50,10 +50,8 @@ public class ProblemAnalyzerTest extends ComponentTestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
-
 		m_timestamp = 1385470800000L;
-		m_analyzer = (ProblemAnalyzer) lookup(MessageAnalyzer.class, ProblemAnalyzer.ID);
+		m_analyzer = createAnalyzer();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
 		Date date = sdf.parse("20120101 00:00");
 
@@ -142,6 +140,32 @@ public class ProblemAnalyzerTest extends ComponentTestCase {
 			tree.setMessage(t);
 		}
 		return tree;
+	}
+
+	private ProblemAnalyzer createAnalyzer() {
+		ProblemAnalyzer analyzer = new ProblemAnalyzer();
+
+		analyzer.setReportManager(new MockProblemReportManager());
+		return analyzer;
+	}
+
+	private static class MockProblemReportManager extends MockReportManager<ProblemReport> {
+		private final ReportDelegate<ProblemReport> m_delegate = new ProblemDelegate();
+
+		private ProblemReport m_report;
+
+		@Override
+		public ProblemReport getHourlyReport(long startTime, String domain, boolean createIfNotExist) {
+			if (m_report == null) {
+				m_report = m_delegate.makeReport(domain, startTime, Constants.HOUR);
+			}
+
+			return m_report;
+		}
+
+		@Override
+		public void destory() {
+		}
 	}
 
 }

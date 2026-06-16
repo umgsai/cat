@@ -20,23 +20,26 @@ package com.dianping.cat.consumer.cross;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.cross.model.entity.CrossReport;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.internal.DefaultEvent;
 import com.dianping.cat.message.internal.DefaultTransaction;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.report.ReportDelegate;
 
-public class CrossAnalyzerTest extends ComponentTestCase {
+public class CrossAnalyzerTest {
 
 	private long m_timestamp;
 
@@ -46,14 +49,12 @@ public class CrossAnalyzerTest extends ComponentTestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
 		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
 		long currentTimeMillis = System.currentTimeMillis();
 
 		m_timestamp = currentTimeMillis - currentTimeMillis % (3600 * 1000);
 
-		m_analyzer = (CrossAnalyzer) lookup(MessageAnalyzer.class, CrossAnalyzer.ID);
-
+		m_analyzer = createAnalyzer();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
 		Date date = sdf.parse("20120101 00:00");
 
@@ -133,6 +134,56 @@ public class CrossAnalyzerTest extends ComponentTestCase {
 		Assert.assertEquals(false, analyzer.isIPAddress("2886.1.6.1228"));
 
 		Assert.assertEquals("10.1.6.128", analyzer.convertHostNameToIP("10.1.6.128"));
+	}
+
+	private CrossAnalyzer createAnalyzer() {
+		CrossAnalyzer analyzer = new CrossAnalyzer();
+
+		analyzer.setIpConvertManager(new IpConvertManager());
+		analyzer.setReportManager(new MockCrossReportManager());
+		analyzer.setServerConfigManager(new MockServerConfigManager());
+		return analyzer;
+	}
+
+	private static class MockCrossReportManager extends MockReportManager<CrossReport> {
+		private final ReportDelegate<CrossReport> m_delegate = new CrossDelegate();
+
+		private Map<Long, Map<String, CrossReport>> m_reports = new ConcurrentHashMap<Long, Map<String, CrossReport>>();
+
+		@Override
+		public CrossReport getHourlyReport(long startTime, String domain, boolean createIfNotExist) {
+			Map<String, CrossReport> reports = m_reports.get(startTime);
+
+			if (reports == null && createIfNotExist) {
+				reports = new ConcurrentHashMap<String, CrossReport>();
+				m_reports.put(startTime, reports);
+			}
+
+			CrossReport report = reports.get(domain);
+
+			if (report == null && createIfNotExist) {
+				report = m_delegate.makeReport(domain, startTime, Constants.HOUR);
+				reports.put(domain, report);
+			}
+			return report;
+		}
+
+		@Override
+		public void destory() {
+		}
+	}
+
+	private static class MockServerConfigManager extends ServerConfigManager {
+
+		@Override
+		public boolean isRpcClient(String type) {
+			return "PigeonCall".equals(type) || "Call".equals(type);
+		}
+
+		@Override
+		public boolean isRpcServer(String type) {
+			return "PigeonService".equals(type) || "Service".equals(type);
+		}
 	}
 
 }

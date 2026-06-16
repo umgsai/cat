@@ -26,27 +26,30 @@ import java.util.Comparator;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.cat.message.storage.StorageConfiguration;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.message.DefaultPathBuilder;
 import com.dianping.cat.message.codec.PlainTextMessageCodec;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageCodec;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.message.storage.LocalMessageBucket;
+import com.dianping.cat.message.storage.MessageBucketFactory;
 import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.message.tree.MessageId;
+import com.dianping.cat.statistic.ServerStatisticManager;
 
-public class StoragePerformanceTest extends ComponentTestCase {
+public class StoragePerformanceTest {
 	private MessageCodec m_codec = new PlainTextMessageCodec();
+
+	private File m_baseDir;
 
 	@Before
 	public void before() throws IOException {
-		File baseDir = new File(Cat.getCatHome(),"bucket/dump/20160415");
+		m_baseDir = new File(Cat.getCatHome(),"bucket/dump/20160415");
 
-		deleteDirectory(new File(baseDir, "dump").toPath());
-
-		lookup(StorageConfiguration.class).setBaseDataDir(baseDir);
+		deleteDirectory(new File(m_baseDir, "dump").toPath());
 	}
 
 	private void deleteDirectory(Path path) throws IOException {
@@ -63,7 +66,7 @@ public class StoragePerformanceTest extends ComponentTestCase {
 	public void testManyDomainIpWrite() throws Exception {
 		TreeHelper.init(m_codec);
 		long start = System.currentTimeMillis();
-		MessageBucketManager manager = lookup(MessageBucketManager.class, "local");
+		MessageBucketManager manager = createLocalMessageBucketManager();
 		int hour = 405746;
 
 		for (int i = 0; i < 10000; i++) {
@@ -93,5 +96,47 @@ public class StoragePerformanceTest extends ComponentTestCase {
 
 		long duration = System.currentTimeMillis() - start;
 		System.out.println("write cost" + duration);
+	}
+
+	private MessageBucketManager createLocalMessageBucketManager() {
+		LocalMessageBucketManager manager = new LocalMessageBucketManager();
+
+		manager.setBucketFactory(new MockMessageBucketFactory());
+		manager.setConfigManager(new MockServerConfigManager());
+		manager.setLocalIp("127.0.0.1");
+		manager.setPathBuilder(new DefaultPathBuilder());
+		manager.setServerStateManager(new ServerStatisticManager());
+		manager.initialize();
+		return manager;
+	}
+
+	private class MockMessageBucketFactory implements MessageBucketFactory {
+
+		@Override
+		public LocalMessageBucket createBucket(File baseDir, String dataFile) throws IOException {
+			LocalMessageBucket bucket = new LocalMessageBucket();
+
+			bucket.setBaseDir(baseDir);
+			bucket.initialize(dataFile);
+			return bucket;
+		}
+	}
+
+	private class MockServerConfigManager extends ServerConfigManager {
+
+		@Override
+		public String getHdfsLocalBaseDir(String id) {
+			return new File(m_baseDir, id).getPath();
+		}
+
+		@Override
+		public boolean isLocalMode() {
+			return true;
+		}
+
+		@Override
+		public boolean isUseNewStorage() {
+			return false;
+		}
 	}
 }

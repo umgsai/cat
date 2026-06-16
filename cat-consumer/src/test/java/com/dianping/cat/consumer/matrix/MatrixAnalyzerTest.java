@@ -24,20 +24,21 @@ import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.TestHelper;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.internal.DefaultTransaction;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.report.ReportDelegate;
 
 import org.junit.Assert;
 
-public class MatrixAnalyzerTest extends ComponentTestCase {
+public class MatrixAnalyzerTest {
 
 	private long m_timestamp;
 
@@ -47,13 +48,12 @@ public class MatrixAnalyzerTest extends ComponentTestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
 		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
 		long currentTimeMillis = System.currentTimeMillis();
 
 		m_timestamp = currentTimeMillis - currentTimeMillis % (3600 * 1000);
 
-		m_analyzer = (MatrixAnalyzer) lookup(MessageAnalyzer.class, MatrixAnalyzer.ID);
+		m_analyzer = createAnalyzer();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
 		Date date = sdf.parse("20120101 00:00");
 
@@ -111,6 +111,33 @@ public class MatrixAnalyzerTest extends ComponentTestCase {
 		tree.setMessage(t);
 
 		return tree;
+	}
+
+	private MatrixAnalyzer createAnalyzer() {
+		MatrixAnalyzer analyzer = new MatrixAnalyzer();
+
+		analyzer.setReportManager(new MockMatrixReportManager());
+		analyzer.setServerConfigManager(new ServerConfigManager());
+		return analyzer;
+	}
+
+	private static class MockMatrixReportManager extends MockReportManager<MatrixReport> {
+		private final ReportDelegate<MatrixReport> m_delegate = new MatrixDelegate();
+
+		private MatrixReport m_report;
+
+		@Override
+		public MatrixReport getHourlyReport(long startTime, String domain, boolean createIfNotExist) {
+			if (m_report == null) {
+				m_report = m_delegate.makeReport(domain, startTime, Constants.HOUR);
+			}
+
+			return m_report;
+		}
+
+		@Override
+		public void destory() {
+		}
 	}
 
 }

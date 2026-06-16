@@ -24,18 +24,22 @@ import java.util.Date;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.config.AtomicMessageConfigManager;
+import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.config.server.ServerFilterConfigManager;
+import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
+import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.TestHelper;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.internal.DefaultTransaction;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.report.ReportDelegate;
 
-public class TransactionAnalyzerTest extends ComponentTestCase {
+public class TransactionAnalyzerTest {
 	private long m_timestamp;
 
 	private TransactionAnalyzer m_analyzer;
@@ -58,10 +62,8 @@ public class TransactionAnalyzerTest extends ComponentTestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
-
 		m_timestamp = System.currentTimeMillis() - System.currentTimeMillis() % (3600 * 1000);
-		m_analyzer = (TransactionAnalyzer) lookup(MessageAnalyzer.class, TransactionAnalyzer.ID);
+		m_analyzer = createAnalyzer();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
 		Date date = sdf.parse("20120101 00:00");
 
@@ -119,5 +121,77 @@ public class TransactionAnalyzerTest extends ComponentTestCase {
 		tree.setMessage(t);
 
 		return tree;
+	}
+
+	private TransactionAnalyzer createAnalyzer() {
+		TransactionAnalyzer analyzer = new TransactionAnalyzer();
+
+		analyzer.setAtomicMessageConfigManager(new MockAtomicMessageConfigManager());
+		analyzer.setFilterConfigManager(new MockServerFilterConfigManager());
+		analyzer.setReportManager(new MockTransactionReportManager());
+		analyzer.setServerConfigManager(new MockServerConfigManager());
+		analyzer.setStatisticManager(new MockTpValueStatisticConfigManager());
+		return analyzer;
+	}
+
+	private static class MockAtomicMessageConfigManager extends AtomicMessageConfigManager {
+
+		@Override
+		public int getMaxNameThreshold(String domain) {
+			return 200;
+		}
+	}
+
+	private static class MockServerConfigManager extends ServerConfigManager {
+
+		@Override
+		public int getMaxTypeThreshold() {
+			return 100;
+		}
+
+		@Override
+		public int getTpValueExpireMinute() {
+			return 1;
+		}
+
+		@Override
+		public int getTypeNameLengthLimit() {
+			return 256;
+		}
+	}
+
+	private static class MockServerFilterConfigManager extends ServerFilterConfigManager {
+
+		@Override
+		public boolean discardTransaction(String type, String name) {
+			return false;
+		}
+	}
+
+	private static class MockTpValueStatisticConfigManager extends TpValueStatisticConfigManager {
+
+		@Override
+		public boolean shouldStatistic(String type, String domain) {
+			return false;
+		}
+	}
+
+	private static class MockTransactionReportManager extends MockReportManager<TransactionReport> {
+		private final ReportDelegate<TransactionReport> m_delegate = new TransactionDelegate();
+
+		private TransactionReport m_report;
+
+		@Override
+		public TransactionReport getHourlyReport(long startTime, String domain, boolean createIfNotExist) {
+			if (m_report == null) {
+				m_report = m_delegate.makeReport(domain, startTime, Constants.HOUR);
+			}
+
+			return m_report;
+		}
+
+		@Override
+		public void destory() {
+		}
 	}
 }

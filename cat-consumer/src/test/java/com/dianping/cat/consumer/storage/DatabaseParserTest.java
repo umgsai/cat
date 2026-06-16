@@ -20,16 +20,15 @@ package com.dianping.cat.consumer.storage;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.consumer.DatabaseParser;
 import com.dianping.cat.consumer.DatabaseParser.Database;
 
-public class DatabaseParserTest extends ComponentTestCase {
+public class DatabaseParserTest {
 
 	@Test
 	public void testOracle() {
-		DatabaseParser parser = lookup(DatabaseParser.class);
+		DatabaseParser parser = new DatabaseParser();
 		Database database = parser.parseDatabase("jdbc:oracle:thin:@ 172.20.70.36:1521:gbst");
 
 		Assert.assertEquals("172.20.70.36", database.getIp());
@@ -38,7 +37,7 @@ public class DatabaseParserTest extends ComponentTestCase {
 
 	@Test
 	public void testMysql() {
-		DatabaseParser parser = lookup(DatabaseParser.class);
+		DatabaseParser parser = new DatabaseParser();
 		Database database = parser.parseDatabase("jdbc:mysql://localhost:3306/mydb");
 
 		Assert.assertEquals("localhost", database.getIp());

@@ -19,24 +19,27 @@
 package com.dianping.cat.consumer.performance;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.Constants;
+import com.dianping.cat.config.AtomicMessageConfigManager;
+import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.config.server.ServerFilterConfigManager;
+import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
+import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
+import com.dianping.cat.consumer.transaction.TransactionDelegate;
+import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.internal.MockMessageBuilder;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.report.ReportDelegate;
 
-public class TransactionPerformanceTest extends ComponentTestCase {
-
-	public void setUp() throws Exception {
-		super.setUp();
-	}
+public class TransactionPerformanceTest {
 
 	@Test
 	public void test() throws Exception {
-		TransactionAnalyzer analyzer = (TransactionAnalyzer) lookup(MessageAnalyzer.class, TransactionAnalyzer.ID);
+		TransactionAnalyzer analyzer = createAnalyzer();
 
 		MessageTree tree = buildMessage();
 
@@ -106,6 +109,57 @@ public class TransactionPerformanceTest extends ComponentTestCase {
 		tree.setThreadName("test");
 		tree.setMessage(message);
 		return tree;
+	}
+
+	private TransactionAnalyzer createAnalyzer() {
+		TransactionAnalyzer analyzer = new TransactionAnalyzer();
+
+		analyzer.setAtomicMessageConfigManager(new MockAtomicMessageConfigManager());
+		analyzer.setFilterConfigManager(new MockServerFilterConfigManager());
+		analyzer.setReportManager(new MockTransactionReportManager());
+		analyzer.setServerConfigManager(new ServerConfigManager());
+		analyzer.setStatisticManager(new MockTpValueStatisticConfigManager());
+		return analyzer;
+	}
+
+	private static class MockAtomicMessageConfigManager extends AtomicMessageConfigManager {
+		@Override
+		public int getMaxNameThreshold(String domain) {
+			return 200;
+		}
+	}
+
+	private static class MockServerFilterConfigManager extends ServerFilterConfigManager {
+		@Override
+		public boolean discardTransaction(String type, String name) {
+			return false;
+		}
+	}
+
+	private static class MockTpValueStatisticConfigManager extends TpValueStatisticConfigManager {
+		@Override
+		public boolean shouldStatistic(String type, String domain) {
+			return false;
+		}
+	}
+
+	private static class MockTransactionReportManager extends MockReportManager<TransactionReport> {
+		private final ReportDelegate<TransactionReport> m_delegate = new TransactionDelegate();
+
+		private TransactionReport m_report;
+
+		@Override
+		public TransactionReport getHourlyReport(long startTime, String domain, boolean createIfNotExist) {
+			if (m_report == null) {
+				m_report = m_delegate.makeReport(domain, startTime, Constants.HOUR);
+			}
+
+			return m_report;
+		}
+
+		@Override
+		public void destory() {
+		}
 	}
 
 }

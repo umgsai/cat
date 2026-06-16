@@ -19,20 +19,24 @@
 package com.dianping.cat.consumer.performance;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.Constants;
+import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
+import com.dianping.cat.consumer.matrix.MatrixDelegate;
+import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.internal.MockMessageBuilder;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.report.ReportDelegate;
 
-public class MatrixPerformanceTest extends ComponentTestCase {
+public class MatrixPerformanceTest {
 
 	@Test
 	public void test() throws Exception {
-		MatrixAnalyzer analyzer = (MatrixAnalyzer) lookup(MessageAnalyzer.class, MatrixAnalyzer.ID);
+		MatrixAnalyzer analyzer = createAnalyzer();
 		MessageTree tree = buildMessage();
 
 		long current = System.currentTimeMillis();
@@ -95,6 +99,33 @@ public class MatrixPerformanceTest extends ComponentTestCase {
 		tree.setThreadName("test");
 		tree.setMessage(message);
 		return tree;
+	}
+
+	private MatrixAnalyzer createAnalyzer() {
+		MatrixAnalyzer analyzer = new MatrixAnalyzer();
+
+		analyzer.setReportManager(new MockMatrixReportManager());
+		analyzer.setServerConfigManager(new ServerConfigManager());
+		return analyzer;
+	}
+
+	private static class MockMatrixReportManager extends MockReportManager<MatrixReport> {
+		private final ReportDelegate<MatrixReport> m_delegate = new MatrixDelegate();
+
+		private MatrixReport m_report;
+
+		@Override
+		public MatrixReport getHourlyReport(long startTime, String domain, boolean createIfNotExist) {
+			if (m_report == null) {
+				m_report = m_delegate.makeReport(domain, startTime, Constants.HOUR);
+			}
+
+			return m_report;
+		}
+
+		@Override
+		public void destory() {
+		}
 	}
 
 }

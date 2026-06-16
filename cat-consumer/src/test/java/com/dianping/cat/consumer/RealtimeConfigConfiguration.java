@@ -28,14 +28,13 @@ import com.dianping.cat.analysis.MessageAnalyzer;
 import com.dianping.cat.analysis.MessageAnalyzerManager;
 import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.consumer.top.TopAnalyzer;
-import com.dianping.cat.consumer.transaction.Configurator;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzerTest;
 
 public class RealtimeConfigConfiguration extends AbstractResourceConfigurator {
 
 	public static void main(String[] args) {
-		generatePlexusComponentsXmlFile(new Configurator());
+		generatePlexusComponentsXmlFile(new RealtimeConfigConfiguration());
 	}
 
 	protected Class<?> getTestClass() {

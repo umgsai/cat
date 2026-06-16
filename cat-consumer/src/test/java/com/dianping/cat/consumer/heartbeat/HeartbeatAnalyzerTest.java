@@ -25,18 +25,19 @@ import java.util.Date;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.config.server.ServerFilterConfigManager;
+import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.message.Heartbeat;
 import com.dianping.cat.message.internal.DefaultHeartbeat;
 import com.dianping.cat.message.internal.DefaultTransaction;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.report.ReportDelegate;
 
-public class HeartbeatAnalyzerTest extends ComponentTestCase {
+public class HeartbeatAnalyzerTest {
 
 	private long m_timestamp;
 
@@ -48,15 +49,12 @@ public class HeartbeatAnalyzerTest extends ComponentTestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
-
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
 		Date date = sdf.parse("20120101 00:00");
 
 		m_timestamp = date.getTime();
 
-		m_analyzer = (HeartbeatAnalyzer) lookup(MessageAnalyzer.class, HeartbeatAnalyzer.ID);
-
+		m_analyzer = createAnalyzer();
 		m_analyzer.initialize(date.getTime(), Constants.HOUR, Constants.MINUTE * 5);
 	}
 
@@ -109,5 +107,40 @@ public class HeartbeatAnalyzerTest extends ComponentTestCase {
 		heartbeat.addData(m_status);
 
 		return heartbeat;
+	}
+
+	private HeartbeatAnalyzer createAnalyzer() {
+		HeartbeatAnalyzer analyzer = new HeartbeatAnalyzer();
+
+		analyzer.setReportManager(new MockHeartbeatReportManager());
+		analyzer.setServerFilterConfigManager(new MockServerFilterConfigManager());
+		return analyzer;
+	}
+
+	private static class MockHeartbeatReportManager extends MockReportManager<HeartbeatReport> {
+		private final ReportDelegate<HeartbeatReport> m_delegate = new HeartbeatDelegate();
+
+		private HeartbeatReport m_report;
+
+		@Override
+		public HeartbeatReport getHourlyReport(long startTime, String domain, boolean createIfNotExist) {
+			if (m_report == null) {
+				m_report = m_delegate.makeReport(domain, startTime, Constants.HOUR);
+			}
+
+			return m_report;
+		}
+
+		@Override
+		public void destory() {
+		}
+	}
+
+	private static class MockServerFilterConfigManager extends ServerFilterConfigManager {
+
+		@Override
+		public boolean validateDomain(String domain) {
+			return true;
+		}
 	}
 }

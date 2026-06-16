@@ -24,10 +24,10 @@ import java.util.Date;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.config.AtomicMessageConfigManager;
+import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.TestHelper;
 import com.dianping.cat.consumer.event.model.entity.EventReport;
 import com.dianping.cat.message.Message;
@@ -35,8 +35,9 @@ import com.dianping.cat.message.internal.DefaultEvent;
 import com.dianping.cat.message.internal.DefaultTransaction;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
+import com.dianping.cat.report.ReportDelegate;
 
-public class EventAnalyzerTest extends ComponentTestCase {
+public class EventAnalyzerTest {
 
 	private long m_timestamp;
 
@@ -46,12 +47,11 @@ public class EventAnalyzerTest extends ComponentTestCase {
 
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
 		long currentTimeMillis = System.currentTimeMillis();
 
 		m_timestamp = currentTimeMillis - currentTimeMillis % (3600 * 1000);
 
-		m_analyzer = (EventAnalyzer) lookup(MessageAnalyzer.class, EventAnalyzer.ID);
+		m_analyzer = createAnalyzer();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm");
 		Date date = sdf.parse("20120101 00:00");
 
@@ -119,6 +119,40 @@ public class EventAnalyzerTest extends ComponentTestCase {
 		tree.setMessage(t);
 
 		return tree;
+	}
+
+	private EventAnalyzer createAnalyzer() {
+		EventAnalyzer analyzer = new EventAnalyzer();
+
+		analyzer.setAtomicMessageConfigManager(new MockAtomicMessageConfigManager());
+		analyzer.setReportManager(new MockEventReportManager());
+		return analyzer;
+	}
+
+	private static class MockAtomicMessageConfigManager extends AtomicMessageConfigManager {
+		@Override
+		public int getMaxNameThreshold(String domain) {
+			return 200;
+		}
+	}
+
+	private static class MockEventReportManager extends MockReportManager<EventReport> {
+		private final ReportDelegate<EventReport> m_delegate = new EventDelegate();
+
+		private EventReport m_report;
+
+		@Override
+		public EventReport getHourlyReport(long startTime, String domain, boolean createIfNotExist) {
+			if (m_report == null) {
+				m_report = m_delegate.makeReport(domain, startTime, Constants.HOUR);
+			}
+
+			return m_report;
+		}
+
+		@Override
+		public void destory() {
+		}
 	}
 
 }
