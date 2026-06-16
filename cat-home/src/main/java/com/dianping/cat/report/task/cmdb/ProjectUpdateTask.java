@@ -30,11 +30,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import com.dianping.cat.support.Threads.Task;
-import org.unidal.webres.json.JsonArray;
-import org.unidal.webres.json.JsonObject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
@@ -120,29 +120,29 @@ public class ProjectUpdateTask implements Task {
 	}
 
 	public String parseDomain(String content) throws Exception {
-		JsonObject object = new JsonObject(content);
-		JsonArray projectArray = object.getJSONArray("projects");
+		JSONObject object = JSONObject.parseObject(content);
+		JSONArray projectArray = object.getJSONArray("projects");
 
-		if (projectArray.length() > 0) {
-			JsonObject firstProject = projectArray.getJSONObject(0);
+		if (projectArray.size() > 0) {
+			JSONObject firstProject = projectArray.getJSONObject(0);
 			return firstProject.get("project_name").toString();
 		}
 		return null;
 	}
 
 	public String parseHostname(String content) throws Exception {
-		JsonObject object = new JsonObject(content);
-		JsonArray resultArray = object.getJSONArray("result");
+		JSONObject object = JSONObject.parseObject(content);
+		JSONArray resultArray = object.getJSONArray("result");
 
-		if (resultArray.length() > 0) {
-			JsonObject firstResult = resultArray.getJSONObject(0);
+		if (resultArray.size() > 0) {
+			JSONObject firstResult = resultArray.getJSONObject(0);
 			return firstResult.get("hostname").toString();
 		}
 		return null;
 	}
 
 	private String parseInfo(String content, String jsonName, String attrName) throws Exception {
-		JsonObject json = new JsonObject(content).getJSONObject(jsonName);
+		JSONObject json = JSONObject.parseObject(content).getJSONObject(jsonName);
 
 		if (json != null) {
 			Object obj = json.get(attrName);
@@ -156,7 +156,7 @@ public class ProjectUpdateTask implements Task {
 
 	private Map<String, String> parseInfos(String content) throws Exception {
 		Map<String, String> infosMap = new HashMap<String, String>();
-		JsonObject project = new JsonObject(content).getJSONObject("project");
+		JSONObject project = JSONObject.parseObject(content).getJSONObject("project");
 
 		if (project == null) {
 			return infosMap;

@@ -90,7 +90,7 @@
     </textarea>
     <pre>
     &nbsp;&nbsp;&nbsp;&nbsp;代码示例如下：
-    	&nbsp;&nbsp;&nbsp;&nbsp;import org.unidal.tuple.Pair;
+    	&nbsp;&nbsp;&nbsp;&nbsp;import org.apache.commons.lang3.tuple.Pair;
 	    import com.dianping.cat.report.task.alert.RuleType.MonitorRule;
 	    
 	    public class UserDefinedRule implements MonitorRule{

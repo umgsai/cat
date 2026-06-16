@@ -23,8 +23,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.unidal.webres.json.JsonArray;
-import org.unidal.webres.json.JsonObject;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 
 public class Api {
 
@@ -35,12 +35,12 @@ public class Api {
 	public static void main(String args[]) throws Exception {
 		String content = fetchContent(BU_API);
 
-		JsonObject object = new JsonObject(content);
-		JsonArray projectArray = object.getJSONArray("bu");
-		int length = projectArray.length();
+		JSONObject object = JSONObject.parseObject(content);
+		JSONArray projectArray = object.getJSONArray("bu");
+		int length = projectArray.size();
 
 		for (int i = 0; i < length; i++) {
-			JsonObject project = projectArray.getJSONObject(i);
+			JSONObject project = projectArray.getJSONObject(i);
 			String bu = project.getString("bu_name");
 
 			String nextUrl = String.format(PROJECT_API, bu, String.valueOf(1));
@@ -54,8 +54,8 @@ public class Api {
 	}
 
 	private static void findNextProjects(String bu, String detailContent) throws Exception, IOException {
-		JsonObject jobject = new JsonObject(detailContent);
-		int number = jobject.getInt("numfound");
+		JSONObject jobject = JSONObject.parseObject(detailContent);
+		int number = jobject.getIntValue("numfound");
 		int index = (int) Math.ceil(number * 1.0 / 25.0);
 
 		for (int j = 2; j <= index; j++) {
@@ -67,12 +67,12 @@ public class Api {
 	}
 
 	private static void print(String bu, String detailContent) throws Exception {
-		JsonObject object = new JsonObject(detailContent);
-		JsonArray projectArray = object.getJSONArray("products");
-		int length = projectArray.length();
+		JSONObject object = JSONObject.parseObject(detailContent);
+		JSONArray projectArray = object.getJSONArray("products");
+		int length = projectArray.size();
 
 		for (int i = 0; i < length; i++) {
-			JsonObject project = projectArray.getJSONObject(i);
+			JSONObject project = projectArray.getJSONObject(i);
 			String projectName = project.getString("product_name");
 
 			System.out.println(bu + "\t" + projectName);

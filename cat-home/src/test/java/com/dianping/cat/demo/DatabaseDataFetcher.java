@@ -22,16 +22,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import org.junit.Test;
-import org.unidal.webres.json.JsonArray;
-import org.unidal.webres.json.JsonObject;
 
 public class DatabaseDataFetcher {
 
@@ -50,23 +49,21 @@ public class DatabaseDataFetcher {
 				try (InputStream stream = connection.getInputStream()) {
 					result = new String(stream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 				}
-				JsonObject jo = new JsonObject(result);
-				JsonArray array = jo.getJSONArray("lineCharts");
+				JSONObject jo = JSONObject.parseObject(result);
+				JSONArray array = jo.getJSONArray("lineCharts");
 				Map<Long, Double> datas = new LinkedHashMap<Long, Double>();
 
-				for (int i = 0; i < array.length(); i++) {
-					JsonObject o = array.getJSONObject(i);
+				for (int i = 0; i < array.size(); i++) {
+					JSONObject o = array.getJSONObject(i);
 					String title = o.getString("title");
 
 					if (title.contains("THREADS_RUNNING")) {
-						JsonArray arys = o.getJSONArray("datas");
-						JsonObject object = arys.getJSONObject(0);
-						JsonArray names = object.names();
+						JSONArray arys = o.getJSONArray("datas");
+						JSONObject object = arys.getJSONObject(0);
 
 						List<Long> sortedNames = new ArrayList<Long>();
 
-						for (int k = 0; k < names.length(); k++) {
-							String key = names.getString(k);
+						for (String key : object.keySet()) {
 							sortedNames.add(Long.parseLong(key));
 						}
 
@@ -80,8 +77,6 @@ public class DatabaseDataFetcher {
 				}
 				System.out.println(datas);
 			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (ParseException e) {
 				e.printStackTrace();
 			}
 		}

@@ -27,8 +27,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
-import org.unidal.webres.json.JsonArray;
-import org.unidal.webres.json.JsonObject;
+
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 
 public class TestApi {
 
@@ -51,11 +52,11 @@ public class TestApi {
 	}
 
 	private Pair<Integer, Double> parse(String content) throws ParseException {
-		JsonObject obj = new JsonObject(content);
-		JsonArray array = obj.getJSONArray("lineChartDetails");
-		JsonObject chart = (JsonObject) array.get(0);
+		JSONObject obj = JSONObject.parseObject(content);
+		JSONArray array = obj.getJSONArray("lineChartDetails");
+		JSONObject chart = array.getJSONObject(0);
 
-		return Pair.of(chart.getInt("accessNumberSum"), chart.getDouble("successRatio"));
+		return Pair.of(chart.getIntValue("accessNumberSum"), chart.getDouble("successRatio"));
 	}
 
 	@Test

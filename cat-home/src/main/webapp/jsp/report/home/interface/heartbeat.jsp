@@ -14,10 +14,9 @@ package com.dianping.cat.status;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import javax.annotation.PostConstruct;
 
-public class HeartbeatExtenstion implements StatusExtension, Initializable {
+public class HeartbeatExtenstion implements StatusExtension {
 
 	//给当前的类定义一个ID
 	@Override
@@ -44,8 +43,8 @@ public class HeartbeatExtenstion implements StatusExtension, Initializable {
 	}
 
 	//这里是实现了初始化方法，把这个实现注册到cat上，如果你使用spring，需要在spring里面注册此bean，并实现初始化方法。
-	@Override
-	public void initialize() throws InitializationException {
+	@PostConstruct
+	public void initialize() {
 		StatusExtensionRegister.getInstance().register(this);
 	}
 }
