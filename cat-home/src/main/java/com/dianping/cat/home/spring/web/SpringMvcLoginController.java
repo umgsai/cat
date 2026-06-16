@@ -2,6 +2,8 @@ package com.dianping.cat.home.spring.web;
 
 import java.io.IOException;
 
+import jakarta.annotation.Resource;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -9,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -17,14 +20,12 @@ import com.dianping.cat.system.page.login.service.Session;
 import com.dianping.cat.system.page.login.service.SigninContext;
 import com.dianping.cat.system.page.login.service.SigninService;
 
+@Controller
 public class SpringMvcLoginController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpringMvcLoginController.class);
 
-	private final SigninService m_signinService;
-
-	public SpringMvcLoginController(SigninService signinService) {
-		m_signinService = signinService;
-	}
+	@Resource
+	private SigninService m_signinService;
 
 	@GetMapping("/s/login")
 	public void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

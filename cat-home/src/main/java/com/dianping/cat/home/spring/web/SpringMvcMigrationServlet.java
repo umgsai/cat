@@ -26,6 +26,10 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcLoginController m_loginController;
 
+	private SpringMvcPluginController m_pluginController;
+
+	private SpringMvcRouterController m_routerController;
+
 	private Map<RouteKey, RouteHandler> m_routes = Collections.emptyMap();
 
 	@Override
@@ -41,6 +45,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		m_healthController = context.getBean(SpringMvcHealthController.class);
 		m_homeController = context.getBean(SpringMvcHomeController.class);
 		m_loginController = context.getBean(SpringMvcLoginController.class);
+		m_pluginController = context.getBean(SpringMvcPluginController.class);
+		m_routerController = context.getBean(SpringMvcRouterController.class);
 		m_routes = buildRoutes();
 	}
 
@@ -61,6 +67,9 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/health", (request, response) -> writeJson(response, m_healthController.health()));
 		register(routes, "GET", "/r/home", m_homeController::home);
 		register(routes, "GET", "/s/login", m_loginController::login);
+		register(routes, "GET", "/s/plugin", m_pluginController::plugin);
+		register(routes, "GET", "/s/plugin/chrome", m_pluginController::chrome);
+		register(routes, "GET", "/s/router", m_routerController::router);
 		register(routes, "POST", "/s/login", m_loginController::submit);
 
 		return Collections.unmodifiableMap(routes);

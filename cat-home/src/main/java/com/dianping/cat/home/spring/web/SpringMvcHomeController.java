@@ -9,8 +9,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+@Controller
 public class SpringMvcHomeController {
 	@GetMapping("/r/home")
 	public void home(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
