@@ -6,8 +6,8 @@
         <result column="ip" property="ip"/>
         <result column="domain" property="domain"/>
         <result column="hostname" property="hostname"/>
-        <result column="creation_date" property="creationDate"/>
-        <result column="last_modified_date" property="lastModifiedDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -15,8 +15,8 @@
         ip ,
         domain ,
         hostname ,
-        creation_date ,
-        last_modified_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -25,45 +25,45 @@
             <if test="ip != null">ip = #{ip} ,</if>
             <if test="domain != null">domain = #{domain} ,</if>
             <if test="hostname != null">hostname = #{hostname} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate} ,</if>
-            <if test="lastModifiedDate != null">last_modified_date = #{lastModifiedDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO" keyProperty="id">
-        INSERT INTO hostinfo
+        INSERT INTO t_host_info
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from hostinfo where id = #{id}
+        from t_host_info where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from hostinfo
+        from t_host_info
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from hostinfo where id = #{id}
+        delete from t_host_info where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO">
-        UPDATE hostinfo
+        UPDATE t_host_info
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="findByIp" resultMap="BaseResultMap">
-        select id, ip, domain, hostname, creation_date, last_modified_date from hostinfo where ip = #{record.ip}
+        select id, ip, domain, hostname, create_time, update_time from t_host_info where ip = #{record.ip}
     </select>
 
     <select id="findAllIp" resultMap="BaseResultMap">
-        select id, ip, domain, hostname, creation_date, last_modified_date from hostinfo
+        select id, ip, domain, hostname, create_time, update_time from t_host_info
     </select>
 
 </mapper>

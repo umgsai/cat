@@ -42,7 +42,7 @@ public class HostinfoRepository {
 		return mapper.findAllIp(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public Hostinfo findByPK(int keyId) {
+	public Hostinfo findByPK(long keyId) {
 		HostinfoMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
@@ -136,11 +136,11 @@ public class HostinfoRepository {
 		if (record.getHostname() != null) {
 			model.setHostname(record.getHostname());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
 		}
-		if (record.getLastModifiedDate() != null) {
-			model.setLastModifiedDate(record.getLastModifiedDate());
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
 		}
 		model.afterLoad();
 		return model;
@@ -153,8 +153,8 @@ public class HostinfoRepository {
 		record.setIp(model.getIp());
 		record.setDomain(model.getDomain());
 		record.setHostname(model.getHostname());
-		record.setCreationDate(model.getCreationDate());
-		record.setLastModifiedDate(model.getLastModifiedDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		return record;
 	}

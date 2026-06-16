@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class HostinfoDO {
-	private Integer id;
+	private Long id;
 
 	private String ip;
 
@@ -14,9 +14,9 @@ public class HostinfoDO {
 
 	private String hostname;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Date lastModifiedDate;
+	private Date updateTime;
 
-	private Integer keyId;
+	private Long keyId;
 }

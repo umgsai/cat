@@ -228,7 +228,7 @@ public class HostinfoService {
 		}
 	}
 
-	public boolean update(int id, String domain, String ip) {
+	public boolean update(long id, String domain, String ip) {
 		ensureInitialized();
 
 		Hostinfo info = createLocal();

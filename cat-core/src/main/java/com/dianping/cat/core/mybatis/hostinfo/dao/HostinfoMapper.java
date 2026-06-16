@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO;
 
 public interface HostinfoMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	HostinfoDO findByPrimaryKey(@Param("id") Integer id);
+	HostinfoDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(HostinfoDO record);
 

@@ -9,7 +9,7 @@
          <properties>useUnicode=true&amp;autoReconnect=true</properties>
       </datasource>
       <group name="report" package="com.dianping.cat.core.dal">
-         <table name="hostinfo"/>
+         <table name="t_host_info"/>
          <table name="task"/>
          <table name="project"/>
          <table name="report"/>

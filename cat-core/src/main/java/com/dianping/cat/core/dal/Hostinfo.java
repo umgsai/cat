@@ -2,7 +2,7 @@ package com.dianping.cat.core.dal;
 
 
 public class Hostinfo {
-   private int m_id;
+   private long m_id;
 
    private String m_ip;
 
@@ -10,17 +10,21 @@ public class Hostinfo {
 
    private String m_hostname;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private java.util.Date m_lastModifiedDate;
+   private java.util.Date m_updateTime;
 
-   private int m_keyId;
+   private long m_keyId;
    public void afterLoad() {
       m_keyId = m_id;
    }
 
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public String getDomain() {
@@ -31,7 +35,7 @@ public class Hostinfo {
       return m_hostname;
    }
 
-   public int getId() {
+   public long getId() {
       return m_id;
    }
 
@@ -39,16 +43,25 @@ public class Hostinfo {
       return m_ip;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
    }
 
    public java.util.Date getLastModifiedDate() {
-      return m_lastModifiedDate;
+      return m_updateTime;
+   }
+
+   public java.util.Date getUpdateTime() {
+      return m_updateTime;
    }
 
    public Hostinfo setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public Hostinfo setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
@@ -62,7 +75,7 @@ public class Hostinfo {
       return this;
    }
 
-   public Hostinfo setId(int id) {
+   public Hostinfo setId(long id) {
       m_id = id;
       m_keyId = id;
       return this;
@@ -73,13 +86,18 @@ public class Hostinfo {
       return this;
    }
 
-   public Hostinfo setKeyId(int keyId) {
+   public Hostinfo setKeyId(long keyId) {
       m_keyId = keyId;
       return this;
    }
 
    public Hostinfo setLastModifiedDate(java.util.Date lastModifiedDate) {
-      m_lastModifiedDate = lastModifiedDate;
+      m_updateTime = lastModifiedDate;
+      return this;
+   }
+
+   public Hostinfo setUpdateTime(java.util.Date updateTime) {
+      m_updateTime = updateTime;
       return this;
    }
 
@@ -88,13 +106,13 @@ public class Hostinfo {
       StringBuilder sb = new StringBuilder(1024);
 
       sb.append("Hostinfo[");
-      sb.append("creation-date: ").append(m_creationDate);
+      sb.append("create-time: ").append(m_createTime);
       sb.append(", domain: ").append(m_domain);
       sb.append(", hostname: ").append(m_hostname);
       sb.append(", id: ").append(m_id);
       sb.append(", ip: ").append(m_ip);
       sb.append(", key-id: ").append(m_keyId);
-      sb.append(", last-modified-date: ").append(m_lastModifiedDate);
+      sb.append(", update-time: ").append(m_updateTime);
       sb.append("]");
       return sb.toString();
    }

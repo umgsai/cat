@@ -49,16 +49,21 @@ CREATE TABLE `t_monthly_report`
     KEY `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='月报表';
 
-CREATE TABLE `hostinfo` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ip` varchar(50) NOT NULL COMMENT '部署机器IP',
-  `domain` varchar(200) NOT NULL COMMENT '部署机器对应的项目名',
-  `hostname` varchar(200) DEFAULT NULL COMMENT '机器域名',
-  `creation_date` datetime NOT NULL,
-  `last_modified_date` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `ip_index` (`ip`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='IP和项目名的对应关系';
+CREATE TABLE `t_host_info`
+(
+    `id`          bigint       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `ip`          varchar(50)  NOT NULL DEFAULT '' COMMENT '部署机器IP',
+    `domain`      varchar(200) NOT NULL DEFAULT '' COMMENT '部署机器对应的项目名',
+    `hostname`    varchar(200) NOT NULL DEFAULT '' COMMENT '机器域名',
+    `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_ip` (`ip`),
+    KEY `idx_domain` (`domain`),
+    KEY `idx_hostname` (`hostname`),
+    KEY `idx_create_time` (`create_time`),
+    KEY `idx_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='IP和项目名的对应关系';
 
 CREATE TABLE `hourlyreport` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
