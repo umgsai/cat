@@ -8,10 +8,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.core.mybatis.generated.project.dao.ProjectMapper;
@@ -36,7 +34,7 @@ public class ProjectRepository {
 		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
-	public List<Project> findAll(Readset<Project> readset) throws DalException {
+	public List<Project> findAll(Object readset) throws DalException {
 		ProjectMapper mapper = springMapper();
 
 		ProjectDO record = new ProjectDO();
@@ -44,13 +42,13 @@ public class ProjectRepository {
 		return mapper.findAll(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public Project findByPK(int keyId, Readset<Project> readset) throws DalException {
+	public Project findByPK(int keyId, Object readset) throws DalException {
 		ProjectMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public Project findByDomain(String domain, Readset<Project> readset) throws DalException {
+	public Project findByDomain(String domain, Object readset) throws DalException {
 		ProjectDO record = new ProjectDO();
 		ProjectMapper mapper = springMapper();
 
@@ -60,7 +58,7 @@ public class ProjectRepository {
 		return requireFound(result, "findByDomain", record.toString());
 	}
 
-	public Project findByCmdbDomain(String domain, Readset<Project> readset) throws DalException {
+	public Project findByCmdbDomain(String domain, Object readset) throws DalException {
 		ProjectDO record = new ProjectDO();
 		ProjectMapper mapper = springMapper();
 
@@ -81,7 +79,7 @@ public class ProjectRepository {
 		return count;
 	}
 
-	public int updateByPK(Project proto, Updateset<Project> updateset) throws DalException {
+	public int updateByPK(Project proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));

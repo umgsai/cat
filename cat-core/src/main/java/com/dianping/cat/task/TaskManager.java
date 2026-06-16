@@ -22,7 +22,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
-import org.unidal.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalException;
 
 import java.util.Calendar;
 import java.util.Date;

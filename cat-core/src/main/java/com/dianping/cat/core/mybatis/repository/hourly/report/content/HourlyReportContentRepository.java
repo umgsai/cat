@@ -8,10 +8,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.core.mybatis.generated.hourly.report.content.dao.HourlyReportContentMapper;
@@ -40,7 +38,7 @@ public class HourlyReportContentRepository {
 		}
 	}
 
-	public List<HourlyReportContent> findOverloadReport(int startId, Readset<HourlyReportContent> readset)
+	public List<HourlyReportContent> findOverloadReport(int startId, Object readset)
 			throws DalException {
 		HourlyReportContentMapper mapper = springMapper();
 		HourlyReportContentDO record = new HourlyReportContentDO();
@@ -53,7 +51,7 @@ public class HourlyReportContentRepository {
 		}
 	}
 
-	public HourlyReportContent findByPK(int keyReportId, java.util.Date period, Readset<HourlyReportContent> readset)
+	public HourlyReportContent findByPK(int keyReportId, java.util.Date period, Object readset)
 			throws DalException {
 		HourlyReportContentMapper mapper = springMapper();
 
@@ -76,7 +74,7 @@ public class HourlyReportContentRepository {
 		}
 	}
 
-	public int updateByPK(HourlyReportContent proto, Updateset<HourlyReportContent> updateset) throws DalException {
+	public int updateByPK(HourlyReportContent proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

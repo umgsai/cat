@@ -7,10 +7,8 @@ import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 public class UserDefineRuleRepository extends SpringBackedRepositorySupport<UserDefineRuleMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserDefineRuleRepository.class);
@@ -36,7 +34,7 @@ public class UserDefineRuleRepository extends SpringBackedRepositorySupport<User
 		}
 	}
 
-	public UserDefineRule findByPK(int keyId, Readset<UserDefineRule> readset) throws DalException {
+	public UserDefineRule findByPK(int keyId, Object readset) throws DalException {
 		UserDefineRuleMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -48,7 +46,7 @@ public class UserDefineRuleRepository extends SpringBackedRepositorySupport<User
 		}
 	}
 
-	public UserDefineRule findMaxId(Readset<UserDefineRule> readset) throws DalException {
+	public UserDefineRule findMaxId(Object readset) throws DalException {
 		UserDefineRuleMapper mapper = springMapper(LOGGER);
 		UserDefineRuleDO record = new UserDefineRuleDO();
 
@@ -78,7 +76,7 @@ public class UserDefineRuleRepository extends SpringBackedRepositorySupport<User
 		}
 	}
 
-	public int updateByPK(UserDefineRule proto, Updateset<UserDefineRule> updateset) throws DalException {
+	public int updateByPK(UserDefineRule proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

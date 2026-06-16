@@ -32,7 +32,7 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.unidal.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.support.Threads.Task;
 import org.unidal.webres.json.JsonArray;
 import org.unidal.webres.json.JsonObject;

@@ -9,10 +9,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<ServerAlarmRuleMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServerAlarmRuleRepository.class);
@@ -38,7 +36,7 @@ public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<Ser
 		}
 	}
 
-	public List<ServerAlarmRule> findAll(Readset<ServerAlarmRule> readset) throws DalException {
+	public List<ServerAlarmRule> findAll(Object readset) throws DalException {
 		ServerAlarmRuleMapper mapper = springMapper(LOGGER);
 		ServerAlarmRuleDO record = new ServerAlarmRuleDO();
 
@@ -49,7 +47,7 @@ public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<Ser
 		}
 	}
 
-	public ServerAlarmRule findByPK(int keyId, Readset<ServerAlarmRule> readset) throws DalException {
+	public ServerAlarmRule findByPK(int keyId, Object readset) throws DalException {
 		ServerAlarmRuleMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -76,7 +74,7 @@ public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<Ser
 		}
 	}
 
-	public int updateByPK(ServerAlarmRule proto, Updateset<ServerAlarmRule> updateset) throws DalException {
+	public int updateByPK(ServerAlarmRule proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

@@ -8,10 +8,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.DailyReportContent;
 import com.dianping.cat.core.mybatis.generated.daily.report.content.dao.DailyReportContentMapper;
@@ -40,7 +38,7 @@ public class DailyReportContentRepository {
 		}
 	}
 
-	public List<DailyReportContent> findOverloadReport(int startId, Readset<DailyReportContent> readset)
+	public List<DailyReportContent> findOverloadReport(int startId, Object readset)
 			throws DalException {
 		DailyReportContentMapper mapper = springMapper();
 		DailyReportContentDO record = new DailyReportContentDO();
@@ -53,7 +51,7 @@ public class DailyReportContentRepository {
 		}
 	}
 
-	public DailyReportContent findByPK(int keyReportId, Readset<DailyReportContent> readset) throws DalException {
+	public DailyReportContent findByPK(int keyReportId, Object readset) throws DalException {
 		DailyReportContentMapper mapper = springMapper();
 
 		try {
@@ -75,7 +73,7 @@ public class DailyReportContentRepository {
 		}
 	}
 
-	public int updateByPK(DailyReportContent proto, Updateset<DailyReportContent> updateset) throws DalException {
+	public int updateByPK(DailyReportContent proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

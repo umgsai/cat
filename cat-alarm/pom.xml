@@ -28,10 +28,6 @@
       <artifactId>web-framework</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.unidal.framework</groupId>
-      <artifactId>dal-jdbc</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.mybatis</groupId>
       <artifactId>mybatis</artifactId>
     </dependency>
@@ -122,6 +118,29 @@
             </goals>
             <configuration>
               <manifest>${basedir}/src/main/resources/META-INF/dal/jdbc/alarm-manifest.xml,</manifest>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>rewrite generated dal jdbc sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <delete>
+                  <fileset dir="${project.build.directory}/generated-sources/dal-jdbc" includes="**/*Dao.java" />
+                  <fileset dir="${project.build.directory}/generated-sources/dal-jdbc" includes="**/_INDEX.java" />
+                </delete>
+                <replaceregexp match="org\.unidal\.dal\.jdbc" replace="com.dianping.cat.core.dal.jdbc" byline="true">
+                  <fileset dir="${project.build.directory}/generated-sources/dal-jdbc" includes="**/*.java" />
+                </replaceregexp>
+              </target>
             </configuration>
           </execution>
         </executions>

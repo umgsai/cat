@@ -9,10 +9,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 public class MetricScreenRepository extends SpringBackedRepositorySupport<MetricScreenMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MetricScreenRepository.class);
@@ -58,7 +56,7 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 		}
 	}
 
-	public List<MetricScreen> findAll(Readset<MetricScreen> readset) throws DalException {
+	public List<MetricScreen> findAll(Object readset) throws DalException {
 		MetricScreenMapper mapper = springMapper(LOGGER);
 		MetricScreenDO record = new MetricScreenDO();
 
@@ -69,7 +67,7 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 		}
 	}
 
-	public List<MetricScreen> findByName(String name, Readset<MetricScreen> readset) throws DalException {
+	public List<MetricScreen> findByName(String name, Object readset) throws DalException {
 		MetricScreenMapper mapper = springMapper(LOGGER);
 		MetricScreenDO record = new MetricScreenDO();
 
@@ -81,7 +79,7 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 		}
 	}
 
-	public MetricScreen findByPK(int keyId, Readset<MetricScreen> readset) throws DalException {
+	public MetricScreen findByPK(int keyId, Object readset) throws DalException {
 		MetricScreenMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -93,7 +91,7 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 		}
 	}
 
-	public MetricScreen findByNameGraph(String name, String graphName, Readset<MetricScreen> readset) throws DalException {
+	public MetricScreen findByNameGraph(String name, String graphName, Object readset) throws DalException {
 		MetricScreenMapper mapper = springMapper(LOGGER);
 		MetricScreenDO record = new MetricScreenDO();
 
@@ -135,7 +133,7 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 		}
 	}
 
-	public int updateByPK(MetricScreen proto, Updateset<MetricScreen> updateset) throws DalException {
+	public int updateByPK(MetricScreen proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

@@ -8,10 +8,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.mybatis.generated.hourlyreport.dao.HourlyreportMapper;
@@ -37,7 +35,7 @@ public class HourlyReportRepository {
 	}
 
 	public List<HourlyReport> findAllByDomainNamePeriod(java.util.Date period, String domain, String name,
-			Readset<HourlyReport> readset) throws DalException {
+			Object readset) throws DalException {
 		HourlyreportDO record = new HourlyreportDO();
 		HourlyreportMapper mapper = springMapper();
 
@@ -47,7 +45,7 @@ public class HourlyReportRepository {
 		return mapper.findAllByDomainNamePeriod(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public List<HourlyReport> findAllByPeriodName(java.util.Date period, String name, Readset<HourlyReport> readset)
+	public List<HourlyReport> findAllByPeriodName(java.util.Date period, String name, Object readset)
 			throws DalException {
 		HourlyreportDO record = new HourlyreportDO();
 		HourlyreportMapper mapper = springMapper();
@@ -57,7 +55,7 @@ public class HourlyReportRepository {
 		return mapper.findAllByPeriodName(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public HourlyReport findByPK(int keyId, Readset<HourlyReport> readset) throws DalException {
+	public HourlyReport findByPK(int keyId, Object readset) throws DalException {
 		HourlyreportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
@@ -74,7 +72,7 @@ public class HourlyReportRepository {
 		return count;
 	}
 
-	public int updateByPK(HourlyReport proto, Updateset<HourlyReport> updateset) throws DalException {
+	public int updateByPK(HourlyReport proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));

@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;

@@ -28,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.dal.jdbc.DalNotFoundException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;

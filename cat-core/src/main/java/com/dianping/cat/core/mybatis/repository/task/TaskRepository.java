@@ -6,10 +6,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.core.mybatis.generated.task.dao.TaskMapper;
@@ -34,13 +32,13 @@ public class TaskRepository {
 		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
-	public Task findByPK(int keyId, Readset<Task> readset) throws DalException {
+	public Task findByPK(int keyId, Object readset) throws DalException {
 		TaskMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public Task findByStatusConsumer(int status, String consumer, Readset<Task> readset) throws DalException {
+	public Task findByStatusConsumer(int status, String consumer, Object readset) throws DalException {
 		TaskMapper mapper = springMapper();
 		TaskDO record = new TaskDO();
 
@@ -62,37 +60,37 @@ public class TaskRepository {
 		return count;
 	}
 
-	public int updateByPK(Task proto, Updateset<Task> updateset) throws DalException {
+	public int updateByPK(Task proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 	}
 
-	public int updateTodoToDoing(Task proto, Updateset<Task> updateset) throws DalException {
+	public int updateTodoToDoing(Task proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateTodoToDoing(toRecord(proto)));
 	}
 
-	public int updateDoingToDone(Task proto, Updateset<Task> updateset) throws DalException {
+	public int updateDoingToDone(Task proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateDoingToDone(toRecord(proto)));
 	}
 
-	public int updateFailureToDone(Task proto, Updateset<Task> updateset) throws DalException {
+	public int updateFailureToDone(Task proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateFailureToDone(toRecord(proto)));
 	}
 
-	public int updateStatusToTodo(Task proto, Updateset<Task> updateset) throws DalException {
+	public int updateStatusToTodo(Task proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateStatusToTodo(toRecord(proto)));
 	}
 
-	public int updateDoingToFail(Task proto, Updateset<Task> updateset) throws DalException {
+	public int updateDoingToFail(Task proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateDoingToFail(toRecord(proto)));

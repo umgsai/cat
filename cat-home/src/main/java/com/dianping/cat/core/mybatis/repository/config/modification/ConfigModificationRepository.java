@@ -7,10 +7,8 @@ import com.dianping.cat.home.dal.report.ConfigModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 public class ConfigModificationRepository extends SpringBackedRepositorySupport<ConfigModificationMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigModificationRepository.class);
@@ -36,7 +34,7 @@ public class ConfigModificationRepository extends SpringBackedRepositorySupport<
 		}
 	}
 
-	public ConfigModification findByPK(int keyId, Readset<ConfigModification> readset) throws DalException {
+	public ConfigModification findByPK(int keyId, Object readset) throws DalException {
 		ConfigModificationMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -63,7 +61,7 @@ public class ConfigModificationRepository extends SpringBackedRepositorySupport<
 		}
 	}
 
-	public int updateByPK(ConfigModification proto, Updateset<ConfigModification> updateset) throws DalException {
+	public int updateByPK(ConfigModification proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

@@ -8,10 +8,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.WeeklyReportContent;
 import com.dianping.cat.core.mybatis.generated.weekly.report.content.dao.WeeklyReportContentMapper;
@@ -40,7 +38,7 @@ public class WeeklyReportContentRepository {
 		}
 	}
 
-	public List<WeeklyReportContent> findOverloadReport(int startId, Readset<WeeklyReportContent> readset)
+	public List<WeeklyReportContent> findOverloadReport(int startId, Object readset)
 			throws DalException {
 		WeeklyReportContentMapper mapper = springMapper();
 		WeeklyReportContentDO record = new WeeklyReportContentDO();
@@ -53,7 +51,7 @@ public class WeeklyReportContentRepository {
 		}
 	}
 
-	public WeeklyReportContent findByPK(int keyReportId, Readset<WeeklyReportContent> readset) throws DalException {
+	public WeeklyReportContent findByPK(int keyReportId, Object readset) throws DalException {
 		WeeklyReportContentMapper mapper = springMapper();
 
 		try {
@@ -75,7 +73,7 @@ public class WeeklyReportContentRepository {
 		}
 	}
 
-	public int updateByPK(WeeklyReportContent proto, Updateset<WeeklyReportContent> updateset) throws DalException {
+	public int updateByPK(WeeklyReportContent proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

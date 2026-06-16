@@ -18,7 +18,7 @@
  */
 package com.dianping.cat.report.alert.spi.config;
 
-import org.unidal.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.alarm.UserDefineRule;
 import com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleRepository;

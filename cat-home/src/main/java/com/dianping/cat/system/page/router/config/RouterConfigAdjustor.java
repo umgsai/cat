@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.unidal.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalException;
 import com.google.common.base.Splitter;
 
 import com.dianping.cat.Cat;

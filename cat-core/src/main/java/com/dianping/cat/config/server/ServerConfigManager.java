@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
-import org.unidal.dal.jdbc.DalNotFoundException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import com.dianping.cat.support.Threads;
 import org.xml.sax.SAXException;
 

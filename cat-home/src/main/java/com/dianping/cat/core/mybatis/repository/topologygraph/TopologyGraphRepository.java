@@ -7,10 +7,8 @@ import com.dianping.cat.home.dal.report.TopologyGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 public class TopologyGraphRepository extends SpringBackedRepositorySupport<TopologyGraphMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TopologyGraphRepository.class);
@@ -36,7 +34,7 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 		}
 	}
 
-	public TopologyGraph findByPK(int keyId, Readset<TopologyGraph> readset) throws DalException {
+	public TopologyGraph findByPK(int keyId, Object readset) throws DalException {
 		TopologyGraphMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -48,7 +46,7 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 		}
 	}
 
-	public TopologyGraph findByPeriod(java.util.Date period, Readset<TopologyGraph> readset) throws DalException {
+	public TopologyGraph findByPeriod(java.util.Date period, Object readset) throws DalException {
 		TopologyGraphMapper mapper = springMapper(LOGGER);
 		TopologyGraphDO record = new TopologyGraphDO();
 
@@ -79,7 +77,7 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 		}
 	}
 
-	public int updateByPK(TopologyGraph proto, Updateset<TopologyGraph> updateset) throws DalException {
+	public int updateByPK(TopologyGraph proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

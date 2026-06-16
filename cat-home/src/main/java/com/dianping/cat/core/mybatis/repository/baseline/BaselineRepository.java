@@ -7,10 +7,8 @@ import com.dianping.cat.home.dal.report.Baseline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BaselineRepository.class);
@@ -35,7 +33,7 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 		}
 	}
 
-	public Baseline findByPK(int keyId, Readset<Baseline> readset) throws DalException {
+	public Baseline findByPK(int keyId, Object readset) throws DalException {
 		BaselineMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -47,7 +45,7 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 		}
 	}
 
-	public Baseline findByReportNameKeyTime(java.util.Date reportPeriod, String reportName, String indexKey, Readset<Baseline> readset) throws DalException {
+	public Baseline findByReportNameKeyTime(java.util.Date reportPeriod, String reportName, String indexKey, Object readset) throws DalException {
 		BaselineMapper mapper = springMapper(LOGGER);
 		BaselineDO record = new BaselineDO();
 
@@ -80,7 +78,7 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 		}
 	}
 
-	public int updateByPK(Baseline proto, Updateset<Baseline> updateset) throws DalException {
+	public int updateByPK(Baseline proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

@@ -21,23 +21,22 @@ package com.dianping.cat.report.service;
 import java.util.Date;
 
 import org.junit.Test;
-import org.unidal.dal.jdbc.DalException;
 
 import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportDao;
 import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.dal.MonthlyReportDao;
 import com.dianping.cat.core.dal.WeeklyReport;
-import com.dianping.cat.core.dal.WeeklyReportDao;
+import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
+import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 
 public class ReportDaoTest extends SpringCatHomeTestSupport {
 
 	@Test
-	public void test() throws DalException {
-		HourlyReportDao dao = lookup(HourlyReportDao.class);
+	public void test() throws Exception {
+		HourlyReportRepository dao = lookup(HourlyReportRepository.class);
 		HourlyReport proto = new HourlyReport();
 
 		proto.setCreationDate(new Date());
@@ -51,7 +50,7 @@ public class ReportDaoTest extends SpringCatHomeTestSupport {
 	}
 
 	@Test
-	public void testDaily() throws DalException {
+	public void testDaily() throws Exception {
 		DailyReportRepository dao = lookup(DailyReportRepository.class);
 		DailyReport proto = new DailyReport();
 
@@ -66,8 +65,8 @@ public class ReportDaoTest extends SpringCatHomeTestSupport {
 	}
 
 	@Test
-	public void testWeek() throws DalException {
-		WeeklyReportDao dao = lookup(WeeklyReportDao.class);
+	public void testWeek() throws Exception {
+		WeeklyReportRepository dao = lookup(WeeklyReportRepository.class);
 		WeeklyReport proto = new WeeklyReport();
 
 		proto.setCreationDate(new Date());
@@ -80,8 +79,8 @@ public class ReportDaoTest extends SpringCatHomeTestSupport {
 	}
 
 	@Test
-	public void testMonth() throws DalException {
-		MonthlyReportDao dao = lookup(MonthlyReportDao.class);
+	public void testMonth() throws Exception {
+		MonthlyReportRepository dao = lookup(MonthlyReportRepository.class);
 		MonthlyReport proto = new MonthlyReport();
 
 		proto.setCreationDate(new Date());

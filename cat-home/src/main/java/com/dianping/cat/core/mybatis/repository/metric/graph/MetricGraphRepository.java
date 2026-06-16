@@ -7,10 +7,8 @@ import com.dianping.cat.home.dal.report.MetricGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricGraphMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MetricGraphRepository.class);
@@ -46,7 +44,7 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 		}
 	}
 
-	public MetricGraph findByPK(int keyId, Readset<MetricGraph> readset) throws DalException {
+	public MetricGraph findByPK(int keyId, Object readset) throws DalException {
 		MetricGraphMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -58,7 +56,7 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 		}
 	}
 
-	public MetricGraph findByGrapId(long graphId, Readset<MetricGraph> readset) throws DalException {
+	public MetricGraph findByGrapId(long graphId, Object readset) throws DalException {
 		MetricGraphMapper mapper = springMapper(LOGGER);
 		MetricGraphDO record = new MetricGraphDO();
 
@@ -74,7 +72,7 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 		}
 	}
 
-	public MetricGraph findLast(int number, Readset<MetricGraph> readset) throws DalException {
+	public MetricGraph findLast(int number, Object readset) throws DalException {
 		MetricGraphMapper mapper = springMapper(LOGGER);
 		MetricGraphDO record = new MetricGraphDO();
 
@@ -105,7 +103,7 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 		}
 	}
 
-	public int updateByPK(MetricGraph proto, Updateset<MetricGraph> updateset) throws DalException {
+	public int updateByPK(MetricGraph proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

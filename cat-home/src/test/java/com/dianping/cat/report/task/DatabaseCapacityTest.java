@@ -18,8 +18,8 @@
  */
 package com.dianping.cat.report.task;
 
-import org.unidal.dal.jdbc.DalException;
 
+import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.report.page.overload.task.CapacityUpdater;
 import com.dianping.cat.report.page.overload.task.HourlyCapacityUpdater;
 

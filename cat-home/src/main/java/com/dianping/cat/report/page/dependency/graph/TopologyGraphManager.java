@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
 

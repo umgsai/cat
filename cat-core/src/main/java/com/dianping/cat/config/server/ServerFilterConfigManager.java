@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.xml.sax.SAXException;
 
 import com.dianping.cat.Cat;

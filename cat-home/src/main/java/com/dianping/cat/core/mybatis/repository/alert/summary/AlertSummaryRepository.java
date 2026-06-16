@@ -7,10 +7,8 @@ import com.dianping.cat.home.dal.report.AlertSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 public class AlertSummaryRepository extends SpringBackedRepositorySupport<AlertSummaryMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryRepository.class);
@@ -36,7 +34,7 @@ public class AlertSummaryRepository extends SpringBackedRepositorySupport<AlertS
 		}
 	}
 
-	public AlertSummary findByPK(int keyId, Readset<AlertSummary> readset) throws DalException {
+	public AlertSummary findByPK(int keyId, Object readset) throws DalException {
 		AlertSummaryMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -63,7 +61,7 @@ public class AlertSummaryRepository extends SpringBackedRepositorySupport<AlertS
 		}
 	}
 
-	public int updateByPK(AlertSummary proto, Updateset<AlertSummary> updateset) throws DalException {
+	public int updateByPK(AlertSummary proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

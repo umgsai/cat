@@ -8,10 +8,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.dao.ConfigMapper;
@@ -36,19 +34,19 @@ public class ConfigRepository {
 		return transactionTemplate.execute(status -> springMapper().deleteById(proto.getKeyId()));
 	}
 
-	public List<Config> findAllConfig(Readset<Config> readset) throws DalException {
+	public List<Config> findAllConfig(Object readset) throws DalException {
 		ConfigMapper mapper = springMapper();
 
 		return mapper.queryAll().stream().map(this::toConfig).collect(Collectors.toList());
 	}
 
-	public Config findByName(String name, Readset<Config> readset) throws DalException {
+	public Config findByName(String name, Object readset) throws DalException {
 		ConfigMapper mapper = springMapper();
 
 		return requireFound(mapper.findByName(name), "name", name);
 	}
 
-	public Config findByPK(int keyId, Readset<Config> readset) throws DalException {
+	public Config findByPK(int keyId, Object readset) throws DalException {
 		ConfigMapper mapper = springMapper();
 
 		return requireFound(mapper.findById(keyId), "id", String.valueOf(keyId));
@@ -65,7 +63,7 @@ public class ConfigRepository {
 		return count;
 	}
 
-	public int updateByPK(Config proto, Updateset<Config> updateset) throws DalException {
+	public int updateByPK(Config proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateById(toConfigDO(proto)));

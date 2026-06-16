@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.unidal.dal.jdbc.DalNotFoundException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.dianping.cat.Cat;

@@ -8,10 +8,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.Hostinfo;
 import com.dianping.cat.core.mybatis.generated.hostinfo.dao.HostinfoMapper;
@@ -36,7 +34,7 @@ public class HostinfoRepository {
 		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
-	public List<Hostinfo> findAllIp(Readset<Hostinfo> readset) throws DalException {
+	public List<Hostinfo> findAllIp(Object readset) throws DalException {
 		HostinfoMapper mapper = springMapper();
 
 		HostinfoDO record = new HostinfoDO();
@@ -44,13 +42,13 @@ public class HostinfoRepository {
 		return mapper.findAllIp(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public Hostinfo findByPK(int keyId, Readset<Hostinfo> readset) throws DalException {
+	public Hostinfo findByPK(int keyId, Object readset) throws DalException {
 		HostinfoMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public Hostinfo findByIp(String ip, Readset<Hostinfo> readset) throws DalException {
+	public Hostinfo findByIp(String ip, Object readset) throws DalException {
 		HostinfoMapper mapper = springMapper();
 		HostinfoDO record = new HostinfoDO();
 
@@ -71,7 +69,7 @@ public class HostinfoRepository {
 		return count;
 	}
 
-	public int updateByPK(Hostinfo proto, Updateset<Hostinfo> updateset) throws DalException {
+	public int updateByPK(Hostinfo proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));

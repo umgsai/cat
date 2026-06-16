@@ -18,7 +18,7 @@
  */
 package com.dianping.cat.report.page.overload.task;
 
-import org.unidal.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalException;
 
 public interface CapacityUpdater {
 

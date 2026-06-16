@@ -21,7 +21,7 @@ package com.dianping.cat.alarm.spi.config;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.dal.jdbc.DalNotFoundException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.receiver.entity.AlertConfig;

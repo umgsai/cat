@@ -21,7 +21,7 @@ package com.dianping.cat.config.transaction;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.unidal.dal.jdbc.DalNotFoundException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;

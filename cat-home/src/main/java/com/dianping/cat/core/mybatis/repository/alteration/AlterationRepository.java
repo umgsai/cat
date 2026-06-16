@@ -9,10 +9,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 public class AlterationRepository extends SpringBackedRepositorySupport<AlterationMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlterationRepository.class);
@@ -38,7 +36,7 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		}
 	}
 
-	public List<Alteration> findByTypeDruation(java.util.Date startTime, java.util.Date endTime, String type, Readset<Alteration> readset) throws DalException {
+	public List<Alteration> findByTypeDruation(java.util.Date startTime, java.util.Date endTime, String type, Object readset) throws DalException {
 		AlterationMapper mapper = springMapper(LOGGER);
 		AlterationDO record = new AlterationDO();
 
@@ -52,7 +50,7 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		}
 	}
 
-	public List<Alteration> findByDtdh(java.util.Date startTime, java.util.Date endTime, String type, String domain, String hostname, Readset<Alteration> readset) throws DalException {
+	public List<Alteration> findByDtdh(java.util.Date startTime, java.util.Date endTime, String type, String domain, String hostname, Object readset) throws DalException {
 		AlterationMapper mapper = springMapper(LOGGER);
 		AlterationDO record = new AlterationDO();
 
@@ -68,7 +66,7 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		}
 	}
 
-	public List<Alteration> findByDtdhTypes(java.util.Date startTime, java.util.Date endTime, String type, String domain, String hostname, String[] types, Readset<Alteration> readset) throws DalException {
+	public List<Alteration> findByDtdhTypes(java.util.Date startTime, java.util.Date endTime, String type, String domain, String hostname, String[] types, Object readset) throws DalException {
 		AlterationMapper mapper = springMapper(LOGGER);
 		AlterationDO record = new AlterationDO();
 
@@ -85,7 +83,7 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		}
 	}
 
-	public List<Alteration> findByDomainAndTime(java.util.Date startTime, java.util.Date endTime, String domain, Readset<Alteration> readset) throws DalException {
+	public List<Alteration> findByDomainAndTime(java.util.Date startTime, java.util.Date endTime, String domain, Object readset) throws DalException {
 		AlterationMapper mapper = springMapper(LOGGER);
 		AlterationDO record = new AlterationDO();
 
@@ -99,7 +97,7 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		}
 	}
 
-	public Alteration findByPK(int keyId, Readset<Alteration> readset) throws DalException {
+	public Alteration findByPK(int keyId, Object readset) throws DalException {
 		AlterationMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -126,7 +124,7 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		}
 	}
 
-	public int updateByPK(Alteration proto, Updateset<Alteration> updateset) throws DalException {
+	public int updateByPK(Alteration proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

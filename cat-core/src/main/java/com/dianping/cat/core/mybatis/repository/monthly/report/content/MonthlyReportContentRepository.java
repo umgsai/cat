@@ -8,10 +8,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.MonthlyReportContent;
 import com.dianping.cat.core.mybatis.generated.monthly.report.content.dao.MonthlyReportContentMapper;
@@ -40,7 +38,7 @@ public class MonthlyReportContentRepository {
 		}
 	}
 
-	public List<MonthlyReportContent> findOverloadReport(int startId, Readset<MonthlyReportContent> readset)
+	public List<MonthlyReportContent> findOverloadReport(int startId, Object readset)
 			throws DalException {
 		MonthlyReportContentMapper mapper = springMapper();
 		MonthlyReportContentDO record = new MonthlyReportContentDO();
@@ -53,7 +51,7 @@ public class MonthlyReportContentRepository {
 		}
 	}
 
-	public MonthlyReportContent findByPK(int keyReportId, Readset<MonthlyReportContent> readset) throws DalException {
+	public MonthlyReportContent findByPK(int keyReportId, Object readset) throws DalException {
 		MonthlyReportContentMapper mapper = springMapper();
 
 		try {
@@ -75,7 +73,7 @@ public class MonthlyReportContentRepository {
 		}
 	}
 
-	public int updateByPK(MonthlyReportContent proto, Updateset<MonthlyReportContent> updateset) throws DalException {
+	public int updateByPK(MonthlyReportContent proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

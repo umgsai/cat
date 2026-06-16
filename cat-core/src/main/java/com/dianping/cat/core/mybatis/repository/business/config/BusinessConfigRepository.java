@@ -8,10 +8,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.config.BusinessConfig;
 import com.dianping.cat.core.mybatis.generated.business.config.dao.BusinessConfigMapper;
@@ -36,7 +34,7 @@ public class BusinessConfigRepository {
 		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
-	public List<BusinessConfig> findByName(String name, Readset<BusinessConfig> readset) throws DalException {
+	public List<BusinessConfig> findByName(String name, Object readset) throws DalException {
 		BusinessConfigMapper mapper = springMapper();
 		BusinessConfigDO record = new BusinessConfigDO();
 
@@ -44,13 +42,13 @@ public class BusinessConfigRepository {
 		return mapper.findByName(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public BusinessConfig findByPK(int keyId, Readset<BusinessConfig> readset) throws DalException {
+	public BusinessConfig findByPK(int keyId, Object readset) throws DalException {
 		BusinessConfigMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public BusinessConfig findByNameDomain(String name, String domain, Readset<BusinessConfig> readset)
+	public BusinessConfig findByNameDomain(String name, String domain, Object readset)
 			throws DalException {
 		BusinessConfigMapper mapper = springMapper();
 		BusinessConfigDO record = new BusinessConfigDO();
@@ -73,13 +71,13 @@ public class BusinessConfigRepository {
 		return count;
 	}
 
-	public int updateByPK(BusinessConfig proto, Updateset<BusinessConfig> updateset) throws DalException {
+	public int updateByPK(BusinessConfig proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 	}
 
-	public int updateBaseConfigByDomain(BusinessConfig proto, Updateset<BusinessConfig> updateset) throws DalException {
+	public int updateBaseConfigByDomain(BusinessConfig proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateBaseConfigByDomain(toRecord(proto)));

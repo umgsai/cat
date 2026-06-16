@@ -24,8 +24,8 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.dal.jdbc.DalException;
 
+import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
 import com.dianping.cat.core.config.ConfigEntity;

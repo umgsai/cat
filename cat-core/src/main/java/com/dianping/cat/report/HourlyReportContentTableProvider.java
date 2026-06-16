@@ -20,7 +20,7 @@ package com.dianping.cat.report;
 
 import java.util.Map;
 
-import org.unidal.dal.jdbc.mapping.TableProvider;
+import com.dianping.cat.core.dal.jdbc.mapping.TableProvider;
 
 public class HourlyReportContentTableProvider implements TableProvider {
 

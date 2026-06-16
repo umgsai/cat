@@ -9,10 +9,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OverloadRepository.class);
@@ -37,7 +35,7 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 		}
 	}
 
-	public List<Overload> findIdAndSizeByDuration(java.util.Date startTime, java.util.Date endTime, Readset<Overload> readset) throws DalException {
+	public List<Overload> findIdAndSizeByDuration(java.util.Date startTime, java.util.Date endTime, Object readset) throws DalException {
 		OverloadMapper mapper = springMapper(LOGGER);
 		OverloadDO record = new OverloadDO();
 
@@ -50,7 +48,7 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 		}
 	}
 
-	public Overload findByPK(int keyId, Readset<Overload> readset) throws DalException {
+	public Overload findByPK(int keyId, Object readset) throws DalException {
 		OverloadMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -62,7 +60,7 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 		}
 	}
 
-	public Overload findMaxIdByType(int type, Readset<Overload> readset) throws DalException {
+	public Overload findMaxIdByType(int type, Object readset) throws DalException {
 		OverloadMapper mapper = springMapper(LOGGER);
 		OverloadDO record = new OverloadDO();
 
@@ -78,7 +76,7 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 		}
 	}
 
-	public Overload findCount(Readset<Overload> readset) throws DalException {
+	public Overload findCount(Object readset) throws DalException {
 		OverloadMapper mapper = springMapper(LOGGER);
 		OverloadDO record = new OverloadDO();
 
@@ -108,7 +106,7 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 		}
 	}
 
-	public int updateByPK(Overload proto, Updateset<Overload> updateset) throws DalException {
+	public int updateByPK(Overload proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

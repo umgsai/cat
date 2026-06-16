@@ -27,8 +27,8 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.dal.jdbc.DalException;
 
+import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
 public class TaskManagerTest {

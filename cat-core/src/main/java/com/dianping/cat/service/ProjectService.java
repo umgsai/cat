@@ -25,7 +25,7 @@ import com.dianping.cat.core.mybatis.repository.project.ProjectRepository;
 import com.dianping.cat.core.dal.ProjectEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidal.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalException;
 
 import java.util.*;
 import java.util.Map.Entry;

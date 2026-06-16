@@ -9,10 +9,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertRepository.class);
@@ -37,7 +35,7 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 		}
 	}
 
-	public List<Alert> queryAlertsByTimeDomain(java.util.Date startTime, java.util.Date endTime, String domain, Readset<Alert> readset) throws DalException {
+	public List<Alert> queryAlertsByTimeDomain(java.util.Date startTime, java.util.Date endTime, String domain, Object readset) throws DalException {
 		AlertMapper mapper = springMapper(LOGGER);
 		AlertDO record = new AlertDO();
 
@@ -51,7 +49,7 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 		}
 	}
 
-	public List<Alert> queryAlertsByTimeDomainCategories(java.util.Date startTime, java.util.Date endTime, String domain, String[] categories, Readset<Alert> readset) throws DalException {
+	public List<Alert> queryAlertsByTimeDomainCategories(java.util.Date startTime, java.util.Date endTime, String domain, String[] categories, Object readset) throws DalException {
 		AlertMapper mapper = springMapper(LOGGER);
 		AlertDO record = new AlertDO();
 
@@ -67,7 +65,7 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 		}
 	}
 
-	public List<Alert> queryAlertsByTimeCategoryDomain(java.util.Date startTime, java.util.Date endTime, String category, String domain, Readset<Alert> readset) throws DalException {
+	public List<Alert> queryAlertsByTimeCategoryDomain(java.util.Date startTime, java.util.Date endTime, String category, String domain, Object readset) throws DalException {
 		AlertMapper mapper = springMapper(LOGGER);
 		AlertDO record = new AlertDO();
 
@@ -83,7 +81,7 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 		}
 	}
 
-	public List<Alert> queryAlertsByTimeCategory(java.util.Date startTime, java.util.Date endTime, String category, Readset<Alert> readset) throws DalException {
+	public List<Alert> queryAlertsByTimeCategory(java.util.Date startTime, java.util.Date endTime, String category, Object readset) throws DalException {
 		AlertMapper mapper = springMapper(LOGGER);
 		AlertDO record = new AlertDO();
 
@@ -97,7 +95,7 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 		}
 	}
 
-	public Alert findByPK(int keyId, Readset<Alert> readset) throws DalException {
+	public Alert findByPK(int keyId, Object readset) throws DalException {
 		AlertMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -124,7 +122,7 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 		}
 	}
 
-	public int updateByPK(Alert proto, Updateset<Alert> updateset) throws DalException {
+	public int updateByPK(Alert proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {

@@ -30,8 +30,8 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.dal.jdbc.DalException;
 
+import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;

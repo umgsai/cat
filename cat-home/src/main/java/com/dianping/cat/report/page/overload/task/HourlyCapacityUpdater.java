@@ -20,8 +20,8 @@ package com.dianping.cat.report.page.overload.task;
 
 import java.util.List;
 
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

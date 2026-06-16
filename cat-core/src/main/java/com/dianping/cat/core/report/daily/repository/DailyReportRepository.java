@@ -8,10 +8,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.dal.jdbc.DalNotFoundException;
-import org.unidal.dal.jdbc.Readset;
-import org.unidal.dal.jdbc.Updateset;
+import com.dianping.cat.core.dal.jdbc.DalException;
+import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.report.daily.dao.DailyReportMapper;
@@ -44,14 +42,14 @@ public class DailyReportRepository {
 	}
 
 	public DailyReport findByDomainNamePeriod(String domain, String name, java.util.Date period,
-			Readset<DailyReport> readset) throws DalException {
+			Object readset) throws DalException {
 		DailyReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByDomainNamePeriod(domain, name, period), "domain/name/period",
 				domain + "/" + name + "/" + period);
 	}
 
-	public DailyReport findByPK(int keyId, Readset<DailyReport> readset) throws DalException {
+	public DailyReport findByPK(int keyId, Object readset) throws DalException {
 		DailyReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findById(keyId), "id", String.valueOf(keyId));
@@ -69,7 +67,7 @@ public class DailyReportRepository {
 	}
 
 	public List<DailyReport> queryLatestReportsByDomainName(String domain, String name, int limits,
-			Readset<DailyReport> readset) throws DalException {
+			Object readset) throws DalException {
 		DailyReportMapper mapper = springMapper();
 
 		return mapper.queryLatestReportsByDomainName(domain, name, limits).stream()
@@ -77,7 +75,7 @@ public class DailyReportRepository {
 				.collect(Collectors.toList());
 	}
 
-	public int updateByPK(DailyReport proto, Updateset<DailyReport> updateset) throws DalException {
+	public int updateByPK(DailyReport proto, Object updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateById(toDailyReportDO(proto)));
