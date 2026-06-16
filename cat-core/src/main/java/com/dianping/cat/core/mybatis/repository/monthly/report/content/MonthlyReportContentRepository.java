@@ -123,8 +123,11 @@ public class MonthlyReportContentRepository {
 		if (record.getContent() != null) {
 			model.setContent(record.getContent());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
+		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
 		}
 		if (record.getContentLength() != null) {
 			model.setContentLength(record.getContentLength());
@@ -138,7 +141,8 @@ public class MonthlyReportContentRepository {
 
 		record.setReportId(model.getReportId());
 		record.setContent(model.getContent());
-		record.setCreationDate(model.getCreationDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyReportId(model.getKeyReportId());
 		record.setCapacity(model.getCapacity());
 		record.setStartId(model.getStartId());

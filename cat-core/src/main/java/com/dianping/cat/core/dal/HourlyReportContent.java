@@ -8,7 +8,9 @@ public class HourlyReportContent {
 
    private java.util.Date m_period;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
+
+   private java.util.Date m_updateTime;
 
    private long m_keyReportId;
 
@@ -34,7 +36,11 @@ public class HourlyReportContent {
    }
 
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public long getKeyReportId() {
@@ -53,6 +59,10 @@ public class HourlyReportContent {
       return m_startId;
    }
 
+   public java.util.Date getUpdateTime() {
+      return m_updateTime;
+   }
+
    public HourlyReportContent setCapacity(double capacity) {
       m_capacity = capacity;
       return this;
@@ -69,7 +79,12 @@ public class HourlyReportContent {
    }
 
    public HourlyReportContent setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public HourlyReportContent setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
@@ -94,6 +109,11 @@ public class HourlyReportContent {
       return this;
    }
 
+   public HourlyReportContent setUpdateTime(java.util.Date updateTime) {
+      m_updateTime = updateTime;
+      return this;
+   }
+
    @Override
    public String toString() {
       StringBuilder sb = new StringBuilder(1024);
@@ -102,11 +122,12 @@ public class HourlyReportContent {
       sb.append("capacity: ").append(m_capacity);
       sb.append(", content: ").append(m_content == null ? null : java.util.Arrays.asList(m_content));
       sb.append(", content-length: ").append(m_contentLength);
-      sb.append(", creation-date: ").append(m_creationDate);
+      sb.append(", create-time: ").append(m_createTime);
       sb.append(", key-report-id: ").append(m_keyReportId);
       sb.append(", period: ").append(m_period);
       sb.append(", report-id: ").append(m_reportId);
       sb.append(", start-id: ").append(m_startId);
+      sb.append(", update-time: ").append(m_updateTime);
       sb.append("]");
       return sb.toString();
    }

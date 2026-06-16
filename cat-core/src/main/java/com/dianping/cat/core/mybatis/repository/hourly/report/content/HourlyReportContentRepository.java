@@ -126,8 +126,11 @@ public class HourlyReportContentRepository {
 		if (record.getPeriod() != null) {
 			model.setPeriod(record.getPeriod());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
+		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
 		}
 		if (record.getContentLength() != null) {
 			model.setContentLength(record.getContentLength().longValue());
@@ -142,7 +145,8 @@ public class HourlyReportContentRepository {
 		record.setReportId(model.getReportId());
 		record.setContent(model.getContent());
 		record.setPeriod(model.getPeriod());
-		record.setCreationDate(model.getCreationDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyReportId(model.getKeyReportId());
 		record.setStartId(model.getStartId());
 		record.setCapacity(model.getCapacity());

@@ -12,7 +12,9 @@ public class HourlyReportContentDO {
 
 	private Date period;
 
-	private Date creationDate;
+	private Date createTime;
+
+	private Date updateTime;
 
 	private Double contentLength;
 

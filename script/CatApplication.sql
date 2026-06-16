@@ -83,41 +83,57 @@ CREATE TABLE `t_hourly_report`
     KEY `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='小时报表';
 
-CREATE TABLE `hourly_report_content` (
-  `report_id` bigint NOT NULL COMMENT '报表ID',
-  `content` longblob NOT NULL COMMENT '二进制报表内容',
-  `period` datetime NOT NULL  COMMENT '报表时间段',
-  `creation_date` datetime NOT NULL COMMENT '创建时间',
-  PRIMARY KEY (`report_id`),
-  KEY `IX_Period` (`period`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED COMMENT='小时报表二进制内容';
+CREATE TABLE `t_hourly_report_content`
+(
+    `report_id`   bigint   NOT NULL COMMENT '报表ID',
+    `content`     longblob NOT NULL COMMENT '二进制报表内容',
+    `period`      datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '报表时间段',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`report_id`),
+    KEY `idx_period` (`period`),
+    KEY `idx_create_time` (`create_time`),
+    KEY `idx_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='小时报表二进制内容';
 
-CREATE TABLE `daily_report_content` (
-  `report_id` bigint NOT NULL COMMENT '报表ID',
-  `content` longblob NOT NULL COMMENT '二进制报表内容',
-  `period` datetime  COMMENT '报表时间段',
-  `creation_date` datetime NOT NULL COMMENT '创建时间',
-  PRIMARY KEY (`report_id`),
-  KEY `IX_Period` (`period`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED COMMENT='天报表二进制内容';
+CREATE TABLE `t_daily_report_content`
+(
+    `report_id`   bigint   NOT NULL COMMENT '报表ID',
+    `content`     longblob NOT NULL COMMENT '二进制报表内容',
+    `period`      datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '报表时间段',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`report_id`),
+    KEY `idx_period` (`period`),
+    KEY `idx_create_time` (`create_time`),
+    KEY `idx_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='天报表二进制内容';
 
-CREATE TABLE `weekly_report_content` (
-  `report_id` bigint NOT NULL COMMENT '报表ID',
-  `content` longblob NOT NULL COMMENT '二进制报表内容',
-  `period` datetime  COMMENT '报表时间段',
-  `creation_date` datetime NOT NULL COMMENT '创建时间',
-  PRIMARY KEY (`report_id`),
-  KEY `IX_Period` (`period`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED COMMENT='周报表二进制内容';
+CREATE TABLE `t_weekly_report_content`
+(
+    `report_id`   bigint   NOT NULL COMMENT '报表ID',
+    `content`     longblob NOT NULL COMMENT '二进制报表内容',
+    `period`      datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '报表时间段',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`report_id`),
+    KEY `idx_period` (`period`),
+    KEY `idx_create_time` (`create_time`),
+    KEY `idx_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='周报表二进制内容';
 
-CREATE TABLE `monthly_report_content` (
-  `report_id` bigint NOT NULL COMMENT '报表ID',
-  `content` longblob NOT NULL COMMENT '二进制报表内容',
-  `period` datetime  COMMENT '报表时间段',
-  `creation_date` datetime NOT NULL COMMENT '创建时间',
-  PRIMARY KEY (`report_id`),
-  KEY `IX_Period` (`period`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED COMMENT='月报表二进制内容';
+CREATE TABLE `t_monthly_report_content`
+(
+    `report_id`   bigint   NOT NULL COMMENT '报表ID',
+    `content`     longblob NOT NULL COMMENT '二进制报表内容',
+    `period`      datetime NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '报表时间段',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`report_id`),
+    KEY `idx_period` (`period`),
+    KEY `idx_create_time` (`create_time`),
+    KEY `idx_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='月报表二进制内容';
 
 CREATE TABLE `businessReport` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

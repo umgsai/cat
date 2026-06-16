@@ -5,7 +5,8 @@
         <result column="report_id" property="reportId"/>
         <result column="content" property="content"/>
         <result column="period" property="period"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
         <result column="content_length" property="contentLength"/>
     </resultMap>
 
@@ -13,7 +14,8 @@
         report_id ,
         content ,
         period ,
-        creation_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -21,39 +23,40 @@
             <if test="reportId != null">report_id = #{reportId} ,</if>
             <if test="content != null">content = #{content} ,</if>
             <if test="period != null">period = #{period} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" parameterType="com.dianping.cat.core.mybatis.daily.report.content.dao.data.DailyReportContentDO">
-        INSERT INTO daily_report_content
+        INSERT INTO t_daily_report_content
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from daily_report_content where report_id = #{reportId}
+        from t_daily_report_content where report_id = #{reportId}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from daily_report_content
+        from t_daily_report_content
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from daily_report_content where report_id = #{reportId}
+        delete from t_daily_report_content where report_id = #{reportId}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.daily.report.content.dao.data.DailyReportContentDO">
-        UPDATE daily_report_content
+        UPDATE t_daily_report_content
         <include refid="setField"/>
         WHERE report_id = #{reportId}
     </update>
 
     <select id="findOverloadReport" resultMap="BaseResultMap">
-        select report_id, content, period, creation_date, length(content)/1024/1024 AS content_length from daily_report_content where report_id > #{record.startId} order by report_id asc limit 1000
+        select report_id, content, period, create_time, update_time, length(content)/1024/1024 AS content_length from t_daily_report_content where report_id > #{record.startId} order by report_id asc limit 1000
     </select>
 
 </mapper>
