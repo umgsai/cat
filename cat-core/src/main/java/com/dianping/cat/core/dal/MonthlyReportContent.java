@@ -2,19 +2,19 @@ package com.dianping.cat.core.dal;
 
 
 public class MonthlyReportContent {
-   private int m_reportId;
+   private long m_reportId;
 
    private byte[] m_content;
 
    private java.util.Date m_creationDate;
 
-   private int m_keyReportId;
+   private long m_keyReportId;
 
    private double m_contentLength;
 
    private double m_capacity;
 
-   private int m_startId;
+   private long m_startId;
    public void afterLoad() {
       m_keyReportId = m_reportId;
    }
@@ -35,15 +35,15 @@ public class MonthlyReportContent {
       return m_creationDate;
    }
 
-   public int getKeyReportId() {
+   public long getKeyReportId() {
       return m_keyReportId;
    }
 
-   public int getReportId() {
+   public long getReportId() {
       return m_reportId;
    }
 
-   public int getStartId() {
+   public long getStartId() {
       return m_startId;
    }
 
@@ -67,18 +67,18 @@ public class MonthlyReportContent {
       return this;
    }
 
-   public MonthlyReportContent setKeyReportId(int keyReportId) {
+   public MonthlyReportContent setKeyReportId(long keyReportId) {
       m_keyReportId = keyReportId;
       return this;
    }
 
-   public MonthlyReportContent setReportId(int reportId) {
+   public MonthlyReportContent setReportId(long reportId) {
       m_reportId = reportId;
       m_keyReportId = reportId;
       return this;
    }
 
-   public MonthlyReportContent setStartId(int startId) {
+   public MonthlyReportContent setStartId(long startId) {
       m_startId = startId;
       return this;
    }

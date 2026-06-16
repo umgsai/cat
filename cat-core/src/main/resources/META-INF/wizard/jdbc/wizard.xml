@@ -15,7 +15,7 @@
          <table name="report"/>
          <table name="t_daily_report"/>
          <table name="t_weekly_report"/>
-         <table name="monthreport"/>
+         <table name="t_monthly_report"/>
          <table name="graph"/>
          <table name="dailygraph"/>
          <table name="report_content"/>

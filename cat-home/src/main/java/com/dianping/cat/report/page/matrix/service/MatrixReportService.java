@@ -103,7 +103,7 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 		}
 	}
 
-	private MatrixReport queryFromMonthlyBinary(int id, String domain) {
+	private MatrixReport queryFromMonthlyBinary(long id, String domain) {
 		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
 
 		if (content != null) {

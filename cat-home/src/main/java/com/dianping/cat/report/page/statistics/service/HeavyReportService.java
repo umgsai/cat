@@ -103,7 +103,7 @@ public class HeavyReportService extends AbstractReportService<HeavyReport> {
 		}
 	}
 
-	private HeavyReport queryFromMonthlyBinary(int id, String domain) {
+	private HeavyReport queryFromMonthlyBinary(long id, String domain) {
 		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
 
 		if (content != null) {

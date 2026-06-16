@@ -8,7 +8,7 @@
         <result column="domain" property="domain"/>
         <result column="period" property="period"/>
         <result column="type" property="type"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -18,7 +18,7 @@
         domain ,
         period ,
         type ,
-        creation_date
+        create_time
     </sql>
 
     <sql id="setField">
@@ -29,44 +29,44 @@
             <if test="domain != null">domain = #{domain} ,</if>
             <if test="period != null">period = #{period} ,</if>
             <if test="type != null">type = #{type} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.monthreport.dao.data.MonthreportDO" keyProperty="id">
-        INSERT INTO monthreport
+        INSERT INTO t_monthly_report
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from monthreport where id = #{id}
+        from t_monthly_report where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from monthreport
+        from t_monthly_report
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from monthreport where id = #{id}
+        delete from t_monthly_report where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.monthreport.dao.data.MonthreportDO">
-        UPDATE monthreport
+        UPDATE t_monthly_report
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="findReportByDomainNamePeriod" resultMap="BaseResultMap">
-        select id, name, ip, domain, period, type, creation_date from monthreport where period = #{record.period} and domain = #{record.domain} and name = #{record.name} and binary(domain) = binary(#{record.domain})
+        select id, name, ip, domain, period, type, create_time from t_monthly_report where period = #{record.period} and domain = #{record.domain} and name = #{record.name} and binary(domain) = binary(#{record.domain})
     </select>
 
     <delete id="deleteReportByDomainNamePeriod">
-        DELETE from monthreport where period = #{record.period} and domain = #{record.domain} and name = #{record.name}
+        DELETE from t_monthly_report where period = #{record.period} and domain = #{record.domain} and name = #{record.name}
     </delete>
 
 </mapper>

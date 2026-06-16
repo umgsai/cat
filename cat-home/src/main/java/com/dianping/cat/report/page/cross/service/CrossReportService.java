@@ -103,7 +103,7 @@ public class CrossReportService extends AbstractReportService<CrossReport> {
 		}
 	}
 
-	private CrossReport queryFromMonthlyBinary(int id, String domain) {
+	private CrossReport queryFromMonthlyBinary(long id, String domain) {
 		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
 
 		if (content != null) {

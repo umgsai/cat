@@ -137,7 +137,7 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 		}
 	}
 
-	private TransactionReport queryFromMonthlyBinary(int id, String domain) {
+	private TransactionReport queryFromMonthlyBinary(long id, String domain) {
 		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
 
 		if (content != null) {

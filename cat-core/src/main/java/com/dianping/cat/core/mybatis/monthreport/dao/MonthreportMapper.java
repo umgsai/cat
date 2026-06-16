@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.monthreport.dao.data.MonthreportDO;
 
 public interface MonthreportMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	MonthreportDO findByPrimaryKey(@Param("id") Integer id);
+	MonthreportDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(MonthreportDO record);
 

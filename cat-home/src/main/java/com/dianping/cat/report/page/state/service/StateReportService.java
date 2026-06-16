@@ -103,7 +103,7 @@ public class StateReportService extends AbstractReportService<StateReport> {
 		}
 	}
 
-	private StateReport queryFromMonthlyBinary(int id, String domain) {
+	private StateReport queryFromMonthlyBinary(long id, String domain) {
 		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
 
 		if (content != null) {

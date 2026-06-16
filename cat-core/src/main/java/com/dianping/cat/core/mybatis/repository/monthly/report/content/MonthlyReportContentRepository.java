@@ -37,7 +37,7 @@ public class MonthlyReportContentRepository {
 		}
 	}
 
-	public List<MonthlyReportContent> findOverloadReport(int startId) {
+	public List<MonthlyReportContent> findOverloadReport(long startId) {
 		MonthlyReportContentMapper mapper = springMapper();
 		MonthlyReportContentDO record = new MonthlyReportContentDO();
 
@@ -49,7 +49,7 @@ public class MonthlyReportContentRepository {
 		}
 	}
 
-	public MonthlyReportContent findByPK(int keyReportId) {
+	public MonthlyReportContent findByPK(long keyReportId) {
 		MonthlyReportContentMapper mapper = springMapper();
 
 		try {

@@ -106,7 +106,7 @@ public class ProblemReportService extends AbstractReportService<ProblemReport> {
 		}
 	}
 
-	private ProblemReport queryFromMonthlyBinary(int id, String domain) {
+	private ProblemReport queryFromMonthlyBinary(long id, String domain) {
 		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
 
 		if (content != null) {

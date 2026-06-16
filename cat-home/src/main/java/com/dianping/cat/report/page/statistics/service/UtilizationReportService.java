@@ -102,7 +102,7 @@ public class UtilizationReportService extends AbstractReportService<UtilizationR
 		}
 	}
 
-	private UtilizationReport queryFromMonthlyBinary(int id, String domain) {
+	private UtilizationReport queryFromMonthlyBinary(long id, String domain) {
 		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
 
 		if (content != null) {

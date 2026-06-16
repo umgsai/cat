@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class MonthreportDO {
-	private Integer id;
+	private Long id;
 
 	private String name;
 
@@ -18,7 +18,7 @@ public class MonthreportDO {
 
 	private Integer type;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Integer keyId;
+	private Long keyId;
 }
