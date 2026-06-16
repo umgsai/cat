@@ -116,7 +116,7 @@ public class ProblemReportService extends AbstractReportService<ProblemReport> {
 		}
 	}
 
-	private ProblemReport queryFromWeeklyBinary(int id, String domain) {
+	private ProblemReport queryFromWeeklyBinary(long id, String domain) {
 		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
 
 		if (content != null) {

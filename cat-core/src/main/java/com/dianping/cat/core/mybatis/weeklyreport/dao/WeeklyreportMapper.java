@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.weeklyreport.dao.data.WeeklyreportDO;
 
 public interface WeeklyreportMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	WeeklyreportDO findByPrimaryKey(@Param("id") Integer id);
+	WeeklyreportDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(WeeklyreportDO record);
 

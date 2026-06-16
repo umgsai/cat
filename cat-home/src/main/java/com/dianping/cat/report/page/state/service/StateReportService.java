@@ -113,7 +113,7 @@ public class StateReportService extends AbstractReportService<StateReport> {
 		}
 	}
 
-	private StateReport queryFromWeeklyBinary(int id, String domain) {
+	private StateReport queryFromWeeklyBinary(long id, String domain) {
 		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
 
 		if (content != null) {

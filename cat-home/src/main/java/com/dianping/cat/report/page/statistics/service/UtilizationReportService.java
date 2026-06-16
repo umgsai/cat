@@ -112,7 +112,7 @@ public class UtilizationReportService extends AbstractReportService<UtilizationR
 		}
 	}
 
-	private UtilizationReport queryFromWeeklyBinary(int id, String domain) {
+	private UtilizationReport queryFromWeeklyBinary(long id, String domain) {
 		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
 
 		if (content != null) {

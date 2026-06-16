@@ -14,7 +14,7 @@
          <table name="project"/>
          <table name="report"/>
          <table name="t_daily_report"/>
-         <table name="weeklyreport"/>
+         <table name="t_weekly_report"/>
          <table name="monthreport"/>
          <table name="graph"/>
          <table name="dailygraph"/>

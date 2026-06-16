@@ -140,7 +140,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 		}
 	}
 
-	private StorageReport queryFromWeeklyBinary(int id, String reportId) {
+	private StorageReport queryFromWeeklyBinary(long id, String reportId) {
 		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
 
 		if (content != null) {

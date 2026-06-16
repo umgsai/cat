@@ -113,7 +113,7 @@ public class HeavyReportService extends AbstractReportService<HeavyReport> {
 		}
 	}
 
-	private HeavyReport queryFromWeeklyBinary(int id, String domain) {
+	private HeavyReport queryFromWeeklyBinary(long id, String domain) {
 		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
 
 		if (content != null) {

@@ -113,7 +113,7 @@ public class CrossReportService extends AbstractReportService<CrossReport> {
 		}
 	}
 
-	private CrossReport queryFromWeeklyBinary(int id, String domain) {
+	private CrossReport queryFromWeeklyBinary(long id, String domain) {
 		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
 
 		if (content != null) {

@@ -37,7 +37,7 @@ public class WeeklyReportRepository {
 		return transactionTemplate.execute(status -> springMapper().deleteReportByDomainNamePeriod(toRecord(proto)));
 	}
 
-	public WeeklyReport findByPK(int keyId) {
+	public WeeklyReport findByPK(long keyId) {
 		WeeklyreportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
@@ -130,8 +130,8 @@ public class WeeklyReportRepository {
 		if (record.getType() != null) {
 			model.setType(record.getType());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
 		}
 		model.afterLoad();
 		return model;
@@ -146,7 +146,7 @@ public class WeeklyReportRepository {
 		record.setDomain(model.getDomain());
 		record.setPeriod(model.getPeriod());
 		record.setType(model.getType());
-		record.setCreationDate(model.getCreationDate());
+		record.setCreateTime(model.getCreateTime());
 		record.setKeyId(model.getKeyId());
 		return record;
 	}

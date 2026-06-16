@@ -147,7 +147,7 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 		}
 	}
 
-	private TransactionReport queryFromWeeklyBinary(int id, String domain) {
+	private TransactionReport queryFromWeeklyBinary(long id, String domain) {
 		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
 
 		if (content != null) {

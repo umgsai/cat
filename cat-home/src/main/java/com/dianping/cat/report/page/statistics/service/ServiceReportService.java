@@ -113,7 +113,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 		}
 	}
 
-	private ServiceReport queryFromWeeklyBinary(int id, String domain) {
+	private ServiceReport queryFromWeeklyBinary(long id, String domain) {
 		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
 
 		if (content != null) {
