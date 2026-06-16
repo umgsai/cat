@@ -92,7 +92,7 @@ public class CrossReportService extends AbstractReportService<CrossReport> {
 		}
 	}
 
-	private CrossReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private CrossReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

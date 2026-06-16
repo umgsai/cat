@@ -52,7 +52,7 @@ public class TopReportService extends AbstractReportService<TopReport> {
 		throw new RuntimeException("Top report don't support daily report");
 	}
 
-	private TopReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private TopReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

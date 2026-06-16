@@ -92,7 +92,7 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 		}
 	}
 
-	private MatrixReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private MatrixReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

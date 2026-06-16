@@ -2,7 +2,7 @@ package com.dianping.cat.core.dal;
 
 
 public class HourlyReportContent {
-   private int m_reportId;
+   private long m_reportId;
 
    private byte[] m_content;
 
@@ -10,11 +10,11 @@ public class HourlyReportContent {
 
    private java.util.Date m_creationDate;
 
-   private int m_keyReportId;
+   private long m_keyReportId;
 
    private long m_contentLength;
 
-   private int m_startId;
+   private long m_startId;
 
    private double m_capacity;
    public void afterLoad() {
@@ -37,7 +37,7 @@ public class HourlyReportContent {
       return m_creationDate;
    }
 
-   public int getKeyReportId() {
+   public long getKeyReportId() {
       return m_keyReportId;
    }
 
@@ -45,11 +45,11 @@ public class HourlyReportContent {
       return m_period;
    }
 
-   public int getReportId() {
+   public long getReportId() {
       return m_reportId;
    }
 
-   public int getStartId() {
+   public long getStartId() {
       return m_startId;
    }
 
@@ -73,7 +73,7 @@ public class HourlyReportContent {
       return this;
    }
 
-   public HourlyReportContent setKeyReportId(int keyReportId) {
+   public HourlyReportContent setKeyReportId(long keyReportId) {
       m_keyReportId = keyReportId;
       return this;
    }
@@ -83,13 +83,13 @@ public class HourlyReportContent {
       return this;
    }
 
-   public HourlyReportContent setReportId(int reportId) {
+   public HourlyReportContent setReportId(long reportId) {
       m_reportId = reportId;
       m_keyReportId = reportId;
       return this;
    }
 
-   public HourlyReportContent setStartId(int startId) {
+   public HourlyReportContent setStartId(long startId) {
       m_startId = startId;
       return this;
    }

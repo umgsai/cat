@@ -92,7 +92,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 		}
 	}
 
-	private ServiceReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private ServiceReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

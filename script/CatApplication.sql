@@ -65,22 +65,26 @@ CREATE TABLE `t_host_info`
     KEY `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='IP和项目名的对应关系';
 
-CREATE TABLE `hourlyreport` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `type` tinyint(4) NOT NULL COMMENT '报表类型, 1/xml, 9/binary 默认1',
-  `name` varchar(20) NOT NULL COMMENT '报表名称',
-  `ip` varchar(50) DEFAULT NULL COMMENT '报表来自于哪台机器',
-  `domain` varchar(50) NOT NULL  COMMENT '报表项目',
-  `period` datetime NOT NULL COMMENT '报表时间段',
-  `creation_date` datetime NOT NULL COMMENT '报表创建时间',
-  PRIMARY KEY (`id`),
-  KEY `IX_Domain_Name_Period` (`domain`,`name`,`period`),
-  KEY `IX_Name_Period` (`name`,`period`),
-  KEY `IX_Period` (`period`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED COMMENT='用于存放实时报表信息，处理之后的结果';
+CREATE TABLE `t_hourly_report`
+(
+    `id`          bigint      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `type`        tinyint(4)  NOT NULL DEFAULT '1' COMMENT '报表类型, 1/xml, 9/binary, 默认1',
+    `name`        varchar(20) NOT NULL DEFAULT '' COMMENT '报表名称',
+    `ip`          varchar(50) NOT NULL DEFAULT '' COMMENT '报表来自于哪台机器',
+    `domain`      varchar(50) NOT NULL DEFAULT '' COMMENT '报表项目',
+    `period`      datetime    NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '报表时间段',
+    `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '报表创建时间',
+    `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_domain_name_period` (`domain`,`name`,`period`),
+    KEY `idx_name_period` (`name`,`period`),
+    KEY `idx_period` (`period`),
+    KEY `idx_create_time` (`create_time`),
+    KEY `idx_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='小时报表';
 
 CREATE TABLE `hourly_report_content` (
-  `report_id` int(11) NOT NULL COMMENT '报表ID',
+  `report_id` bigint NOT NULL COMMENT '报表ID',
   `content` longblob NOT NULL COMMENT '二进制报表内容',
   `period` datetime NOT NULL  COMMENT '报表时间段',
   `creation_date` datetime NOT NULL COMMENT '创建时间',

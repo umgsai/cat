@@ -46,7 +46,7 @@ public class JarReportService extends AbstractReportService<JarReport> {
 		throw new RuntimeException("JarReportService do not suppot queryDailyReport feature");
 	}
 
-	private JarReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private JarReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

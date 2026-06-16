@@ -91,7 +91,7 @@ public class UtilizationReportService extends AbstractReportService<UtilizationR
 		}
 	}
 
-	private UtilizationReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private UtilizationReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

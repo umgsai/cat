@@ -119,7 +119,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 		}
 	}
 
-	private StorageReport queryFromHourlyBinary(int id, Date period, String reportId) {
+	private StorageReport queryFromHourlyBinary(long id, Date period, String reportId) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

@@ -137,7 +137,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 		try {
 			m_hourlyReportDao.insert(report);
 
-			int id = report.getId();
+			long id = report.getId();
 			HourlyReportContent proto = m_hourlyReportContentDao.createLocal();
 
 			proto.setReportId(id);

@@ -126,7 +126,7 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 		}
 	}
 
-	private TransactionReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private TransactionReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

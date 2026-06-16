@@ -87,7 +87,7 @@ public class BusinessReportService extends AbstractReportService<BusinessReport>
 		return businessReport;
 	}
 
-	private BusinessReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private BusinessReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.hourly.report.content.dao.data.HourlyReportContentDO;
 
 public interface HourlyReportContentMapper {
-	int deleteByPrimaryKey(@Param("reportId") Integer reportId);
+	int deleteByPrimaryKey(@Param("reportId") Long reportId);
 
-	HourlyReportContentDO findByPrimaryKey(@Param("reportId") Integer reportId);
+	HourlyReportContentDO findByPrimaryKey(@Param("reportId") Long reportId);
 
 	int insert(HourlyReportContentDO record);
 

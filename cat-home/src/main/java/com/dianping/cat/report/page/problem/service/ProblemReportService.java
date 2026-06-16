@@ -95,7 +95,7 @@ public class ProblemReportService extends AbstractReportService<ProblemReport> {
 		}
 	}
 
-	private ProblemReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private ProblemReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

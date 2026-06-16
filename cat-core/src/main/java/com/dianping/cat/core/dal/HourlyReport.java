@@ -2,7 +2,7 @@ package com.dianping.cat.core.dal;
 
 
 public class HourlyReport {
-   private int m_id;
+   private long m_id;
 
    private int m_type;
 
@@ -14,9 +14,9 @@ public class HourlyReport {
 
    private java.util.Date m_period;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private int m_keyId;
+   private long m_keyId;
 
    private java.util.Date m_startDate;
 
@@ -26,7 +26,11 @@ public class HourlyReport {
    }
 
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public String getDomain() {
@@ -37,7 +41,7 @@ public class HourlyReport {
       return m_endDate;
    }
 
-   public int getId() {
+   public long getId() {
       return m_id;
    }
 
@@ -45,7 +49,7 @@ public class HourlyReport {
       return m_ip;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
    }
 
@@ -66,7 +70,12 @@ public class HourlyReport {
    }
 
    public HourlyReport setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public HourlyReport setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
@@ -80,7 +89,7 @@ public class HourlyReport {
       return this;
    }
 
-   public HourlyReport setId(int id) {
+   public HourlyReport setId(long id) {
       m_id = id;
       m_keyId = id;
       return this;
@@ -91,7 +100,7 @@ public class HourlyReport {
       return this;
    }
 
-   public HourlyReport setKeyId(int keyId) {
+   public HourlyReport setKeyId(long keyId) {
       m_keyId = keyId;
       return this;
    }
@@ -121,7 +130,7 @@ public class HourlyReport {
       StringBuilder sb = new StringBuilder(1024);
 
       sb.append("HourlyReport[");
-      sb.append("creation-date: ").append(m_creationDate);
+      sb.append("create-time: ").append(m_createTime);
       sb.append(", domain: ").append(m_domain);
       sb.append(", end-date: ").append(m_endDate);
       sb.append(", id: ").append(m_id);

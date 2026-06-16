@@ -37,7 +37,7 @@ public class HourlyReportContentRepository {
 		}
 	}
 
-	public List<HourlyReportContent> findOverloadReport(int startId) {
+	public List<HourlyReportContent> findOverloadReport(long startId) {
 		HourlyReportContentMapper mapper = springMapper();
 		HourlyReportContentDO record = new HourlyReportContentDO();
 
@@ -49,7 +49,7 @@ public class HourlyReportContentRepository {
 		}
 	}
 
-	public HourlyReportContent findByPK(int keyReportId, java.util.Date period) {
+	public HourlyReportContent findByPK(long keyReportId, java.util.Date period) {
 		HourlyReportContentMapper mapper = springMapper();
 
 		try {

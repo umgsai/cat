@@ -13,6 +13,7 @@
          <table name="task"/>
          <table name="project"/>
          <table name="report"/>
+         <table name="t_hourly_report"/>
          <table name="t_daily_report"/>
          <table name="t_weekly_report"/>
          <table name="t_monthly_report"/>

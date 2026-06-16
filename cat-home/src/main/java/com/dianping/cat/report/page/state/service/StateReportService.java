@@ -92,7 +92,7 @@ public class StateReportService extends AbstractReportService<StateReport> {
 		}
 	}
 
-	private StateReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private StateReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

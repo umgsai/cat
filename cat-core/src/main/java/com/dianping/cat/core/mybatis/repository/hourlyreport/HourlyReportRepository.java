@@ -52,7 +52,7 @@ public class HourlyReportRepository {
 		return mapper.findAllByPeriodName(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public HourlyReport findByPK(int keyId) {
+	public HourlyReport findByPK(long keyId) {
 		HourlyreportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
@@ -133,8 +133,8 @@ public class HourlyReportRepository {
 		if (record.getPeriod() != null) {
 			model.setPeriod(record.getPeriod());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
 		}
 		model.afterLoad();
 		return model;
@@ -149,7 +149,7 @@ public class HourlyReportRepository {
 		record.setIp(model.getIp());
 		record.setDomain(model.getDomain());
 		record.setPeriod(model.getPeriod());
-		record.setCreationDate(model.getCreationDate());
+		record.setCreateTime(model.getCreateTime());
 		record.setKeyId(model.getKeyId());
 		return record;
 	}

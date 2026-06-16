@@ -94,7 +94,7 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 		}
 	}
 
-	private HeartbeatReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private HeartbeatReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

@@ -8,7 +8,7 @@
         <result column="ip" property="ip"/>
         <result column="domain" property="domain"/>
         <result column="period" property="period"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -18,7 +18,7 @@
         ip ,
         domain ,
         period ,
-        creation_date
+        create_time
     </sql>
 
     <sql id="setField">
@@ -29,34 +29,34 @@
             <if test="ip != null">ip = #{ip} ,</if>
             <if test="domain != null">domain = #{domain} ,</if>
             <if test="period != null">period = #{period} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.hourlyreport.dao.data.HourlyreportDO" keyProperty="id">
-        INSERT INTO hourlyreport
+        INSERT INTO t_hourly_report
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from hourlyreport where id = #{id}
+        from t_hourly_report where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from hourlyreport
+        from t_hourly_report
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from hourlyreport where id = #{id}
+        delete from t_hourly_report where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.hourlyreport.dao.data.HourlyreportDO">
-        UPDATE hourlyreport
+        UPDATE t_hourly_report
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
@@ -64,7 +64,7 @@
     <select id="findAllByDomainNamePeriod" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from hourlyreport
+        from t_hourly_report
         where period = #{record.period}
         and domain = #{record.domain}
         and name = #{record.name}
@@ -74,7 +74,7 @@
     <select id="findAllByPeriodName" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from hourlyreport
+        from t_hourly_report
         where period = #{record.period}
         and name = #{record.name}
     </select>

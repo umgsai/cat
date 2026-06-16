@@ -121,7 +121,7 @@ public class EventReportService extends AbstractReportService<EventReport> {
 		}
 	}
 
-	private EventReport queryFromHourlyBinary(int id, Date period, String domain) {
+	private EventReport queryFromHourlyBinary(long id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
 								.findByPK(id, period);
 

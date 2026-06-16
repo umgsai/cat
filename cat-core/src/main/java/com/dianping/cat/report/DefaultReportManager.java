@@ -258,7 +258,7 @@ public class DefaultReportManager<T> implements ReportManager<T> {
 
 				m_reportDao.insert(r);
 
-				int id = r.getId();
+				long id = r.getId();
 				byte[] binaryContent = m_reportDelegate.buildBinary(report);
 				HourlyReportContent content = m_reportContentDao.createLocal();
 

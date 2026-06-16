@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class HourlyreportDO {
-	private Integer id;
+	private Long id;
 
 	private Integer type;
 
@@ -18,7 +18,7 @@ public class HourlyreportDO {
 
 	private Date period;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Integer keyId;
+	private Long keyId;
 }
