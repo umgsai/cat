@@ -30,14 +30,18 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.unidal.lookup.ComponentTestCase;
 
+import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.message.DefaultPathBuilder;
+import com.dianping.cat.report.DefaultReportBucketManager;
+import com.dianping.cat.report.LocalReportBucket;
 import com.dianping.cat.report.ReportBucket;
+import com.dianping.cat.report.ReportBucketFactory;
 import com.dianping.cat.report.ReportBucketManager;
 
 @RunWith(JUnit4.class)
 @Ignore
-public class BucketConcurrentTest extends ComponentTestCase {
+public class BucketConcurrentTest {
 	@BeforeClass
 	public static void beforeClass() {
 		new File("target/bucket/concurrent/bytes").delete();
@@ -48,7 +52,7 @@ public class BucketConcurrentTest extends ComponentTestCase {
 	@Test
 	public void testStringBucket() throws Exception {
 		long timestamp = System.currentTimeMillis();
-		ReportBucketManager manager = lookup(ReportBucketManager.class);
+		ReportBucketManager manager = createReportBucketManager();
 		final ReportBucket bucket = manager.getReportBucket(timestamp, "concurrent/data", 0);
 		ExecutorService pool = Executors.newFixedThreadPool(10);
 
@@ -111,6 +115,28 @@ public class BucketConcurrentTest extends ComponentTestCase {
 			String t2 = bucket.findById(id);
 
 			Assert.assertEquals("Unable to find data after stored it.", t1, t2);
+		}
+	}
+
+	private ReportBucketManager createReportBucketManager() {
+		DefaultReportBucketManager manager = new DefaultReportBucketManager();
+
+		manager.setBucketFactory(new MockReportBucketFactory());
+		manager.setConfigManager(new ServerConfigManager());
+		manager.initialize();
+		return manager;
+	}
+
+	private static class MockReportBucketFactory implements ReportBucketFactory {
+
+		@Override
+		public ReportBucket createReportBucket(String name, java.util.Date timestamp, int index) throws IOException {
+			LocalReportBucket bucket = new LocalReportBucket();
+
+			bucket.setConfigManager(new ServerConfigManager());
+			bucket.setPathBuilder(new DefaultPathBuilder());
+			bucket.initialize(name, timestamp, index);
+			return bucket;
 		}
 	}
 }

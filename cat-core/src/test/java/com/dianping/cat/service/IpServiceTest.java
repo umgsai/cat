@@ -23,11 +23,10 @@ import java.util.List;
 
 import org.junit.Test;
 import com.dianping.cat.support.Threads;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.service.IpService.IpInfo;
 
-public class IpServiceTest extends ComponentTestCase {
+public class IpServiceTest {
 	IpService2 service;
 
 	List<Long> result = new ArrayList<Long>();
@@ -39,7 +38,7 @@ public class IpServiceTest extends ComponentTestCase {
 
 	@Test
 	public void test() throws Exception {
-		IpService service = (IpService) lookup(IpService.class);
+		IpService service = new IpService();
 
 		for (int i = 0; i < 10000; i++) {
 			String ip = i % 255 + "." + i % 255 + "." + i % 255 + "." + i % 255;
@@ -55,7 +54,7 @@ public class IpServiceTest extends ComponentTestCase {
 
 	@Test
 	public void test2() throws InterruptedException {
-		service = (IpService2) lookup(IpService2.class);
+		service = new IpService2();
 		int count = 1000;
 
 		for (int j = 0; j < count; j++) {

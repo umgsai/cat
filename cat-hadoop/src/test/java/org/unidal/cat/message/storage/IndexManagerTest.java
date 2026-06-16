@@ -22,15 +22,14 @@ import java.io.IOException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.message.tree.MessageId;
 
-public class IndexManagerTest extends ComponentTestCase {
+public class IndexManagerTest {
 	@Test
 	public void test() throws IOException {
-		IndexManager manager = lookup(IndexManager.class, "local");
+		IndexManager manager = new LocalStorageTestSupport(new java.io.File("target")).getIndexManager();
 		MessageId id = MessageId.parse("mock-0a260014-403890-12345");
 		String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 

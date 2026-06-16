@@ -27,22 +27,22 @@ import java.util.Comparator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.message.tree.MessageId;
 
-public class IndexTest extends ComponentTestCase {
+public class IndexTest {
 
 	private String m_ip;
 
+	private LocalStorageTestSupport m_storage;
+
 	@Before
 	public void before() throws Exception {
-		StorageConfiguration config = lookup(StorageConfiguration.class);
-
-		config.setBaseDataDir(new File("target"));
 		File baseDir = new File("target");
+
 		deleteDirectory(new File(baseDir, "dump").toPath());
+		m_storage = new LocalStorageTestSupport(baseDir);
 		m_ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 	}
 
@@ -59,7 +59,7 @@ public class IndexTest extends ComponentTestCase {
 	@Test
 	public void testMapAndLookups() throws Exception {
 		int total = 15000;
-		IndexManager manager = lookup(IndexManager.class, "local");
+		IndexManager manager = m_storage.getIndexManager();
 		Index index = manager.getIndex("from", m_ip, 403899, true);
 
 		for (int i = 1; i < total; i++) {
@@ -81,7 +81,7 @@ public class IndexTest extends ComponentTestCase {
 
 	@Test
 	public void testMapAndLookupManyIps() throws Exception {
-		IndexManager manager = lookup(IndexManager.class, "local");
+		IndexManager manager = m_storage.getIndexManager();
 		Index index = manager.getIndex("from", m_ip, 403899, true);
 
 		for (int i = 1; i < 150000; i++) {

@@ -23,27 +23,31 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.tree.MessageId;
 
-public class MessageConsumerIpFindTest extends ComponentTestCase {
+public class MessageConsumerIpFindTest {
+	private MessageConsumerFinder m_finder;
 
 	@Before
 	public void before() throws Exception {
-		ServerConfigManager config = lookup(ServerConfigManager.class);
+		ServerConfigManager config = new ServerConfigManager();
+		HdfsSystemManager fileSystemManager = new HdfsSystemManager();
+		HdfsMessageConsumerFinder finder = new HdfsMessageConsumerFinder();
 
 		config.initialize(new File(MessageConsumerIpFindTest.class.getClassLoader().getResource("server.xml").getFile()));
+		fileSystemManager.setConfigManager(config);
+		fileSystemManager.initialize();
+		finder.setFileSystemManager(fileSystemManager);
+		m_finder = finder;
 	}
 
 	@Test
 	public void test() {
-		MessageConsumerFinder find = lookup(MessageConsumerFinder.class, "hdfs");
 		MessageId id = MessageId.parse("shop-web-0a420d56-405915-16");
-		Set<String> ips = find.findConsumerIps(id.getDomain(), id.getHour());
+		Set<String> ips = m_finder.findConsumerIps(id.getDomain(), id.getHour());
 
 		System.err.println(ips);
-
 	}
 }

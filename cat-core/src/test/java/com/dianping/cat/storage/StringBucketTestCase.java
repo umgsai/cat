@@ -28,11 +28,10 @@ import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.report.ReportBucket;
 
-public abstract class StringBucketTestCase extends ComponentTestCase {
+public abstract class StringBucketTestCase {
 
 	protected final static int threadNum = 200;// notice: max 9, for creating asc order id bellow
 
@@ -76,13 +75,7 @@ public abstract class StringBucketTestCase extends ComponentTestCase {
 	}
 
 	@Before
-	@Override
 	public void setUp() throws IOException {
-		try {
-			super.setUp();
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
 		try {
 			pool = Executors.newFixedThreadPool(threadNum);
 			bucket = createBucket();
@@ -94,9 +87,7 @@ public abstract class StringBucketTestCase extends ComponentTestCase {
 	protected abstract ReportBucket createBucket() throws Exception;
 
 	@After
-	@Override
 	public void tearDown() throws Exception {
-		super.tearDown();
 		bucket.close();
 	}
 

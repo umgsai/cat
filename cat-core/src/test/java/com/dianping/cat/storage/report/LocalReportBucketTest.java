@@ -24,6 +24,8 @@ import java.util.Date;
 
 import org.junit.After;
 
+import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.message.DefaultPathBuilder;
 import com.dianping.cat.report.LocalReportBucket;
 import com.dianping.cat.report.ReportBucket;
 import com.dianping.cat.storage.StringBucketTestCase;
@@ -32,7 +34,10 @@ public class LocalReportBucketTest extends StringBucketTestCase {
 
 	@Override
 	protected ReportBucket createBucket() throws Exception, IOException {
-		ReportBucket bucket = lookup(ReportBucket.class, String.class.getName() + "-report");
+		LocalReportBucket bucket = new LocalReportBucket();
+
+		bucket.setConfigManager(new ServerConfigManager());
+		bucket.setPathBuilder(new DefaultPathBuilder());
 		bucket.initialize("cat", new Date(), 0);
 		return bucket;
 	}

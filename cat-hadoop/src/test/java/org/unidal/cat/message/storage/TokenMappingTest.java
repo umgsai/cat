@@ -28,21 +28,19 @@ import java.util.concurrent.CountDownLatch;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
-import org.unidal.lookup.ComponentTestCase;
 
-public class TokenMappingTest extends ComponentTestCase {
+public class TokenMappingTest {
+	private LocalStorageTestSupport m_storage;
 
 	@Before
 	public void before() throws IOException {
 		File baseDir = new File("target");
 
 		deleteDirectory(new File(baseDir, "dump").toPath());
-
-		StorageConfiguration config = lookup(StorageConfiguration.class);
-
-		config.setBaseDataDir(baseDir);
+		m_storage = new LocalStorageTestSupport(baseDir);
 	}
 
 	private void deleteDirectory(Path path) throws IOException {
@@ -57,11 +55,10 @@ public class TokenMappingTest extends ComponentTestCase {
 
 	@Test
 	public void test() throws IOException {
-		TokenMapping mapping = lookup(TokenMapping.class, "local");
 		int hour = 405845;
 
 		for (int times = 0; times < 3; times++) {
-			mapping.open(hour, "127.0.0.1");
+			TokenMapping mapping = m_storage.createTokenMapping(hour, "127.0.0.1");
 
 			for (int i = 0; i < 64 * 1024; i++) {
 				String expected = "token-mapping-" + i;
@@ -78,15 +75,10 @@ public class TokenMappingTest extends ComponentTestCase {
 
 	@Test
 	public void testMany() throws IOException {
-		StorageConfiguration config = lookup(StorageConfiguration.class);
-
-		config.setBaseDataDir(new File("target"));
-
-		TokenMapping mapping = lookup(TokenMapping.class, "local");
 		int hour = 405845;
 
 		for (int times = 0; times < 3; times++) {
-			mapping.open(hour, "127.0.0.1");
+			TokenMapping mapping = m_storage.createTokenMapping(hour, "127.0.0.1");
 
 			for (int i = 0; i < 64 * 1024 * 10; i++) {
 				String expected = "token-mapping-" + i;
@@ -133,7 +125,7 @@ public class TokenMappingTest extends ComponentTestCase {
 			}
 
 			try {
-				TokenMappingManager mappingManager = lookup(TokenMappingManager.class, "local");
+				TokenMappingManager mappingManager = m_storage.getTokenMappingManager();
 				int hour = 405845;
 				TokenMapping mapping = mappingManager.getTokenMapping(hour, "127.0.0.1");
 
