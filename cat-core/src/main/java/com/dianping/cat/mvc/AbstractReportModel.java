@@ -38,7 +38,6 @@ import com.dianping.cat.sample.entity.Domain;
 import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
-import com.dianping.cat.spring.CatSpringContext;
 
 public abstract class AbstractReportModel<A extends Action, P extends Page, M extends ActionContext<?>>
 						extends	ViewModel<P, A, M> {
@@ -68,18 +67,22 @@ public abstract class AbstractReportModel<A extends Action, P extends Page, M ex
 
 	public AbstractReportModel(M ctx) {
 		super(ctx);
-		m_projectService = resolveService(ProjectService.class);
-		m_sampleConfigManager = resolveService(SampleConfigManager.class);
-		m_hostInfoService = resolveService(HostinfoService.class);
+		ReportModelDependencies dependencies = resolveDependencies(ctx);
+
+		m_projectService = dependencies.getProjectService();
+		m_sampleConfigManager = dependencies.getSampleConfigManager();
+		m_hostInfoService = dependencies.getHostinfoService();
 	}
 
-	private <T> T resolveService(Class<T> type) {
-		T service = CatSpringContext.getBeanIfAvailable(type);
+	private ReportModelDependencies resolveDependencies(M ctx) {
+		if (ctx instanceof ReportModelDependencyProvider) {
+			ReportModelDependencies dependencies = ((ReportModelDependencyProvider) ctx).getReportModelDependencies();
 
-		if (service != null) {
-			return service;
+			if (dependencies != null) {
+				return dependencies;
+			}
 		}
-		throw new IllegalStateException(type.getName() + " must be configured by Spring.");
+		throw new IllegalStateException("ReportModelDependencies must be configured for " + ctx.getClass().getName() + ".");
 	}
 
 	public double getSample() {

@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -36,7 +35,7 @@ import com.dianping.cat.message.internal.MockMessageBuilder;
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
 
-public class CrossPerformanceTest extends ComponentTestCase {
+public class CrossPerformanceTest {
 
 	@Test
 	public void test() throws Exception {

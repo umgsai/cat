@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import com.dianping.cat.spring.CatSpringContext;
-
 public class CatHomeSpringContextListener implements ServletContextListener {
 	public static final String ATTRIBUTE_NAME = CatHomeSpringContextListener.class.getName() + ".context";
 
@@ -22,14 +20,12 @@ public class CatHomeSpringContextListener implements ServletContextListener {
 
 		try {
 			context.register(CatHomeSpringConfiguration.class);
-			CatSpringContext.setContext(context);
 			context.refresh();
 			event.getServletContext().setAttribute(ATTRIBUTE_NAME, context);
 			m_context = context;
 			LOGGER.info("CAT home Spring context initialized, beanCount={}.", context.getBeanDefinitionCount());
 		} catch (RuntimeException | Error e) {
 			LOGGER.error("Failed to initialize CAT home Spring context.", e);
-			CatSpringContext.clear(context);
 			context.close();
 			throw e;
 		}
@@ -40,7 +36,6 @@ public class CatHomeSpringContextListener implements ServletContextListener {
 		event.getServletContext().removeAttribute(ATTRIBUTE_NAME);
 
 		if (m_context != null) {
-			CatSpringContext.clear(m_context);
 			m_context.close();
 			LOGGER.info("CAT home Spring context closed.");
 		}

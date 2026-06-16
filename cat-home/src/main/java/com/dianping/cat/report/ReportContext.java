@@ -35,7 +35,17 @@ import org.unidal.webres.resource.spi.IResourceRegistry;
 import org.unidal.webres.tag.resource.ResourceTagConfigurator;
 import org.unidal.webres.taglib.basic.ResourceTagLibConfigurator;
 
-public class ReportContext<T extends ActionPayload<? extends Page, ? extends Action>> extends ActionContext<T> {
+import com.dianping.cat.mvc.ReportModelDependencies;
+import com.dianping.cat.mvc.ReportModelDependencyProvider;
+
+public class ReportContext<T extends ActionPayload<? extends Page, ? extends Action>> extends ActionContext<T>
+		implements ReportModelDependencyProvider {
+	private ReportModelDependencies m_reportModelDependencies;
+
+	@Override
+	public ReportModelDependencies getReportModelDependencies() {
+		return m_reportModelDependencies;
+	}
 
 	@Override
 	public void initialize(HttpServletRequest request, HttpServletResponse response) {
@@ -67,4 +77,8 @@ public class ReportContext<T extends ActionPayload<? extends Page, ? extends Act
 		}
 	}
 
+	@Override
+	public void setReportModelDependencies(ReportModelDependencies dependencies) {
+		m_reportModelDependencies = dependencies;
+	}
 }

@@ -21,13 +21,12 @@ package com.dianping.cat.analysis;
 import org.junit.Assert;
 import org.junit.Test;
 import com.dianping.cat.support.Threads;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.ReportManager;
 
-public class AbstractMessageAnalyzerTest extends ComponentTestCase {
+public class AbstractMessageAnalyzerTest {
 
 	@Test
 	public void testTimeOut() throws InterruptedException {

@@ -195,6 +195,7 @@ import com.dianping.cat.message.storage.LocalMessageBucket;
 import com.dianping.cat.message.storage.MessageBucketFactory;
 import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.mvc.PayloadNormalizer;
+import com.dianping.cat.mvc.ReportModelDependencies;
 import com.dianping.cat.report.DefaultReportBucketManager;
 import com.dianping.cat.report.DefaultReportManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
@@ -1341,6 +1342,12 @@ public class CatHomeSpringConfiguration {
 
 		normalizer.setManager(serverConfigManager);
 		return normalizer;
+	}
+
+	@Bean
+	public ReportModelDependencies reportModelDependencies(ProjectService projectService, HostinfoService hostinfoService,
+			SampleConfigManager sampleConfigManager) {
+		return new ReportModelDependencies(projectService, hostinfoService, sampleConfigManager);
 	}
 
 	@Bean

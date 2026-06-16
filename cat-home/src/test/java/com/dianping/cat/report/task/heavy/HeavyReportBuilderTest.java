@@ -20,13 +20,12 @@ package com.dianping.cat.report.task.heavy;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.home.heavy.entity.HeavyReport;
 import com.dianping.cat.home.heavy.transform.DefaultSaxParser;
 import com.dianping.cat.report.page.statistics.task.heavy.HeavyReportMerger;
 
-public class HeavyReportBuilderTest extends ComponentTestCase {
+public class HeavyReportBuilderTest {
 
 	@Test
 	public void testMerge() throws Exception {

@@ -20,13 +20,12 @@ package com.dianping.cat.analysis;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.message.spi.DefaultMessageTree;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.ReportManager;
 
-public class PeriodTaskTest extends ComponentTestCase {
+public class PeriodTaskTest {
 
 	@Test
 	public void test() throws Exception {

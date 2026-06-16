@@ -73,11 +73,14 @@ final class SpringMvcRuntime {
 
 	private final Map<String, List<ModuleModel>> m_modules = new HashMap<String, List<ModuleModel>>();
 
+	private final ReportModelDependencies m_reportModelDependencies;
+
 	private final ServletContext m_servletContext;
 
 	SpringMvcRuntime(ApplicationContext applicationContext, ServletContext servletContext) {
 		m_applicationContext = applicationContext;
 		m_servletContext = servletContext;
+		m_reportModelDependencies = applicationContext.getBean(ReportModelDependencies.class);
 		m_defaultModule = register(new ReportModule(), true);
 		register(new SystemModule(), false);
 		LOGGER.info("Spring MVC runtime initialized, modules={}.", m_modules.keySet());
@@ -287,7 +290,14 @@ final class SpringMvcRuntime {
 		context.setInboundPage(inboundAction.getActionName());
 		context.setOutboundPage(inboundAction.getActionName());
 		context.setServletContext(m_servletContext);
+		injectReportModelDependencies(context);
 		return context;
+	}
+
+	private void injectReportModelDependencies(ActionContext<?> context) {
+		if (context instanceof ReportModelDependencyProvider) {
+			((ReportModelDependencyProvider) context).setReportModelDependencies(m_reportModelDependencies);
+		}
 	}
 
 	private RequestContext createPreActionRequestContext(RequestContext parentContext, InboundActionModel preAction) {

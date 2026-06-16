@@ -22,11 +22,10 @@ import java.io.IOException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.cat.message.tree.MessageId;
 
-public class MessageIdTest extends ComponentTestCase {
+public class MessageIdTest {
 	@Test
 	public void test() throws IOException {
 		MessageId id = MessageId.parse("child-0a260015-403899-12345");
