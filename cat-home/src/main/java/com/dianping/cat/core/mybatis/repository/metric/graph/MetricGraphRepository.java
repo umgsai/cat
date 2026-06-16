@@ -4,7 +4,6 @@ import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.generated.metric.graph.dao.MetricGraphMapper;
 import com.dianping.cat.core.mybatis.generated.metric.graph.dao.data.MetricGraphDO;
 import com.dianping.cat.home.dal.report.MetricGraph;
-import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -30,14 +29,8 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 	public int deleteByPK(MetricGraph proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(MetricGraphMapper.class).deleteByPrimaryKey(proto.getKeyId());
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByPK for MetricGraph.", e);
 		}
@@ -46,14 +39,8 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 	public int deleteBeforeDate(MetricGraph proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteBeforeDate(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(MetricGraphMapper.class).deleteBeforeDate(toRecord(proto));
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteBeforeDate for MetricGraph.", e);
 		}
@@ -62,13 +49,8 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 	public MetricGraph findByPK(int keyId, Readset<MetricGraph> readset) throws DalException {
 		MetricGraphMapper mapper = springMapper(LOGGER);
 
-		if (mapper != null) {
+		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		}
-
-		try (SqlSession session = openSession()) {
-			MetricGraphDO record = session.getMapper(MetricGraphMapper.class).findByPrimaryKey(keyId);
-			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
 		} catch (Exception e) {
@@ -81,16 +63,9 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 		MetricGraphDO record = new MetricGraphDO();
 
 		record.setGraphId(graphId);
-		if (mapper != null) {
+		try {
 			MetricGraphDO result = mapper.findByGrapId(record).stream().findFirst().orElse(null);
 
-			return requireFound(result, "findByGrapId", record.toString());
-		}
-
-		try (SqlSession session = openSession()) {
-			MetricGraphDO result = session.getMapper(MetricGraphMapper.class).findByGrapId(record).stream()
-					.findFirst()
-					.orElse(null);
 			return requireFound(result, "findByGrapId", record.toString());
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -104,15 +79,9 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 		MetricGraphDO record = new MetricGraphDO();
 
 		record.setNumber(number);
-		if (mapper != null) {
+		try {
 			MetricGraphDO result = mapper.findLast(record).stream().findFirst().orElse(null);
 
-			return requireFound(result, "findLast", record.toString());
-		}
-
-		try (SqlSession session = openSession()) {
-			MetricGraphDO result = session.getMapper(MetricGraphMapper.class).findLast(record).stream().findFirst()
-					.orElse(null);
 			return requireFound(result, "findLast", record.toString());
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -124,19 +93,10 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 	public int insert(MetricGraph proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			MetricGraphDO record = toRecord(proto);
 			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
 
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
-			return count;
-		}
-
-		try (SqlSession session = openSession()) {
-			MetricGraphDO record = toRecord(proto);
-			int count = session.getMapper(MetricGraphMapper.class).insert(record);
-			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
 			return count;
@@ -148,14 +108,8 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 	public int updateByPK(MetricGraph proto, Updateset<MetricGraph> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(MetricGraphMapper.class).updateByPrimaryKey(toRecord(proto));
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing updateByPK for MetricGraph.", e);
 		}

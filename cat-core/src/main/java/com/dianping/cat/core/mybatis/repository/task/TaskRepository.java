@@ -2,8 +2,6 @@ package com.dianping.cat.core.mybatis.repository.task;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,27 +10,19 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
-import org.unidal.dal.jdbc.datasource.DataSourceManager;
 
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.core.mybatis.generated.task.dao.TaskMapper;
 import com.dianping.cat.core.mybatis.generated.task.dao.data.TaskDO;
-import com.dianping.cat.core.mybatis.repository.SupportingMyBatisRepository;
 
 public class TaskRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TaskRepository.class);
 
-	private static final String MAPPER_RESOURCE = "mybatis/mapper/TaskMapper.xml";
-
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
-
-	private DataSourceManager m_dataSourceManager;
 
 	private SqlSessionTemplate m_sqlSessionTemplate;
 
 	private TransactionTemplate m_transactionTemplate;
-
-	private volatile SqlSessionFactory m_sqlSessionFactory;
 
 	public Task createLocal() {
 		return new Task();
@@ -41,36 +31,13 @@ public class TaskRepository {
 	public int deleteByPK(Task proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
-			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(TaskMapper.class).deleteByPrimaryKey(proto.getKeyId());
-
-			session.commit();
-			return count;
-		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for Task.", e);
-		}
+		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
 	public Task findByPK(int keyId, Readset<Task> readset) throws DalException {
 		TaskMapper mapper = springMapper();
 
-		if (mapper != null) {
-			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		}
-
-		try (SqlSession session = openSession()) {
-			TaskDO record = session.getMapper(TaskMapper.class).findByPrimaryKey(keyId);
-
-			return requireFound(record, "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for Task.", e);
-		}
+		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
 	public Task findByStatusConsumer(int status, String consumer, Readset<Task> readset) throws DalException {
@@ -79,176 +46,61 @@ public class TaskRepository {
 
 		record.setStatus(status);
 		record.setConsumer(consumer);
-		if (mapper != null) {
-			TaskDO result = mapper.findByStatusConsumer(record).stream().findFirst().orElse(null);
+		TaskDO result = mapper.findByStatusConsumer(record).stream().findFirst().orElse(null);
 
-			return requireFound(result, "findByStatusConsumer", record.toString());
-		}
-
-		try (SqlSession session = openSession()) {
-			TaskDO result = session.getMapper(TaskMapper.class).findByStatusConsumer(record).stream().findFirst()
-					.orElse(null);
-
-			return requireFound(result, "findByStatusConsumer", record.toString());
-		} catch (DalNotFoundException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new DalException("Error when executing findByStatusConsumer for Task.", e);
-		}
+		return requireFound(result, "findByStatusConsumer", record.toString());
 	}
 
 	public int insert(Task proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
-			TaskDO record = toRecord(proto);
-			int count = transactionTemplate.execute(status -> springMapper().insert(record));
+		TaskDO record = toRecord(proto);
+		int count = transactionTemplate.execute(status -> springMapper().insert(record));
 
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
-			return count;
-		}
-
-		try (SqlSession session = openSession()) {
-			TaskDO record = toRecord(proto);
-			int count = session.getMapper(TaskMapper.class).insert(record);
-
-			session.commit();
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
-			return count;
-		} catch (Exception e) {
-			throw new DalException("Error when executing insert for Task.", e);
-		}
+		proto.setId(record.getId());
+		proto.setKeyId(record.getId());
+		return count;
 	}
 
 	public int updateByPK(Task proto, Updateset<Task> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
-			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(TaskMapper.class).updateByPrimaryKey(toRecord(proto));
-
-			session.commit();
-			return count;
-		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for Task.", e);
-		}
+		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 	}
 
 	public int updateTodoToDoing(Task proto, Updateset<Task> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
-			return transactionTemplate.execute(status -> springMapper().updateTodoToDoing(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(TaskMapper.class).updateTodoToDoing(toRecord(proto));
-
-			session.commit();
-			return count;
-		} catch (Exception e) {
-			throw new DalException("Error when executing updateTodoToDoing for Task.", e);
-		}
+		return transactionTemplate.execute(status -> springMapper().updateTodoToDoing(toRecord(proto)));
 	}
 
 	public int updateDoingToDone(Task proto, Updateset<Task> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
-			return transactionTemplate.execute(status -> springMapper().updateDoingToDone(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(TaskMapper.class).updateDoingToDone(toRecord(proto));
-
-			session.commit();
-			return count;
-		} catch (Exception e) {
-			throw new DalException("Error when executing updateDoingToDone for Task.", e);
-		}
+		return transactionTemplate.execute(status -> springMapper().updateDoingToDone(toRecord(proto)));
 	}
 
 	public int updateFailureToDone(Task proto, Updateset<Task> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
-			return transactionTemplate.execute(status -> springMapper().updateFailureToDone(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(TaskMapper.class).updateFailureToDone(toRecord(proto));
-
-			session.commit();
-			return count;
-		} catch (Exception e) {
-			throw new DalException("Error when executing updateFailureToDone for Task.", e);
-		}
+		return transactionTemplate.execute(status -> springMapper().updateFailureToDone(toRecord(proto)));
 	}
 
 	public int updateStatusToTodo(Task proto, Updateset<Task> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
-			return transactionTemplate.execute(status -> springMapper().updateStatusToTodo(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(TaskMapper.class).updateStatusToTodo(toRecord(proto));
-
-			session.commit();
-			return count;
-		} catch (Exception e) {
-			throw new DalException("Error when executing updateStatusToTodo for Task.", e);
-		}
+		return transactionTemplate.execute(status -> springMapper().updateStatusToTodo(toRecord(proto)));
 	}
 
 	public int updateDoingToFail(Task proto, Updateset<Task> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
-			return transactionTemplate.execute(status -> springMapper().updateDoingToFail(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(TaskMapper.class).updateDoingToFail(toRecord(proto));
-
-			session.commit();
-			return count;
-		} catch (Exception e) {
-			throw new DalException("Error when executing updateDoingToFail for Task.", e);
-		}
-	}
-
-	private SqlSessionFactory getSqlSessionFactory() {
-		SqlSessionFactory sqlSessionFactory = m_sqlSessionFactory;
-
-		if (sqlSessionFactory == null) {
-			synchronized (this) {
-				sqlSessionFactory = m_sqlSessionFactory;
-
-				if (sqlSessionFactory == null) {
-					sqlSessionFactory = SupportingMyBatisRepository.newSqlSessionFactory(m_dataSourceManager,
-							TaskMapper.class, MAPPER_RESOURCE);
-					m_sqlSessionFactory = sqlSessionFactory;
-				}
-			}
-		}
-
-		return sqlSessionFactory;
-	}
-
-	private SqlSession openSession() {
-		return getSqlSessionFactory().openSession(false);
+		return transactionTemplate.execute(status -> springMapper().updateDoingToFail(toRecord(proto)));
 	}
 
 	private TaskMapper springMapper() {
 		if (m_sqlSessionTemplate == null) {
-			return null;
+			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for TaskMapper.");
 		}
 		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
 			LOGGER.info("TaskRepository is using Spring managed TaskMapper.");
@@ -257,6 +109,9 @@ public class TaskRepository {
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
+		if (m_transactionTemplate == null) {
+			throw new IllegalStateException("Spring TransactionTemplate is not configured for TaskMapper.");
+		}
 		return m_transactionTemplate;
 	}
 

@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,30 +12,19 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
-import org.unidal.dal.jdbc.datasource.DataSourceManager;
 
 import com.dianping.cat.core.dal.DailyReportContent;
 import com.dianping.cat.core.mybatis.generated.daily.report.content.dao.DailyReportContentMapper;
 import com.dianping.cat.core.mybatis.generated.daily.report.content.dao.data.DailyReportContentDO;
-import com.dianping.cat.core.mybatis.repository.SupportingMyBatisRepository;
 
 public class DailyReportContentRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DailyReportContentRepository.class);
 
-	private static final String MAPPER_RESOURCE = "mybatis/mapper/DailyReportContentMapper.xml";
-
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
-	private DataSourceManager m_dataSourceManager;
 
 	private SqlSessionTemplate m_sqlSessionTemplate;
 
 	private TransactionTemplate m_transactionTemplate;
-
-	private volatile SqlSessionFactory m_sqlSessionFactory;
-
-	public void setDataSourceManager(DataSourceManager dataSourceManager) {
-		m_dataSourceManager = dataSourceManager;
-	}
 
 	public DailyReportContent createLocal() {
 		return new DailyReportContent();
@@ -46,15 +33,8 @@ public class DailyReportContentRepository {
 	public int deleteByPK(DailyReportContent proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(DailyReportContentMapper.class).deleteByPrimaryKey(proto.getKeyReportId());
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByPK for DailyReportContent.", e);
 		}
@@ -66,14 +46,8 @@ public class DailyReportContentRepository {
 		DailyReportContentDO record = new DailyReportContentDO();
 
 		record.setStartId(startId);
-		if (mapper != null) {
+		try {
 			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
-		}
-
-		try (SqlSession session = openSession()) {
-			return session.getMapper(DailyReportContentMapper.class).findOverloadReport(record).stream()
-					.map(this::toModel)
-					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findOverloadReport for DailyReportContent.", e);
 		}
@@ -82,14 +56,8 @@ public class DailyReportContentRepository {
 	public DailyReportContent findByPK(int keyReportId, Readset<DailyReportContent> readset) throws DalException {
 		DailyReportContentMapper mapper = springMapper();
 
-		if (mapper != null) {
+		try {
 			return requireFound(mapper.findByPrimaryKey(keyReportId), "primary key", String.valueOf(keyReportId));
-		}
-
-		try (SqlSession session = openSession()) {
-			DailyReportContentDO record = session.getMapper(DailyReportContentMapper.class).findByPrimaryKey(keyReportId);
-
-			return requireFound(record, "primary key", String.valueOf(keyReportId));
 		} catch (DalNotFoundException e) {
 			throw e;
 		} catch (Exception e) {
@@ -100,16 +68,8 @@ public class DailyReportContentRepository {
 	public int insert(DailyReportContent proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			DailyReportContentDO record = toRecord(proto);
-			int count = session.getMapper(DailyReportContentMapper.class).insert(record);
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing insert for DailyReportContent.", e);
 		}
@@ -118,45 +78,16 @@ public class DailyReportContentRepository {
 	public int updateByPK(DailyReportContent proto, Updateset<DailyReportContent> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(DailyReportContentMapper.class).updateByPrimaryKey(toRecord(proto));
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing updateByPK for DailyReportContent.", e);
 		}
 	}
 
-	private SqlSessionFactory getSqlSessionFactory() {
-		SqlSessionFactory sqlSessionFactory = m_sqlSessionFactory;
-
-		if (sqlSessionFactory == null) {
-			synchronized (this) {
-				sqlSessionFactory = m_sqlSessionFactory;
-
-				if (sqlSessionFactory == null) {
-					sqlSessionFactory = SupportingMyBatisRepository.newSqlSessionFactory(m_dataSourceManager,
-							DailyReportContentMapper.class, MAPPER_RESOURCE);
-					m_sqlSessionFactory = sqlSessionFactory;
-				}
-			}
-		}
-
-		return sqlSessionFactory;
-	}
-
-	private SqlSession openSession() {
-		return getSqlSessionFactory().openSession(false);
-	}
-
 	private DailyReportContentMapper springMapper() {
 		if (m_sqlSessionTemplate == null) {
-			return null;
+			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for DailyReportContentMapper.");
 		}
 		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
 			LOGGER.info("DailyReportContentRepository is using Spring managed DailyReportContentMapper.");
@@ -165,6 +96,9 @@ public class DailyReportContentRepository {
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
+		if (m_transactionTemplate == null) {
+			throw new IllegalStateException("Spring TransactionTemplate is not configured for DailyReportContentMapper.");
+		}
 		return m_transactionTemplate;
 	}
 

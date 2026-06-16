@@ -6,7 +6,6 @@ import com.dianping.cat.core.mybatis.generated.metric.screen.dao.data.MetricScre
 import com.dianping.cat.home.dal.report.MetricScreen;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -32,14 +31,8 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 	public int deleteByPK(MetricScreen proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(MetricScreenMapper.class).deleteByPrimaryKey(proto.getKeyId());
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByPK for MetricScreen.", e);
 		}
@@ -48,14 +41,8 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 	public int deleteByName(MetricScreen proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByName(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(MetricScreenMapper.class).deleteByName(toRecord(proto));
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByName for MetricScreen.", e);
 		}
@@ -64,14 +51,8 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 	public int deleteByNameGraph(MetricScreen proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByNameGraph(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(MetricScreenMapper.class).deleteByNameGraph(toRecord(proto));
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByNameGraph for MetricScreen.", e);
 		}
@@ -81,14 +62,8 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 		MetricScreenMapper mapper = springMapper(LOGGER);
 		MetricScreenDO record = new MetricScreenDO();
 
-		if (mapper != null) {
+		try {
 			return mapper.findAll(record).stream().map(this::toModel).collect(Collectors.toList());
-		}
-
-		try (SqlSession session = openSession()) {
-			return session.getMapper(MetricScreenMapper.class).findAll(record).stream()
-					.map(this::toModel)
-					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findAll for MetricScreen.", e);
 		}
@@ -99,14 +74,8 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 		MetricScreenDO record = new MetricScreenDO();
 
 		record.setName(name);
-		if (mapper != null) {
+		try {
 			return mapper.findByName(record).stream().map(this::toModel).collect(Collectors.toList());
-		}
-
-		try (SqlSession session = openSession()) {
-			return session.getMapper(MetricScreenMapper.class).findByName(record).stream()
-					.map(this::toModel)
-					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findByName for MetricScreen.", e);
 		}
@@ -115,13 +84,8 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 	public MetricScreen findByPK(int keyId, Readset<MetricScreen> readset) throws DalException {
 		MetricScreenMapper mapper = springMapper(LOGGER);
 
-		if (mapper != null) {
+		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		}
-
-		try (SqlSession session = openSession()) {
-			MetricScreenDO record = session.getMapper(MetricScreenMapper.class).findByPrimaryKey(keyId);
-			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
 		} catch (Exception e) {
@@ -135,16 +99,9 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 
 		record.setName(name);
 		record.setGraphName(graphName);
-		if (mapper != null) {
+		try {
 			MetricScreenDO result = mapper.findByNameGraph(record).stream().findFirst().orElse(null);
 
-			return requireFound(result, "findByNameGraph", record.toString());
-		}
-
-		try (SqlSession session = openSession()) {
-			MetricScreenDO result = session.getMapper(MetricScreenMapper.class).findByNameGraph(record).stream()
-					.findFirst()
-					.orElse(null);
 			return requireFound(result, "findByNameGraph", record.toString());
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -156,19 +113,10 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 	public int insert(MetricScreen proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			MetricScreenDO record = toRecord(proto);
 			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
 
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
-			return count;
-		}
-
-		try (SqlSession session = openSession()) {
-			MetricScreenDO record = toRecord(proto);
-			int count = session.getMapper(MetricScreenMapper.class).insert(record);
-			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
 			return count;
@@ -180,14 +128,8 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 	public int insertOrUpdateByNameGraph(MetricScreen proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).insertOrUpdateByNameGraph(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(MetricScreenMapper.class).insertOrUpdateByNameGraph(toRecord(proto));
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing insertOrUpdateByNameGraph for MetricScreen.", e);
 		}
@@ -196,14 +138,8 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 	public int updateByPK(MetricScreen proto, Updateset<MetricScreen> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(MetricScreenMapper.class).updateByPrimaryKey(toRecord(proto));
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing updateByPK for MetricScreen.", e);
 		}

@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,30 +12,19 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
-import org.unidal.dal.jdbc.datasource.DataSourceManager;
 
 import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.core.mybatis.generated.hourly.report.content.dao.HourlyReportContentMapper;
 import com.dianping.cat.core.mybatis.generated.hourly.report.content.dao.data.HourlyReportContentDO;
-import com.dianping.cat.core.mybatis.repository.SupportingMyBatisRepository;
 
 public class HourlyReportContentRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HourlyReportContentRepository.class);
 
-	private static final String MAPPER_RESOURCE = "mybatis/mapper/HourlyReportContentMapper.xml";
-
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
-	private DataSourceManager m_dataSourceManager;
 
 	private SqlSessionTemplate m_sqlSessionTemplate;
 
 	private TransactionTemplate m_transactionTemplate;
-
-	private volatile SqlSessionFactory m_sqlSessionFactory;
-
-	public void setDataSourceManager(DataSourceManager dataSourceManager) {
-		m_dataSourceManager = dataSourceManager;
-	}
 
 	public HourlyReportContent createLocal() {
 		return new HourlyReportContent();
@@ -46,15 +33,8 @@ public class HourlyReportContentRepository {
 	public int deleteByPK(HourlyReportContent proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(HourlyReportContentMapper.class).deleteByPrimaryKey(proto.getKeyReportId());
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByPK for HourlyReportContent.", e);
 		}
@@ -66,14 +46,8 @@ public class HourlyReportContentRepository {
 		HourlyReportContentDO record = new HourlyReportContentDO();
 
 		record.setStartId(startId);
-		if (mapper != null) {
+		try {
 			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
-		}
-
-		try (SqlSession session = openSession()) {
-			return session.getMapper(HourlyReportContentMapper.class).findOverloadReport(record).stream()
-					.map(this::toModel)
-					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findOverloadReport for HourlyReportContent.", e);
 		}
@@ -83,15 +57,8 @@ public class HourlyReportContentRepository {
 			throws DalException {
 		HourlyReportContentMapper mapper = springMapper();
 
-		if (mapper != null) {
+		try {
 			return requireFound(mapper.findByPrimaryKey(keyReportId), "primary key", String.valueOf(keyReportId));
-		}
-
-		try (SqlSession session = openSession()) {
-			HourlyReportContentDO record = session.getMapper(HourlyReportContentMapper.class)
-					.findByPrimaryKey(keyReportId);
-
-			return requireFound(record, "primary key", String.valueOf(keyReportId));
 		} catch (DalNotFoundException e) {
 			throw e;
 		} catch (Exception e) {
@@ -102,16 +69,8 @@ public class HourlyReportContentRepository {
 	public int insert(HourlyReportContent proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			HourlyReportContentDO record = toRecord(proto);
-			int count = session.getMapper(HourlyReportContentMapper.class).insert(record);
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing insert for HourlyReportContent.", e);
 		}
@@ -120,45 +79,16 @@ public class HourlyReportContentRepository {
 	public int updateByPK(HourlyReportContent proto, Updateset<HourlyReportContent> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(HourlyReportContentMapper.class).updateByPrimaryKey(toRecord(proto));
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing updateByPK for HourlyReportContent.", e);
 		}
 	}
 
-	private SqlSessionFactory getSqlSessionFactory() {
-		SqlSessionFactory sqlSessionFactory = m_sqlSessionFactory;
-
-		if (sqlSessionFactory == null) {
-			synchronized (this) {
-				sqlSessionFactory = m_sqlSessionFactory;
-
-				if (sqlSessionFactory == null) {
-					sqlSessionFactory = SupportingMyBatisRepository.newSqlSessionFactory(m_dataSourceManager,
-							HourlyReportContentMapper.class, MAPPER_RESOURCE);
-					m_sqlSessionFactory = sqlSessionFactory;
-				}
-			}
-		}
-
-		return sqlSessionFactory;
-	}
-
-	private SqlSession openSession() {
-		return getSqlSessionFactory().openSession(false);
-	}
-
 	private HourlyReportContentMapper springMapper() {
 		if (m_sqlSessionTemplate == null) {
-			return null;
+			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for HourlyReportContentMapper.");
 		}
 		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
 			LOGGER.info("HourlyReportContentRepository is using Spring managed HourlyReportContentMapper.");
@@ -167,6 +97,9 @@ public class HourlyReportContentRepository {
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
+		if (m_transactionTemplate == null) {
+			throw new IllegalStateException("Spring TransactionTemplate is not configured for HourlyReportContentMapper.");
+		}
 		return m_transactionTemplate;
 	}
 

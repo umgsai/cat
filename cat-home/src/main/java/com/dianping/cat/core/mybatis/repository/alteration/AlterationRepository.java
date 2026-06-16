@@ -6,7 +6,6 @@ import com.dianping.cat.core.mybatis.generated.alteration.dao.data.AlterationDO;
 import com.dianping.cat.home.dal.report.Alteration;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -32,14 +31,8 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 	public int deleteByPK(Alteration proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(AlterationMapper.class).deleteByPrimaryKey(proto.getKeyId());
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByPK for Alteration.", e);
 		}
@@ -52,14 +45,8 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		record.setStartTime(startTime);
 		record.setEndTime(endTime);
 		record.setType(type);
-		if (mapper != null) {
+		try {
 			return mapper.findByTypeDruation(record).stream().map(this::toModel).collect(Collectors.toList());
-		}
-
-		try (SqlSession session = openSession()) {
-			return session.getMapper(AlterationMapper.class).findByTypeDruation(record).stream()
-					.map(this::toModel)
-					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findByTypeDruation for Alteration.", e);
 		}
@@ -74,14 +61,8 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		record.setType(type);
 		record.setDomain(domain);
 		record.setHostname(hostname);
-		if (mapper != null) {
+		try {
 			return mapper.findByDtdh(record).stream().map(this::toModel).collect(Collectors.toList());
-		}
-
-		try (SqlSession session = openSession()) {
-			return session.getMapper(AlterationMapper.class).findByDtdh(record).stream()
-					.map(this::toModel)
-					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findByDtdh for Alteration.", e);
 		}
@@ -97,14 +78,8 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		record.setDomain(domain);
 		record.setHostname(hostname);
 		record.setTypes(types);
-		if (mapper != null) {
+		try {
 			return mapper.findByDtdhTypes(record).stream().map(this::toModel).collect(Collectors.toList());
-		}
-
-		try (SqlSession session = openSession()) {
-			return session.getMapper(AlterationMapper.class).findByDtdhTypes(record).stream()
-					.map(this::toModel)
-					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findByDtdhTypes for Alteration.", e);
 		}
@@ -117,14 +92,8 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		record.setStartTime(startTime);
 		record.setEndTime(endTime);
 		record.setDomain(domain);
-		if (mapper != null) {
+		try {
 			return mapper.findByDomainAndTime(record).stream().map(this::toModel).collect(Collectors.toList());
-		}
-
-		try (SqlSession session = openSession()) {
-			return session.getMapper(AlterationMapper.class).findByDomainAndTime(record).stream()
-					.map(this::toModel)
-					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findByDomainAndTime for Alteration.", e);
 		}
@@ -133,13 +102,8 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 	public Alteration findByPK(int keyId, Readset<Alteration> readset) throws DalException {
 		AlterationMapper mapper = springMapper(LOGGER);
 
-		if (mapper != null) {
+		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		}
-
-		try (SqlSession session = openSession()) {
-			AlterationDO record = session.getMapper(AlterationMapper.class).findByPrimaryKey(keyId);
-			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
 		} catch (Exception e) {
@@ -150,19 +114,10 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 	public int insert(Alteration proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			AlterationDO record = toRecord(proto);
 			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
 
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
-			return count;
-		}
-
-		try (SqlSession session = openSession()) {
-			AlterationDO record = toRecord(proto);
-			int count = session.getMapper(AlterationMapper.class).insert(record);
-			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
 			return count;
@@ -174,14 +129,8 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 	public int updateByPK(Alteration proto, Updateset<Alteration> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(AlterationMapper.class).updateByPrimaryKey(toRecord(proto));
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing updateByPK for Alteration.", e);
 		}

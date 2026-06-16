@@ -4,7 +4,6 @@ import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.generated.config.modification.dao.ConfigModificationMapper;
 import com.dianping.cat.core.mybatis.generated.config.modification.dao.data.ConfigModificationDO;
 import com.dianping.cat.home.dal.report.ConfigModification;
-import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -30,14 +29,8 @@ public class ConfigModificationRepository extends SpringBackedRepositorySupport<
 	public int deleteByPK(ConfigModification proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(ConfigModificationMapper.class).deleteByPrimaryKey(proto.getKeyId());
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByPK for ConfigModification.", e);
 		}
@@ -46,13 +39,8 @@ public class ConfigModificationRepository extends SpringBackedRepositorySupport<
 	public ConfigModification findByPK(int keyId, Readset<ConfigModification> readset) throws DalException {
 		ConfigModificationMapper mapper = springMapper(LOGGER);
 
-		if (mapper != null) {
+		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		}
-
-		try (SqlSession session = openSession()) {
-			ConfigModificationDO record = session.getMapper(ConfigModificationMapper.class).findByPrimaryKey(keyId);
-			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
 		} catch (Exception e) {
@@ -63,19 +51,10 @@ public class ConfigModificationRepository extends SpringBackedRepositorySupport<
 	public int insert(ConfigModification proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			ConfigModificationDO record = toRecord(proto);
 			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
 
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
-			return count;
-		}
-
-		try (SqlSession session = openSession()) {
-			ConfigModificationDO record = toRecord(proto);
-			int count = session.getMapper(ConfigModificationMapper.class).insert(record);
-			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
 			return count;
@@ -87,14 +66,8 @@ public class ConfigModificationRepository extends SpringBackedRepositorySupport<
 	public int updateByPK(ConfigModification proto, Updateset<ConfigModification> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(ConfigModificationMapper.class).updateByPrimaryKey(toRecord(proto));
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing updateByPK for ConfigModification.", e);
 		}

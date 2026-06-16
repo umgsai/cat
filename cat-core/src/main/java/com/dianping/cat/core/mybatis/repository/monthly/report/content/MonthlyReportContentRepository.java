@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,30 +12,19 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
-import org.unidal.dal.jdbc.datasource.DataSourceManager;
 
 import com.dianping.cat.core.dal.MonthlyReportContent;
 import com.dianping.cat.core.mybatis.generated.monthly.report.content.dao.MonthlyReportContentMapper;
 import com.dianping.cat.core.mybatis.generated.monthly.report.content.dao.data.MonthlyReportContentDO;
-import com.dianping.cat.core.mybatis.repository.SupportingMyBatisRepository;
 
 public class MonthlyReportContentRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MonthlyReportContentRepository.class);
 
-	private static final String MAPPER_RESOURCE = "mybatis/mapper/MonthlyReportContentMapper.xml";
-
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
-	private DataSourceManager m_dataSourceManager;
 
 	private SqlSessionTemplate m_sqlSessionTemplate;
 
 	private TransactionTemplate m_transactionTemplate;
-
-	private volatile SqlSessionFactory m_sqlSessionFactory;
-
-	public void setDataSourceManager(DataSourceManager dataSourceManager) {
-		m_dataSourceManager = dataSourceManager;
-	}
 
 	public MonthlyReportContent createLocal() {
 		return new MonthlyReportContent();
@@ -46,15 +33,8 @@ public class MonthlyReportContentRepository {
 	public int deleteByPK(MonthlyReportContent proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(MonthlyReportContentMapper.class).deleteByPrimaryKey(proto.getKeyReportId());
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByPK for MonthlyReportContent.", e);
 		}
@@ -66,14 +46,8 @@ public class MonthlyReportContentRepository {
 		MonthlyReportContentDO record = new MonthlyReportContentDO();
 
 		record.setStartId(startId);
-		if (mapper != null) {
+		try {
 			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
-		}
-
-		try (SqlSession session = openSession()) {
-			return session.getMapper(MonthlyReportContentMapper.class).findOverloadReport(record).stream()
-					.map(this::toModel)
-					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findOverloadReport for MonthlyReportContent.", e);
 		}
@@ -82,15 +56,8 @@ public class MonthlyReportContentRepository {
 	public MonthlyReportContent findByPK(int keyReportId, Readset<MonthlyReportContent> readset) throws DalException {
 		MonthlyReportContentMapper mapper = springMapper();
 
-		if (mapper != null) {
+		try {
 			return requireFound(mapper.findByPrimaryKey(keyReportId), "primary key", String.valueOf(keyReportId));
-		}
-
-		try (SqlSession session = openSession()) {
-			MonthlyReportContentDO record = session.getMapper(MonthlyReportContentMapper.class)
-					.findByPrimaryKey(keyReportId);
-
-			return requireFound(record, "primary key", String.valueOf(keyReportId));
 		} catch (DalNotFoundException e) {
 			throw e;
 		} catch (Exception e) {
@@ -101,16 +68,8 @@ public class MonthlyReportContentRepository {
 	public int insert(MonthlyReportContent proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			MonthlyReportContentDO record = toRecord(proto);
-			int count = session.getMapper(MonthlyReportContentMapper.class).insert(record);
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing insert for MonthlyReportContent.", e);
 		}
@@ -119,45 +78,16 @@ public class MonthlyReportContentRepository {
 	public int updateByPK(MonthlyReportContent proto, Updateset<MonthlyReportContent> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(MonthlyReportContentMapper.class).updateByPrimaryKey(toRecord(proto));
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing updateByPK for MonthlyReportContent.", e);
 		}
 	}
 
-	private SqlSessionFactory getSqlSessionFactory() {
-		SqlSessionFactory sqlSessionFactory = m_sqlSessionFactory;
-
-		if (sqlSessionFactory == null) {
-			synchronized (this) {
-				sqlSessionFactory = m_sqlSessionFactory;
-
-				if (sqlSessionFactory == null) {
-					sqlSessionFactory = SupportingMyBatisRepository.newSqlSessionFactory(m_dataSourceManager,
-							MonthlyReportContentMapper.class, MAPPER_RESOURCE);
-					m_sqlSessionFactory = sqlSessionFactory;
-				}
-			}
-		}
-
-		return sqlSessionFactory;
-	}
-
-	private SqlSession openSession() {
-		return getSqlSessionFactory().openSession(false);
-	}
-
 	private MonthlyReportContentMapper springMapper() {
 		if (m_sqlSessionTemplate == null) {
-			return null;
+			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for MonthlyReportContentMapper.");
 		}
 		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
 			LOGGER.info("MonthlyReportContentRepository is using Spring managed MonthlyReportContentMapper.");
@@ -166,6 +96,9 @@ public class MonthlyReportContentRepository {
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
+		if (m_transactionTemplate == null) {
+			throw new IllegalStateException("Spring TransactionTemplate is not configured for MonthlyReportContentMapper.");
+		}
 		return m_transactionTemplate;
 	}
 

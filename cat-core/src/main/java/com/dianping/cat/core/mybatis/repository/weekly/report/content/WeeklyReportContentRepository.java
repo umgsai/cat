@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,30 +12,19 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
-import org.unidal.dal.jdbc.datasource.DataSourceManager;
 
 import com.dianping.cat.core.dal.WeeklyReportContent;
 import com.dianping.cat.core.mybatis.generated.weekly.report.content.dao.WeeklyReportContentMapper;
 import com.dianping.cat.core.mybatis.generated.weekly.report.content.dao.data.WeeklyReportContentDO;
-import com.dianping.cat.core.mybatis.repository.SupportingMyBatisRepository;
 
 public class WeeklyReportContentRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WeeklyReportContentRepository.class);
 
-	private static final String MAPPER_RESOURCE = "mybatis/mapper/WeeklyReportContentMapper.xml";
-
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
-	private DataSourceManager m_dataSourceManager;
 
 	private SqlSessionTemplate m_sqlSessionTemplate;
 
 	private TransactionTemplate m_transactionTemplate;
-
-	private volatile SqlSessionFactory m_sqlSessionFactory;
-
-	public void setDataSourceManager(DataSourceManager dataSourceManager) {
-		m_dataSourceManager = dataSourceManager;
-	}
 
 	public WeeklyReportContent createLocal() {
 		return new WeeklyReportContent();
@@ -46,15 +33,8 @@ public class WeeklyReportContentRepository {
 	public int deleteByPK(WeeklyReportContent proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(WeeklyReportContentMapper.class).deleteByPrimaryKey(proto.getKeyReportId());
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByPK for WeeklyReportContent.", e);
 		}
@@ -66,14 +46,8 @@ public class WeeklyReportContentRepository {
 		WeeklyReportContentDO record = new WeeklyReportContentDO();
 
 		record.setStartId(startId);
-		if (mapper != null) {
+		try {
 			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
-		}
-
-		try (SqlSession session = openSession()) {
-			return session.getMapper(WeeklyReportContentMapper.class).findOverloadReport(record).stream()
-					.map(this::toModel)
-					.collect(Collectors.toList());
 		} catch (Exception e) {
 			throw new DalException("Error when executing findOverloadReport for WeeklyReportContent.", e);
 		}
@@ -82,15 +56,8 @@ public class WeeklyReportContentRepository {
 	public WeeklyReportContent findByPK(int keyReportId, Readset<WeeklyReportContent> readset) throws DalException {
 		WeeklyReportContentMapper mapper = springMapper();
 
-		if (mapper != null) {
+		try {
 			return requireFound(mapper.findByPrimaryKey(keyReportId), "primary key", String.valueOf(keyReportId));
-		}
-
-		try (SqlSession session = openSession()) {
-			WeeklyReportContentDO record = session.getMapper(WeeklyReportContentMapper.class)
-					.findByPrimaryKey(keyReportId);
-
-			return requireFound(record, "primary key", String.valueOf(keyReportId));
 		} catch (DalNotFoundException e) {
 			throw e;
 		} catch (Exception e) {
@@ -101,16 +68,8 @@ public class WeeklyReportContentRepository {
 	public int insert(WeeklyReportContent proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			WeeklyReportContentDO record = toRecord(proto);
-			int count = session.getMapper(WeeklyReportContentMapper.class).insert(record);
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing insert for WeeklyReportContent.", e);
 		}
@@ -119,45 +78,16 @@ public class WeeklyReportContentRepository {
 	public int updateByPK(WeeklyReportContent proto, Updateset<WeeklyReportContent> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(WeeklyReportContentMapper.class).updateByPrimaryKey(toRecord(proto));
-
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing updateByPK for WeeklyReportContent.", e);
 		}
 	}
 
-	private SqlSessionFactory getSqlSessionFactory() {
-		SqlSessionFactory sqlSessionFactory = m_sqlSessionFactory;
-
-		if (sqlSessionFactory == null) {
-			synchronized (this) {
-				sqlSessionFactory = m_sqlSessionFactory;
-
-				if (sqlSessionFactory == null) {
-					sqlSessionFactory = SupportingMyBatisRepository.newSqlSessionFactory(m_dataSourceManager,
-							WeeklyReportContentMapper.class, MAPPER_RESOURCE);
-					m_sqlSessionFactory = sqlSessionFactory;
-				}
-			}
-		}
-
-		return sqlSessionFactory;
-	}
-
-	private SqlSession openSession() {
-		return getSqlSessionFactory().openSession(false);
-	}
-
 	private WeeklyReportContentMapper springMapper() {
 		if (m_sqlSessionTemplate == null) {
-			return null;
+			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for WeeklyReportContentMapper.");
 		}
 		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
 			LOGGER.info("WeeklyReportContentRepository is using Spring managed WeeklyReportContentMapper.");
@@ -166,6 +96,9 @@ public class WeeklyReportContentRepository {
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
+		if (m_transactionTemplate == null) {
+			throw new IllegalStateException("Spring TransactionTemplate is not configured for WeeklyReportContentMapper.");
+		}
 		return m_transactionTemplate;
 	}
 

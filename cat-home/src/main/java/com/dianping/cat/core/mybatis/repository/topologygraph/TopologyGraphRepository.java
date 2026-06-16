@@ -4,7 +4,6 @@ import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.generated.topologygraph.dao.TopologyGraphMapper;
 import com.dianping.cat.core.mybatis.generated.topologygraph.dao.data.TopologyGraphDO;
 import com.dianping.cat.home.dal.report.TopologyGraph;
-import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -30,14 +29,8 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 	public int deleteByPK(TopologyGraph proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(TopologyGraphMapper.class).deleteByPrimaryKey(proto.getKeyId());
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByPK for TopologyGraph.", e);
 		}
@@ -46,13 +39,8 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 	public TopologyGraph findByPK(int keyId, Readset<TopologyGraph> readset) throws DalException {
 		TopologyGraphMapper mapper = springMapper(LOGGER);
 
-		if (mapper != null) {
+		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		}
-
-		try (SqlSession session = openSession()) {
-			TopologyGraphDO record = session.getMapper(TopologyGraphMapper.class).findByPrimaryKey(keyId);
-			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
 		} catch (Exception e) {
@@ -65,16 +53,9 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 		TopologyGraphDO record = new TopologyGraphDO();
 
 		record.setPeriod(period);
-		if (mapper != null) {
+		try {
 			TopologyGraphDO result = mapper.findByPeriod(record).stream().findFirst().orElse(null);
 
-			return requireFound(result, "findByPeriod", record.toString());
-		}
-
-		try (SqlSession session = openSession()) {
-			TopologyGraphDO result = session.getMapper(TopologyGraphMapper.class).findByPeriod(record).stream()
-					.findFirst()
-					.orElse(null);
 			return requireFound(result, "findByPeriod", record.toString());
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -86,19 +67,10 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 	public int insert(TopologyGraph proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			TopologyGraphDO record = toRecord(proto);
 			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
 
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
-			return count;
-		}
-
-		try (SqlSession session = openSession()) {
-			TopologyGraphDO record = toRecord(proto);
-			int count = session.getMapper(TopologyGraphMapper.class).insert(record);
-			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
 			return count;
@@ -110,14 +82,8 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 	public int updateByPK(TopologyGraph proto, Updateset<TopologyGraph> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(TopologyGraphMapper.class).updateByPrimaryKey(toRecord(proto));
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing updateByPK for TopologyGraph.", e);
 		}

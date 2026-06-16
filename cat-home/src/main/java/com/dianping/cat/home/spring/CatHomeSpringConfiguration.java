@@ -58,7 +58,6 @@ import org.unidal.cat.message.storage.local.LocalTokenMapping;
 import org.unidal.cat.message.storage.local.LocalTokenMappingManager;
 import org.unidal.cat.message.storage.clean.HdfsUploader;
 import org.unidal.cat.message.storage.clean.LogviewProcessor;
-import org.unidal.dal.jdbc.datasource.DataSourceManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -2737,93 +2736,80 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public DataSourceManager dataSourceManager(DataSource catDataSource) {
-		return new SpringDataSourceManager(catDataSource);
-	}
-
-	@Bean
-	public DailyReportRepository dailyReportRepository(DataSourceManager dataSourceManager,
-			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
+	public DailyReportRepository dailyReportRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
 		DailyReportRepository repository = new DailyReportRepository();
 
-		repository.setDataSourceManager(dataSourceManager);
 		repository.setSqlSessionTemplate(sqlSessionTemplate);
 		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public DailyReportContentRepository dailyReportContentRepository(DataSourceManager dataSourceManager,
-			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
+	public DailyReportContentRepository dailyReportContentRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
 		DailyReportContentRepository repository = new DailyReportContentRepository();
 
-		repository.setDataSourceManager(dataSourceManager);
 		repository.setSqlSessionTemplate(sqlSessionTemplate);
 		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public HourlyReportRepository hourlyReportRepository(DataSourceManager dataSourceManager,
-			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
+	public HourlyReportRepository hourlyReportRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
 		HourlyReportRepository repository = new HourlyReportRepository();
 
-		repository.setDataSourceManager(dataSourceManager);
 		repository.setSqlSessionTemplate(sqlSessionTemplate);
 		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public HourlyReportContentRepository hourlyReportContentRepository(DataSourceManager dataSourceManager,
-			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
+	public HourlyReportContentRepository hourlyReportContentRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
 		HourlyReportContentRepository repository = new HourlyReportContentRepository();
 
-		repository.setDataSourceManager(dataSourceManager);
 		repository.setSqlSessionTemplate(sqlSessionTemplate);
 		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public WeeklyReportRepository weeklyReportRepository(DataSourceManager dataSourceManager,
-			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
+	public WeeklyReportRepository weeklyReportRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
 		WeeklyReportRepository repository = new WeeklyReportRepository();
 
-		repository.setDataSourceManager(dataSourceManager);
 		repository.setSqlSessionTemplate(sqlSessionTemplate);
 		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public WeeklyReportContentRepository weeklyReportContentRepository(DataSourceManager dataSourceManager,
-			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
+	public WeeklyReportContentRepository weeklyReportContentRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
 		WeeklyReportContentRepository repository = new WeeklyReportContentRepository();
 
-		repository.setDataSourceManager(dataSourceManager);
 		repository.setSqlSessionTemplate(sqlSessionTemplate);
 		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public MonthlyReportRepository monthlyReportRepository(DataSourceManager dataSourceManager,
-			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
+	public MonthlyReportRepository monthlyReportRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
 		MonthlyReportRepository repository = new MonthlyReportRepository();
 
-		repository.setDataSourceManager(dataSourceManager);
 		repository.setSqlSessionTemplate(sqlSessionTemplate);
 		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
 	}
 
 	@Bean
-	public MonthlyReportContentRepository monthlyReportContentRepository(DataSourceManager dataSourceManager,
-			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
+	public MonthlyReportContentRepository monthlyReportContentRepository(SqlSessionTemplate sqlSessionTemplate,
+			TransactionTemplate transactionTemplate) {
 		MonthlyReportContentRepository repository = new MonthlyReportContentRepository();
 
-		repository.setDataSourceManager(dataSourceManager);
 		repository.setSqlSessionTemplate(sqlSessionTemplate);
 		repository.setTransactionTemplate(transactionTemplate);
 		return repository;

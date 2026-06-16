@@ -4,7 +4,6 @@ import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.generated.baseline.dao.BaselineMapper;
 import com.dianping.cat.core.mybatis.generated.baseline.dao.data.BaselineDO;
 import com.dianping.cat.home.dal.report.Baseline;
-import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -29,14 +28,8 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 	public int deleteByPK(Baseline proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(BaselineMapper.class).deleteByPrimaryKey(proto.getKeyId());
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing deleteByPK for Baseline.", e);
 		}
@@ -45,13 +38,8 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 	public Baseline findByPK(int keyId, Readset<Baseline> readset) throws DalException {
 		BaselineMapper mapper = springMapper(LOGGER);
 
-		if (mapper != null) {
+		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		}
-
-		try (SqlSession session = openSession()) {
-			BaselineDO record = session.getMapper(BaselineMapper.class).findByPrimaryKey(keyId);
-			return requireFound(record, "primary key", String.valueOf(keyId));
 		} catch (DalNotFoundException e) {
 			throw e;
 		} catch (Exception e) {
@@ -66,16 +54,9 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 		record.setReportPeriod(reportPeriod);
 		record.setReportName(reportName);
 		record.setIndexKey(indexKey);
-		if (mapper != null) {
+		try {
 			BaselineDO result = mapper.findByReportNameKeyTime(record).stream().findFirst().orElse(null);
 
-			return requireFound(result, "findByReportNameKeyTime", record.toString());
-		}
-
-		try (SqlSession session = openSession()) {
-			BaselineDO result = session.getMapper(BaselineMapper.class).findByReportNameKeyTime(record).stream()
-					.findFirst()
-					.orElse(null);
 			return requireFound(result, "findByReportNameKeyTime", record.toString());
 		} catch (DalNotFoundException e) {
 			throw e;
@@ -87,19 +68,10 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 	public int insert(Baseline proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			BaselineDO record = toRecord(proto);
 			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
 
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
-			return count;
-		}
-
-		try (SqlSession session = openSession()) {
-			BaselineDO record = toRecord(proto);
-			int count = session.getMapper(BaselineMapper.class).insert(record);
-			session.commit();
 			proto.setId(record.getId());
 			proto.setKeyId(record.getId());
 			return count;
@@ -111,14 +83,8 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 	public int updateByPK(Baseline proto, Updateset<Baseline> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
+		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(BaselineMapper.class).updateByPrimaryKey(toRecord(proto));
-			session.commit();
-			return count;
 		} catch (Exception e) {
 			throw new DalException("Error when executing updateByPK for Baseline.", e);
 		}

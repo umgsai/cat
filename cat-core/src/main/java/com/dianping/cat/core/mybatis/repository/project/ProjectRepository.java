@@ -1,22 +1,9 @@
 package com.dianping.cat.core.mybatis.repository.project;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.sql.Connection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import javax.sql.DataSource;
-
-import org.apache.ibatis.builder.xml.XMLMapperBuilder;
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.mapping.Environment;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +12,6 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.dal.jdbc.Readset;
 import org.unidal.dal.jdbc.Updateset;
-import org.unidal.dal.jdbc.datasource.DataSourceManager;
 
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.core.mybatis.generated.project.dao.ProjectMapper;
@@ -34,18 +20,11 @@ import com.dianping.cat.core.mybatis.generated.project.dao.data.ProjectDO;
 public class ProjectRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectRepository.class);
 
-	private static final String DATA_SOURCE_NAME = "cat";
-
-	private static final String MAPPER_RESOURCE = "mybatis/mapper/ProjectMapper.xml";
-
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
-	private DataSourceManager m_dataSourceManager;
 
 	private SqlSessionTemplate m_sqlSessionTemplate;
 
 	private TransactionTemplate m_transactionTemplate;
-
-	private volatile SqlSessionFactory m_sqlSessionFactory;
 
 	public Project createLocal() {
 		return new Project();
@@ -54,56 +33,21 @@ public class ProjectRepository {
 	public int deleteByPK(Project proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
-			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(ProjectMapper.class).deleteByPrimaryKey(proto.getKeyId());
-
-			session.commit();
-			return count;
-		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for Project.", e);
-		}
+		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
 	public List<Project> findAll(Readset<Project> readset) throws DalException {
 		ProjectMapper mapper = springMapper();
 
-		if (mapper != null) {
-			ProjectDO record = new ProjectDO();
+		ProjectDO record = new ProjectDO();
 
-			return mapper.findAll(record).stream().map(this::toModel).collect(Collectors.toList());
-		}
-
-		try (SqlSession session = openSession()) {
-			ProjectDO record = new ProjectDO();
-
-			return session.getMapper(ProjectMapper.class).findAll(record).stream()
-					.map(this::toModel)
-					.collect(Collectors.toList());
-		} catch (Exception e) {
-			throw new DalException("Error when executing findAll for Project.", e);
-		}
+		return mapper.findAll(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
 	public Project findByPK(int keyId, Readset<Project> readset) throws DalException {
 		ProjectMapper mapper = springMapper();
 
-		if (mapper != null) {
-			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		}
-
-		try (SqlSession session = openSession()) {
-			ProjectDO record = session.getMapper(ProjectMapper.class).findByPrimaryKey(keyId);
-
-			return requireFound(record, "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for Project.", e);
-		}
+		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
 	public Project findByDomain(String domain, Readset<Project> readset) throws DalException {
@@ -111,22 +55,9 @@ public class ProjectRepository {
 		ProjectMapper mapper = springMapper();
 
 		record.setDomain(domain);
-		if (mapper != null) {
-			ProjectDO result = mapper.findByDomain(record).stream().findFirst().orElse(null);
+		ProjectDO result = mapper.findByDomain(record).stream().findFirst().orElse(null);
 
-			return requireFound(result, "findByDomain", record.toString());
-		}
-
-		try (SqlSession session = openSession()) {
-			ProjectDO result = session.getMapper(ProjectMapper.class).findByDomain(record).stream().findFirst()
-					.orElse(null);
-
-			return requireFound(result, "findByDomain", record.toString());
-		} catch (DalNotFoundException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new DalException("Error when executing findByDomain for Project.", e);
-		}
+		return requireFound(result, "findByDomain", record.toString());
 	}
 
 	public Project findByCmdbDomain(String domain, Readset<Project> readset) throws DalException {
@@ -134,112 +65,33 @@ public class ProjectRepository {
 		ProjectMapper mapper = springMapper();
 
 		record.setDomain(domain);
-		if (mapper != null) {
-			ProjectDO result = mapper.findByCmdbDomain(record).stream().findFirst().orElse(null);
+		ProjectDO result = mapper.findByCmdbDomain(record).stream().findFirst().orElse(null);
 
-			return requireFound(result, "findByCmdbDomain", record.toString());
-		}
-
-		try (SqlSession session = openSession()) {
-			ProjectDO result = session.getMapper(ProjectMapper.class).findByCmdbDomain(record).stream().findFirst()
-					.orElse(null);
-
-			return requireFound(result, "findByCmdbDomain", record.toString());
-		} catch (DalNotFoundException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new DalException("Error when executing findByCmdbDomain for Project.", e);
-		}
+		return requireFound(result, "findByCmdbDomain", record.toString());
 	}
 
 	public int insert(Project proto) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
-			ProjectDO record = toRecord(proto);
-			int count = transactionTemplate.execute(status -> springMapper().insert(record));
+		ProjectDO record = toRecord(proto);
+		int count = transactionTemplate.execute(status -> springMapper().insert(record));
 
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
-			return count;
-		}
-
-		try (SqlSession session = openSession()) {
-			ProjectDO record = toRecord(proto);
-			int count = session.getMapper(ProjectMapper.class).insert(record);
-
-			session.commit();
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
-			return count;
-		} catch (Exception e) {
-			throw new DalException("Error when executing insert for Project.", e);
-		}
+		proto.setId(record.getId());
+		proto.setKeyId(record.getId());
+		return count;
 	}
 
 	public int updateByPK(Project proto, Updateset<Project> updateset) throws DalException {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		if (transactionTemplate != null) {
-			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
-		}
-
-		try (SqlSession session = openSession()) {
-			int count = session.getMapper(ProjectMapper.class).updateByPrimaryKey(toRecord(proto));
-
-			session.commit();
-			return count;
-		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for Project.", e);
-		}
-	}
-
-	private SqlSessionFactory getSqlSessionFactory() {
-		SqlSessionFactory sqlSessionFactory = m_sqlSessionFactory;
-
-		if (sqlSessionFactory == null) {
-			synchronized (this) {
-				sqlSessionFactory = m_sqlSessionFactory;
-
-				if (sqlSessionFactory == null) {
-					sqlSessionFactory = newSqlSessionFactory();
-					m_sqlSessionFactory = sqlSessionFactory;
-				}
-			}
-		}
-
-		return sqlSessionFactory;
-	}
-
-	private void loadMapperXml(Configuration configuration) {
-		try (Reader reader = Resources.getResourceAsReader(MAPPER_RESOURCE)) {
-			XMLMapperBuilder mapperParser = new XMLMapperBuilder(reader, configuration, MAPPER_RESOURCE,
-					configuration.getSqlFragments());
-
-			mapperParser.parse();
-		} catch (IOException e) {
-			throw new IllegalStateException("Error when loading MyBatis mapper: " + MAPPER_RESOURCE, e);
-		}
-	}
-
-	private SqlSessionFactory newSqlSessionFactory() {
-		Configuration configuration = new Configuration(new Environment(DATA_SOURCE_NAME, new JdbcTransactionFactory(),
-				new UnidalDataSource(m_dataSourceManager, DATA_SOURCE_NAME)));
-
-		configuration.addMapper(ProjectMapper.class);
-		loadMapperXml(configuration);
-		return new SqlSessionFactoryBuilder().build(configuration);
-	}
-
-	private SqlSession openSession() {
-		return getSqlSessionFactory().openSession(false);
+		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 	}
 
 	private ProjectMapper springMapper() {
 		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
 
 		if (sqlSessionTemplate == null) {
-			return null;
+			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for ProjectMapper.");
 		}
 
 		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
@@ -250,6 +102,9 @@ public class ProjectRepository {
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
+		if (m_transactionTemplate == null) {
+			throw new IllegalStateException("Spring TransactionTemplate is not configured for ProjectMapper.");
+		}
 		return m_transactionTemplate;
 	}
 
@@ -327,57 +182,4 @@ public class ProjectRepository {
 		return record;
 	}
 
-	private static final class UnidalDataSource implements DataSource {
-		private final DataSourceManager m_dataSourceManager;
-
-		private final String m_dataSourceName;
-
-		private UnidalDataSource(DataSourceManager dataSourceManager, String dataSourceName) {
-			m_dataSourceManager = dataSourceManager;
-			m_dataSourceName = dataSourceName;
-		}
-
-		@Override
-		public Connection getConnection() throws java.sql.SQLException {
-			return m_dataSourceManager.getDataSource(m_dataSourceName).getConnection();
-		}
-
-		@Override
-		public Connection getConnection(String username, String password) throws java.sql.SQLException {
-			return getConnection();
-		}
-
-		@Override
-		public int getLoginTimeout() {
-			return 0;
-		}
-
-		@Override
-		public java.io.PrintWriter getLogWriter() {
-			return null;
-		}
-
-		@Override
-		public java.util.logging.Logger getParentLogger() {
-			return java.util.logging.Logger.getGlobal();
-		}
-
-		@Override
-		public boolean isWrapperFor(Class<?> iface) {
-			return false;
-		}
-
-		@Override
-		public void setLoginTimeout(int seconds) {
-		}
-
-		@Override
-		public void setLogWriter(java.io.PrintWriter out) {
-		}
-
-		@Override
-		public <T> T unwrap(Class<T> iface) throws java.sql.SQLException {
-			throw new java.sql.SQLException("Not a wrapper for " + iface.getName());
-		}
-	}
 }
