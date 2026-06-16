@@ -21,8 +21,8 @@ package com.dianping.cat.alarm.spi.config;
 import java.util.List;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.sender.entity.Par;
@@ -32,7 +32,6 @@ import com.dianping.cat.alarm.sender.transform.DefaultSaxParser;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 
 public class SenderConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SenderConfigManager.class);
@@ -71,13 +70,13 @@ public class SenderConfigManager {
 				return;
 			}
 			try {
-				Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+				Config config = m_configDao.findByName(CONFIG_NAME);
 				String content = config.getContent();
 
 				m_senderConfig = DefaultSaxParser.parse(content);
 				m_configId = config.getId();
 				LOGGER.info("Loaded sender config from repository, configId={}.", m_configId);
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Sender config is missing in repository, loading default content from fetcher.", e);
 
 				try {
@@ -182,7 +181,7 @@ public class SenderConfigManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(m_senderConfig.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 				LOGGER.info("Stored sender config, configId={}, senderCount={}.", m_configId,
 						m_senderConfig.getSenders().size());
 			} catch (Exception e) {

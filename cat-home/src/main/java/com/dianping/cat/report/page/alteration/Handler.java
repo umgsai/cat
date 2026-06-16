@@ -33,8 +33,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.PageHandler;
@@ -46,7 +46,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.storage.builder.StorageSQLBuilder;
 import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
-import com.dianping.cat.home.dal.report.AlterationEntity;
 import com.dianping.cat.report.ReportPage;
 
 public class Handler implements PageHandler<Context> {
@@ -168,12 +167,12 @@ public class Handler implements PageHandler<Context> {
 
 			try {
 				if (altTypes == null) {
-					alts = m_alterationDao.findByDtdh(startTime, endTime, type, domain, hostname,	AlterationEntity.READSET_FULL);
+					alts = m_alterationDao.findByDtdh(startTime, endTime, type, domain, hostname);
 				} else {
 					alts = m_alterationDao
-											.findByDtdhTypes(startTime, endTime, type, domain, hostname, altTypes,	AlterationEntity.READSET_FULL);
+											.findByDtdhTypes(startTime, endTime, type, domain, hostname, altTypes);
 				}
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				// ignore it
 			} catch (Exception e) {
 				LOGGER.error("Unable to query alterations, startTime={}, endTime={}, type={}, domain={}, hostname={}.",

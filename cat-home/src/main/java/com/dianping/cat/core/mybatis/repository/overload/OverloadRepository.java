@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OverloadRepository.class);
@@ -25,17 +24,17 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 		return new Overload();
 	}
 
-	public int deleteByPK(Overload proto) throws DalException {
+	public int deleteByPK(Overload proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for Overload.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for Overload.", e);
 		}
 	}
 
-	public List<Overload> findIdAndSizeByDuration(java.util.Date startTime, java.util.Date endTime, Object readset) throws DalException {
+	public List<Overload> findIdAndSizeByDuration(java.util.Date startTime, java.util.Date endTime) {
 		OverloadMapper mapper = springMapper(LOGGER);
 		OverloadDO record = new OverloadDO();
 
@@ -44,23 +43,23 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 		try {
 			return mapper.findIdAndSizeByDuration(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findIdAndSizeByDuration for Overload.", e);
+			throw new IllegalStateException("Error when executing findIdAndSizeByDuration for Overload.", e);
 		}
 	}
 
-	public Overload findByPK(int keyId, Object readset) throws DalException {
+	public Overload findByPK(int keyId) {
 		OverloadMapper mapper = springMapper(LOGGER);
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for Overload.", e);
+			throw new IllegalStateException("Error when executing findByPK for Overload.", e);
 		}
 	}
 
-	public Overload findMaxIdByType(int type, Object readset) throws DalException {
+	public Overload findMaxIdByType(int type) {
 		OverloadMapper mapper = springMapper(LOGGER);
 		OverloadDO record = new OverloadDO();
 
@@ -69,14 +68,14 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 			OverloadDO result = mapper.findMaxIdByType(record).stream().findFirst().orElse(null);
 
 			return requireFound(result, "findMaxIdByType", record.toString());
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findMaxIdByType for Overload.", e);
+			throw new IllegalStateException("Error when executing findMaxIdByType for Overload.", e);
 		}
 	}
 
-	public Overload findCount(Object readset) throws DalException {
+	public Overload findCount() {
 		OverloadMapper mapper = springMapper(LOGGER);
 		OverloadDO record = new OverloadDO();
 
@@ -84,14 +83,14 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 			OverloadDO result = mapper.findCount(record).stream().findFirst().orElse(null);
 
 			return requireFound(result, "findCount", record.toString());
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findCount for Overload.", e);
+			throw new IllegalStateException("Error when executing findCount for Overload.", e);
 		}
 	}
 
-	public int insert(Overload proto) throws DalException {
+	public int insert(Overload proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
@@ -102,23 +101,23 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 			proto.setKeyId(record.getId());
 			return count;
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for Overload.", e);
+			throw new IllegalStateException("Error when executing insert for Overload.", e);
 		}
 	}
 
-	public int updateByPK(Overload proto, Object updateset) throws DalException {
+	public int updateByPK(Overload proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for Overload.", e);
+			throw new IllegalStateException("Error when executing updateByPK for Overload.", e);
 		}
 	}
 
-	private Overload requireFound(OverloadDO record, String field, String value) throws DalNotFoundException {
+	private Overload requireFound(OverloadDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No Overload found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No Overload found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

@@ -52,38 +52,6 @@
 		</dependency>
 
 	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.unidal.maven.plugins</groupId>
-				<artifactId>codegen-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>generate report models</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>dal-model</goal>
-						</goals>
-						<configuration>
-							<manifest>${basedir}/src/main/resources/META-INF/dal/model/transaction-report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/all-report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/event-report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/problem-report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/heartbeat-report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/state-report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/top-report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/cross-report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/matrix-report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/dependency-report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/storage-report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/business-report-manifest.xml,
-							</manifest>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
 	</properties>

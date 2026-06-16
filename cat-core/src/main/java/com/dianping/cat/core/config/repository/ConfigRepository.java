@@ -7,9 +7,8 @@ import java.util.stream.Collectors;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.dao.ConfigMapper;
@@ -28,31 +27,31 @@ public class ConfigRepository {
 		return new Config();
 	}
 
-	public int deleteByPK(Config proto) throws DalException {
+	public int deleteByPK(Config proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteById(proto.getKeyId()));
 	}
 
-	public List<Config> findAllConfig(Object readset) throws DalException {
+	public List<Config> findAllConfig() {
 		ConfigMapper mapper = springMapper();
 
 		return mapper.queryAll().stream().map(this::toConfig).collect(Collectors.toList());
 	}
 
-	public Config findByName(String name, Object readset) throws DalException {
+	public Config findByName(String name) {
 		ConfigMapper mapper = springMapper();
 
 		return requireFound(mapper.findByName(name), "name", name);
 	}
 
-	public Config findByPK(int keyId, Object readset) throws DalException {
+	public Config findByPK(int keyId) {
 		ConfigMapper mapper = springMapper();
 
 		return requireFound(mapper.findById(keyId), "id", String.valueOf(keyId));
 	}
 
-	public int insert(Config proto) throws DalException {
+	public int insert(Config proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		ConfigDO config = toConfigDO(proto);
@@ -63,7 +62,7 @@ public class ConfigRepository {
 		return count;
 	}
 
-	public int updateByPK(Config proto, Object updateset) throws DalException {
+	public int updateByPK(Config proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateById(toConfigDO(proto)));
@@ -98,9 +97,9 @@ public class ConfigRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private Config requireFound(ConfigDO config, String field, String value) throws DalNotFoundException {
+	private Config requireFound(ConfigDO config, String field, String value) {
 		if (config == null) {
-			throw new DalNotFoundException(String.format("No config found by %s(%s).", field, value));
+			throw new EmptyResultDataAccessException(String.format("No config found by %s(%s).", field, value), 1);
 		}
 
 		return toConfig(config);

@@ -23,14 +23,11 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentEntity;
-import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.jar.entity.JarReport;
 import com.dianping.cat.home.jar.transform.DefaultNativeParser;
@@ -49,9 +46,9 @@ public class JarReportService extends AbstractReportService<JarReport> {
 		throw new RuntimeException("JarReportService do not suppot queryDailyReport feature");
 	}
 
-	private JarReport queryFromHourlyBinary(int id, Date period, String domain) throws DalException {
+	private JarReport queryFromHourlyBinary(int id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
-								.findByPK(id, period,	HourlyReportContentEntity.READSET_CONTENT);
+								.findByPK(id, period);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -69,8 +66,8 @@ public class JarReportService extends AbstractReportService<JarReport> {
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			List<HourlyReport> reports = null;
 			try {
-				reports = m_hourlyReportDao.findAllByDomainNamePeriod(start, domain, name, HourlyReportEntity.READSET_FULL);
-			} catch (DalException e) {
+				reports = m_hourlyReportDao.findAllByDomainNamePeriod(start, domain, name);
+			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query jar hourly report list, domain={}, period={}.", domain, new Date(startTime),
 						e);
 				Cat.logError(e);
@@ -79,7 +76,7 @@ public class JarReportService extends AbstractReportService<JarReport> {
 				for (HourlyReport report : reports) {
 					try {
 						return queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
-					} catch (DalException e) {
+					} catch (RuntimeException e) {
 						LOGGER.error("Unable to parse jar hourly report, domain={}, reportId={}, period={}.", domain,
 								report.getId(), report.getPeriod(), e);
 						Cat.logError(e);

@@ -22,14 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.home.exception.entity.ExceptionExclude;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;
 import com.dianping.cat.home.exception.entity.ExceptionRuleConfig;
@@ -85,11 +84,11 @@ public class ExceptionRuleConfigManager {
 
 			try {
 				LOGGER.info("Initializing exception rule config manager, configName={}.", CONFIG_NAME);
-				Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+				Config config = m_configDao.findByName(CONFIG_NAME);
 				String content = config.getContent();
 				m_configId = config.getId();
 				m_exceptionRuleConfig = DefaultSaxParser.parse(content);
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Exception rule config not found in repository, loading default content, configName={}.",
 				      CONFIG_NAME);
 				try {
@@ -190,7 +189,7 @@ public class ExceptionRuleConfigManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(m_exceptionRuleConfig.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 			} catch (Exception e) {
 				LOGGER.error("Unable to store exception rule config, configName={}, configId={}.", CONFIG_NAME,
 				      m_configId, e);

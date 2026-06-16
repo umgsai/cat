@@ -22,9 +22,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
@@ -33,20 +32,12 @@ import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.matrix.model.transform.DefaultNativeParser;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.dal.DailyReportContentEntity;
-import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentEntity;
-import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
-import com.dianping.cat.core.dal.MonthlyReportContentEntity;
-import com.dianping.cat.core.dal.MonthlyReportEntity;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.dal.WeeklyReportContent;
-import com.dianping.cat.core.dal.WeeklyReportContentEntity;
-import com.dianping.cat.core.dal.WeeklyReportEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
@@ -72,11 +63,11 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_DAY) {
 			try {
 				DailyReport report = m_dailyReportDao
-										.findByDomainNamePeriod(domain, name, new Date(startTime),	DailyReportEntity.READSET_FULL);
+										.findByDomainNamePeriod(domain, name, new Date(startTime));
 				MatrixReport reportModel = queryFromDailyBinary(report.getId(), domain);
 
 				reportModel.accept(merger);
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Matrix daily report is missing, domain={}, period={}.", domain, new Date(startTime), e);
 			} catch (Exception e) {
 				LOGGER.error("Unable to query matrix daily report, domain={}, period={}.", domain, new Date(startTime),
@@ -91,8 +82,8 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 		return matrixReport;
 	}
 
-	private MatrixReport queryFromDailyBinary(int id, String domain) throws DalException {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id, DailyReportContentEntity.READSET_FULL);
+	private MatrixReport queryFromDailyBinary(int id, String domain) {
+		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -101,9 +92,9 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 		}
 	}
 
-	private MatrixReport queryFromHourlyBinary(int id, Date period, String domain) throws DalException {
+	private MatrixReport queryFromHourlyBinary(int id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
-								.findByPK(id, period,	HourlyReportContentEntity.READSET_CONTENT);
+								.findByPK(id, period);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -112,8 +103,8 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 		}
 	}
 
-	private MatrixReport queryFromMonthlyBinary(int id, String domain) throws DalException {
-		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id, MonthlyReportContentEntity.READSET_FULL);
+	private MatrixReport queryFromMonthlyBinary(int id, String domain) {
+		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -122,8 +113,8 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 		}
 	}
 
-	private MatrixReport queryFromWeeklyBinary(int id, String domain) throws DalException {
-		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id, WeeklyReportContentEntity.READSET_FULL);
+	private MatrixReport queryFromWeeklyBinary(int id, String domain) {
+		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -143,8 +134,8 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 			List<HourlyReport> reports = null;
 			try {
 				reports = m_hourlyReportDao
-										.findAllByDomainNamePeriod(new Date(startTime), domain, name,	HourlyReportEntity.READSET_FULL);
-			} catch (DalException e) {
+										.findAllByDomainNamePeriod(new Date(startTime), domain, name);
+			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query matrix hourly report list, domain={}, period={}.", domain,
 						new Date(startTime), e);
 				Cat.logError(e);
@@ -155,7 +146,7 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 						MatrixReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 
 						reportModel.accept(merger);
-					} catch (DalNotFoundException e) {
+					} catch (EmptyResultDataAccessException e) {
 						LOGGER.warn("Matrix hourly report content is missing, domain={}, reportId={}, period={}.", domain,
 								report.getId(), report.getPeriod(), e);
 					} catch (Exception e) {
@@ -178,9 +169,9 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 	public MatrixReport queryMonthlyReport(String domain, Date start) {
 		try {
 			MonthlyReport entity = m_monthlyReportDao
-									.findReportByDomainNamePeriod(start, domain, MatrixAnalyzer.ID,	MonthlyReportEntity.READSET_FULL);
+									.findReportByDomainNamePeriod(start, domain, MatrixAnalyzer.ID);
 			return queryFromMonthlyBinary(entity.getId(), domain);
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Matrix monthly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
 			LOGGER.error("Unable to query matrix monthly report, domain={}, period={}.", domain, start, e);
@@ -193,9 +184,9 @@ public class MatrixReportService extends AbstractReportService<MatrixReport> {
 	public MatrixReport queryWeeklyReport(String domain, Date start) {
 		try {
 			WeeklyReport entity = m_weeklyReportDao
-									.findReportByDomainNamePeriod(start, domain, MatrixAnalyzer.ID,	WeeklyReportEntity.READSET_FULL);
+									.findReportByDomainNamePeriod(start, domain, MatrixAnalyzer.ID);
 			return queryFromWeeklyBinary(entity.getId(), domain);
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Matrix weekly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
 			LOGGER.error("Unable to query matrix weekly report, domain={}, period={}.", domain, start, e);

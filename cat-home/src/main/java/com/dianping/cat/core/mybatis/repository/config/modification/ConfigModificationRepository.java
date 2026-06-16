@@ -7,8 +7,7 @@ import com.dianping.cat.home.dal.report.ConfigModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class ConfigModificationRepository extends SpringBackedRepositorySupport<ConfigModificationMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigModificationRepository.class);
@@ -24,29 +23,29 @@ public class ConfigModificationRepository extends SpringBackedRepositorySupport<
 		return new ConfigModification();
 	}
 
-	public int deleteByPK(ConfigModification proto) throws DalException {
+	public int deleteByPK(ConfigModification proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for ConfigModification.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for ConfigModification.", e);
 		}
 	}
 
-	public ConfigModification findByPK(int keyId, Object readset) throws DalException {
+	public ConfigModification findByPK(int keyId) {
 		ConfigModificationMapper mapper = springMapper(LOGGER);
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for ConfigModification.", e);
+			throw new IllegalStateException("Error when executing findByPK for ConfigModification.", e);
 		}
 	}
 
-	public int insert(ConfigModification proto) throws DalException {
+	public int insert(ConfigModification proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
@@ -57,23 +56,23 @@ public class ConfigModificationRepository extends SpringBackedRepositorySupport<
 			proto.setKeyId(record.getId());
 			return count;
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for ConfigModification.", e);
+			throw new IllegalStateException("Error when executing insert for ConfigModification.", e);
 		}
 	}
 
-	public int updateByPK(ConfigModification proto, Object updateset) throws DalException {
+	public int updateByPK(ConfigModification proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for ConfigModification.", e);
+			throw new IllegalStateException("Error when executing updateByPK for ConfigModification.", e);
 		}
 	}
 
-	private ConfigModification requireFound(ConfigModificationDO record, String field, String value) throws DalNotFoundException {
+	private ConfigModification requireFound(ConfigModificationDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No ConfigModification found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No ConfigModification found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

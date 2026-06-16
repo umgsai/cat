@@ -7,9 +7,8 @@ import java.util.stream.Collectors;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.DailyReportContent;
 import com.dianping.cat.core.mybatis.generated.daily.report.content.dao.DailyReportContentMapper;
@@ -28,18 +27,17 @@ public class DailyReportContentRepository {
 		return new DailyReportContent();
 	}
 
-	public int deleteByPK(DailyReportContent proto) throws DalException {
+	public int deleteByPK(DailyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for DailyReportContent.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for DailyReportContent.", e);
 		}
 	}
 
-	public List<DailyReportContent> findOverloadReport(int startId, Object readset)
-			throws DalException {
+	public List<DailyReportContent> findOverloadReport(int startId) {
 		DailyReportContentMapper mapper = springMapper();
 		DailyReportContentDO record = new DailyReportContentDO();
 
@@ -47,39 +45,39 @@ public class DailyReportContentRepository {
 		try {
 			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findOverloadReport for DailyReportContent.", e);
+			throw new IllegalStateException("Error when executing findOverloadReport for DailyReportContent.", e);
 		}
 	}
 
-	public DailyReportContent findByPK(int keyReportId, Object readset) throws DalException {
+	public DailyReportContent findByPK(int keyReportId) {
 		DailyReportContentMapper mapper = springMapper();
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyReportId), "primary key", String.valueOf(keyReportId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for DailyReportContent.", e);
+			throw new IllegalStateException("Error when executing findByPK for DailyReportContent.", e);
 		}
 	}
 
-	public int insert(DailyReportContent proto) throws DalException {
+	public int insert(DailyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for DailyReportContent.", e);
+			throw new IllegalStateException("Error when executing insert for DailyReportContent.", e);
 		}
 	}
 
-	public int updateByPK(DailyReportContent proto, Object updateset) throws DalException {
+	public int updateByPK(DailyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for DailyReportContent.", e);
+			throw new IllegalStateException("Error when executing updateByPK for DailyReportContent.", e);
 		}
 	}
 
@@ -108,10 +106,9 @@ public class DailyReportContentRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private DailyReportContent requireFound(DailyReportContentDO record, String field, String value)
-			throws DalNotFoundException {
+	private DailyReportContent requireFound(DailyReportContentDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No DailyReportContent found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No DailyReportContent found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

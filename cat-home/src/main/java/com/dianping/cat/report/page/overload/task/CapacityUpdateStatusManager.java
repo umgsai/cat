@@ -20,14 +20,11 @@ package com.dianping.cat.report.page.overload.task;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
-import com.dianping.cat.home.dal.report.OverloadEntity;
 
 public class CapacityUpdateStatusManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CapacityUpdateStatusManager.class);
@@ -91,21 +88,21 @@ public class CapacityUpdateStatusManager {
 
 	public void initialize() {
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+			Config config = m_configDao.findByName(CONFIG_NAME);
 			String content = config.getContent();
 			m_configId = config.getId();
 
 			extractStatus(content);
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.warn("Unable to load capacity update status config, will initialize it from overload table.", e);
 
 			try {
-				m_hourlyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.HOURLY_TYPE, OverloadEntity.READSET_MAXID)
+				m_hourlyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.HOURLY_TYPE)
 										.getMaxId();
-				m_dailyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.DAILY_TYPE, OverloadEntity.READSET_MAXID).getMaxId();
-				m_weeklyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.WEEKLY_TYPE, OverloadEntity.READSET_MAXID)
+				m_dailyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.DAILY_TYPE).getMaxId();
+				m_weeklyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.WEEKLY_TYPE)
 										.getMaxId();
-				m_monthlyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.MONTHLY_TYPE, OverloadEntity.READSET_MAXID)
+				m_monthlyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.MONTHLY_TYPE)
 										.getMaxId();
 
 				Config config = m_configDao.createLocal();
@@ -115,7 +112,7 @@ public class CapacityUpdateStatusManager {
 				m_configDao.insert(config);
 
 				m_configId = config.getId();
-			} catch (DalException ex) {
+			} catch (RuntimeException ex) {
 				LOGGER.error("Unable to initialize capacity update status config from overload table.", ex);
 				Cat.logError(ex);
 			}
@@ -131,7 +128,7 @@ public class CapacityUpdateStatusManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(buildConfigContent());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 			} catch (Exception e) {
 				LOGGER.error("Unable to store capacity update status config. content={}", buildConfigContent(), e);
 				Cat.logError(e);

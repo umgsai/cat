@@ -22,9 +22,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.top.TopAnalyzer;
@@ -33,8 +32,6 @@ import com.dianping.cat.consumer.top.model.entity.TopReport;
 import com.dianping.cat.consumer.top.model.transform.DefaultNativeParser;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentEntity;
-import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
@@ -55,9 +52,9 @@ public class TopReportService extends AbstractReportService<TopReport> {
 		throw new RuntimeException("Top report don't support daily report");
 	}
 
-	private TopReport queryFromHourlyBinary(int id, Date period, String domain) throws DalException {
+	private TopReport queryFromHourlyBinary(int id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
-								.findByPK(id, period,	HourlyReportContentEntity.READSET_CONTENT);
+								.findByPK(id, period);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -77,8 +74,8 @@ public class TopReportService extends AbstractReportService<TopReport> {
 			List<HourlyReport> reports = null;
 			try {
 				reports = m_hourlyReportDao
-										.findAllByDomainNamePeriod(new Date(startTime), domain, name,	HourlyReportEntity.READSET_FULL);
-			} catch (DalException e) {
+										.findAllByDomainNamePeriod(new Date(startTime), domain, name);
+			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query top hourly report list, domain={}, period={}.", domain,
 						new Date(startTime), e);
 				Cat.logError(e);
@@ -88,7 +85,7 @@ public class TopReportService extends AbstractReportService<TopReport> {
 					try {
 						TopReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 						reportModel.accept(merger);
-					} catch (DalNotFoundException e) {
+					} catch (EmptyResultDataAccessException e) {
 						LOGGER.warn("Top hourly report content is missing, domain={}, reportId={}, period={}.", domain,
 								report.getId(), report.getPeriod(), e);
 					} catch (Exception e) {

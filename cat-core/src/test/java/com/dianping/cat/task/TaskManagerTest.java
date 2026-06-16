@@ -28,7 +28,6 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
 public class TaskManagerTest {
@@ -79,7 +78,7 @@ public class TaskManagerTest {
 		private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 		@Override
-		protected void insertToDatabase(Date period, String ip, String domain, int reportType) throws DalException {
+		protected void insertToDatabase(Date period, String ip, String domain, int reportType) {
 			Set<String> lists = m_results.get(reportType);
 
 			if (lists == null) {

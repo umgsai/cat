@@ -7,9 +7,8 @@ import java.util.stream.Collectors;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.Hostinfo;
 import com.dianping.cat.core.mybatis.generated.hostinfo.dao.HostinfoMapper;
@@ -28,13 +27,13 @@ public class HostinfoRepository {
 		return new Hostinfo();
 	}
 
-	public int deleteByPK(Hostinfo proto) throws DalException {
+	public int deleteByPK(Hostinfo proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
-	public List<Hostinfo> findAllIp(Object readset) throws DalException {
+	public List<Hostinfo> findAllIp() {
 		HostinfoMapper mapper = springMapper();
 
 		HostinfoDO record = new HostinfoDO();
@@ -42,13 +41,13 @@ public class HostinfoRepository {
 		return mapper.findAllIp(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public Hostinfo findByPK(int keyId, Object readset) throws DalException {
+	public Hostinfo findByPK(int keyId) {
 		HostinfoMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public Hostinfo findByIp(String ip, Object readset) throws DalException {
+	public Hostinfo findByIp(String ip) {
 		HostinfoMapper mapper = springMapper();
 		HostinfoDO record = new HostinfoDO();
 
@@ -58,7 +57,7 @@ public class HostinfoRepository {
 		return requireFound(result, "findByIp", record.toString());
 	}
 
-	public int insert(Hostinfo proto) throws DalException {
+	public int insert(Hostinfo proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		HostinfoDO record = toRecord(proto);
@@ -69,7 +68,7 @@ public class HostinfoRepository {
 		return count;
 	}
 
-	public int updateByPK(Hostinfo proto, Object updateset) throws DalException {
+	public int updateByPK(Hostinfo proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
@@ -104,9 +103,9 @@ public class HostinfoRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private Hostinfo requireFound(HostinfoDO record, String field, String value) throws DalNotFoundException {
+	private Hostinfo requireFound(HostinfoDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No Hostinfo found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No Hostinfo found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

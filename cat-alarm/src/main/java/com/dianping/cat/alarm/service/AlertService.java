@@ -22,16 +22,15 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
-import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
+import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 
 public class AlertService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertService.class);
@@ -55,9 +54,8 @@ public class AlertService {
 		List<Alert> alerts = new LinkedList<Alert>();
 
 		try {
-			alerts = m_alertDao.queryAlertsByTimeCategory(start, end, type,
-			      com.dianping.cat.alarm.AlertEntity.READSET_FULL);
-		} catch (DalNotFoundException e) {
+			alerts = m_alertDao.queryAlertsByTimeCategory(start, end, type);
+		} catch (EmptyResultDataAccessException e) {
 			// ignore
 		} catch (Exception e) {
 			LOGGER.error("Unable to query alerts, start={}, end={}, type={}.", start, end, type, e);
@@ -78,7 +76,7 @@ public class AlertService {
 				      alert.getDomain(), alert.getCategory(), alert.getMetric());
 				Cat.logError("insert alert error: " + alert.toString(), new RuntimeException());
 			}
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to insert alert, domain={}, type={}, metric={}.", alertEntity.getDomain(),
 			      alertEntity.getType().getName(), alertEntity.getMetric(), e);
 			Cat.logError(e);

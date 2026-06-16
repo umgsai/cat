@@ -25,10 +25,8 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 
 public class ConfigsBackupTest extends SpringTaskTestSupport {
 
@@ -66,7 +64,7 @@ public class ConfigsBackupTest extends SpringTaskTestSupport {
 			boolean result = true;
 
 			try {
-				List<Config> configs = m_dao.findAllConfig(ConfigEntity.READSET_FULL);
+				List<Config> configs = m_dao.findAllConfig();
 
 				for (Config config : configs) {
 					boolean tmpResult = backupConfig(config.getName(), config.getContent());
@@ -75,7 +73,7 @@ public class ConfigsBackupTest extends SpringTaskTestSupport {
 						result = false;
 					}
 				}
-			} catch (DalException e) {
+			} catch (RuntimeException e) {
 				return false;
 			}
 			return result;

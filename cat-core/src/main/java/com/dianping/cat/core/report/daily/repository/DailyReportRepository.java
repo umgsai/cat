@@ -7,9 +7,8 @@ import java.util.stream.Collectors;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.report.daily.dao.DailyReportMapper;
@@ -28,34 +27,33 @@ public class DailyReportRepository {
 		return new DailyReport();
 	}
 
-	public int deleteByDomainNamePeriod(DailyReport proto) throws DalException {
+	public int deleteByDomainNamePeriod(DailyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteByDomainNamePeriod(proto.getDomain(),
 				proto.getName(), proto.getPeriod()));
 	}
 
-	public int deleteByPK(DailyReport proto) throws DalException {
+	public int deleteByPK(DailyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteById(proto.getKeyId()));
 	}
 
-	public DailyReport findByDomainNamePeriod(String domain, String name, java.util.Date period,
-			Object readset) throws DalException {
+	public DailyReport findByDomainNamePeriod(String domain, String name, java.util.Date period) {
 		DailyReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByDomainNamePeriod(domain, name, period), "domain/name/period",
 				domain + "/" + name + "/" + period);
 	}
 
-	public DailyReport findByPK(int keyId, Object readset) throws DalException {
+	public DailyReport findByPK(int keyId) {
 		DailyReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findById(keyId), "id", String.valueOf(keyId));
 	}
 
-	public int insert(DailyReport proto) throws DalException {
+	public int insert(DailyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		DailyReportDO report = toDailyReportDO(proto);
@@ -66,8 +64,7 @@ public class DailyReportRepository {
 		return count;
 	}
 
-	public List<DailyReport> queryLatestReportsByDomainName(String domain, String name, int limits,
-			Object readset) throws DalException {
+	public List<DailyReport> queryLatestReportsByDomainName(String domain, String name, int limits) {
 		DailyReportMapper mapper = springMapper();
 
 		return mapper.queryLatestReportsByDomainName(domain, name, limits).stream()
@@ -75,7 +72,7 @@ public class DailyReportRepository {
 				.collect(Collectors.toList());
 	}
 
-	public int updateByPK(DailyReport proto, Object updateset) throws DalException {
+	public int updateByPK(DailyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateById(toDailyReportDO(proto)));
@@ -110,9 +107,9 @@ public class DailyReportRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private DailyReport requireFound(DailyReportDO report, String field, String value) throws DalNotFoundException {
+	private DailyReport requireFound(DailyReportDO report, String field, String value) {
 		if (report == null) {
-			throw new DalNotFoundException(String.format("No daily report found by %s(%s).", field, value));
+			throw new EmptyResultDataAccessException(String.format("No daily report found by %s(%s).", field, value), 1);
 		}
 
 		return toDailyReport(report);

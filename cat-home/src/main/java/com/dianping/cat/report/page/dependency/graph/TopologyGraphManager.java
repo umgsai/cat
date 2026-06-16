@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
 
@@ -40,7 +39,6 @@ import com.dianping.cat.consumer.dependency.DependencyAnalyzer;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.core.mybatis.repository.topologygraph.TopologyGraphRepository;
-import com.dianping.cat.home.dal.report.TopologyGraphEntity;
 import com.dianping.cat.home.dependency.format.entity.Domain;
 import com.dianping.cat.home.dependency.format.entity.ProductLine;
 import com.dianping.cat.home.dependency.graph.entity.TopologyEdge;
@@ -204,14 +202,14 @@ public class TopologyGraphManager {
 	public TopologyGraph queryGraphFromDB(long time) {
 		try {
 			com.dianping.cat.home.dal.report.TopologyGraph topologyGraph = m_topologyGraphDao
-									.findByPeriod(new Date(time),	TopologyGraphEntity.READSET_FULL);
+									.findByPeriod(new Date(time));
 
 			if (topologyGraph != null) {
 				byte[] content = topologyGraph.getContent();
 
 				return DefaultNativeParser.parse(content);
 			}
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to query dependency topology graph from database, time={}.", time, e);
 			Cat.logError(e);
 		}

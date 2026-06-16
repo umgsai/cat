@@ -32,8 +32,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,6 @@ import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
-import com.dianping.cat.home.dal.report.AlterationEntity;
 import com.dianping.cat.home.storage.alert.entity.Storage;
 import com.dianping.cat.home.storage.alert.entity.StorageAlertInfo;
 import com.dianping.cat.mvc.PayloadNormalizer;
@@ -137,12 +136,12 @@ public class Handler implements PageHandler<Context> {
 		List<Alteration> results = new LinkedList<Alteration>();
 
 		try {
-			List<Alteration> alterations = m_alterationDao.findByTypeDruation(start, end, type,	AlterationEntity.READSET_FULL);
+			List<Alteration> alterations = m_alterationDao.findByTypeDruation(start, end, type);
 
 			for (Alteration alteration : alterations) {
 				results.add(alteration);
 			}
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			// ignore it
 		} catch (Exception e) {
 			LOGGER.error("Unable to query storage alterations, start={}, end={}, type={}.", start, end, type, e);

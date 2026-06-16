@@ -29,9 +29,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.xml.sax.SAXException;
@@ -48,7 +47,6 @@ import com.dianping.cat.alarm.rule.transform.DefaultSaxParser;
 import com.dianping.cat.alarm.spi.rule.RuleType;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
@@ -102,13 +100,12 @@ public abstract class BaseRuleConfigManager {
 
 			LOGGER.info("Initializing alert rule config manager, configName={}.", getConfigName());
 			try {
-				com.dianping.cat.core.config.Config config = m_configDao.findByName(getConfigName(),
-				      ConfigEntity.READSET_FULL);
+				com.dianping.cat.core.config.Config config = m_configDao.findByName(getConfigName());
 				String content = config.getContent();
 
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Alert rule config not found in repository, loading default content, configName={}.",
 				      getConfigName());
 				try {
@@ -162,8 +159,8 @@ public abstract class BaseRuleConfigManager {
 		});
 	}
 
-	private void refreshConfig() throws DalException, SAXException, IOException {
-		com.dianping.cat.core.config.Config config = m_configDao.findByName(getConfigName(), ConfigEntity.READSET_FULL);
+	private void refreshConfig() throws SAXException, IOException {
+		com.dianping.cat.core.config.Config config = m_configDao.findByName(getConfigName());
 
 		long modifyTime = config.getModifyDate().getTime();
 
@@ -213,7 +210,7 @@ public abstract class BaseRuleConfigManager {
 							String id = subCondition.getText();
 
 							m_manager.removeById(id);
-						} catch (DalException e) {
+						} catch (RuntimeException e) {
 							LOGGER.error("Unable to remove user defined alert rule text, configName={}, id={}.",
 							      getConfigName(), subCondition.getText(), e);
 							Cat.logError(e);
@@ -235,7 +232,7 @@ public abstract class BaseRuleConfigManager {
 							String id = subCondition.getText();
 
 							subCondition.setText(m_manager.getUserDefineText(id));
-						} catch (DalException e) {
+						} catch (RuntimeException e) {
 							LOGGER.error("Unable to read user defined alert rule text, configName={}, id={}.",
 							      getConfigName(), subCondition.getText(), e);
 							Cat.logError(e);
@@ -256,7 +253,7 @@ public abstract class BaseRuleConfigManager {
 		return configs;
 	}
 
-	private void decorateConfigOnStore(List<Config> configs) throws DalException {
+	private void decorateConfigOnStore(List<Config> configs) {
 		for (Config config : configs) {
 			for (Condition condition : config.getConditions()) {
 				for (SubCondition subCondition : condition.getSubConditions()) {
@@ -265,7 +262,7 @@ public abstract class BaseRuleConfigManager {
 							String userDefinedText = subCondition.getText();
 
 							subCondition.setText(m_manager.addUserDefineText(userDefinedText));
-						} catch (DalException e) {
+						} catch (RuntimeException e) {
 							LOGGER.error("Unable to store user defined alert rule text, configName={}.",
 							      getConfigName(), e);
 							Cat.logError(e);
@@ -425,7 +422,7 @@ public abstract class BaseRuleConfigManager {
 				config.setKeyId(m_configId);
 				config.setName(getConfigName());
 				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 			} catch (Exception e) {
 				LOGGER.error("Unable to store alert rule config, configName={}, configId={}.", getConfigName(),
 				      m_configId, e);

@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -57,7 +56,7 @@ public abstract class AbstractReportReloader implements ReportReloader {
 			proto.setPeriod(report.getPeriod());
 			m_hourlyReportContentDao.insert(proto);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			HourlyReport report = entity == null ? null : entity.getReport();
 			LOGGER.error("Unable to insert reloaded hourly report, reloader={}, reportName={}, domain={}, period={}.",
 					getId(), report == null ? null : report.getName(), report == null ? null : report.getDomain(),

@@ -21,7 +21,6 @@ package com.dianping.cat.report.page.transaction.task;
 import java.util.Date;
 
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.AtomicMessageConfigManager;
@@ -186,8 +185,7 @@ public class TransactionReportBuilder implements TaskBuilder {
 		return transactionReport;
 	}
 
-	private TransactionReport queryHourlyReportsByDuration(String name, String domain, Date start, Date endDate)
-							throws DalException {
+	private TransactionReport queryHourlyReportsByDuration(String name, String domain, Date start, Date endDate) {
 		long startTime = start.getTime();
 		long endTime = endDate.getTime();
 		double duration = (endTime - startTime) * 1.0 / TimeHelper.ONE_DAY;

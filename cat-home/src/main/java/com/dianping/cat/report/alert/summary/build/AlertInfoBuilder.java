@@ -28,12 +28,10 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
 import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
-import com.dianping.cat.alarm.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.home.alert.summary.entity.AlertSummary;
 import com.dianping.cat.home.alert.summary.entity.Category;
@@ -147,11 +145,11 @@ public class AlertInfoBuilder {
 				return category;
 			}
 			List<Alert> dbAlerts = alertDao
-									.queryAlertsByTimeCategoryDomain(startTime, date, dbCategoryName, domain, AlertEntity.READSET_FULL);
+									.queryAlertsByTimeCategoryDomain(startTime, date, dbCategoryName, domain);
 			LOGGER.info("Loaded alert summary category alerts, category={}, domain={}, start={}, end={}, alertCount={}.",
 					cate, domain, startTime, date, dbAlerts.size());
 			setDBAlertsToCategory(category, dbAlerts);
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to load alert summary category alerts, category={}, domain={}, start={}, end={}.", cate,
 					domain, startTime, date, e);
 			Cat.logError("find alerts error for category:" + cate + " domain:" + domain + " date:" + date, e);
@@ -176,12 +174,12 @@ public class AlertInfoBuilder {
 					continue;
 				}
 				List<Alert> dbAlerts = alertDao
-										.queryAlertsByTimeCategoryDomain(startTime, date, dbCategoryName, domain, AlertEntity.READSET_FULL);
+										.queryAlertsByTimeCategoryDomain(startTime, date, dbCategoryName, domain);
 
 				LOGGER.info("Loaded dependency alert summary alerts, category={}, domain={}, start={}, end={}, alertCount={}.",
 						cate, domain, startTime, date, dbAlerts.size());
 				setDBAlertsToCategory(category, dbAlerts);
-			} catch (DalException e) {
+			} catch (RuntimeException e) {
 				LOGGER.error("Unable to load dependency alert summary alerts, category={}, domain={}, start={}, end={}.",
 						cate, domain, startTime, date, e);
 				Cat.logError("find dependency alerts error for category:" + cate + " domain:" + domain + " date:" + date, e);

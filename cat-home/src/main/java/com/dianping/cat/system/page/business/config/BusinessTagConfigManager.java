@@ -32,7 +32,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.core.config.BusinessConfig;
 import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
-import com.dianping.cat.core.config.BusinessConfigEntity;
 import com.dianping.cat.home.business.entity.BusinessItem;
 import com.dianping.cat.home.business.entity.BusinessTagConfig;
 import com.dianping.cat.home.business.entity.Tag;
@@ -110,7 +109,7 @@ public class BusinessTagConfigManager {
 		}
 
 		try {
-			List<BusinessConfig> result = m_configDao.findByName(TAG_CONFIG, BusinessConfigEntity.READSET_FULL);
+			List<BusinessConfig> result = m_configDao.findByName(TAG_CONFIG);
 
 			if (result.size() > 0) {
 				BusinessConfig config = result.get(0);
@@ -166,7 +165,7 @@ public class BusinessTagConfigManager {
 				config.setDomain(Constants.CAT);
 				config.setContent(m_tagConfig.toString());
 				config.setUpdatetime(new Date());
-				m_configDao.updateByPK(config, BusinessConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 				LOGGER.info("Stored business tag config, configId={}, tagCount={}.", m_configId,
 						m_tagConfig.getTags().size());
 			} catch (Exception e) {

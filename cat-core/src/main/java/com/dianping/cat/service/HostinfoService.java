@@ -26,8 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
 
@@ -35,7 +34,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.dal.Hostinfo;
 import com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository;
-import com.dianping.cat.core.dal.HostinfoEntity;
 import com.dianping.cat.helper.TimeHelper;
 
 public class HostinfoService {
@@ -57,7 +55,7 @@ public class HostinfoService {
 		return m_hostinfoDao.createLocal();
 	}
 
-	public List<Hostinfo> findAll() throws DalException {
+	public List<Hostinfo> findAll() {
 		ensureInitialized();
 
 		return new ArrayList<Hostinfo>(m_hostinfos.values());
@@ -72,7 +70,7 @@ public class HostinfoService {
 			return hostinfo;
 		} else {
 			try {
-				hostinfo = m_hostinfoDao.findByIp(ip, HostinfoEntity.READSET_FULL);
+				hostinfo = m_hostinfoDao.findByIp(ip);
 
 				if (hostinfo != null) {
 					m_hostinfos.put(ip, hostinfo);
@@ -80,7 +78,7 @@ public class HostinfoService {
 				} else {
 					return null;
 				}
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				SLF4J_LOGGER.warn("Hostinfo is missing by ip={}.", ip, e);
 			} catch (Exception e) {
 				SLF4J_LOGGER.error("Unable to find hostinfo by ip={}.", ip, e);
@@ -113,7 +111,7 @@ public class HostinfoService {
 		SLF4J_LOGGER.info("HostinfoService started refresh task.");
 	}
 
-	private boolean insert(Hostinfo hostinfo) throws DalException {
+	private boolean insert(Hostinfo hostinfo) {
 		m_hostinfos.put(hostinfo.getIp(), hostinfo);
 
 		int result = m_hostinfoDao.insert(hostinfo);
@@ -136,7 +134,7 @@ public class HostinfoService {
 			m_hostinfos.put(ip, info);
 			SLF4J_LOGGER.info("Inserted hostinfo, domain={}, ip={}.", domain, ip);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			SLF4J_LOGGER.error("Unable to insert hostinfo, domain={}, ip={}.", domain, ip, e);
 			Cat.logError(e);
 		}
@@ -210,7 +208,7 @@ public class HostinfoService {
 
 	protected void refresh() {
 		try {
-			List<Hostinfo> hostinfos = m_hostinfoDao.findAllIp(HostinfoEntity.READSET_FULL);
+			List<Hostinfo> hostinfos = m_hostinfoDao.findAllIp();
 			Map<String, Hostinfo> tmpHostInfos = new ConcurrentHashMap<String, Hostinfo>();
 			Map<String, String> tmpIpDomains = new ConcurrentHashMap<String, String>();
 
@@ -221,7 +219,7 @@ public class HostinfoService {
 			m_hostinfos = tmpHostInfos;
 			m_ipDomains = tmpIpDomains;
 			SLF4J_LOGGER.info("Refreshed hostinfo cache, hostCount={}.", hostinfos.size());
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			SLF4J_LOGGER.error("Unable to refresh hostinfo cache.", e);
 			Cat.logError("initialize HostService error", e);
 		}
@@ -247,11 +245,11 @@ public class HostinfoService {
 		m_hostinfos.put(hostinfo.getIp(), hostinfo);
 
 		try {
-			m_hostinfoDao.updateByPK(hostinfo, HostinfoEntity.UPDATESET_FULL);
+			m_hostinfoDao.updateByPK(hostinfo);
 			SLF4J_LOGGER.info("Updated hostinfo, id={}, domain={}, ip={}.", hostinfo.getId(), hostinfo.getDomain(),
 					hostinfo.getIp());
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			SLF4J_LOGGER.error("Unable to update hostinfo, id={}, domain={}, ip={}.", hostinfo.getId(),
 					hostinfo.getDomain(), hostinfo.getIp(), e);
 			Cat.logError(e);

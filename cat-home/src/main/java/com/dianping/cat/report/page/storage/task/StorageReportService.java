@@ -24,9 +24,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.storage.StorageAnalyzer;
@@ -35,20 +34,12 @@ import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.consumer.storage.model.transform.DefaultNativeParser;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.dal.DailyReportContentEntity;
-import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentEntity;
-import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
-import com.dianping.cat.core.dal.MonthlyReportContentEntity;
-import com.dianping.cat.core.dal.MonthlyReportEntity;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.dal.WeeklyReportContent;
-import com.dianping.cat.core.dal.WeeklyReportContentEntity;
-import com.dianping.cat.core.dal.WeeklyReportEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
@@ -100,11 +91,11 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_DAY) {
 			try {
 				DailyReport report = m_dailyReportDao
-										.findByDomainNamePeriod(id, name, new Date(startTime),	DailyReportEntity.READSET_FULL);
+										.findByDomainNamePeriod(id, name, new Date(startTime));
 				StorageReport reportModel = queryFromDailyBinary(report.getId(), id);
 
 				reportModel.accept(merger);
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Storage daily report is missing, reportId={}, period={}.", id, new Date(startTime), e);
 			} catch (Exception e) {
 				LOGGER.error("Unable to query storage daily report, reportId={}, period={}.", id, new Date(startTime), e);
@@ -118,8 +109,8 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 		return storageReport;
 	}
 
-	private StorageReport queryFromDailyBinary(int id, String domain) throws DalException {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id, DailyReportContentEntity.READSET_FULL);
+	private StorageReport queryFromDailyBinary(int id, String domain) {
+		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -128,9 +119,9 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 		}
 	}
 
-	private StorageReport queryFromHourlyBinary(int id, Date period, String reportId) throws DalException {
+	private StorageReport queryFromHourlyBinary(int id, Date period, String reportId) {
 		HourlyReportContent content = m_hourlyReportContentDao
-								.findByPK(id, period,	HourlyReportContentEntity.READSET_CONTENT);
+								.findByPK(id, period);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -139,8 +130,8 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 		}
 	}
 
-	private StorageReport queryFromMonthlyBinary(int id, String reportId) throws DalException {
-		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id, MonthlyReportContentEntity.READSET_FULL);
+	private StorageReport queryFromMonthlyBinary(int id, String reportId) {
+		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -149,8 +140,8 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 		}
 	}
 
-	private StorageReport queryFromWeeklyBinary(int id, String reportId) throws DalException {
-		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id, WeeklyReportContentEntity.READSET_FULL);
+	private StorageReport queryFromWeeklyBinary(int id, String reportId) {
+		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -170,8 +161,8 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 			List<HourlyReport> reports = null;
 			try {
 				reports = m_hourlyReportDao
-										.findAllByDomainNamePeriod(new Date(startTime), reportId, name,	HourlyReportEntity.READSET_FULL);
-			} catch (DalException e) {
+										.findAllByDomainNamePeriod(new Date(startTime), reportId, name);
+			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query storage hourly report list, reportId={}, period={}.", reportId,
 						new Date(startTime), e);
 				Cat.logError(e);
@@ -181,7 +172,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 					try {
 						StorageReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), reportId);
 						reportModel.accept(merger);
-					} catch (DalNotFoundException e) {
+					} catch (EmptyResultDataAccessException e) {
 						LOGGER.warn("Storage hourly report content is missing, reportId={}, reportDbId={}, period={}.",
 								reportId, report.getId(), report.getPeriod(), e);
 					} catch (Exception e) {
@@ -206,10 +197,10 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	public StorageReport queryMonthlyReport(String reportId, Date start) {
 		try {
 			MonthlyReport entity = m_monthlyReportDao
-									.findReportByDomainNamePeriod(start, reportId, StorageAnalyzer.ID,	MonthlyReportEntity.READSET_FULL);
+									.findReportByDomainNamePeriod(start, reportId, StorageAnalyzer.ID);
 
 			return queryFromMonthlyBinary(entity.getId(), reportId);
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Storage monthly report is missing, reportId={}, period={}.", reportId, start, e);
 		} catch (Exception e) {
 			LOGGER.error("Unable to query storage monthly report, reportId={}, period={}.", reportId, start, e);
@@ -222,10 +213,10 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	public StorageReport queryWeeklyReport(String reportId, Date start) {
 		try {
 			WeeklyReport entity = m_weeklyReportDao
-									.findReportByDomainNamePeriod(start, reportId, StorageAnalyzer.ID,	WeeklyReportEntity.READSET_FULL);
+									.findReportByDomainNamePeriod(start, reportId, StorageAnalyzer.ID);
 
 			return queryFromWeeklyBinary(entity.getId(), reportId);
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Storage weekly report is missing, reportId={}, period={}.", reportId, start, e);
 		} catch (Exception e) {
 			LOGGER.error("Unable to query storage weekly report, reportId={}, period={}.", reportId, start, e);

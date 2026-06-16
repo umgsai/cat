@@ -32,7 +32,6 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.support.Threads.Task;
 import org.unidal.webres.json.JsonArray;
 import org.unidal.webres.json.JsonObject;
@@ -110,7 +109,7 @@ public class ProjectUpdateTask implements Task {
 				m_projectService.delete(project);
 				Cat.logEvent("DeleteDomainInfo", project.getDomain(), Event.SUCCESS, project.toString());
 			}
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			Cat.logError(e);
 		}
 	}

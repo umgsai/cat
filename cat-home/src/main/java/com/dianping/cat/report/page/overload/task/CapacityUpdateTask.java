@@ -21,7 +21,6 @@ package com.dianping.cat.report.page.overload.task;
 import java.util.Date;
 
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -47,7 +46,7 @@ public class CapacityUpdateTask implements TaskBuilder {
 			m_dailyUpdater.updateDBCapacity();
 			SLF4J_LOGGER.info("Finished daily capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			SLF4J_LOGGER.error("Unable to build daily capacity update task, name={}, domain={}, period={}.", name,
 			      domain, period, e);
 			Cat.logError(e);
@@ -62,7 +61,7 @@ public class CapacityUpdateTask implements TaskBuilder {
 			m_hourlyUpdater.updateDBCapacity();
 			SLF4J_LOGGER.info("Finished hourly capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			SLF4J_LOGGER.error("Unable to build hourly capacity update task, name={}, domain={}, period={}.", name,
 			      domain, period, e);
 			Cat.logError(e);
@@ -79,7 +78,7 @@ public class CapacityUpdateTask implements TaskBuilder {
 			SLF4J_LOGGER.info("Finished monthly capacity update task, name={}, domain={}, period={}.", name, domain,
 			      period);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			SLF4J_LOGGER.error("Unable to build monthly capacity update task, name={}, domain={}, period={}.", name,
 			      domain, period, e);
 			Cat.logError(e);
@@ -94,7 +93,7 @@ public class CapacityUpdateTask implements TaskBuilder {
 			m_weeklyUpdater.updateDBCapacity();
 			SLF4J_LOGGER.info("Finished weekly capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			SLF4J_LOGGER.error("Unable to build weekly capacity update task, name={}, domain={}, period={}.", name,
 			      domain, period, e);
 			Cat.logError(e);

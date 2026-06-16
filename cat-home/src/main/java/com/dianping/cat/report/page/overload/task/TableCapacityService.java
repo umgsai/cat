@@ -22,27 +22,21 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
-import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
-import com.dianping.cat.core.dal.MonthlyReportEntity;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
-import com.dianping.cat.core.dal.WeeklyReportEntity;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
-import com.dianping.cat.home.dal.report.OverloadEntity;
 
 public class TableCapacityService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TableCapacityService.class);
@@ -101,7 +95,7 @@ public class TableCapacityService {
 
 		try {
 			List<Overload> overloads = m_overloadDao
-									.findIdAndSizeByDuration(startTime, endTime,	OverloadEntity.READSET_ID_SIZE_TYPE);
+									.findIdAndSizeByDuration(startTime, endTime);
 
 			for (Overload overload : overloads) {
 				try {
@@ -112,20 +106,20 @@ public class TableCapacityService {
 
 					switch (reportType) {
 					case CapacityUpdater.HOURLY_TYPE:
-						report = m_hourlyReportDao.findByPK(reportId, HourlyReportEntity.READSET_FULL);
+						report = m_hourlyReportDao.findByPK(reportId);
 						break;
 					case CapacityUpdater.DAILY_TYPE:
-						report = m_dailyReportDao.findByPK(reportId, DailyReportEntity.READSET_FULL);
+						report = m_dailyReportDao.findByPK(reportId);
 						break;
 					case CapacityUpdater.WEEKLY_TYPE:
-						report = m_weeklyReportDao.findByPK(reportId, WeeklyReportEntity.READSET_FULL);
+						report = m_weeklyReportDao.findByPK(reportId);
 						break;
 					case CapacityUpdater.MONTHLY_TYPE:
-						report = m_monthlyReportDao.findByPK(reportId, MonthlyReportEntity.READSET_FULL);
+						report = m_monthlyReportDao.findByPK(reportId);
 						break;
 					}
 					reports.add(generateOverloadReport(report, reportSize, reportType));
-				} catch (DalNotFoundException e) {
+				} catch (EmptyResultDataAccessException e) {
 					LOGGER.warn("Overload report target record not found, overloadId={}, reportId={}, reportType={}.",
 					      overload.getId(), overload.getReportId(), overload.getReportType());
 				} catch (Exception ex) {
@@ -134,7 +128,7 @@ public class TableCapacityService {
 					Cat.logError(ex);
 				}
 			}
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to query overload reports, startTime={}, endTime={}.", startTime, endTime, e);
 			Cat.logError(e);
 		}

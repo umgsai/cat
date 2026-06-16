@@ -19,9 +19,9 @@
 package com.dianping.cat.alarm.spi.config;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.receiver.entity.AlertConfig;
@@ -30,7 +30,6 @@ import com.dianping.cat.alarm.receiver.transform.DefaultSaxParser;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 
 public class AlertConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertConfigManager.class);
@@ -91,13 +90,13 @@ public class AlertConfigManager {
 				return;
 			}
 			try {
-				Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+				Config config = m_configDao.findByName(CONFIG_NAME);
 				String content = config.getContent();
 
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
 				LOGGER.info("Loaded alert config from repository, configId={}.", m_configId);
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Alert config is missing in repository, loading default content from fetcher.", e);
 
 				try {
@@ -160,7 +159,7 @@ public class AlertConfigManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 				LOGGER.info("Stored alert config, configId={}, receiverCount={}.", m_configId,
 						m_config.getReceivers().size());
 			} catch (Exception e) {

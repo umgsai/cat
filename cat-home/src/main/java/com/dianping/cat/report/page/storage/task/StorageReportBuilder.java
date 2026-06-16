@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -155,7 +154,7 @@ public class StorageReportBuilder implements TaskBuilder {
 		return storageReport;
 	}
 
-	private StorageReport queryHourlyReportsByDuration(String reportId, Date start, Date end) throws DalException {
+	private StorageReport queryHourlyReportsByDuration(String reportId, Date start, Date end) {
 		long startTime = start.getTime();
 		long endTime = end.getTime();
 		int index = reportId.lastIndexOf("-");

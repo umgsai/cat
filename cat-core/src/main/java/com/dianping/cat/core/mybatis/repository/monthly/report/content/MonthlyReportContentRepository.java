@@ -7,9 +7,8 @@ import java.util.stream.Collectors;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.MonthlyReportContent;
 import com.dianping.cat.core.mybatis.generated.monthly.report.content.dao.MonthlyReportContentMapper;
@@ -28,18 +27,17 @@ public class MonthlyReportContentRepository {
 		return new MonthlyReportContent();
 	}
 
-	public int deleteByPK(MonthlyReportContent proto) throws DalException {
+	public int deleteByPK(MonthlyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for MonthlyReportContent.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for MonthlyReportContent.", e);
 		}
 	}
 
-	public List<MonthlyReportContent> findOverloadReport(int startId, Object readset)
-			throws DalException {
+	public List<MonthlyReportContent> findOverloadReport(int startId) {
 		MonthlyReportContentMapper mapper = springMapper();
 		MonthlyReportContentDO record = new MonthlyReportContentDO();
 
@@ -47,39 +45,39 @@ public class MonthlyReportContentRepository {
 		try {
 			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findOverloadReport for MonthlyReportContent.", e);
+			throw new IllegalStateException("Error when executing findOverloadReport for MonthlyReportContent.", e);
 		}
 	}
 
-	public MonthlyReportContent findByPK(int keyReportId, Object readset) throws DalException {
+	public MonthlyReportContent findByPK(int keyReportId) {
 		MonthlyReportContentMapper mapper = springMapper();
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyReportId), "primary key", String.valueOf(keyReportId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for MonthlyReportContent.", e);
+			throw new IllegalStateException("Error when executing findByPK for MonthlyReportContent.", e);
 		}
 	}
 
-	public int insert(MonthlyReportContent proto) throws DalException {
+	public int insert(MonthlyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for MonthlyReportContent.", e);
+			throw new IllegalStateException("Error when executing insert for MonthlyReportContent.", e);
 		}
 	}
 
-	public int updateByPK(MonthlyReportContent proto, Object updateset) throws DalException {
+	public int updateByPK(MonthlyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for MonthlyReportContent.", e);
+			throw new IllegalStateException("Error when executing updateByPK for MonthlyReportContent.", e);
 		}
 	}
 
@@ -108,10 +106,9 @@ public class MonthlyReportContentRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private MonthlyReportContent requireFound(MonthlyReportContentDO record, String field, String value)
-			throws DalNotFoundException {
+	private MonthlyReportContent requireFound(MonthlyReportContentDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No MonthlyReportContent found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No MonthlyReportContent found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

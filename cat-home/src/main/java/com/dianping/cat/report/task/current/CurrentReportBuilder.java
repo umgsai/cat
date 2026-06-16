@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.support.Threads;
 
 import com.dianping.cat.Cat;
@@ -62,7 +61,7 @@ public class CurrentReportBuilder implements TaskBuilder {
 			LOGGER.info("Starting current weekly/monthly refresh task, domainCount={}.", domains.size());
 
 			Threads.forGroup(Constants.CAT).start(reportTask);
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to build current weekly/monthly refresh task, name={}, domain={}, period={}.", name,
 					domain, period, e);
 			Cat.logError(e);

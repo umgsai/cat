@@ -7,9 +7,8 @@ import java.util.stream.Collectors;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.mybatis.generated.hourlyreport.dao.HourlyreportMapper;
@@ -28,14 +27,13 @@ public class HourlyReportRepository {
 		return new HourlyReport();
 	}
 
-	public int deleteByPK(HourlyReport proto) throws DalException {
+	public int deleteByPK(HourlyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
-	public List<HourlyReport> findAllByDomainNamePeriod(java.util.Date period, String domain, String name,
-			Object readset) throws DalException {
+	public List<HourlyReport> findAllByDomainNamePeriod(java.util.Date period, String domain, String name) {
 		HourlyreportDO record = new HourlyreportDO();
 		HourlyreportMapper mapper = springMapper();
 
@@ -45,8 +43,7 @@ public class HourlyReportRepository {
 		return mapper.findAllByDomainNamePeriod(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public List<HourlyReport> findAllByPeriodName(java.util.Date period, String name, Object readset)
-			throws DalException {
+	public List<HourlyReport> findAllByPeriodName(java.util.Date period, String name) {
 		HourlyreportDO record = new HourlyreportDO();
 		HourlyreportMapper mapper = springMapper();
 
@@ -55,13 +52,13 @@ public class HourlyReportRepository {
 		return mapper.findAllByPeriodName(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public HourlyReport findByPK(int keyId, Object readset) throws DalException {
+	public HourlyReport findByPK(int keyId) {
 		HourlyreportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public int insert(HourlyReport proto) throws DalException {
+	public int insert(HourlyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		HourlyreportDO record = toRecord(proto);
@@ -72,7 +69,7 @@ public class HourlyReportRepository {
 		return count;
 	}
 
-	public int updateByPK(HourlyReport proto, Object updateset) throws DalException {
+	public int updateByPK(HourlyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
@@ -107,9 +104,9 @@ public class HourlyReportRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private HourlyReport requireFound(HourlyreportDO record, String field, String value) throws DalNotFoundException {
+	private HourlyReport requireFound(HourlyreportDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No HourlyReport found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No HourlyReport found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

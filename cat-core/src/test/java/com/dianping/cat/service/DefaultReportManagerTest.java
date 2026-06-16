@@ -31,7 +31,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
@@ -164,7 +163,7 @@ public class DefaultReportManagerTest {
 		public Date creationDate;
 
 		@Override
-		public int insert(HourlyReport proto) throws DalException {
+		public int insert(HourlyReport proto) {
 			creationDate = proto.getCreationDate();
 			return count++;
 		}
@@ -178,7 +177,7 @@ public class DefaultReportManagerTest {
 		public Date creationDate;
 
 		@Override
-		public int insert(HourlyReportContent proto) throws DalException {
+		public int insert(HourlyReportContent proto) {
 			creationDate = proto.getCreationDate();
 			return count++;
 		}

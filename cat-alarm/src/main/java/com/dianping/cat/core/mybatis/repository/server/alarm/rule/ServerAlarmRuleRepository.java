@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<ServerAlarmRuleMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServerAlarmRuleRepository.class);
@@ -26,40 +25,40 @@ public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<Ser
 		return new ServerAlarmRule();
 	}
 
-	public int deleteByPK(ServerAlarmRule proto) throws DalException {
+	public int deleteByPK(ServerAlarmRule proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for ServerAlarmRule.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for ServerAlarmRule.", e);
 		}
 	}
 
-	public List<ServerAlarmRule> findAll(Object readset) throws DalException {
+	public List<ServerAlarmRule> findAll() {
 		ServerAlarmRuleMapper mapper = springMapper(LOGGER);
 		ServerAlarmRuleDO record = new ServerAlarmRuleDO();
 
 		try {
 			return mapper.findAll(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findAll for ServerAlarmRule.", e);
+			throw new IllegalStateException("Error when executing findAll for ServerAlarmRule.", e);
 		}
 	}
 
-	public ServerAlarmRule findByPK(int keyId, Object readset) throws DalException {
+	public ServerAlarmRule findByPK(int keyId) {
 		ServerAlarmRuleMapper mapper = springMapper(LOGGER);
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for ServerAlarmRule.", e);
+			throw new IllegalStateException("Error when executing findByPK for ServerAlarmRule.", e);
 		}
 	}
 
-	public int insert(ServerAlarmRule proto) throws DalException {
+	public int insert(ServerAlarmRule proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
@@ -70,23 +69,23 @@ public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<Ser
 			proto.setKeyId(record.getId());
 			return count;
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for ServerAlarmRule.", e);
+			throw new IllegalStateException("Error when executing insert for ServerAlarmRule.", e);
 		}
 	}
 
-	public int updateByPK(ServerAlarmRule proto, Object updateset) throws DalException {
+	public int updateByPK(ServerAlarmRule proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for ServerAlarmRule.", e);
+			throw new IllegalStateException("Error when executing updateByPK for ServerAlarmRule.", e);
 		}
 	}
 
-	private ServerAlarmRule requireFound(ServerAlarmRuleDO record, String field, String value) throws DalNotFoundException {
+	private ServerAlarmRule requireFound(ServerAlarmRuleDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No ServerAlarmRule found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No ServerAlarmRule found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

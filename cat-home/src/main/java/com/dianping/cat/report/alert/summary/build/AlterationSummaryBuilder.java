@@ -25,12 +25,10 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
-import com.dianping.cat.home.dal.report.AlterationEntity;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 
 public class AlterationSummaryBuilder extends SummaryBuilder {
@@ -53,11 +51,11 @@ public class AlterationSummaryBuilder extends SummaryBuilder {
 				return dataMap;
 			}
 			List<Alteration> alterations = alterationDao
-									.findByDomainAndTime(getStartDate(date), date, domain,	AlterationEntity.READSET_FULL);
+									.findByDomainAndTime(getStartDate(date), date, domain);
 
 			dataMap.put("count", alterations.size());
 			dataMap.put("items", alterations);
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to query alteration summary data, domain={}, date={}.", domain, date, e);
 			Cat.logError(e);
 		}

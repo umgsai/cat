@@ -23,7 +23,6 @@ import com.dianping.cat.Constants;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.core.dal.*;
 import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
@@ -35,11 +34,10 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 import org.apache.commons.net.util.SubnetUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -130,13 +128,13 @@ public class RouterConfigManager {
 
 		try {
 			SLF4J_LOGGER.info("Initializing router config manager, configName={}.", CONFIG_NAME);
-			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+			Config config = m_configDao.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
 			m_configId = config.getId();
 			m_routerConfig = DefaultSaxParser.parse(content);
 			m_modifyTime = config.getModifyDate().getTime();
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			SLF4J_LOGGER.warn("Router config not found in repository, loading default content, configName={}.",
 			      CONFIG_NAME);
 			try {
@@ -337,8 +335,8 @@ public class RouterConfigManager {
 		return result;
 	}
 
-	private void refreshConfigInfo() throws DalException, SAXException, IOException {
-		Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+	private void refreshConfigInfo() throws SAXException, IOException {
+		Config config = m_configDao.findByName(CONFIG_NAME);
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
@@ -385,25 +383,23 @@ public class RouterConfigManager {
 		long time = period.getTime();
 
 		try {
-			DailyReport report = m_dailyReportDao.findByDomainNamePeriod(Constants.CAT, RouterConfigBuilder.ID, period,
-			      DailyReportEntity.READSET_FULL);
+			DailyReport report = m_dailyReportDao.findByDomainNamePeriod(Constants.CAT, RouterConfigBuilder.ID, period);
 			long modifyTime = report.getCreationDate().getTime();
 			Pair<RouterConfig, Long> pair = m_routerConfigs.get(time);
 
 			if (pair == null || modifyTime > pair.getValue()) {
 				try {
-					DailyReportContent reportContent = m_dailyReportContentDao.findByPK(report.getId(),
-					      DailyReportContentEntity.READSET_FULL);
+					DailyReportContent reportContent = m_dailyReportContentDao.findByPK(report.getId());
 					RouterConfig routerConfig = DefaultNativeParser.parse(reportContent.getContent());
 
 					m_routerConfigs.put(time, Pair.of(routerConfig, modifyTime));
 					Cat.logEvent("ReloadConfig", "router");
-				} catch (DalNotFoundException ignored) {
+				} catch (EmptyResultDataAccessException ignored) {
 					SLF4J_LOGGER.warn("Router report content not found while refreshing report cache, reportId={}.",
 					      report.getId());
 				}
 			}
-		} catch (DalNotFoundException ignored) {
+		} catch (EmptyResultDataAccessException ignored) {
 			SLF4J_LOGGER.warn("Router daily report not found while refreshing report cache, period={}.", period);
 		}
 	}
@@ -430,7 +426,7 @@ public class RouterConfigManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(m_routerConfig.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 			} catch (Exception e) {
 				SLF4J_LOGGER.error("Unable to store router config, configName={}, configId={}.", CONFIG_NAME,
 				      m_configId, e);

@@ -22,7 +22,6 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.AtomicMessageConfigManager;
@@ -183,8 +182,7 @@ public class EventReportBuilder implements TaskBuilder {
 		return eventReport;
 	}
 
-	private EventReport queryHourlyReportsByDuration(String name, String domain, Date start, Date endDate)
-							throws DalException {
+	private EventReport queryHourlyReportsByDuration(String name, String domain, Date start, Date endDate) {
 		long startTime = start.getTime();
 		long endTime = endDate.getTime();
 		double duration = (endTime - startTime) * 1.0 / TimeHelper.ONE_DAY;

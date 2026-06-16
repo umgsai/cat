@@ -5,9 +5,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.mybatis.generated.weeklyreport.dao.WeeklyreportMapper;
@@ -26,26 +25,25 @@ public class WeeklyReportRepository {
 		return new WeeklyReport();
 	}
 
-	public int deleteByPK(WeeklyReport proto) throws DalException {
+	public int deleteByPK(WeeklyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
-	public int deleteReportByDomainNamePeriod(WeeklyReport proto) throws DalException {
+	public int deleteReportByDomainNamePeriod(WeeklyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteReportByDomainNamePeriod(toRecord(proto)));
 	}
 
-	public WeeklyReport findByPK(int keyId, Object readset) throws DalException {
+	public WeeklyReport findByPK(int keyId) {
 		WeeklyreportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public WeeklyReport findReportByDomainNamePeriod(java.util.Date period, String domain, String name,
-			Object readset) throws DalException {
+	public WeeklyReport findReportByDomainNamePeriod(java.util.Date period, String domain, String name) {
 		WeeklyreportDO record = new WeeklyreportDO();
 		WeeklyreportMapper mapper = springMapper();
 
@@ -57,7 +55,7 @@ public class WeeklyReportRepository {
 		return requireFound(result, "findReportByDomainNamePeriod", record.toString());
 	}
 
-	public int insert(WeeklyReport proto) throws DalException {
+	public int insert(WeeklyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		WeeklyreportDO record = toRecord(proto);
@@ -68,7 +66,7 @@ public class WeeklyReportRepository {
 		return count;
 	}
 
-	public int updateByPK(WeeklyReport proto, Object updateset) throws DalException {
+	public int updateByPK(WeeklyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
@@ -103,9 +101,9 @@ public class WeeklyReportRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private WeeklyReport requireFound(WeeklyreportDO record, String field, String value) throws DalNotFoundException {
+	private WeeklyReport requireFound(WeeklyreportDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No WeeklyReport found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No WeeklyReport found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

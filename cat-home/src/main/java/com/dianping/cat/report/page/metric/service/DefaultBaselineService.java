@@ -18,6 +18,8 @@
  */
 package com.dianping.cat.report.page.metric.service;
 
+import org.springframework.dao.EmptyResultDataAccessException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -28,13 +30,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.dal.report.Baseline;
 import com.dianping.cat.core.mybatis.repository.baseline.BaselineRepository;
-import com.dianping.cat.home.dal.report.BaselineEntity;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.task.TaskHelper;
 
@@ -106,9 +106,9 @@ public class DefaultBaselineService implements BaselineService {
 			has = true;
 		} else {
 			try {
-				baseline = m_baselineDao.findByReportNameKeyTime(reportPeriod, reportName, key, BaselineEntity.READSET_FULL);
+				baseline = m_baselineDao.findByReportNameKeyTime(reportPeriod, reportName, key);
 				has = true;
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 			} catch (Exception e) {
 				Cat.logError(e);
 			}
@@ -198,12 +198,12 @@ public class DefaultBaselineService implements BaselineService {
 				boolean has = getEmpties().containsKey(baselineKey);
 
 				if (!has) {
-					baseline = m_baselineDao.findByReportNameKeyTime(reportPeriod, reportName, key,	BaselineEntity.READSET_FULL);
+					baseline = m_baselineDao.findByReportNameKeyTime(reportPeriod, reportName, key);
 					m_baselines.put(baselineKey, baseline);
 				} else {
 					return null;
 				}
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				getEmpties().put(baselineKey, baselineKey);
 				return null;
 			} catch (Exception e) {

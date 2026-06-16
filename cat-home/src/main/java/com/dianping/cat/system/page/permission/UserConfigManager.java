@@ -19,14 +19,13 @@
 package com.dianping.cat.system.page.permission;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.home.user.entity.User;
 import com.dianping.cat.home.user.entity.UserConfig;
 import com.dianping.cat.home.user.transform.DefaultSaxParser;
@@ -78,14 +77,14 @@ public class UserConfigManager {
 
 	public void initialize() {
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+			Config config = m_configDao.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
 			m_configId = config.getId();
 			m_modifyTime = config.getModifyDate().getTime();
 			m_config = DefaultSaxParser.parse(content);
 			LOGGER.info("Loaded user config from repository, configId={}, modifyTime={}.", m_configId, m_modifyTime);
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("User config is missing in repository, loading default content from fetcher.", e);
 
 			try {
@@ -127,7 +126,7 @@ public class UserConfigManager {
 	}
 
 	private void refreshConfig() throws Exception {
-		Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+		Config config = m_configDao.findByName(CONFIG_NAME);
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
@@ -174,7 +173,7 @@ public class UserConfigManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 				LOGGER.info("Stored user config, configId={}, userCount={}.", m_configId, m_config.getUsers().size());
 			} catch (Exception e) {
 				LOGGER.error("Unable to store user config, configId={}.", m_configId, e);

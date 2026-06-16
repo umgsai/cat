@@ -22,9 +22,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +31,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.dal.DailyReportContentEntity;
-import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.home.router.entity.RouterConfig;
 import com.dianping.cat.home.router.transform.DefaultNativeParser;
 import com.dianping.cat.report.service.AbstractReportService;
@@ -59,12 +56,12 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 			String name = Constants.REPORT_ROUTER;
 
 			try {
-				DailyReport report = m_dailyReportDao.findByDomainNamePeriod(domain, name, start, DailyReportEntity.READSET_FULL);
+				DailyReport report = m_dailyReportDao.findByDomainNamePeriod(domain, name, start);
 				RouterConfig config = queryFromDailyBinary(report.getId());
 
 				routerConfigs.put(time, Pair.of(config, report.getCreationDate().getTime()));
 				return config;
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				// ignore
 			} catch (Exception e) {
 				LOGGER.error("Unable to query daily router config report, domain={}, start={}, end={}.", domain, start,
@@ -77,8 +74,8 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 		}
 	}
 
-	private RouterConfig queryFromDailyBinary(int id) throws DalException {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id, DailyReportContentEntity.READSET_FULL);
+	private RouterConfig queryFromDailyBinary(int id) {
+		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -95,7 +92,7 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 	public RouterConfig queryLastReport(String domain) {
 		try {
 			List<DailyReport> reports = m_dailyReportDao
-									.queryLatestReportsByDomainName(domain, Constants.REPORT_ROUTER, 1, DailyReportEntity.READSET_FULL);
+									.queryLatestReportsByDomainName(domain, Constants.REPORT_ROUTER, 1);
 
 			if (reports.size() == 0) {
 				return null;
@@ -105,7 +102,7 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 			RouterConfig config = queryFromDailyBinary(report.getId());
 
 			return config;
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			// ignore
 		} catch (Exception e) {
 			LOGGER.error("Unable to query latest router config report, domain={}.", domain, e);

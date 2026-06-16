@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertRepository.class);
@@ -25,17 +24,17 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 		return new Alert();
 	}
 
-	public int deleteByPK(Alert proto) throws DalException {
+	public int deleteByPK(Alert proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for Alert.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for Alert.", e);
 		}
 	}
 
-	public List<Alert> queryAlertsByTimeDomain(java.util.Date startTime, java.util.Date endTime, String domain, Object readset) throws DalException {
+	public List<Alert> queryAlertsByTimeDomain(java.util.Date startTime, java.util.Date endTime, String domain) {
 		AlertMapper mapper = springMapper(LOGGER);
 		AlertDO record = new AlertDO();
 
@@ -45,11 +44,11 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 		try {
 			return mapper.queryAlertsByTimeDomain(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing queryAlertsByTimeDomain for Alert.", e);
+			throw new IllegalStateException("Error when executing queryAlertsByTimeDomain for Alert.", e);
 		}
 	}
 
-	public List<Alert> queryAlertsByTimeDomainCategories(java.util.Date startTime, java.util.Date endTime, String domain, String[] categories, Object readset) throws DalException {
+	public List<Alert> queryAlertsByTimeDomainCategories(java.util.Date startTime, java.util.Date endTime, String domain, String[] categories) {
 		AlertMapper mapper = springMapper(LOGGER);
 		AlertDO record = new AlertDO();
 
@@ -61,11 +60,11 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 			return mapper.queryAlertsByTimeDomainCategories(record).stream().map(this::toModel)
 					.collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing queryAlertsByTimeDomainCategories for Alert.", e);
+			throw new IllegalStateException("Error when executing queryAlertsByTimeDomainCategories for Alert.", e);
 		}
 	}
 
-	public List<Alert> queryAlertsByTimeCategoryDomain(java.util.Date startTime, java.util.Date endTime, String category, String domain, Object readset) throws DalException {
+	public List<Alert> queryAlertsByTimeCategoryDomain(java.util.Date startTime, java.util.Date endTime, String category, String domain) {
 		AlertMapper mapper = springMapper(LOGGER);
 		AlertDO record = new AlertDO();
 
@@ -77,11 +76,11 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 			return mapper.queryAlertsByTimeCategoryDomain(record).stream().map(this::toModel)
 					.collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing queryAlertsByTimeCategoryDomain for Alert.", e);
+			throw new IllegalStateException("Error when executing queryAlertsByTimeCategoryDomain for Alert.", e);
 		}
 	}
 
-	public List<Alert> queryAlertsByTimeCategory(java.util.Date startTime, java.util.Date endTime, String category, Object readset) throws DalException {
+	public List<Alert> queryAlertsByTimeCategory(java.util.Date startTime, java.util.Date endTime, String category) {
 		AlertMapper mapper = springMapper(LOGGER);
 		AlertDO record = new AlertDO();
 
@@ -91,23 +90,23 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 		try {
 			return mapper.queryAlertsByTimeCategory(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing queryAlertsByTimeCategory for Alert.", e);
+			throw new IllegalStateException("Error when executing queryAlertsByTimeCategory for Alert.", e);
 		}
 	}
 
-	public Alert findByPK(int keyId, Object readset) throws DalException {
+	public Alert findByPK(int keyId) {
 		AlertMapper mapper = springMapper(LOGGER);
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for Alert.", e);
+			throw new IllegalStateException("Error when executing findByPK for Alert.", e);
 		}
 	}
 
-	public int insert(Alert proto) throws DalException {
+	public int insert(Alert proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
@@ -118,23 +117,23 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 			proto.setKeyId(record.getId());
 			return count;
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for Alert.", e);
+			throw new IllegalStateException("Error when executing insert for Alert.", e);
 		}
 	}
 
-	public int updateByPK(Alert proto, Object updateset) throws DalException {
+	public int updateByPK(Alert proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for Alert.", e);
+			throw new IllegalStateException("Error when executing updateByPK for Alert.", e);
 		}
 	}
 
-	private Alert requireFound(AlertDO record, String field, String value) throws DalNotFoundException {
+	private Alert requireFound(AlertDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No Alert found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No Alert found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

@@ -22,7 +22,6 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
@@ -64,7 +63,7 @@ public class ProblemReportBuilder implements TaskBuilder {
 			byte[] binaryContent = DefaultNativeBuilder.build(problemReport);
 
 			return m_reportService.insertDailyReport(report, binaryContent);
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to build problem daily report, name={}, domain={}, period={}.", name, domain, period, e);
 			Cat.logError(e);
 			return false;
@@ -161,8 +160,7 @@ public class ProblemReportBuilder implements TaskBuilder {
 		return problemReport;
 	}
 
-	private ProblemReport queryHourlyReportsByDuration(String name, String domain, Date start, Date endDate)
-							throws DalException {
+	private ProblemReport queryHourlyReportsByDuration(String name, String domain, Date start, Date endDate) {
 		long startTime = start.getTime();
 		long endTime = endDate.getTime();
 

@@ -7,9 +7,8 @@ import java.util.stream.Collectors;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.core.mybatis.generated.project.dao.ProjectMapper;
@@ -28,13 +27,13 @@ public class ProjectRepository {
 		return new Project();
 	}
 
-	public int deleteByPK(Project proto) throws DalException {
+	public int deleteByPK(Project proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
-	public List<Project> findAll(Object readset) throws DalException {
+	public List<Project> findAll() {
 		ProjectMapper mapper = springMapper();
 
 		ProjectDO record = new ProjectDO();
@@ -42,13 +41,13 @@ public class ProjectRepository {
 		return mapper.findAll(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public Project findByPK(int keyId, Object readset) throws DalException {
+	public Project findByPK(int keyId) {
 		ProjectMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public Project findByDomain(String domain, Object readset) throws DalException {
+	public Project findByDomain(String domain) {
 		ProjectDO record = new ProjectDO();
 		ProjectMapper mapper = springMapper();
 
@@ -58,7 +57,7 @@ public class ProjectRepository {
 		return requireFound(result, "findByDomain", record.toString());
 	}
 
-	public Project findByCmdbDomain(String domain, Object readset) throws DalException {
+	public Project findByCmdbDomain(String domain) {
 		ProjectDO record = new ProjectDO();
 		ProjectMapper mapper = springMapper();
 
@@ -68,7 +67,7 @@ public class ProjectRepository {
 		return requireFound(result, "findByCmdbDomain", record.toString());
 	}
 
-	public int insert(Project proto) throws DalException {
+	public int insert(Project proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		ProjectDO record = toRecord(proto);
@@ -79,7 +78,7 @@ public class ProjectRepository {
 		return count;
 	}
 
-	public int updateByPK(Project proto, Object updateset) throws DalException {
+	public int updateByPK(Project proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
@@ -114,9 +113,9 @@ public class ProjectRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private Project requireFound(ProjectDO record, String field, String value) throws DalNotFoundException {
+	private Project requireFound(ProjectDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No Project found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No Project found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

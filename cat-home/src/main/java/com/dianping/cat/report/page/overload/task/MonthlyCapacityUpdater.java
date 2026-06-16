@@ -20,18 +20,15 @@ package com.dianping.cat.report.page.overload.task;
 
 import java.util.List;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
 import com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository;
-import com.dianping.cat.core.dal.MonthlyReportContentEntity;
 import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
-import com.dianping.cat.core.dal.MonthlyReportEntity;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 
@@ -54,13 +51,13 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 	}
 
 	@Override
-	public void updateDBCapacity() throws DalException {
+	public void updateDBCapacity() {
 		int maxId = m_manager.getMonthlyStatus();
 		LOGGER.info("Starting monthly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
 			List<MonthlyReportContent> reports = m_monthlyReportContentDao
-									.findOverloadReport(maxId,	MonthlyReportContentEntity.READSET_LENGTH);
+									.findOverloadReport(maxId);
 
 			for (MonthlyReportContent content : reports) {
 				try {
@@ -75,10 +72,10 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 						overload.setReportType(CapacityUpdater.MONTHLY_TYPE);
 
 						try {
-							MonthlyReport report = m_monthlyReportDao.findByPK(reportId, MonthlyReportEntity.READSET_FULL);
+							MonthlyReport report = m_monthlyReportDao.findByPK(reportId);
 							overload.setPeriod(report.getPeriod());
 							m_overloadDao.insert(overload);
-						} catch (DalNotFoundException e) {
+						} catch (EmptyResultDataAccessException e) {
 							LOGGER.warn("Monthly report not found while recording overload report, reportId={}.", reportId);
 						} catch (Exception e) {
 							LOGGER.error("Unable to record monthly overload report, reportId={}, contentLength={}.",

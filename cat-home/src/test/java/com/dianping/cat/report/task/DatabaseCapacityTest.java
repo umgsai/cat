@@ -19,14 +19,13 @@
 package com.dianping.cat.report.task;
 
 
-import com.dianping.cat.core.dal.jdbc.DalException;
 import com.dianping.cat.report.page.overload.task.CapacityUpdater;
 import com.dianping.cat.report.page.overload.task.HourlyCapacityUpdater;
 
 public class DatabaseCapacityTest extends SpringTaskTestSupport {
 
 	// @Test
-	public void testTaskDuration() throws DalException {
+	public void testTaskDuration() {
 		CapacityUpdater updater = lookup(CapacityUpdater.class, HourlyCapacityUpdater.ID);
 		long currentMills = System.currentTimeMillis();
 

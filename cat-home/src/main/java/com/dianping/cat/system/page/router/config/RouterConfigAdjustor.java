@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
 import com.google.common.base.Splitter;
 
 import com.dianping.cat.Cat;
@@ -36,7 +35,6 @@ import com.dianping.cat.consumer.state.model.entity.Machine;
 import com.dianping.cat.consumer.state.model.entity.ProcessDomain;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
@@ -271,7 +269,7 @@ public class RouterConfigAdjustor {
 			String name = RouterConfigBuilder.ID;
 			String domain = Constants.CAT;
 			List<DailyReport> reports = m_dailyReportDao
-									.queryLatestReportsByDomainName(domain, name, 1,	DailyReportEntity.READSET_FULL);
+									.queryLatestReportsByDomainName(domain, name, 1);
 			DailyReport oldReport = reports.get(0);
 			DailyReport dailyReport = new DailyReport();
 
@@ -287,7 +285,7 @@ public class RouterConfigAdjustor {
 
 			m_routerService.insertDailyReport(dailyReport, binaryContent);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			Cat.logError(e);
 			return false;
 		}

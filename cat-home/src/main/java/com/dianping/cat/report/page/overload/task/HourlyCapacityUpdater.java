@@ -20,18 +20,15 @@ package com.dianping.cat.report.page.overload.task;
 
 import java.util.List;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
-import com.dianping.cat.core.dal.HourlyReportContentEntity;
 import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
-import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 
@@ -54,13 +51,13 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 	}
 
 	@Override
-	public void updateDBCapacity() throws DalException {
+	public void updateDBCapacity() {
 		int maxId = m_manager.getHourlyStatus();
 		LOGGER.info("Starting hourly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
 			List<HourlyReportContent> reports = m_hourlyReportContentDao
-									.findOverloadReport(maxId,	HourlyReportContentEntity.READSET_LENGTH);
+									.findOverloadReport(maxId);
 
 			for (HourlyReportContent content : reports) {
 				try {
@@ -76,11 +73,11 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 
 						HourlyReport hourlyReport;
 						try {
-							hourlyReport = m_hourlyReportDao.findByPK(reportId, HourlyReportEntity.READSET_FULL);
+							hourlyReport = m_hourlyReportDao.findByPK(reportId);
 							overload.setPeriod(hourlyReport.getPeriod());
 							m_overloadDao.insert(overload);
 
-						} catch (DalNotFoundException e) {
+						} catch (EmptyResultDataAccessException e) {
 							LOGGER.warn("Hourly report not found while recording overload report, reportId={}.", reportId);
 						} catch (Exception e) {
 							LOGGER.error("Unable to record hourly overload report, reportId={}, contentLength={}.",

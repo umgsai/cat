@@ -5,9 +5,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.mybatis.generated.monthreport.dao.MonthreportMapper;
@@ -26,26 +25,25 @@ public class MonthlyReportRepository {
 		return new MonthlyReport();
 	}
 
-	public int deleteByPK(MonthlyReport proto) throws DalException {
+	public int deleteByPK(MonthlyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
-	public int deleteReportByDomainNamePeriod(MonthlyReport proto) throws DalException {
+	public int deleteReportByDomainNamePeriod(MonthlyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteReportByDomainNamePeriod(toRecord(proto)));
 	}
 
-	public MonthlyReport findByPK(int keyId, Object readset) throws DalException {
+	public MonthlyReport findByPK(int keyId) {
 		MonthreportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public MonthlyReport findReportByDomainNamePeriod(java.util.Date period, String domain, String name,
-			Object readset) throws DalException {
+	public MonthlyReport findReportByDomainNamePeriod(java.util.Date period, String domain, String name) {
 		MonthreportDO record = new MonthreportDO();
 		MonthreportMapper mapper = springMapper();
 
@@ -57,7 +55,7 @@ public class MonthlyReportRepository {
 		return requireFound(result, "findReportByDomainNamePeriod", record.toString());
 	}
 
-	public int insert(MonthlyReport proto) throws DalException {
+	public int insert(MonthlyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		MonthreportDO record = toRecord(proto);
@@ -68,7 +66,7 @@ public class MonthlyReportRepository {
 		return count;
 	}
 
-	public int updateByPK(MonthlyReport proto, Object updateset) throws DalException {
+	public int updateByPK(MonthlyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
@@ -103,9 +101,9 @@ public class MonthlyReportRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private MonthlyReport requireFound(MonthreportDO record, String field, String value) throws DalNotFoundException {
+	private MonthlyReport requireFound(MonthreportDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No MonthlyReport found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No MonthlyReport found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

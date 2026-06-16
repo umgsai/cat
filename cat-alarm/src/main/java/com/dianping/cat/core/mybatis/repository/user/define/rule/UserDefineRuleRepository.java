@@ -7,8 +7,7 @@ import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class UserDefineRuleRepository extends SpringBackedRepositorySupport<UserDefineRuleMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserDefineRuleRepository.class);
@@ -24,29 +23,29 @@ public class UserDefineRuleRepository extends SpringBackedRepositorySupport<User
 		return new UserDefineRule();
 	}
 
-	public int deleteByPK(UserDefineRule proto) throws DalException {
+	public int deleteByPK(UserDefineRule proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for UserDefineRule.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for UserDefineRule.", e);
 		}
 	}
 
-	public UserDefineRule findByPK(int keyId, Object readset) throws DalException {
+	public UserDefineRule findByPK(int keyId) {
 		UserDefineRuleMapper mapper = springMapper(LOGGER);
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for UserDefineRule.", e);
+			throw new IllegalStateException("Error when executing findByPK for UserDefineRule.", e);
 		}
 	}
 
-	public UserDefineRule findMaxId(Object readset) throws DalException {
+	public UserDefineRule findMaxId() {
 		UserDefineRuleMapper mapper = springMapper(LOGGER);
 		UserDefineRuleDO record = new UserDefineRuleDO();
 
@@ -54,14 +53,14 @@ public class UserDefineRuleRepository extends SpringBackedRepositorySupport<User
 			UserDefineRuleDO result = mapper.findMaxId(record).stream().findFirst().orElse(null);
 
 			return requireFound(result, "findMaxId", record.toString());
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findMaxId for UserDefineRule.", e);
+			throw new IllegalStateException("Error when executing findMaxId for UserDefineRule.", e);
 		}
 	}
 
-	public int insert(UserDefineRule proto) throws DalException {
+	public int insert(UserDefineRule proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
@@ -72,23 +71,23 @@ public class UserDefineRuleRepository extends SpringBackedRepositorySupport<User
 			proto.setKeyId(record.getId());
 			return count;
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for UserDefineRule.", e);
+			throw new IllegalStateException("Error when executing insert for UserDefineRule.", e);
 		}
 	}
 
-	public int updateByPK(UserDefineRule proto, Object updateset) throws DalException {
+	public int updateByPK(UserDefineRule proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for UserDefineRule.", e);
+			throw new IllegalStateException("Error when executing updateByPK for UserDefineRule.", e);
 		}
 	}
 
-	private UserDefineRule requireFound(UserDefineRuleDO record, String field, String value) throws DalNotFoundException {
+	private UserDefineRule requireFound(UserDefineRuleDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No UserDefineRule found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No UserDefineRule found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

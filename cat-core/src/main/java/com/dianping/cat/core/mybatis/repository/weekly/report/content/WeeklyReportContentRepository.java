@@ -7,9 +7,8 @@ import java.util.stream.Collectors;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.WeeklyReportContent;
 import com.dianping.cat.core.mybatis.generated.weekly.report.content.dao.WeeklyReportContentMapper;
@@ -28,18 +27,17 @@ public class WeeklyReportContentRepository {
 		return new WeeklyReportContent();
 	}
 
-	public int deleteByPK(WeeklyReportContent proto) throws DalException {
+	public int deleteByPK(WeeklyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for WeeklyReportContent.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for WeeklyReportContent.", e);
 		}
 	}
 
-	public List<WeeklyReportContent> findOverloadReport(int startId, Object readset)
-			throws DalException {
+	public List<WeeklyReportContent> findOverloadReport(int startId) {
 		WeeklyReportContentMapper mapper = springMapper();
 		WeeklyReportContentDO record = new WeeklyReportContentDO();
 
@@ -47,39 +45,39 @@ public class WeeklyReportContentRepository {
 		try {
 			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findOverloadReport for WeeklyReportContent.", e);
+			throw new IllegalStateException("Error when executing findOverloadReport for WeeklyReportContent.", e);
 		}
 	}
 
-	public WeeklyReportContent findByPK(int keyReportId, Object readset) throws DalException {
+	public WeeklyReportContent findByPK(int keyReportId) {
 		WeeklyReportContentMapper mapper = springMapper();
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyReportId), "primary key", String.valueOf(keyReportId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for WeeklyReportContent.", e);
+			throw new IllegalStateException("Error when executing findByPK for WeeklyReportContent.", e);
 		}
 	}
 
-	public int insert(WeeklyReportContent proto) throws DalException {
+	public int insert(WeeklyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for WeeklyReportContent.", e);
+			throw new IllegalStateException("Error when executing insert for WeeklyReportContent.", e);
 		}
 	}
 
-	public int updateByPK(WeeklyReportContent proto, Object updateset) throws DalException {
+	public int updateByPK(WeeklyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for WeeklyReportContent.", e);
+			throw new IllegalStateException("Error when executing updateByPK for WeeklyReportContent.", e);
 		}
 	}
 
@@ -108,10 +106,9 @@ public class WeeklyReportContentRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private WeeklyReportContent requireFound(WeeklyReportContentDO record, String field, String value)
-			throws DalNotFoundException {
+	private WeeklyReportContent requireFound(WeeklyReportContentDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No WeeklyReportContent found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No WeeklyReportContent found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

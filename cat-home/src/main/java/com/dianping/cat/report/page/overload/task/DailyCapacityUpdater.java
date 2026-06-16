@@ -20,17 +20,14 @@ package com.dianping.cat.report.page.overload.task;
 
 import java.util.List;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
 import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
-import com.dianping.cat.core.dal.DailyReportContentEntity;
-import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
@@ -54,13 +51,13 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 	}
 
 	@Override
-	public void updateDBCapacity() throws DalException {
+	public void updateDBCapacity() {
 		int maxId = m_manager.getDailyStatus();
 		LOGGER.info("Starting daily report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
 			List<DailyReportContent> reports = m_dailyReportContentDao
-									.findOverloadReport(maxId,	DailyReportContentEntity.READSET_LENGTH);
+									.findOverloadReport(maxId);
 
 			for (DailyReportContent content : reports) {
 				try {
@@ -75,10 +72,10 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 						overload.setReportType(CapacityUpdater.DAILY_TYPE);
 
 						try {
-							DailyReport report = m_dailyReportDao.findByPK(reportId, DailyReportEntity.READSET_FULL);
+							DailyReport report = m_dailyReportDao.findByPK(reportId);
 							overload.setPeriod(report.getPeriod());
 							m_overloadDao.insert(overload);
-						} catch (DalNotFoundException e) {
+						} catch (EmptyResultDataAccessException e) {
 							LOGGER.warn("Daily report not found while recording overload report, reportId={}.", reportId);
 						} catch (Exception e) {
 							LOGGER.error("Unable to record daily overload report, reportId={}, contentLength={}.",

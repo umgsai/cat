@@ -90,69 +90,6 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.unidal.maven.plugins</groupId>
-				<artifactId>codegen-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>generate data model</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>dal-model</goal>
-						</goals>
-						<configuration>
-							<manifest>${basedir}/src/main/resources/META-INF/dal/model/server-config-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/url-pattern-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/server-filter-config-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/sample-config-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/business-report-config-manifest.xml,
-                ${basedir}/src/main/resources/META-INF/dal/model/atomic-message-config-manifest.xml,
-                ${basedir}/src/main/resources/META-INF/dal/model/tp-value-statistic-config-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/model/report-reload-config-manifest.xml,
-							</manifest>
-						</configuration>
-					</execution>
-					<execution>
-						<id>generate dal jdbc model</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>dal-jdbc</goal>
-						</goals>
-						<configuration>
-							<manifest>${basedir}/src/main/resources/META-INF/dal/jdbc/report-manifest.xml,
-								${basedir}/src/main/resources/META-INF/dal/jdbc/config-manifest.xml,
-							</manifest>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>rewrite generated dal jdbc sources</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<target>
-								<delete>
-									<fileset dir="${project.build.directory}/generated-sources/dal-jdbc" includes="**/*Dao.java" />
-									<fileset dir="${project.build.directory}/generated-sources/dal-jdbc" includes="**/_INDEX.java" />
-								</delete>
-								<replaceregexp match="org\.unidal\.dal\.jdbc" replace="com.dianping.cat.core.dal.jdbc" byline="true">
-									<fileset dir="${project.build.directory}/generated-sources/dal-jdbc" includes="**/*.java" />
-								</replaceregexp>
-							</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 	<properties>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
 	</properties>

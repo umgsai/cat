@@ -7,8 +7,7 @@ import com.dianping.cat.home.dal.report.AlertSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class AlertSummaryRepository extends SpringBackedRepositorySupport<AlertSummaryMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryRepository.class);
@@ -24,29 +23,29 @@ public class AlertSummaryRepository extends SpringBackedRepositorySupport<AlertS
 		return new AlertSummary();
 	}
 
-	public int deleteByPK(AlertSummary proto) throws DalException {
+	public int deleteByPK(AlertSummary proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for AlertSummary.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for AlertSummary.", e);
 		}
 	}
 
-	public AlertSummary findByPK(int keyId, Object readset) throws DalException {
+	public AlertSummary findByPK(int keyId) {
 		AlertSummaryMapper mapper = springMapper(LOGGER);
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for AlertSummary.", e);
+			throw new IllegalStateException("Error when executing findByPK for AlertSummary.", e);
 		}
 	}
 
-	public int insert(AlertSummary proto) throws DalException {
+	public int insert(AlertSummary proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
@@ -57,23 +56,23 @@ public class AlertSummaryRepository extends SpringBackedRepositorySupport<AlertS
 			proto.setKeyId(record.getId());
 			return count;
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for AlertSummary.", e);
+			throw new IllegalStateException("Error when executing insert for AlertSummary.", e);
 		}
 	}
 
-	public int updateByPK(AlertSummary proto, Object updateset) throws DalException {
+	public int updateByPK(AlertSummary proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for AlertSummary.", e);
+			throw new IllegalStateException("Error when executing updateByPK for AlertSummary.", e);
 		}
 	}
 
-	private AlertSummary requireFound(AlertSummaryDO record, String field, String value) throws DalNotFoundException {
+	private AlertSummary requireFound(AlertSummaryDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No AlertSummary found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No AlertSummary found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

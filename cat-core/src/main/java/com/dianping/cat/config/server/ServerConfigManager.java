@@ -32,9 +32,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import com.dianping.cat.support.Threads;
 import org.xml.sax.SAXException;
 
@@ -55,7 +55,6 @@ import com.dianping.cat.configuration.server.entity.StorageConfig;
 import com.dianping.cat.configuration.server.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -403,7 +402,7 @@ public class ServerConfigManager {
 
 		try {
 			try {
-				Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+				Config config = m_configDao.findByName(CONFIG_NAME);
 				String content = config.getContent();
 
 				m_configId = config.getId();
@@ -411,7 +410,7 @@ public class ServerConfigManager {
 				m_config = DefaultSaxParser.parse(content);
 				SLF4J_LOGGER.info("Loaded server config from repository, configId={}, modifyTime={}.", m_configId,
 						m_modifyTime);
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				SLF4J_LOGGER.warn("Server config is missing in repository, loading default content from fetcher.", e);
 
 				try {
@@ -586,7 +585,7 @@ public class ServerConfigManager {
 	}
 
 	private void refreshConfig() throws Exception {
-		Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+		Config config = m_configDao.findByName(CONFIG_NAME);
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
@@ -632,7 +631,7 @@ public class ServerConfigManager {
 			config.setKeyId(m_configId);
 			config.setName(CONFIG_NAME);
 			config.setContent(m_config.toString());
-			m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+			m_configDao.updateByPK(config);
 			refreshServer();
 			SLF4J_LOGGER.info("Stored server config, configId={}.", m_configId);
 		} catch (Exception e) {

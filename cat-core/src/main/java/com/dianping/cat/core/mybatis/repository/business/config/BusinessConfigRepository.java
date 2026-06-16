@@ -7,9 +7,8 @@ import java.util.stream.Collectors;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.config.BusinessConfig;
 import com.dianping.cat.core.mybatis.generated.business.config.dao.BusinessConfigMapper;
@@ -28,13 +27,13 @@ public class BusinessConfigRepository {
 		return new BusinessConfig();
 	}
 
-	public int deleteByPK(BusinessConfig proto) throws DalException {
+	public int deleteByPK(BusinessConfig proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
-	public List<BusinessConfig> findByName(String name, Object readset) throws DalException {
+	public List<BusinessConfig> findByName(String name) {
 		BusinessConfigMapper mapper = springMapper();
 		BusinessConfigDO record = new BusinessConfigDO();
 
@@ -42,14 +41,13 @@ public class BusinessConfigRepository {
 		return mapper.findByName(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
-	public BusinessConfig findByPK(int keyId, Object readset) throws DalException {
+	public BusinessConfig findByPK(int keyId) {
 		BusinessConfigMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public BusinessConfig findByNameDomain(String name, String domain, Object readset)
-			throws DalException {
+	public BusinessConfig findByNameDomain(String name, String domain) {
 		BusinessConfigMapper mapper = springMapper();
 		BusinessConfigDO record = new BusinessConfigDO();
 
@@ -60,7 +58,7 @@ public class BusinessConfigRepository {
 		return requireFound(result, "findByNameDomain", record.toString());
 	}
 
-	public int insert(BusinessConfig proto) throws DalException {
+	public int insert(BusinessConfig proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		BusinessConfigDO record = toRecord(proto);
@@ -71,13 +69,13 @@ public class BusinessConfigRepository {
 		return count;
 	}
 
-	public int updateByPK(BusinessConfig proto, Object updateset) throws DalException {
+	public int updateByPK(BusinessConfig proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 	}
 
-	public int updateBaseConfigByDomain(BusinessConfig proto, Object updateset) throws DalException {
+	public int updateBaseConfigByDomain(BusinessConfig proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateBaseConfigByDomain(toRecord(proto)));
@@ -109,9 +107,9 @@ public class BusinessConfigRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private BusinessConfig requireFound(BusinessConfigDO record, String field, String value) throws DalNotFoundException {
+	private BusinessConfig requireFound(BusinessConfigDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No BusinessConfig found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No BusinessConfig found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

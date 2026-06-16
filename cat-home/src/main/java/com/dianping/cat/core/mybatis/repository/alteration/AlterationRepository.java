@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class AlterationRepository extends SpringBackedRepositorySupport<AlterationMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlterationRepository.class);
@@ -26,17 +25,17 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		return new Alteration();
 	}
 
-	public int deleteByPK(Alteration proto) throws DalException {
+	public int deleteByPK(Alteration proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for Alteration.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for Alteration.", e);
 		}
 	}
 
-	public List<Alteration> findByTypeDruation(java.util.Date startTime, java.util.Date endTime, String type, Object readset) throws DalException {
+	public List<Alteration> findByTypeDruation(java.util.Date startTime, java.util.Date endTime, String type) {
 		AlterationMapper mapper = springMapper(LOGGER);
 		AlterationDO record = new AlterationDO();
 
@@ -46,11 +45,11 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		try {
 			return mapper.findByTypeDruation(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByTypeDruation for Alteration.", e);
+			throw new IllegalStateException("Error when executing findByTypeDruation for Alteration.", e);
 		}
 	}
 
-	public List<Alteration> findByDtdh(java.util.Date startTime, java.util.Date endTime, String type, String domain, String hostname, Object readset) throws DalException {
+	public List<Alteration> findByDtdh(java.util.Date startTime, java.util.Date endTime, String type, String domain, String hostname) {
 		AlterationMapper mapper = springMapper(LOGGER);
 		AlterationDO record = new AlterationDO();
 
@@ -62,11 +61,11 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		try {
 			return mapper.findByDtdh(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByDtdh for Alteration.", e);
+			throw new IllegalStateException("Error when executing findByDtdh for Alteration.", e);
 		}
 	}
 
-	public List<Alteration> findByDtdhTypes(java.util.Date startTime, java.util.Date endTime, String type, String domain, String hostname, String[] types, Object readset) throws DalException {
+	public List<Alteration> findByDtdhTypes(java.util.Date startTime, java.util.Date endTime, String type, String domain, String hostname, String[] types) {
 		AlterationMapper mapper = springMapper(LOGGER);
 		AlterationDO record = new AlterationDO();
 
@@ -79,11 +78,11 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		try {
 			return mapper.findByDtdhTypes(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByDtdhTypes for Alteration.", e);
+			throw new IllegalStateException("Error when executing findByDtdhTypes for Alteration.", e);
 		}
 	}
 
-	public List<Alteration> findByDomainAndTime(java.util.Date startTime, java.util.Date endTime, String domain, Object readset) throws DalException {
+	public List<Alteration> findByDomainAndTime(java.util.Date startTime, java.util.Date endTime, String domain) {
 		AlterationMapper mapper = springMapper(LOGGER);
 		AlterationDO record = new AlterationDO();
 
@@ -93,23 +92,23 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		try {
 			return mapper.findByDomainAndTime(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByDomainAndTime for Alteration.", e);
+			throw new IllegalStateException("Error when executing findByDomainAndTime for Alteration.", e);
 		}
 	}
 
-	public Alteration findByPK(int keyId, Object readset) throws DalException {
+	public Alteration findByPK(int keyId) {
 		AlterationMapper mapper = springMapper(LOGGER);
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for Alteration.", e);
+			throw new IllegalStateException("Error when executing findByPK for Alteration.", e);
 		}
 	}
 
-	public int insert(Alteration proto) throws DalException {
+	public int insert(Alteration proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
@@ -120,23 +119,23 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 			proto.setKeyId(record.getId());
 			return count;
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for Alteration.", e);
+			throw new IllegalStateException("Error when executing insert for Alteration.", e);
 		}
 	}
 
-	public int updateByPK(Alteration proto, Object updateset) throws DalException {
+	public int updateByPK(Alteration proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for Alteration.", e);
+			throw new IllegalStateException("Error when executing updateByPK for Alteration.", e);
 		}
 	}
 
-	private Alteration requireFound(AlterationDO record, String field, String value) throws DalNotFoundException {
+	private Alteration requireFound(AlterationDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No Alteration found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No Alteration found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

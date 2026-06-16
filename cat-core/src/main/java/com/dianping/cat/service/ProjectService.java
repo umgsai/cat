@@ -22,10 +22,9 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.core.mybatis.repository.project.ProjectRepository;
-import com.dianping.cat.core.dal.ProjectEntity;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -95,7 +94,7 @@ public class ProjectService {
 		}
 	}
 
-	public List<Project> findAll() throws DalException {
+	public List<Project> findAll() {
 		ensureInitialized();
 
 		return new ArrayList<Project>(m_domainToProjects.values());
@@ -116,11 +115,11 @@ public class ProjectService {
 			return project;
 		} else {
 			try {
-				Project pro = m_projectDao.findByDomain(domainName, ProjectEntity.READSET_FULL);
+				Project pro = m_projectDao.findByDomain(domainName);
 
 				m_domainToProjects.put(pro.getDomain(), pro);
 				return project;
-			} catch (DalException e) {
+			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Project is missing or unavailable by domain={}.", domainName, e);
 			} catch (Exception e) {
 				LOGGER.error("Unable to find project by domain={}.", domainName, e);
@@ -214,7 +213,7 @@ public class ProjectService {
 						result);
 				return false;
 			}
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to insert project, domain={}.", project.getDomain(), e);
 			Cat.logError(e);
 			return false;
@@ -244,7 +243,7 @@ public class ProjectService {
 
 	protected void refresh() {
 		try {
-			List<Project> projects = m_projectDao.findAll(ProjectEntity.READSET_FULL);
+			List<Project> projects = m_projectDao.findAll();
 			ConcurrentHashMap<String, Project> tmpDomainProjects = new ConcurrentHashMap<String, Project>();
 			ConcurrentHashMap<String, Project> tmpCmdbProjects = new ConcurrentHashMap<String, Project>();
 			ConcurrentHashMap<String, String> tmpDomains = new ConcurrentHashMap<String, String>();
@@ -266,7 +265,7 @@ public class ProjectService {
 			m_cmdbToProjects = tmpCmdbProjects;
 			LOGGER.info("Refreshed projects, projectCount={}, cmdbDomainCount={}.", projects.size(),
 					tmpCmdbProjects.size());
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to refresh ProjectService projects.", e);
 			Cat.logError("initialize ProjectService error", e);
 		}
@@ -278,10 +277,10 @@ public class ProjectService {
 		m_domainToProjects.put(project.getDomain(), project);
 
 		try {
-			m_projectDao.updateByPK(project, ProjectEntity.UPDATESET_FULL);
+			m_projectDao.updateByPK(project);
 			LOGGER.info("Updated project, domain={}, id={}.", project.getDomain(), project.getId());
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to update project, domain={}, id={}.", project.getDomain(), project.getId(), e);
 			Cat.logError(e);
 			return false;

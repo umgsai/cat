@@ -20,18 +20,15 @@ package com.dianping.cat.report.page.overload.task;
 
 import java.util.List;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.dal.WeeklyReportContent;
 import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
-import com.dianping.cat.core.dal.WeeklyReportContentEntity;
 import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
-import com.dianping.cat.core.dal.WeeklyReportEntity;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 
@@ -54,13 +51,13 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 	}
 
 	@Override
-	public void updateDBCapacity() throws DalException {
+	public void updateDBCapacity() {
 		int maxId = m_manager.getWeeklyStatus();
 		LOGGER.info("Starting weekly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
 			List<WeeklyReportContent> reports = m_weeklyReportContentDao
-									.findOverloadReport(maxId,	WeeklyReportContentEntity.READSET_LENGTH);
+									.findOverloadReport(maxId);
 
 			for (WeeklyReportContent content : reports) {
 				try {
@@ -75,10 +72,10 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 						overload.setReportType(CapacityUpdater.WEEKLY_TYPE);
 
 						try {
-							WeeklyReport report = m_weeklyReportDao.findByPK(reportId, WeeklyReportEntity.READSET_FULL);
+							WeeklyReport report = m_weeklyReportDao.findByPK(reportId);
 							overload.setPeriod(report.getPeriod());
 							m_overloadDao.insert(overload);
-						} catch (DalNotFoundException e) {
+						} catch (EmptyResultDataAccessException e) {
 							LOGGER.warn("Weekly report not found while recording overload report, reportId={}.", reportId);
 						} catch (Exception e) {
 							LOGGER.error("Unable to record weekly overload report, reportId={}, contentLength={}.",

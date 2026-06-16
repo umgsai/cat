@@ -7,9 +7,8 @@ import java.util.stream.Collectors;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.core.mybatis.generated.hourly.report.content.dao.HourlyReportContentMapper;
@@ -28,18 +27,17 @@ public class HourlyReportContentRepository {
 		return new HourlyReportContent();
 	}
 
-	public int deleteByPK(HourlyReportContent proto) throws DalException {
+	public int deleteByPK(HourlyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for HourlyReportContent.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for HourlyReportContent.", e);
 		}
 	}
 
-	public List<HourlyReportContent> findOverloadReport(int startId, Object readset)
-			throws DalException {
+	public List<HourlyReportContent> findOverloadReport(int startId) {
 		HourlyReportContentMapper mapper = springMapper();
 		HourlyReportContentDO record = new HourlyReportContentDO();
 
@@ -47,40 +45,39 @@ public class HourlyReportContentRepository {
 		try {
 			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findOverloadReport for HourlyReportContent.", e);
+			throw new IllegalStateException("Error when executing findOverloadReport for HourlyReportContent.", e);
 		}
 	}
 
-	public HourlyReportContent findByPK(int keyReportId, java.util.Date period, Object readset)
-			throws DalException {
+	public HourlyReportContent findByPK(int keyReportId, java.util.Date period) {
 		HourlyReportContentMapper mapper = springMapper();
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyReportId), "primary key", String.valueOf(keyReportId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for HourlyReportContent.", e);
+			throw new IllegalStateException("Error when executing findByPK for HourlyReportContent.", e);
 		}
 	}
 
-	public int insert(HourlyReportContent proto) throws DalException {
+	public int insert(HourlyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for HourlyReportContent.", e);
+			throw new IllegalStateException("Error when executing insert for HourlyReportContent.", e);
 		}
 	}
 
-	public int updateByPK(HourlyReportContent proto, Object updateset) throws DalException {
+	public int updateByPK(HourlyReportContent proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for HourlyReportContent.", e);
+			throw new IllegalStateException("Error when executing updateByPK for HourlyReportContent.", e);
 		}
 	}
 
@@ -109,10 +106,9 @@ public class HourlyReportContentRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private HourlyReportContent requireFound(HourlyReportContentDO record, String field, String value)
-			throws DalNotFoundException {
+	private HourlyReportContent requireFound(HourlyReportContentDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No HourlyReportContent found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No HourlyReportContent found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

@@ -28,8 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
@@ -39,17 +38,14 @@ import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
-import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
 import com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
-import com.dianping.cat.core.dal.MonthlyReportEntity;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.dal.WeeklyReportContent;
 import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
 import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
-import com.dianping.cat.core.dal.WeeklyReportEntity;
 import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
@@ -129,7 +125,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 			proto.setContent(content);
 			m_dailyReportContentDao.insert(proto);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			Cat.logError(e);
 			return false;
 		}
@@ -149,7 +145,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 			proto.setPeriod(report.getPeriod());
 			m_hourlyReportContentDao.insert(proto);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			Cat.logError(e);
 			return false;
 		}
@@ -160,8 +156,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 		ensureReportRepositories();
 		try {
 			MonthlyReport monthReport = m_monthlyReportDao
-									.findReportByDomainNamePeriod(report.getPeriod(),	report.getDomain(), report.getName(),
-															MonthlyReportEntity.READSET_FULL);
+									.findReportByDomainNamePeriod(report.getPeriod(),	report.getDomain(), report.getName());
 
 			if (monthReport != null) {
 				MonthlyReportContent reportContent = m_monthlyReportContentDao.createLocal();
@@ -171,7 +166,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 				m_monthlyReportDao.deleteReportByDomainNamePeriod(report);
 				m_monthlyReportContentDao.deleteByPK(reportContent);
 			}
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 		} catch (Exception e) {
 			Cat.logError(e);
 		}
@@ -187,7 +182,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 			m_monthlyReportContentDao.insert(proto);
 
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			Cat.logError(e);
 			return false;
 		}
@@ -198,8 +193,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 		ensureReportRepositories();
 		try {
 			WeeklyReport weeklyReport = m_weeklyReportDao
-									.findReportByDomainNamePeriod(report.getPeriod(),	report.getDomain(), report.getName(),
-															WeeklyReportEntity.READSET_FULL);
+									.findReportByDomainNamePeriod(report.getPeriod(),	report.getDomain(), report.getName());
 
 			if (weeklyReport != null) {
 				WeeklyReportContent reportContent = m_weeklyReportContentDao.createLocal();
@@ -209,7 +203,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 				m_weeklyReportContentDao.deleteByPK(reportContent);
 				m_weeklyReportDao.deleteReportByDomainNamePeriod(report);
 			}
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 		} catch (Exception e) {
 			Cat.logError(e);
 		}
@@ -224,7 +218,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 			proto.setContent(content);
 			m_weeklyReportContentDao.insert(proto);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			Cat.logError(e);
 			return false;
 		}
@@ -252,7 +246,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 			domains = new HashSet<String>();
 			try {
 				List<HourlyReport> reports = m_hourlyReportDao
-										.findAllByPeriodName(date, name,	HourlyReportEntity.READSET_DOMAIN_NAME);
+										.findAllByPeriodName(date, name);
 
 				if (reports != null) {
 					for (HourlyReport report : reports) {
@@ -261,7 +255,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 				}
 				Cat.logEvent("FindDomain", key, Event.SUCCESS, domains.toString());
 				m_domains.put(key, domains);
-			} catch (DalException e) {
+			} catch (RuntimeException e) {
 				Cat.logError(e);
 			}
 		}

@@ -5,9 +5,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.core.mybatis.generated.task.dao.TaskMapper;
@@ -26,19 +25,19 @@ public class TaskRepository {
 		return new Task();
 	}
 
-	public int deleteByPK(Task proto) throws DalException {
+	public int deleteByPK(Task proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
 	}
 
-	public Task findByPK(int keyId, Object readset) throws DalException {
+	public Task findByPK(int keyId) {
 		TaskMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public Task findByStatusConsumer(int status, String consumer, Object readset) throws DalException {
+	public Task findByStatusConsumer(int status, String consumer) {
 		TaskMapper mapper = springMapper();
 		TaskDO record = new TaskDO();
 
@@ -49,7 +48,7 @@ public class TaskRepository {
 		return requireFound(result, "findByStatusConsumer", record.toString());
 	}
 
-	public int insert(Task proto) throws DalException {
+	public int insert(Task proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		TaskDO record = toRecord(proto);
@@ -60,37 +59,37 @@ public class TaskRepository {
 		return count;
 	}
 
-	public int updateByPK(Task proto, Object updateset) throws DalException {
+	public int updateByPK(Task proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 	}
 
-	public int updateTodoToDoing(Task proto, Object updateset) throws DalException {
+	public int updateTodoToDoing(Task proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateTodoToDoing(toRecord(proto)));
 	}
 
-	public int updateDoingToDone(Task proto, Object updateset) throws DalException {
+	public int updateDoingToDone(Task proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateDoingToDone(toRecord(proto)));
 	}
 
-	public int updateFailureToDone(Task proto, Object updateset) throws DalException {
+	public int updateFailureToDone(Task proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateFailureToDone(toRecord(proto)));
 	}
 
-	public int updateStatusToTodo(Task proto, Object updateset) throws DalException {
+	public int updateStatusToTodo(Task proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateStatusToTodo(toRecord(proto)));
 	}
 
-	public int updateDoingToFail(Task proto, Object updateset) throws DalException {
+	public int updateDoingToFail(Task proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().updateDoingToFail(toRecord(proto)));
@@ -121,9 +120,9 @@ public class TaskRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private Task requireFound(TaskDO record, String field, String value) throws DalNotFoundException {
+	private Task requireFound(TaskDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No Task found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No Task found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

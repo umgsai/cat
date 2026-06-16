@@ -21,16 +21,13 @@ package com.dianping.cat.report.page.statistics.service;
 import java.util.Date;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.dal.DailyReportContentEntity;
-import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.home.service.client.entity.ClientReport;
 import com.dianping.cat.home.service.client.transform.DefaultNativeParser;
 import com.dianping.cat.report.service.AbstractReportService;
@@ -54,9 +51,9 @@ public class ClientReportService extends AbstractReportService<ClientReport> {
 
 		try {
 			DailyReport report = m_dailyReportDao
-									.findByDomainNamePeriod(domain, name, new Date(startTime),	DailyReportEntity.READSET_FULL);
+									.findByDomainNamePeriod(domain, name, new Date(startTime));
 			return queryFromDailyBinary(report.getId(), domain);
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Client daily report is missing, domain={}, period={}.", domain, new Date(startTime), e);
 		} catch (Exception e) {
 			LOGGER.error("Unable to query client daily report, domain={}, period={}.", domain, new Date(startTime), e);
@@ -69,8 +66,8 @@ public class ClientReportService extends AbstractReportService<ClientReport> {
 		return report;
 	}
 
-	private ClientReport queryFromDailyBinary(int id, String domain) throws DalException {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id, DailyReportContentEntity.READSET_FULL);
+	private ClientReport queryFromDailyBinary(int id, String domain) {
+		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());

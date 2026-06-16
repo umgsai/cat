@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.dianping.cat.Cat;
@@ -36,7 +36,6 @@ import com.dianping.cat.consumer.dependency.model.entity.Dependency;
 import com.dianping.cat.consumer.dependency.model.entity.Index;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.helper.Chinese;
 import com.dianping.cat.home.dependency.config.entity.DomainConfig;
 import com.dianping.cat.home.dependency.config.entity.EdgeConfig;
@@ -252,12 +251,12 @@ public class TopologyGraphConfigManager {
 			}
 		} else {
 			try {
-				Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+				Config config = m_configDao.findByName(CONFIG_NAME);
 				String content = config.getContent();
 
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				try {
 					String content = m_fetcher.getConfigContent(CONFIG_NAME);
 					Config config = m_configDao.createLocal();
@@ -382,7 +381,7 @@ public class TopologyGraphConfigManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 			} catch (Exception e) {
 				Cat.logError(e);
 				return false;

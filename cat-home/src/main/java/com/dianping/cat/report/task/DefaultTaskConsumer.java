@@ -26,13 +26,11 @@ import java.util.concurrent.locks.LockSupport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
-import com.dianping.cat.core.dal.TaskEntity;
 import com.dianping.cat.message.Transaction;
 
 public class DefaultTaskConsumer extends TaskConsumer {
@@ -46,8 +44,8 @@ public class DefaultTaskConsumer extends TaskConsumer {
 	protected Task findDoingTask(String ip) {
 		Task task = null;
 		try {
-			task = m_taskDao.findByStatusConsumer(STATUS_DOING, ip, TaskEntity.READSET_FULL);
-		} catch (DalException e) {
+			task = m_taskDao.findByStatusConsumer(STATUS_DOING, ip);
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to find doing task, consumerIp={}.", ip, e);
 		}
 		return task;
@@ -57,8 +55,8 @@ public class DefaultTaskConsumer extends TaskConsumer {
 	protected Task findTodoTask() {
 		Task task = null;
 		try {
-			task = m_taskDao.findByStatusConsumer(STATUS_TODO, null, TaskEntity.READSET_FULL);
-		} catch (DalException e) {
+			task = m_taskDao.findByStatusConsumer(STATUS_TODO, null);
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to find todo task.", e);
 		}
 		return task;
@@ -117,8 +115,8 @@ public class DefaultTaskConsumer extends TaskConsumer {
 		doing.setEndDate(new Date());
 
 		try {
-			return m_taskDao.updateDoingToDone(doing, TaskEntity.UPDATESET_FULL) == 1;
-		} catch (DalException e) {
+			return m_taskDao.updateDoingToDone(doing) == 1;
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to mark task done, reportName={}, domain={}, type={}, period={}, taskId={}.",
 					doing.getReportName(), doing.getReportDomain(), doing.getTaskType(), doing.getReportPeriod(), doing.getId(), e);
 			Cat.logError(e);
@@ -132,8 +130,8 @@ public class DefaultTaskConsumer extends TaskConsumer {
 		doing.setEndDate(new Date());
 
 		try {
-			return m_taskDao.updateDoingToFail(doing, TaskEntity.UPDATESET_FULL) == 1;
-		} catch (DalException e) {
+			return m_taskDao.updateDoingToFail(doing) == 1;
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to mark task failed, reportName={}, domain={}, type={}, period={}, taskId={}.",
 					doing.getReportName(), doing.getReportDomain(), doing.getTaskType(), doing.getReportPeriod(), doing.getId(), e);
 			Cat.logError(e);
@@ -148,8 +146,8 @@ public class DefaultTaskConsumer extends TaskConsumer {
 		todo.setStartDate(new Date());
 
 		try {
-			return m_taskDao.updateTodoToDoing(todo, TaskEntity.UPDATESET_FULL) == 1;
-		} catch (DalException e) {
+			return m_taskDao.updateTodoToDoing(todo) == 1;
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to claim todo task, reportName={}, domain={}, type={}, period={}, taskId={}, consumer={}.",
 					todo.getReportName(), todo.getReportDomain(), todo.getTaskType(), todo.getReportPeriod(), todo.getId(),
 					todo.getConsumer(), e);

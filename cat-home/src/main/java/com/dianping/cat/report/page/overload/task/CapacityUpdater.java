@@ -18,7 +18,6 @@
  */
 package com.dianping.cat.report.page.overload.task;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 public interface CapacityUpdater {
 
@@ -32,7 +31,7 @@ public interface CapacityUpdater {
 
 	public static final double CAPACITY = 15.0;
 
-	public void updateDBCapacity() throws DalException;
+	public void updateDBCapacity();
 
 	public String getId();
 

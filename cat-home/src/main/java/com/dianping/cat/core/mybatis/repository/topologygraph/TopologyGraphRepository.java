@@ -7,8 +7,7 @@ import com.dianping.cat.home.dal.report.TopologyGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class TopologyGraphRepository extends SpringBackedRepositorySupport<TopologyGraphMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TopologyGraphRepository.class);
@@ -24,29 +23,29 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 		return new TopologyGraph();
 	}
 
-	public int deleteByPK(TopologyGraph proto) throws DalException {
+	public int deleteByPK(TopologyGraph proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for TopologyGraph.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for TopologyGraph.", e);
 		}
 	}
 
-	public TopologyGraph findByPK(int keyId, Object readset) throws DalException {
+	public TopologyGraph findByPK(int keyId) {
 		TopologyGraphMapper mapper = springMapper(LOGGER);
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for TopologyGraph.", e);
+			throw new IllegalStateException("Error when executing findByPK for TopologyGraph.", e);
 		}
 	}
 
-	public TopologyGraph findByPeriod(java.util.Date period, Object readset) throws DalException {
+	public TopologyGraph findByPeriod(java.util.Date period) {
 		TopologyGraphMapper mapper = springMapper(LOGGER);
 		TopologyGraphDO record = new TopologyGraphDO();
 
@@ -55,14 +54,14 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 			TopologyGraphDO result = mapper.findByPeriod(record).stream().findFirst().orElse(null);
 
 			return requireFound(result, "findByPeriod", record.toString());
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPeriod for TopologyGraph.", e);
+			throw new IllegalStateException("Error when executing findByPeriod for TopologyGraph.", e);
 		}
 	}
 
-	public int insert(TopologyGraph proto) throws DalException {
+	public int insert(TopologyGraph proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
@@ -73,23 +72,23 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 			proto.setKeyId(record.getId());
 			return count;
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for TopologyGraph.", e);
+			throw new IllegalStateException("Error when executing insert for TopologyGraph.", e);
 		}
 	}
 
-	public int updateByPK(TopologyGraph proto, Object updateset) throws DalException {
+	public int updateByPK(TopologyGraph proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for TopologyGraph.", e);
+			throw new IllegalStateException("Error when executing updateByPK for TopologyGraph.", e);
 		}
 	}
 
-	private TopologyGraph requireFound(TopologyGraphDO record, String field, String value) throws DalNotFoundException {
+	private TopologyGraph requireFound(TopologyGraphDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No TopologyGraph found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No TopologyGraph found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

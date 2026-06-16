@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class MetricScreenRepository extends SpringBackedRepositorySupport<MetricScreenMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MetricScreenRepository.class);
@@ -26,48 +25,48 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 		return new MetricScreen();
 	}
 
-	public int deleteByPK(MetricScreen proto) throws DalException {
+	public int deleteByPK(MetricScreen proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for MetricScreen.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for MetricScreen.", e);
 		}
 	}
 
-	public int deleteByName(MetricScreen proto) throws DalException {
+	public int deleteByName(MetricScreen proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByName(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByName for MetricScreen.", e);
+			throw new IllegalStateException("Error when executing deleteByName for MetricScreen.", e);
 		}
 	}
 
-	public int deleteByNameGraph(MetricScreen proto) throws DalException {
+	public int deleteByNameGraph(MetricScreen proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByNameGraph(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByNameGraph for MetricScreen.", e);
+			throw new IllegalStateException("Error when executing deleteByNameGraph for MetricScreen.", e);
 		}
 	}
 
-	public List<MetricScreen> findAll(Object readset) throws DalException {
+	public List<MetricScreen> findAll() {
 		MetricScreenMapper mapper = springMapper(LOGGER);
 		MetricScreenDO record = new MetricScreenDO();
 
 		try {
 			return mapper.findAll(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findAll for MetricScreen.", e);
+			throw new IllegalStateException("Error when executing findAll for MetricScreen.", e);
 		}
 	}
 
-	public List<MetricScreen> findByName(String name, Object readset) throws DalException {
+	public List<MetricScreen> findByName(String name) {
 		MetricScreenMapper mapper = springMapper(LOGGER);
 		MetricScreenDO record = new MetricScreenDO();
 
@@ -75,23 +74,23 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 		try {
 			return mapper.findByName(record).stream().map(this::toModel).collect(Collectors.toList());
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByName for MetricScreen.", e);
+			throw new IllegalStateException("Error when executing findByName for MetricScreen.", e);
 		}
 	}
 
-	public MetricScreen findByPK(int keyId, Object readset) throws DalException {
+	public MetricScreen findByPK(int keyId) {
 		MetricScreenMapper mapper = springMapper(LOGGER);
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for MetricScreen.", e);
+			throw new IllegalStateException("Error when executing findByPK for MetricScreen.", e);
 		}
 	}
 
-	public MetricScreen findByNameGraph(String name, String graphName, Object readset) throws DalException {
+	public MetricScreen findByNameGraph(String name, String graphName) {
 		MetricScreenMapper mapper = springMapper(LOGGER);
 		MetricScreenDO record = new MetricScreenDO();
 
@@ -101,14 +100,14 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 			MetricScreenDO result = mapper.findByNameGraph(record).stream().findFirst().orElse(null);
 
 			return requireFound(result, "findByNameGraph", record.toString());
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByNameGraph for MetricScreen.", e);
+			throw new IllegalStateException("Error when executing findByNameGraph for MetricScreen.", e);
 		}
 	}
 
-	public int insert(MetricScreen proto) throws DalException {
+	public int insert(MetricScreen proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
@@ -119,33 +118,33 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 			proto.setKeyId(record.getId());
 			return count;
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for MetricScreen.", e);
+			throw new IllegalStateException("Error when executing insert for MetricScreen.", e);
 		}
 	}
 
-	public int insertOrUpdateByNameGraph(MetricScreen proto) throws DalException {
+	public int insertOrUpdateByNameGraph(MetricScreen proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).insertOrUpdateByNameGraph(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing insertOrUpdateByNameGraph for MetricScreen.", e);
+			throw new IllegalStateException("Error when executing insertOrUpdateByNameGraph for MetricScreen.", e);
 		}
 	}
 
-	public int updateByPK(MetricScreen proto, Object updateset) throws DalException {
+	public int updateByPK(MetricScreen proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for MetricScreen.", e);
+			throw new IllegalStateException("Error when executing updateByPK for MetricScreen.", e);
 		}
 	}
 
-	private MetricScreen requireFound(MetricScreenDO record, String field, String value) throws DalNotFoundException {
+	private MetricScreen requireFound(MetricScreenDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No MetricScreen found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No MetricScreen found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

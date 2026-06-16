@@ -24,14 +24,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.home.storage.entity.Link;
 import com.dianping.cat.home.storage.entity.Storage;
 import com.dianping.cat.home.storage.entity.StorageGroup;
@@ -81,12 +80,12 @@ public class StorageGroupConfigManager {
 
 	public void initialize() {
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+			Config config = m_configDao.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
 			m_configId = config.getId();
 			m_config = DefaultSaxParser.parse(content);
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -196,7 +195,7 @@ public class StorageGroupConfigManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 				return true;
 			} catch (Exception e) {
 				Cat.logError(e);

@@ -27,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.rule.entity.Condition;
@@ -40,7 +39,6 @@ import com.dianping.cat.alarm.rule.transform.DefaultSaxParser;
 import com.dianping.cat.configuration.business.entity.BusinessItemConfig;
 import com.dianping.cat.core.config.BusinessConfig;
 import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
-import com.dianping.cat.core.config.BusinessConfigEntity;
 import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
@@ -151,7 +149,7 @@ public class BusinessRuleConfigManager {
 
 	private void loadData() {
 		try {
-			List<BusinessConfig> configs = m_configDao.findByName(ALERT_CONFIG, BusinessConfigEntity.READSET_FULL);
+			List<BusinessConfig> configs = m_configDao.findByName(ALERT_CONFIG);
 			Map<String, MonitorRules> rules = new ConcurrentHashMap<String, MonitorRules>();
 
 			for (BusinessConfig config : configs) {
@@ -167,7 +165,7 @@ public class BusinessRuleConfigManager {
 			}
 			m_rules = rules;
 			LOGGER.info("Loaded business alert rule configs, count={}.", m_rules.size());
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to load business alert rule configs from repository.", e);
 			Cat.logError(e);
 		}
@@ -232,7 +230,7 @@ public class BusinessRuleConfigManager {
 			proto.setUpdatetime(new Date());
 
 			if (isExist) {
-				m_configDao.updateBaseConfigByDomain(proto, BusinessConfigEntity.UPDATESET_FULL);
+				m_configDao.updateBaseConfigByDomain(proto);
 			} else {
 				m_configDao.insert(proto);
 			}

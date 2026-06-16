@@ -22,9 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
@@ -38,20 +37,12 @@ import com.dianping.cat.consumer.event.model.transform.BaseVisitor;
 import com.dianping.cat.consumer.event.model.transform.DefaultNativeParser;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.dal.DailyReportContentEntity;
-import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentEntity;
-import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
-import com.dianping.cat.core.dal.MonthlyReportContentEntity;
-import com.dianping.cat.core.dal.MonthlyReportEntity;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.dal.WeeklyReportContent;
-import com.dianping.cat.core.dal.WeeklyReportContentEntity;
-import com.dianping.cat.core.dal.WeeklyReportEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
@@ -102,11 +93,11 @@ public class EventReportService extends AbstractReportService<EventReport> {
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_DAY) {
 			try {
 				DailyReport report = m_dailyReportDao
-										.findByDomainNamePeriod(domain, name, new Date(startTime),	DailyReportEntity.READSET_FULL);
+										.findByDomainNamePeriod(domain, name, new Date(startTime));
 				EventReport reportModel = queryFromDailyBinary(report.getId(), domain);
 
 				reportModel.accept(merger);
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Event daily report is missing, domain={}, period={}.", domain, new Date(startTime), e);
 			} catch (Exception e) {
 				LOGGER.error("Unable to query event daily report, domain={}, period={}.", domain, new Date(startTime), e);
@@ -120,8 +111,8 @@ public class EventReportService extends AbstractReportService<EventReport> {
 		return convert(eventReport);
 	}
 
-	private EventReport queryFromDailyBinary(int id, String domain) throws DalException {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id, DailyReportContentEntity.READSET_FULL);
+	private EventReport queryFromDailyBinary(int id, String domain) {
+		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -130,9 +121,9 @@ public class EventReportService extends AbstractReportService<EventReport> {
 		}
 	}
 
-	private EventReport queryFromHourlyBinary(int id, Date period, String domain) throws DalException {
+	private EventReport queryFromHourlyBinary(int id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
-								.findByPK(id, period,	HourlyReportContentEntity.READSET_CONTENT);
+								.findByPK(id, period);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -141,8 +132,8 @@ public class EventReportService extends AbstractReportService<EventReport> {
 		}
 	}
 
-	private EventReport queryFromMonthlyBinary(int id, String domain) throws DalException {
-		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id, MonthlyReportContentEntity.READSET_FULL);
+	private EventReport queryFromMonthlyBinary(int id, String domain) {
+		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -151,8 +142,8 @@ public class EventReportService extends AbstractReportService<EventReport> {
 		}
 	}
 
-	private EventReport queryFromWeeklyBinary(int id, String domain) throws DalException {
-		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id, WeeklyReportContentEntity.READSET_FULL);
+	private EventReport queryFromWeeklyBinary(int id, String domain) {
+		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -172,8 +163,8 @@ public class EventReportService extends AbstractReportService<EventReport> {
 			List<HourlyReport> reports = null;
 			try {
 				reports = m_hourlyReportDao
-										.findAllByDomainNamePeriod(new Date(startTime), domain, name,	HourlyReportEntity.READSET_FULL);
-			} catch (DalException e) {
+										.findAllByDomainNamePeriod(new Date(startTime), domain, name);
+			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query event hourly report list, domain={}, period={}.", domain,
 						new Date(startTime), e);
 				Cat.logError(e);
@@ -184,7 +175,7 @@ public class EventReportService extends AbstractReportService<EventReport> {
 						EventReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 
 						reportModel.accept(merger);
-					} catch (DalNotFoundException e) {
+					} catch (EmptyResultDataAccessException e) {
 						LOGGER.warn("Event hourly report content is missing, domain={}, reportId={}, period={}.", domain,
 								report.getId(), report.getPeriod(), e);
 					} catch (Exception e) {
@@ -209,10 +200,10 @@ public class EventReportService extends AbstractReportService<EventReport> {
 
 		try {
 			MonthlyReport entity = m_monthlyReportDao
-									.findReportByDomainNamePeriod(start, domain, EventAnalyzer.ID,	MonthlyReportEntity.READSET_FULL);
+									.findReportByDomainNamePeriod(start, domain, EventAnalyzer.ID);
 
 			eventReport = queryFromMonthlyBinary(entity.getId(), domain);
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Event monthly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
 			LOGGER.error("Unable to query event monthly report, domain={}, period={}.", domain, start, e);
@@ -227,10 +218,10 @@ public class EventReportService extends AbstractReportService<EventReport> {
 
 		try {
 			WeeklyReport entity = m_weeklyReportDao
-									.findReportByDomainNamePeriod(start, domain, EventAnalyzer.ID,	WeeklyReportEntity.READSET_FULL);
+									.findReportByDomainNamePeriod(start, domain, EventAnalyzer.ID);
 
 			eventReport = queryFromWeeklyBinary(entity.getId(), domain);
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Event weekly report is missing, domain={}, period={}.", domain, start, e);
 		} catch (Exception e) {
 			LOGGER.error("Unable to query event weekly report, domain={}, period={}.", domain, start, e);

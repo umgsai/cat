@@ -22,7 +22,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -78,13 +77,13 @@ public class TaskManager {
 				}
 			}
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			Cat.logError(e);
 			return false;
 		}
 	}
 
-	protected void insertToDatabase(Date period, String domain, String name, int reportType) throws DalException {
+	protected void insertToDatabase(Date period, String domain, String name, int reportType) {
 		ensureTaskDao();
 		Task task = m_taskDao.createLocal();
 

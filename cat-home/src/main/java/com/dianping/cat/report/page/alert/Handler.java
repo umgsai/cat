@@ -31,7 +31,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,6 @@ import com.google.common.base.Splitter;
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
 import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
-import com.dianping.cat.alarm.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
@@ -148,7 +146,7 @@ public class Handler implements PageHandler<Context> {
 					} else {
 						setAlertResult(model, 1);
 					}
-				} catch (DalException e) {
+				} catch (RuntimeException e) {
 					setAlertResult(model, 5);
 					LOGGER.error("Unable to insert manual alert, domain={}, category={}, metric={}.",
 					      alertEntity.getDomain(), alertEntity.getCategory(), alertEntity.getMetric(), e);
@@ -164,12 +162,11 @@ public class Handler implements PageHandler<Context> {
 			List<Alert> alerts;
 			try {
 				if (StringUtils.isEmpty(alertTypeStr)) {
-					alerts = m_alertDao.queryAlertsByTimeDomain(startTime, endTime, domain, AlertEntity.READSET_FULL);
+					alerts = m_alertDao.queryAlertsByTimeDomain(startTime, endTime, domain);
 				} else {
-					alerts = m_alertDao.queryAlertsByTimeDomainCategories(startTime, endTime, domain,	payload.getAlertTypeArray(),
-											AlertEntity.READSET_FULL);
+					alerts = m_alertDao.queryAlertsByTimeDomainCategories(startTime, endTime, domain,	payload.getAlertTypeArray());
 				}
-			} catch (DalException e) {
+			} catch (RuntimeException e) {
 				alerts = new ArrayList<Alert>();
 				LOGGER.error("Unable to query alerts, startTime={}, endTime={}, domain={}, alertTypes={}.", startTime,
 				      endTime, domain, alertTypeStr, e);

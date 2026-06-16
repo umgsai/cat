@@ -20,7 +20,6 @@ package com.dianping.cat.report.alert.summary;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.dal.report.AlertSummary;
@@ -41,7 +40,7 @@ public class AlertSummaryService {
 
 		try {
 			m_alertSummaryDao.insert(summary);
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to insert alert summary, domain={}, alertTime={}.", alertSummary.getDomain(),
 					alertSummary.getAlertDate(), e);
 			Cat.logError("insert alert summary error: " + content, e);

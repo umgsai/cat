@@ -26,9 +26,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -37,7 +36,6 @@ import com.dianping.cat.configuration.business.entity.BusinessReportConfig;
 import com.dianping.cat.configuration.business.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.BusinessConfig;
 import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
-import com.dianping.cat.core.config.BusinessConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -74,13 +72,13 @@ public class BusinessConfigManager {
 		ensureInitialized();
 
 		try {
-			BusinessConfig config = m_configDao.findByNameDomain(BASE_CONFIG, domain, BusinessConfigEntity.READSET_FULL);
+			BusinessConfig config = m_configDao.findByNameDomain(BASE_CONFIG, domain);
 			BusinessReportConfig businessReportConfig = DefaultSaxParser.parse(config.getContent());
 
 			businessReportConfig.removeBusinessItemConfig(key);
 			config.setContent(businessReportConfig.toString());
 			config.setUpdatetime(new Date());
-			m_configDao.updateByPK(config, BusinessConfigEntity.UPDATESET_FULL);
+			m_configDao.updateByPK(config);
 
 			Set<String> itemIds = m_domains.get(domain);
 
@@ -98,14 +96,14 @@ public class BusinessConfigManager {
 		ensureInitialized();
 
 		try {
-			BusinessConfig config = m_configDao.findByNameDomain(BASE_CONFIG, domain, BusinessConfigEntity.READSET_FULL);
+			BusinessConfig config = m_configDao.findByNameDomain(BASE_CONFIG, domain);
 			BusinessReportConfig businessReportConfig = DefaultSaxParser.parse(config.getContent());
 
 			businessReportConfig.removeCustomConfig(key);
 			config.setContent(businessReportConfig.toString());
 			config.setUpdatetime(new Date());
 
-			m_configDao.updateByPK(config, BusinessConfigEntity.UPDATESET_FULL);
+			m_configDao.updateByPK(config);
 			cacheConfigs(businessReportConfig, domain);
 		} catch (Exception e) {
 			LOGGER.error("Unable to delete business custom config, domain={}, key={}.", domain, key, e);
@@ -164,7 +162,7 @@ public class BusinessConfigManager {
 
 	private void loadData() {
 		try {
-			List<BusinessConfig> configs = m_configDao.findByName(BASE_CONFIG, BusinessConfigEntity.READSET_FULL);
+			List<BusinessConfig> configs = m_configDao.findByName(BASE_CONFIG);
 			Map<String, Set<String>> domains = new ConcurrentHashMap<String, Set<String>>();
 
 			for (BusinessConfig config : configs) {
@@ -224,13 +222,13 @@ public class BusinessConfigManager {
 
 				if (!itemIds.contains(key)) {
 					BusinessConfig businessConfig = m_configDao
-											.findByNameDomain(BASE_CONFIG, domain,	BusinessConfigEntity.READSET_FULL);
+											.findByNameDomain(BASE_CONFIG, domain);
 					BusinessReportConfig config = DefaultSaxParser.parse(businessConfig.getContent());
 					BusinessItemConfig businessItemConfig = buildBusinessItemConfig(key, item);
 
 					config.addBusinessItemConfig(businessItemConfig);
 					businessConfig.setContent(config.toString());
-					m_configDao.updateByPK(businessConfig, BusinessConfigEntity.UPDATESET_FULL);
+					m_configDao.updateByPK(businessConfig);
 
 					itemIds.add(key);
 					cacheConfigs(config, domain);
@@ -255,11 +253,11 @@ public class BusinessConfigManager {
 			if (m_alertMachine) {
 				businessReportConfig = m_configs.get(domain);
 			} else {
-				BusinessConfig config = m_configDao.findByNameDomain(BASE_CONFIG, domain, BusinessConfigEntity.READSET_FULL);
+				BusinessConfig config = m_configDao.findByNameDomain(BASE_CONFIG, domain);
 
 				businessReportConfig = DefaultSaxParser.parse(config.getContent());
 			}
-		} catch (DalNotFoundException notFound) {
+		} catch (EmptyResultDataAccessException notFound) {
 			LOGGER.warn("Business config is missing, domain={}; returning empty config.", domain, notFound);
 		} catch (Exception e) {
 			LOGGER.error("Unable to query business config by domain={}.", domain, e);
@@ -283,11 +281,11 @@ public class BusinessConfigManager {
 		proto.setContent(config.toString());
 
 		try {
-			m_configDao.updateBaseConfigByDomain(proto, BusinessConfigEntity.UPDATESET_FULL);
+			m_configDao.updateBaseConfigByDomain(proto);
 			cacheConfigs(config, domain);
 			LOGGER.info("Updated business config, domain={}.", domain);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to update business config, domain={}.", domain, e);
 			Cat.logError(e);
 		}
@@ -311,7 +309,7 @@ public class BusinessConfigManager {
 			cacheConfigs(config, domain);
 			LOGGER.info("Inserted business config, domain={}.", domain);
 			return true;
-		} catch (DalException e) {
+		} catch (RuntimeException e) {
 			LOGGER.error("Unable to insert business config, domain={}.", domain, e);
 			Cat.logError(e);
 		}

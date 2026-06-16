@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.xml.sax.SAXException;
 
 import com.dianping.cat.Cat;
@@ -37,7 +36,6 @@ import com.dianping.cat.consumer.all.config.entity.Type;
 import com.dianping.cat.consumer.all.config.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
@@ -75,13 +73,13 @@ public class AllReportConfigManager {
 		}
 
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+			Config config = m_configDao.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
 			m_configId = config.getId();
 			m_config = DefaultSaxParser.parse(content);
 			m_modifyTime = config.getModifyDate().getTime();
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			try {
 				String content = m_fetcher.getConfigContent(CONFIG_NAME);
 				Config config = m_configDao.createLocal();
@@ -135,8 +133,8 @@ public class AllReportConfigManager {
 		}
 	}
 
-	private void refreshConfig() throws DalException, SAXException, IOException {
-		Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+	private void refreshConfig() throws SAXException, IOException {
+		Config config = m_configDao.findByName(CONFIG_NAME);
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
@@ -159,7 +157,7 @@ public class AllReportConfigManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 			} catch (Exception e) {
 				Cat.logError(e);
 				return false;

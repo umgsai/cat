@@ -22,14 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.home.group.entity.Domain;
 import com.dianping.cat.home.group.entity.DomainGroup;
@@ -65,13 +64,13 @@ public class DomainGroupConfigManager {
 
 	public void initialize() {
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+			Config config = m_configDao.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
 			m_configId = config.getId();
 			m_domainGroup = DefaultSaxParser.parse(content);
 			LOGGER.info("Loaded domain group config from repository, configId={}.", m_configId);
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Domain group config is missing in repository, loading default content from fetcher.", e);
 
 			try {
@@ -195,7 +194,7 @@ public class DomainGroupConfigManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(m_domainGroup.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 				LOGGER.info("Stored domain group config, configId={}, domainCount={}.", m_configId,
 						m_domainGroup.getDomains().size());
 			} catch (Exception e) {

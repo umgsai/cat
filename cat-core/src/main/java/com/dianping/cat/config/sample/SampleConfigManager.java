@@ -19,14 +19,13 @@
 package com.dianping.cat.config.sample;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 import com.dianping.cat.sample.entity.SampleConfig;
 import com.dianping.cat.sample.transform.DefaultSaxParser;
 import com.dianping.cat.task.TimerSyncTask;
@@ -66,7 +65,7 @@ public class SampleConfigManager {
 		}
 
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+			Config config = m_configDao.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
 			m_configId = config.getId();
@@ -74,7 +73,7 @@ public class SampleConfigManager {
 			m_config = DefaultSaxParser.parse(content);
 			LOGGER.info("Loaded sample config from repository, configId={}, modifyTime={}.", m_configId,
 					m_modifyTime);
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Sample config is missing in repository, loading default content from fetcher.", e);
 
 			try {
@@ -139,7 +138,7 @@ public class SampleConfigManager {
 	}
 
 	private void refreshConfig() throws Exception {
-		Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+		Config config = m_configDao.findByName(CONFIG_NAME);
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
@@ -162,7 +161,7 @@ public class SampleConfigManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 				LOGGER.info("Stored sample config, configId={}.", m_configId);
 			} catch (Exception e) {
 				LOGGER.error("Unable to store sample config, configId={}.", m_configId, e);

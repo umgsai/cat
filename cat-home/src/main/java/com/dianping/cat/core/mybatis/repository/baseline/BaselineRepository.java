@@ -7,8 +7,7 @@ import com.dianping.cat.home.dal.report.Baseline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BaselineRepository.class);
@@ -23,29 +22,29 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 		return new Baseline();
 	}
 
-	public int deleteByPK(Baseline proto) throws DalException {
+	public int deleteByPK(Baseline proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
 		} catch (Exception e) {
-			throw new DalException("Error when executing deleteByPK for Baseline.", e);
+			throw new IllegalStateException("Error when executing deleteByPK for Baseline.", e);
 		}
 	}
 
-	public Baseline findByPK(int keyId, Object readset) throws DalException {
+	public Baseline findByPK(int keyId) {
 		BaselineMapper mapper = springMapper(LOGGER);
 
 		try {
 			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByPK for Baseline.", e);
+			throw new IllegalStateException("Error when executing findByPK for Baseline.", e);
 		}
 	}
 
-	public Baseline findByReportNameKeyTime(java.util.Date reportPeriod, String reportName, String indexKey, Object readset) throws DalException {
+	public Baseline findByReportNameKeyTime(java.util.Date reportPeriod, String reportName, String indexKey) {
 		BaselineMapper mapper = springMapper(LOGGER);
 		BaselineDO record = new BaselineDO();
 
@@ -56,14 +55,14 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 			BaselineDO result = mapper.findByReportNameKeyTime(record).stream().findFirst().orElse(null);
 
 			return requireFound(result, "findByReportNameKeyTime", record.toString());
-		} catch (DalNotFoundException e) {
+		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DalException("Error when executing findByReportNameKeyTime for Baseline.", e);
+			throw new IllegalStateException("Error when executing findByReportNameKeyTime for Baseline.", e);
 		}
 	}
 
-	public int insert(Baseline proto) throws DalException {
+	public int insert(Baseline proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
@@ -74,23 +73,23 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 			proto.setKeyId(record.getId());
 			return count;
 		} catch (Exception e) {
-			throw new DalException("Error when executing insert for Baseline.", e);
+			throw new IllegalStateException("Error when executing insert for Baseline.", e);
 		}
 	}
 
-	public int updateByPK(Baseline proto, Object updateset) throws DalException {
+	public int updateByPK(Baseline proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
 			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
 		} catch (Exception e) {
-			throw new DalException("Error when executing updateByPK for Baseline.", e);
+			throw new IllegalStateException("Error when executing updateByPK for Baseline.", e);
 		}
 	}
 
-	private Baseline requireFound(BaselineDO record, String field, String value) throws DalNotFoundException {
+	private Baseline requireFound(BaselineDO record, String field, String value) {
 		if (record == null) {
-			throw new DalNotFoundException("No Baseline found by " + field + "(" + value + ").");
+			throw new EmptyResultDataAccessException("No Baseline found by " + field + "(" + value + ").", 1);
 		}
 
 		return toModel(record);

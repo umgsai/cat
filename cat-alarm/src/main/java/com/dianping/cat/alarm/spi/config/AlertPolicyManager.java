@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.policy.entity.AlertPolicy;
@@ -35,7 +35,6 @@ import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.config.ConfigEntity;
 
 public class AlertPolicyManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertPolicyManager.class);
@@ -78,13 +77,13 @@ public class AlertPolicyManager {
 				return;
 			}
 			try {
-				Config config = m_configDao.findByName(CONFIG_NAME, ConfigEntity.READSET_FULL);
+				Config config = m_configDao.findByName(CONFIG_NAME);
 				String content = config.getContent();
 
 				m_configId = config.getId();
 				m_config = DefaultSaxParser.parse(content);
 				LOGGER.info("Loaded alert policy from repository, configId={}.", m_configId);
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Alert policy is missing in repository, loading default content from fetcher.", e);
 
 				try {
@@ -221,7 +220,7 @@ public class AlertPolicyManager {
 				config.setKeyId(m_configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config, ConfigEntity.UPDATESET_FULL);
+				m_configDao.updateByPK(config);
 				LOGGER.info("Stored alert policy, configId={}, typeCount={}.", m_configId, m_config.getTypes().size());
 			} catch (Exception e) {
 				LOGGER.error("Unable to store alert policy, configId={}.", m_configId, e);

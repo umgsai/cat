@@ -21,9 +21,8 @@ package com.dianping.cat.report.page.heartbeat.service;
 import java.util.Date;
 import java.util.List;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
@@ -37,12 +36,8 @@ import com.dianping.cat.consumer.heartbeat.model.transform.BaseVisitor;
 import com.dianping.cat.consumer.heartbeat.model.transform.DefaultNativeParser;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.dal.DailyReportContentEntity;
-import com.dianping.cat.core.dal.DailyReportEntity;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentEntity;
-import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
@@ -68,11 +63,11 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_DAY) {
 			try {
 				DailyReport report = m_dailyReportDao
-										.findByDomainNamePeriod(domain, name, new Date(startTime),	DailyReportEntity.READSET_FULL);
+										.findByDomainNamePeriod(domain, name, new Date(startTime));
 				HeartbeatReport reportModel = queryFromDailyBinary(report.getId(), domain);
 
 				reportModel.accept(merger);
-			} catch (DalNotFoundException e) {
+			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Heartbeat daily report is missing, domain={}, period={}.", domain, new Date(startTime), e);
 			} catch (Exception e) {
 				LOGGER.error("Unable to query heartbeat daily report, domain={}, period={}.", domain,
@@ -89,8 +84,8 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 		return heartbeatReport;
 	}
 
-	private HeartbeatReport queryFromDailyBinary(int id, String domain) throws DalException {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id, DailyReportContentEntity.READSET_FULL);
+	private HeartbeatReport queryFromDailyBinary(int id, String domain) {
+		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -99,9 +94,9 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 		}
 	}
 
-	private HeartbeatReport queryFromHourlyBinary(int id, Date period, String domain) throws DalException {
+	private HeartbeatReport queryFromHourlyBinary(int id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
-								.findByPK(id, period,	HourlyReportContentEntity.READSET_CONTENT);
+								.findByPK(id, period);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -121,8 +116,8 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 			List<HourlyReport> reports = null;
 			try {
 				reports = m_hourlyReportDao
-										.findAllByDomainNamePeriod(new Date(startTime), domain, name,	HourlyReportEntity.READSET_FULL);
-			} catch (DalException e) {
+										.findAllByDomainNamePeriod(new Date(startTime), domain, name);
+			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query heartbeat hourly report list, domain={}, period={}.", domain,
 						new Date(startTime), e);
 				Cat.logError(e);
@@ -132,7 +127,7 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 					try {
 						HeartbeatReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 						reportModel.accept(merger);
-					} catch (DalNotFoundException e) {
+					} catch (EmptyResultDataAccessException e) {
 						LOGGER.warn("Heartbeat hourly report content is missing, domain={}, reportId={}, period={}.",
 								domain, report.getId(), report.getPeriod(), e);
 					} catch (Exception e) {

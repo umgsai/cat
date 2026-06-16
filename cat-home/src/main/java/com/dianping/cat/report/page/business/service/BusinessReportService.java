@@ -18,11 +18,11 @@
  */
 package com.dianping.cat.report.page.business.service;
 
+import org.springframework.dao.EmptyResultDataAccessException;
+
 import java.util.Date;
 import java.util.List;
 
-import com.dianping.cat.core.dal.jdbc.DalException;
-import com.dianping.cat.core.dal.jdbc.DalNotFoundException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
@@ -31,8 +31,6 @@ import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.consumer.business.model.transform.DefaultNativeParser;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.dal.HourlyReportContentEntity;
-import com.dianping.cat.core.dal.HourlyReportEntity;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
@@ -64,8 +62,8 @@ public class BusinessReportService extends AbstractReportService<BusinessReport>
 			List<HourlyReport> reports = null;
 
 			try {
-				reports = m_hourlyReportDao.findAllByDomainNamePeriod(period, domain, name, HourlyReportEntity.READSET_FULL);
-			} catch (DalException e) {
+				reports = m_hourlyReportDao.findAllByDomainNamePeriod(period, domain, name);
+			} catch (RuntimeException e) {
 				Cat.logError(e);
 			}
 			if (reports != null) {
@@ -73,7 +71,7 @@ public class BusinessReportService extends AbstractReportService<BusinessReport>
 					try {
 						BusinessReport reportModel = queryFromHourlyBinary(report.getId(), period, domain);
 						reportModel.accept(merger);
-					} catch (DalNotFoundException e) {
+					} catch (EmptyResultDataAccessException e) {
 						// ignore
 					} catch (Exception e) {
 						Cat.logError(e);
@@ -89,9 +87,9 @@ public class BusinessReportService extends AbstractReportService<BusinessReport>
 		return businessReport;
 	}
 
-	private BusinessReport queryFromHourlyBinary(int id, Date period, String domain) throws DalException {
+	private BusinessReport queryFromHourlyBinary(int id, Date period, String domain) {
 		HourlyReportContent content = m_hourlyReportContentDao
-								.findByPK(id, period,	HourlyReportContentEntity.READSET_CONTENT);
+								.findByPK(id, period);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
