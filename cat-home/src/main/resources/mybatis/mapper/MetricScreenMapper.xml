@@ -6,11 +6,11 @@
         <result column="name" property="name"/>
         <result column="graph_name" property="graphName"/>
         <result column="view" property="view"/>
-        <result column="endPoints" property="endPoints"/>
+        <result column="end_points" property="endPoints"/>
         <result column="measurements" property="measurements"/>
         <result column="content" property="content"/>
-        <result column="creation_date" property="creationDate"/>
-        <result column="updatetime" property="updatetime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -18,11 +18,11 @@
         name ,
         graph_name ,
         view ,
-        endPoints ,
+        end_points ,
         measurements ,
         content ,
-        creation_date ,
-        updatetime
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -31,66 +31,72 @@
             <if test="name != null">name = #{name} ,</if>
             <if test="graphName != null">graph_name = #{graphName} ,</if>
             <if test="view != null">view = #{view} ,</if>
-            <if test="endPoints != null">endPoints = #{endPoints} ,</if>
+            <if test="endPoints != null">end_points = #{endPoints} ,</if>
             <if test="measurements != null">measurements = #{measurements} ,</if>
             <if test="content != null">content = #{content} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate} ,</if>
-            <if test="updatetime != null">updatetime = #{updatetime}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.metric.screen.dao.data.MetricScreenDO" keyProperty="id">
-        INSERT INTO metric_screen
+        INSERT INTO t_metric_screen
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from metric_screen where id = #{id}
+        from t_metric_screen where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from metric_screen
+        from t_metric_screen
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from metric_screen where id = #{id}
+        delete from t_metric_screen where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.metric.screen.dao.data.MetricScreenDO">
-        UPDATE metric_screen
+        UPDATE t_metric_screen
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="findAll" resultMap="BaseResultMap">
-        select id, name, graph_name, view, endPoints, measurements, content, creation_date, updatetime from metric_screen
+        select
+        <include refid="Base_Column_List"/>
+        from t_metric_screen
     </select>
 
     <select id="findByNameGraph" resultMap="BaseResultMap">
-        select id, name, graph_name, view, endPoints, measurements, content, creation_date, updatetime from metric_screen where name = #{record.name} and graph_name = #{record.graphName}
+        select
+        <include refid="Base_Column_List"/>
+        from t_metric_screen where name = #{record.name} and graph_name = #{record.graphName}
     </select>
 
     <select id="findByName" resultMap="BaseResultMap">
-        select id, name, graph_name, view, endPoints, measurements, content, creation_date, updatetime from metric_screen where name = #{record.name}
+        select
+        <include refid="Base_Column_List"/>
+        from t_metric_screen where name = #{record.name}
     </select>
 
     <insert id="insertOrUpdateByNameGraph">
-        INSERT INTO metric_screen(id, name, graph_name, view, endPoints, measurements, content, creation_date, updatetime)
-        values(#{record.id}, #{record.name}, #{record.graphName}, #{record.view}, #{record.endPoints}, #{record.measurements}, #{record.content}, #{record.creationDate}, #{record.updatetime})
-        ON DUPLICATE KEY UPDATE view = #{record.view}, endPoints = #{record.endPoints}, measurements = #{record.measurements}, content = #{record.content}
+        INSERT INTO t_metric_screen(id, name, graph_name, view, end_points, measurements, content, create_time, update_time)
+        values(#{record.id}, #{record.name}, #{record.graphName}, #{record.view}, #{record.endPoints}, #{record.measurements}, #{record.content}, #{record.createTime}, #{record.updateTime})
+        ON DUPLICATE KEY UPDATE view = #{record.view}, end_points = #{record.endPoints}, measurements = #{record.measurements}, content = #{record.content}, update_time = NOW()
     </insert>
 
     <delete id="deleteByName">
-        DELETE from metric_screen where name = #{record.name}
+        DELETE from t_metric_screen where name = #{record.name}
     </delete>
 
     <delete id="deleteByNameGraph">
-        DELETE from metric_screen where name = #{record.name} and graph_name = #{record.graphName}
+        DELETE from t_metric_screen where name = #{record.name} and graph_name = #{record.graphName}
     </delete>
 
 </mapper>

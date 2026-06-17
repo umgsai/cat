@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.metric.screen.dao.data.MetricScreenDO;
 
 public interface MetricScreenMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	MetricScreenDO findByPrimaryKey(@Param("id") Integer id);
+	MetricScreenDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(MetricScreenDO record);
 

@@ -79,6 +79,10 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 	}
 
 	public MetricScreen findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public MetricScreen findByPK(long keyId) {
 		MetricScreenMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -194,8 +198,8 @@ public class MetricScreenRepository extends SpringBackedRepositorySupport<Metric
 		record.setEndPoints(model.getEndPoints());
 		record.setMeasurements(model.getMeasurements());
 		record.setContent(model.getContent());
-		record.setCreationDate(model.getCreationDate());
-		record.setUpdatetime(model.getUpdatetime());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		return record;
 	}

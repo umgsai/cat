@@ -348,19 +348,23 @@ data:
       KEY `idx_update_time` (`update_time`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务配置';
 
-    CREATE TABLE `metric_screen` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `name` varchar(50) NOT NULL COMMENT '配置名称',
-      `graph_name` varchar(50) NOT NULL DEFAULT '' COMMENT 'Graph名称',
-      `view` varchar(50) NOT NULL DEFAULT '' COMMENT '视角',
-      `endPoints` longtext NOT NULL,
-      `measurements` longtext NOT NULL COMMENT '配置的指标',
-      `content` longtext NOT NULL COMMENT '配置的具体内容',
-      `creation_date` datetime NOT NULL COMMENT '配置创建时间',
-      `updatetime` datetime NOT NULL COMMENT '配置修改时间',
+    CREATE TABLE `t_metric_screen` (
+      `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+      `name` varchar(64) NOT NULL DEFAULT '' COMMENT '配置名称',
+      `graph_name` varchar(64) NOT NULL DEFAULT '' COMMENT 'Graph名称',
+      `view` varchar(64) NOT NULL DEFAULT '' COMMENT '视角',
+      `end_points` longtext NOT NULL COMMENT '端点配置',
+      `measurements` longtext NOT NULL COMMENT '指标配置',
+      `content` longtext NOT NULL COMMENT '配置内容',
+      `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+      `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
       PRIMARY KEY (`id`),
-      UNIQUE KEY `name_graph` (`name`,`graph_name`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统监控的screen配置';
+      UNIQUE KEY `uk_name_graph` (`name`, `graph_name`),
+      KEY `idx_name` (`name`),
+      KEY `idx_graph_name` (`graph_name`),
+      KEY `idx_create_time` (`create_time`),
+      KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统监控Screen配置';
 
     CREATE TABLE `metric_graph` (
           `id` int(11) NOT NULL AUTO_INCREMENT,

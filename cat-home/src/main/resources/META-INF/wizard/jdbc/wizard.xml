@@ -17,7 +17,7 @@
          <table name="t_overload"/>
          <table name="t_config_modification"/>
          <table name="t_user_define_rule"/>
-         <table name="metric_screen"/>
+         <table name="t_metric_screen"/>
          <table name="metric_graph"/>
       </group>
    </jdbc>
