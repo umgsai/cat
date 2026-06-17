@@ -366,16 +366,19 @@ data:
       KEY `idx_update_time` (`update_time`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统监控Screen配置';
 
-    CREATE TABLE `metric_graph` (
-          `id` int(11) NOT NULL AUTO_INCREMENT,
-          `graph_id` int(11) NOT NULL COMMENT '大盘ID',
-          `name` varchar(50) NOT NULL COMMENT '配置ID',
-          `content` longtext COMMENT '配置的具体内容',
-          `creation_date` datetime NOT NULL COMMENT '配置创建时间',
-          `updatetime` datetime NOT NULL COMMENT '配置修改时间',
+    CREATE TABLE `t_metric_graph` (
+          `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+          `graph_id` bigint NOT NULL DEFAULT '0' COMMENT '大盘ID',
+          `name` varchar(64) NOT NULL DEFAULT '' COMMENT '配置ID',
+          `content` longtext NOT NULL COMMENT '配置内容',
+          `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+          `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
           PRIMARY KEY (`id`),
-          UNIQUE `name` (`name`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统监控的graph配置';
+          UNIQUE KEY `uk_name` (`name`),
+          KEY `idx_graph_id` (`graph_id`),
+          KEY `idx_create_time` (`create_time`),
+          KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统监控Graph配置';
 
     CREATE TABLE `server_alarm_rule` (
           `id` int(11) NOT NULL AUTO_INCREMENT,

@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.metric.graph.dao.data.MetricGraphDO;
 
 public interface MetricGraphMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	MetricGraphDO findByPrimaryKey(@Param("id") Integer id);
+	MetricGraphDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(MetricGraphDO record);
 

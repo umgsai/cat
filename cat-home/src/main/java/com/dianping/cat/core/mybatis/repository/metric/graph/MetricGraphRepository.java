@@ -44,6 +44,10 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 	}
 
 	public MetricGraph findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public MetricGraph findByPK(long keyId) {
 		MetricGraphMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -132,6 +136,9 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 		if (record.getContent() != null) {
 			model.setContent(record.getContent());
 		}
+		if (record.getName() != null) {
+			model.setName(record.getName());
+		}
 		if (record.getCreationDate() != null) {
 			model.setCreationDate(record.getCreationDate());
 		}
@@ -147,9 +154,10 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 
 		record.setId(model.getId());
 		record.setGraphId(model.getGraphId());
+		record.setName(model.getName());
 		record.setContent(model.getContent());
-		record.setCreationDate(model.getCreationDate());
-		record.setUpdatetime(model.getUpdatetime());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		record.setNumber(model.getNumber());
 		return record;
