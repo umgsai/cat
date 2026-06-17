@@ -122,22 +122,29 @@ data:
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='业务监控实时报表';
 
 
-    CREATE TABLE `task` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `producer`      varchar(20) NOT NULL COMMENT '任务创建者ip',
-      `consumer`      varchar(20) NULL COMMENT '任务执行者ip',
-      `failure_count` tinyint(4) NOT NULL COMMENT '任务失败次数',
-      `report_name`   varchar(20) NOT NULL COMMENT '报表名称, transaction, problem...',
-      `report_domain` varchar(50) NOT NULL COMMENT '报表处理的Domain信息',  
-      `report_period` datetime NOT NULL  COMMENT '报表时间',
-      `status`        tinyint(4) NOT NULL COMMENT '执行状态: 1/todo, 2/doing, 3/done 4/failed',  
-      `task_type`     tinyint(4) NOT NULL DEFAULT '1' COMMENT '0表示小时任务，1表示天任务',
-      `creation_date` datetime NOT NULL  COMMENT '任务创建时间',
-      `start_date`    datetime NULL  COMMENT '开始时间, 这次执行开始时间',
-      `end_date`      datetime NULL  COMMENT '结束时间, 这次执行结束时间',
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `task_period_domain_name_type` (`report_period`,`report_domain`,`report_name`,`task_type`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='后台任务';
+    CREATE TABLE `t_task`
+    (
+        `id`            bigint      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+        `producer`      varchar(50) NOT NULL DEFAULT '' COMMENT '任务创建机器IP',
+        `consumer`      varchar(50) NOT NULL DEFAULT '' COMMENT '任务执行机器IP',
+        `failure_count` int         NOT NULL DEFAULT '0' COMMENT '任务失败次数',
+        `report_name`   varchar(20) NOT NULL DEFAULT '' COMMENT '报表名称, transaction, problem...',
+        `report_domain` varchar(50) NOT NULL DEFAULT '' COMMENT '报表所属Domain',
+        `report_period` datetime    NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '报表时间',
+        `status`        tinyint(4)  NOT NULL DEFAULT '1' COMMENT '执行状态, 1/todo, 2/doing, 3/done, 4/failed',
+        `task_type`     tinyint(4)  NOT NULL DEFAULT '1' COMMENT '任务类型, 0/hourly, 1/daily',
+        `create_time`   datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+        `start_time`    datetime    NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '执行开始时间',
+        `end_time`      datetime    NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '执行结束时间',
+        `update_time`   datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `uk_report_period_domain_name_type` (`report_period`,`report_domain`,`report_name`,`task_type`),
+        KEY `idx_status_consumer` (`status`,`consumer`),
+        KEY `idx_report_period` (`report_period`),
+        KEY `idx_create_time` (`create_time`),
+        KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='后台任务';
+
 
     CREATE TABLE `project` (
       `id` int(11) NOT NULL AUTO_INCREMENT,

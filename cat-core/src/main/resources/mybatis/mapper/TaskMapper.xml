@@ -11,9 +11,10 @@
         <result column="report_period" property="reportPeriod"/>
         <result column="status" property="status"/>
         <result column="task_type" property="taskType"/>
-        <result column="creation_date" property="creationDate"/>
-        <result column="start_date" property="startDate"/>
-        <result column="end_date" property="endDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="update_time" property="updateTime"/>
         <result column="count" property="count"/>
     </resultMap>
 
@@ -27,9 +28,10 @@
         report_period ,
         status ,
         task_type ,
-        creation_date ,
-        start_date ,
-        end_date
+        create_time ,
+        start_time ,
+        end_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -43,62 +45,63 @@
             <if test="reportPeriod != null">report_period = #{reportPeriod} ,</if>
             <if test="status != null">status = #{status} ,</if>
             <if test="taskType != null">task_type = #{taskType} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate} ,</if>
-            <if test="startDate != null">start_date = #{startDate} ,</if>
-            <if test="endDate != null">end_date = #{endDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="startTime != null">start_time = #{startTime} ,</if>
+            <if test="endTime != null">end_time = #{endTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.task.dao.data.TaskDO" keyProperty="id">
-        INSERT INTO task
+        INSERT INTO t_task
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from task where id = #{id}
+        from t_task where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from task
+        from t_task
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from task where id = #{id}
+        delete from t_task where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.task.dao.data.TaskDO">
-        UPDATE task
+        UPDATE t_task
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="findByStatusConsumer" resultMap="BaseResultMap">
-        select id, producer, consumer, failure_count, report_name, report_domain, report_period, status, task_type, creation_date, start_date, end_date, COUNT(*) AS count from task where status = #{record.status} <if test="record.consumer != null"> and consumer = #{record.consumer} </if> limit 1
+        select id, producer, consumer, failure_count, report_name, report_domain, report_period, status, task_type, create_time, start_time, end_time, update_time, COUNT(*) AS count from t_task where status = #{record.status} <if test="record.consumer != null"> and consumer = #{record.consumer} </if> limit 1
     </select>
 
     <update id="updateTodoToDoing">
-        UPDATE task SET consumer=#{record.consumer}, status=2, start_date=#{record.startDate} where status = 1 and id = #{record.id}
+        UPDATE t_task SET consumer=#{record.consumer}, status=2, start_time=#{record.startTime} where status = 1 and id = #{record.id}
     </update>
 
     <update id="updateDoingToDone">
-        UPDATE task SET status=3, end_date=#{record.endDate} where status = 2 and id = #{record.id}
+        UPDATE t_task SET status=3, end_time=#{record.endTime} where status = 2 and id = #{record.id}
     </update>
 
     <update id="updateFailureToDone">
-        UPDATE task SET status=3, end_date=#{record.endDate} where status =4 and id = #{record.id}
+        UPDATE t_task SET status=3, end_time=#{record.endTime} where status =4 and id = #{record.id}
     </update>
 
     <update id="updateStatusToTodo">
-        UPDATE task SET status=1, where id = #{record.id}
+        UPDATE t_task SET status=1 where id = #{record.id}
     </update>
 
     <update id="updateDoingToFail">
-        UPDATE task SET status=4, end_date=#{record.endDate}, failure_count = failure_count + 1 where status = 2 and id = #{record.id}
+        UPDATE t_task SET status=4, end_time=#{record.endTime}, failure_count = failure_count + 1 where status = 2 and id = #{record.id}
     </update>
 
 </mapper>

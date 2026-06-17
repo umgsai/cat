@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class TaskDO {
-	private Integer id;
+	private Long id;
 
 	private String producer;
 
@@ -24,15 +24,17 @@ public class TaskDO {
 
 	private Integer taskType;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Date startDate;
+	private Date startTime;
 
-	private Date endDate;
+	private Date endTime;
+
+	private Date updateTime;
 
 	private Integer count;
 
-	private Integer keyId;
+	private Long keyId;
 
 	private Integer startLimit;
 

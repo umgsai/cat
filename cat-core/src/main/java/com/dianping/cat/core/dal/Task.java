@@ -2,7 +2,7 @@ package com.dianping.cat.core.dal;
 
 
 public class Task {
-   private int m_id;
+   private long m_id;
 
    private String m_producer;
 
@@ -20,13 +20,15 @@ public class Task {
 
    private int m_taskType;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private java.util.Date m_startDate;
+   private java.util.Date m_startTime;
 
-   private java.util.Date m_endDate;
+   private java.util.Date m_endTime;
 
-   private int m_keyId;
+   private long m_keyId;
+
+   private java.util.Date m_updateTime;
 
    private int m_count;
 
@@ -46,11 +48,15 @@ public class Task {
    }
 
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public java.util.Date getEndDate() {
-      return m_endDate;
+      return m_endTime;
    }
 
    public int getEndLimit() {
@@ -61,11 +67,15 @@ public class Task {
       return m_failureCount;
    }
 
-   public int getId() {
+   public java.util.Date getEndTime() {
+      return m_endTime;
+   }
+
+   public long getId() {
       return m_id;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
    }
 
@@ -86,7 +96,7 @@ public class Task {
    }
 
    public java.util.Date getStartDate() {
-      return m_startDate;
+      return m_startTime;
    }
 
    public int getStartLimit() {
@@ -101,6 +111,14 @@ public class Task {
       return m_taskType;
    }
 
+   public java.util.Date getStartTime() {
+      return m_startTime;
+   }
+
+   public java.util.Date getUpdateTime() {
+      return m_updateTime;
+   }
+
    public Task setConsumer(String consumer) {
       m_consumer = consumer;
       return this;
@@ -112,12 +130,17 @@ public class Task {
    }
 
    public Task setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public Task setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
    public Task setEndDate(java.util.Date endDate) {
-      m_endDate = endDate;
+      m_endTime = endDate;
       return this;
    }
 
@@ -131,13 +154,18 @@ public class Task {
       return this;
    }
 
-   public Task setId(int id) {
+   public Task setEndTime(java.util.Date endTime) {
+      m_endTime = endTime;
+      return this;
+   }
+
+   public Task setId(long id) {
       m_id = id;
       m_keyId = id;
       return this;
    }
 
-   public Task setKeyId(int keyId) {
+   public Task setKeyId(long keyId) {
       m_keyId = keyId;
       return this;
    }
@@ -163,7 +191,7 @@ public class Task {
    }
 
    public Task setStartDate(java.util.Date startDate) {
-      m_startDate = startDate;
+      m_startTime = startDate;
       return this;
    }
 
@@ -182,6 +210,16 @@ public class Task {
       return this;
    }
 
+   public Task setStartTime(java.util.Date startTime) {
+      m_startTime = startTime;
+      return this;
+   }
+
+   public Task setUpdateTime(java.util.Date updateTime) {
+      m_updateTime = updateTime;
+      return this;
+   }
+
    @Override
    public String toString() {
       StringBuilder sb = new StringBuilder(1024);
@@ -189,8 +227,8 @@ public class Task {
       sb.append("Task[");
       sb.append("consumer: ").append(m_consumer);
       sb.append(", count: ").append(m_count);
-      sb.append(", creation-date: ").append(m_creationDate);
-      sb.append(", end-date: ").append(m_endDate);
+      sb.append(", create-time: ").append(m_createTime);
+      sb.append(", end-time: ").append(m_endTime);
       sb.append(", end-limit: ").append(m_endLimit);
       sb.append(", failure-count: ").append(m_failureCount);
       sb.append(", id: ").append(m_id);
@@ -199,10 +237,11 @@ public class Task {
       sb.append(", report-domain: ").append(m_reportDomain);
       sb.append(", report-name: ").append(m_reportName);
       sb.append(", report-period: ").append(m_reportPeriod);
-      sb.append(", start-date: ").append(m_startDate);
+      sb.append(", start-time: ").append(m_startTime);
       sb.append(", start-limit: ").append(m_startLimit);
       sb.append(", status: ").append(m_status);
       sb.append(", task-type: ").append(m_taskType);
+      sb.append(", update-time: ").append(m_updateTime);
       sb.append("]");
       return sb.toString();
    }

@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.task.dao.data.TaskDO;
 
 public interface TaskMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	TaskDO findByPrimaryKey(@Param("id") Integer id);
+	TaskDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(TaskDO record);
 

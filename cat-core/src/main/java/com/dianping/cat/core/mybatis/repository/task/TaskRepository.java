@@ -32,6 +32,10 @@ public class TaskRepository {
 	}
 
 	public Task findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public Task findByPK(long keyId) {
 		TaskMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
@@ -158,14 +162,17 @@ public class TaskRepository {
 		if (record.getTaskType() != null) {
 			model.setTaskType(record.getTaskType());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
 		}
-		if (record.getStartDate() != null) {
-			model.setStartDate(record.getStartDate());
+		if (record.getStartTime() != null) {
+			model.setStartTime(record.getStartTime());
 		}
-		if (record.getEndDate() != null) {
-			model.setEndDate(record.getEndDate());
+		if (record.getEndTime() != null) {
+			model.setEndTime(record.getEndTime());
+		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
 		}
 		if (record.getCount() != null) {
 			model.setCount(record.getCount());
@@ -186,9 +193,10 @@ public class TaskRepository {
 		record.setReportPeriod(model.getReportPeriod());
 		record.setStatus(model.getStatus());
 		record.setTaskType(model.getTaskType());
-		record.setCreationDate(model.getCreationDate());
-		record.setStartDate(model.getStartDate());
-		record.setEndDate(model.getEndDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setStartTime(model.getStartTime());
+		record.setEndTime(model.getEndTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		record.setStartLimit(model.getStartLimit());
 		record.setEndLimit(model.getEndLimit());
