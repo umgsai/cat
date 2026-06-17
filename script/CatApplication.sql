@@ -412,17 +412,21 @@ CREATE TABLE `t_metric_graph` (
       KEY `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统监控Graph配置';
 
-CREATE TABLE `server_alarm_rule` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `category` varchar(50) NOT NULL COMMENT '监控分类',
-      `endPoint` varchar(200) NOT NULL COMMENT '监控对象ID',
-      `measurement` varchar(200) NOT NULL COMMENT '监控指标',
-      `tags` varchar(200) NOT NULL DEFAULT '' COMMENT '监控指标标签',
-      `content` longtext NOT NULL COMMENT '配置的具体内容',
-      `type` varchar(20) NOT NULL DEFAULT '' COMMENT '数据聚合方式',
-      `creator` varchar(100) DEFAULT '' COMMENT '创建人',
-      `creation_date` datetime NOT NULL COMMENT '配置创建时间',
-      `updatetime` datetime NOT NULL COMMENT '配置修改时间',
+CREATE TABLE `t_server_alarm_rule` (
+      `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+      `category` varchar(64) NOT NULL DEFAULT '' COMMENT '监控分类',
+      `endpoint` varchar(256) NOT NULL DEFAULT '' COMMENT '监控对象ID',
+      `measurement` varchar(256) NOT NULL DEFAULT '' COMMENT '监控指标',
+      `tags` varchar(512) NOT NULL DEFAULT '' COMMENT '监控指标标签',
+      `content` longtext NOT NULL COMMENT '配置内容',
+      `type` varchar(32) NOT NULL DEFAULT '' COMMENT '数据聚合方式',
+      `creator` varchar(128) NOT NULL DEFAULT '' COMMENT '创建人',
+      `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+      `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
       PRIMARY KEY (`id`),
-      KEY `updatetime` (`updatetime`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统告警的配置';
+      KEY `idx_category` (`category`),
+      KEY `idx_type` (`type`),
+      KEY `idx_category_type` (`category`,`type`),
+      KEY `idx_create_time` (`create_time`),
+      KEY `idx_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统告警规则配置';

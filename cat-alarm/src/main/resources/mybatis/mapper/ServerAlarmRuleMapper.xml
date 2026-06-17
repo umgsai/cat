@@ -4,74 +4,76 @@
     <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.server.alarm.rule.dao.data.ServerAlarmRuleDO">
         <result column="id" property="id"/>
         <result column="category" property="category"/>
-        <result column="endPoint" property="endPoint"/>
+        <result column="endpoint" property="endPoint"/>
         <result column="measurement" property="measurement"/>
         <result column="tags" property="tags"/>
         <result column="content" property="content"/>
         <result column="type" property="type"/>
         <result column="creator" property="creator"/>
-        <result column="creation_date" property="creationDate"/>
-        <result column="updatetime" property="updatetime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id ,
         category ,
-        endPoint ,
+        endpoint ,
         measurement ,
         tags ,
         content ,
         type ,
         creator ,
-        creation_date ,
-        updatetime
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
         <set>
             <if test="id != null">id = #{id} ,</if>
             <if test="category != null">category = #{category} ,</if>
-            <if test="endPoint != null">endPoint = #{endPoint} ,</if>
+            <if test="endPoint != null">endpoint = #{endPoint} ,</if>
             <if test="measurement != null">measurement = #{measurement} ,</if>
             <if test="tags != null">tags = #{tags} ,</if>
             <if test="content != null">content = #{content} ,</if>
             <if test="type != null">type = #{type} ,</if>
             <if test="creator != null">creator = #{creator} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate} ,</if>
-            <if test="updatetime != null">updatetime = #{updatetime}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.server.alarm.rule.dao.data.ServerAlarmRuleDO" keyProperty="id">
-        INSERT INTO server_alarm_rule
+        INSERT INTO t_server_alarm_rule
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from server_alarm_rule where id = #{id}
+        from t_server_alarm_rule where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from server_alarm_rule
+        from t_server_alarm_rule
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from server_alarm_rule where id = #{id}
+        delete from t_server_alarm_rule where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.server.alarm.rule.dao.data.ServerAlarmRuleDO">
-        UPDATE server_alarm_rule
+        UPDATE t_server_alarm_rule
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="findAll" resultMap="BaseResultMap">
-        select id, category, endPoint, measurement, tags, content, type, creator, creation_date, updatetime from server_alarm_rule
+        select
+        <include refid="Base_Column_List"/>
+        from t_server_alarm_rule
     </select>
 
 </mapper>

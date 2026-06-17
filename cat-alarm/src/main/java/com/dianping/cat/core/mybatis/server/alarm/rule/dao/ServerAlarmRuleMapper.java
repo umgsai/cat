@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.server.alarm.rule.dao.data.ServerAlarmRuleDO;
 
 public interface ServerAlarmRuleMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	ServerAlarmRuleDO findByPrimaryKey(@Param("id") Integer id);
+	ServerAlarmRuleDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(ServerAlarmRuleDO record);
 

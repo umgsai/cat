@@ -11,7 +11,7 @@
       <group name="alarm" package="com.dianping.cat.alarm">
          <table name="alert"/>
          <table name="t_user_define_rule"/>
-         <table name="server_alarm_rule"/>
+         <table name="t_server_alarm_rule"/>
          <table name="app_alarm_rule"/>
       </group>
    </jdbc>

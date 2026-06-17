@@ -47,6 +47,10 @@ public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<Ser
 	}
 
 	public ServerAlarmRule findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public ServerAlarmRule findByPK(long keyId) {
 		ServerAlarmRuleMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -139,8 +143,8 @@ public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<Ser
 		record.setContent(model.getContent());
 		record.setType(model.getType());
 		record.setCreator(model.getCreator());
-		record.setCreationDate(model.getCreationDate());
-		record.setUpdatetime(model.getUpdatetime());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		return record;
 	}

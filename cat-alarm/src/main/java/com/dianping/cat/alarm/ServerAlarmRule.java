@@ -2,7 +2,7 @@ package com.dianping.cat.alarm;
 
 
 public class ServerAlarmRule {
-   private int m_id;
+   private long m_id;
 
    private String m_category;
 
@@ -18,11 +18,11 @@ public class ServerAlarmRule {
 
    private String m_creator;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private java.util.Date m_updatetime;
+   private java.util.Date m_updateTime;
 
-   private int m_keyId;
+   private long m_keyId;
    public void afterLoad() {
       m_keyId = m_id;
    }
@@ -36,7 +36,11 @@ public class ServerAlarmRule {
    }
 
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public String getCreator() {
@@ -47,11 +51,11 @@ public class ServerAlarmRule {
       return m_endPoint;
    }
 
-   public int getId() {
+   public long getId() {
       return m_id;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
    }
 
@@ -68,7 +72,11 @@ public class ServerAlarmRule {
    }
 
    public java.util.Date getUpdatetime() {
-      return m_updatetime;
+      return m_updateTime;
+   }
+
+   public java.util.Date getUpdateTime() {
+      return m_updateTime;
    }
 
    public ServerAlarmRule setCategory(String category) {
@@ -82,7 +90,12 @@ public class ServerAlarmRule {
    }
 
    public ServerAlarmRule setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public ServerAlarmRule setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
@@ -102,7 +115,18 @@ public class ServerAlarmRule {
       return this;
    }
 
+   public ServerAlarmRule setId(long id) {
+      m_id = id;
+      m_keyId = id;
+      return this;
+   }
+
    public ServerAlarmRule setKeyId(int keyId) {
+      m_keyId = keyId;
+      return this;
+   }
+
+   public ServerAlarmRule setKeyId(long keyId) {
       m_keyId = keyId;
       return this;
    }
@@ -123,7 +147,12 @@ public class ServerAlarmRule {
    }
 
    public ServerAlarmRule setUpdatetime(java.util.Date updatetime) {
-      m_updatetime = updatetime;
+      m_updateTime = updatetime;
+      return this;
+   }
+
+   public ServerAlarmRule setUpdateTime(java.util.Date updateTime) {
+      m_updateTime = updateTime;
       return this;
    }
 
@@ -134,7 +163,7 @@ public class ServerAlarmRule {
       sb.append("ServerAlarmRule[");
       sb.append("category: ").append(m_category);
       sb.append(", content: ").append(m_content);
-      sb.append(", creation-date: ").append(m_creationDate);
+      sb.append(", create-time: ").append(m_createTime);
       sb.append(", creator: ").append(m_creator);
       sb.append(", end-point: ").append(m_endPoint);
       sb.append(", id: ").append(m_id);
@@ -142,7 +171,7 @@ public class ServerAlarmRule {
       sb.append(", measurement: ").append(m_measurement);
       sb.append(", tags: ").append(m_tags);
       sb.append(", type: ").append(m_type);
-      sb.append(", updatetime: ").append(m_updatetime);
+      sb.append(", update-time: ").append(m_updateTime);
       sb.append("]");
       return sb.toString();
    }
