@@ -6,7 +6,8 @@
         <result column="name" property="name"/>
         <result column="domain" property="domain"/>
         <result column="content" property="content"/>
-        <result column="updatetime" property="updatetime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -14,7 +15,8 @@
         name ,
         domain ,
         content ,
-        updatetime
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -23,48 +25,53 @@
             <if test="name != null">name = #{name} ,</if>
             <if test="domain != null">domain = #{domain} ,</if>
             <if test="content != null">content = #{content} ,</if>
-            <if test="updatetime != null">updatetime = #{updatetime}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.business.config.dao.data.BusinessConfigDO" keyProperty="id">
-        INSERT INTO business_config
+        INSERT INTO t_business_config
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from business_config where id = #{id}
+        from t_business_config where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from business_config
+        from t_business_config
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from business_config where id = #{id}
+        delete from t_business_config where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.business.config.dao.data.BusinessConfigDO">
-        UPDATE business_config
+        UPDATE t_business_config
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="findByNameDomain" resultMap="BaseResultMap">
-        select id, name, domain, content, updatetime from business_config where name = #{record.name} and domain = #{record.domain}
+        select
+        <include refid="Base_Column_List"/>
+        from t_business_config where name = #{record.name} and domain = #{record.domain}
     </select>
 
     <select id="findByName" resultMap="BaseResultMap">
-        select id, name, domain, content, updatetime from business_config where name = #{record.name}
+        select
+        <include refid="Base_Column_List"/>
+        from t_business_config where name = #{record.name}
     </select>
 
     <update id="updateBaseConfigByDomain">
-        UPDATE business_config SET content=#{record.content}, updatetime=NOW() where domain = #{record.domain} and name = #{record.name}
+        UPDATE t_business_config SET content=#{record.content}, update_time=NOW() where domain = #{record.domain} and name = #{record.name}
     </update>
 
 </mapper>

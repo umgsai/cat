@@ -333,16 +333,20 @@ data:
       KEY `idx_update_time` (`update_time`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户自定义规则';
 
-    CREATE TABLE `business_config` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `name` varchar(20) NOT NULL DEFAULT '' COMMENT '配置名称',
-      `domain` varchar(50) NOT NULL DEFAULT '' COMMENT '项目',
-      `content` longtext COMMENT '配置内容',
-      `updatetime` datetime NOT NULL,
+    CREATE TABLE `t_business_config` (
+      `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+      `name` varchar(64) NOT NULL DEFAULT '' COMMENT '配置名称',
+      `domain` varchar(128) NOT NULL DEFAULT '' COMMENT '项目',
+      `content` longtext NOT NULL COMMENT '配置内容',
+      `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+      `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
       PRIMARY KEY (`id`),
-      KEY `updatetime` (`updatetime`),
-      KEY `name_domain` (`name`,`domain`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+      UNIQUE KEY `uk_name_domain` (`name`, `domain`),
+      KEY `idx_name` (`name`),
+      KEY `idx_domain` (`domain`),
+      KEY `idx_create_time` (`create_time`),
+      KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务配置';
 
     CREATE TABLE `metric_screen` (
       `id` int(11) NOT NULL AUTO_INCREMENT,

@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.business.config.dao.data.BusinessConfigDO;
 
 public interface BusinessConfigMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	BusinessConfigDO findByPrimaryKey(@Param("id") Integer id);
+	BusinessConfigDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(BusinessConfigDO record);
 

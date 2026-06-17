@@ -44,7 +44,7 @@ public class BusinessTagConfigManager {
 
 	private BusinessConfigRepository m_configDao;
 
-	private int m_configId;
+	private long m_configId;
 
 	private BusinessTagConfig m_tagConfig = new BusinessTagConfig();
 

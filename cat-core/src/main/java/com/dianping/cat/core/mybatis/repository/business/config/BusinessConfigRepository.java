@@ -1,10 +1,8 @@
 package com.dianping.cat.core.mybatis.repository.business.config;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -13,15 +11,17 @@ import org.springframework.transaction.support.TransactionTemplate;
 import com.dianping.cat.core.config.BusinessConfig;
 import com.dianping.cat.core.mybatis.business.config.dao.BusinessConfigMapper;
 import com.dianping.cat.core.mybatis.business.config.dao.data.BusinessConfigDO;
+import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 
-public class BusinessConfigRepository {
+public class BusinessConfigRepository extends SpringBackedRepositorySupport<BusinessConfigMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessConfigRepository.class);
 
-	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
+	private static final String MAPPER_RESOURCE = "mybatis/mapper/BusinessConfigMapper.xml";
 
-	private SqlSessionTemplate m_sqlSessionTemplate;
-
-	private TransactionTemplate m_transactionTemplate;
+	public BusinessConfigRepository() {
+		super(BusinessConfigMapper.class, MAPPER_RESOURCE,
+				"BusinessConfigRepository is using Spring managed BusinessConfigMapper.");
+	}
 
 	public BusinessConfig createLocal() {
 		return new BusinessConfig();
@@ -30,11 +30,11 @@ public class BusinessConfigRepository {
 	public int deleteByPK(BusinessConfig proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
+		return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
 	}
 
 	public List<BusinessConfig> findByName(String name) {
-		BusinessConfigMapper mapper = springMapper();
+		BusinessConfigMapper mapper = springMapper(LOGGER);
 		BusinessConfigDO record = new BusinessConfigDO();
 
 		record.setName(name);
@@ -42,13 +42,17 @@ public class BusinessConfigRepository {
 	}
 
 	public BusinessConfig findByPK(int keyId) {
-		BusinessConfigMapper mapper = springMapper();
+		return findByPK((long) keyId);
+	}
+
+	public BusinessConfig findByPK(long keyId) {
+		BusinessConfigMapper mapper = springMapper(LOGGER);
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
 	public BusinessConfig findByNameDomain(String name, String domain) {
-		BusinessConfigMapper mapper = springMapper();
+		BusinessConfigMapper mapper = springMapper(LOGGER);
 		BusinessConfigDO record = new BusinessConfigDO();
 
 		record.setName(name);
@@ -62,7 +66,7 @@ public class BusinessConfigRepository {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		BusinessConfigDO record = toRecord(proto);
-		int count = transactionTemplate.execute(status -> springMapper().insert(record));
+		int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
 
 		proto.setId(record.getId());
 		proto.setKeyId(record.getId());
@@ -72,39 +76,13 @@ public class BusinessConfigRepository {
 	public int updateByPK(BusinessConfig proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
+		return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
 	}
 
 	public int updateBaseConfigByDomain(BusinessConfig proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateBaseConfigByDomain(toRecord(proto)));
-	}
-
-	private BusinessConfigMapper springMapper() {
-		if (m_sqlSessionTemplate == null) {
-			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for BusinessConfigMapper.");
-		}
-		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
-			LOGGER.info("BusinessConfigRepository is using Spring managed BusinessConfigMapper.");
-		}
-
-		return m_sqlSessionTemplate.getMapper(BusinessConfigMapper.class);
-	}
-
-	private TransactionTemplate springTransactionTemplate() {
-		if (m_transactionTemplate == null) {
-			throw new IllegalStateException("Spring TransactionTemplate is not configured for BusinessConfigMapper.");
-		}
-		return m_transactionTemplate;
-	}
-
-	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		m_sqlSessionTemplate = sqlSessionTemplate;
-	}
-
-	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-		m_transactionTemplate = transactionTemplate;
+		return transactionTemplate.execute(status -> springMapper(LOGGER).updateBaseConfigByDomain(toRecord(proto)));
 	}
 
 	private BusinessConfig requireFound(BusinessConfigDO record, String field, String value) {
@@ -133,6 +111,9 @@ public class BusinessConfigRepository {
 		if (record.getUpdatetime() != null) {
 			model.setUpdatetime(record.getUpdatetime());
 		}
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
+		}
 		model.afterLoad();
 		return model;
 	}
@@ -144,7 +125,8 @@ public class BusinessConfigRepository {
 		record.setName(model.getName());
 		record.setDomain(model.getDomain());
 		record.setContent(model.getContent());
-		record.setUpdatetime(model.getUpdatetime());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		return record;
 	}
