@@ -65,13 +65,9 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 					double contentLength = content.getContentLength();
 
 					if (contentLength >= CapacityUpdater.CAPACITY) {
-						if (reportId > Integer.MAX_VALUE) {
-							LOGGER.warn("Weekly report id exceeds overload table capacity, reportId={}.", reportId);
-							continue;
-						}
 						Overload overload = m_overloadDao.createLocal();
 
-						overload.setReportId((int) reportId);
+						overload.setReportId(reportId);
 						overload.setReportSize(contentLength);
 						overload.setReportType(CapacityUpdater.WEEKLY_TYPE);
 
@@ -100,7 +96,7 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 				maxId = reports.get(size - 1).getReportId();
 			}
 		}
-		m_manager.updateWeeklyStatus((int) Math.min(maxId, Integer.MAX_VALUE));
+		m_manager.updateWeeklyStatus(maxId);
 		LOGGER.info("Finished weekly report capacity scan, finalMaxId={}.", maxId);
 	}
 

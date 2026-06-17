@@ -7,7 +7,8 @@
         <result column="report_type" property="reportType"/>
         <result column="report_size" property="reportSize"/>
         <result column="period" property="period"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
         <result column="max_id" property="maxId"/>
         <result column="count" property="count"/>
     </resultMap>
@@ -18,7 +19,8 @@
         report_type ,
         report_size ,
         period ,
-        creation_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -28,48 +30,51 @@
             <if test="reportType != null">report_type = #{reportType} ,</if>
             <if test="reportSize != null">report_size = #{reportSize} ,</if>
             <if test="period != null">period = #{period} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.overload.dao.data.OverloadDO" keyProperty="id">
-        INSERT INTO overload
+        INSERT INTO t_overload
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from overload where id = #{id}
+        from t_overload where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from overload
+        from t_overload
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from overload where id = #{id}
+        delete from t_overload where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.overload.dao.data.OverloadDO">
-        UPDATE overload
+        UPDATE t_overload
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="findMaxIdByType" resultMap="BaseResultMap">
-        select id, report_id, report_type, report_size, period, creation_date, max(report_id) AS max_id, count(*) AS count from overload where report_type = #{record.type}
+        select max(report_id) AS max_id, count(*) AS count from t_overload where report_type = #{record.type}
     </select>
 
     <select id="findCount" resultMap="BaseResultMap">
-        select id, report_id, report_type, report_size, period, creation_date, max(report_id) AS max_id, count(*) AS count from overload
+        select max(report_id) AS max_id, count(*) AS count from t_overload
     </select>
 
     <select id="findIdAndSizeByDuration" resultMap="BaseResultMap">
-        select id, report_id, report_type, report_size, period, creation_date, max(report_id) AS max_id, count(*) AS count from overload where period >= #{record.startTime} and period &lt;= #{record.endTime} order by period DESC, report_type ASC
+        select
+        <include refid="Base_Column_List"/>
+        from t_overload where period >= #{record.startTime} and period &lt;= #{record.endTime} order by period DESC, report_type ASC
     </select>
 
 </mapper>

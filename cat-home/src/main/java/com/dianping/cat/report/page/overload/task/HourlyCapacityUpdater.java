@@ -65,13 +65,9 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 					double contentLength = content.getContentLength();
 
 					if (contentLength >= CapacityUpdater.CAPACITY) {
-						if (reportId > Integer.MAX_VALUE) {
-							LOGGER.warn("Hourly report id exceeds overload table capacity, reportId={}.", reportId);
-							continue;
-						}
 						Overload overload = m_overloadDao.createLocal();
 
-						overload.setReportId((int) reportId);
+						overload.setReportId(reportId);
 						overload.setReportSize(contentLength);
 						overload.setReportType(CapacityUpdater.HOURLY_TYPE);
 
@@ -102,7 +98,7 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 				maxId = reports.get(size - 1).getReportId();
 			}
 		}
-		m_manager.updateHourlyStatus((int) Math.min(maxId, Integer.MAX_VALUE));
+		m_manager.updateHourlyStatus(maxId);
 		LOGGER.info("Finished hourly report capacity scan, finalMaxId={}.", maxId);
 	}
 

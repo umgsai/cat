@@ -99,7 +99,7 @@ public class TableCapacityService {
 
 			for (Overload overload : overloads) {
 				try {
-					int reportId = overload.getReportId();
+					long reportId = overload.getReportId();
 					int reportType = overload.getReportType();
 					double reportSize = overload.getReportSize();
 					Object report = null;

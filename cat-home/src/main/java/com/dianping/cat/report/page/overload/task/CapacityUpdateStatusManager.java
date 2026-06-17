@@ -35,13 +35,13 @@ public class CapacityUpdateStatusManager {
 
 	private OverloadRepository m_overloadDao;
 
-	private int m_hourlyStatus;
+	private long m_hourlyStatus;
 
-	private int m_dailyStatus;
+	private long m_dailyStatus;
 
-	private int m_weeklyStatus;
+	private long m_weeklyStatus;
 
-	private int m_monthlyStatus;
+	private long m_monthlyStatus;
 
 	private long m_configId;
 
@@ -64,25 +64,25 @@ public class CapacityUpdateStatusManager {
 	}
 
 	private void extractStatus(String content) {
-		m_hourlyStatus = Integer.parseInt(content.split("Hourly:")[1].split(";")[0]);
-		m_dailyStatus = Integer.parseInt(content.split("Daily:")[1].split(";")[0]);
-		m_weeklyStatus = Integer.parseInt(content.split("Weekly:")[1].split(";")[0]);
-		m_monthlyStatus = Integer.parseInt(content.split("Monthly:")[1].split(";")[0]);
+		m_hourlyStatus = Long.parseLong(content.split("Hourly:")[1].split(";")[0]);
+		m_dailyStatus = Long.parseLong(content.split("Daily:")[1].split(";")[0]);
+		m_weeklyStatus = Long.parseLong(content.split("Weekly:")[1].split(";")[0]);
+		m_monthlyStatus = Long.parseLong(content.split("Monthly:")[1].split(";")[0]);
 	}
 
-	public int getDailyStatus() {
+	public long getDailyStatus() {
 		return m_dailyStatus;
 	}
 
-	public int getHourlyStatus() {
+	public long getHourlyStatus() {
 		return m_hourlyStatus;
 	}
 
-	public int getMonthlyStatus() {
+	public long getMonthlyStatus() {
 		return m_monthlyStatus;
 	}
 
-	public int getWeeklyStatus() {
+	public long getWeeklyStatus() {
 		return m_weeklyStatus;
 	}
 
@@ -138,22 +138,22 @@ public class CapacityUpdateStatusManager {
 		return true;
 	}
 
-	public void updateDailyStatus(int dailyStatus) {
+	public void updateDailyStatus(long dailyStatus) {
 		this.m_dailyStatus = dailyStatus;
 		storeConfig();
 	}
 
-	public void updateHourlyStatus(int hourlyStatus) {
+	public void updateHourlyStatus(long hourlyStatus) {
 		this.m_hourlyStatus = hourlyStatus;
 		storeConfig();
 	}
 
-	public void updateMonthlyStatus(int monthlyStatus) {
+	public void updateMonthlyStatus(long monthlyStatus) {
 		this.m_monthlyStatus = monthlyStatus;
 		storeConfig();
 	}
 
-	public void updateWeeklyStatus(int weeklyStatus) {
+	public void updateWeeklyStatus(long weeklyStatus) {
 		this.m_weeklyStatus = weeklyStatus;
 		storeConfig();
 	}

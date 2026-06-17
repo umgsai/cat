@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.overload.dao.data.OverloadDO;
 
 public interface OverloadMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	OverloadDO findByPrimaryKey(@Param("id") Integer id);
+	OverloadDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(OverloadDO record);
 

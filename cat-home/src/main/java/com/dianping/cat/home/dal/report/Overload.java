@@ -2,9 +2,9 @@ package com.dianping.cat.home.dal.report;
 
 
 public class Overload {
-   private int m_id;
+   private long m_id;
 
-   private int m_reportId;
+   private long m_reportId;
 
    private int m_reportType;
 
@@ -12,9 +12,11 @@ public class Overload {
 
    private java.util.Date m_period;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private int m_keyId;
+   private java.util.Date m_updateTime;
+
+   private long m_keyId;
 
    private java.util.Date m_startTime;
 
@@ -22,34 +24,38 @@ public class Overload {
 
    private int m_type;
 
-   private int m_maxId;
+   private long m_maxId;
 
-   private int m_count;
+   private long m_count;
    public void afterLoad() {
       m_keyId = m_id;
    }
 
-   public int getCount() {
+   public long getCount() {
       return m_count;
    }
 
+   public java.util.Date getCreateTime() {
+      return m_createTime;
+   }
+
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
    }
 
    public java.util.Date getEndTime() {
       return m_endTime;
    }
 
-   public int getId() {
+   public long getId() {
       return m_id;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
    }
 
-   public int getMaxId() {
+   public long getMaxId() {
       return m_maxId;
    }
 
@@ -57,7 +63,7 @@ public class Overload {
       return m_period;
    }
 
-   public int getReportId() {
+   public long getReportId() {
       return m_reportId;
    }
 
@@ -77,13 +83,27 @@ public class Overload {
       return m_type;
    }
 
+   public java.util.Date getUpdateTime() {
+      return m_updateTime;
+   }
+
    public Overload setCount(int count) {
       m_count = count;
       return this;
    }
 
+   public Overload setCount(long count) {
+      m_count = count;
+      return this;
+   }
+
+   public Overload setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
+      return this;
+   }
+
    public Overload setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
       return this;
    }
 
@@ -98,12 +118,28 @@ public class Overload {
       return this;
    }
 
+   public Overload setId(long id) {
+      m_id = id;
+      m_keyId = id;
+      return this;
+   }
+
    public Overload setKeyId(int keyId) {
       m_keyId = keyId;
       return this;
    }
 
+   public Overload setKeyId(long keyId) {
+      m_keyId = keyId;
+      return this;
+   }
+
    public Overload setMaxId(int maxId) {
+      m_maxId = maxId;
+      return this;
+   }
+
+   public Overload setMaxId(long maxId) {
       m_maxId = maxId;
       return this;
    }
@@ -114,6 +150,11 @@ public class Overload {
    }
 
    public Overload setReportId(int reportId) {
+      m_reportId = reportId;
+      return this;
+   }
+
+   public Overload setReportId(long reportId) {
       m_reportId = reportId;
       return this;
    }
@@ -138,13 +179,18 @@ public class Overload {
       return this;
    }
 
+   public Overload setUpdateTime(java.util.Date updateTime) {
+      m_updateTime = updateTime;
+      return this;
+   }
+
    @Override
    public String toString() {
       StringBuilder sb = new StringBuilder(1024);
 
       sb.append("Overload[");
       sb.append("count: ").append(m_count);
-      sb.append(", creation-date: ").append(m_creationDate);
+      sb.append(", create-time: ").append(m_createTime);
       sb.append(", end-time: ").append(m_endTime);
       sb.append(", id: ").append(m_id);
       sb.append(", key-id: ").append(m_keyId);
@@ -155,6 +201,7 @@ public class Overload {
       sb.append(", report-type: ").append(m_reportType);
       sb.append(", start-time: ").append(m_startTime);
       sb.append(", type: ").append(m_type);
+      sb.append(", update-time: ").append(m_updateTime);
       sb.append("]");
       return sb.toString();
    }

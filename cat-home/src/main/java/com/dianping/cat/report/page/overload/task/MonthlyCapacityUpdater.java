@@ -65,13 +65,9 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 					double contentLength = content.getContentLength();
 
 					if (contentLength >= CapacityUpdater.CAPACITY) {
-						if (reportId > Integer.MAX_VALUE) {
-							LOGGER.warn("Monthly report id exceeds overload table capacity, reportId={}.", reportId);
-							continue;
-						}
 						Overload overload = m_overloadDao.createLocal();
 
-						overload.setReportId((int) reportId);
+						overload.setReportId(reportId);
 						overload.setReportSize(contentLength);
 						overload.setReportType(CapacityUpdater.MONTHLY_TYPE);
 
@@ -100,7 +96,7 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 				maxId = reports.get(size - 1).getReportId();
 			}
 		}
-		m_manager.updateMonthlyStatus((int) Math.min(maxId, Integer.MAX_VALUE));
+		m_manager.updateMonthlyStatus(maxId);
 		LOGGER.info("Finished monthly report capacity scan, finalMaxId={}.", maxId);
 	}
 

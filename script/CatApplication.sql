@@ -321,16 +321,21 @@ CREATE TABLE `t_operation` (
   KEY `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户操作日志';
 
-CREATE TABLE `overload` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增长ID',
-  `report_id` int(11) NOT NULL COMMENT '报告id',
-  `report_type` tinyint(4) NOT NULL COMMENT '报告类型 1:hourly 2:daily 3:weekly 4:monthly',
-  `report_size` double NOT NULL COMMENT '报告大小 单位MB',
-  `period` datetime NOT NULL COMMENT '报表时间',
-  `creation_date` datetime NOT NULL COMMENT '创建时间',
+CREATE TABLE `t_overload` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `report_id` bigint NOT NULL DEFAULT '0' COMMENT '报表ID',
+  `report_type` tinyint NOT NULL DEFAULT '0' COMMENT '报表类型 1=hourly 2=daily 3=weekly 4=monthly',
+  `report_size` double NOT NULL DEFAULT '0' COMMENT '报表大小，单位MB',
+  `period` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '报表时间',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  KEY `period` (`period`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='过大容量表';
+  KEY `idx_period` (`period`),
+  KEY `idx_report_type_report_id` (`report_type`, `report_id`),
+  KEY `idx_period_report_type` (`period`, `report_type`),
+  KEY `idx_create_time` (`create_time`),
+  KEY `idx_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='过大容量报表';
 
 CREATE TABLE `config_modification` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增长ID',

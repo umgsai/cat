@@ -48,6 +48,10 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 	}
 
 	public Overload findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public Overload findByPK(long keyId) {
 		OverloadMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -144,6 +148,9 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 		if (record.getCreationDate() != null) {
 			model.setCreationDate(record.getCreationDate());
 		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
+		}
 		if (record.getMaxId() != null) {
 			model.setMaxId(record.getMaxId());
 		}
@@ -162,7 +169,8 @@ public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMa
 		record.setReportType(model.getReportType());
 		record.setReportSize(model.getReportSize());
 		record.setPeriod(model.getPeriod());
-		record.setCreationDate(model.getCreationDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		record.setStartTime(model.getStartTime());
 		record.setEndTime(model.getEndTime());
