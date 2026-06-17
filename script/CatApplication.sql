@@ -264,24 +264,30 @@ CREATE TABLE `t_alteration`
     `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    KEY `idx_date_domain_host` (`change_time`, `domain`, `hostname`),
+    KEY `ind_date_domain_host` (`change_time`, `domain`, `hostname`),
     KEY `idx_type_change_time` (`type`, `change_time`),
     KEY `idx_create_time` (`create_time`),
     KEY `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='变更记录';
 
-CREATE TABLE `alert` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增长ID',
-  `domain` varchar(128) NOT NULL COMMENT '告警项目',
-  `alert_time` datetime NOT NULL COMMENT '告警时间',
-  `category` varchar(64) NOT NULL COMMENT '告警分类:network/business/system/exception -alert',
-  `type` varchar(64) NOT NULL COMMENT '告警类型:error/warning',
-  `content` longtext NOT NULL COMMENT '告警内容',
-  `metric` varchar(128) NOT NULL COMMENT '告警指标',
-  `creation_date` datetime NOT NULL COMMENT '数据插入时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_alert_time_category_domain` (`alert_time`,`category`,`domain`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='存储告警信息';
+CREATE TABLE `t_alert`
+(
+    `id`          bigint       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `domain`      varchar(128) NOT NULL DEFAULT '' COMMENT '告警项目',
+    `alert_time`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '告警时间',
+    `category`    varchar(64)  NOT NULL DEFAULT '' COMMENT '告警分类',
+    `type`        varchar(64)  NOT NULL DEFAULT '' COMMENT '告警类型',
+    `content`     longtext     NOT NULL COMMENT '告警内容',
+    `metric`      varchar(256) NOT NULL DEFAULT '' COMMENT '告警指标',
+    `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_alert_time_category_domain` (`alert_time`, `category`, `domain`),
+    KEY `idx_domain_alert_time` (`domain`, `alert_time`),
+    KEY `idx_category_alert_time` (`category`, `alert_time`),
+    KEY `idx_create_time` (`create_time`),
+    KEY `idx_update_time` (`update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='告警记录';
 
 CREATE TABLE `alert_summary` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增长ID',

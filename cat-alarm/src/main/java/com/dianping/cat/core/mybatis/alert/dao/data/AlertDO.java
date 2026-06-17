@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class AlertDO {
-	private Integer id;
+	private Long id;
 
 	private String domain;
 
@@ -20,9 +20,11 @@ public class AlertDO {
 
 	private String metric;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Integer keyId;
+	private Date updateTime;
+
+	private Long keyId;
 
 	private Date startTime;
 

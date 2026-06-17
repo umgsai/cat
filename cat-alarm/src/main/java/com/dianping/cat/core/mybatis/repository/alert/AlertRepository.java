@@ -95,6 +95,10 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 	}
 
 	public Alert findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public Alert findByPK(long keyId) {
 		AlertMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -163,8 +167,11 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 		if (record.getMetric() != null) {
 			model.setMetric(record.getMetric());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
+		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
 		}
 		model.afterLoad();
 		return model;
@@ -180,7 +187,8 @@ public class AlertRepository extends SpringBackedRepositorySupport<AlertMapper> 
 		record.setType(model.getType());
 		record.setContent(model.getContent());
 		record.setMetric(model.getMetric());
-		record.setCreationDate(model.getCreationDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		record.setStartTime(model.getStartTime());
 		record.setEndTime(model.getEndTime());

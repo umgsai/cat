@@ -9,7 +9,8 @@
         <result column="type" property="type"/>
         <result column="content" property="content"/>
         <result column="metric" property="metric"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -20,7 +21,8 @@
         type ,
         content ,
         metric ,
-        creation_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -32,52 +34,53 @@
             <if test="type != null">type = #{type} ,</if>
             <if test="content != null">content = #{content} ,</if>
             <if test="metric != null">metric = #{metric} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.alert.dao.data.AlertDO" keyProperty="id">
-        INSERT INTO alert
+        INSERT INTO t_alert
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from alert where id = #{id}
+        from t_alert where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from alert
+        from t_alert
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from alert where id = #{id}
+        delete from t_alert where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.alert.dao.data.AlertDO">
-        UPDATE alert
+        UPDATE t_alert
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="queryAlertsByTimeDomain" resultMap="BaseResultMap">
-        select id, domain, alert_time, category, type, content, metric, creation_date from alert where alert_time >= #{record.startTime} and alert_time &lt;= #{record.endTime} <if test="record.domain != null"> and domain = #{record.domain} </if> order by alert_time desc
+        select id, domain, alert_time, category, type, content, metric, create_time, update_time from t_alert where alert_time >= #{record.startTime} and alert_time &lt;= #{record.endTime} <if test="record.domain != null"> and domain = #{record.domain} </if> order by alert_time desc
     </select>
 
     <select id="queryAlertsByTimeDomainCategories" resultMap="BaseResultMap">
-        select id, domain, alert_time, category, type, content, metric, creation_date from alert where alert_time >= #{record.startTime} and alert_time &lt;= #{record.endTime} <if test="record.domain != null"> and domain = #{record.domain} </if> and category in <foreach collection="record.categories" item="item" open="(" close=")" separator=",">#{item}</foreach> order by alert_time desc
+        select id, domain, alert_time, category, type, content, metric, create_time, update_time from t_alert where alert_time >= #{record.startTime} and alert_time &lt;= #{record.endTime} <if test="record.domain != null"> and domain = #{record.domain} </if> and category in <foreach collection="record.categories" item="item" open="(" close=")" separator=",">#{item}</foreach> order by alert_time desc
     </select>
 
     <select id="queryAlertsByTimeCategoryDomain" resultMap="BaseResultMap">
-        select id, domain, alert_time, category, type, content, metric, creation_date from alert where alert_time >= #{record.startTime} and alert_time &lt;= #{record.endTime} <if test="record.category != null"> and category = #{record.category} </if> <if test="record.domain != null"> and domain = #{record.domain} </if> order by alert_time asc
+        select id, domain, alert_time, category, type, content, metric, create_time, update_time from t_alert where alert_time >= #{record.startTime} and alert_time &lt;= #{record.endTime} <if test="record.category != null"> and category = #{record.category} </if> <if test="record.domain != null"> and domain = #{record.domain} </if> order by alert_time asc
     </select>
 
     <select id="queryAlertsByTimeCategory" resultMap="BaseResultMap">
-        select id, domain, alert_time, category, type, content, metric, creation_date from alert where alert_time >= #{record.startTime} and alert_time &lt;= #{record.endTime} <if test="record.category != null"> and category = #{record.category} </if> order by alert_time asc
+        select id, domain, alert_time, category, type, content, metric, create_time, update_time from t_alert where alert_time >= #{record.startTime} and alert_time &lt;= #{record.endTime} <if test="record.category != null"> and category = #{record.category} </if> order by alert_time asc
     </select>
 
 </mapper>

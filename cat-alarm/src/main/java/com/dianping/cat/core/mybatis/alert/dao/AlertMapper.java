@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.alert.dao.data.AlertDO;
 
 public interface AlertMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	AlertDO findByPrimaryKey(@Param("id") Integer id);
+	AlertDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(AlertDO record);
 

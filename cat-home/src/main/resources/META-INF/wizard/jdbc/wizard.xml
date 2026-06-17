@@ -12,7 +12,7 @@
          <table name="t_topology_graph"/>
          <table name="t_baseline"/>
          <table name="t_alteration"/>
-         <table name="alert"/>
+         <table name="t_alert"/>
          <table name="alert_summary"/>
          <table name="overload"/>
          <table name="config_modification"/>

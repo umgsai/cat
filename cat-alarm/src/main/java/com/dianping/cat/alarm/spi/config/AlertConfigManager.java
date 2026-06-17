@@ -40,7 +40,7 @@ public class AlertConfigManager {
 
 	private ContentFetcher m_fetcher;
 
-	private int m_configId;
+	private long m_configId;
 
 	private AlertConfig m_config;
 

@@ -49,7 +49,7 @@ public class AlertPolicyManager {
 
 	private ContentFetcher m_fetcher;
 
-	private int m_configId;
+	private long m_configId;
 
 	private AlertPolicy m_config;
 

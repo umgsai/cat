@@ -2,7 +2,7 @@ package com.dianping.cat.alarm;
 
 
 public class Alert {
-   private int m_id;
+   private long m_id;
 
    private String m_domain;
 
@@ -16,9 +16,11 @@ public class Alert {
 
    private String m_metric;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private int m_keyId;
+   private java.util.Date m_updateTime;
+
+   private long m_keyId;
 
    private java.util.Date m_startTime;
 
@@ -46,7 +48,11 @@ public class Alert {
    }
 
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public String getDomain() {
@@ -57,11 +63,11 @@ public class Alert {
       return m_endTime;
    }
 
-   public int getId() {
+   public long getId() {
       return m_id;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
    }
 
@@ -75,6 +81,10 @@ public class Alert {
 
    public String getType() {
       return m_type;
+   }
+
+   public java.util.Date getUpdateTime() {
+      return m_updateTime;
    }
 
    public Alert setAlertTime(java.util.Date alertTime) {
@@ -98,7 +108,12 @@ public class Alert {
    }
 
    public Alert setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public Alert setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
@@ -112,13 +127,13 @@ public class Alert {
       return this;
    }
 
-   public Alert setId(int id) {
+   public Alert setId(long id) {
       m_id = id;
       m_keyId = id;
       return this;
    }
 
-   public Alert setKeyId(int keyId) {
+   public Alert setKeyId(long keyId) {
       m_keyId = keyId;
       return this;
    }
@@ -138,6 +153,11 @@ public class Alert {
       return this;
    }
 
+   public Alert setUpdateTime(java.util.Date updateTime) {
+      m_updateTime = updateTime;
+      return this;
+   }
+
    @Override
    public String toString() {
       StringBuilder sb = new StringBuilder(1024);
@@ -147,7 +167,7 @@ public class Alert {
       sb.append(", categories: ").append(m_categories == null ? null : java.util.Arrays.asList(m_categories));
       sb.append(", category: ").append(m_category);
       sb.append(", content: ").append(m_content);
-      sb.append(", creation-date: ").append(m_creationDate);
+      sb.append(", create-time: ").append(m_createTime);
       sb.append(", domain: ").append(m_domain);
       sb.append(", end-time: ").append(m_endTime);
       sb.append(", id: ").append(m_id);
@@ -155,6 +175,7 @@ public class Alert {
       sb.append(", metric: ").append(m_metric);
       sb.append(", start-time: ").append(m_startTime);
       sb.append(", type: ").append(m_type);
+      sb.append(", update-time: ").append(m_updateTime);
       sb.append("]");
       return sb.toString();
    }
