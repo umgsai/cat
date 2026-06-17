@@ -9,7 +9,7 @@
          <properties>useUnicode=true&amp;autoReconnect=true</properties>
       </datasource>
       <group name="report" package="com.dainping.cat.consumer.dal.report">
-         <table name="businessReport"/>
+         <table name="t_business_report"/>
       </group>
    </jdbc>
 </wizard>

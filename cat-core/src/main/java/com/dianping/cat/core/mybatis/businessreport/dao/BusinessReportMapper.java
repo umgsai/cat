@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.businessreport.dao.data.BusinessReportDO;
 
 public interface BusinessReportMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	BusinessReportDO findByPrimaryKey(@Param("id") Integer id);
+	BusinessReportDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(BusinessReportDO record);
 

@@ -6,10 +6,11 @@
         <result column="type" property="type"/>
         <result column="name" property="name"/>
         <result column="ip" property="ip"/>
-        <result column="productLine" property="productLine"/>
+        <result column="product_line" property="productLine"/>
         <result column="period" property="period"/>
         <result column="content" property="content"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -17,10 +18,11 @@
         type ,
         name ,
         ip ,
-        productLine ,
+        product_line ,
         period ,
         content ,
-        creation_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -29,37 +31,38 @@
             <if test="type != null">type = #{type} ,</if>
             <if test="name != null">name = #{name} ,</if>
             <if test="ip != null">ip = #{ip} ,</if>
-            <if test="productLine != null">productLine = #{productLine} ,</if>
+            <if test="productLine != null">product_line = #{productLine} ,</if>
             <if test="period != null">period = #{period} ,</if>
             <if test="content != null">content = #{content} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.businessreport.dao.data.BusinessReportDO" keyProperty="id">
-        INSERT INTO businessReport
+        INSERT INTO t_business_report
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from businessReport where id = #{id}
+        from t_business_report where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from businessReport
+        from t_business_report
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from businessReport where id = #{id}
+        delete from t_business_report where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.businessreport.dao.data.BusinessReportDO">
-        UPDATE businessReport
+        UPDATE t_business_report
         <include refid="setField"/>
         WHERE id = #{id}
     </update>

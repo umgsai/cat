@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class BusinessReportDO {
-	private Integer id;
+	private Long id;
 
 	private Integer type;
 
@@ -20,5 +20,7 @@ public class BusinessReportDO {
 
 	private byte[] content;
 
-	private Date creationDate;
+	private Date createTime;
+
+	private Date updateTime;
 }

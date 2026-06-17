@@ -102,18 +102,25 @@ data:
       KEY `IX_Period` (`period`)
     )ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED COMMENT='月报表二进制内容';
 
-    CREATE TABLE `businessReport` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `type` tinyint(4) NOT NULL COMMENT '报表类型 报表数据格式, 1/Binary, 2/xml , 3/json',
-      `name` varchar(20) NOT NULL COMMENT '报表名称',
-      `ip` varchar(50) NOT NULL COMMENT '报表来自于哪台机器',
-      `productLine` varchar(50) NOT NULL COMMENT '指标来源于哪个产品组',
-      `period` datetime NOT NULL COMMENT '报表时间段',
-      `content` longblob COMMENT '用于存放报表的具体内容',
-      `creation_date` datetime NOT NULL COMMENT '报表创建时间',
-      PRIMARY KEY (`id`),
-      KEY `IX_Period_productLine_name` (`period`,`productLine`,`name`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED COMMENT='用于存放业务监控实时报表信息，处理之后的结果';
+    CREATE TABLE `t_business_report`
+    (
+        `id`           bigint      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+        `type`         tinyint(4)  NOT NULL DEFAULT '1' COMMENT '报表数据格式, 1/binary, 2/xml, 3/json',
+        `name`         varchar(20) NOT NULL DEFAULT '' COMMENT '报表名称',
+        `ip`           varchar(50) NOT NULL DEFAULT '' COMMENT '报表来源机器IP',
+        `product_line` varchar(50) NOT NULL DEFAULT '' COMMENT '业务指标来源产品线',
+        `period`       datetime    NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '报表时间段',
+        `content`      longblob    NOT NULL COMMENT '业务报表内容',
+        `create_time`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+        `update_time`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        PRIMARY KEY (`id`),
+        KEY `idx_period_product_line_name` (`period`,`product_line`,`name`),
+        KEY `idx_product_line_name_period` (`product_line`,`name`,`period`),
+        KEY `idx_period` (`period`),
+        KEY `idx_create_time` (`create_time`),
+        KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='业务监控实时报表';
+
 
     CREATE TABLE `task` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
