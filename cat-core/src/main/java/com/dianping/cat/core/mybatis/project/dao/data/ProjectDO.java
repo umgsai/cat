@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class ProjectDO {
-	private Integer id;
+	private Long id;
 
 	private String domain;
 
@@ -24,9 +24,9 @@ public class ProjectDO {
 
 	private String phone;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Date modifyDate;
+	private Date updateTime;
 
-	private Integer keyId;
+	private Long keyId;
 }

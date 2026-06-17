@@ -2,7 +2,7 @@ package com.dianping.cat.core.dal;
 
 
 public class Project {
-   private int m_id;
+   private long m_id;
 
    private String m_domain;
 
@@ -20,11 +20,11 @@ public class Project {
 
    private String m_phone;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private java.util.Date m_modifyDate;
+   private java.util.Date m_updateTime;
 
-   private int m_keyId;
+   private long m_keyId;
    public void afterLoad() {
       m_keyId = m_id;
    }
@@ -42,7 +42,11 @@ public class Project {
    }
 
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public String getDomain() {
@@ -53,11 +57,11 @@ public class Project {
       return m_email;
    }
 
-   public int getId() {
+   public long getId() {
       return m_id;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
    }
 
@@ -66,7 +70,7 @@ public class Project {
    }
 
    public java.util.Date getModifyDate() {
-      return m_modifyDate;
+      return m_updateTime;
    }
 
    public String getOwner() {
@@ -75,6 +79,10 @@ public class Project {
 
    public String getPhone() {
       return m_phone;
+   }
+
+   public java.util.Date getUpdateTime() {
+      return m_updateTime;
    }
 
    public Project setBu(String bu) {
@@ -93,7 +101,12 @@ public class Project {
    }
 
    public Project setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public Project setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
@@ -107,13 +120,13 @@ public class Project {
       return this;
    }
 
-   public Project setId(int id) {
+   public Project setId(long id) {
       m_id = id;
       m_keyId = id;
       return this;
    }
 
-   public Project setKeyId(int keyId) {
+   public Project setKeyId(long keyId) {
       m_keyId = keyId;
       return this;
    }
@@ -124,7 +137,7 @@ public class Project {
    }
 
    public Project setModifyDate(java.util.Date modifyDate) {
-      m_modifyDate = modifyDate;
+      m_updateTime = modifyDate;
       return this;
    }
 
@@ -138,6 +151,11 @@ public class Project {
       return this;
    }
 
+   public Project setUpdateTime(java.util.Date updateTime) {
+      m_updateTime = updateTime;
+      return this;
+   }
+
    @Override
    public String toString() {
       StringBuilder sb = new StringBuilder(1024);
@@ -146,15 +164,15 @@ public class Project {
       sb.append("bu: ").append(m_bu);
       sb.append(", cmdb-domain: ").append(m_cmdbDomain);
       sb.append(", cmdb-productline: ").append(m_cmdbProductline);
-      sb.append(", creation-date: ").append(m_creationDate);
+      sb.append(", create-time: ").append(m_createTime);
       sb.append(", domain: ").append(m_domain);
       sb.append(", email: ").append(m_email);
       sb.append(", id: ").append(m_id);
       sb.append(", key-id: ").append(m_keyId);
       sb.append(", level: ").append(m_level);
-      sb.append(", modify-date: ").append(m_modifyDate);
       sb.append(", owner: ").append(m_owner);
       sb.append(", phone: ").append(m_phone);
+      sb.append(", update-time: ").append(m_updateTime);
       sb.append("]");
       return sb.toString();
    }

@@ -11,7 +11,7 @@
       <group name="report" package="com.dianping.cat.core.dal">
          <table name="t_host_info"/>
          <table name="t_task"/>
-         <table name="project"/>
+         <table name="t_project"/>
          <table name="report"/>
          <table name="t_hourly_report"/>
          <table name="t_daily_report"/>

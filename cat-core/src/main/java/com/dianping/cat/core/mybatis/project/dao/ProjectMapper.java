@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.project.dao.data.ProjectDO;
 
 public interface ProjectMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	ProjectDO findByPrimaryKey(@Param("id") Integer id);
+	ProjectDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(ProjectDO record);
 

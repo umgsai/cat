@@ -146,21 +146,27 @@ data:
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='后台任务';
 
 
-    CREATE TABLE `project` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `domain` varchar(200) NOT NULL COMMENT '项目名称',
-      `cmdb_domain` varchar(200) DEFAULT  NULL COMMENT 'cmdb项目名称',
-      `level` int(5) DEFAULT NULL COMMENT '项目级别',  
-      `bu` varchar(50) DEFAULT NULL COMMENT 'CMDB事业部',
-      `cmdb_productline` varchar(50) DEFAULT NULL COMMENT 'CMDB产品线',
-      `owner` varchar(50)  DEFAULT NULL COMMENT '项目负责人',
-      `email` longtext  DEFAULT NULL COMMENT '项目组邮件',
-      `phone` longtext  DEFAULT NULL COMMENT '联系电话',
-      `creation_date` datetime DEFAULT NULL COMMENT '创建时间',
-      `modify_date` datetime DEFAULT NULL COMMENT '修改时间',
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `domain` (`domain`)
-    )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='项目基本信息';
+    CREATE TABLE `t_project`
+    (
+        `id`                bigint       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+        `domain`            varchar(200) NOT NULL DEFAULT '' COMMENT '项目名称',
+        `cmdb_domain`       varchar(200) NOT NULL DEFAULT '' COMMENT 'CMDB项目名称',
+        `level`             int          NOT NULL DEFAULT '0' COMMENT '项目级别',
+        `bu`                varchar(50)  NOT NULL DEFAULT '' COMMENT 'CMDB事业部',
+        `cmdb_product_line` varchar(50)  NOT NULL DEFAULT '' COMMENT 'CMDB产品线',
+        `owner`             varchar(50)  NOT NULL DEFAULT '' COMMENT '项目负责人',
+        `email`             text         NOT NULL COMMENT '项目组邮箱',
+        `phone`             text         NOT NULL COMMENT '联系电话',
+        `create_time`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+        `update_time`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `uk_domain` (`domain`),
+        KEY `idx_cmdb_domain` (`cmdb_domain`),
+        KEY `idx_cmdb_product_line` (`cmdb_product_line`),
+        KEY `idx_create_time` (`create_time`),
+        KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目基础信息';
+
 
     CREATE TABLE `topologyGraph` (
       `id` int(11) NOT NULL AUTO_INCREMENT,

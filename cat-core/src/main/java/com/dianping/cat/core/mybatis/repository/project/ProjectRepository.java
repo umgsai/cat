@@ -42,6 +42,10 @@ public class ProjectRepository {
 	}
 
 	public Project findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public Project findByPK(long keyId) {
 		ProjectMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
@@ -151,11 +155,11 @@ public class ProjectRepository {
 		if (record.getPhone() != null) {
 			model.setPhone(record.getPhone());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
 		}
-		if (record.getModifyDate() != null) {
-			model.setModifyDate(record.getModifyDate());
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
 		}
 		model.afterLoad();
 		return model;
@@ -173,8 +177,8 @@ public class ProjectRepository {
 		record.setOwner(model.getOwner());
 		record.setEmail(model.getEmail());
 		record.setPhone(model.getPhone());
-		record.setCreationDate(model.getCreationDate());
-		record.setModifyDate(model.getModifyDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		return record;
 	}

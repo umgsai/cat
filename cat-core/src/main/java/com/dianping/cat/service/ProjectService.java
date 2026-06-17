@@ -60,7 +60,7 @@ public class ProjectService {
 	public boolean delete(Project project) {
 		ensureInitialized();
 
-		int id = project.getId();
+		long id = project.getId();
 		String domainName = null;
 
 		for (Entry<String, Project> entry : m_domainToProjects.entrySet()) {
