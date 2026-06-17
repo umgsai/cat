@@ -6,57 +6,60 @@
         <result column="user" property="user"/>
         <result column="module" property="module"/>
         <result column="operation" property="operation"/>
-        <result column="time" property="time"/>
+        <result column="operation_time" property="operationTime"/>
         <result column="content" property="content"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id ,
-        user ,
+        `user` ,
         module ,
         operation ,
-        time ,
+        operation_time ,
         content ,
-        creation_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
         <set>
             <if test="id != null">id = #{id} ,</if>
-            <if test="user != null">user = #{user} ,</if>
+            <if test="user != null">`user` = #{user} ,</if>
             <if test="module != null">module = #{module} ,</if>
             <if test="operation != null">operation = #{operation} ,</if>
-            <if test="time != null">time = #{time} ,</if>
+            <if test="operationTime != null">operation_time = #{operationTime} ,</if>
             <if test="content != null">content = #{content} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.operation.dao.data.OperationDO" keyProperty="id">
-        INSERT INTO operation
+        INSERT INTO t_operation
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from operation where id = #{id}
+        from t_operation where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from operation
+        from t_operation
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from operation where id = #{id}
+        delete from t_operation where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.operation.dao.data.OperationDO">
-        UPDATE operation
+        UPDATE t_operation
         <include refid="setField"/>
         WHERE id = #{id}
     </update>

@@ -272,16 +272,22 @@ data:
         KEY `idx_update_time` (`update_time`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='统一告警信息';
 
-    CREATE TABLE `operation` (
-      `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增长ID',
-      `user` varchar(128) NOT NULL COMMENT '用户名',
-      `module` varchar(128) NOT NULL COMMENT '模块',
-      `operation` varchar(128) NOT NULL COMMENT '操作',
-      `time` datetime NOT NULL COMMENT '修改时间',
-      `content` longtext NOT NULL COMMENT '修改内容',
-      `creation_date` datetime NOT NULL COMMENT '数据插入时间',
-      PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户操作日志';
+    CREATE TABLE `t_operation` (
+      `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+      `user` varchar(128) NOT NULL DEFAULT '' COMMENT '用户名',
+      `module` varchar(128) NOT NULL DEFAULT '' COMMENT '模块',
+      `operation` varchar(128) NOT NULL DEFAULT '' COMMENT '操作',
+      `operation_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+      `content` longtext NOT NULL COMMENT '操作内容',
+      `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+      `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+      PRIMARY KEY (`id`),
+      KEY `idx_operation_time` (`operation_time`),
+      KEY `idx_user_operation_time` (`user`, `operation_time`),
+      KEY `idx_module_operation_time` (`module`, `operation_time`),
+      KEY `idx_create_time` (`create_time`),
+      KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户操作日志';
 
     CREATE TABLE `overload` (
       `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增长ID',

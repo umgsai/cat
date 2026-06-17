@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class OperationDO {
-	private Integer id;
+	private Long id;
 
 	private String user;
 
@@ -14,9 +14,37 @@ public class OperationDO {
 
 	private String operation;
 
-	private Date time;
+	private Date operationTime;
 
 	private String content;
 
-	private Date creationDate;
+	private Date createTime;
+
+	private Date updateTime;
+
+	private Long keyId;
+
+	public Date getCreationDate() {
+		return createTime;
+	}
+
+	public Date getTime() {
+		return operationTime;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		createTime = creationDate;
+	}
+
+	public void setId(Integer id) {
+		this.id = id == null ? null : id.longValue();
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setTime(Date time) {
+		operationTime = time;
+	}
 }
