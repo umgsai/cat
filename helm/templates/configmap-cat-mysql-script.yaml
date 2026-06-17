@@ -257,14 +257,20 @@ data:
         KEY `idx_update_time` (`update_time`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='告警记录';
 
-    CREATE TABLE `alert_summary` (
-      `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增长ID',
-      `domain` varchar(128) NOT NULL COMMENT '告警项目',
-      `alert_time` datetime NOT NULL COMMENT '告警时间',
-      `content` longtext NOT NULL COMMENT '统一告警内容',
-      `creation_date` datetime NOT NULL COMMENT '数据插入时间',
-      PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='统一告警信息';
+    CREATE TABLE `t_alert_summary`
+    (
+        `id`          bigint       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+        `domain`      varchar(128) NOT NULL DEFAULT '' COMMENT '告警项目',
+        `alert_time`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '告警时间',
+        `content`     longtext     NOT NULL COMMENT '统一告警内容',
+        `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+        `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        PRIMARY KEY (`id`),
+        KEY `idx_alert_time_domain` (`alert_time`, `domain`),
+        KEY `idx_domain_alert_time` (`domain`, `alert_time`),
+        KEY `idx_create_time` (`create_time`),
+        KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='统一告警信息';
 
     CREATE TABLE `operation` (
       `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增长ID',

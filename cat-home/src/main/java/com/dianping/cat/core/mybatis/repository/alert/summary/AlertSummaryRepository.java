@@ -34,6 +34,10 @@ public class AlertSummaryRepository extends SpringBackedRepositorySupport<AlertS
 	}
 
 	public AlertSummary findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public AlertSummary findByPK(long keyId) {
 		AlertSummaryMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -93,8 +97,11 @@ public class AlertSummaryRepository extends SpringBackedRepositorySupport<AlertS
 		if (record.getContent() != null) {
 			model.setContent(record.getContent());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
+		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
 		}
 		model.afterLoad();
 		return model;
@@ -107,7 +114,8 @@ public class AlertSummaryRepository extends SpringBackedRepositorySupport<AlertS
 		record.setDomain(model.getDomain());
 		record.setAlertTime(model.getAlertTime());
 		record.setContent(model.getContent());
-		record.setCreationDate(model.getCreationDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		return record;
 	}

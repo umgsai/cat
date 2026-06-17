@@ -6,7 +6,8 @@
         <result column="domain" property="domain"/>
         <result column="alert_time" property="alertTime"/>
         <result column="content" property="content"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -14,7 +15,8 @@
         domain ,
         alert_time ,
         content ,
-        creation_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -23,34 +25,35 @@
             <if test="domain != null">domain = #{domain} ,</if>
             <if test="alertTime != null">alert_time = #{alertTime} ,</if>
             <if test="content != null">content = #{content} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.alert.summary.dao.data.AlertSummaryDO" keyProperty="id">
-        INSERT INTO alert_summary
+        INSERT INTO t_alert_summary
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from alert_summary where id = #{id}
+        from t_alert_summary where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from alert_summary
+        from t_alert_summary
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from alert_summary where id = #{id}
+        delete from t_alert_summary where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.alert.summary.dao.data.AlertSummaryDO">
-        UPDATE alert_summary
+        UPDATE t_alert_summary
         <include refid="setField"/>
         WHERE id = #{id}
     </update>

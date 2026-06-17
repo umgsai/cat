@@ -2,7 +2,7 @@ package com.dianping.cat.home.dal.report;
 
 
 public class AlertSummary {
-   private int m_id;
+   private long m_id;
 
    private String m_domain;
 
@@ -10,9 +10,11 @@ public class AlertSummary {
 
    private String m_content;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private int m_keyId;
+   private java.util.Date m_updateTime;
+
+   private long m_keyId;
    public void afterLoad() {
       m_keyId = m_id;
    }
@@ -26,19 +28,27 @@ public class AlertSummary {
    }
 
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public String getDomain() {
       return m_domain;
    }
 
-   public int getId() {
+   public long getId() {
       return m_id;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
+   }
+
+   public java.util.Date getUpdateTime() {
+      return m_updateTime;
    }
 
    public AlertSummary setAlertTime(java.util.Date alertTime) {
@@ -52,7 +62,12 @@ public class AlertSummary {
    }
 
    public AlertSummary setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public AlertSummary setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
@@ -61,14 +76,19 @@ public class AlertSummary {
       return this;
    }
 
-   public AlertSummary setId(int id) {
+   public AlertSummary setId(long id) {
       m_id = id;
       m_keyId = id;
       return this;
    }
 
-   public AlertSummary setKeyId(int keyId) {
+   public AlertSummary setKeyId(long keyId) {
       m_keyId = keyId;
+      return this;
+   }
+
+   public AlertSummary setUpdateTime(java.util.Date updateTime) {
+      m_updateTime = updateTime;
       return this;
    }
 
@@ -79,10 +99,11 @@ public class AlertSummary {
       sb.append("AlertSummary[");
       sb.append("alert-time: ").append(m_alertTime);
       sb.append(", content: ").append(m_content);
-      sb.append(", creation-date: ").append(m_creationDate);
+      sb.append(", create-time: ").append(m_createTime);
       sb.append(", domain: ").append(m_domain);
       sb.append(", id: ").append(m_id);
       sb.append(", key-id: ").append(m_keyId);
+      sb.append(", update-time: ").append(m_updateTime);
       sb.append("]");
       return sb.toString();
    }

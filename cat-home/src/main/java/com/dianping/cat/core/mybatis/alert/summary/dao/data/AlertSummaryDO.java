@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class AlertSummaryDO {
-	private Integer id;
+	private Long id;
 
 	private String domain;
 
@@ -14,7 +14,9 @@ public class AlertSummaryDO {
 
 	private String content;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Integer keyId;
+	private Date updateTime;
+
+	private Long keyId;
 }
