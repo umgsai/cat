@@ -44,10 +44,10 @@ public class TaskManager {
 
 	private TaskRepository m_taskDao;
 
-	public boolean createTask(Date period, String domain, String name, TaskCreationPolicy prolicy) {
+	public boolean createTask(Date period, String domain, String name, TaskCreationPolicy policy) {
 		ensureTaskDao();
 		try {
-			if (prolicy.shouldCreateHourlyTask()) {
+			if (policy.shouldCreateHourlyTask()) {
 				insertToDatabase(period, domain, name, REPORT_HOUR);
 			}
 
@@ -58,17 +58,17 @@ public class TaskManager {
 			cal.add(Calendar.HOUR_OF_DAY, -hour);
 			Date currentDay = cal.getTime();
 
-			if (prolicy.shouldCreateDailyTask()) {
+			if (policy.shouldCreateDailyTask()) {
 				insertToDatabase(new Date(currentDay.getTime() - ONE_DAY), domain, name, REPORT_DAILY);
 			}
 
-			if (prolicy.shouldCreateWeeklyTask()) {
+			if (policy.shouldCreateWeeklyTask()) {
 				int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
 				if (dayOfWeek == 7) {
 					insertToDatabase(new Date(currentDay.getTime() - 7 * ONE_DAY), domain, name, REPORT_WEEK);
 				}
 			}
-			if (prolicy.shouldCreateMonthTask()) {
+			if (policy.shouldCreateMonthTask()) {
 				int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
 
 				if (dayOfMonth == 1) {
