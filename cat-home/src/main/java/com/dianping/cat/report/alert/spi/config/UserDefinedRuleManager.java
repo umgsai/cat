@@ -28,7 +28,7 @@ public class UserDefinedRuleManager {
 
 	public String addUserDefineText(String userDefinedText) {
 		UserDefineRule item = m_dao.findMaxId();
-		int id = 1;
+		long id = 1;
 		if (item != null) {
 			id = item.getMaxId() + 1;
 		}
@@ -38,11 +38,11 @@ public class UserDefinedRuleManager {
 		userDefineRule.setContent(userDefinedText);
 		userDefineRule.setId(id);
 		m_dao.insert(userDefineRule);
-		return Integer.toString(id);
+		return Long.toString(id);
 	}
 
 	public String getUserDefineText(String idStr) {
-		int id = Integer.parseInt(idStr);
+		long id = Long.parseLong(idStr);
 
 		UserDefineRule item = m_dao.findByPK(id);
 		return item.getContent();
@@ -51,7 +51,7 @@ public class UserDefinedRuleManager {
 	public void removeById(String id) {
 		UserDefineRule item = m_dao.createLocal();
 
-		item.setId(Integer.parseInt(id));
+		item.setId(Long.parseLong(id));
 		m_dao.deleteByPK(item);
 	}
 

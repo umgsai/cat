@@ -4,54 +4,57 @@
     <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.user.define.rule.dao.data.UserDefineRuleDO">
         <result column="id" property="id"/>
         <result column="content" property="content"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
         <result column="max_id" property="maxId"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id ,
         content ,
-        creation_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
         <set>
             <if test="id != null">id = #{id} ,</if>
             <if test="content != null">content = #{content} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.user.define.rule.dao.data.UserDefineRuleDO" keyProperty="id">
-        INSERT INTO user_define_rule
+        INSERT INTO t_user_define_rule
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from user_define_rule where id = #{id}
+        from t_user_define_rule where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from user_define_rule
+        from t_user_define_rule
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from user_define_rule where id = #{id}
+        delete from t_user_define_rule where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.user.define.rule.dao.data.UserDefineRuleDO">
-        UPDATE user_define_rule
+        UPDATE t_user_define_rule
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="findMaxId" resultMap="BaseResultMap">
-        select id, content, creation_date, max(id) AS max_id from user_define_rule
+        select max(id) AS max_id from t_user_define_rule
     </select>
 
 </mapper>

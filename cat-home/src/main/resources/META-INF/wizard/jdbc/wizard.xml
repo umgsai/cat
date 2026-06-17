@@ -16,7 +16,7 @@
          <table name="t_alert_summary"/>
          <table name="t_overload"/>
          <table name="t_config_modification"/>
-         <table name="user_define_rule"/>
+         <table name="t_user_define_rule"/>
          <table name="metric_screen"/>
          <table name="metric_graph"/>
       </group>

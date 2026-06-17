@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.user.define.rule.dao.data.UserDefineRuleDO;
 
 public interface UserDefineRuleMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	UserDefineRuleDO findByPrimaryKey(@Param("id") Integer id);
+	UserDefineRuleDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(UserDefineRuleDO record);
 

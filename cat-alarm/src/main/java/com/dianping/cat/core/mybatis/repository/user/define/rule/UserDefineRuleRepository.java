@@ -34,6 +34,10 @@ public class UserDefineRuleRepository extends SpringBackedRepositorySupport<User
 	}
 
 	public UserDefineRule findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public UserDefineRule findByPK(long keyId) {
 		UserDefineRuleMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -105,6 +109,9 @@ public class UserDefineRuleRepository extends SpringBackedRepositorySupport<User
 		if (record.getCreationDate() != null) {
 			model.setCreationDate(record.getCreationDate());
 		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
+		}
 		if (record.getMaxId() != null) {
 			model.setMaxId(record.getMaxId());
 		}
@@ -117,7 +124,8 @@ public class UserDefineRuleRepository extends SpringBackedRepositorySupport<User
 
 		record.setId(model.getId());
 		record.setContent(model.getContent());
-		record.setCreationDate(model.getCreationDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		return record;
 	}
