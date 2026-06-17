@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.baseline.dao.data.BaselineDO;
 
 public interface BaselineMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	BaselineDO findByPrimaryKey(@Param("id") Integer id);
+	BaselineDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(BaselineDO record);
 

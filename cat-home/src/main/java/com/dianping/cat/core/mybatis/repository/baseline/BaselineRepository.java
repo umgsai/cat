@@ -33,6 +33,10 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 	}
 
 	public Baseline findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public Baseline findByPK(long keyId) {
 		BaselineMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -113,8 +117,11 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 		if (record.getData() != null) {
 			model.setData(record.getData());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
+		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
 		}
 		model.afterLoad();
 		return model;
@@ -128,7 +135,8 @@ public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMa
 		record.setIndexKey(model.getIndexKey());
 		record.setReportPeriod(model.getReportPeriod());
 		record.setData(model.getData());
-		record.setCreationDate(model.getCreationDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		record.setDataInDoubleArray(model.getDataInDoubleArray());
 		return record;

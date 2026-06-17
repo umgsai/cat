@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class BaselineDO {
-	private Integer id;
+	private Long id;
 
 	private String reportName;
 
@@ -16,9 +16,11 @@ public class BaselineDO {
 
 	private byte[] data;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Integer keyId;
+	private Date updateTime;
+
+	private Long keyId;
 
 	private double[] dataInDoubleArray;
 }

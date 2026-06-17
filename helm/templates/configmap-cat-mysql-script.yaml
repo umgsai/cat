@@ -198,16 +198,22 @@ data:
         KEY `idx_update_time` (`update_time`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统全局配置';
 
-    CREATE TABLE `baseline` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `report_name` varchar(100) DEFAULT NULL,
-      `index_key` varchar(100) DEFAULT NULL,
-      `report_period` datetime DEFAULT NULL,
-      `data` blob,
-      `creation_date` datetime DEFAULT NULL,
-      PRIMARY KEY (`id`),
-      KEY `period_name_key` (`report_period`,`report_name`,`index_key`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    CREATE TABLE `t_baseline`
+    (
+        `id`            bigint       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+        `report_name`   varchar(100) NOT NULL DEFAULT '' COMMENT '报表名称',
+        `index_key`     varchar(255) NOT NULL DEFAULT '' COMMENT '指标Key',
+        `report_period` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '报表时间',
+        `data`          blob         NOT NULL COMMENT '基线数据',
+        `create_time`   datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+        `update_time`   datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `uk_period_name_key` (`report_period`, `report_name`, `index_key`),
+        KEY `idx_report_name` (`report_name`),
+        KEY `idx_index_key` (`index_key`),
+        KEY `idx_create_time` (`create_time`),
+        KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='指标基线数据';
 
     CREATE TABLE `alteration` (
       `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增长ID',

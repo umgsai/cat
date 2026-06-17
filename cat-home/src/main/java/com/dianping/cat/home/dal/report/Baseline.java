@@ -2,7 +2,7 @@ package com.dianping.cat.home.dal.report;
 
 
 public class Baseline {
-   private int m_id;
+   private long m_id;
 
    private String m_reportName;
 
@@ -12,9 +12,11 @@ public class Baseline {
 
    private byte[] m_data;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private int m_keyId;
+   private java.util.Date m_updateTime;
+
+   private long m_keyId;
 
    private double[] m_dataInDoubleArray;
    public void afterLoad() {
@@ -22,7 +24,11 @@ public class Baseline {
    }
 
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public byte[] getData() {
@@ -33,7 +39,7 @@ public class Baseline {
       return m_dataInDoubleArray;
    }
 
-   public int getId() {
+   public long getId() {
       return m_id;
    }
 
@@ -41,7 +47,7 @@ public class Baseline {
       return m_indexKey;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
    }
 
@@ -53,8 +59,17 @@ public class Baseline {
       return m_reportPeriod;
    }
 
+   public java.util.Date getUpdateTime() {
+      return m_updateTime;
+   }
+
    public Baseline setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public Baseline setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
@@ -68,7 +83,7 @@ public class Baseline {
       return this;
    }
 
-   public Baseline setId(int id) {
+   public Baseline setId(long id) {
       m_id = id;
       m_keyId = id;
       return this;
@@ -79,7 +94,7 @@ public class Baseline {
       return this;
    }
 
-   public Baseline setKeyId(int keyId) {
+   public Baseline setKeyId(long keyId) {
       m_keyId = keyId;
       return this;
    }
@@ -94,12 +109,17 @@ public class Baseline {
       return this;
    }
 
+   public Baseline setUpdateTime(java.util.Date updateTime) {
+      m_updateTime = updateTime;
+      return this;
+   }
+
    @Override
    public String toString() {
       StringBuilder sb = new StringBuilder(1024);
 
       sb.append("Baseline[");
-      sb.append("creation-date: ").append(m_creationDate);
+      sb.append("create-time: ").append(m_createTime);
       sb.append(", data: ").append(m_data == null ? null : java.util.Arrays.asList(m_data));
       sb.append(", dataInDoubleArray: ").append(m_dataInDoubleArray == null ? null : java.util.Arrays.asList(m_dataInDoubleArray));
       sb.append(", id: ").append(m_id);
@@ -107,6 +127,7 @@ public class Baseline {
       sb.append(", key-id: ").append(m_keyId);
       sb.append(", report-name: ").append(m_reportName);
       sb.append(", report-period: ").append(m_reportPeriod);
+      sb.append(", update-time: ").append(m_updateTime);
       sb.append("]");
       return sb.toString();
    }

@@ -10,7 +10,7 @@
       </datasource>
       <group name="report" package="com.dianping.cat.home.dal.report">
          <table name="t_topology_graph"/>
-         <table name="baseline"/>
+         <table name="t_baseline"/>
          <table name="alteration"/>
          <table name="alert"/>
          <table name="alert_summary"/>

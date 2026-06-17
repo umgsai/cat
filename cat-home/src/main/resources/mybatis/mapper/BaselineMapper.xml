@@ -7,7 +7,8 @@
         <result column="index_key" property="indexKey"/>
         <result column="report_period" property="reportPeriod"/>
         <result column="data" property="data"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -16,7 +17,8 @@
         index_key ,
         report_period ,
         data ,
-        creation_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -26,40 +28,41 @@
             <if test="indexKey != null">index_key = #{indexKey} ,</if>
             <if test="reportPeriod != null">report_period = #{reportPeriod} ,</if>
             <if test="data != null">data = #{data} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.baseline.dao.data.BaselineDO" keyProperty="id">
-        INSERT INTO baseline
+        INSERT INTO t_baseline
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from baseline where id = #{id}
+        from t_baseline where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from baseline
+        from t_baseline
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from baseline where id = #{id}
+        delete from t_baseline where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.baseline.dao.data.BaselineDO">
-        UPDATE baseline
+        UPDATE t_baseline
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="findByReportNameKeyTime" resultMap="BaseResultMap">
-        select id, report_name, index_key, report_period, data, creation_date from baseline where report_period = #{record.reportPeriod} and report_name = #{record.reportName} and index_key = #{record.indexKey}
+        select id, report_name, index_key, report_period, data, create_time, update_time from t_baseline where report_period = #{record.reportPeriod} and report_name = #{record.reportName} and index_key = #{record.indexKey}
     </select>
 
 </mapper>
