@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.topologygraph.dao.data.TopologyGraphDO;
 
 public interface TopologyGraphMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	TopologyGraphDO findByPrimaryKey(@Param("id") Integer id);
+	TopologyGraphDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(TopologyGraphDO record);
 

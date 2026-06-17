@@ -272,7 +272,7 @@ public class GlobalConfigProcessor {
 		String domain = project.getDomain();
 
 		if (StringUtils.isNotEmpty(domain)) {
-			int id = project.getId();
+			long id = project.getId();
 			Project temp = m_projectService.findByDomain(domain);
 
 			if (temp != null && id > 0) {

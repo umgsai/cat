@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class TopologyGraphDO {
-	private Integer id;
+	private Long id;
 
 	private String ip;
 
@@ -16,7 +16,9 @@ public class TopologyGraphDO {
 
 	private byte[] content;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Integer keyId;
+	private Date updateTime;
+
+	private Long keyId;
 }

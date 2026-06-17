@@ -168,16 +168,22 @@ data:
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目基础信息';
 
 
-    CREATE TABLE `topologyGraph` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `ip` varchar(50) NOT NULL COMMENT '报表来自于哪台cat-client机器ip',
-      `period` datetime NOT NULL  COMMENT '报表时间段,精确到分钟',
-      `type` tinyint(4) NOT NULL COMMENT '报表数据格式, 1/xml, 2/json, 3/binary',
-      `content` longblob COMMENT '用于存放报表的具体内容',
-      `creation_date` datetime NOT NULL COMMENT '报表创建时间',
-      PRIMARY KEY (`id`),
-      KEY `period` (`period`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用于存储历史的拓扑图曲线';
+    CREATE TABLE `t_topology_graph`
+    (
+        `id`          bigint      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+        `ip`          varchar(50) NOT NULL DEFAULT '' COMMENT '生成拓扑图的机器IP',
+        `period`      datetime    NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT '拓扑图时间段, 精确到分钟',
+        `type`        tinyint(4)  NOT NULL DEFAULT '3' COMMENT '数据格式, 1/xml, 2/json, 3/binary',
+        `content`     longblob    NOT NULL COMMENT '拓扑图内容',
+        `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+        `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        PRIMARY KEY (`id`),
+        KEY `idx_period` (`period`),
+        KEY `idx_ip_period` (`ip`,`period`),
+        KEY `idx_create_time` (`create_time`),
+        KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='历史拓扑图';
+
 
     CREATE TABLE `config` (
       `id` int(11) NOT NULL AUTO_INCREMENT,

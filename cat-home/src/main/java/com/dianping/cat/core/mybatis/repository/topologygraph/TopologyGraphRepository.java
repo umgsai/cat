@@ -34,6 +34,10 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 	}
 
 	public TopologyGraph findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public TopologyGraph findByPK(long keyId) {
 		TopologyGraphMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -112,8 +116,11 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 		if (record.getContent() != null) {
 			model.setContent(record.getContent());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
+		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
 		}
 		model.afterLoad();
 		return model;
@@ -127,7 +134,8 @@ public class TopologyGraphRepository extends SpringBackedRepositorySupport<Topol
 		record.setPeriod(model.getPeriod());
 		record.setType(model.getType());
 		record.setContent(model.getContent());
-		record.setCreationDate(model.getCreationDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		return record;
 	}

@@ -7,7 +7,8 @@
         <result column="period" property="period"/>
         <result column="type" property="type"/>
         <result column="content" property="content"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -16,7 +17,8 @@
         period ,
         type ,
         content ,
-        creation_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -26,40 +28,41 @@
             <if test="period != null">period = #{period} ,</if>
             <if test="type != null">type = #{type} ,</if>
             <if test="content != null">content = #{content} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.topologygraph.dao.data.TopologyGraphDO" keyProperty="id">
-        INSERT INTO topologyGraph
+        INSERT INTO t_topology_graph
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from topologyGraph where id = #{id}
+        from t_topology_graph where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from topologyGraph
+        from t_topology_graph
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from topologyGraph where id = #{id}
+        delete from t_topology_graph where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.topologygraph.dao.data.TopologyGraphDO">
-        UPDATE topologyGraph
+        UPDATE t_topology_graph
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="findByPeriod" resultMap="BaseResultMap">
-        select id, ip, period, type, content, creation_date from topologyGraph where period = #{record.period}
+        select id, ip, period, type, content, create_time, update_time from t_topology_graph where period = #{record.period}
     </select>
 
 </mapper>
