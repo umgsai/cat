@@ -2,7 +2,7 @@ package com.dianping.cat.home.dal.report;
 
 
 public class ConfigModification {
-   private int m_id;
+   private long m_id;
 
    private String m_userName;
 
@@ -12,11 +12,13 @@ public class ConfigModification {
 
    private String m_argument;
 
-   private java.util.Date m_date;
+   private java.util.Date m_modifyTime;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private int m_keyId;
+   private java.util.Date m_updateTime;
+
+   private long m_keyId;
    public void afterLoad() {
       m_keyId = m_id;
    }
@@ -34,19 +36,31 @@ public class ConfigModification {
    }
 
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public java.util.Date getDate() {
-      return m_date;
+      return m_modifyTime;
    }
 
-   public int getId() {
+   public long getId() {
       return m_id;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
+   }
+
+   public java.util.Date getModifyTime() {
+      return m_modifyTime;
+   }
+
+   public java.util.Date getUpdateTime() {
+      return m_updateTime;
    }
 
    public String getUserName() {
@@ -69,12 +83,17 @@ public class ConfigModification {
    }
 
    public ConfigModification setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public ConfigModification setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
    public ConfigModification setDate(java.util.Date date) {
-      m_date = date;
+      m_modifyTime = date;
       return this;
    }
 
@@ -84,8 +103,29 @@ public class ConfigModification {
       return this;
    }
 
+   public ConfigModification setId(long id) {
+      m_id = id;
+      m_keyId = id;
+      return this;
+   }
+
    public ConfigModification setKeyId(int keyId) {
       m_keyId = keyId;
+      return this;
+   }
+
+   public ConfigModification setKeyId(long keyId) {
+      m_keyId = keyId;
+      return this;
+   }
+
+   public ConfigModification setModifyTime(java.util.Date modifyTime) {
+      m_modifyTime = modifyTime;
+      return this;
+   }
+
+   public ConfigModification setUpdateTime(java.util.Date updateTime) {
+      m_updateTime = updateTime;
       return this;
    }
 
@@ -102,10 +142,11 @@ public class ConfigModification {
       sb.append("account-name: ").append(m_accountName);
       sb.append(", action-name: ").append(m_actionName);
       sb.append(", argument: ").append(m_argument);
-      sb.append(", creation-date: ").append(m_creationDate);
-      sb.append(", date: ").append(m_date);
+      sb.append(", create-time: ").append(m_createTime);
       sb.append(", id: ").append(m_id);
       sb.append(", key-id: ").append(m_keyId);
+      sb.append(", modify-time: ").append(m_modifyTime);
+      sb.append(", update-time: ").append(m_updateTime);
       sb.append(", user-name: ").append(m_userName);
       sb.append("]");
       return sb.toString();

@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class ConfigModificationDO {
-	private Integer id;
+	private Long id;
 
 	private String userName;
 
@@ -16,9 +16,43 @@ public class ConfigModificationDO {
 
 	private String argument;
 
-	private Date date;
+	private Date modifyTime;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Integer keyId;
+	private Date updateTime;
+
+	private Long keyId;
+
+	public Date getCreationDate() {
+		return createTime;
+	}
+
+	public Date getDate() {
+		return modifyTime;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		createTime = creationDate;
+	}
+
+	public void setDate(Date date) {
+		modifyTime = date;
+	}
+
+	public void setId(Integer id) {
+		this.id = id == null ? null : id.longValue();
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setKeyId(Integer keyId) {
+		this.keyId = keyId == null ? null : keyId.longValue();
+	}
+
+	public void setKeyId(Long keyId) {
+		this.keyId = keyId;
+	}
 }

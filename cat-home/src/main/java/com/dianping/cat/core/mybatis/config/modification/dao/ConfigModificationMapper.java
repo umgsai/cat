@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.config.modification.dao.data.ConfigModificationDO;
 
 public interface ConfigModificationMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	ConfigModificationDO findByPrimaryKey(@Param("id") Integer id);
+	ConfigModificationDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(ConfigModificationDO record);
 

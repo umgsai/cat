@@ -305,16 +305,23 @@ data:
       KEY `idx_update_time` (`update_time`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='过大容量报表';
 
-    CREATE TABLE `config_modification` (
-      `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增长ID',
-      `user_name` varchar(64) NOT NULL COMMENT '用户名',
-      `account_name` varchar(64) NOT NULL COMMENT '账户名',
-      `action_name` varchar(64) NOT NULL COMMENT 'action名',
-      `argument` longtext COMMENT '参数内容',
-      `date` datetime NOT NULL COMMENT '修改时间',
-      `creation_date` datetime NOT NULL COMMENT '创建时间',
-      PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='配置修改记录表';
+    CREATE TABLE `t_config_modification` (
+      `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+      `user_name` varchar(64) NOT NULL DEFAULT '' COMMENT '用户名',
+      `account_name` varchar(64) NOT NULL DEFAULT '' COMMENT '账号名',
+      `action_name` varchar(64) NOT NULL DEFAULT '' COMMENT '操作名称',
+      `argument` longtext NOT NULL COMMENT '参数内容',
+      `modify_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+      `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+      `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+      PRIMARY KEY (`id`),
+      KEY `idx_modify_time` (`modify_time`),
+      KEY `idx_user_modify_time` (`user_name`, `modify_time`),
+      KEY `idx_account_modify_time` (`account_name`, `modify_time`),
+      KEY `idx_action_modify_time` (`action_name`, `modify_time`),
+      KEY `idx_create_time` (`create_time`),
+      KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='配置修改记录';
 
     CREATE TABLE `user_define_rule` (
       `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增长ID',

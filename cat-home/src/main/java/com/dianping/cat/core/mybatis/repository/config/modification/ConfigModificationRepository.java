@@ -34,6 +34,10 @@ public class ConfigModificationRepository extends SpringBackedRepositorySupport<
 	}
 
 	public ConfigModification findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public ConfigModification findByPK(long keyId) {
 		ConfigModificationMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -102,6 +106,9 @@ public class ConfigModificationRepository extends SpringBackedRepositorySupport<
 		if (record.getCreationDate() != null) {
 			model.setCreationDate(record.getCreationDate());
 		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
+		}
 		model.afterLoad();
 		return model;
 	}
@@ -114,8 +121,9 @@ public class ConfigModificationRepository extends SpringBackedRepositorySupport<
 		record.setAccountName(model.getAccountName());
 		record.setActionName(model.getActionName());
 		record.setArgument(model.getArgument());
-		record.setDate(model.getDate());
-		record.setCreationDate(model.getCreationDate());
+		record.setModifyTime(model.getModifyTime());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		return record;
 	}

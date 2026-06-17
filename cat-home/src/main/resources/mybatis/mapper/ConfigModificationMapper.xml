@@ -7,8 +7,9 @@
         <result column="account_name" property="accountName"/>
         <result column="action_name" property="actionName"/>
         <result column="argument" property="argument"/>
-        <result column="date" property="date"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -17,8 +18,9 @@
         account_name ,
         action_name ,
         argument ,
-        date ,
-        creation_date
+        modify_time ,
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -28,35 +30,36 @@
             <if test="accountName != null">account_name = #{accountName} ,</if>
             <if test="actionName != null">action_name = #{actionName} ,</if>
             <if test="argument != null">argument = #{argument} ,</if>
-            <if test="date != null">date = #{date} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="modifyTime != null">modify_time = #{modifyTime} ,</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.config.modification.dao.data.ConfigModificationDO" keyProperty="id">
-        INSERT INTO config_modification
+        INSERT INTO t_config_modification
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from config_modification where id = #{id}
+        from t_config_modification where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from config_modification
+        from t_config_modification
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from config_modification where id = #{id}
+        delete from t_config_modification where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.config.modification.dao.data.ConfigModificationDO">
-        UPDATE config_modification
+        UPDATE t_config_modification
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
