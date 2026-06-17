@@ -19,6 +19,7 @@
 package com.dianping.cat.report.page.logview.service;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -37,6 +38,7 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.codec.HtmlMessageCodec;
 import com.dianping.cat.message.codec.WaterfallMessageCodec;
+import com.dianping.cat.message.spi.BufReleaseHelper;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.message.tree.MessageId;
@@ -93,7 +95,7 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 					messageId, period, domain);
 		}
 		if (buf != null) {
-			tree = CodecHandler.decode(changeBuf(buf));
+			tree = decode(buf);
 		}
 
 		if (tree == null && m_bucketManager != null) {
@@ -105,7 +107,7 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 				ByteBuf data = bucket.get(id);
 
 				if (data != null) {
-					tree = CodecHandler.decode(changeBuf(data));
+					tree = decode(data);
 				}
 			} else {
 				LOGGER.warn(
@@ -120,18 +122,19 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 		if (tree != null) {
 			ByteBuf content = ByteBufAllocator.DEFAULT.buffer(8192);
 
-			if (tree.getMessage() instanceof Transaction && waterfall) {
-				m_waterfall.encode(tree, content);
-			} else {
-				m_html.encode(tree, content);
-			}
-
 			try {
+				if (tree.getMessage() instanceof Transaction && waterfall) {
+					m_waterfall.encode(tree, content);
+				} else {
+					m_html.encode(tree, content);
+				}
 				content.readInt(); // get rid of length
-				return content.toString(Charset.forName("utf-8"));
+				return content.toString(StandardCharsets.UTF_8);
 			} catch (Exception e) {
 				LOGGER.error("Unable to render new local logview message, messageId={}, waterfall={}.", messageId,
 						waterfall, e);
+			} finally {
+				BufReleaseHelper.release(content);
 			}
 		}
 
@@ -140,6 +143,18 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 				messageId, id.getDomain(), localHostAddress, id.getHour(), period, domain, m_finderManager != null,
 				m_bucketManager != null);
 		return null;
+	}
+
+	private MessageTree decode(ByteBuf data) {
+		ByteBuf message = null;
+
+		try {
+			message = changeBuf(data);
+			return CodecHandler.decode(message);
+		} finally {
+			BufReleaseHelper.release(message);
+			BufReleaseHelper.release(data);
+		}
 	}
 
 	private ByteBuf changeBuf(ByteBuf data) {
@@ -169,18 +184,19 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 		if (tree != null) {
 			ByteBuf buf = ByteBufAllocator.DEFAULT.buffer(8192);
 
-			if (tree.getMessage() instanceof Transaction && waterfall) {
-				m_waterfall.encode(tree, buf);
-			} else {
-				m_html.encode(tree, buf);
-			}
-
 			try {
+				if (tree.getMessage() instanceof Transaction && waterfall) {
+					m_waterfall.encode(tree, buf);
+				} else {
+					m_html.encode(tree, buf);
+				}
 				buf.readInt(); // get rid of length
 				return buf.toString(Charset.forName("utf-8"));
 			} catch (Exception e) {
 				LOGGER.error("Unable to render old local logview message, messageId={}, waterfall={}.", messageId,
 						waterfall, e);
+			} finally {
+				BufReleaseHelper.release(buf);
 			}
 		}
 		LOGGER.warn(

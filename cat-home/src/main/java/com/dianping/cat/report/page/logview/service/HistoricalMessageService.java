@@ -19,6 +19,7 @@
 package com.dianping.cat.report.page.logview.service;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -32,6 +33,7 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.codec.HtmlMessageCodec;
 import com.dianping.cat.message.codec.WaterfallMessageCodec;
+import com.dianping.cat.message.spi.BufReleaseHelper;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.message.tree.MessageId;
@@ -109,18 +111,19 @@ public class HistoricalMessageService extends BaseHistoricalModelService<String>
 	protected String toString(ModelRequest request, MessageTree tree) {
 		ByteBuf buf = ByteBufAllocator.DEFAULT.buffer(8192);
 
-		if (tree.getMessage() instanceof Transaction && request.getProperty("waterfall", "false").equals("true")) {
-			m_waterfall.encode(tree, buf);
-		} else {
-			m_html.encode(tree, buf);
-		}
-
 		try {
+			if (tree.getMessage() instanceof Transaction && request.getProperty("waterfall", "false").equals("true")) {
+				m_waterfall.encode(tree, buf);
+			} else {
+				m_html.encode(tree, buf);
+			}
 			buf.readInt(); // get rid of length
-			return buf.toString(Charset.forName("utf-8"));
+			return buf.toString(StandardCharsets.UTF_8);
 		} catch (Exception e) {
 			LOGGER.error("Unable to render historical logview message, messageId={}, waterfall={}.",
 					request.getProperty("messageId"), request.getProperty("waterfall", "false"), e);
+		} finally {
+			BufReleaseHelper.release(buf);
 		}
 		return null;
 	}
