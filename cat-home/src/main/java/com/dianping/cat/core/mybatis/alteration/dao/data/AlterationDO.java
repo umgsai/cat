@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class AlterationDO {
-	private Integer id;
+	private Long id;
 
 	private String type;
 
@@ -18,7 +18,7 @@ public class AlterationDO {
 
 	private String ip;
 
-	private Date date;
+	private Date changeTime;
 
 	private String user;
 
@@ -30,9 +30,11 @@ public class AlterationDO {
 
 	private Integer status;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Integer keyId;
+	private Date updateTime;
+
+	private Long keyId;
 
 	private Date startTime;
 

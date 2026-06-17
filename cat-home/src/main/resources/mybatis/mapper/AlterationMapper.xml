@@ -8,13 +8,14 @@
         <result column="domain" property="domain"/>
         <result column="hostname" property="hostname"/>
         <result column="ip" property="ip"/>
-        <result column="date" property="date"/>
+        <result column="change_time" property="changeTime"/>
         <result column="user" property="user"/>
         <result column="alt_group" property="altGroup"/>
         <result column="content" property="content"/>
         <result column="url" property="url"/>
         <result column="status" property="status"/>
-        <result column="creation_date" property="creationDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -24,13 +25,14 @@
         domain ,
         hostname ,
         ip ,
-        date ,
-        user ,
+        change_time ,
+        `user` ,
         alt_group ,
         content ,
         url ,
         status ,
-        creation_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -41,58 +43,59 @@
             <if test="domain != null">domain = #{domain} ,</if>
             <if test="hostname != null">hostname = #{hostname} ,</if>
             <if test="ip != null">ip = #{ip} ,</if>
-            <if test="date != null">date = #{date} ,</if>
-            <if test="user != null">user = #{user} ,</if>
+            <if test="changeTime != null">change_time = #{changeTime} ,</if>
+            <if test="user != null">`user` = #{user} ,</if>
             <if test="altGroup != null">alt_group = #{altGroup} ,</if>
             <if test="content != null">content = #{content} ,</if>
             <if test="url != null">url = #{url} ,</if>
             <if test="status != null">status = #{status} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.mybatis.alteration.dao.data.AlterationDO" keyProperty="id">
-        INSERT INTO alteration
+        INSERT INTO t_alteration
         <include refid="setField"/>
     </insert>
 
     <select id="findByPrimaryKey" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from alteration where id = #{id}
+        from t_alteration where id = #{id}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from alteration
+        from t_alteration
     </select>
 
     <delete id="deleteByPrimaryKey">
-        delete from alteration where id = #{id}
+        delete from t_alteration where id = #{id}
     </delete>
 
     <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.alteration.dao.data.AlterationDO">
-        UPDATE alteration
+        UPDATE t_alteration
         <include refid="setField"/>
         WHERE id = #{id}
     </update>
 
     <select id="findByTypeDruation" resultMap="BaseResultMap">
-        select id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date from alteration where date >= #{record.startTime} and date &lt;= #{record.endTime} <if test="record.type != null"> and type = #{record.type} </if> order by date desc
+        select id, type, title, domain, hostname, ip, change_time, `user`, alt_group, content, url, status, create_time, update_time from t_alteration where change_time >= #{record.startTime} and change_time &lt;= #{record.endTime} <if test="record.type != null"> and type = #{record.type} </if> order by change_time desc
     </select>
 
     <select id="findByDtdh" resultMap="BaseResultMap">
-        select id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date from alteration where date >= #{record.startTime} and date &lt;= #{record.endTime} <if test="record.type != null"> and type = #{record.type} </if> <if test="record.domain != null"> and domain = #{record.domain} </if> <if test="record.hostname != null"> and hostname = #{record.hostname} </if> order by date desc
+        select id, type, title, domain, hostname, ip, change_time, `user`, alt_group, content, url, status, create_time, update_time from t_alteration where change_time >= #{record.startTime} and change_time &lt;= #{record.endTime} <if test="record.type != null"> and type = #{record.type} </if> <if test="record.domain != null"> and domain = #{record.domain} </if> <if test="record.hostname != null"> and hostname = #{record.hostname} </if> order by change_time desc
     </select>
 
     <select id="findByDtdhTypes" resultMap="BaseResultMap">
-        select id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date from alteration where date >= #{record.startTime} and date &lt;= #{record.endTime} <if test="record.type != null"> and type = #{record.type} </if> <if test="record.domain != null"> and domain = #{record.domain} </if> <if test="record.hostname != null"> and hostname = #{record.hostname} </if> and type in <foreach collection="record.types" item="item" open="(" close=")" separator=",">#{item}</foreach> order by date desc
+        select id, type, title, domain, hostname, ip, change_time, `user`, alt_group, content, url, status, create_time, update_time from t_alteration where change_time >= #{record.startTime} and change_time &lt;= #{record.endTime} <if test="record.type != null"> and type = #{record.type} </if> <if test="record.domain != null"> and domain = #{record.domain} </if> <if test="record.hostname != null"> and hostname = #{record.hostname} </if> and type in <foreach collection="record.types" item="item" open="(" close=")" separator=",">#{item}</foreach> order by change_time desc
     </select>
 
     <select id="findByDomainAndTime" resultMap="BaseResultMap">
-        select id, type, title, domain, hostname, ip, date, user, alt_group, content, url, status, creation_date from alteration where date >= #{record.startTime} and date &lt;= #{record.endTime} <if test="record.domain != null"> and domain = #{record.domain} </if> order by date desc
+        select id, type, title, domain, hostname, ip, change_time, `user`, alt_group, content, url, status, create_time, update_time from t_alteration where change_time >= #{record.startTime} and change_time &lt;= #{record.endTime} <if test="record.domain != null"> and domain = #{record.domain} </if> order by change_time desc
     </select>
 
 </mapper>

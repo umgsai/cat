@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.mybatis.alteration.dao.data.AlterationDO;
 
 public interface AlterationMapper {
-	int deleteByPrimaryKey(@Param("id") Integer id);
+	int deleteByPrimaryKey(@Param("id") Long id);
 
-	AlterationDO findByPrimaryKey(@Param("id") Integer id);
+	AlterationDO findByPrimaryKey(@Param("id") Long id);
 
 	int insert(AlterationDO record);
 

@@ -97,6 +97,10 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 	}
 
 	public Alteration findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public Alteration findByPK(long keyId) {
 		AlterationMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -162,8 +166,8 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		if (record.getIp() != null) {
 			model.setIp(record.getIp());
 		}
-		if (record.getDate() != null) {
-			model.setDate(record.getDate());
+		if (record.getChangeTime() != null) {
+			model.setChangeTime(record.getChangeTime());
 		}
 		if (record.getUser() != null) {
 			model.setUser(record.getUser());
@@ -180,8 +184,11 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		if (record.getStatus() != null) {
 			model.setStatus(record.getStatus());
 		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
+		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
 		}
 		model.afterLoad();
 		return model;
@@ -196,13 +203,14 @@ public class AlterationRepository extends SpringBackedRepositorySupport<Alterati
 		record.setDomain(model.getDomain());
 		record.setHostname(model.getHostname());
 		record.setIp(model.getIp());
-		record.setDate(model.getDate());
+		record.setChangeTime(model.getChangeTime());
 		record.setUser(model.getUser());
 		record.setAltGroup(model.getAltGroup());
 		record.setContent(model.getContent());
 		record.setUrl(model.getUrl());
 		record.setStatus(model.getStatus());
-		record.setCreationDate(model.getCreationDate());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
 		record.setStartTime(model.getStartTime());
 		record.setEndTime(model.getEndTime());

@@ -2,7 +2,7 @@ package com.dianping.cat.home.dal.report;
 
 
 public class Alteration {
-   private int m_id;
+   private long m_id;
 
    private String m_type;
 
@@ -14,7 +14,7 @@ public class Alteration {
 
    private String m_ip;
 
-   private java.util.Date m_date;
+   private java.util.Date m_changeTime;
 
    private String m_user;
 
@@ -26,9 +26,11 @@ public class Alteration {
 
    private int m_status;
 
-   private java.util.Date m_creationDate;
+   private java.util.Date m_createTime;
 
-   private int m_keyId;
+   private java.util.Date m_updateTime;
+
+   private long m_keyId;
 
    private java.util.Date m_startTime;
 
@@ -47,12 +49,20 @@ public class Alteration {
       return m_content;
    }
 
+   public java.util.Date getChangeTime() {
+      return m_changeTime;
+   }
+
    public java.util.Date getCreationDate() {
-      return m_creationDate;
+      return m_createTime;
+   }
+
+   public java.util.Date getCreateTime() {
+      return m_createTime;
    }
 
    public java.util.Date getDate() {
-      return m_date;
+      return m_changeTime;
    }
 
    public String getDomain() {
@@ -67,7 +77,7 @@ public class Alteration {
       return m_hostname;
    }
 
-   public int getId() {
+   public long getId() {
       return m_id;
    }
 
@@ -75,7 +85,7 @@ public class Alteration {
       return m_ip;
    }
 
-   public int getKeyId() {
+   public long getKeyId() {
       return m_keyId;
    }
 
@@ -99,6 +109,10 @@ public class Alteration {
       return m_types;
    }
 
+   public java.util.Date getUpdateTime() {
+      return m_updateTime;
+   }
+
    public String getUrl() {
       return m_url;
    }
@@ -117,13 +131,23 @@ public class Alteration {
       return this;
    }
 
+   public Alteration setChangeTime(java.util.Date changeTime) {
+      m_changeTime = changeTime;
+      return this;
+   }
+
    public Alteration setCreationDate(java.util.Date creationDate) {
-      m_creationDate = creationDate;
+      m_createTime = creationDate;
+      return this;
+   }
+
+   public Alteration setCreateTime(java.util.Date createTime) {
+      m_createTime = createTime;
       return this;
    }
 
    public Alteration setDate(java.util.Date date) {
-      m_date = date;
+      m_changeTime = date;
       return this;
    }
 
@@ -142,7 +166,7 @@ public class Alteration {
       return this;
    }
 
-   public Alteration setId(int id) {
+   public Alteration setId(long id) {
       m_id = id;
       m_keyId = id;
       return this;
@@ -153,7 +177,7 @@ public class Alteration {
       return this;
    }
 
-   public Alteration setKeyId(int keyId) {
+   public Alteration setKeyId(long keyId) {
       m_keyId = keyId;
       return this;
    }
@@ -183,6 +207,11 @@ public class Alteration {
       return this;
    }
 
+   public Alteration setUpdateTime(java.util.Date updateTime) {
+      m_updateTime = updateTime;
+      return this;
+   }
+
    public Alteration setUrl(String url) {
       m_url = url;
       return this;
@@ -199,9 +228,9 @@ public class Alteration {
 
       sb.append("Alteration[");
       sb.append("alt-group: ").append(m_altGroup);
+      sb.append(", change-time: ").append(m_changeTime);
       sb.append(", content: ").append(m_content);
-      sb.append(", creation-date: ").append(m_creationDate);
-      sb.append(", date: ").append(m_date);
+      sb.append(", create-time: ").append(m_createTime);
       sb.append(", domain: ").append(m_domain);
       sb.append(", end-time: ").append(m_endTime);
       sb.append(", hostname: ").append(m_hostname);
@@ -213,6 +242,7 @@ public class Alteration {
       sb.append(", title: ").append(m_title);
       sb.append(", type: ").append(m_type);
       sb.append(", types: ").append(m_types == null ? null : java.util.Arrays.asList(m_types));
+      sb.append(", update-time: ").append(m_updateTime);
       sb.append(", url: ").append(m_url);
       sb.append(", user: ").append(m_user);
       sb.append("]");
