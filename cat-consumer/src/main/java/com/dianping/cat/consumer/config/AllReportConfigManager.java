@@ -48,7 +48,7 @@ public class AllReportConfigManager {
 
 	private ContentFetcher m_fetcher;
 
-	private int m_configId;
+	private long m_configId;
 
 	private volatile AllConfig m_config;
 

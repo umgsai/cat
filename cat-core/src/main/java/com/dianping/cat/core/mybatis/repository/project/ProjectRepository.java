@@ -1,6 +1,7 @@
 package com.dianping.cat.core.mybatis.repository.project;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -175,8 +176,8 @@ public class ProjectRepository {
 		record.setBu(model.getBu());
 		record.setCmdbProductline(model.getCmdbProductline());
 		record.setOwner(model.getOwner());
-		record.setEmail(model.getEmail());
-		record.setPhone(model.getPhone());
+		record.setEmail(Optional.ofNullable(model.getEmail()).orElse(""));
+		record.setPhone(Optional.ofNullable(model.getPhone()).orElse( ""));
 		record.setCreateTime(model.getCreateTime());
 		record.setUpdateTime(model.getUpdateTime());
 		record.setKeyId(model.getKeyId());
