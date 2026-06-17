@@ -43,7 +43,7 @@ public class CapacityUpdateStatusManager {
 
 	private int m_monthlyStatus;
 
-	private int m_configId;
+	private long m_configId;
 
 	public void setConfigDao(ConfigRepository configDao) {
 		m_configDao = configDao;

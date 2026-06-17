@@ -65,7 +65,7 @@ public abstract class BaseRuleConfigManager {
 
 	protected ContentFetcher m_fetcher;
 
-	protected int m_configId;
+	protected long m_configId;
 
 	protected MonitorRules m_config;
 

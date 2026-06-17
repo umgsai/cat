@@ -7,9 +7,9 @@ import org.apache.ibatis.annotations.Param;
 import com.dianping.cat.core.config.dao.data.ConfigDO;
 
 public interface ConfigMapper {
-	int deleteById(@Param("id") Integer id);
+	int deleteById(@Param("id") Long id);
 
-	ConfigDO findById(@Param("id") Integer id);
+	ConfigDO findById(@Param("id") Long id);
 
 	ConfigDO findByName(@Param("name") String name);
 

@@ -44,7 +44,7 @@ public class DomainGroupConfigManager {
 
 	private ContentFetcher m_fetcher;
 
-	private int m_configId;
+	private long m_configId;
 
 	private DomainGroup m_domainGroup;
 

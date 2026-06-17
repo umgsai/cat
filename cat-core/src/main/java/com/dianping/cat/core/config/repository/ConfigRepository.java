@@ -47,6 +47,10 @@ public class ConfigRepository {
 	}
 
 	public Config findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public Config findByPK(long keyId) {
 		ConfigMapper mapper = springMapper();
 
 		return requireFound(mapper.findById(keyId), "id", String.valueOf(keyId));
@@ -121,8 +125,8 @@ public class ConfigRepository {
 		config.setId(configDO.getId());
 		config.setName(configDO.getName());
 		config.setContent(configDO.getContent());
-		config.setCreationDate(configDO.getCreationDate());
-		config.setModifyDate(configDO.getModifyDate());
+		config.setCreateTime(configDO.getCreateTime());
+		config.setUpdateTime(configDO.getUpdateTime());
 		config.afterLoad();
 		return config;
 	}
@@ -133,8 +137,8 @@ public class ConfigRepository {
 		configDO.setId(config.getKeyId() > 0 ? config.getKeyId() : config.getId());
 		configDO.setName(config.getName());
 		configDO.setContent(config.getContent());
-		configDO.setCreationDate(config.getCreationDate());
-		configDO.setModifyDate(config.getModifyDate());
+		configDO.setCreateTime(config.getCreateTime());
+		configDO.setUpdateTime(config.getUpdateTime());
 		return configDO;
 	}
 

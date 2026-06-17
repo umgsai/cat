@@ -47,7 +47,7 @@ public class HeartbeatDisplayPolicyManager {
 
 	private ContentFetcher m_fetcher;
 
-	private int m_configId;
+	private long m_configId;
 
 	private HeartbeatDisplayPolicy m_config;
 

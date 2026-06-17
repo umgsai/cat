@@ -68,7 +68,7 @@ public class TopologyGraphConfigManager {
 
 	private DecimalFormat m_df = new DecimalFormat("0.0");
 
-	private int m_configId;
+	private long m_configId;
 
 	private String m_fileName;
 

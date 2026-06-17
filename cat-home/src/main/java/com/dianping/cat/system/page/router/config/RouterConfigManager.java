@@ -59,7 +59,7 @@ public class RouterConfigManager {
 
 	private DailyReportContentRepository m_dailyReportContentDao;
 
-	private int m_configId;
+	private long m_configId;
 
 	private volatile RouterConfig m_routerConfig;
 

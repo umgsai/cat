@@ -6,13 +6,13 @@ import lombok.Data;
 
 @Data
 public class ConfigDO {
-	private Integer id;
+	private Long id;
 
 	private String name;
 
 	private String content;
 
-	private Date creationDate;
+	private Date createTime;
 
-	private Date modifyDate;
+	private Date updateTime;
 }

@@ -5,16 +5,16 @@
         <result column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="content" property="content"/>
-        <result column="creation_date" property="creationDate"/>
-        <result column="modify_date" property="modifyDate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id ,
         name ,
         content ,
-        creation_date ,
-        modify_date
+        create_time ,
+        update_time
     </sql>
 
     <sql id="setField">
@@ -22,42 +22,42 @@
             <if test="id != null">id = #{id} ,</if>
             <if test="name != null">name = #{name} ,</if>
             <if test="content != null">content = #{content} ,</if>
-            <if test="creationDate != null">creation_date = #{creationDate} ,</if>
-            <if test="modifyDate != null">modify_date = #{modifyDate}</if>
+            <if test="createTime != null">create_time = #{createTime} ,</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
         </set>
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
             parameterType="com.dianping.cat.core.config.dao.data.ConfigDO" keyProperty="id">
-        INSERT INTO config
+        INSERT INTO t_config
         <include refid="setField"/>
     </insert>
 
     <select id="findById" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from config where id = #{id}
+        from t_config where id = #{id}
     </select>
 
     <select id="findByName" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from config
+        from t_config
         where name = #{name}
     </select>
 
     <select id="queryAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from config
+        from t_config
     </select>
 
     <delete id="deleteById">
-        delete from config where id = #{id}
+        delete from t_config where id = #{id}
     </delete>
 
     <update id="updateById" parameterType="com.dianping.cat.core.config.dao.data.ConfigDO">
-        UPDATE config
+        UPDATE t_config
         <include refid="setField"/>
         WHERE id = #{id}
     </update>

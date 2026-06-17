@@ -185,15 +185,18 @@ data:
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='历史拓扑图';
 
 
-    CREATE TABLE `config` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `name` varchar(50) NOT NULL COMMENT '配置名称',
-      `content` longtext COMMENT '配置的具体内容',
-      `creation_date` datetime NOT NULL COMMENT '配置创建时间',
-      `modify_date` datetime NOT NULL COMMENT '配置修改时间',
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `name` (`name`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用于存储系统的全局配置信息';
+    CREATE TABLE `t_config`
+    (
+        `id`          bigint       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+        `name`        varchar(100) NOT NULL DEFAULT '' COMMENT '配置名称',
+        `content`     longtext     NOT NULL COMMENT '配置内容',
+        `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+        `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `uk_name` (`name`),
+        KEY `idx_create_time` (`create_time`),
+        KEY `idx_update_time` (`update_time`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统全局配置';
 
     CREATE TABLE `baseline` (
       `id` int(11) NOT NULL AUTO_INCREMENT,

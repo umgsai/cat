@@ -47,7 +47,7 @@ public class ExceptionRuleConfigManager {
 
 	private ContentFetcher m_fetcher;
 
-	private int m_configId;
+	private long m_configId;
 
 	private ExceptionRuleConfig m_exceptionRuleConfig;
 

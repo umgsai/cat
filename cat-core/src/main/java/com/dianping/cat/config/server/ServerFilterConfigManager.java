@@ -45,7 +45,7 @@ public class ServerFilterConfigManager {
 
 	private volatile ServerFilterConfig m_config;
 
-	private int m_configId;
+	private long m_configId;
 
 	private long m_modifyTime;
 

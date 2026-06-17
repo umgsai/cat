@@ -45,7 +45,7 @@ public class TpValueStatisticConfigManager {
 
 	private ServerConfigManager m_serverConfigManager;
 
-	private int m_configId;
+	private long m_configId;
 
 	private long m_modifyTime;
 

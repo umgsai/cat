@@ -26,7 +26,7 @@
          <table name="t_weekly_report_content"/>
       </group>
       <group name="config" package="com.dianping.cat.core.config">
-         <table name="config"/>
+         <table name="t_config"/>
          <table name="business_config"/>
       </group>
    </jdbc>
