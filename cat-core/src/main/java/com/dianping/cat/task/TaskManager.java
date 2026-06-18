@@ -21,7 +21,7 @@ package com.dianping.cat.task;
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.Task;
-import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
+import com.dianping.cat.core.mybatis.TaskRepository;
 
 import java.util.Calendar;
 import java.util.Date;

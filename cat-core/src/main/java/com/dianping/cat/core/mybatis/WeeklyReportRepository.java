@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.repository.weeklyreport;
+package com.dianping.cat.core.mybatis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -9,8 +9,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.WeeklyReport;
-import com.dianping.cat.core.mybatis.weeklyreport.dao.WeeklyreportMapper;
-import com.dianping.cat.core.mybatis.weeklyreport.dao.data.WeeklyreportDO;
+import com.dianping.cat.core.mybatis.mapper.WeeklyReportMapper;
+import com.dianping.cat.core.mybatis.data.WeeklyReportDO;
 
 public class WeeklyReportRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WeeklyReportRepository.class);
@@ -38,19 +38,19 @@ public class WeeklyReportRepository {
 	}
 
 	public WeeklyReport findByPK(long keyId) {
-		WeeklyreportMapper mapper = springMapper();
+		WeeklyReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
 	public WeeklyReport findReportByDomainNamePeriod(java.util.Date period, String domain, String name) {
-		WeeklyreportDO record = new WeeklyreportDO();
-		WeeklyreportMapper mapper = springMapper();
+		WeeklyReportDO record = new WeeklyReportDO();
+		WeeklyReportMapper mapper = springMapper();
 
 		record.setPeriod(period);
 		record.setDomain(domain);
 		record.setName(name);
-		WeeklyreportDO result = mapper.findReportByDomainNamePeriod(record).stream().findFirst().orElse(null);
+		WeeklyReportDO result = mapper.findReportByDomainNamePeriod(record).stream().findFirst().orElse(null);
 
 		return requireFound(result, "findReportByDomainNamePeriod", record.toString());
 	}
@@ -58,7 +58,7 @@ public class WeeklyReportRepository {
 	public int insert(WeeklyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		WeeklyreportDO record = toRecord(proto);
+		WeeklyReportDO record = toRecord(proto);
 		int count = transactionTemplate.execute(status -> springMapper().insert(record));
 
 		proto.setId(record.getId());
@@ -72,7 +72,7 @@ public class WeeklyReportRepository {
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 	}
 
-	private WeeklyreportMapper springMapper() {
+	private WeeklyReportMapper springMapper() {
 		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
 
 		if (sqlSessionTemplate == null) {
@@ -83,7 +83,7 @@ public class WeeklyReportRepository {
 			LOGGER.info("WeeklyReportRepository is using Spring managed WeeklyreportMapper.");
 		}
 
-		return sqlSessionTemplate.getMapper(WeeklyreportMapper.class);
+		return sqlSessionTemplate.getMapper(WeeklyReportMapper.class);
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
@@ -101,7 +101,7 @@ public class WeeklyReportRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private WeeklyReport requireFound(WeeklyreportDO record, String field, String value) {
+	private WeeklyReport requireFound(WeeklyReportDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No WeeklyReport found by " + field + "(" + value + ").", 1);
 		}
@@ -109,7 +109,7 @@ public class WeeklyReportRepository {
 		return toModel(record);
 	}
 
-	private WeeklyReport toModel(WeeklyreportDO record) {
+	private WeeklyReport toModel(WeeklyReportDO record) {
 		WeeklyReport model = new WeeklyReport();
 
 		if (record.getId() != null) {
@@ -137,8 +137,8 @@ public class WeeklyReportRepository {
 		return model;
 	}
 
-	private WeeklyreportDO toRecord(WeeklyReport model) {
-		WeeklyreportDO record = new WeeklyreportDO();
+	private WeeklyReportDO toRecord(WeeklyReport model) {
+		WeeklyReportDO record = new WeeklyReportDO();
 
 		record.setId(model.getId());
 		record.setName(model.getName());

@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.weekly.report.content.dao.data;
+package com.dianping.cat.core.mybatis.data;
 
 import java.util.Date;
 

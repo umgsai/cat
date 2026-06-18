@@ -1,10 +1,10 @@
-package com.dianping.cat.core.mybatis.businessreport.dao;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.core.mybatis.businessreport.dao.data.BusinessReportDO;
+import com.dianping.cat.core.mybatis.data.BusinessReportDO;
 
 public interface BusinessReportMapper {
 	int deleteByPrimaryKey(@Param("id") Long id);

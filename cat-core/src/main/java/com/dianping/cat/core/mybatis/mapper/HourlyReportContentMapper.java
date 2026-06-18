@@ -1,10 +1,10 @@
-package com.dianping.cat.core.mybatis.hourly.report.content.dao;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.core.mybatis.hourly.report.content.dao.data.HourlyReportContentDO;
+import com.dianping.cat.core.mybatis.data.HourlyReportContentDO;
 
 public interface HourlyReportContentMapper {
 	int deleteByPrimaryKey(@Param("reportId") Long reportId);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.task.dao.TaskMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.task.dao.data.TaskDO">
+<mapper namespace="com.dianping.cat.core.mybatis.mapper.TaskMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.data.TaskDO">
         <result column="id" property="id"/>
         <result column="producer" property="producer"/>
         <result column="consumer" property="consumer"/>
@@ -53,7 +53,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.task.dao.data.TaskDO" keyProperty="id">
+            parameterType="com.dianping.cat.core.mybatis.data.TaskDO" keyProperty="id">
         INSERT INTO t_task
         <include refid="setField"/>
     </insert>
@@ -74,7 +74,7 @@
         delete from t_task where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.task.dao.data.TaskDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.data.TaskDO">
         UPDATE t_task
         <include refid="setField"/>
         WHERE id = #{id}

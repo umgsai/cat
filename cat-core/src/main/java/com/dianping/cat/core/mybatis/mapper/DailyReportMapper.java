@@ -1,11 +1,11 @@
-package com.dianping.cat.core.report.daily.dao;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.Date;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.core.report.daily.dao.data.DailyReportDO;
+import com.dianping.cat.core.mybatis.data.DailyReportDO;
 
 public interface DailyReportMapper {
 	int deleteByDomainNamePeriod(@Param("domain") String domain, @Param("name") String name,

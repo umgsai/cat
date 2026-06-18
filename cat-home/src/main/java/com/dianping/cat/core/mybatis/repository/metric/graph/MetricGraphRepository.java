@@ -1,6 +1,6 @@
 package com.dianping.cat.core.mybatis.repository.metric.graph;
 
-import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
+import com.dianping.cat.core.mybatis.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.metric.graph.dao.MetricGraphMapper;
 import com.dianping.cat.core.mybatis.metric.graph.dao.data.MetricGraphDO;
 import com.dianping.cat.home.dal.report.MetricGraph;

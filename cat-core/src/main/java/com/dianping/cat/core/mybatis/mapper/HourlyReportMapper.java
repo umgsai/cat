@@ -1,23 +1,23 @@
-package com.dianping.cat.core.mybatis.hourlyreport.dao;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.core.mybatis.hourlyreport.dao.data.HourlyreportDO;
+import com.dianping.cat.core.mybatis.data.HourlyReportDO;
 
-public interface HourlyreportMapper {
+public interface HourlyReportMapper {
 	int deleteByPrimaryKey(@Param("id") Long id);
 
-	HourlyreportDO findByPrimaryKey(@Param("id") Long id);
+	HourlyReportDO findByPrimaryKey(@Param("id") Long id);
 
-	int insert(HourlyreportDO record);
+	int insert(HourlyReportDO record);
 
-	List<HourlyreportDO> queryAll();
+	List<HourlyReportDO> queryAll();
 
-	int updateByPrimaryKey(HourlyreportDO record);
+	int updateByPrimaryKey(HourlyReportDO record);
 
-	List<HourlyreportDO> findAllByDomainNamePeriod(@Param("record") HourlyreportDO record);
+	List<HourlyReportDO> findAllByDomainNamePeriod(@Param("record") HourlyReportDO record);
 
-	List<HourlyreportDO> findAllByPeriodName(@Param("record") HourlyreportDO record);
+	List<HourlyReportDO> findAllByPeriodName(@Param("record") HourlyReportDO record);
 }

@@ -1,6 +1,6 @@
 package com.dianping.cat.core.mybatis.repository.alert.summary;
 
-import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
+import com.dianping.cat.core.mybatis.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.alert.summary.dao.AlertSummaryMapper;
 import com.dianping.cat.core.mybatis.alert.summary.dao.data.AlertSummaryDO;
 import com.dianping.cat.home.dal.report.AlertSummary;

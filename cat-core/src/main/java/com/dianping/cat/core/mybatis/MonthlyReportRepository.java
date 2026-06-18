@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.repository.monthreport;
+package com.dianping.cat.core.mybatis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -9,8 +9,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.mybatis.monthreport.dao.MonthreportMapper;
-import com.dianping.cat.core.mybatis.monthreport.dao.data.MonthreportDO;
+import com.dianping.cat.core.mybatis.mapper.MonthReportMapper;
+import com.dianping.cat.core.mybatis.data.MonthReportDO;
 
 public class MonthlyReportRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MonthlyReportRepository.class);
@@ -38,19 +38,19 @@ public class MonthlyReportRepository {
 	}
 
 	public MonthlyReport findByPK(long keyId) {
-		MonthreportMapper mapper = springMapper();
+		MonthReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
 	public MonthlyReport findReportByDomainNamePeriod(java.util.Date period, String domain, String name) {
-		MonthreportDO record = new MonthreportDO();
-		MonthreportMapper mapper = springMapper();
+		MonthReportDO record = new MonthReportDO();
+		MonthReportMapper mapper = springMapper();
 
 		record.setPeriod(period);
 		record.setDomain(domain);
 		record.setName(name);
-		MonthreportDO result = mapper.findReportByDomainNamePeriod(record).stream().findFirst().orElse(null);
+		MonthReportDO result = mapper.findReportByDomainNamePeriod(record).stream().findFirst().orElse(null);
 
 		return requireFound(result, "findReportByDomainNamePeriod", record.toString());
 	}
@@ -58,7 +58,7 @@ public class MonthlyReportRepository {
 	public int insert(MonthlyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		MonthreportDO record = toRecord(proto);
+		MonthReportDO record = toRecord(proto);
 		int count = transactionTemplate.execute(status -> springMapper().insert(record));
 
 		proto.setId(record.getId());
@@ -72,7 +72,7 @@ public class MonthlyReportRepository {
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 	}
 
-	private MonthreportMapper springMapper() {
+	private MonthReportMapper springMapper() {
 		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
 
 		if (sqlSessionTemplate == null) {
@@ -83,7 +83,7 @@ public class MonthlyReportRepository {
 			LOGGER.info("MonthlyReportRepository is using Spring managed MonthreportMapper.");
 		}
 
-		return sqlSessionTemplate.getMapper(MonthreportMapper.class);
+		return sqlSessionTemplate.getMapper(MonthReportMapper.class);
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
@@ -101,7 +101,7 @@ public class MonthlyReportRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private MonthlyReport requireFound(MonthreportDO record, String field, String value) {
+	private MonthlyReport requireFound(MonthReportDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No MonthlyReport found by " + field + "(" + value + ").", 1);
 		}
@@ -109,7 +109,7 @@ public class MonthlyReportRepository {
 		return toModel(record);
 	}
 
-	private MonthlyReport toModel(MonthreportDO record) {
+	private MonthlyReport toModel(MonthReportDO record) {
 		MonthlyReport model = new MonthlyReport();
 
 		if (record.getId() != null) {
@@ -137,8 +137,8 @@ public class MonthlyReportRepository {
 		return model;
 	}
 
-	private MonthreportDO toRecord(MonthlyReport model) {
-		MonthreportDO record = new MonthreportDO();
+	private MonthReportDO toRecord(MonthlyReport model) {
+		MonthReportDO record = new MonthReportDO();
 
 		record.setId(model.getId());
 		record.setName(model.getName());

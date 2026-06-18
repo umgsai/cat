@@ -35,7 +35,7 @@ import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.consumer.dependency.model.entity.Dependency;
 import com.dianping.cat.consumer.dependency.model.entity.Index;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.repository.ConfigRepository;
+import com.dianping.cat.core.mybatis.ConfigRepository;
 import com.dianping.cat.helper.Chinese;
 import com.dianping.cat.home.dependency.config.entity.DomainConfig;
 import com.dianping.cat.home.dependency.config.entity.EdgeConfig;

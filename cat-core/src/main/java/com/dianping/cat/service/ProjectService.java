@@ -21,7 +21,7 @@ package com.dianping.cat.service;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.dal.Project;
-import com.dianping.cat.core.mybatis.repository.project.ProjectRepository;
+import com.dianping.cat.core.mybatis.ProjectRepository;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

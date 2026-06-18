@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.repository.task;
+package com.dianping.cat.core.mybatis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -9,8 +9,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.Task;
-import com.dianping.cat.core.mybatis.task.dao.TaskMapper;
-import com.dianping.cat.core.mybatis.task.dao.data.TaskDO;
+import com.dianping.cat.core.mybatis.mapper.TaskMapper;
+import com.dianping.cat.core.mybatis.data.TaskDO;
 
 public class TaskRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TaskRepository.class);

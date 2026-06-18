@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.repository.project;
+package com.dianping.cat.core.mybatis;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,8 +12,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.Project;
-import com.dianping.cat.core.mybatis.project.dao.ProjectMapper;
-import com.dianping.cat.core.mybatis.project.dao.data.ProjectDO;
+import com.dianping.cat.core.mybatis.mapper.ProjectMapper;
+import com.dianping.cat.core.mybatis.data.ProjectDO;
 
 public class ProjectRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectRepository.class);

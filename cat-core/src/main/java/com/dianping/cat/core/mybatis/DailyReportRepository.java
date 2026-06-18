@@ -1,4 +1,4 @@
-package com.dianping.cat.core.report.daily.repository;
+package com.dianping.cat.core.mybatis;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,8 +11,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.report.daily.dao.DailyReportMapper;
-import com.dianping.cat.core.report.daily.dao.data.DailyReportDO;
+import com.dianping.cat.core.mybatis.mapper.DailyReportMapper;
+import com.dianping.cat.core.mybatis.data.DailyReportDO;
 
 public class DailyReportRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DailyReportRepository.class);

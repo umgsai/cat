@@ -31,7 +31,7 @@ import com.dianping.cat.alarm.sender.entity.SenderConfig;
 import com.dianping.cat.alarm.sender.transform.DefaultSaxParser;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.repository.ConfigRepository;
+import com.dianping.cat.core.mybatis.ConfigRepository;
 
 public class SenderConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SenderConfigManager.class);

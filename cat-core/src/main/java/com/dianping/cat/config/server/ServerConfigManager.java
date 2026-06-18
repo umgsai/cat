@@ -54,7 +54,7 @@ import com.dianping.cat.configuration.server.entity.ServerConfig;
 import com.dianping.cat.configuration.server.entity.StorageConfig;
 import com.dianping.cat.configuration.server.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.repository.ConfigRepository;
+import com.dianping.cat.core.mybatis.ConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 

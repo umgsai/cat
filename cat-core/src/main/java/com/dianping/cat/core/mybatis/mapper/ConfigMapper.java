@@ -1,10 +1,10 @@
-package com.dianping.cat.core.config.dao;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.core.config.dao.data.ConfigDO;
+import com.dianping.cat.core.mybatis.data.ConfigDO;
 
 public interface ConfigMapper {
 	int deleteById(@Param("id") Long id);

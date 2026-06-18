@@ -27,9 +27,9 @@ CREATE TABLE `t_weekly_report`
     `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_period_domain_name` (`period`,`domain`,`name`),
-    KEY `idx_domain_name` (`domain`,`name`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_domain_name` (`domain`,`name`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='周报表';
 
 CREATE TABLE `t_monthly_report`
@@ -44,9 +44,9 @@ CREATE TABLE `t_monthly_report`
     `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_period_domain_name` (`period`,`domain`,`name`),
-    KEY `idx_domain_name` (`domain`,`name`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_domain_name` (`domain`,`name`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='月报表';
 
 CREATE TABLE `t_host_info`
@@ -59,10 +59,10 @@ CREATE TABLE `t_host_info`
     `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_ip` (`ip`),
-    KEY `idx_domain` (`domain`),
-    KEY `idx_hostname` (`hostname`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_domain` (`domain`),
+    KEY           `idx_hostname` (`hostname`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='IP和项目名的对应关系';
 
 CREATE TABLE `t_hourly_report`
@@ -76,11 +76,11 @@ CREATE TABLE `t_hourly_report`
     `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '报表创建时间',
     `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    KEY `idx_domain_name_period` (`domain`,`name`,`period`),
-    KEY `idx_name_period` (`name`,`period`),
-    KEY `idx_period` (`period`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_domain_name_period` (`domain`,`name`,`period`),
+    KEY           `idx_name_period` (`name`,`period`),
+    KEY           `idx_period` (`period`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='小时报表';
 
 CREATE TABLE `t_hourly_report_content`
@@ -91,9 +91,9 @@ CREATE TABLE `t_hourly_report_content`
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`report_id`),
-    KEY `idx_period` (`period`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_period` (`period`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='小时报表二进制内容';
 
 CREATE TABLE `t_daily_report_content`
@@ -104,9 +104,9 @@ CREATE TABLE `t_daily_report_content`
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`report_id`),
-    KEY `idx_period` (`period`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_period` (`period`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='天报表二进制内容';
 
 CREATE TABLE `t_weekly_report_content`
@@ -117,9 +117,9 @@ CREATE TABLE `t_weekly_report_content`
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`report_id`),
-    KEY `idx_period` (`period`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_period` (`period`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='周报表二进制内容';
 
 CREATE TABLE `t_monthly_report_content`
@@ -130,9 +130,9 @@ CREATE TABLE `t_monthly_report_content`
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`report_id`),
-    KEY `idx_period` (`period`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_period` (`period`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='月报表二进制内容';
 
 CREATE TABLE `t_business_report`
@@ -147,11 +147,11 @@ CREATE TABLE `t_business_report`
     `create_time`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    KEY `idx_period_product_line_name` (`period`,`product_line`,`name`),
-    KEY `idx_product_line_name_period` (`product_line`,`name`,`period`),
-    KEY `idx_period` (`period`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY            `idx_period_product_line_name` (`period`,`product_line`,`name`),
+    KEY            `idx_product_line_name_period` (`product_line`,`name`,`period`),
+    KEY            `idx_period` (`period`),
+    KEY            `idx_create_time` (`create_time`),
+    KEY            `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='业务监控实时报表';
 
 CREATE TABLE `t_task`
@@ -171,10 +171,10 @@ CREATE TABLE `t_task`
     `update_time`   datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_report_period_domain_name_type` (`report_period`,`report_domain`,`report_name`,`task_type`),
-    KEY `idx_status_consumer` (`status`,`consumer`),
-    KEY `idx_report_period` (`report_period`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY             `idx_status_consumer` (`status`,`consumer`),
+    KEY             `idx_report_period` (`report_period`),
+    KEY             `idx_create_time` (`create_time`),
+    KEY             `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='后台任务';
 
 
@@ -193,10 +193,10 @@ CREATE TABLE `t_project`
     `update_time`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_domain` (`domain`),
-    KEY `idx_cmdb_domain` (`cmdb_domain`),
-    KEY `idx_cmdb_product_line` (`cmdb_product_line`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY                 `idx_cmdb_domain` (`cmdb_domain`),
+    KEY                 `idx_cmdb_product_line` (`cmdb_product_line`),
+    KEY                 `idx_create_time` (`create_time`),
+    KEY                 `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目基础信息';
 
 
@@ -210,10 +210,10 @@ CREATE TABLE `t_topology_graph`
     `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    KEY `idx_period` (`period`),
-    KEY `idx_ip_period` (`ip`,`period`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_period` (`period`),
+    KEY           `idx_ip_period` (`ip`,`period`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPRESSED COMMENT='历史拓扑图';
 
 
@@ -226,8 +226,8 @@ CREATE TABLE `t_config`
     `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_name` (`name`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统全局配置';
 
 CREATE TABLE `t_baseline`
@@ -241,10 +241,10 @@ CREATE TABLE `t_baseline`
     `update_time`   datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_period_name_key` (`report_period`, `report_name`, `index_key`),
-    KEY `idx_report_name` (`report_name`),
-    KEY `idx_index_key` (`index_key`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY             `idx_report_name` (`report_name`),
+    KEY             `idx_index_key` (`index_key`),
+    KEY             `idx_create_time` (`create_time`),
+    KEY             `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='指标基线数据';
 
 CREATE TABLE `t_alteration`
@@ -264,10 +264,10 @@ CREATE TABLE `t_alteration`
     `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    KEY `ind_date_domain_host` (`change_time`, `domain`, `hostname`),
-    KEY `idx_type_change_time` (`type`, `change_time`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `ind_date_domain_host` (`change_time`, `domain`, `hostname`),
+    KEY           `idx_type_change_time` (`type`, `change_time`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='变更记录';
 
 CREATE TABLE `t_alert`
@@ -282,11 +282,11 @@ CREATE TABLE `t_alert`
     `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    KEY `idx_alert_time_category_domain` (`alert_time`, `category`, `domain`),
-    KEY `idx_domain_alert_time` (`domain`, `alert_time`),
-    KEY `idx_category_alert_time` (`category`, `alert_time`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_alert_time_category_domain` (`alert_time`, `category`, `domain`),
+    KEY           `idx_domain_alert_time` (`domain`, `alert_time`),
+    KEY           `idx_category_alert_time` (`category`, `alert_time`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='告警记录';
 
 CREATE TABLE `t_alert_summary`
@@ -298,135 +298,143 @@ CREATE TABLE `t_alert_summary`
     `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    KEY `idx_alert_time_domain` (`alert_time`, `domain`),
-    KEY `idx_domain_alert_time` (`domain`, `alert_time`),
-    KEY `idx_create_time` (`create_time`),
-    KEY `idx_update_time` (`update_time`)
+    KEY           `idx_alert_time_domain` (`alert_time`, `domain`),
+    KEY           `idx_domain_alert_time` (`domain`, `alert_time`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='统一告警信息';
 
-CREATE TABLE `t_operation` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `user` varchar(128) NOT NULL DEFAULT '' COMMENT '用户名',
-  `module` varchar(128) NOT NULL DEFAULT '' COMMENT '模块',
-  `operation` varchar(128) NOT NULL DEFAULT '' COMMENT '操作',
-  `operation_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
-  `content` longtext NOT NULL COMMENT '操作内容',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_operation_time` (`operation_time`),
-  KEY `idx_user_operation_time` (`user`, `operation_time`),
-  KEY `idx_module_operation_time` (`module`, `operation_time`),
-  KEY `idx_create_time` (`create_time`),
-  KEY `idx_update_time` (`update_time`)
+CREATE TABLE `t_operation`
+(
+    `id`             bigint       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `user`           varchar(128) NOT NULL DEFAULT '' COMMENT '用户名',
+    `module`         varchar(128) NOT NULL DEFAULT '' COMMENT '模块',
+    `operation`      varchar(128) NOT NULL DEFAULT '' COMMENT '操作',
+    `operation_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+    `content`        longtext     NOT NULL COMMENT '操作内容',
+    `create_time`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`    datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY              `idx_operation_time` (`operation_time`),
+    KEY              `idx_user_operation_time` (`user`, `operation_time`),
+    KEY              `idx_module_operation_time` (`module`, `operation_time`),
+    KEY              `idx_create_time` (`create_time`),
+    KEY              `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户操作日志';
 
-CREATE TABLE `t_overload` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `report_id` bigint NOT NULL DEFAULT '0' COMMENT '报表ID',
-  `report_type` tinyint NOT NULL DEFAULT '0' COMMENT '报表类型 1=hourly 2=daily 3=weekly 4=monthly',
-  `report_size` double NOT NULL DEFAULT '0' COMMENT '报表大小，单位MB',
-  `period` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '报表时间',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_period` (`period`),
-  KEY `idx_report_type_report_id` (`report_type`, `report_id`),
-  KEY `idx_period_report_type` (`period`, `report_type`),
-  KEY `idx_create_time` (`create_time`),
-  KEY `idx_update_time` (`update_time`)
+CREATE TABLE `t_overload`
+(
+    `id`          bigint   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `report_id`   bigint   NOT NULL DEFAULT '0' COMMENT '报表ID',
+    `report_type` tinyint  NOT NULL DEFAULT '0' COMMENT '报表类型 1=hourly 2=daily 3=weekly 4=monthly',
+    `report_size` double NOT NULL DEFAULT '0' COMMENT '报表大小，单位MB',
+    `period`      datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '报表时间',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY           `idx_period` (`period`),
+    KEY           `idx_report_type_report_id` (`report_type`, `report_id`),
+    KEY           `idx_period_report_type` (`period`, `report_type`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='过大容量报表';
 
-CREATE TABLE `t_config_modification` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `user_name` varchar(64) NOT NULL DEFAULT '' COMMENT '用户名',
-  `account_name` varchar(64) NOT NULL DEFAULT '' COMMENT '账号名',
-  `action_name` varchar(64) NOT NULL DEFAULT '' COMMENT '操作名称',
-  `argument` longtext NOT NULL COMMENT '参数内容',
-  `modify_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_modify_time` (`modify_time`),
-  KEY `idx_user_modify_time` (`user_name`, `modify_time`),
-  KEY `idx_account_modify_time` (`account_name`, `modify_time`),
-  KEY `idx_action_modify_time` (`action_name`, `modify_time`),
-  KEY `idx_create_time` (`create_time`),
-  KEY `idx_update_time` (`update_time`)
+CREATE TABLE `t_config_modification`
+(
+    `id`           bigint      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `user_name`    varchar(64) NOT NULL DEFAULT '' COMMENT '用户名',
+    `account_name` varchar(64) NOT NULL DEFAULT '' COMMENT '账号名',
+    `action_name`  varchar(64) NOT NULL DEFAULT '' COMMENT '操作名称',
+    `argument`     longtext    NOT NULL COMMENT '参数内容',
+    `modify_time`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    `create_time`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY            `idx_modify_time` (`modify_time`),
+    KEY            `idx_user_modify_time` (`user_name`, `modify_time`),
+    KEY            `idx_account_modify_time` (`account_name`, `modify_time`),
+    KEY            `idx_action_modify_time` (`action_name`, `modify_time`),
+    KEY            `idx_create_time` (`create_time`),
+    KEY            `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='配置修改记录';
 
-CREATE TABLE `t_user_define_rule` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `content` text NOT NULL COMMENT '用户自定义规则',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_create_time` (`create_time`),
-  KEY `idx_update_time` (`update_time`)
+CREATE TABLE `t_user_define_rule`
+(
+    `id`          bigint   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `content`     text     NOT NULL COMMENT '用户自定义规则',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户自定义规则';
 
-CREATE TABLE `t_business_config` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `name` varchar(64) NOT NULL DEFAULT '' COMMENT '配置名称',
-  `domain` varchar(128) NOT NULL DEFAULT '' COMMENT '项目',
-  `content` longtext NOT NULL COMMENT '配置内容',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_name_domain` (`name`, `domain`),
-  KEY `idx_name` (`name`),
-  KEY `idx_domain` (`domain`),
-  KEY `idx_create_time` (`create_time`),
-  KEY `idx_update_time` (`update_time`)
+CREATE TABLE `t_business_config`
+(
+    `id`          bigint       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `name`        varchar(64)  NOT NULL DEFAULT '' COMMENT '配置名称',
+    `domain`      varchar(128) NOT NULL DEFAULT '' COMMENT '项目',
+    `content`     longtext     NOT NULL COMMENT '配置内容',
+    `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_name_domain` (`name`, `domain`),
+    KEY           `idx_name` (`name`),
+    KEY           `idx_domain` (`domain`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='业务配置';
 
-CREATE TABLE `t_metric_screen` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `name` varchar(64) NOT NULL DEFAULT '' COMMENT '配置名称',
-  `graph_name` varchar(64) NOT NULL DEFAULT '' COMMENT 'Graph名称',
-  `view` varchar(64) NOT NULL DEFAULT '' COMMENT '视角',
-  `end_points` longtext NOT NULL COMMENT '端点配置',
-  `measurements` longtext NOT NULL COMMENT '指标配置',
-  `content` longtext NOT NULL COMMENT '配置内容',
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_name_graph` (`name`, `graph_name`),
-  KEY `idx_name` (`name`),
-  KEY `idx_graph_name` (`graph_name`),
-  KEY `idx_create_time` (`create_time`),
-  KEY `idx_update_time` (`update_time`)
+CREATE TABLE `t_metric_screen`
+(
+    `id`           bigint      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `name`         varchar(64) NOT NULL DEFAULT '' COMMENT '配置名称',
+    `graph_name`   varchar(64) NOT NULL DEFAULT '' COMMENT 'Graph名称',
+    `view`         varchar(64) NOT NULL DEFAULT '' COMMENT '视角',
+    `end_points`   longtext    NOT NULL COMMENT '端点配置',
+    `measurements` longtext    NOT NULL COMMENT '指标配置',
+    `content`      longtext    NOT NULL COMMENT '配置内容',
+    `create_time`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_name_graph` (`name`, `graph_name`),
+    KEY            `idx_name` (`name`),
+    KEY            `idx_graph_name` (`graph_name`),
+    KEY            `idx_create_time` (`create_time`),
+    KEY            `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统监控Screen配置';
 
-CREATE TABLE `t_metric_graph` (
-      `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-      `graph_id` bigint NOT NULL DEFAULT '0' COMMENT '大盘ID',
-      `name` varchar(64) NOT NULL DEFAULT '' COMMENT '配置ID',
-      `content` longtext NOT NULL COMMENT '配置内容',
-      `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-      `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `uk_name` (`name`),
-      KEY `idx_graph_id` (`graph_id`),
-      KEY `idx_create_time` (`create_time`),
-      KEY `idx_update_time` (`update_time`)
+CREATE TABLE `t_metric_graph`
+(
+    `id`          bigint      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `graph_id`    bigint      NOT NULL DEFAULT '0' COMMENT '大盘ID',
+    `name`        varchar(64) NOT NULL DEFAULT '' COMMENT '配置ID',
+    `content`     longtext    NOT NULL COMMENT '配置内容',
+    `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_name` (`name`),
+    KEY           `idx_graph_id` (`graph_id`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统监控Graph配置';
 
-CREATE TABLE `t_server_alarm_rule` (
-      `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-      `category` varchar(64) NOT NULL DEFAULT '' COMMENT '监控分类',
-      `endpoint` varchar(256) NOT NULL DEFAULT '' COMMENT '监控对象ID',
-      `measurement` varchar(256) NOT NULL DEFAULT '' COMMENT '监控指标',
-      `tags` varchar(512) NOT NULL DEFAULT '' COMMENT '监控指标标签',
-      `content` longtext NOT NULL COMMENT '配置内容',
-      `type` varchar(32) NOT NULL DEFAULT '' COMMENT '数据聚合方式',
-      `creator` varchar(128) NOT NULL DEFAULT '' COMMENT '创建人',
-      `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-      `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-      PRIMARY KEY (`id`),
-      KEY `idx_category` (`category`),
-      KEY `idx_type` (`type`),
-      KEY `idx_category_type` (`category`,`type`),
-      KEY `idx_create_time` (`create_time`),
-      KEY `idx_update_time` (`update_time`)
+CREATE TABLE `t_server_alarm_rule`
+(
+    `id`          bigint       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `category`    varchar(64)  NOT NULL DEFAULT '' COMMENT '监控分类',
+    `endpoint`    varchar(256) NOT NULL DEFAULT '' COMMENT '监控对象ID',
+    `measurement` varchar(256) NOT NULL DEFAULT '' COMMENT '监控指标',
+    `tags`        varchar(512) NOT NULL DEFAULT '' COMMENT '监控指标标签',
+    `content`     longtext     NOT NULL COMMENT '配置内容',
+    `type`        varchar(32)  NOT NULL DEFAULT '' COMMENT '数据聚合方式',
+    `creator`     varchar(128) NOT NULL DEFAULT '' COMMENT '创建人',
+    `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY           `idx_category` (`category`),
+    KEY           `idx_type` (`type`),
+    KEY           `idx_category_type` (`category`,`type`),
+    KEY           `idx_create_time` (`create_time`),
+    KEY           `idx_update_time` (`update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统告警规则配置';

@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.repository.business.config;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,9 +9,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.config.BusinessConfig;
-import com.dianping.cat.core.mybatis.BusinessConfigMapper;
-import com.dianping.cat.core.mybatis.business.config.dao.data.BusinessConfigDO;
-import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
+import com.dianping.cat.core.mybatis.data.BusinessConfigDO;
+import com.dianping.cat.core.mybatis.SpringBackedRepositorySupport;
 
 public class BusinessConfigRepository extends SpringBackedRepositorySupport<BusinessConfigMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessConfigRepository.class);

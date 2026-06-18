@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.operation.dao.OperationMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.operation.dao.data.OperationDO">
+<mapper namespace="com.dianping.cat.core.mybatis.mapper.OperationMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.data.OperationDO">
         <result column="id" property="id"/>
         <result column="user" property="user"/>
         <result column="module" property="module"/>
@@ -37,7 +37,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.operation.dao.data.OperationDO" keyProperty="id">
+            parameterType="com.dianping.cat.core.mybatis.data.OperationDO" keyProperty="id">
         INSERT INTO t_operation
         <include refid="setField"/>
     </insert>
@@ -58,7 +58,7 @@
         delete from t_operation where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.operation.dao.data.OperationDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.data.OperationDO">
         UPDATE t_operation
         <include refid="setField"/>
         WHERE id = #{id}

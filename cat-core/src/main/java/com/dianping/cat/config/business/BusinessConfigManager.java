@@ -35,7 +35,7 @@ import com.dianping.cat.configuration.business.entity.BusinessItemConfig;
 import com.dianping.cat.configuration.business.entity.BusinessReportConfig;
 import com.dianping.cat.configuration.business.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.BusinessConfig;
-import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
+import com.dianping.cat.core.mybatis.mapper.BusinessConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 

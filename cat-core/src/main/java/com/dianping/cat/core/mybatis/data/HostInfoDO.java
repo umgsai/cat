@@ -1,11 +1,11 @@
-package com.dianping.cat.core.mybatis.hostinfo.dao.data;
+package com.dianping.cat.core.mybatis.data;
 
 import java.util.Date;
 
 import lombok.Data;
 
 @Data
-public class HostinfoDO {
+public class HostInfoDO {
 	private Long id;
 
 	private String ip;

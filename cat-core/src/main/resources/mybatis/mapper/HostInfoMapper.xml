@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.hostinfo.dao.HostinfoMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO">
+<mapper namespace="com.dianping.cat.core.mybatis.mapper.HostInfoMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.data.HostInfoDO">
         <result column="id" property="id"/>
         <result column="ip" property="ip"/>
         <result column="domain" property="domain"/>
@@ -31,7 +31,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO" keyProperty="id">
+            parameterType="com.dianping.cat.core.mybatis.data.HostInfoDO" keyProperty="id">
         INSERT INTO t_host_info
         <include refid="setField"/>
     </insert>
@@ -52,7 +52,7 @@
         delete from t_host_info where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.data.HostInfoDO">
         UPDATE t_host_info
         <include refid="setField"/>
         WHERE id = #{id}

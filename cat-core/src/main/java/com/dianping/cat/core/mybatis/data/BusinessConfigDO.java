@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.business.config.dao.data;
+package com.dianping.cat.core.mybatis.data;
 
 import java.util.Date;
 

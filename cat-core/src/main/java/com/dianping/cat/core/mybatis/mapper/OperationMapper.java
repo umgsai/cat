@@ -1,10 +1,10 @@
-package com.dianping.cat.core.mybatis.operation.dao;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.core.mybatis.operation.dao.data.OperationDO;
+import com.dianping.cat.core.mybatis.data.OperationDO;
 
 public interface OperationMapper {
 	int deleteByPrimaryKey(@Param("id") Long id);

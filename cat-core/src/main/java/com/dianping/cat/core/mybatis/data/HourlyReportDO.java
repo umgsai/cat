@@ -1,11 +1,11 @@
-package com.dianping.cat.core.mybatis.hourlyreport.dao.data;
+package com.dianping.cat.core.mybatis.data;
 
 import java.util.Date;
 
 import lombok.Data;
 
 @Data
-public class HourlyreportDO {
+public class HourlyReportDO {
 	private Long id;
 
 	private Integer type;

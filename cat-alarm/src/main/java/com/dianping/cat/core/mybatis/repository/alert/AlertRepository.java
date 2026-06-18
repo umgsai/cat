@@ -3,7 +3,7 @@ package com.dianping.cat.core.mybatis.repository.alert;
 import com.dianping.cat.alarm.Alert;
 import com.dianping.cat.core.mybatis.alert.dao.AlertMapper;
 import com.dianping.cat.core.mybatis.alert.dao.data.AlertDO;
-import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
+import com.dianping.cat.core.mybatis.SpringBackedRepositorySupport;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;

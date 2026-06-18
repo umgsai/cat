@@ -1,10 +1,10 @@
-package com.dianping.cat.core.mybatis.monthly.report.content.dao;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.core.mybatis.monthly.report.content.dao.data.MonthlyReportContentDO;
+import com.dianping.cat.core.mybatis.data.MonthlyReportContentDO;
 
 public interface MonthlyReportContentMapper {
 	int deleteByPrimaryKey(@Param("reportId") Long reportId);

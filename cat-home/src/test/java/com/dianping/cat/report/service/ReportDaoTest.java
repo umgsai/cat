@@ -27,10 +27,10 @@ import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.WeeklyReport;
-import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
-import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
-import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
-import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
+import com.dianping.cat.core.mybatis.HourlyReportRepository;
+import com.dianping.cat.core.mybatis.MonthlyReportRepository;
+import com.dianping.cat.core.mybatis.WeeklyReportRepository;
+import com.dianping.cat.core.mybatis.DailyReportRepository;
 
 public class ReportDaoTest extends SpringCatHomeTestSupport {
 

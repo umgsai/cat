@@ -27,8 +27,8 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
-import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
+import com.dianping.cat.core.mybatis.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.HourlyReportRepository;
 
 public abstract class AbstractReportReloader implements ReportReloader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractReportReloader.class);

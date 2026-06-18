@@ -30,7 +30,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.repository.ConfigRepository;
+import com.dianping.cat.core.mybatis.ConfigRepository;
 import com.dianping.cat.home.storage.entity.Link;
 import com.dianping.cat.home.storage.entity.Storage;
 import com.dianping.cat.home.storage.entity.StorageGroup;

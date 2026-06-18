@@ -3,7 +3,7 @@ package com.dianping.cat.core.mybatis.repository.user.define.rule;
 import com.dianping.cat.alarm.UserDefineRule;
 import com.dianping.cat.core.mybatis.user.define.rule.dao.UserDefineRuleMapper;
 import com.dianping.cat.core.mybatis.user.define.rule.dao.data.UserDefineRuleDO;
-import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
+import com.dianping.cat.core.mybatis.SpringBackedRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;

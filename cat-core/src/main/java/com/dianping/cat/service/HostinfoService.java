@@ -33,7 +33,7 @@ import com.dianping.cat.support.Threads.Task;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.dal.Hostinfo;
-import com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository;
+import com.dianping.cat.core.mybatis.HostInfoRepository;
 import com.dianping.cat.helper.TimeHelper;
 
 public class HostinfoService {
@@ -41,7 +41,7 @@ public class HostinfoService {
 
 	public static final String UNKNOWN_PROJECT = "UnknownProject";
 
-	private HostinfoRepository m_hostinfoDao;
+	private HostInfoRepository m_hostinfoDao;
 
 	private ServerConfigManager m_manager;
 
@@ -260,7 +260,7 @@ public class HostinfoService {
 		}
 	}
 
-	public void setHostinfoDao(HostinfoRepository hostinfoDao) {
+	public void setHostinfoDao(HostInfoRepository hostinfoDao) {
 		m_hostinfoDao = hostinfoDao;
 	}
 

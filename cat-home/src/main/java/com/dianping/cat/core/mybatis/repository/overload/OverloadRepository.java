@@ -1,6 +1,6 @@
 package com.dianping.cat.core.mybatis.repository.overload;
 
-import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
+import com.dianping.cat.core.mybatis.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.overload.dao.OverloadMapper;
 import com.dianping.cat.core.mybatis.overload.dao.data.OverloadDO;
 import com.dianping.cat.home.dal.report.Overload;

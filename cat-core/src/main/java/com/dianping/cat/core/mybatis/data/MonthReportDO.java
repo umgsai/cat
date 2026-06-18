@@ -1,11 +1,11 @@
-package com.dianping.cat.core.mybatis.monthreport.dao.data;
+package com.dianping.cat.core.mybatis.data;
 
 import java.util.Date;
 
 import lombok.Data;
 
 @Data
-public class MonthreportDO {
+public class MonthReportDO {
 	private Long id;
 
 	private String name;

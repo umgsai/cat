@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.repository;
+package com.dianping.cat.core.mybatis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

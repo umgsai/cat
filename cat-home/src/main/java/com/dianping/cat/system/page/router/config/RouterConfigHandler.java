@@ -33,7 +33,7 @@ import com.dianping.cat.Constants;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
+import com.dianping.cat.core.mybatis.DailyReportRepository;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.router.entity.Domain;
 import com.dianping.cat.home.router.entity.Group;

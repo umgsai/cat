@@ -1,23 +1,23 @@
-package com.dianping.cat.core.mybatis.weeklyreport.dao;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.core.mybatis.weeklyreport.dao.data.WeeklyreportDO;
+import com.dianping.cat.core.mybatis.data.WeeklyReportDO;
 
-public interface WeeklyreportMapper {
+public interface WeeklyReportMapper {
 	int deleteByPrimaryKey(@Param("id") Long id);
 
-	WeeklyreportDO findByPrimaryKey(@Param("id") Long id);
+	WeeklyReportDO findByPrimaryKey(@Param("id") Long id);
 
-	int insert(WeeklyreportDO record);
+	int insert(WeeklyReportDO record);
 
-	List<WeeklyreportDO> queryAll();
+	List<WeeklyReportDO> queryAll();
 
-	int updateByPrimaryKey(WeeklyreportDO record);
+	int updateByPrimaryKey(WeeklyReportDO record);
 
-	List<WeeklyreportDO> findReportByDomainNamePeriod(@Param("record") WeeklyreportDO record);
+	List<WeeklyReportDO> findReportByDomainNamePeriod(@Param("record") WeeklyReportDO record);
 
-	int deleteReportByDomainNamePeriod(@Param("record") WeeklyreportDO record);
+	int deleteReportByDomainNamePeriod(@Param("record") WeeklyReportDO record);
 }

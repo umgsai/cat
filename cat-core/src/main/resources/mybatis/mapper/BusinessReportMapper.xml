@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.businessreport.dao.BusinessReportMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.businessreport.dao.data.BusinessReportDO">
+<mapper namespace="com.dianping.cat.core.mybatis.mapper.BusinessReportMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.data.BusinessReportDO">
         <result column="id" property="id"/>
         <result column="type" property="type"/>
         <result column="name" property="name"/>
@@ -40,7 +40,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.businessreport.dao.data.BusinessReportDO" keyProperty="id">
+            parameterType="com.dianping.cat.core.mybatis.data.BusinessReportDO" keyProperty="id">
         INSERT INTO t_business_report
         <include refid="setField"/>
     </insert>
@@ -61,7 +61,7 @@
         delete from t_business_report where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.businessreport.dao.data.BusinessReportDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.data.BusinessReportDO">
         UPDATE t_business_report
         <include refid="setField"/>
         WHERE id = #{id}

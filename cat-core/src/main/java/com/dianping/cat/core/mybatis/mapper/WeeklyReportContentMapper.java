@@ -1,10 +1,10 @@
-package com.dianping.cat.core.mybatis.weekly.report.content.dao;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.core.mybatis.weekly.report.content.dao.data.WeeklyReportContentDO;
+import com.dianping.cat.core.mybatis.data.WeeklyReportContentDO;
 
 public interface WeeklyReportContentMapper {
 	int deleteByPrimaryKey(@Param("reportId") Long reportId);

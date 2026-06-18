@@ -1,10 +1,10 @@
-package com.dianping.cat.core.mybatis.task.dao;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.core.mybatis.task.dao.data.TaskDO;
+import com.dianping.cat.core.mybatis.data.TaskDO;
 
 public interface TaskMapper {
 	int deleteByPrimaryKey(@Param("id") Long id);

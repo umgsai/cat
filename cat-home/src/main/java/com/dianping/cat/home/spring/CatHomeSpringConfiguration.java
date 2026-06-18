@@ -18,7 +18,6 @@ import org.unidal.cat.message.storage.BucketManager;
 import org.unidal.cat.message.storage.BlockDumperManager;
 import org.unidal.cat.message.storage.BlockDumperFactory;
 import org.unidal.cat.message.storage.BlockWriterFactory;
-import org.unidal.cat.message.storage.Index;
 import org.unidal.cat.message.storage.IndexFactory;
 import org.unidal.cat.message.storage.IndexManager;
 import org.unidal.cat.message.storage.MessageDumperManager;
@@ -26,7 +25,6 @@ import org.unidal.cat.message.storage.MessageDumperFactory;
 import org.unidal.cat.message.storage.MessageFinderManager;
 import org.unidal.cat.message.storage.MessageProcessorFactory;
 import org.unidal.cat.message.storage.StorageConfiguration;
-import org.unidal.cat.message.storage.TokenMapping;
 import org.unidal.cat.message.storage.TokenMappingFactory;
 import org.unidal.cat.message.storage.TokenMappingManager;
 import org.unidal.cat.message.storage.internals.ByteBufCache;
@@ -134,8 +132,8 @@ import com.dianping.cat.consumer.dump.LocalMessageBucketManager;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionDelegate;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
-import com.dianping.cat.core.config.repository.ConfigRepository;
-import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
+import com.dianping.cat.core.mybatis.ConfigRepository;
+import com.dianping.cat.core.mybatis.SpringBackedRepositorySupport;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
@@ -161,25 +159,25 @@ import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository;
 import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
 import com.dianping.cat.core.mybatis.repository.baseline.BaselineRepository;
-import com.dianping.cat.core.mybatis.repository.business.config.BusinessConfigRepository;
+import com.dianping.cat.core.mybatis.mapper.BusinessConfigRepository;
 import com.dianping.cat.core.mybatis.repository.config.modification.ConfigModificationRepository;
-import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
-import com.dianping.cat.core.mybatis.repository.hostinfo.HostinfoRepository;
-import com.dianping.cat.core.mybatis.repository.hourly.report.content.HourlyReportContentRepository;
-import com.dianping.cat.core.mybatis.repository.hourlyreport.HourlyReportRepository;
+import com.dianping.cat.core.mybatis.DailyReportContentRepository;
+import com.dianping.cat.core.mybatis.HostInfoRepository;
+import com.dianping.cat.core.mybatis.HourlyReportContentRepository;
+import com.dianping.cat.core.mybatis.HourlyReportRepository;
 import com.dianping.cat.core.mybatis.repository.metric.graph.MetricGraphRepository;
 import com.dianping.cat.core.mybatis.repository.metric.screen.MetricScreenRepository;
-import com.dianping.cat.core.mybatis.repository.monthly.report.content.MonthlyReportContentRepository;
-import com.dianping.cat.core.mybatis.repository.monthreport.MonthlyReportRepository;
+import com.dianping.cat.core.mybatis.MonthlyReportContentRepository;
+import com.dianping.cat.core.mybatis.MonthlyReportRepository;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
-import com.dianping.cat.core.mybatis.repository.project.ProjectRepository;
+import com.dianping.cat.core.mybatis.ProjectRepository;
 import com.dianping.cat.core.mybatis.repository.server.alarm.rule.ServerAlarmRuleRepository;
-import com.dianping.cat.core.mybatis.repository.task.TaskRepository;
+import com.dianping.cat.core.mybatis.TaskRepository;
 import com.dianping.cat.core.mybatis.repository.topologygraph.TopologyGraphRepository;
 import com.dianping.cat.core.mybatis.repository.user.define.rule.UserDefineRuleRepository;
-import com.dianping.cat.core.mybatis.repository.weekly.report.content.WeeklyReportContentRepository;
-import com.dianping.cat.core.mybatis.repository.weeklyreport.WeeklyReportRepository;
-import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
+import com.dianping.cat.core.mybatis.WeeklyReportContentRepository;
+import com.dianping.cat.core.mybatis.WeeklyReportRepository;
+import com.dianping.cat.core.mybatis.DailyReportRepository;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.hadoop.hdfs.FileSystemManager;
 import com.dianping.cat.hadoop.hdfs.HdfsMessageBucketFactory;
@@ -2728,9 +2726,9 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public HostinfoRepository hostinfoRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		HostinfoRepository repository = new HostinfoRepository();
+	public HostInfoRepository hostinfoRepository(SqlSessionTemplate sqlSessionTemplate,
+	                                             TransactionTemplate transactionTemplate) {
+		HostInfoRepository repository = new HostInfoRepository();
 
 		repository.setSqlSessionTemplate(sqlSessionTemplate);
 		repository.setTransactionTemplate(transactionTemplate);
@@ -4472,8 +4470,8 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public HostinfoService hostinfoService(HostinfoRepository hostinfoRepository,
-			ServerConfigManager serverConfigManager) {
+	public HostinfoService hostinfoService(HostInfoRepository hostinfoRepository,
+	                                       ServerConfigManager serverConfigManager) {
 		HostinfoService service = new HostinfoService();
 
 		service.setHostinfoDao(hostinfoRepository);

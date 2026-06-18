@@ -28,7 +28,7 @@ import java.util.Map;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.repository.ConfigRepository;
+import com.dianping.cat.core.mybatis.ConfigRepository;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.home.dependency.format.entity.ProductLine;
 import com.dianping.cat.home.dependency.format.entity.TopoGraphFormatConfig;

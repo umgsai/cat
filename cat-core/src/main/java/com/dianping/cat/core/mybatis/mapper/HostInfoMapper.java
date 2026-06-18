@@ -1,23 +1,23 @@
-package com.dianping.cat.core.mybatis.hostinfo.dao;
+package com.dianping.cat.core.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO;
+import com.dianping.cat.core.mybatis.data.HostInfoDO;
 
-public interface HostinfoMapper {
+public interface HostInfoMapper {
 	int deleteByPrimaryKey(@Param("id") Long id);
 
-	HostinfoDO findByPrimaryKey(@Param("id") Long id);
+	HostInfoDO findByPrimaryKey(@Param("id") Long id);
 
-	int insert(HostinfoDO record);
+	int insert(HostInfoDO record);
 
-	List<HostinfoDO> queryAll();
+	List<HostInfoDO> queryAll();
 
-	int updateByPrimaryKey(HostinfoDO record);
+	int updateByPrimaryKey(HostInfoDO record);
 
-	List<HostinfoDO> findByIp(@Param("record") HostinfoDO record);
+	List<HostInfoDO> findByIp(@Param("record") HostInfoDO record);
 
-	List<HostinfoDO> findAllIp(@Param("record") HostinfoDO record);
+	List<HostInfoDO> findAllIp(@Param("record") HostInfoDO record);
 }

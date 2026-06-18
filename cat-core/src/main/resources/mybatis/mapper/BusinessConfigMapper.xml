@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.business.config.dao.BusinessConfigMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.business.config.dao.data.BusinessConfigDO">
+<mapper namespace="com.dianping.cat.core.mybatis.mapper.BusinessConfigMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.data.BusinessConfigDO">
         <result column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="domain" property="domain"/>
@@ -31,7 +31,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.business.config.dao.data.BusinessConfigDO" keyProperty="id">
+            parameterType="com.dianping.cat.core.mybatis.data.BusinessConfigDO" keyProperty="id">
         INSERT INTO t_business_config
         <include refid="setField"/>
     </insert>
@@ -52,7 +52,7 @@
         delete from t_business_config where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.business.config.dao.data.BusinessConfigDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.data.BusinessConfigDO">
         UPDATE t_business_config
         <include refid="setField"/>
         WHERE id = #{id}

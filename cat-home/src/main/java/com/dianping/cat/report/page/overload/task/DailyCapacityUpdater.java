@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.mybatis.repository.daily.report.content.DailyReportContentRepository;
-import com.dianping.cat.core.report.daily.repository.DailyReportRepository;
+import com.dianping.cat.core.mybatis.DailyReportContentRepository;
+import com.dianping.cat.core.mybatis.DailyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
 

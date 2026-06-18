@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.repository.weekly.report.content;
+package com.dianping.cat.core.mybatis;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,8 +11,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.WeeklyReportContent;
-import com.dianping.cat.core.mybatis.weekly.report.content.dao.WeeklyReportContentMapper;
-import com.dianping.cat.core.mybatis.weekly.report.content.dao.data.WeeklyReportContentDO;
+import com.dianping.cat.core.mybatis.mapper.WeeklyReportContentMapper;
+import com.dianping.cat.core.mybatis.data.WeeklyReportContentDO;
 
 public class WeeklyReportContentRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WeeklyReportContentRepository.class);

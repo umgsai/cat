@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.repository.hostinfo;
+package com.dianping.cat.core.mybatis;
 
 import java.util.Date;
 import java.util.List;
@@ -12,11 +12,11 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.Hostinfo;
-import com.dianping.cat.core.mybatis.hostinfo.dao.HostinfoMapper;
-import com.dianping.cat.core.mybatis.hostinfo.dao.data.HostinfoDO;
+import com.dianping.cat.core.mybatis.mapper.HostInfoMapper;
+import com.dianping.cat.core.mybatis.data.HostInfoDO;
 
-public class HostinfoRepository {
-	private static final Logger LOGGER = LoggerFactory.getLogger(HostinfoRepository.class);
+public class HostInfoRepository {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HostInfoRepository.class);
 
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 
@@ -35,25 +35,25 @@ public class HostinfoRepository {
 	}
 
 	public List<Hostinfo> findAllIp() {
-		HostinfoMapper mapper = springMapper();
+		HostInfoMapper mapper = springMapper();
 
-		HostinfoDO record = new HostinfoDO();
+		HostInfoDO record = new HostInfoDO();
 
 		return mapper.findAllIp(record).stream().map(this::toModel).collect(Collectors.toList());
 	}
 
 	public Hostinfo findByPK(long keyId) {
-		HostinfoMapper mapper = springMapper();
+		HostInfoMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
 	public Hostinfo findByIp(String ip) {
-		HostinfoMapper mapper = springMapper();
-		HostinfoDO record = new HostinfoDO();
+		HostInfoMapper mapper = springMapper();
+		HostInfoDO record = new HostInfoDO();
 
 		record.setIp(ip);
-		HostinfoDO result = mapper.findByIp(record).stream().findFirst().orElse(null);
+		HostInfoDO result = mapper.findByIp(record).stream().findFirst().orElse(null);
 
 		return requireFound(result, "findByIp", record.toString());
 	}
@@ -70,7 +70,7 @@ public class HostinfoRepository {
 			proto.setLastModifiedDate(now);
 		}
 
-		HostinfoDO record = toRecord(proto);
+		HostInfoDO record = toRecord(proto);
 		int count = transactionTemplate.execute(status -> springMapper().insert(record));
 
 		proto.setId(record.getId());
@@ -84,7 +84,7 @@ public class HostinfoRepository {
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 	}
 
-	private HostinfoMapper springMapper() {
+	private HostInfoMapper springMapper() {
 		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
 
 		if (sqlSessionTemplate == null) {
@@ -95,7 +95,7 @@ public class HostinfoRepository {
 			LOGGER.info("HostinfoRepository is using Spring managed HostinfoMapper.");
 		}
 
-		return sqlSessionTemplate.getMapper(HostinfoMapper.class);
+		return sqlSessionTemplate.getMapper(HostInfoMapper.class);
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
@@ -113,7 +113,7 @@ public class HostinfoRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private Hostinfo requireFound(HostinfoDO record, String field, String value) {
+	private Hostinfo requireFound(HostInfoDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No Hostinfo found by " + field + "(" + value + ").", 1);
 		}
@@ -121,7 +121,7 @@ public class HostinfoRepository {
 		return toModel(record);
 	}
 
-	private Hostinfo toModel(HostinfoDO record) {
+	private Hostinfo toModel(HostInfoDO record) {
 		Hostinfo model = new Hostinfo();
 
 		if (record.getId() != null) {
@@ -146,8 +146,8 @@ public class HostinfoRepository {
 		return model;
 	}
 
-	private HostinfoDO toRecord(Hostinfo model) {
-		HostinfoDO record = new HostinfoDO();
+	private HostInfoDO toRecord(Hostinfo model) {
+		HostInfoDO record = new HostInfoDO();
 
 		record.setId(model.getId());
 		record.setIp(model.getIp());

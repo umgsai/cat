@@ -1,6 +1,6 @@
 package com.dianping.cat.core.mybatis.repository.metric.screen;
 
-import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
+import com.dianping.cat.core.mybatis.SpringBackedRepositorySupport;
 import com.dianping.cat.core.mybatis.metric.screen.dao.MetricScreenMapper;
 import com.dianping.cat.core.mybatis.metric.screen.dao.data.MetricScreenDO;
 import com.dianping.cat.home.dal.report.MetricScreen;

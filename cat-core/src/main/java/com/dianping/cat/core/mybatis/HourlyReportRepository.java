@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.repository.hourlyreport;
+package com.dianping.cat.core.mybatis;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,8 +11,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.mybatis.hourlyreport.dao.HourlyreportMapper;
-import com.dianping.cat.core.mybatis.hourlyreport.dao.data.HourlyreportDO;
+import com.dianping.cat.core.mybatis.mapper.HourlyReportMapper;
+import com.dianping.cat.core.mybatis.data.HourlyReportDO;
 
 public class HourlyReportRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HourlyReportRepository.class);
@@ -34,8 +34,8 @@ public class HourlyReportRepository {
 	}
 
 	public List<HourlyReport> findAllByDomainNamePeriod(java.util.Date period, String domain, String name) {
-		HourlyreportDO record = new HourlyreportDO();
-		HourlyreportMapper mapper = springMapper();
+		HourlyReportDO record = new HourlyReportDO();
+		HourlyReportMapper mapper = springMapper();
 
 		record.setPeriod(period);
 		record.setDomain(domain);
@@ -44,8 +44,8 @@ public class HourlyReportRepository {
 	}
 
 	public List<HourlyReport> findAllByPeriodName(java.util.Date period, String name) {
-		HourlyreportDO record = new HourlyreportDO();
-		HourlyreportMapper mapper = springMapper();
+		HourlyReportDO record = new HourlyReportDO();
+		HourlyReportMapper mapper = springMapper();
 
 		record.setPeriod(period);
 		record.setName(name);
@@ -53,7 +53,7 @@ public class HourlyReportRepository {
 	}
 
 	public HourlyReport findByPK(long keyId) {
-		HourlyreportMapper mapper = springMapper();
+		HourlyReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
@@ -61,7 +61,7 @@ public class HourlyReportRepository {
 	public int insert(HourlyReport proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		HourlyreportDO record = toRecord(proto);
+		HourlyReportDO record = toRecord(proto);
 		int count = transactionTemplate.execute(status -> springMapper().insert(record));
 
 		proto.setId(record.getId());
@@ -75,7 +75,7 @@ public class HourlyReportRepository {
 		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
 	}
 
-	private HourlyreportMapper springMapper() {
+	private HourlyReportMapper springMapper() {
 		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
 
 		if (sqlSessionTemplate == null) {
@@ -86,7 +86,7 @@ public class HourlyReportRepository {
 			LOGGER.info("HourlyReportRepository is using Spring managed HourlyreportMapper.");
 		}
 
-		return sqlSessionTemplate.getMapper(HourlyreportMapper.class);
+		return sqlSessionTemplate.getMapper(HourlyReportMapper.class);
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
@@ -104,7 +104,7 @@ public class HourlyReportRepository {
 		m_transactionTemplate = transactionTemplate;
 	}
 
-	private HourlyReport requireFound(HourlyreportDO record, String field, String value) {
+	private HourlyReport requireFound(HourlyReportDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No HourlyReport found by " + field + "(" + value + ").", 1);
 		}
@@ -112,7 +112,7 @@ public class HourlyReportRepository {
 		return toModel(record);
 	}
 
-	private HourlyReport toModel(HourlyreportDO record) {
+	private HourlyReport toModel(HourlyReportDO record) {
 		HourlyReport model = new HourlyReport();
 
 		if (record.getId() != null) {
@@ -140,8 +140,8 @@ public class HourlyReportRepository {
 		return model;
 	}
 
-	private HourlyreportDO toRecord(HourlyReport model) {
-		HourlyreportDO record = new HourlyreportDO();
+	private HourlyReportDO toRecord(HourlyReport model) {
+		HourlyReportDO record = new HourlyReportDO();
 
 		record.setId(model.getId());
 		record.setType(model.getType());

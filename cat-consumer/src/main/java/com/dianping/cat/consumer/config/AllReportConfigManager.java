@@ -35,7 +35,7 @@ import com.dianping.cat.consumer.all.config.entity.Report;
 import com.dianping.cat.consumer.all.config.entity.Type;
 import com.dianping.cat.consumer.all.config.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.repository.ConfigRepository;
+import com.dianping.cat.core.mybatis.ConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
