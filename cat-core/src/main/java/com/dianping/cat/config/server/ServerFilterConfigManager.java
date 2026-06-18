@@ -31,7 +31,7 @@ import com.dianping.cat.configuration.server.filter.entity.AtomicTreeConfig;
 import com.dianping.cat.configuration.server.filter.entity.ServerFilterConfig;
 import com.dianping.cat.configuration.server.filter.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.mybatis.ConfigRepository;
+import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.config.modification.dao.ConfigModificationMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.config.modification.dao.data.ConfigModificationDO">
+<mapper namespace="com.dianping.cat.mybatis.mapper.ConfigModificationMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.data.ConfigModificationDO">
         <result column="id" property="id"/>
         <result column="user_name" property="userName"/>
         <result column="account_name" property="accountName"/>
@@ -37,7 +37,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.config.modification.dao.data.ConfigModificationDO" keyProperty="id">
+            parameterType="com.dianping.cat.mybatis.data.ConfigModificationDO" keyProperty="id">
         INSERT INTO t_config_modification
         <include refid="setField"/>
     </insert>
@@ -58,7 +58,7 @@
         delete from t_config_modification where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.config.modification.dao.data.ConfigModificationDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.data.ConfigModificationDO">
         UPDATE t_config_modification
         <include refid="setField"/>
         WHERE id = #{id}

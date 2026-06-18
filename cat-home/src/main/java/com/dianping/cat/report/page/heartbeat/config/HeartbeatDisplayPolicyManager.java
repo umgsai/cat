@@ -31,7 +31,7 @@ import java.util.Set;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.mybatis.ConfigRepository;
+import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.home.heartbeat.entity.Group;
 import com.dianping.cat.home.heartbeat.entity.HeartbeatDisplayPolicy;
 import com.dianping.cat.home.heartbeat.entity.Metric;

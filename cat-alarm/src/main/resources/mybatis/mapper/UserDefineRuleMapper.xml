@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.user.define.rule.dao.UserDefineRuleMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.user.define.rule.dao.data.UserDefineRuleDO">
+<mapper namespace="com.dianping.cat.mybatis.user.define.rule.dao.UserDefineRuleMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.user.define.rule.dao.data.UserDefineRuleDO">
         <result column="id" property="id"/>
         <result column="content" property="content"/>
         <result column="create_time" property="createTime"/>
@@ -26,7 +26,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.user.define.rule.dao.data.UserDefineRuleDO" keyProperty="id">
+            parameterType="com.dianping.cat.mybatis.user.define.rule.dao.data.UserDefineRuleDO" keyProperty="id">
         INSERT INTO t_user_define_rule
         <include refid="setField"/>
     </insert>
@@ -47,7 +47,7 @@
         delete from t_user_define_rule where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.user.define.rule.dao.data.UserDefineRuleDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.user.define.rule.dao.data.UserDefineRuleDO">
         UPDATE t_user_define_rule
         <include refid="setField"/>
         WHERE id = #{id}

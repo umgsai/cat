@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.mapper.ProjectMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.data.ProjectDO">
+<mapper namespace="com.dianping.cat.mybatis.mapper.ProjectMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.data.ProjectDO">
         <result column="id" property="id"/>
         <result column="domain" property="domain"/>
         <result column="cmdb_domain" property="cmdbDomain"/>
@@ -46,7 +46,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.data.ProjectDO" keyProperty="id">
+            parameterType="com.dianping.cat.mybatis.data.ProjectDO" keyProperty="id">
         INSERT INTO t_project
         <include refid="setField"/>
     </insert>
@@ -67,7 +67,7 @@
         delete from t_project where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.data.ProjectDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.data.ProjectDO">
         UPDATE t_project
         <include refid="setField"/>
         WHERE id = #{id}

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.mybatis.ConfigRepository;
+import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.home.resource.entity.Resource;
 import com.dianping.cat.home.resource.entity.ResourceConfig;
 import com.dianping.cat.home.resource.transform.DefaultSaxParser;

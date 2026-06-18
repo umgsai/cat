@@ -29,7 +29,7 @@ import com.dianping.cat.alarm.receiver.entity.Receiver;
 import com.dianping.cat.alarm.receiver.transform.DefaultSaxParser;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.mybatis.ConfigRepository;
+import com.dianping.cat.mybatis.ConfigRepository;
 
 public class AlertConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertConfigManager.class);

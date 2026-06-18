@@ -34,8 +34,8 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.core.mybatis.HourlyReportContentRepository;
-import com.dianping.cat.core.mybatis.HourlyReportRepository;
+import com.dianping.cat.mybatis.HourlyReportContentRepository;
+import com.dianping.cat.mybatis.HourlyReportRepository;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.metric.graph.dao.MetricGraphMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.metric.graph.dao.data.MetricGraphDO">
+<mapper namespace="com.dianping.cat.mybatis.mapper.MetricGraphMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.data.MetricGraphDO">
         <result column="id" property="id"/>
         <result column="graph_id" property="graphId"/>
         <result column="name" property="name"/>
@@ -31,7 +31,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.metric.graph.dao.data.MetricGraphDO" keyProperty="id">
+            parameterType="com.dianping.cat.mybatis.data.MetricGraphDO" keyProperty="id">
         INSERT INTO t_metric_graph
         <include refid="setField"/>
     </insert>
@@ -52,7 +52,7 @@
         delete from t_metric_graph where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.metric.graph.dao.data.MetricGraphDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.data.MetricGraphDO">
         UPDATE t_metric_graph
         <include refid="setField"/>
         WHERE id = #{id}

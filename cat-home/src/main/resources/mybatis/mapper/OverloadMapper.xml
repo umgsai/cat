@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.overload.dao.OverloadMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.overload.dao.data.OverloadDO">
+<mapper namespace="com.dianping.cat.mybatis.mapper.OverloadMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.data.OverloadDO">
         <result column="id" property="id"/>
         <result column="report_id" property="reportId"/>
         <result column="report_type" property="reportType"/>
@@ -36,7 +36,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.overload.dao.data.OverloadDO" keyProperty="id">
+            parameterType="com.dianping.cat.mybatis.data.OverloadDO" keyProperty="id">
         INSERT INTO t_overload
         <include refid="setField"/>
     </insert>
@@ -57,7 +57,7 @@
         delete from t_overload where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.overload.dao.data.OverloadDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.data.OverloadDO">
         UPDATE t_overload
         <include refid="setField"/>
         WHERE id = #{id}

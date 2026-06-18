@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.alteration.dao.AlterationMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.alteration.dao.data.AlterationDO">
+<mapper namespace="com.dianping.cat.mybatis.mapper.AlterationMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.data.AlterationDO">
         <result column="id" property="id"/>
         <result column="type" property="type"/>
         <result column="title" property="title"/>
@@ -55,7 +55,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.alteration.dao.data.AlterationDO" keyProperty="id">
+            parameterType="com.dianping.cat.mybatis.data.AlterationDO" keyProperty="id">
         INSERT INTO t_alteration
         <include refid="setField"/>
     </insert>
@@ -76,7 +76,7 @@
         delete from t_alteration where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.alteration.dao.data.AlterationDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.data.AlterationDO">
         UPDATE t_alteration
         <include refid="setField"/>
         WHERE id = #{id}

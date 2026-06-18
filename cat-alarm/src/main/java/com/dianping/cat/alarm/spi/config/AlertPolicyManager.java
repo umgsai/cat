@@ -34,7 +34,7 @@ import com.dianping.cat.alarm.policy.transform.DefaultSaxParser;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.mybatis.ConfigRepository;
+import com.dianping.cat.mybatis.ConfigRepository;
 
 public class AlertPolicyManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertPolicyManager.class);

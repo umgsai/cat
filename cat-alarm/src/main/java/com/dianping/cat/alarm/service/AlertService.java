@@ -30,7 +30,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
-import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
+import com.dianping.cat.mybatis.repository.alert.AlertRepository;
 
 public class AlertService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertService.class);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.topologygraph.dao.TopologyGraphMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.topologygraph.dao.data.TopologyGraphDO">
+<mapper namespace="com.dianping.cat.mybatis.mapper.TopologyGraphMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.data.TopologyGraphDO">
         <result column="id" property="id"/>
         <result column="ip" property="ip"/>
         <result column="period" property="period"/>
@@ -34,7 +34,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.topologygraph.dao.data.TopologyGraphDO" keyProperty="id">
+            parameterType="com.dianping.cat.mybatis.data.TopologyGraphDO" keyProperty="id">
         INSERT INTO t_topology_graph
         <include refid="setField"/>
     </insert>
@@ -55,7 +55,7 @@
         delete from t_topology_graph where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.topologygraph.dao.data.TopologyGraphDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.data.TopologyGraphDO">
         UPDATE t_topology_graph
         <include refid="setField"/>
         WHERE id = #{id}

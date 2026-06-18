@@ -1,0 +1,141 @@
+package com.dianping.cat.mybatis;
+
+import com.dianping.cat.mybatis.data.TopologyGraphDO;
+import com.dianping.cat.mybatis.mapper.TopologyGraphMapper;
+import com.dianping.cat.home.dal.report.TopologyGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.dao.EmptyResultDataAccessException;
+
+public class TopologyGraphRepository extends SpringBackedRepositorySupport<TopologyGraphMapper> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TopologyGraphRepository.class);
+
+	private static final String MAPPER_RESOURCE = "mybatis/mapper/TopologyGraphMapper.xml";
+
+	public TopologyGraphRepository() {
+		super(TopologyGraphMapper.class, MAPPER_RESOURCE,
+				"TopologyGraphRepository is using Spring managed TopologyGraphMapper.");
+	}
+
+	public TopologyGraph createLocal() {
+		return new TopologyGraph();
+	}
+
+	public int deleteByPK(TopologyGraph proto) {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		try {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
+		} catch (Exception e) {
+			throw new IllegalStateException("Error when executing deleteByPK for TopologyGraph.", e);
+		}
+	}
+
+	public TopologyGraph findByPK(int keyId) {
+		return findByPK((long) keyId);
+	}
+
+	public TopologyGraph findByPK(long keyId) {
+		TopologyGraphMapper mapper = springMapper(LOGGER);
+
+		try {
+			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
+		} catch (EmptyResultDataAccessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new IllegalStateException("Error when executing findByPK for TopologyGraph.", e);
+		}
+	}
+
+	public TopologyGraph findByPeriod(java.util.Date period) {
+		TopologyGraphMapper mapper = springMapper(LOGGER);
+		TopologyGraphDO record = new TopologyGraphDO();
+
+		record.setPeriod(period);
+		try {
+			TopologyGraphDO result = mapper.findByPeriod(record).stream().findFirst().orElse(null);
+
+			return requireFound(result, "findByPeriod", record.toString());
+		} catch (EmptyResultDataAccessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new IllegalStateException("Error when executing findByPeriod for TopologyGraph.", e);
+		}
+	}
+
+	public int insert(TopologyGraph proto) {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		try {
+			TopologyGraphDO record = toRecord(proto);
+			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
+
+			proto.setId(record.getId());
+			proto.setKeyId(record.getId());
+			return count;
+		} catch (Exception e) {
+			throw new IllegalStateException("Error when executing insert for TopologyGraph.", e);
+		}
+	}
+
+	public int updateByPK(TopologyGraph proto) {
+		TransactionTemplate transactionTemplate = springTransactionTemplate();
+
+		try {
+			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
+		} catch (Exception e) {
+			throw new IllegalStateException("Error when executing updateByPK for TopologyGraph.", e);
+		}
+	}
+
+	private TopologyGraph requireFound(TopologyGraphDO record, String field, String value) {
+		if (record == null) {
+			throw new EmptyResultDataAccessException("No TopologyGraph found by " + field + "(" + value + ").", 1);
+		}
+
+		return toModel(record);
+	}
+
+	private TopologyGraph toModel(TopologyGraphDO record) {
+		TopologyGraph model = new TopologyGraph();
+
+		if (record.getId() != null) {
+			model.setId(record.getId());
+		}
+		if (record.getIp() != null) {
+			model.setIp(record.getIp());
+		}
+		if (record.getPeriod() != null) {
+			model.setPeriod(record.getPeriod());
+		}
+		if (record.getType() != null) {
+			model.setType(record.getType());
+		}
+		if (record.getContent() != null) {
+			model.setContent(record.getContent());
+		}
+		if (record.getCreateTime() != null) {
+			model.setCreateTime(record.getCreateTime());
+		}
+		if (record.getUpdateTime() != null) {
+			model.setUpdateTime(record.getUpdateTime());
+		}
+		model.afterLoad();
+		return model;
+	}
+
+	private TopologyGraphDO toRecord(TopologyGraph model) {
+		TopologyGraphDO record = new TopologyGraphDO();
+
+		record.setId(model.getId());
+		record.setIp(model.getIp());
+		record.setPeriod(model.getPeriod());
+		record.setType(model.getType());
+		record.setContent(model.getContent());
+		record.setCreateTime(model.getCreateTime());
+		record.setUpdateTime(model.getUpdateTime());
+		record.setKeyId(model.getKeyId());
+		return record;
+	}
+}

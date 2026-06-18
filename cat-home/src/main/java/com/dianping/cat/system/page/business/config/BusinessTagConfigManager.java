@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.core.config.BusinessConfig;
-import com.dianping.cat.core.mybatis.mapper.BusinessConfigRepository;
+import com.dianping.cat.mybatis.mapper.BusinessConfigRepository;
 import com.dianping.cat.home.business.entity.BusinessItem;
 import com.dianping.cat.home.business.entity.BusinessTagConfig;
 import com.dianping.cat.home.business.entity.Tag;

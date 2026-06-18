@@ -29,7 +29,7 @@ import com.dianping.cat.configuration.message.entity.Domain;
 import com.dianping.cat.configuration.message.entity.Property;
 import com.dianping.cat.configuration.message.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.mybatis.ConfigRepository;
+import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 
 public class AtomicMessageConfigManager {

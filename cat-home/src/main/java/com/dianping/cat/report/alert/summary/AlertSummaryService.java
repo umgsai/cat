@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.dal.report.AlertSummary;
-import com.dianping.cat.core.mybatis.repository.alert.summary.AlertSummaryRepository;
+import com.dianping.cat.mybatis.AlertSummaryRepository;
 
 public class AlertSummaryService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryService.class);

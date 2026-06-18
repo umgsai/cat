@@ -45,7 +45,7 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.storage.builder.StorageSQLBuilder;
 import com.dianping.cat.home.dal.report.Alteration;
-import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
+import com.dianping.cat.mybatis.AlterationRepository;
 import com.dianping.cat.report.ReportPage;
 
 public class Handler implements PageHandler<Context> {

@@ -35,7 +35,7 @@ import com.dianping.cat.consumer.state.model.entity.Machine;
 import com.dianping.cat.consumer.state.model.entity.ProcessDomain;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.mybatis.DailyReportRepository;
+import com.dianping.cat.mybatis.DailyReportRepository;
 import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.router.entity.DefaultServer;

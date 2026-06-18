@@ -34,7 +34,7 @@ import java.util.Map.Entry;
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.dal.report.Baseline;
-import com.dianping.cat.core.mybatis.repository.baseline.BaselineRepository;
+import com.dianping.cat.mybatis.BaselineRepository;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.task.TaskHelper;
 

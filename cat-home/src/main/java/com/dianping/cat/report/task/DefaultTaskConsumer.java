@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.Task;
-import com.dianping.cat.core.mybatis.TaskRepository;
+import com.dianping.cat.mybatis.TaskRepository;
 import com.dianping.cat.message.Transaction;
 
 public class DefaultTaskConsumer extends TaskConsumer {

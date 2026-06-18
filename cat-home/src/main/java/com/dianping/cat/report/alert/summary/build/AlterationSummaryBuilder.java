@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.dal.report.Alteration;
-import com.dianping.cat.core.mybatis.repository.alteration.AlterationRepository;
+import com.dianping.cat.mybatis.AlterationRepository;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 
 public class AlterationSummaryBuilder extends SummaryBuilder {

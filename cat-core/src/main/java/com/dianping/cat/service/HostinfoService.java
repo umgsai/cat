@@ -33,7 +33,7 @@ import com.dianping.cat.support.Threads.Task;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.dal.Hostinfo;
-import com.dianping.cat.core.mybatis.HostInfoRepository;
+import com.dianping.cat.mybatis.HostInfoRepository;
 import com.dianping.cat.helper.TimeHelper;
 
 public class HostinfoService {

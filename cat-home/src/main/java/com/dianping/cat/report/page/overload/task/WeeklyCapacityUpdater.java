@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.core.dal.WeeklyReportContent;
-import com.dianping.cat.core.mybatis.WeeklyReportContentRepository;
-import com.dianping.cat.core.mybatis.WeeklyReportRepository;
+import com.dianping.cat.mybatis.WeeklyReportContentRepository;
+import com.dianping.cat.mybatis.WeeklyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
-import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
+import com.dianping.cat.mybatis.OverloadRepository;
 
 public class WeeklyCapacityUpdater implements CapacityUpdater {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WeeklyCapacityUpdater.class);

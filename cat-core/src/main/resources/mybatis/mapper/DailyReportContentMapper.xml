@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.mapper.DailyReportContentMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.data.DailyReportContentDO">
+<mapper namespace="com.dianping.cat.mybatis.mapper.DailyReportContentMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.data.DailyReportContentDO">
         <result column="report_id" property="reportId"/>
         <result column="content" property="content"/>
         <result column="period" property="period"/>
@@ -28,7 +28,7 @@
         </set>
     </sql>
 
-    <insert id="insert" parameterType="com.dianping.cat.core.mybatis.data.DailyReportContentDO">
+    <insert id="insert" parameterType="com.dianping.cat.mybatis.data.DailyReportContentDO">
         INSERT INTO t_daily_report_content
         <include refid="setField"/>
     </insert>
@@ -49,7 +49,7 @@
         delete from t_daily_report_content where report_id = #{reportId}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.data.DailyReportContentDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.data.DailyReportContentDO">
         UPDATE t_daily_report_content
         <include refid="setField"/>
         WHERE report_id = #{reportId}

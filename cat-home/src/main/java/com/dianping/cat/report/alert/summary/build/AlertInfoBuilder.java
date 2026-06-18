@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
-import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
+import com.dianping.cat.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.home.alert.summary.entity.AlertSummary;
 import com.dianping.cat.home.alert.summary.entity.Category;

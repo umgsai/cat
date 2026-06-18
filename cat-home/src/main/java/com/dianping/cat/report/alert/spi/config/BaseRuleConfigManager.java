@@ -46,7 +46,7 @@ import com.dianping.cat.alarm.rule.transform.DefaultJsonParser;
 import com.dianping.cat.alarm.rule.transform.DefaultSaxParser;
 import com.dianping.cat.alarm.spi.rule.RuleType;
 import com.dianping.cat.config.content.ContentFetcher;
-import com.dianping.cat.core.mybatis.ConfigRepository;
+import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;

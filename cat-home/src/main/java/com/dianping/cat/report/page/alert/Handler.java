@@ -43,7 +43,7 @@ import com.google.common.base.Splitter;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
-import com.dianping.cat.core.mybatis.repository.alert.AlertRepository;
+import com.dianping.cat.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.alarm.spi.sender.SenderManager;

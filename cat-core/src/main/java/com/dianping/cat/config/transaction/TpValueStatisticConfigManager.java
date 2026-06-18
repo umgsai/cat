@@ -30,7 +30,7 @@ import com.dianping.cat.configuration.tp.entity.Domain;
 import com.dianping.cat.configuration.tp.entity.TpValueStatisticConfig;
 import com.dianping.cat.configuration.tp.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.mybatis.ConfigRepository;
+import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 
 public class TpValueStatisticConfigManager {

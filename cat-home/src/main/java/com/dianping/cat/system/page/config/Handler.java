@@ -33,7 +33,7 @@ import org.unidal.web.mvc.annotation.PreInboundActionMeta;
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.home.dal.report.ConfigModification;
-import com.dianping.cat.core.mybatis.repository.config.modification.ConfigModificationRepository;
+import com.dianping.cat.mybatis.ConfigModificationRepository;
 import com.dianping.cat.system.SystemPage;
 import com.dianping.cat.system.page.config.processor.AlertConfigProcessor;
 import com.dianping.cat.system.page.config.processor.DependencyConfigProcessor;

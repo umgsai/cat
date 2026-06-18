@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
-import com.dianping.cat.core.mybatis.MonthlyReportContentRepository;
-import com.dianping.cat.core.mybatis.MonthlyReportRepository;
+import com.dianping.cat.mybatis.MonthlyReportContentRepository;
+import com.dianping.cat.mybatis.MonthlyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
-import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
+import com.dianping.cat.mybatis.OverloadRepository;
 
 public class MonthlyCapacityUpdater implements CapacityUpdater {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MonthlyCapacityUpdater.class);

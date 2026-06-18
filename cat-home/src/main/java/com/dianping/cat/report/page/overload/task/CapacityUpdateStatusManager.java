@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.mybatis.ConfigRepository;
-import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
+import com.dianping.cat.mybatis.ConfigRepository;
+import com.dianping.cat.mybatis.OverloadRepository;
 
 public class CapacityUpdateStatusManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CapacityUpdateStatusManager.class);

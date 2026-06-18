@@ -29,14 +29,14 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.mybatis.HourlyReportRepository;
+import com.dianping.cat.mybatis.HourlyReportRepository;
 import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.mybatis.MonthlyReportRepository;
+import com.dianping.cat.mybatis.MonthlyReportRepository;
 import com.dianping.cat.core.dal.WeeklyReport;
-import com.dianping.cat.core.mybatis.WeeklyReportRepository;
-import com.dianping.cat.core.mybatis.DailyReportRepository;
+import com.dianping.cat.mybatis.WeeklyReportRepository;
+import com.dianping.cat.mybatis.DailyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
-import com.dianping.cat.core.mybatis.repository.overload.OverloadRepository;
+import com.dianping.cat.mybatis.OverloadRepository;
 
 public class TableCapacityService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TableCapacityService.class);

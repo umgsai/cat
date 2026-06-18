@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.core.mybatis.metric.screen.dao.MetricScreenMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.core.mybatis.metric.screen.dao.data.MetricScreenDO">
+<mapper namespace="com.dianping.cat.mybatis.mapper.MetricScreenMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.data.MetricScreenDO">
         <result column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="graph_name" property="graphName"/>
@@ -40,7 +40,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.core.mybatis.metric.screen.dao.data.MetricScreenDO" keyProperty="id">
+            parameterType="com.dianping.cat.mybatis.data.MetricScreenDO" keyProperty="id">
         INSERT INTO t_metric_screen
         <include refid="setField"/>
     </insert>
@@ -61,7 +61,7 @@
         delete from t_metric_screen where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.core.mybatis.metric.screen.dao.data.MetricScreenDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.data.MetricScreenDO">
         UPDATE t_metric_screen
         <include refid="setField"/>
         WHERE id = #{id}
