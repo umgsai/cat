@@ -9,7 +9,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.config.BusinessConfig;
-import com.dianping.cat.core.mybatis.business.config.dao.BusinessConfigMapper;
+import com.dianping.cat.core.mybatis.BusinessConfigMapper;
 import com.dianping.cat.core.mybatis.business.config.dao.data.BusinessConfigDO;
 import com.dianping.cat.core.mybatis.repository.SpringBackedRepositorySupport;
 

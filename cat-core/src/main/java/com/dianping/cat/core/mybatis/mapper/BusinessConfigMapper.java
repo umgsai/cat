@@ -1,4 +1,4 @@
-package com.dianping.cat.core.mybatis.business.config.dao;
+package com.dianping.cat.core.mybatis;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.dianping.cat.core.config.repository;
+package com.dianping.cat.core.mybatis;
 
 import java.util.Date;
 import java.util.List;
@@ -12,8 +12,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.config.Config;
-import com.dianping.cat.core.config.dao.ConfigMapper;
-import com.dianping.cat.core.config.dao.data.ConfigDO;
+import com.dianping.cat.core.mybatis.mapper.ConfigMapper;
+import com.dianping.cat.core.mybatis.data.ConfigDO;
 
 public class ConfigRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigRepository.class);
