@@ -62,10 +62,11 @@ public class CatHomeRuntimeBootstrap {
 		m_tcpSocketReceiver.init();
 		Threads.forGroup("Cat").start(m_logviewProcessor);
 		Threads.forGroup("Cat").start(m_reportReloadTask);
-
+		LOGGER.info("isJobMachine: {}", m_serverConfigManager.isJobMachine());
 		if (m_serverConfigManager.isJobMachine()) {
 			Threads.forGroup("Cat").start(m_taskConsumer);
 		}
+		LOGGER.info("isAlertMachine: {}", m_serverConfigManager.isAlertMachine());
 		if (m_serverConfigManager.isAlertMachine()) {
 			m_alarmManager.startAlarm();
 		}
