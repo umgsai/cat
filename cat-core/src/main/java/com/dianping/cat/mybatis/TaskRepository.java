@@ -49,7 +49,7 @@ public class TaskRepository {
 		record.setConsumer(consumer);
 		TaskDO result = mapper.findByStatusConsumer(record).stream().findFirst().orElse(null);
 
-		return requireFound(result, "findByStatusConsumer", record.toString());
+		return result == null ? null : toModel(result);
 	}
 
 	public int insert(Task proto) {
