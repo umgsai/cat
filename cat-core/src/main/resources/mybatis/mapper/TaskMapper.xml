@@ -81,7 +81,10 @@
     </update>
 
     <select id="findByStatusConsumer" resultMap="BaseResultMap">
-        select id, producer, consumer, failure_count, report_name, report_domain, report_period, status, task_type, create_time, start_time, end_time, update_time, COUNT(*) AS count from t_task where status = #{record.status} <if test="record.consumer != null"> and consumer = #{record.consumer} </if> limit 1
+        select id, producer, consumer, failure_count, report_name, report_domain, report_period, status, task_type, create_time, start_time, end_time, update_time from t_task
+        where status = #{record.status}
+        <if test="record.consumer != null"> and consumer = #{record.consumer} </if>
+        limit 1
     </select>
 
     <update id="updateTodoToDoing">

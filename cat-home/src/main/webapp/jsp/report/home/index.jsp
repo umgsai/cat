@@ -33,7 +33,6 @@
 <table>
 	<tr>
 		<td><a target="_blank" href="http://www.dianping.com/"><img  class="img-polaroid"  src="${model.webapp}/images/logo/dianping.png"/></a></td>
-		<td><a target="_blank" href="http://www.ctrip.com/"><img  class="img-polaroid"  src="${model.webapp}/images/logo/ctrip.png"/></a></td>
 		<td><a target="_blank" href="https://www.lufax.com/"><img  class="img-polaroid"  src="${model.webapp}/images/logo/lufax.png"/></a></td>
 		<td><a target="_blank" href="http://www.ly.com/"><img  class="img-polaroid"  src="${model.webapp}/images/logo/ly.png"/></a></td>
 	</tr>
