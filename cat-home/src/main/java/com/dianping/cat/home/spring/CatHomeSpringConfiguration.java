@@ -813,6 +813,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(name = BusinessAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	@Scope("prototype")
 	public ReportManager<BusinessReport> businessReportManager(ReportDelegate<BusinessReport> businessDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
@@ -828,6 +829,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(name = TransactionAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	@Scope("prototype")
 	public ReportManager<TransactionReport> transactionReportManager(
 			ReportDelegate<TransactionReport> transactionDelegate, ReportBucketManager reportBucketManager,
 			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
@@ -844,6 +846,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(name = CrossAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	@Scope("prototype")
 	public ReportManager<CrossReport> crossReportManager(ReportDelegate<CrossReport> crossDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
@@ -859,6 +862,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(name = DependencyAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	@Scope("prototype")
 	public ReportManager<DependencyReport> dependencyReportManager(
 			ReportDelegate<DependencyReport> dependencyDelegate, ReportBucketManager reportBucketManager,
 			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
@@ -875,6 +879,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(name = EventAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	@Scope("prototype")
 	public ReportManager<EventReport> eventReportManager(ReportDelegate<EventReport> eventDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
@@ -890,6 +895,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(name = HeartbeatAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	@Scope("prototype")
 	public ReportManager<HeartbeatReport> heartbeatReportManager(ReportDelegate<HeartbeatReport> heartbeatDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
@@ -905,6 +911,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(name = MatrixAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	@Scope("prototype")
 	public ReportManager<MatrixReport> matrixReportManager(ReportDelegate<MatrixReport> matrixDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
@@ -920,6 +927,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(name = ProblemAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	@Scope("prototype")
 	public ReportManager<ProblemReport> problemReportManager(ReportDelegate<ProblemReport> problemDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
@@ -935,6 +943,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(name = StorageAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	@Scope("prototype")
 	public ReportManager<StorageReport> storageReportManager(ReportDelegate<StorageReport> storageDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
@@ -950,6 +959,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(name = TopAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	@Scope("prototype")
 	public ReportManager<TopReport> topReportManager(ReportDelegate<TopReport> topDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
@@ -965,6 +975,7 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean(name = StateAnalyzer.ID + "ReportManager", initMethod = "initialize")
+	@Scope("prototype")
 	public ReportManager<StateReport> stateReportManager(ReportDelegate<StateReport> stateDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {

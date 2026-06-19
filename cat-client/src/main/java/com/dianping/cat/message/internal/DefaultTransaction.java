@@ -136,7 +136,8 @@ public class DefaultTransaction extends AbstractMessage implements Transaction {
 
 	@Override
 	public long getDurationInMicros() {
-		if (super.isCompleted()) {
+		// 解码出来的 transaction 没有运行中的 TraceContext，但已经带有编码后的耗时。
+		if (super.isCompleted() || (m_ctx == null && m_durationInMicros > 0)) {
 			return m_durationInMicros;
 		} else {
 			return 0;
@@ -145,7 +146,8 @@ public class DefaultTransaction extends AbstractMessage implements Transaction {
 
 	@Override
 	public long getDurationInMillis() {
-		if (super.isCompleted()) {
+		// 解码出来的 transaction 没有运行中的 TraceContext，但已经带有编码后的耗时。
+		if (super.isCompleted() || (m_ctx == null && m_durationInMicros > 0)) {
 			return m_durationInMicros / 1000L;
 		} else {
 			return 0;

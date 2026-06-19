@@ -242,7 +242,6 @@ public class NativeMessageCodec implements MessageCodec {
 				t.setStatus(status);
 				t.addData(data);
 				t.setDurationInMicros(durationInMicros);
-				t.setCompleted();
 				return t;
 			}
 
