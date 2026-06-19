@@ -20,6 +20,10 @@ public class CatHomeRuntimeBootstrap {
 
 	private final AtomicBoolean m_started = new AtomicBoolean();
 
+	private final AtomicBoolean m_stopped = new AtomicBoolean();
+
+	private Thread m_shutdownHook;
+
 	private AlarmManager m_alarmManager;
 
 	private DefaultTaskConsumer m_taskConsumer;
@@ -37,15 +41,17 @@ public class CatHomeRuntimeBootstrap {
 	private TcpSocketReceiver m_tcpSocketReceiver;
 
 	public void shutdown() {
-		if (!m_started.get()) {
+		if (!m_started.get() || !m_stopped.compareAndSet(false, true)) {
 			return;
 		}
+
 		try {
 			m_messageConsumer.doCheckpoint();
 		} catch (RuntimeException e) {
 			LOGGER.warn("Unable to checkpoint message consumer during shutdown.", e);
 		}
 		m_tcpSocketReceiver.destory();
+		removeShutdownHook();
 		LOGGER.info("CAT home runtime bootstrap stopped.");
 	}
 
@@ -59,6 +65,7 @@ public class CatHomeRuntimeBootstrap {
 		}
 		LOGGER.info("Resolved ServersUpdaterManager for CAT home runtime bootstrap.");
 
+		registerShutdownHook();
 		m_tcpSocketReceiver.init();
 		Threads.forGroup("Cat").start(m_logviewProcessor);
 		Threads.forGroup("Cat").start(m_reportReloadTask);
@@ -71,6 +78,25 @@ public class CatHomeRuntimeBootstrap {
 			m_alarmManager.startAlarm();
 		}
 		LOGGER.info("CAT home runtime bootstrap started.");
+	}
+
+	private void registerShutdownHook() {
+		m_shutdownHook = new Thread(this::shutdown);
+		Runtime.getRuntime().addShutdownHook(m_shutdownHook);
+	}
+
+	private void removeShutdownHook() {
+		Thread shutdownHook = m_shutdownHook;
+
+		if (shutdownHook == null || shutdownHook == Thread.currentThread()) {
+			return;
+		}
+
+		try {
+			Runtime.getRuntime().removeShutdownHook(shutdownHook);
+		} catch (IllegalStateException e) {
+			// JVM is already shutting down, so the hook no longer needs removal.
+		}
 	}
 
 	public void setAlarmManager(AlarmManager alarmManager) {
