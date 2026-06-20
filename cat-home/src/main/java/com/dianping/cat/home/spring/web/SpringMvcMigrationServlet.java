@@ -34,6 +34,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcRouterController m_routerController;
 
+	private SpringMvcTopController m_topController;
+
 	private Map<RouteKey, RouteHandler> m_routes = Collections.emptyMap();
 
 	@Override
@@ -53,6 +55,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		m_pluginController = context.getBean(SpringMvcPluginController.class);
 		m_projectController = context.getBean(SpringMvcProjectController.class);
 		m_routerController = context.getBean(SpringMvcRouterController.class);
+		m_topController = context.getBean(SpringMvcTopController.class);
 		m_routes = buildRoutes();
 	}
 
@@ -78,6 +81,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/s/plugin/chrome", m_pluginController::chrome);
 		register(routes, "GET", "/s/project", m_projectController::project);
 		register(routes, "GET", "/s/router", m_routerController::router);
+		register(routes, "GET", "/r/top", m_topController::top);
 		register(routes, "POST", "/s/login", m_loginController::submit);
 
 		return Collections.unmodifiableMap(routes);

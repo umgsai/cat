@@ -1,58 +1,214 @@
 <%@ page session="false" language="java" pageEncoding="UTF-8" %>
 <%@ page contentType="text/html; charset=utf-8" %>
+<%@ page import="java.util.LinkedHashMap" %>
+<%@ page import="java.util.Map" %>
 <%
 	String contextPath = request.getContextPath();
 	String docName = (String) request.getAttribute("docName");
-	String runtime = (String) request.getAttribute("runtime");
-	String legacyHomeUrl = (String) request.getAttribute("legacyHomeUrl");
-	String loginUrl = (String) request.getAttribute("loginUrl");
+	String domain = (String) request.getAttribute("domain");
+	String ipAddress = (String) request.getAttribute("ipAddress");
+	String date = (String) request.getAttribute("date");
+	String reportType = (String) request.getAttribute("reportType");
+	String actionName = (String) request.getAttribute("actionName");
 
 	if (docName == null || docName.length() == 0) {
 		docName = "index";
 	}
+	if (domain == null || domain.length() == 0) {
+		domain = "cat";
+	}
+	if (ipAddress == null || ipAddress.length() == 0) {
+		ipAddress = "All";
+	}
+	if (reportType == null || reportType.length() == 0) {
+		reportType = "day";
+	}
+	if (actionName == null || actionName.length() == 0) {
+		actionName = "view";
+	}
+
+	Map<String, String> jspModel = new LinkedHashMap<String, String>();
+
+	jspModel.put("webapp", contextPath);
+	jspModel.put("domain", domain);
+	jspModel.put("ipAddress", ipAddress);
+	jspModel.put("date", date);
+	jspModel.put("reportType", reportType);
+	pageContext.setAttribute("model", jspModel);
 %>
 <!doctype html>
-<html>
+<html lang="en">
 <head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta charset="utf-8">
-	<title>CAT Spring MVC Home</title>
-	<link rel="stylesheet" href="<%=contextPath%>/assets/css/bootstrap.min.css">
-	<style>
-		body {
-			padding: 24px;
-		}
-
-		.page-header {
-			margin-top: 0;
-		}
-
-		.migration-links a {
-			margin-right: 12px;
-		}
-	</style>
+	<title>CAT</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/jquery-ui.min.css">
+	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/ace-fonts.css">
+	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/ace.min.css" id="main-ace-style">
+	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/ace-skins.min.css">
+	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/ace-rtl.min.css">
+	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/css/body.css">
+	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/js/jquery.datetimepicker.css">
+	<script src="<%=contextPath%>/assets/js/jquery.min.js"></script>
+	<script src="<%=contextPath%>/assets/js/ace-extra.min.js"></script>
+	<script src="<%=contextPath%>/assets/js/bootstrap.min.js"></script>
+	<script src="<%=contextPath%>/js/highcharts.js"></script>
+	<script src="<%=contextPath%>/js/baseGraph.js"></script>
+	<script src="<%=contextPath%>/js/jquery.datetimepicker.js"></script>
+	<script src="<%=contextPath%>/assets/js/jquery-ui.min.js"></script>
+	<script src="<%=contextPath%>/assets/js/jquery.ui.touch-punch.min.js"></script>
+	<script src="<%=contextPath%>/assets/js/ace-elements.min.js"></script>
+	<script src="<%=contextPath%>/assets/js/ace.min.js"></script>
 </head>
-<body>
-	<div class="page-header">
-		<h3>CAT Home</h3>
+<body class="no-skin">
+	<div id="navbar" class="navbar navbar-default">
+		<script type="text/javascript">
+			try { ace.settings.check('navbar', 'fixed'); } catch(e) {}
+		</script>
+		<div class="navbar-container" id="navbar-container">
+			<button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler">
+				<span class="sr-only">Toggle sidebar</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<div class="navbar-header pull-left">
+				<i class="navbar-brand">
+					<span>CAT</span>
+					<small style="font-size:65%">（Central Application Tracking）</small>
+					<button class="btn btn-success btn-sm" id="nav_application">
+						<i class="ace-icon fa fa-signal"></i>Application
+					</button>
+					<button class="btn btn-inverse btn-sm" id="nav_config">
+						<i class="ace-icon fa fa-cogs"></i>Configs
+					</button>
+					<button class="btn btn-yellow btn-sm disabled" id="nav_document">
+						<i class="ace-icon fa fa-cogs"></i>Documents
+					</button>
+				</i>
+			</div>
+			<div class="navbar-buttons navbar-header pull-right" role="navigation">
+				<ul class="nav ace-nav" style="height:auto;">
+					<li class="light-blue">
+						<a href="<%=contextPath%>/mvc/r/home?op=view&docName=index">
+							<i class="ace-icon glyphicon glyphicon-star"></i>
+							<span>Star</span>
+						</a>
+					</li>
+					<li class="light-blue">
+						<a data-toggle="dropdown" href="#" class="dropdown-toggle">
+							<span class="user-info" style="max-width:200px">
+								<span id="loginInfo"></span>
+							</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
 	</div>
-	<div class="alert alert-info">
-		<strong>Runtime:</strong> <%=runtime%>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#nav_document").addClass("disabled");
+		});
+	</script>
+	<div class="main-container" id="main-container">
+		<script type="text/javascript">
+			try { ace.settings.check('main-container', 'fixed'); } catch(e) {}
+		</script>
+		<div id="sidebar" class="sidebar responsive">
+			<script type="text/javascript">
+				try { ace.settings.check('sidebar', 'fixed'); } catch(e) {}
+			</script>
+			<ul class="nav nav-list" style="top: 0px;">
+				<li id="indexButton">
+					<a href="<%=contextPath%>/mvc/r/home?op=view&docName=index">
+						<i class="menu-icon glyphicon glyphicon-home"></i>
+						<span class="menu-text">项目首页</span>
+					</a>
+					<b class="arrow"></b>
+				</li>
+				<li id="releaseButton">
+					<a href="<%=contextPath%>/mvc/r/home?op=view&docName=release">
+						<i class="menu-icon glyphicon glyphicon-book"></i>
+						<span class="menu-text">版本说明</span>
+					</a>
+					<b class="arrow"></b>
+				</li>
+				<li id="pluginButton">
+					<a href="<%=contextPath%>/mvc/r/home?op=view&docName=plugin">
+						<i class="menu-icon fa fa-key"></i>
+						<span class="menu-text">插件扩展</span>
+					</a>
+					<b class="arrow"></b>
+				</li>
+			</ul>
+			<div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
+				<i class="ace-icon fa fa-angle-double-left" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i>
+			</div>
+			<script type="text/javascript">
+				try { ace.settings.check('sidebar', 'collapsed'); } catch(e) {}
+			</script>
+		</div>
+		<div class="main-content">
+			<div style="padding-top:2px;padding-right:8px;">
+				<div class="tab-content">
+					<%
+						if ("release".equals(docName)) {
+					%>
+						<%@ include file="../../../report/home/releasenotes.jsp"%>
+					<%
+						} else if ("plugin".equals(docName)) {
+					%>
+						<%@ include file="../../../report/home/plugin.jsp"%>
+					<%
+						} else {
+					%>
+						<%@ include file="../../../report/home/index.jsp"%>
+					<%
+						}
+					%>
+				</div>
+				<br>
+				<br>
+				<a href="<%=contextPath%>/mvc/r/home?op=checkpoint&domain=<%=domain%>&date=<%=date%>" style="color:#FFF">Do checkpoint here</a>
+			</div>
+		</div>
 	</div>
-	<table class="table table-bordered table-striped">
-		<tbody>
-			<tr>
-				<th style="width: 180px;">Path</th>
-				<td><%=request.getRequestURI()%></td>
-			</tr>
-			<tr>
-				<th>Document</th>
-				<td><%=docName%></td>
-			</tr>
-		</tbody>
-	</table>
-	<p class="migration-links">
-		<a class="btn btn-primary" href="<%=legacyHomeUrl%>">Open legacy home</a>
-		<a class="btn btn-default" href="<%=loginUrl%>">Login</a>
-	</p>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			var liElement = $('#<%=docName%>Button');
+			if (liElement.size && liElement.size() == 0) {
+				liElement = $('#indexButton');
+			}
+			liElement.addClass('active');
+
+			$("#nav_application").click(function() {
+				window.location.href = "<%=contextPath%>/mvc/r/t?domain=<%=domain%>&ip=<%=ipAddress%>&date=<%=date%>&reportType=<%=reportType%>&op=<%=actionName%>";
+			});
+			$("#nav_config").click(function() {
+				window.location.href = "<%=contextPath%>/mvc/s/config?op=projects";
+			});
+			$("#nav_document").click(function() {
+				window.location.href = "<%=contextPath%>/mvc/r/home?domain=<%=domain%>&ip=<%=ipAddress%>&date=<%=date%>&reportType=<%=reportType%>&op=<%=actionName%>";
+			});
+			$("a[href]").each(function() {
+				var href = $(this).attr("href");
+				var origin = window.location.protocol + "//" + window.location.host;
+
+				if (href.indexOf("<%=contextPath%>/r/") == 0) {
+					$(this).attr("href", "<%=contextPath%>/mvc/r/" + href.substring("<%=contextPath%>/r/".length));
+				} else if (href.indexOf("<%=contextPath%>/s/") == 0) {
+					$(this).attr("href", "<%=contextPath%>/mvc/s/" + href.substring("<%=contextPath%>/s/".length));
+				} else if (href.indexOf(origin + "<%=contextPath%>/r/") == 0) {
+					$(this).attr("href", "<%=contextPath%>/mvc/r/" + href.substring((origin + "<%=contextPath%>/r/").length));
+				} else if (href.indexOf(origin + "<%=contextPath%>/s/") == 0) {
+					$(this).attr("href", "<%=contextPath%>/mvc/s/" + href.substring((origin + "<%=contextPath%>/s/").length));
+				}
+			});
+		});
+	</script>
 </body>
 </html>

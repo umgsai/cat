@@ -15,29 +15,29 @@ public class SpringMvcHomeControllerTest {
 	@Test
 	public void shouldBuildDefaultHomeModel() {
 		SpringMvcHomeController controller = new SpringMvcHomeController();
-		Map<String, Object> model = controller.homeModel(request("/cat", Collections.<String, String>emptyMap()));
+		Map<String, Object> model = controller.homeModel(request(Collections.<String, String>emptyMap()));
 
 		Assert.assertEquals("index", model.get("docName"));
 		Assert.assertEquals("spring-mvc-migration", model.get("runtime"));
-		Assert.assertEquals("/cat/r/home", model.get("legacyHomeUrl"));
+		Assert.assertEquals("/cat/mvc/r/home", model.get("homeUrl"));
 		Assert.assertEquals("/cat/mvc/s/login", model.get("loginUrl"));
 	}
 
 	@Test
 	public void shouldPreserveRequestedDocName() {
 		SpringMvcHomeController controller = new SpringMvcHomeController();
-		Map<String, Object> model = controller.homeModel(request("/cat", Collections.singletonMap("docName", "plugin")));
+		Map<String, Object> model = controller.homeModel(request(Collections.singletonMap("docName", "plugin")));
 
 		Assert.assertEquals("plugin", model.get("docName"));
 	}
 
-	private HttpServletRequest request(String contextPath, Map<String, String> parameters) {
+	private HttpServletRequest request(Map<String, String> parameters) {
 		return (HttpServletRequest) Proxy.newProxyInstance(getClass().getClassLoader(),
 				new Class<?>[] { HttpServletRequest.class }, new InvocationHandler() {
 					@Override
 					public Object invoke(Object proxy, Method method, Object[] args) {
 						if ("getContextPath".equals(method.getName())) {
-							return contextPath;
+							return "/cat";
 						}
 						if ("getParameter".equals(method.getName())) {
 							return parameters.get(args[0]);
