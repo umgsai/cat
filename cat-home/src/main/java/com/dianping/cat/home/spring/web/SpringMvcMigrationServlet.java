@@ -24,6 +24,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcBusinessController m_businessController;
 
+	private SpringMvcEventController m_eventController;
+
 	private SpringMvcHomeController m_homeController;
 
 	private SpringMvcLoginController m_loginController;
@@ -35,6 +37,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 	private SpringMvcRouterController m_routerController;
 
 	private SpringMvcTopController m_topController;
+
+	private SpringMvcTransactionController m_transactionController;
 
 	private Map<RouteKey, RouteHandler> m_routes = Collections.emptyMap();
 
@@ -49,6 +53,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 			throw new ServletException("CAT home Spring context is not initialized.");
 		}
 		m_businessController = context.getBean(SpringMvcBusinessController.class);
+		m_eventController = context.getBean(SpringMvcEventController.class);
 		m_healthController = context.getBean(SpringMvcHealthController.class);
 		m_homeController = context.getBean(SpringMvcHomeController.class);
 		m_loginController = context.getBean(SpringMvcLoginController.class);
@@ -56,6 +61,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		m_projectController = context.getBean(SpringMvcProjectController.class);
 		m_routerController = context.getBean(SpringMvcRouterController.class);
 		m_topController = context.getBean(SpringMvcTopController.class);
+		m_transactionController = context.getBean(SpringMvcTransactionController.class);
 		m_routes = buildRoutes();
 	}
 
@@ -82,6 +88,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/s/project", m_projectController::project);
 		register(routes, "GET", "/s/router", m_routerController::router);
 		register(routes, "GET", "/r/top", m_topController::top);
+		register(routes, "GET", "/r/t", m_transactionController::transaction);
+		register(routes, "GET", "/r/e", m_eventController::event);
 		register(routes, "POST", "/s/login", m_loginController::submit);
 
 		return Collections.unmodifiableMap(routes);
