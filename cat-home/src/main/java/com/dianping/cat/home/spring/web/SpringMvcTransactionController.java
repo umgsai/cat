@@ -167,6 +167,8 @@ public class SpringMvcTransactionController {
 		model.put("groupIps", m_configManager.queryIpByDomainAndGroup(domain, group));
 		model.put("domainGroups", domainGroups());
 		model.put("navs", UrlNav.values());
+		model.put("navPrefix", "ip=" + ipAddress + "&queryname=" + (queryName == null ? "" : queryName) + "&domain="
+				+ report.getDomain() + (type == null ? "" : "&type=" + encode(type)));
 		model.put("baseUri", contextPath + "/mvc/r/t");
 		model.put("sample", sample(report.getDomain()));
 		model.put("model", model);
