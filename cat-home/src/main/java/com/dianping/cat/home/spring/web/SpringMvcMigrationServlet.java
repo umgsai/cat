@@ -34,6 +34,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcProjectController m_projectController;
 
+	private SpringMvcProblemController m_problemController;
+
 	private SpringMvcRouterController m_routerController;
 
 	private SpringMvcTopController m_topController;
@@ -59,6 +61,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		m_loginController = context.getBean(SpringMvcLoginController.class);
 		m_pluginController = context.getBean(SpringMvcPluginController.class);
 		m_projectController = context.getBean(SpringMvcProjectController.class);
+		m_problemController = context.getBean(SpringMvcProblemController.class);
 		m_routerController = context.getBean(SpringMvcRouterController.class);
 		m_topController = context.getBean(SpringMvcTopController.class);
 		m_transactionController = context.getBean(SpringMvcTransactionController.class);
@@ -90,6 +93,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/r/top", m_topController::top);
 		register(routes, "GET", "/r/t", m_transactionController::transaction);
 		register(routes, "GET", "/r/e", m_eventController::event);
+		register(routes, "GET", "/r/p", m_problemController::problem);
 		register(routes, "POST", "/s/login", m_loginController::submit);
 
 		return Collections.unmodifiableMap(routes);

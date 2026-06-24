@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,7 +18,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.top.model.entity.TopReport;
 import com.dianping.cat.helper.TimeHelper;
+import com.dianping.cat.mvc.UrlNav;
+import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
+import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.dependency.TopExceptionExclude;
 import com.dianping.cat.report.page.dependency.TopMetric;
 import com.dianping.cat.report.page.state.StateBuilder;
@@ -27,6 +29,9 @@ import com.dianping.cat.report.page.top.service.TopReportService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import com.dianping.cat.sample.entity.Domain;
+import com.dianping.cat.service.ProjectService;
+import com.dianping.cat.service.ProjectService.Department;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -40,6 +45,15 @@ public class SpringMvcTopController {
 
 	@Resource
 	private ExceptionRuleConfigManager m_configManager;
+
+	@Resource
+	private DomainGroupConfigManager m_domainGroupConfigManager;
+
+	@Resource
+	private ProjectService m_projectService;
+
+	@Resource
+	private SampleConfigManager m_sampleConfigManager;
 
 	@Resource
 	private StateBuilder m_stateBuilder;
@@ -117,6 +131,12 @@ public class SpringMvcTopController {
 		model.put("topReport", report);
 		model.put("topMetric", topMetric);
 		model.put("topResult", topMetric.getError().getResult());
+		model.put("topResultView", topResultView(topMetric.getError().getResult()));
+		model.put("domainGroups", domainGroups());
+		model.put("groups", m_domainGroupConfigManager.queryDomainGroup(domain));
+		model.put("navs", UrlNav.values());
+		model.put("baseUri", contextPath + "/mvc/r/top");
+		model.put("sample", sample(domain));
 		model.put("homeUrl", contextPath + "/mvc/r/home");
 		model.put("model", model);
 		return model;
@@ -188,6 +208,10 @@ public class SpringMvcTopController {
 		return minutes;
 	}
 
+	private Map<String, Department> domainGroups() {
+		return m_projectService.findDepartments(m_projectService.findAllDomains());
+	}
+
 	private String parameter(HttpServletRequest request, String name, String defaultValue) {
 		String value = request.getParameter(name);
 
@@ -195,6 +219,77 @@ public class SpringMvcTopController {
 			return defaultValue;
 		}
 		return value;
+	}
+
+	private Map<String, List<TopItemView>> topResultView(Map<String, List<TopMetric.Item>> topResult) {
+		Map<String, List<TopItemView>> result = new LinkedHashMap<String, List<TopItemView>>();
+
+		for (Map.Entry<String, List<TopMetric.Item>> entry : topResult.entrySet()) {
+			List<TopItemView> items = new ArrayList<TopItemView>();
+
+			for (TopMetric.Item item : entry.getValue()) {
+				items.add(new TopItemView(item));
+			}
+			result.put(entry.getKey(), items);
+		}
+		return result;
+	}
+
+	private double sample(String domain) {
+		Domain sampleDomain = m_sampleConfigManager.getConfig().findDomain(domain);
+
+		return sampleDomain == null ? 1.0 : sampleDomain.getSample();
+	}
+
+	public static class TopItemView {
+		private final TopMetric.Item m_item;
+
+		private final String m_linkStyle;
+
+		private final String m_shortDomain;
+
+		private final String m_style;
+
+		public TopItemView(TopMetric.Item item) {
+			m_item = item;
+			m_shortDomain = item == null ? "" : item.getDomain() == null ? "" : item.getDomain().length() <= 18
+					? item.getDomain() : item.getDomain().substring(0, 18);
+
+			if (item != null && item.getAlert() == 2) {
+				m_style = "background-color:red;color:white;";
+				m_linkStyle = "color:white;";
+			} else if (item != null && item.getAlert() == 1) {
+				m_style = "background-color:#bfa22f;color:white;";
+				m_linkStyle = "color:white;";
+			} else {
+				m_style = "";
+				m_linkStyle = "";
+			}
+		}
+
+		public String getDomain() {
+			return m_item.getDomain();
+		}
+
+		public String getErrorInfo() {
+			return m_item.getErrorInfo();
+		}
+
+		public String getLinkStyle() {
+			return m_linkStyle;
+		}
+
+		public String getShortDomain() {
+			return m_shortDomain;
+		}
+
+		public String getStyle() {
+			return m_style;
+		}
+
+		public double getValue() {
+			return m_item.getValue();
+		}
 	}
 
 	private TopReport queryTopReport(long date) {

@@ -1,41 +1,13 @@
 <%@ page session="false" language="java" pageEncoding="UTF-8" %>
 <%@ page contentType="text/html; charset=utf-8" %>
-<%@ page import="java.util.LinkedHashMap" %>
-<%@ page import="java.util.Map" %>
-<%
-	String contextPath = request.getContextPath();
-	String docName = (String) request.getAttribute("docName");
-	String domain = (String) request.getAttribute("domain");
-	String ipAddress = (String) request.getAttribute("ipAddress");
-	String date = (String) request.getAttribute("date");
-	String reportType = (String) request.getAttribute("reportType");
-	String actionName = (String) request.getAttribute("actionName");
-
-	if (docName == null || docName.length() == 0) {
-		docName = "index";
-	}
-	if (domain == null || domain.length() == 0) {
-		domain = "cat";
-	}
-	if (ipAddress == null || ipAddress.length() == 0) {
-		ipAddress = "All";
-	}
-	if (reportType == null || reportType.length() == 0) {
-		reportType = "day";
-	}
-	if (actionName == null || actionName.length() == 0) {
-		actionName = "view";
-	}
-
-	Map<String, String> jspModel = new LinkedHashMap<String, String>();
-
-	jspModel.put("webapp", contextPath);
-	jspModel.put("domain", domain);
-	jspModel.put("ipAddress", ipAddress);
-	jspModel.put("date", date);
-	jspModel.put("reportType", reportType);
-	pageContext.setAttribute("model", jspModel);
-%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+<c:set var="docName" value="${empty docName ? 'index' : docName}" />
+<c:set var="domain" value="${empty domain ? 'cat' : domain}" />
+<c:set var="ipAddress" value="${empty ipAddress ? 'All' : ipAddress}" />
+<c:set var="date" value="${empty date ? '' : date}" />
+<c:set var="reportType" value="${empty reportType ? 'day' : reportType}" />
+<c:set var="actionName" value="${empty actionName ? 'view' : actionName}" />
 <!doctype html>
 <html lang="en">
 <head>
@@ -43,25 +15,25 @@
 	<meta charset="utf-8">
 	<title>CAT</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/bootstrap.min.css">
-	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/font-awesome.min.css">
-	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/jquery-ui.min.css">
-	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/ace-fonts.css">
-	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/ace.min.css" id="main-ace-style">
-	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/ace-skins.min.css">
-	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/assets/css/ace-rtl.min.css">
-	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/css/body.css">
-	<link rel="stylesheet" type="text/css" href="<%=contextPath%>/js/jquery.datetimepicker.css">
-	<script src="<%=contextPath%>/assets/js/jquery.min.js"></script>
-	<script src="<%=contextPath%>/assets/js/ace-extra.min.js"></script>
-	<script src="<%=contextPath%>/assets/js/bootstrap.min.js"></script>
-	<script src="<%=contextPath%>/js/highcharts.js"></script>
-	<script src="<%=contextPath%>/js/baseGraph.js"></script>
-	<script src="<%=contextPath%>/js/jquery.datetimepicker.js"></script>
-	<script src="<%=contextPath%>/assets/js/jquery-ui.min.js"></script>
-	<script src="<%=contextPath%>/assets/js/jquery.ui.touch-punch.min.js"></script>
-	<script src="<%=contextPath%>/assets/js/ace-elements.min.js"></script>
-	<script src="<%=contextPath%>/assets/js/ace.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="${contextPath}/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="${contextPath}/assets/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="${contextPath}/assets/css/jquery-ui.min.css">
+	<link rel="stylesheet" type="text/css" href="${contextPath}/assets/css/ace-fonts.css">
+	<link rel="stylesheet" type="text/css" href="${contextPath}/assets/css/ace.min.css" id="main-ace-style">
+	<link rel="stylesheet" type="text/css" href="${contextPath}/assets/css/ace-skins.min.css">
+	<link rel="stylesheet" type="text/css" href="${contextPath}/assets/css/ace-rtl.min.css">
+	<link rel="stylesheet" type="text/css" href="${contextPath}/css/body.css">
+	<link rel="stylesheet" type="text/css" href="${contextPath}/js/jquery.datetimepicker.css">
+	<script src="${contextPath}/assets/js/jquery.min.js"></script>
+	<script src="${contextPath}/assets/js/ace-extra.min.js"></script>
+	<script src="${contextPath}/assets/js/bootstrap.min.js"></script>
+	<script src="${contextPath}/js/highcharts.js"></script>
+	<script src="${contextPath}/js/baseGraph.js"></script>
+	<script src="${contextPath}/js/jquery.datetimepicker.js"></script>
+	<script src="${contextPath}/assets/js/jquery-ui.min.js"></script>
+	<script src="${contextPath}/assets/js/jquery.ui.touch-punch.min.js"></script>
+	<script src="${contextPath}/assets/js/ace-elements.min.js"></script>
+	<script src="${contextPath}/assets/js/ace.min.js"></script>
 </head>
 <body class="no-skin">
 	<div id="navbar" class="navbar navbar-default">
@@ -78,7 +50,7 @@
 			<div class="navbar-header pull-left">
 				<i class="navbar-brand">
 					<span>CAT</span>
-					<small style="font-size:65%">（Central Application Tracking）</small>
+					<small style="font-size:65%">锛圕entral Application Tracking锛?/small>
 					<button class="btn btn-success btn-sm" id="nav_application">
 						<i class="ace-icon fa fa-signal"></i>Application
 					</button>
@@ -93,7 +65,7 @@
 			<div class="navbar-buttons navbar-header pull-right" role="navigation">
 				<ul class="nav ace-nav" style="height:auto;">
 					<li class="light-blue">
-						<a href="<%=contextPath%>/mvc/r/home?op=view&docName=index">
+						<a href="${contextPath}/mvc/r/home?op=view&docName=index">
 							<i class="ace-icon glyphicon glyphicon-star"></i>
 							<span>Star</span>
 						</a>
@@ -124,23 +96,23 @@
 			</script>
 			<ul class="nav nav-list" style="top: 0px;">
 				<li id="indexButton">
-					<a href="<%=contextPath%>/mvc/r/home?op=view&docName=index">
+					<a href="${contextPath}/mvc/r/home?op=view&docName=index">
 						<i class="menu-icon glyphicon glyphicon-home"></i>
-						<span class="menu-text">项目首页</span>
+						<span class="menu-text">椤圭洰棣栭〉</span>
 					</a>
 					<b class="arrow"></b>
 				</li>
 				<li id="releaseButton">
-					<a href="<%=contextPath%>/mvc/r/home?op=view&docName=release">
+					<a href="${contextPath}/mvc/r/home?op=view&docName=release">
 						<i class="menu-icon glyphicon glyphicon-book"></i>
-						<span class="menu-text">版本说明</span>
+						<span class="menu-text">鐗堟湰璇存槑</span>
 					</a>
 					<b class="arrow"></b>
 				</li>
 				<li id="pluginButton">
-					<a href="<%=contextPath%>/mvc/r/home?op=view&docName=plugin">
+					<a href="${contextPath}/mvc/r/home?op=view&docName=plugin">
 						<i class="menu-icon fa fa-key"></i>
-						<span class="menu-text">插件扩展</span>
+						<span class="menu-text">鎻掍欢鎵╁睍</span>
 					</a>
 					<b class="arrow"></b>
 				</li>
@@ -155,57 +127,53 @@
 		<div class="main-content">
 			<div style="padding-top:2px;padding-right:8px;">
 				<div class="tab-content">
-					<%
-						if ("release".equals(docName)) {
-					%>
-						<%@ include file="../../../report/home/releasenotes.jsp"%>
-					<%
-						} else if ("plugin".equals(docName)) {
-					%>
-						<%@ include file="../../../report/home/plugin.jsp"%>
-					<%
-						} else {
-					%>
-						<%@ include file="../../../report/home/index.jsp"%>
-					<%
-						}
-					%>
+					<c:choose>
+						<c:when test="${docName eq 'release'}">
+							<jsp:include page="../../../report/home/releasenotes.jsp" />
+						</c:when>
+						<c:when test="${docName eq 'plugin'}">
+							<jsp:include page="../../../report/home/plugin.jsp" />
+						</c:when>
+						<c:otherwise>
+							<jsp:include page="../../../report/home/index.jsp" />
+						</c:otherwise>
+					</c:choose>
 				</div>
 				<br>
 				<br>
-				<a href="<%=contextPath%>/mvc/r/home?op=checkpoint&domain=<%=domain%>&date=<%=date%>" style="color:#FFF">Do checkpoint here</a>
+				<a href="${contextPath}/mvc/r/home?op=checkpoint&domain=${domain}&date=${date}" style="color:#FFF">Do checkpoint here</a>
 			</div>
 		</div>
 	</div>
 	<script type="text/javascript">
 		$(document).ready(function() {
-			var liElement = $('#<%=docName%>Button');
+			var liElement = $('#${docName}Button');
 			if (liElement.size && liElement.size() == 0) {
 				liElement = $('#indexButton');
 			}
 			liElement.addClass('active');
 
 			$("#nav_application").click(function() {
-				window.location.href = "<%=contextPath%>/mvc/r/t?domain=<%=domain%>&ip=<%=ipAddress%>&date=<%=date%>&reportType=<%=reportType%>&op=<%=actionName%>";
+				window.location.href = "${contextPath}/mvc/r/t?domain=${domain}&ip=${ipAddress}&date=${date}&reportType=${reportType}&op=${actionName}";
 			});
 			$("#nav_config").click(function() {
-				window.location.href = "<%=contextPath%>/mvc/s/config?op=projects";
+				window.location.href = "${contextPath}/mvc/s/config?op=projects";
 			});
 			$("#nav_document").click(function() {
-				window.location.href = "<%=contextPath%>/mvc/r/home?domain=<%=domain%>&ip=<%=ipAddress%>&date=<%=date%>&reportType=<%=reportType%>&op=<%=actionName%>";
+				window.location.href = "${contextPath}/mvc/r/home?domain=${domain}&ip=${ipAddress}&date=${date}&reportType=${reportType}&op=${actionName}";
 			});
 			$("a[href]").each(function() {
 				var href = $(this).attr("href");
 				var origin = window.location.protocol + "//" + window.location.host;
 
-				if (href.indexOf("<%=contextPath%>/r/") == 0) {
-					$(this).attr("href", "<%=contextPath%>/mvc/r/" + href.substring("<%=contextPath%>/r/".length));
-				} else if (href.indexOf("<%=contextPath%>/s/") == 0) {
-					$(this).attr("href", "<%=contextPath%>/mvc/s/" + href.substring("<%=contextPath%>/s/".length));
-				} else if (href.indexOf(origin + "<%=contextPath%>/r/") == 0) {
-					$(this).attr("href", "<%=contextPath%>/mvc/r/" + href.substring((origin + "<%=contextPath%>/r/").length));
-				} else if (href.indexOf(origin + "<%=contextPath%>/s/") == 0) {
-					$(this).attr("href", "<%=contextPath%>/mvc/s/" + href.substring((origin + "<%=contextPath%>/s/").length));
+				if (href.indexOf("${contextPath}/r/") == 0) {
+					$(this).attr("href", "${contextPath}/mvc/r/" + href.substring("${contextPath}/r/".length));
+				} else if (href.indexOf("${contextPath}/s/") == 0) {
+					$(this).attr("href", "${contextPath}/mvc/s/" + href.substring("${contextPath}/s/".length));
+				} else if (href.indexOf(origin + "${contextPath}/r/") == 0) {
+					$(this).attr("href", "${contextPath}/mvc/r/" + href.substring((origin + "${contextPath}/r/").length));
+				} else if (href.indexOf(origin + "${contextPath}/s/") == 0) {
+					$(this).attr("href", "${contextPath}/mvc/s/" + href.substring((origin + "${contextPath}/s/").length));
 				}
 			});
 		});

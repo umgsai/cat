@@ -75,61 +75,8 @@
 		</div>
 	</div>
 	<div class="main-container" id="main-container">
-		<div id="sidebar" class="sidebar responsive">
-			<ul class="nav nav-list" style="top: 0px;">
-				<li id="Dashboard_report">
-					<a href="${contextPath}/mvc/r/top?op=view&domain=${domain}">
-						<i class="menu-icon fa fa-tachometer"></i>
-						<span class="menu-text">Dashboard</span>
-					</a>
-				</li>
-				<li id="Transaction_report" class="active open">
-					<a href="${contextPath}/mvc/r/t?domain=${domain}&ip=${ipAddress}&date=${date}&reportType=${reportType}&op=view">
-						<i class="menu-icon glyphicon glyphicon-time"></i>
-						<span class="menu-text">Transaction</span>
-					</a>
-				</li>
-				<li id="Event_report">
-					<a href="${contextPath}/mvc/r/e?domain=${domain}&ip=${ipAddress}&date=${date}&reportType=${reportType}&op=view">
-						<i class="menu-icon fa fa-flag"></i>
-						<span class="menu-text">Event</span>
-					</a>
-				</li>
-				<li id="Problem_report">
-					<a href="${contextPath}/mvc/r/p?domain=${domain}&ip=${ipAddress}&date=${date}&reportType=${reportType}&op=view">
-						<i class="menu-icon fa fa-bug"></i>
-						<span class="menu-text">Problem</span>
-					</a>
-				</li>
-				<li id="Heartbeat_report">
-					<a href="${contextPath}/mvc/r/h?domain=${domain}&ip=${ipAddress}&date=${date}&reportType=${reportType}&op=view">
-						<i class="menu-icon fa fa-heart"></i>
-						<span class="menu-text">Heartbeat</span>
-					</a>
-				</li>
-				<li id="Cross_report">
-					<a href="${contextPath}/mvc/r/cross?domain=${domain}&ip=${ipAddress}&date=${date}&reportType=${reportType}&op=view">
-						<i class="menu-icon glyphicon glyphicon-random"></i>
-						<span class="menu-text">Cross</span>
-					</a>
-				</li>
-				<li id="Business_report">
-					<a href="${contextPath}/mvc/r/business?name=${domain}&type=domain">
-						<i class="menu-icon fa fa-list-alt"></i>
-						<span class="menu-text">Business</span>
-					</a>
-				</li>
-				<li id="State_report">
-					<a href="${contextPath}/mvc/r/state?domain=${domain}&ip=${ipAddress}&date=${date}&reportType=${reportType}&op=view">
-						<i class="menu-icon fa fa-bar-chart-o"></i>
-						<span class="menu-text">State</span>
-					</a>
-				</li>
-			</ul>
-			<div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
-				<i class="ace-icon fa fa-angle-double-left" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i>
-			</div>
-		</div>
+		<c:set var="activeReport" value="Transaction" scope="request" />
+		<jsp:include page="../common/reportSidebar.jsp" />
 		<div class="main-content">
 			<div style="padding-top:2px;padding-left:2px;padding-right:8px;">
 				<div class="report">
