@@ -22,6 +22,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcHealthController m_healthController;
 
+	private SpringMvcHeartbeatController m_heartbeatController;
+
 	private SpringMvcBusinessController m_businessController;
 
 	private SpringMvcEventController m_eventController;
@@ -57,6 +59,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		m_businessController = context.getBean(SpringMvcBusinessController.class);
 		m_eventController = context.getBean(SpringMvcEventController.class);
 		m_healthController = context.getBean(SpringMvcHealthController.class);
+		m_heartbeatController = context.getBean(SpringMvcHeartbeatController.class);
 		m_homeController = context.getBean(SpringMvcHomeController.class);
 		m_loginController = context.getBean(SpringMvcLoginController.class);
 		m_pluginController = context.getBean(SpringMvcPluginController.class);
@@ -93,6 +96,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/r/top", m_topController::top);
 		register(routes, "GET", "/r/t", m_transactionController::transaction);
 		register(routes, "GET", "/r/e", m_eventController::event);
+		register(routes, "GET", "/r/h", m_heartbeatController::heartbeat);
 		register(routes, "GET", "/r/p", m_problemController::problem);
 		register(routes, "POST", "/s/login", m_loginController::submit);
 
