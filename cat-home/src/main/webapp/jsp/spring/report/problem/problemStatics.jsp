@@ -41,41 +41,8 @@
 	</style>
 </head>
 <body class="no-skin">
-	<div id="navbar" class="navbar navbar-default">
-		<div class="navbar-container" id="navbar-container">
-			<button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler">
-				<span class="sr-only">Toggle sidebar</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-			<div class="navbar-header pull-left">
-				<i class="navbar-brand">
-					<span>CAT</span>
-					<small style="font-size:65%">（Central Application Tracking）</small>
-					<button class="btn btn-success btn-sm disabled" id="nav_application">
-						<i class="ace-icon fa fa-signal"></i>Application
-					</button>
-					<button class="btn btn-inverse btn-sm" id="nav_config">
-						<i class="ace-icon fa fa-cogs"></i>Configs
-					</button>
-					<button class="btn btn-yellow btn-sm" id="nav_document">
-						<i class="ace-icon fa fa-cogs"></i>Documents
-					</button>
-				</i>
-			</div>
-			<div class="navbar-buttons navbar-header pull-right" role="navigation">
-				<ul class="nav ace-nav" style="height:auto;">
-					<li class="light-blue">
-						<a href="${contextPath}/mvc/r/home?op=view&docName=index">
-							<i class="ace-icon glyphicon glyphicon-star"></i>
-							<span>Star</span>
-						</a>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</div>
+	<c:set var="navbarApplicationDisabled" value="true" scope="request" />
+	<jsp:include page="../common/navbar.jsp" />
 	<div class="main-container" id="main-container">
 		<c:set var="activeReport" value="Problem" scope="request" />
 		<jsp:include page="../common/reportSidebar.jsp" />

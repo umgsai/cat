@@ -36,56 +36,9 @@
 	<script src="${contextPath}/assets/js/ace.min.js"></script>
 </head>
 <body class="no-skin">
-	<div id="navbar" class="navbar navbar-default">
-		<script type="text/javascript">
-			try { ace.settings.check('navbar', 'fixed'); } catch(e) {}
-		</script>
-		<div class="navbar-container" id="navbar-container">
-			<button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler">
-				<span class="sr-only">Toggle sidebar</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-			<div class="navbar-header pull-left">
-				<i class="navbar-brand">
-					<span>CAT</span>
-					<small style="font-size:65%">锛圕entral Application Tracking锛?/small>
-					<button class="btn btn-success btn-sm" id="nav_application">
-						<i class="ace-icon fa fa-signal"></i>Application
-					</button>
-					<button class="btn btn-inverse btn-sm" id="nav_config">
-						<i class="ace-icon fa fa-cogs"></i>Configs
-					</button>
-					<button class="btn btn-yellow btn-sm disabled" id="nav_document">
-						<i class="ace-icon fa fa-cogs"></i>Documents
-					</button>
-				</i>
-			</div>
-			<div class="navbar-buttons navbar-header pull-right" role="navigation">
-				<ul class="nav ace-nav" style="height:auto;">
-					<li class="light-blue">
-						<a href="${contextPath}/mvc/r/home?op=view&docName=index">
-							<i class="ace-icon glyphicon glyphicon-star"></i>
-							<span>Star</span>
-						</a>
-					</li>
-					<li class="light-blue">
-						<a data-toggle="dropdown" href="#" class="dropdown-toggle">
-							<span class="user-info" style="max-width:200px">
-								<span id="loginInfo"></span>
-							</span>
-						</a>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</div>
-	<script type="text/javascript">
-		$(document).ready(function() {
-			$("#nav_document").addClass("disabled");
-		});
-	</script>
+	<c:set var="navbarDocumentDisabled" value="true" scope="request" />
+	<c:set var="navbarShowLogin" value="true" scope="request" />
+	<jsp:include page="../common/navbar.jsp" />
 	<div class="main-container" id="main-container">
 		<script type="text/javascript">
 			try { ace.settings.check('main-container', 'fixed'); } catch(e) {}
@@ -98,21 +51,21 @@
 				<li id="indexButton">
 					<a href="${contextPath}/mvc/r/home?op=view&docName=index">
 						<i class="menu-icon glyphicon glyphicon-home"></i>
-						<span class="menu-text">椤圭洰棣栭〉</span>
+						<span class="menu-text">项目首页</span>
 					</a>
 					<b class="arrow"></b>
 				</li>
 				<li id="releaseButton">
 					<a href="${contextPath}/mvc/r/home?op=view&docName=release">
 						<i class="menu-icon glyphicon glyphicon-book"></i>
-						<span class="menu-text">鐗堟湰璇存槑</span>
+						<span class="menu-text">版本说明</span>
 					</a>
 					<b class="arrow"></b>
 				</li>
 				<li id="pluginButton">
 					<a href="${contextPath}/mvc/r/home?op=view&docName=plugin">
 						<i class="menu-icon fa fa-key"></i>
-						<span class="menu-text">鎻掍欢鎵╁睍</span>
+						<span class="menu-text">插件扩展</span>
 					</a>
 					<b class="arrow"></b>
 				</li>

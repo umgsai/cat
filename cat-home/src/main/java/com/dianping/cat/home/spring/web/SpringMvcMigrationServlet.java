@@ -28,6 +28,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcBusinessReportController m_businessReportController;
 
+	private SpringMvcConfigController m_configController;
+
 	private SpringMvcCrossController m_crossController;
 
 	private SpringMvcEventController m_eventController;
@@ -35,6 +37,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 	private SpringMvcHomeController m_homeController;
 
 	private SpringMvcLoginController m_loginController;
+
+	private SpringMvcLogviewController m_logviewController;
 
 	private SpringMvcPluginController m_pluginController;
 
@@ -64,12 +68,14 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		}
 		m_businessController = context.getBean(SpringMvcBusinessController.class);
 		m_businessReportController = context.getBean(SpringMvcBusinessReportController.class);
+		m_configController = context.getBean(SpringMvcConfigController.class);
 		m_crossController = context.getBean(SpringMvcCrossController.class);
 		m_eventController = context.getBean(SpringMvcEventController.class);
 		m_healthController = context.getBean(SpringMvcHealthController.class);
 		m_heartbeatController = context.getBean(SpringMvcHeartbeatController.class);
 		m_homeController = context.getBean(SpringMvcHomeController.class);
 		m_loginController = context.getBean(SpringMvcLoginController.class);
+		m_logviewController = context.getBean(SpringMvcLogviewController.class);
 		m_pluginController = context.getBean(SpringMvcPluginController.class);
 		m_projectController = context.getBean(SpringMvcProjectController.class);
 		m_problemController = context.getBean(SpringMvcProblemController.class);
@@ -98,18 +104,21 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/r/home", m_homeController::home);
 		register(routes, "GET", "/s/login", m_loginController::login);
 		register(routes, "GET", "/s/business", m_businessController::business);
+		register(routes, "GET", "/s/config", m_configController::config);
 		register(routes, "GET", "/s/plugin", m_pluginController::plugin);
 		register(routes, "GET", "/s/plugin/chrome", m_pluginController::chrome);
 		register(routes, "GET", "/s/project", m_projectController::project);
 		register(routes, "GET", "/s/router", m_routerController::router);
 		register(routes, "GET", "/r/business", m_businessReportController::business);
 		register(routes, "GET", "/r/cross", m_crossController::cross);
+		register(routes, "GET", "/r/m/*", m_logviewController::logview);
 		register(routes, "GET", "/r/top", m_topController::top);
 		register(routes, "GET", "/r/t", m_transactionController::transaction);
 		register(routes, "GET", "/r/e", m_eventController::event);
 		register(routes, "GET", "/r/h", m_heartbeatController::heartbeat);
 		register(routes, "GET", "/r/p", m_problemController::problem);
 		register(routes, "GET", "/r/state", m_stateController::state);
+		register(routes, "POST", "/s/business", m_businessController::business);
 		register(routes, "POST", "/s/login", m_loginController::submit);
 
 		return Collections.unmodifiableMap(routes);
@@ -117,7 +126,12 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private void handle(String method, HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		RouteHandler handler = m_routes.get(new RouteKey(method, normalizePath(request.getPathInfo())));
+		String path = normalizePath(request.getPathInfo());
+		RouteHandler handler = m_routes.get(new RouteKey(method, path));
+
+		if (handler == null) {
+			handler = wildcardRoute(method, path);
+		}
 
 		if (handler == null) {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -135,6 +149,19 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private void register(Map<RouteKey, RouteHandler> routes, String method, String path, RouteHandler handler) {
 		routes.put(new RouteKey(method, path), handler);
+	}
+
+	private RouteHandler wildcardRoute(String method, String path) {
+		for (Map.Entry<RouteKey, RouteHandler> entry : m_routes.entrySet()) {
+			RouteKey key = entry.getKey();
+			String routePath = key.m_path;
+
+			if (key.m_method.equals(method) && routePath.endsWith("/*")
+					&& path.startsWith(routePath.substring(0, routePath.length() - 1))) {
+				return entry.getValue();
+			}
+		}
+		return null;
 	}
 
 	private void writeJson(HttpServletResponse response, Map<String, Object> model) throws IOException {

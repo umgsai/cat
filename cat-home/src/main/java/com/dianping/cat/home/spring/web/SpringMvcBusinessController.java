@@ -24,6 +24,7 @@ import com.dianping.cat.system.page.business.Context;
 import com.dianping.cat.system.page.business.Model;
 import com.dianping.cat.system.page.business.Payload;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
+import com.dianping.cat.system.page.config.ConfigHtmlParser;
 import jakarta.annotation.Resource;
 import org.unidal.web.lifecycle.ActionResolver;
 import org.unidal.web.lifecycle.DefaultUrlMapping;
@@ -31,7 +32,8 @@ import org.unidal.web.lifecycle.UrlMapping;
 import org.unidal.web.mvc.lifecycle.RequestContext;
 import org.unidal.web.mvc.payload.ParameterProvider;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 public class SpringMvcBusinessController {
@@ -44,11 +46,14 @@ public class SpringMvcBusinessController {
 	@Resource
 	private BusinessTagConfigManager m_tagConfigManager;
 
-	@GetMapping("/s/business")
+	@Resource
+	private ConfigHtmlParser m_configHtmlParser;
+
+	@RequestMapping(value = "/s/business", method = { RequestMethod.GET, RequestMethod.POST })
 	public void business(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String action = action(request);
 
-		if (!"list".equals(action)) {
+		if (!"list".equals(action) && !"tagConfig".equals(action)) {
 			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 			return;
 		}
@@ -61,7 +66,7 @@ public class SpringMvcBusinessController {
 		request.setAttribute("payload", context.getPayload());
 		request.setAttribute("model", model);
 
-		RequestDispatcher dispatcher = request.getRequestDispatcher("/jsp/system/business/list.jsp");
+		RequestDispatcher dispatcher = request.getRequestDispatcher(jsp(action));
 
 		dispatcher.forward(request, response);
 	}
@@ -95,8 +100,9 @@ public class SpringMvcBusinessController {
 		context.setOutboundPage("business");
 		context.setServletContext(request.getSession().getServletContext());
 		payload.setPage(SystemPage.BUSINESS.getName());
-		payload.setAction("list");
+		payload.setAction(action(request));
 		payload.setDomain(domain(request));
+		payload.setContent(request.getParameter("content"));
 		context.setPayload(payload);
 		return context;
 	}
@@ -108,11 +114,20 @@ public class SpringMvcBusinessController {
 		BusinessReportConfig config = m_configManager.queryConfigByDomain(domain);
 
 		model.setPage(SystemPage.BUSINESS);
-		model.setAction(Action.LIST);
+		model.setAction(payload.getAction());
 		model.setDomains(m_projectService.findAllDomains());
-		model.setConfigs(businessItemConfigs(config));
-		model.setCustomConfigs(customConfigs(config));
-		model.setTags(m_tagConfigManager.findTagByDomain(domain));
+		if (Action.TagConfig.equals(payload.getAction())) {
+			String tagConfig = payload.getContent();
+
+			if (tagConfig != null && tagConfig.length() > 0) {
+				model.setOpState(m_tagConfigManager.store(tagConfig));
+			}
+			model.setContent(m_configHtmlParser.parse(m_tagConfigManager.getConfig().toString()));
+		} else {
+			model.setConfigs(businessItemConfigs(config));
+			model.setCustomConfigs(customConfigs(config));
+			model.setTags(m_tagConfigManager.findTagByDomain(domain));
+		}
 		return model;
 	}
 
@@ -152,6 +167,10 @@ public class SpringMvcBusinessController {
 		m_tagConfigManager = tagConfigManager;
 	}
 
+	void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
+		m_configHtmlParser = configHtmlParser;
+	}
+
 	private String domain(HttpServletRequest request) {
 		String domain = request.getParameter("domain");
 
@@ -159,6 +178,13 @@ public class SpringMvcBusinessController {
 			return Constants.CAT;
 		}
 		return domain;
+	}
+
+	private String jsp(String action) {
+		if ("tagConfig".equals(action)) {
+			return "/jsp/spring/report/config/businessTag.jsp";
+		}
+		return "/jsp/spring/report/config/businessList.jsp";
 	}
 
 	private static class SpringMvcActionResolver implements ActionResolver {
