@@ -26,6 +26,10 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcBusinessController m_businessController;
 
+	private SpringMvcBusinessReportController m_businessReportController;
+
+	private SpringMvcCrossController m_crossController;
+
 	private SpringMvcEventController m_eventController;
 
 	private SpringMvcHomeController m_homeController;
@@ -39,6 +43,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 	private SpringMvcProblemController m_problemController;
 
 	private SpringMvcRouterController m_routerController;
+
+	private SpringMvcStateController m_stateController;
 
 	private SpringMvcTopController m_topController;
 
@@ -57,6 +63,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 			throw new ServletException("CAT home Spring context is not initialized.");
 		}
 		m_businessController = context.getBean(SpringMvcBusinessController.class);
+		m_businessReportController = context.getBean(SpringMvcBusinessReportController.class);
+		m_crossController = context.getBean(SpringMvcCrossController.class);
 		m_eventController = context.getBean(SpringMvcEventController.class);
 		m_healthController = context.getBean(SpringMvcHealthController.class);
 		m_heartbeatController = context.getBean(SpringMvcHeartbeatController.class);
@@ -66,6 +74,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		m_projectController = context.getBean(SpringMvcProjectController.class);
 		m_problemController = context.getBean(SpringMvcProblemController.class);
 		m_routerController = context.getBean(SpringMvcRouterController.class);
+		m_stateController = context.getBean(SpringMvcStateController.class);
 		m_topController = context.getBean(SpringMvcTopController.class);
 		m_transactionController = context.getBean(SpringMvcTransactionController.class);
 		m_routes = buildRoutes();
@@ -93,11 +102,14 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/s/plugin/chrome", m_pluginController::chrome);
 		register(routes, "GET", "/s/project", m_projectController::project);
 		register(routes, "GET", "/s/router", m_routerController::router);
+		register(routes, "GET", "/r/business", m_businessReportController::business);
+		register(routes, "GET", "/r/cross", m_crossController::cross);
 		register(routes, "GET", "/r/top", m_topController::top);
 		register(routes, "GET", "/r/t", m_transactionController::transaction);
 		register(routes, "GET", "/r/e", m_eventController::event);
 		register(routes, "GET", "/r/h", m_heartbeatController::heartbeat);
 		register(routes, "GET", "/r/p", m_problemController::problem);
+		register(routes, "GET", "/r/state", m_stateController::state);
 		register(routes, "POST", "/s/login", m_loginController::submit);
 
 		return Collections.unmodifiableMap(routes);
