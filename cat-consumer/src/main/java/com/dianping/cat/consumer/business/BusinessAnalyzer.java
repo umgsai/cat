@@ -18,14 +18,11 @@
  */
 package com.dianping.cat.consumer.business;
 
-import java.util.List;
-
-import org.slf4j.LoggerFactory;
-
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.config.business.BusinessConfigManager;
 import com.dianping.cat.config.business.ConfigItem;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.business.model.entity.BusinessItem;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.consumer.business.model.entity.Segment;
@@ -34,34 +31,44 @@ import com.dianping.cat.message.Metric.Kind;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
+import jakarta.annotation.Resource;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + BusinessAnalyzer.ID)
+@Scope("prototype")
 public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> {
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(BusinessAnalyzer.class);
 
 	public static final String ID = "business";
 
-	private ReportManager<BusinessReport> m_reportManager;
+	@Resource(name = BusinessAnalyzer.ID + "ReportManager")
+	private ReportManager<BusinessReport> reportManager;
 
-	private BusinessConfigManager m_configManager;
+	@Resource(name = "businessConfigManager")
+	private BusinessConfigManager businessConfigManager;
 
 	@Override
 	public void doCheckpoint(boolean atEnd) {
 		if (atEnd && !isLocalMode()) {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
+			reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
 		} else {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+			reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
 	}
 
 	@Override
 	public BusinessReport getReport(String domain) {
 		long period = getStartTime();
-		return m_reportManager.getHourlyReport(period, domain, false);
+		return reportManager.getHourlyReport(period, domain, false);
 	}
 
 	@Override
 	public ReportManager<BusinessReport> getReportManager() {
-		return m_reportManager;
+		return reportManager;
 	}
 
 	@Override
@@ -71,7 +78,7 @@ public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> {
 
 	@Override
 	protected void loadReports() {
-		m_reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+		reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 	}
 
 	ConfigItem parseValue(Metric metric) {
@@ -100,7 +107,7 @@ public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> {
 	@Override
 	protected void process(MessageTree tree) {
 		String domain = tree.getDomain();
-		BusinessReport report = m_reportManager.getHourlyReport(getStartTime(), domain, true);
+		BusinessReport report = reportManager.getHourlyReport(getStartTime(), domain, true);
 		List<Metric> metrics = tree.getMetrics();
 
 		for (Metric metric : metrics) {
@@ -126,7 +133,7 @@ public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> {
 
 			config.setTitle(name);
 
-			boolean result = m_configManager.insertBusinessConfigIfNotExist(domain, name, config);
+			boolean result = businessConfigManager.insertBusinessConfigIfNotExist(domain, name, config);
 
 			if (!result) {
 				LOGGER.error("error when insert business config info, domain {}, metricName {}", domain, name);
@@ -134,11 +141,9 @@ public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> {
 		}
 	}
 
-	public void setConfigManager(BusinessConfigManager configManager) {
-		m_configManager = configManager;
-	}
-
-	public void setReportManager(ReportManager<BusinessReport> reportManager) {
-		m_reportManager = reportManager;
+	@Override
+	@Resource(name = "serverConfigManager")
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		super.setServerConfigManager(serverConfigManager);
 	}
 }
