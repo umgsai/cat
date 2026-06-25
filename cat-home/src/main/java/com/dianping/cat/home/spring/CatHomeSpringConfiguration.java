@@ -57,7 +57,9 @@ import org.unidal.cat.message.storage.local.LocalTokenMappingManager;
 import org.unidal.cat.message.storage.clean.HdfsUploader;
 import org.unidal.cat.message.storage.clean.LogviewProcessor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
@@ -391,6 +393,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
 @Configuration
 @Import(SpringMvcMigrationConfiguration.class)
+@ComponentScan(basePackageClasses = BusinessAnalyzer.class, includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = BusinessAnalyzer.class), useDefaultFilters = false)
 @MapperScan(basePackages = {
 		"com.dianping.cat.core.config.dao",
 		"com.dianping.cat.core.report.daily.dao",
@@ -421,19 +424,6 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public MessageAnalyzerFactory messageAnalyzerFactory() {
 		return new ContainerMessageAnalyzerFactory();
-	}
-
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + BusinessAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer businessAnalyzer(
-			@Qualifier(BusinessAnalyzer.ID + "ReportManager") ReportManager<BusinessReport> businessReportManager,
-			BusinessConfigManager businessConfigManager, ServerConfigManager serverConfigManager) {
-		BusinessAnalyzer analyzer = new BusinessAnalyzer();
-
-		analyzer.setReportManager(businessReportManager);
-		analyzer.setConfigManager(businessConfigManager);
-		analyzer.setServerConfigManager(serverConfigManager);
-		return analyzer;
 	}
 
 	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + TransactionAnalyzer.ID)
