@@ -426,22 +426,6 @@ public class CatHomeSpringConfiguration {
 		return new ContainerMessageAnalyzerFactory();
 	}
 
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + TransactionAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer transactionAnalyzer(
-			@Qualifier(TransactionAnalyzer.ID + "ReportManager") ReportManager<TransactionReport> transactionReportManager,
-			ServerFilterConfigManager serverFilterConfigManager, TpValueStatisticConfigManager tpValueStatisticConfigManager,
-			AtomicMessageConfigManager atomicMessageConfigManager, ServerConfigManager serverConfigManager) {
-		TransactionAnalyzer analyzer = new TransactionAnalyzer();
-
-		analyzer.setReportManager(transactionReportManager);
-		analyzer.setFilterConfigManager(serverFilterConfigManager);
-		analyzer.setStatisticManager(tpValueStatisticConfigManager);
-		analyzer.setAtomicMessageConfigManager(atomicMessageConfigManager);
-		analyzer.setServerConfigManager(serverConfigManager);
-		return analyzer;
-	}
-
 	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + CrossAnalyzer.ID)
 	@Scope("prototype")
 	public MessageAnalyzer crossAnalyzer(

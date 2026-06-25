@@ -26,11 +26,14 @@ import java.util.Set;
 
 import com.dianping.cat.support.Threads;
 
+import jakarta.annotation.Resource;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.MessageAnalyzer;
 import com.dianping.cat.config.AtomicMessageConfigManager;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
 import com.dianping.cat.consumer.transaction.model.entity.AllDuration;
@@ -49,20 +52,28 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + TransactionAnalyzer.ID)
+@Scope("prototype")
 public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionReport> {
 
 	public static final String ID = "transaction";
 
 	private static final int m_statusCodeCountLimit = 100;
 
-	private ReportManager<TransactionReport> m_reportManager;
+	@Resource(name = TransactionAnalyzer.ID + "ReportManager")
+	private ReportManager<TransactionReport> transactionReportManager;
 
-	private ServerFilterConfigManager m_filterConfigManager;
+	@Resource(name = "serverFilterConfigManager")
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private TpValueStatisticConfigManager m_statisticManager;
+	@Resource(name = "tpValueStatisticConfigManager")
+	private TpValueStatisticConfigManager tpValueStatisticConfigManager;
 
-	private AtomicMessageConfigManager m_atomicMessageConfigManager;
+	@Resource(name = "atomicMessageConfigManager")
+	private AtomicMessageConfigManager atomicMessageConfigManager;
 
 	private final TransactionStatisticsComputer m_computer = new TransactionStatisticsComputer();
 
@@ -95,7 +106,7 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 		Transaction t = Cat.newTransaction("CleanUpTransactionReports", minute);
 
 		try {
-			Set<String> domains = m_reportManager.getDomains(m_startTime);
+			Set<String> domains = transactionReportManager.getDomains(m_startTime);
 
 			m_computer.setMaxDurationMinute(m_serverConfigManager.getTpValueExpireMinute());
 
@@ -105,17 +116,17 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 				tran.addData("domain", domain);
 
 				TransactionReportCountFilter visitor = new TransactionReportCountFilter(m_serverConfigManager.getMaxTypeThreshold(),
-										m_atomicMessageConfigManager.getMaxNameThreshold(domain), m_serverConfigManager.getTypeNameLengthLimit());
+										atomicMessageConfigManager.getMaxNameThreshold(domain), m_serverConfigManager.getTypeNameLengthLimit());
 
 				try {
-					TransactionReport transactionReport = m_reportManager.getHourlyReport(m_startTime, domain, false);
+					TransactionReport transactionReport = transactionReportManager.getHourlyReport(m_startTime, domain, false);
 
 					m_computer.visitTransactionReport(transactionReport);
 					visitor.visitTransactionReport(transactionReport);
 					tran.success();
 				} catch (Exception e) {
 					try {
-						TransactionReport transactionReport = m_reportManager.getHourlyReport(m_startTime, domain, false);
+						TransactionReport transactionReport = transactionReportManager.getHourlyReport(m_startTime, domain, false);
 
 						m_computer.visitTransactionReport(transactionReport);
 						visitor.visitTransactionReport(transactionReport);
@@ -165,7 +176,7 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 			mergeMap(allTypeDurations, durations);
 			mergeMap(allNameDurations, durations);
 
-			boolean statistic = m_statisticManager.shouldStatistic(t.getType(), domain);
+			boolean statistic = tpValueStatisticConfigManager.shouldStatistic(t.getType(), domain);
 
 			if (statistic) {
 				mergeMap(typeRange.getAllDurations(), durations);
@@ -209,9 +220,9 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 	@Override
 	public synchronized void doCheckpoint(boolean atEnd) {
 		if (atEnd && !isLocalMode()) {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
+			transactionReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
 		} else {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+			transactionReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
 	}
 
@@ -221,7 +232,7 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 		if (transactionName == null) {
 			int size = type.getNames().size();
 
-			if (size > m_atomicMessageConfigManager.getMaxNameThreshold(domain)) {
+			if (size > atomicMessageConfigManager.getMaxNameThreshold(domain)) {
 				transactionName = type.findOrCreateName(CatConstants.OTHERS);
 			} else {
 				transactionName = type.findOrCreateName(name);
@@ -284,7 +295,7 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 	}
 
 	public Set<String> getDomains() {
-		return m_reportManager.getDomains(getStartTime());
+		return transactionReportManager.getDomains(getStartTime());
 	}
 
 	@Override
@@ -308,7 +319,7 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 
 	@Override
 	public ReportManager<TransactionReport> getReportManager() {
-		return m_reportManager;
+		return transactionReportManager;
 	}
 
 	@Override
@@ -335,7 +346,7 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 
 	@Override
 	protected void loadReports() {
-		m_reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+		transactionReportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 	}
 
 	private void mergeMap(Map<Integer, AllDuration> allDurations, Map<Integer, Integer> other) {
@@ -370,7 +381,7 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 	@Override
 	public void process(MessageTree tree) {
 		String domain = tree.getDomain();
-		TransactionReport report = m_reportManager.getHourlyReport(getStartTime(), domain, true);
+		TransactionReport report = transactionReportManager.getHourlyReport(getStartTime(), domain, true);
 		List<Transaction> transactions = tree.findOrCreateTransactions();
 
 		for (Transaction t : transactions) {
@@ -459,7 +470,7 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 		String type = t.getType();
 		String name = t.getName();
 
-		if (!m_filterConfigManager.discardTransaction(type, name)) {
+		if (!serverFilterConfigManager.discardTransaction(type, name)) {
 			boolean valid = checkForTruncatedMessage(tree, t);
 
 			if (valid) {
@@ -549,7 +560,7 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 
 		long current = t.getTimestamp() / 1000 / 60;
 		int min = (int) (current % (60));
-		boolean statistic = m_statisticManager.shouldStatistic(type.getId(), tree.getDomain());
+		boolean statistic = tpValueStatisticConfigManager.shouldStatistic(type.getId(), tree.getDomain());
 
 		processNameGraph(t, name, min, duration, statistic, allDuration);
 		processTypeRange(t, type, min, duration, statistic, allDuration);
@@ -587,7 +598,7 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 		long remainder = timestamp % ONE_HOUR;
 		long current = timestamp - remainder;
 
-		TransactionReport report = m_reportManager.getHourlyReport(period, domain, false);
+		TransactionReport report = transactionReportManager.getHourlyReport(period, domain, false);
 
 		m_computer.setMaxDurationMinute(m_serverConfigManager.getTpValueExpireMinute());
 
@@ -636,20 +647,9 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 		}
 	}
 
-	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {
-		m_atomicMessageConfigManager = atomicMessageConfigManager;
-	}
-
-	public void setFilterConfigManager(ServerFilterConfigManager filterConfigManager) {
-		m_filterConfigManager = filterConfigManager;
-	}
-
-	public void setReportManager(ReportManager<TransactionReport> reportManager) {
-		m_reportManager = reportManager;
-	}
-
-	public void setStatisticManager(TpValueStatisticConfigManager statisticManager) {
-		m_statisticManager = statisticManager;
+	@Resource(name = "serverConfigManager")
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		super.setServerConfigManager(serverConfigManager);
 	}
 
 }
