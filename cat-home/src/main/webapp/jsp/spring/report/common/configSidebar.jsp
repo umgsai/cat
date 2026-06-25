@@ -4,6 +4,7 @@
 <c:set var="contextPath" value="${empty contextPath ? pageContext.request.contextPath : contextPath}" />
 <c:set var="projectConfigActive" value="${activeConfigMenu eq 'projects' || activeConfigMenu eq 'domainGroupConfigs'}" />
 <c:set var="applicationConfigActive" value="${activeConfigMenu eq 'businessConfig' || activeConfigMenu eq 'businessTag' || activeConfigMenu eq 'displayPolicy'}" />
+<c:set var="alertConfigActive" value="${activeConfigMenu eq 'transactionRule' || activeConfigMenu eq 'eventRule'}" />
 <div id="sidebar" class="sidebar responsive">
 	<script type="text/javascript">
 		try { ace.settings.check('sidebar', 'fixed'); } catch(e) {}
@@ -59,7 +60,7 @@
 				</li>
 			</ul>
 		</li>
-		<li id="alert_config" class="hsub">
+		<li id="alert_config" class="${alertConfigActive ? 'hsub active open' : 'hsub'}">
 			<a href="${contextPath}/mvc/s/config?op=metricConfigList" class="dropdown-toggle">
 				<i class="menu-icon fa fa-bolt"></i>
 				<span class="menu-text">应用告警配置</span>
@@ -67,13 +68,13 @@
 			</a>
 			<b class="arrow"></b>
 			<ul class="submenu">
-				<li id="transactionRule">
+				<li id="transactionRule" class="${activeConfigMenu eq 'transactionRule' ? 'active' : ''}">
 					<a href="${contextPath}/mvc/s/config?op=transactionRule">
 						<i class="menu-icon fa fa-caret-right"></i>Transaction告警
 					</a>
 					<b class="arrow"></b>
 				</li>
-				<li id="eventRule">
+				<li id="eventRule" class="${activeConfigMenu eq 'eventRule' ? 'active' : ''}">
 					<a href="${contextPath}/mvc/s/config?op=eventRule">
 						<i class="menu-icon fa fa-caret-right"></i>Event告警
 					</a>
