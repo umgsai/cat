@@ -14,13 +14,19 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.dianping.cat.Constants;
+import com.dianping.cat.alarm.rule.entity.Config;
+import com.dianping.cat.alarm.rule.entity.MetricItem;
 import com.dianping.cat.alarm.rule.entity.Rule;
 import com.dianping.cat.alarm.rule.transform.DefaultJsonBuilder;
+import com.dianping.cat.alarm.spi.config.AlertConfigManager;
+import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
+import com.dianping.cat.alarm.spi.config.SenderConfigManager;
 import com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator;
-import com.dianping.cat.Constants;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.home.exception.entity.ExceptionExclude;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;
+import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
 import com.dianping.cat.home.group.entity.Domain;
 import com.dianping.cat.home.group.entity.DomainGroup;
 import com.dianping.cat.home.group.entity.Group;
@@ -31,9 +37,12 @@ import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManag
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.system.page.login.service.Session;
 import com.dianping.cat.system.page.login.service.SigninContext;
 import com.dianping.cat.system.page.login.service.SigninService;
+import com.dianping.cat.config.sample.SampleConfigManager;
+import com.dianping.cat.system.page.router.config.RouterConfigManager;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +60,28 @@ public class SpringMvcConfigController {
 	private HeartbeatDisplayPolicyManager m_displayPolicyManager;
 
 	@Resource
+	private HeartbeatRuleConfigManager m_heartbeatRuleConfigManager;
+
+	@Resource
+	private AlertPolicyManager m_alertPolicyManager;
+
+	@Resource
+	private AlertConfigManager m_alertConfigManager;
+
+	@Resource
+	private SenderConfigManager m_senderConfigManager;
+
+	@Resource
 	private ConfigHtmlParser m_configHtmlParser;
+
+	@Resource
+	private ServerConfigManager m_serverConfigManager;
+
+	@Resource
+	private SampleConfigManager m_sampleConfigManager;
+
+	@Resource
+	private RouterConfigManager m_routerConfigManager;
 
 	@Resource
 	private TransactionRuleConfigManager m_transactionRuleConfigManager;
@@ -122,12 +152,40 @@ public class SpringMvcConfigController {
 			configDisplayPolicyModel(request, model);
 			return model;
 		}
+		if ("alertPolicy".equals(action)) {
+			configAlertPolicyModel(request, model);
+			return model;
+		}
+		if ("alertDefaultReceivers".equals(action)) {
+			configAlertDefaultReceiversModel(request, model);
+			return model;
+		}
+		if ("alertSenderConfigUpdate".equals(action)) {
+			configAlertSenderConfigModel(request, model);
+			return model;
+		}
+		if ("serverConfigUpdate".equals(action)) {
+			configServerConfigModel(request, model);
+			return model;
+		}
+		if ("sampleConfigUpdate".equals(action)) {
+			configSampleConfigModel(request, model);
+			return model;
+		}
+		if ("routerConfigUpdate".equals(action)) {
+			configRouterConfigModel(request, model);
+			return model;
+		}
 		if (isExceptionAction(action)) {
 			configExceptionModel(request, action, model);
 			return model;
 		}
 		if (isEventRuleAction(action)) {
 			configEventRuleModel(request, action, model);
+			return model;
+		}
+		if (isHeartbeatRuleAction(action)) {
+			configHeartbeatRuleModel(request, action, model);
 			return model;
 		}
 		if (isTransactionRuleAction(action)) {
@@ -185,8 +243,36 @@ public class SpringMvcConfigController {
 		m_displayPolicyManager = displayPolicyManager;
 	}
 
+	void setHeartbeatRuleConfigManager(HeartbeatRuleConfigManager heartbeatRuleConfigManager) {
+		m_heartbeatRuleConfigManager = heartbeatRuleConfigManager;
+	}
+
+	void setAlertPolicyManager(AlertPolicyManager alertPolicyManager) {
+		m_alertPolicyManager = alertPolicyManager;
+	}
+
+	void setAlertConfigManager(AlertConfigManager alertConfigManager) {
+		m_alertConfigManager = alertConfigManager;
+	}
+
+	void setSenderConfigManager(SenderConfigManager senderConfigManager) {
+		m_senderConfigManager = senderConfigManager;
+	}
+
 	void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
 		m_configHtmlParser = configHtmlParser;
+	}
+
+	void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		m_serverConfigManager = serverConfigManager;
+	}
+
+	void setSampleConfigManager(SampleConfigManager sampleConfigManager) {
+		m_sampleConfigManager = sampleConfigManager;
+	}
+
+	void setRouterConfigManager(RouterConfigManager routerConfigManager) {
+		m_routerConfigManager = routerConfigManager;
 	}
 
 	void setTransactionRuleConfigManager(TransactionRuleConfigManager transactionRuleConfigManager) {
@@ -223,8 +309,13 @@ public class SpringMvcConfigController {
 
 	private boolean isSupported(String action) {
 		return "projects".equals(action) || "projectAdd".equals(action) || "updateSubmit".equals(action)
-				|| "projectDelete".equals(action) || "displayPolicy".equals(action) || isDomainGroupAction(action)
-				|| isExceptionAction(action) || isEventRuleAction(action) || isTransactionRuleAction(action);
+				|| "projectDelete".equals(action) || "displayPolicy".equals(action) || "alertPolicy".equals(action)
+				|| "alertDefaultReceivers".equals(action) || "alertSenderConfigUpdate".equals(action)
+				|| "serverConfigUpdate".equals(action) || "sampleConfigUpdate".equals(action)
+				|| "routerConfigUpdate".equals(action)
+				|| isDomainGroupAction(action) || isExceptionAction(action) || isEventRuleAction(action)
+				|| isHeartbeatRuleAction(action)
+				|| isTransactionRuleAction(action);
 	}
 
 	private void configDomainGroupModel(HttpServletRequest request, String action, Map<String, Object> model,
@@ -257,6 +348,87 @@ public class SpringMvcConfigController {
 			opState = true;
 		}
 		model.put("content", m_configHtmlParser.parse(m_displayPolicyManager.getHeartbeatDisplayPolicy().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configAlertPolicyModel(HttpServletRequest request, Map<String, Object> model) {
+		String content = request.getParameter("content");
+		Boolean opState = null;
+
+		if (content != null && content.length() > 0) {
+			opState = m_alertPolicyManager.insert(content);
+		} else if (request.getParameter("submit") != null) {
+			opState = true;
+		}
+		model.put("content", m_configHtmlParser.parse(m_alertPolicyManager.getAlertPolicy().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configAlertDefaultReceiversModel(HttpServletRequest request, Map<String, Object> model) {
+		String content = request.getParameter("content");
+		String allOnOrOff = parameter(request, "allOnOrOff", "");
+		Boolean opState = null;
+
+		if (content != null && content.length() > 0) {
+			String xml = m_alertConfigManager.buildReceiverContentByOnOff(content, allOnOrOff);
+
+			opState = xml != null && m_alertConfigManager.insert(xml);
+		} else if (request.getParameter("submit") != null) {
+			opState = true;
+		}
+		model.put("content", m_configHtmlParser.parse(m_alertConfigManager.getAlertConfig().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configAlertSenderConfigModel(HttpServletRequest request, Map<String, Object> model) {
+		String content = request.getParameter("content");
+		Boolean opState = null;
+
+		if (content != null && content.length() > 0) {
+			opState = m_senderConfigManager.insert(content);
+		} else if (request.getParameter("submit") != null) {
+			opState = true;
+		}
+		model.put("content", m_configHtmlParser.parse(m_senderConfigManager.getConfig().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configServerConfigModel(HttpServletRequest request, Map<String, Object> model) {
+		String content = request.getParameter("content");
+		Boolean opState = null;
+
+		if (content != null && content.length() > 0) {
+			opState = m_serverConfigManager.insert(content);
+		} else if (request.getParameter("submit") != null) {
+			opState = true;
+		}
+		model.put("content", m_configHtmlParser.parse(m_serverConfigManager.getConfig().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configSampleConfigModel(HttpServletRequest request, Map<String, Object> model) {
+		String content = request.getParameter("content");
+		Boolean opState = null;
+
+		if (content != null && content.length() > 0) {
+			opState = m_sampleConfigManager.insert(content);
+		} else if (request.getParameter("submit") != null) {
+			opState = true;
+		}
+		model.put("content", m_configHtmlParser.parse(m_sampleConfigManager.getConfig().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configRouterConfigModel(HttpServletRequest request, Map<String, Object> model) {
+		String content = request.getParameter("content");
+		Boolean opState = null;
+
+		if (content != null && content.length() > 0) {
+			opState = m_routerConfigManager.insert(content);
+		} else if (request.getParameter("submit") != null) {
+			opState = true;
+		}
+		model.put("content", m_configHtmlParser.parse(m_routerConfigManager.getRouterConfig().toString()));
 		model.put("opState", opState);
 	}
 
@@ -315,6 +487,25 @@ public class SpringMvcConfigController {
 			configEventRuleUpdateModel(request, model);
 		} else {
 			configEventRuleListModel(model);
+		}
+		model.put("opState", opState);
+	}
+
+	private void configHeartbeatRuleModel(HttpServletRequest request, String action, Map<String, Object> model) {
+		Boolean opState = null;
+
+		if ("heartbeatRuleSubmit".equals(action)) {
+			opState = updateHeartbeatRule(parameter(request, "ruleId", parameter(request, "key", "")),
+					parameter(request, "metrics", ""),
+					parameter(request, "configs", ""), booleanParameter(request, "available", true));
+		} else if ("heartbeatRulDelete".equals(action) || "heartbeatRuleDelete".equals(action)) {
+			opState = deleteHeartbeatRule(parameter(request, "ruleId", parameter(request, "key", "")));
+		}
+
+		if ("heartbeatRuleUpdate".equals(action)) {
+			configHeartbeatRuleUpdateModel(request, model);
+		} else {
+			configHeartbeatRuleListModel(model);
 		}
 		model.put("opState", opState);
 	}
@@ -379,6 +570,50 @@ public class SpringMvcConfigController {
 		model.put("ruleId", ruleId);
 		model.put("available", available);
 		model.put("content", m_ruleDecorator.generateConfigsHtml(configs));
+	}
+
+	private void configHeartbeatRuleListModel(Map<String, Object> model) {
+		Map<String, Rule> rules = m_heartbeatRuleConfigManager.getMonitorRules().getRules();
+		List<HeartbeatRuleItem> ruleItems = new ArrayList<HeartbeatRuleItem>();
+
+		for (Rule rule : rules.values()) {
+			if (rule.getAvailable() == null) {
+				rule.setAvailable(true);
+			}
+			if (!rule.getMetricItems().isEmpty()) {
+				MetricItem item = rule.getMetricItems().get(0);
+				HeartbeatRuleItem row = new HeartbeatRuleItem(rule.getId(), item.getProductText(), item.getMetricItemText());
+
+				row.setAvailable(rule.getAvailable());
+				ruleItems.add(row);
+			}
+		}
+		model.put("ruleItems", ruleItems);
+		model.put("rules", rules.values());
+	}
+
+	private void configHeartbeatRuleUpdateModel(HttpServletRequest request, Map<String, Object> model) {
+		String ruleId = parameter(request, "ruleId", parameter(request, "key", ""));
+		String configs = "";
+		String metrics = "";
+		Boolean available = true;
+		Rule rule = null;
+
+		if (ruleId.length() > 0) {
+			rule = m_heartbeatRuleConfigManager.queryRule(ruleId);
+		}
+		if (rule != null) {
+			configs = new DefaultJsonBuilder(true).buildArray(rule.getConfigs());
+			metrics = new DefaultJsonBuilder(true).buildArray(rule.getMetricItems());
+			if (rule.getAvailable() != null) {
+				available = rule.getAvailable();
+			}
+		}
+		model.put("ruleId", ruleId);
+		model.put("available", available);
+		model.put("content", m_ruleDecorator.generateConfigsHtml(configs));
+		model.put("configHeader", metrics);
+		model.put("heartbeatExtensionMetrics", m_displayPolicyManager.queryAlertMetrics());
 	}
 
 	private void configExceptionListModel(Map<String, Object> model) {
@@ -488,6 +723,12 @@ public class SpringMvcConfigController {
 				|| "eventRuleDelete".equals(action);
 	}
 
+	private boolean isHeartbeatRuleAction(String action) {
+		return "heartbeatRuleConfigList".equals(action) || "heartbeatRuleUpdate".equals(action)
+				|| "heartbeatRuleSubmit".equals(action) || "heartbeatRulDelete".equals(action)
+				|| "heartbeatRuleDelete".equals(action);
+	}
+
 	private boolean isExceptionAction(String action) {
 		return "exception".equals(action) || "exceptionThresholdUpdate".equals(action)
 				|| "exceptionThresholdAdd".equals(action) || "exceptionThresholdUpdateSubmit".equals(action)
@@ -498,6 +739,24 @@ public class SpringMvcConfigController {
 	private String jspPath(String action) {
 		if ("displayPolicy".equals(action)) {
 			return "/jsp/spring/report/config/displayPolicy.jsp";
+		}
+		if ("alertPolicy".equals(action)) {
+			return "/jsp/spring/report/config/alertPolicy.jsp";
+		}
+		if ("alertDefaultReceivers".equals(action)) {
+			return "/jsp/spring/report/config/alertDefaultReceivers.jsp";
+		}
+		if ("alertSenderConfigUpdate".equals(action)) {
+			return "/jsp/spring/report/config/alertSenderConfig.jsp";
+		}
+		if ("serverConfigUpdate".equals(action)) {
+			return "/jsp/spring/report/config/serverConfigUpdate.jsp";
+		}
+		if ("sampleConfigUpdate".equals(action)) {
+			return "/jsp/spring/report/config/sampleConfigUpdate.jsp";
+		}
+		if ("routerConfigUpdate".equals(action)) {
+			return "/jsp/spring/report/config/routerConfigUpdate.jsp";
 		}
 		if ("exceptionThresholdUpdate".equals(action) || "exceptionThresholdAdd".equals(action)) {
 			return "/jsp/spring/report/config/exceptionThresholdConfig.jsp";
@@ -513,6 +772,12 @@ public class SpringMvcConfigController {
 		}
 		if (isEventRuleAction(action)) {
 			return "/jsp/spring/report/config/eventRule.jsp";
+		}
+		if ("heartbeatRuleUpdate".equals(action)) {
+			return "/jsp/spring/report/config/heartbeatRuleUpdate.jsp";
+		}
+		if (isHeartbeatRuleAction(action)) {
+			return "/jsp/spring/report/config/heartbeatRule.jsp";
 		}
 		if ("transactionRuleUpdate".equals(action)) {
 			return "/jsp/spring/report/config/transactionRuleUpdate.jsp";
@@ -587,11 +852,31 @@ public class SpringMvcConfigController {
 		}
 	}
 
+	private boolean updateHeartbeatRule(String ruleId, String metrics, String configs, Boolean available) {
+		try {
+			String xml = m_heartbeatRuleConfigManager.updateRule(ruleId, metrics, configs, available);
+
+			return m_heartbeatRuleConfigManager.insert(xml);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	private boolean deleteEventRule(String ruleId) {
 		try {
 			String xml = m_eventRuleConfigManager.deleteRule(ruleId);
 
 			return m_eventRuleConfigManager.insert(xml);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private boolean deleteHeartbeatRule(String ruleId) {
+		try {
+			String xml = m_heartbeatRuleConfigManager.deleteRule(ruleId);
+
+			return m_heartbeatRuleConfigManager.insert(xml);
 		} catch (Exception e) {
 			return false;
 		}
@@ -784,6 +1069,42 @@ public class SpringMvcConfigController {
 
 		public String getIps() {
 			return m_ips;
+		}
+	}
+
+	public static class HeartbeatRuleItem {
+		private final String m_id;
+
+		private final String m_productlineText;
+
+		private final String m_metricText;
+
+		private Boolean m_available = true;
+
+		public HeartbeatRuleItem(String id, String productlineText, String metricText) {
+			m_id = id;
+			m_productlineText = productlineText;
+			m_metricText = metricText;
+		}
+
+		public Boolean getAvailable() {
+			return m_available;
+		}
+
+		public void setAvailable(Boolean available) {
+			m_available = available;
+		}
+
+		public String getId() {
+			return m_id;
+		}
+
+		public String getMetricText() {
+			return m_metricText;
+		}
+
+		public String getProductlineText() {
+			return m_productlineText;
 		}
 	}
 }

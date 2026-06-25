@@ -18,10 +18,12 @@ import com.dianping.cat.alarm.rule.entity.Config;
 import com.dianping.cat.alarm.rule.entity.MonitorRules;
 import com.dianping.cat.alarm.rule.entity.Rule;
 import com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator;
+import com.dianping.cat.alarm.rule.entity.MetricItem;
 import com.dianping.cat.home.exception.entity.ExceptionExclude;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;
 import com.dianping.cat.home.heartbeat.entity.Group;
 import com.dianping.cat.home.heartbeat.entity.HeartbeatDisplayPolicy;
+import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
@@ -88,6 +90,78 @@ public class SpringMvcConfigControllerTest {
 		Assert.assertEquals("cat;URL;All;failRatio", model.get("ruleId"));
 		Assert.assertEquals(Boolean.FALSE, model.get("available"));
 		Assert.assertTrue(model.get("content").toString().contains("\"starttime\":\"00:00\""));
+	}
+
+	@Test
+	public void shouldBuildHeartbeatRuleListModel() {
+		SpringMvcConfigController controller = new SpringMvcConfigController();
+		StubHeartbeatRuleConfigManager manager = new StubHeartbeatRuleConfigManager();
+		Map<String, Object> model;
+
+		manager.addRule(new Rule("cat;DescVal").setAvailable(null));
+		controller.setHeartbeatRuleConfigManager(manager);
+		model = controller.configModel(request("/cat", "op", "heartbeatRuleConfigList"), "heartbeatRuleConfigList");
+
+		Rule rule = ((Collection<Rule>) model.get("rules")).iterator().next();
+
+		Assert.assertEquals(Boolean.TRUE, rule.getAvailable());
+		Assert.assertNull(model.get("opState"));
+	}
+
+	@Test
+	public void shouldBuildHeartbeatRuleUpdateModel() {
+		SpringMvcConfigController controller = new SpringMvcConfigController();
+		StubHeartbeatRuleConfigManager manager = new StubHeartbeatRuleConfigManager();
+		Rule rule = new Rule("cat;DescVal").setAvailable(false);
+		Map<String, Object> model;
+
+		rule.addMetricItem(new MetricItem().setProductText("cat").setMetricItemText("DescVal").setMonitorCount(true));
+		rule.addConfig(new Config().setStarttime("00:00").setEndtime("24:00"));
+		manager.addRule(rule);
+		controller.setHeartbeatRuleConfigManager(manager);
+		controller.setDisplayPolicyManager(new StubDisplayPolicyManager());
+		controller.setRuleDecorator(new StubRuleDecorator());
+		model = controller.configModel(request("/cat", "op", "heartbeatRuleUpdate", "ruleId", "cat;DescVal"),
+				"heartbeatRuleUpdate");
+
+		Assert.assertEquals("cat;DescVal", model.get("ruleId"));
+		Assert.assertEquals(Boolean.FALSE, model.get("available"));
+		Assert.assertTrue(model.get("content").toString().contains("\"starttime\":\"00:00\""));
+		Assert.assertTrue(model.get("configHeader").toString().contains("\"productText\":\"cat\""));
+		Assert.assertTrue(((Collection<String>) model.get("heartbeatExtensionMetrics")).contains("System:Heap"));
+	}
+
+	@Test
+	public void shouldSubmitHeartbeatRule() {
+		SpringMvcConfigController controller = new SpringMvcConfigController();
+		StubHeartbeatRuleConfigManager manager = new StubHeartbeatRuleConfigManager();
+		Map<String, Object> model;
+
+		controller.setHeartbeatRuleConfigManager(manager);
+		model = controller.configModel(request("/cat", "op", "heartbeatRuleSubmit", "ruleId", "cat;DescVal",
+				"configs", "[]", "metrics", "[]", "available", "false"), "heartbeatRuleSubmit");
+
+		Assert.assertEquals("cat;DescVal", manager.getUpdatedId());
+		Assert.assertEquals("[]", manager.getUpdatedConfigs());
+		Assert.assertEquals("[]", manager.getUpdatedMetrics());
+		Assert.assertEquals(Boolean.FALSE, manager.getUpdatedAvailable());
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+	}
+
+	@Test
+	public void shouldDeleteHeartbeatRule() {
+		SpringMvcConfigController controller = new SpringMvcConfigController();
+		StubHeartbeatRuleConfigManager manager = new StubHeartbeatRuleConfigManager();
+		Rule rule = new Rule("cat;DescVal");
+		Map<String, Object> model;
+
+		manager.addRule(rule);
+		controller.setHeartbeatRuleConfigManager(manager);
+		model = controller.configModel(request("/cat", "op", "heartbeatRulDelete", "ruleId", "cat;DescVal"),
+				"heartbeatRulDelete");
+
+		Assert.assertNull(manager.queryRule("cat;DescVal"));
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
 	}
 
 	@Test
@@ -262,6 +336,69 @@ public class SpringMvcConfigControllerTest {
 
 		String getInserted() {
 			return m_inserted;
+		}
+	}
+
+	private static class StubHeartbeatRuleConfigManager extends HeartbeatRuleConfigManager {
+		private final MonitorRules m_rules = new MonitorRules();
+
+		private String m_updatedId;
+
+		private String m_updatedMetrics;
+
+		private String m_updatedConfigs;
+
+		private Boolean m_updatedAvailable;
+
+		void addRule(Rule rule) {
+			m_rules.addRule(rule);
+		}
+
+		@Override
+		public MonitorRules getMonitorRules() {
+			return m_rules;
+		}
+
+		@Override
+		public Rule queryRule(String key) {
+			return m_rules.findRule(key);
+		}
+
+		@Override
+		public String updateRule(String id, String metricsStr, String configsStr, Boolean available) {
+			m_updatedId = id;
+			m_updatedMetrics = metricsStr;
+			m_updatedConfigs = configsStr;
+			m_updatedAvailable = available;
+			m_rules.addRule(new Rule(id).setAvailable(available));
+			return m_rules.toString();
+		}
+
+		@Override
+		public String deleteRule(String key) {
+			m_rules.removeRule(key);
+			return m_rules.toString();
+		}
+
+		@Override
+		public boolean insert(String xml) {
+			return true;
+		}
+
+		String getUpdatedId() {
+			return m_updatedId;
+		}
+
+		String getUpdatedMetrics() {
+			return m_updatedMetrics;
+		}
+
+		String getUpdatedConfigs() {
+			return m_updatedConfigs;
+		}
+
+		Boolean getUpdatedAvailable() {
+			return m_updatedAvailable;
 		}
 	}
 

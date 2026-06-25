@@ -4,7 +4,8 @@
 <c:set var="contextPath" value="${empty contextPath ? pageContext.request.contextPath : contextPath}" />
 <c:set var="projectConfigActive" value="${activeConfigMenu eq 'projects' || activeConfigMenu eq 'domainGroupConfigs'}" />
 <c:set var="applicationConfigActive" value="${activeConfigMenu eq 'businessConfig' || activeConfigMenu eq 'businessTag' || activeConfigMenu eq 'displayPolicy'}" />
-<c:set var="alertConfigActive" value="${activeConfigMenu eq 'transactionRule' || activeConfigMenu eq 'eventRule'}" />
+<c:set var="alertConfigActive" value="${activeConfigMenu eq 'transactionRule' || activeConfigMenu eq 'eventRule' || activeConfigMenu eq 'heartbeatRule'}" />
+<c:set var="overallConfigActive" value="${activeConfigMenu eq 'alertPolicy' || activeConfigMenu eq 'alertDefaultReceivers' || activeConfigMenu eq 'alertSenderConfig' || activeConfigMenu eq 'serverConfigUpdate' || activeConfigMenu eq 'sampleConfigUpdate' || activeConfigMenu eq 'routerConfigUpdate'}" />
 <div id="sidebar" class="sidebar responsive">
 	<script type="text/javascript">
 		try { ace.settings.check('sidebar', 'fixed'); } catch(e) {}
@@ -13,7 +14,7 @@
 		<li id="projects_config" class="${projectConfigActive ? 'hsub active open' : 'hsub'}">
 			<a href="${contextPath}/mvc/s/config?op=projects" class="dropdown-toggle">
 				<i class="menu-icon fa fa-cogs"></i>
-				<span class="menu-text">项目配置信息</span>
+				<span class="menu-text">项目配置</span>
 				<b class="arrow fa fa-angle-down"></b>
 			</a>
 			<b class="arrow"></b>
@@ -80,13 +81,13 @@
 					</a>
 					<b class="arrow"></b>
 				</li>
-				<li id="exception">
+				<li id="exception" class="${activeConfigMenu eq 'exception' ? 'active' : ''}">
 					<a href="${contextPath}/mvc/s/config?op=exception">
 						<i class="menu-icon fa fa-caret-right"></i>异常告警配置
 					</a>
 					<b class="arrow"></b>
 				</li>
-				<li id="heartbeatRuleConfigList">
+				<li id="heartbeatRuleConfigList" class="${activeConfigMenu eq 'heartbeatRule' ? 'active' : ''}">
 					<a href="${contextPath}/mvc/s/config?op=heartbeatRuleConfigList">
 						<i class="menu-icon fa fa-caret-right"></i>心跳告警配置
 					</a>
@@ -94,7 +95,7 @@
 				</li>
 			</ul>
 		</li>
-		<li id="overall_config" class="hsub">
+		<li id="overall_config" class="${overallConfigActive ? 'hsub active open' : 'hsub'}">
 			<a href="${contextPath}/mvc/s/config?op=networkRuleConfigList" class="dropdown-toggle">
 				<i class="menu-icon glyphicon glyphicon-cog"></i>
 				<span class="menu-text">全局系统配置</span>
@@ -102,37 +103,37 @@
 			</a>
 			<b class="arrow"></b>
 			<ul class="submenu">
-				<li id="alertPolicy">
+				<li id="alertPolicy" class="${activeConfigMenu eq 'alertPolicy' ? 'active' : ''}">
 					<a href="${contextPath}/mvc/s/config?op=alertPolicy">
 						<i class="menu-icon fa fa-caret-right"></i>告警策略
 					</a>
 					<b class="arrow"></b>
 				</li>
-				<li id="alertDefaultReceivers">
+				<li id="alertDefaultReceivers" class="${activeConfigMenu eq 'alertDefaultReceivers' ? 'active' : ''}">
 					<a href="${contextPath}/mvc/s/config?op=alertDefaultReceivers">
 						<i class="menu-icon fa fa-caret-right"></i>默认告警人
 					</a>
 					<b class="arrow"></b>
 				</li>
-				<li id="alertSenderConfig">
+				<li id="alertSenderConfig" class="${activeConfigMenu eq 'alertSenderConfig' ? 'active' : ''}">
 					<a href="${contextPath}/mvc/s/config?op=alertSenderConfigUpdate">
 						<i class="menu-icon fa fa-caret-right"></i>告警服务端
 					</a>
 					<b class="arrow"></b>
 				</li>
-				<li id="serverConfigUpdate">
+				<li id="serverConfigUpdate" class="${activeConfigMenu eq 'serverConfigUpdate' ? 'active' : ''}">
 					<a href="${contextPath}/mvc/s/config?op=serverConfigUpdate">
 						<i class="menu-icon fa fa-caret-right"></i>服务端配置
 					</a>
 					<b class="arrow"></b>
 				</li>
-				<li id="sampleConfigUpdate">
+				<li id="sampleConfigUpdate" class="${activeConfigMenu eq 'sampleConfigUpdate' ? 'active' : ''}">
 					<a href="${contextPath}/mvc/s/config?op=sampleConfigUpdate">
 						<i class="menu-icon fa fa-caret-right"></i>消息采样配置
 					</a>
 					<b class="arrow"></b>
 				</li>
-				<li id="routerConfigUpdate">
+				<li id="routerConfigUpdate" class="${activeConfigMenu eq 'routerConfigUpdate' ? 'active' : ''}">
 					<a href="${contextPath}/mvc/s/config?op=routerConfigUpdate">
 						<i class="menu-icon fa fa-caret-right"></i>客户端路由
 					</a>
