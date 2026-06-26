@@ -298,7 +298,7 @@ public class TopMetric extends BaseVisitor {
 			Double d = item.getException().get(exception);
 
 			if (d == null) {
-				d = new Double(count);
+				d = Double.valueOf(count);
 			} else {
 				d = d + count;
 			}

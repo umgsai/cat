@@ -200,7 +200,7 @@ public class CacheReport {
 			Long value = m_methodCounts.get(field);
 
 			if (value == null) {
-				value = new Long(0);
+				value = Long.valueOf(0);
 
 				m_methodCounts.put(field, value);
 			}

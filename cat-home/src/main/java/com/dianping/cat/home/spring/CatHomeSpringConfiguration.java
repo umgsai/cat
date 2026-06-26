@@ -404,30 +404,10 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					ContainerMessageAnalyzerFactory.class}),
 		useDefaultFilters = false)
 @MapperScan(basePackages = {
-		"com.dianping.cat.core.config.dao",
-		"com.dianping.cat.core.report.daily.dao",
-		"com.dianping.cat.core.mybatis.hostinfo.dao",
-		"com.dianping.cat.core.mybatis.hourlyreport.dao",
-		"com.dianping.cat.core.mybatis.weeklyreport.dao",
-		"com.dianping.cat.core.mybatis.monthreport.dao",
-		"com.dianping.cat.core.mybatis.project.dao",
-		"com.dianping.cat.core.mybatis.daily.report.content.dao",
-		"com.dianping.cat.core.mybatis.hourly.report.content.dao",
-		"com.dianping.cat.core.mybatis.weekly.report.content.dao",
-		"com.dianping.cat.core.mybatis.monthly.report.content.dao",
-		"com.dianping.cat.core.mybatis.business.config.dao",
-		"com.dianping.cat.core.mybatis.task.dao",
-		"com.dianping.cat.core.mybatis.alert.summary.dao",
-		"com.dianping.cat.core.mybatis.config.modification.dao",
-		"com.dianping.cat.core.mybatis.baseline.dao",
-		"com.dianping.cat.core.mybatis.overload.dao",
-		"com.dianping.cat.core.mybatis.topologygraph.dao",
-		"com.dianping.cat.core.mybatis.metric.graph.dao",
-		"com.dianping.cat.core.mybatis.metric.screen.dao",
-		"com.dianping.cat.core.mybatis.alteration.dao",
-		"com.dianping.cat.core.mybatis.alert.dao",
-		"com.dianping.cat.core.mybatis.server.alarm.rule.dao",
-		"com.dianping.cat.core.mybatis.user.define.rule.dao"
+		"com.dianping.cat.mybatis.mapper",
+		"com.dianping.cat.mybatis.alert.dao",
+		"com.dianping.cat.mybatis.server.alarm.rule.dao",
+		"com.dianping.cat.mybatis.user.define.rule.dao"
 })
 public class CatHomeSpringConfiguration {
 	@Bean(initMethod = "initialize")

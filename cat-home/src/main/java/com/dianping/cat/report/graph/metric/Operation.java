@@ -75,14 +75,14 @@ public class Operation {
 					while ((!stk.empty()) && (stk.peek() != "(")) {
 						postfix += stk.pop() + " ";
 					}
-					stk.push(new Character(op).toString());
+					stk.push(Character.toString(op));
 					break;
 				case '*':
 				case '/':
 					while ((!stk.empty()) && ((stk.peek() == "*") || (stk.peek() == "/"))) {
 						postfix += stk.pop() + " ";
 					}
-					stk.push(new Character(op).toString());
+					stk.push(Character.toString(op));
 					break;
 				}
 			}

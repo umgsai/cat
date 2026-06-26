@@ -58,7 +58,7 @@ public class StateDistirbutionVisitor extends BaseVisitor {
 			Double old = m_distribute.get(ip);
 
 			if (old == null) {
-				old = new Double(0);
+				old = Double.valueOf(0);
 			}
 			m_distribute.put(ip, old + value);
 		}

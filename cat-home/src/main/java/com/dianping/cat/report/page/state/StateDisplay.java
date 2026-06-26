@@ -282,7 +282,7 @@ public class StateDisplay extends BaseVisitor {
 			if (o2.getName() != null && o2.getName().equalsIgnoreCase(Constants.ALL)) {
 				return 1;
 			}
-			return new Double(o2.getSize()).compareTo(o1.getSize());
+			return Double.compare(o2.getSize(), o1.getSize());
 		}
 	}
 

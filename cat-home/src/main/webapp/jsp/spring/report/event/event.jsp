@@ -10,6 +10,34 @@
 <c:set var="date" value="${empty date ? '' : date}" />
 <c:set var="encodedType" value="${empty encodedType ? '' : encodedType}" />
 <c:set var="reportType" value="${empty reportType ? 'day' : reportType}" />
+<c:set var="historyMode" value="${historyMode == true}" />
+<c:set var="groupMode" value="${action eq 'groupReport' || action eq 'groupGraphs' || action eq 'historyGroupReport' || action eq 'historyGroupGraph'}" />
+<c:set var="groupQuery" value="${groupMode ? '&group=' : ''}${groupMode ? group : ''}" />
+<c:choose>
+	<c:when test="${historyMode}">
+		<c:set var="listAction" value="history" />
+		<c:set var="groupAction" value="historyGroupReport" />
+		<c:choose>
+			<c:when test="${groupMode}">
+				<c:set var="graphAction" value="historyGroupGraph" />
+			</c:when>
+			<c:otherwise>
+				<c:set var="graphAction" value="historyGraph" />
+			</c:otherwise>
+		</c:choose>
+		<c:set var="graphLinkClass" value="history_graph_link" />
+		<c:set var="listQueryPrefix" value="op=history&domain=${domain}&date=${date}&reportType=${reportType}${customDate}" />
+		<c:set var="sortQueryPrefix" value="op=history&domain=${domain}&date=${date}&ip=${ipAddress}&reportType=${reportType}${customDate}" />
+	</c:when>
+	<c:otherwise>
+		<c:set var="listAction" value="view" />
+		<c:set var="groupAction" value="groupReport" />
+		<c:set var="graphAction" value="graphs" />
+		<c:set var="graphLinkClass" value="graph_link" />
+		<c:set var="listQueryPrefix" value="domain=${domain}&date=${date}" />
+		<c:set var="sortQueryPrefix" value="domain=${domain}&date=${date}&ip=${ipAddress}" />
+	</c:otherwise>
+</c:choose>
 <!doctype html>
 <html lang="en">
 <head>
@@ -71,11 +99,24 @@
 								</td>
 								<td>
 									<div class="nav-search nav" id="nav-search">
+										<c:choose>
+											<c:when test="${historyMode}">
+												<span class="text-danger switch">【<a class="switch" href="${contextPath}/mvc/r/e?domain=${domain}&ip=${ipAddress}"><span class="text-danger">切到小时模式</span></a>】</span>
+												<c:forEach var="nav" items="${historyNavs}">
+													&nbsp;[ <a href="${contextPath}/mvc/r/e?op=history&domain=${domain}&ip=${ipAddress}&date=${date}&reportType=${nav.title}" class="${nav.title eq reportType ? 'current' : ''}">${nav.title}</a> ]
+												</c:forEach>
+												&nbsp;[ <a href="${contextPath}/mvc/r/e?op=history&domain=${domain}&ip=${ipAddress}&date=${date}&reportType=${reportType}&step=-1&type=${encodedType}">${currentNav.last}</a> ]
+												&nbsp;[ <a href="${contextPath}/mvc/r/e?op=history&domain=${domain}&ip=${ipAddress}&date=${date}&reportType=${reportType}&step=1&type=${encodedType}">${currentNav.next}</a> ]
+												&nbsp;[ <a href="${contextPath}/mvc/r/e?op=history&domain=${domain}&ip=${ipAddress}&reportType=${reportType}&type=${encodedType}">now</a> ]&nbsp;
+											</c:when>
+											<c:otherwise>
 										<span class="text-danger switch">【<a class="switch" href="${contextPath}/mvc/r/e?op=history&domain=${domain}&ip=${ipAddress}"><span class="text-danger">切到历史模式</span></a>】</span>
 										<c:forEach var="nav" items="${navs}">
 											&nbsp;[ <a href="${contextPath}/mvc/r/e?date=${date}&ip=${ipAddress}&step=${nav.hours}&${navPrefix}">${nav.title}</a> ]
 										</c:forEach>
 										&nbsp;[ <a href="${contextPath}/mvc/r/e?${navPrefix}">now</a> ]&nbsp;
+											</c:otherwise>
+										</c:choose>
 									</div>
 								</td>
 							</tr>
@@ -96,7 +137,7 @@
 										<td class="department"><c:out value="${line.key}" /></td>
 										<td><div class="domain">
 											<c:forEach var="itemDomain" items="${line.value.lineDomains}">
-												&nbsp;<a class="domainItem" href="${contextPath}/mvc/r/e?op=view&domain=${itemDomain}&date=${date}&reportType=${reportType}">[&nbsp;<c:out value="${itemDomain}" />&nbsp;]</a>&nbsp;
+												&nbsp;<a class="domainItem" href="${contextPath}/mvc/r/e?op=${listAction}&domain=${itemDomain}&date=${date}&reportType=${reportType}">[&nbsp;<c:out value="${itemDomain}" />&nbsp;]</a>&nbsp;
 											</c:forEach>
 										</div></td>
 									</tr>
@@ -110,10 +151,10 @@
 					<table class="machines">
 						<tr class="left">
 							<th>&nbsp;[&nbsp;
-								<a href="${contextPath}/mvc/r/e?domain=${domain}&date=${date}&type=${encodedType}" class="${ipAddress eq 'All' ? 'current' : ''}">All</a>
+								<a href="${contextPath}/mvc/r/e?${listQueryPrefix}&type=${encodedType}" class="${ipAddress eq 'All' ? 'current' : ''}">All</a>
 								&nbsp;]&nbsp;
 								<c:forEach var="ip" items="${ips}">
-									&nbsp;[&nbsp;<a href="${contextPath}/mvc/r/e?domain=${domain}&ip=${ip}&date=${date}&type=${encodedType}" class="${ip eq ipAddress ? 'current' : ''}"><c:out value="${ip}" /></a>&nbsp;]&nbsp;
+									&nbsp;[&nbsp;<a href="${contextPath}/mvc/r/e?${listQueryPrefix}&ip=${ip}&type=${encodedType}" class="${ip eq ipAddress ? 'current' : ''}"><c:out value="${ip}" /></a>&nbsp;]&nbsp;
 								</c:forEach>
 							</th>
 						</tr>
@@ -126,7 +167,7 @@
 						<tr class="left">
 							<th>
 								<c:forEach var="itemGroup" items="${groups}">
-									&nbsp;[&nbsp;<a href="${contextPath}/mvc/r/e?op=groupReport&domain=${domain}&date=${date}&group=${itemGroup}"><c:out value="${itemGroup}" /></a>&nbsp;]&nbsp;
+									&nbsp;[&nbsp;<a href="${contextPath}/mvc/r/e?op=${groupAction}&domain=${domain}&date=${date}&group=${itemGroup}&reportType=${reportType}&type=${encodedType}${customDate}"><c:out value="${itemGroup}" /></a>&nbsp;]&nbsp;
 								</c:forEach>
 							</th>
 						</tr>
@@ -135,18 +176,18 @@
 						<c:choose>
 							<c:when test="${empty type}">
 								<tr>
-									<th class="left"><a href="${contextPath}/mvc/r/e?domain=${domain}&date=${date}&ip=${ipAddress}&sort=type">Type</a></th>
-									<th class="right"><a href="${contextPath}/mvc/r/e?domain=${domain}&date=${date}&ip=${ipAddress}&sort=total">Total</a></th>
-									<th class="right"><a href="${contextPath}/mvc/r/e?domain=${domain}&date=${date}&ip=${ipAddress}&sort=failure">Failure</a></th>
-									<th class="right"><a href="${contextPath}/mvc/r/e?domain=${domain}&date=${date}&ip=${ipAddress}&sort=failurePercent">Failure%</a></th>
+									<th class="left"><a href="${contextPath}/mvc/r/e?${sortQueryPrefix}&sort=type">Type</a></th>
+									<th class="right"><a href="${contextPath}/mvc/r/e?${sortQueryPrefix}&sort=total">Total</a></th>
+									<th class="right"><a href="${contextPath}/mvc/r/e?${sortQueryPrefix}&sort=failure">Failure</a></th>
+									<th class="right"><a href="${contextPath}/mvc/r/e?${sortQueryPrefix}&sort=failurePercent">Failure%</a></th>
 									<th class="right">Sample Link</th>
 									<th class="right">QPS</th>
 								</tr>
 								<c:forEach var="item" items="${displayTypeReport.results}" varStatus="status">
 									<c:set var="e" value="${item.detail}" />
 									<tr class="right">
-										<td class="left"><a href="${contextPath}/mvc/r/e?op=graphs&domain=${domain}&date=${date}&type=${item.type}&ip=${ipAddress}" class="graph_link" data-status="${status.index}">[:: show ::]</a>
-										&nbsp;&nbsp;<a href="${contextPath}/mvc/r/e?domain=${report.domain}&date=${date}&ip=${ipAddress}&type=${item.type}"><c:out value="${e.id}" /></a></td>
+										<td class="left"><a href="${contextPath}/mvc/r/e?op=${graphAction}&domain=${domain}&date=${date}&type=${item.type}&ip=${ipAddress}&reportType=${reportType}${groupQuery}${customDate}" class="${graphLinkClass}" data-status="${status.index}">[:: show ::]</a>
+										&nbsp;&nbsp;<a href="${contextPath}/mvc/r/e?${listQueryPrefix}&ip=${ipAddress}&type=${item.type}"><c:out value="${e.id}" /></a></td>
 										<td><fmt:formatNumber value="${e.totalCount}" pattern="#,###,###,###,##0" /></td>
 										<td><fmt:formatNumber value="${e.failCount}" pattern="#,###,###,###,##0" /></td>
 										<td>&nbsp;<fmt:formatNumber value="${e.failPercent / 100}" pattern="0.0000%" /></td>
@@ -159,14 +200,14 @@
 							</c:when>
 							<c:otherwise>
 								<tr>
-									<th class="left"><a href="${contextPath}/mvc/r/e?op=graphs&domain=${domain}&date=${date}&type=${encodedType}&ip=${ipAddress}" class="graph_link" data-status="-1">[:: show ::]</a>
-									<a href="${contextPath}/mvc/r/e?domain=${domain}&date=${date}&ip=${ipAddress}&type=${encodedType}&sort=type"> Name</a></th>
-									<th class="right"><a href="${contextPath}/mvc/r/e?domain=${domain}&date=${date}&ip=${ipAddress}&type=${encodedType}&sort=total">Total</a></th>
-									<th class="right"><a href="${contextPath}/mvc/r/e?domain=${domain}&date=${date}&ip=${ipAddress}&type=${encodedType}&sort=failure">Failure</a></th>
-									<th class="right"><a href="${contextPath}/mvc/r/e?domain=${domain}&date=${date}&ip=${ipAddress}&type=${encodedType}&sort=failurePercent">Failure%</a></th>
+									<th class="left"><a href="${contextPath}/mvc/r/e?op=${graphAction}&domain=${domain}&date=${date}&type=${encodedType}&ip=${ipAddress}&reportType=${reportType}${groupQuery}${customDate}" class="${graphLinkClass}" data-status="-1">[:: show ::]</a>
+									<a href="${contextPath}/mvc/r/e?${sortQueryPrefix}&type=${encodedType}&sort=type"> Name</a></th>
+									<th class="right"><a href="${contextPath}/mvc/r/e?${sortQueryPrefix}&type=${encodedType}&sort=total">Total</a></th>
+									<th class="right"><a href="${contextPath}/mvc/r/e?${sortQueryPrefix}&type=${encodedType}&sort=failure">Failure</a></th>
+									<th class="right"><a href="${contextPath}/mvc/r/e?${sortQueryPrefix}&type=${encodedType}&sort=failurePercent">Failure%</a></th>
 									<th class="center">Sample Link</th>
-									<th class="right"><a href="${contextPath}/mvc/r/e?domain=${domain}&date=${date}&ip=${ipAddress}&type=${encodedType}&sort=total">QPS</a></th>
-									<th class="right"><a href="${contextPath}/mvc/r/e?domain=${domain}&date=${date}&ip=${ipAddress}&type=${encodedType}&sort=total">Percent%</a></th>
+									<th class="right"><a href="${contextPath}/mvc/r/e?${sortQueryPrefix}&type=${encodedType}&sort=total">QPS</a></th>
+									<th class="right"><a href="${contextPath}/mvc/r/e?${sortQueryPrefix}&type=${encodedType}&sort=total">Percent%</a></th>
 								</tr>
 								<tr class="graphs"><td colspan="7" style="display:none"><div id="-1" style="display:none"></div></td></tr>
 								<c:forEach var="item" items="${displayNameReport.results}" varStatus="status">
@@ -174,7 +215,7 @@
 									<tr class="right">
 										<td class="left">
 											<c:if test="${status.index > 0}">
-												<a href="${contextPath}/mvc/r/e?op=graphs&domain=${report.domain}&ip=${ipAddress}&date=${date}&type=${encodedType}&name=${item.name}" class="graph_link" data-status="${status.index}">[:: show ::]</a>
+												<a href="${contextPath}/mvc/r/e?op=${graphAction}&domain=${report.domain}&ip=${ipAddress}&date=${date}&type=${encodedType}&name=${item.name}&reportType=${reportType}${groupQuery}${customDate}" class="${graphLinkClass}" data-status="${status.index}">[:: show ::]</a>
 											</c:if>
 											&nbsp;&nbsp;<c:out value="${e.id}" />
 										</td>
@@ -238,7 +279,7 @@
 			}
 		}
 		function buildHref(domain) {
-			return '<a href="${contextPath}/mvc/r/e?op=view&domain=' + domain + '&date=${date}">&nbsp;[&nbsp;' + domain + '&nbsp;]&nbsp;</a>';
+			return '<a href="${contextPath}/mvc/r/e?op=${listAction}&domain=' + domain + '&date=${date}&reportType=${reportType}">&nbsp;[&nbsp;' + domain + '&nbsp;]&nbsp;</a>';
 		}
 		$(document).ready(function() {
 			var domains = getcookie('CAT_DOMAINS') || '';
@@ -255,10 +296,10 @@
 			}
 			$('#frequentNavbar').html(html);
 			$("#search_go").bind("click", function() {
-				window.location.href = '${contextPath}/mvc/r/e?op=view&domain=' + $("#search").val() + '&date=${date}';
+				window.location.href = '${contextPath}/mvc/r/e?op=${listAction}&domain=' + $("#search").val() + '&date=${date}&reportType=${reportType}';
 			});
 			$('#wrap_search').submit(function() {
-				window.location.href = '${contextPath}/mvc/r/e?op=view&domain=' + $("#search").val() + '&date=${date}';
+				window.location.href = '${contextPath}/mvc/r/e?op=${listAction}&domain=' + $("#search").val() + '&date=${date}&reportType=${reportType}';
 				return false;
 			});
 			$.widget("custom.catcomplete", $.ui.autocomplete, {
