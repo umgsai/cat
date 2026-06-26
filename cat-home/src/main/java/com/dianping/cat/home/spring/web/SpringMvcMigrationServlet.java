@@ -119,6 +119,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/r/p", m_problemController::problem);
 		register(routes, "GET", "/r/state", m_stateController::state);
 		register(routes, "POST", "/s/business", m_businessController::business);
+		register(routes, "POST", "/s/config", m_configController::config);
 		register(routes, "POST", "/s/login", m_loginController::submit);
 
 		return Collections.unmodifiableMap(routes);
