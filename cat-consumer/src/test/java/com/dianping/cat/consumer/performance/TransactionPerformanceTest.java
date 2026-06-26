@@ -115,10 +115,10 @@ public class TransactionPerformanceTest {
 		TransactionAnalyzer analyzer = new TransactionAnalyzer();
 
 		analyzer.setAtomicMessageConfigManager(new MockAtomicMessageConfigManager());
-		analyzer.setFilterConfigManager(new MockServerFilterConfigManager());
-		analyzer.setReportManager(new MockTransactionReportManager());
+		analyzer.setServerFilterConfigManager(new MockServerFilterConfigManager());
+		analyzer.setTransactionReportManager(new MockTransactionReportManager());
 		analyzer.setServerConfigManager(new ServerConfigManager());
-		analyzer.setStatisticManager(new MockTpValueStatisticConfigManager());
+		analyzer.setTpValueStatisticConfigManager(new MockTpValueStatisticConfigManager());
 		return analyzer;
 	}
 

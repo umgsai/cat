@@ -25,7 +25,9 @@ import java.util.stream.Stream;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.top.model.entity.Segment;
 import com.dianping.cat.consumer.top.model.entity.TopReport;
@@ -33,35 +35,43 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
+import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + TopAnalyzer.ID)
+@Scope("prototype")
 public class TopAnalyzer extends AbstractMessageAnalyzer<TopReport> {
 	public static final String ID = "top";
 
-	private ReportManager<TopReport> m_reportManager;
+	@Resource(name = TopAnalyzer.ID + "ReportManager")
+	private ReportManager<TopReport> topReportManager;
 
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource(name = "serverFilterConfigManager")
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private Set<String> m_errorTypes;
+	private Set<String> errorTypes;
 
 	@Override
 	public synchronized void doCheckpoint(boolean atEnd) {
 		long startTime = getStartTime();
 
 		if (atEnd && !isLocalMode()) {
-			m_reportManager.storeHourlyReports(startTime, StoragePolicy.FILE_AND_DB, m_index);
+			topReportManager.storeHourlyReports(startTime, StoragePolicy.FILE_AND_DB, m_index);
 		} else {
-			m_reportManager.storeHourlyReports(startTime, StoragePolicy.FILE, m_index);
+			topReportManager.storeHourlyReports(startTime, StoragePolicy.FILE, m_index);
 		}
 	}
 
 	@Override
 	public TopReport getReport(String domain) {
-		return m_reportManager.getHourlyReport(getStartTime(), Constants.CAT, false);
+		return topReportManager.getHourlyReport(getStartTime(), Constants.CAT, false);
 	}
 
 	@Override
 	public ReportManager<TopReport> getReportManager() {
-		return m_reportManager;
+		return topReportManager;
 	}
 
 	@Override
@@ -75,15 +85,15 @@ public class TopAnalyzer extends AbstractMessageAnalyzer<TopReport> {
 
 	@Override
 	protected void loadReports() {
-		m_reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+		topReportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 	}
 
 	@Override
 	public void process(MessageTree tree) {
 		String domain = tree.getDomain();
 
-		if (m_serverFilterConfigManager.validateDomain(domain)) {
-			TopReport report = m_reportManager.getHourlyReport(getStartTime(), Constants.CAT, true);
+		if (serverFilterConfigManager.validateDomain(domain)) {
+			TopReport report = topReportManager.getHourlyReport(getStartTime(), Constants.CAT, true);
 
 			List<Event> events = tree.getEvents();
 
@@ -96,7 +106,7 @@ public class TopAnalyzer extends AbstractMessageAnalyzer<TopReport> {
 	private void processEvent(TopReport report, MessageTree tree, Event event) {
 		String type = event.getType();
 
-		if (m_errorTypes.contains(type)) {
+		if (errorTypes.contains(type)) {
 			String domain = tree.getDomain();
 			String ip = tree.getIpAddress();
 			String exception = event.getName();
@@ -109,15 +119,22 @@ public class TopAnalyzer extends AbstractMessageAnalyzer<TopReport> {
 		}
 	}
 
+	@Value("Error,RuntimeException,Exception")
 	public void setErrorType(String type) {
-		m_errorTypes = Stream.of(type.split(",")).map(String::trim).filter(item -> !item.isEmpty()).collect(Collectors.toSet());
+		errorTypes = Stream.of(type.split(",")).map(String::trim).filter(item -> !item.isEmpty()).collect(Collectors.toSet());
 	}
 
 	public void setReportManager(ReportManager<TopReport> reportManager) {
-		m_reportManager = reportManager;
+		topReportManager = reportManager;
 	}
 
 	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
+		this.serverFilterConfigManager = serverFilterConfigManager;
+	}
+
+	@Override
+	@Resource(name = "serverConfigManager")
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		super.setServerConfigManager(serverConfigManager);
 	}
 }

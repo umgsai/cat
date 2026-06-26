@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.consumer.problem;
 
+import java.util.Arrays;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -25,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dianping.cat.Constants;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.TestHelper;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
@@ -144,8 +146,14 @@ public class ProblemAnalyzerTest {
 
 	private ProblemAnalyzer createAnalyzer() {
 		ProblemAnalyzer analyzer = new ProblemAnalyzer();
+		DefaultProblemHandler defaultProblemHandler = new DefaultProblemHandler();
+		LongExecutionProblemHandler longExecutionProblemHandler = new LongExecutionProblemHandler();
+
+		defaultProblemHandler.setErrorType("Error,RuntimeException,Exception");
+		longExecutionProblemHandler.setConfigManager(new ServerConfigManager());
 
 		analyzer.setReportManager(new MockProblemReportManager());
+		analyzer.setHandlers(Arrays.asList(defaultProblemHandler, longExecutionProblemHandler));
 		return analyzer;
 	}
 

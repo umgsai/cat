@@ -647,6 +647,22 @@ public class TransactionAnalyzer extends AbstractMessageAnalyzer<TransactionRepo
 		}
 	}
 
+	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {
+		this.atomicMessageConfigManager = atomicMessageConfigManager;
+	}
+
+	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		this.serverFilterConfigManager = serverFilterConfigManager;
+	}
+
+	public void setTpValueStatisticConfigManager(TpValueStatisticConfigManager tpValueStatisticConfigManager) {
+		this.tpValueStatisticConfigManager = tpValueStatisticConfigManager;
+	}
+
+	public void setTransactionReportManager(ReportManager<TransactionReport> transactionReportManager) {
+		this.transactionReportManager = transactionReportManager;
+	}
+
 	@Resource(name = "serverConfigManager")
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
 		super.setServerConfigManager(serverConfigManager);

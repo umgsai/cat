@@ -127,10 +127,10 @@ public class TransactionAnalyzerTest {
 		TransactionAnalyzer analyzer = new TransactionAnalyzer();
 
 		analyzer.setAtomicMessageConfigManager(new MockAtomicMessageConfigManager());
-		analyzer.setFilterConfigManager(new MockServerFilterConfigManager());
-		analyzer.setReportManager(new MockTransactionReportManager());
+		analyzer.setServerFilterConfigManager(new MockServerFilterConfigManager());
+		analyzer.setTransactionReportManager(new MockTransactionReportManager());
 		analyzer.setServerConfigManager(new MockServerConfigManager());
-		analyzer.setStatisticManager(new MockTpValueStatisticConfigManager());
+		analyzer.setTpValueStatisticConfigManager(new MockTpValueStatisticConfigManager());
 		return analyzer;
 	}
 

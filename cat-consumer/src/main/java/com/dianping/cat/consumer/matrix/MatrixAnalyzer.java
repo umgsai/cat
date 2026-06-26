@@ -19,7 +19,9 @@
 package com.dianping.cat.consumer.matrix;
 
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.matrix.model.entity.Matrix;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.matrix.model.entity.Ratio;
@@ -33,34 +35,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + MatrixAnalyzer.ID)
+@Scope("prototype")
 public class MatrixAnalyzer extends AbstractMessageAnalyzer<MatrixReport> {
 	public static final String ID = "matrix";
 
-	private ReportManager<MatrixReport> m_reportManager;
+	@Resource(name = MatrixAnalyzer.ID + "ReportManager")
+	private ReportManager<MatrixReport> matrixReportManager;
 
 	@Override
 	public synchronized void doCheckpoint(boolean atEnd) {
 		if (atEnd && !isLocalMode()) {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
+			matrixReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
 		} else {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+			matrixReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
 	}
 
 	@Override
 	public MatrixReport getReport(String domain) {
-		return m_reportManager.getHourlyReport(getStartTime(), domain, false);
+		return matrixReportManager.getHourlyReport(getStartTime(), domain, false);
 	}
 
 	@Override
 	public ReportManager<MatrixReport> getReportManager() {
-		return m_reportManager;
+		return matrixReportManager;
 	}
 
 	@Override
 	protected void loadReports() {
-		m_reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+		matrixReportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 	}
 
 	@Override
@@ -75,7 +83,7 @@ public class MatrixAnalyzer extends AbstractMessageAnalyzer<MatrixReport> {
 	@Override
 	public void process(MessageTree tree) {
 		String domain = tree.getDomain();
-		MatrixReport report = m_reportManager.getHourlyReport(getStartTime(), domain, true);
+		MatrixReport report = matrixReportManager.getHourlyReport(getStartTime(), domain, true);
 		Message message = tree.getMessage();
 
 		if (message instanceof Transaction) {
@@ -145,7 +153,13 @@ public class MatrixAnalyzer extends AbstractMessageAnalyzer<MatrixReport> {
 	}
 
 	public void setReportManager(ReportManager<MatrixReport> reportManager) {
-		m_reportManager = reportManager;
+		matrixReportManager = reportManager;
+	}
+
+	@Override
+	@Resource(name = "serverConfigManager")
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		super.setServerConfigManager(serverConfigManager);
 	}
 
 }

@@ -21,8 +21,10 @@ package com.dianping.cat.consumer.event;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.MessageAnalyzer;
 import com.dianping.cat.config.AtomicMessageConfigManager;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.event.model.entity.*;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
@@ -34,29 +36,36 @@ import com.dianping.cat.support.Threads;
 
 import java.util.List;
 import java.util.Set;
+import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + EventAnalyzer.ID)
+@Scope("prototype")
 public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 
 	public static final String ID = "event";
 
-	private ReportManager<EventReport> m_reportManager;
+	@Resource(name = EventAnalyzer.ID + "ReportManager")
+	private ReportManager<EventReport> eventReportManager;
 
-	private AtomicMessageConfigManager m_atomicMessageConfigManager;
+	@Resource(name = "atomicMessageConfigManager")
+	private AtomicMessageConfigManager atomicMessageConfigManager;
 
-	private final EventTpsStatisticsComputer m_computer = new EventTpsStatisticsComputer();
+	private final EventTpsStatisticsComputer eventTpsStatisticsComputer = new EventTpsStatisticsComputer();
 
-	private int m_typeCountLimit = 100;
+	private int typeCountLimit = 100;
 
-	private static final int m_statusCodeCountLimit = 100;
+	private static final int statusCodeCountLimit = 100;
 
-	private long m_nextClearTime;
+	private long nextClearTime;
 
 	@Override
 	public synchronized void doCheckpoint(boolean atEnd) {
 		if (atEnd && !isLocalMode()) {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
+			eventReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
 		} else {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+			eventReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
 	}
 
@@ -66,12 +75,12 @@ public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 		long timestamp = System.currentTimeMillis();
 		long remainder = timestamp % 3600000;
 		long current = timestamp - remainder;
-		EventReport report = m_reportManager.getHourlyReport(period, domain, false);
+		EventReport report = eventReportManager.getHourlyReport(period, domain, false);
 
 		if (period == current) {
-			report.accept(m_computer.setDuration(remainder / 1000.0));
+			report.accept(eventTpsStatisticsComputer.setDuration(remainder / 1000.0));
 		} else if (period < current) {
-			report.accept(m_computer.setDuration(3600));
+			report.accept(eventTpsStatisticsComputer.setDuration(3600));
 		}
 
 		// report.getIps().addAll(report.getMachines().keySet());
@@ -85,7 +94,7 @@ public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 		if (eventType == null) {
 			int size = machine.getTypes().size();
 
-			if (size > m_typeCountLimit) {
+			if (size > typeCountLimit) {
 				eventType = machine.findOrCreateType(CatConstants.OTHERS);
 			} else {
 				eventType = machine.findOrCreateType(type);
@@ -101,7 +110,7 @@ public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 		if (eventName == null) {
 			int size = type.getNames().size();
 
-			if (size > m_atomicMessageConfigManager.getMaxNameThreshold(domain)) {
+			if (size > atomicMessageConfigManager.getMaxNameThreshold(domain)) {
 				eventName = type.findOrCreateName(CatConstants.OTHERS);
 			} else {
 				eventName = type.findOrCreateName(name);
@@ -117,7 +126,7 @@ public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 		if (code == null) {
 			int size = name.getStatusCodes().size();
 
-			if (size > m_statusCodeCountLimit) {
+			if (size > statusCodeCountLimit) {
 				code = name.findOrCreateStatusCode(CatConstants.OTHERS);
 			} else {
 				code = name.findOrCreateStatusCode(codeName);
@@ -131,7 +140,7 @@ public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 		Transaction t = Cat.newTransaction("CleanUpEventReports", minute);
 
 		try {
-			Set<String> domains = m_reportManager.getDomains(m_startTime);
+			Set<String> domains = eventReportManager.getDomains(m_startTime);
 
 			for (String domain : domains) {
 				Transaction tran = Cat.newTransaction("CleanUpEvent", minute);
@@ -139,16 +148,16 @@ public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 				tran.addData("domain", domain);
 
 				EventReportCountFilter visitor = new EventReportCountFilter(m_serverConfigManager.getMaxTypeThreshold(),
-										m_atomicMessageConfigManager.getMaxNameThreshold(domain), m_serverConfigManager.getTypeNameLengthLimit());
+										atomicMessageConfigManager.getMaxNameThreshold(domain), m_serverConfigManager.getTypeNameLengthLimit());
 
 				try {
-					EventReport report = m_reportManager.getHourlyReport(m_startTime, domain, false);
+					EventReport report = eventReportManager.getHourlyReport(m_startTime, domain, false);
 
 					visitor.visitEventReport(report);
 					tran.success();
 				} catch (Exception e) {
 					try {
-						EventReport report = m_reportManager.getHourlyReport(m_startTime, domain, false);
+						EventReport report = eventReportManager.getHourlyReport(m_startTime, domain, false);
 
 						visitor.visitEventReport(report);
 						tran.success();
@@ -178,29 +187,35 @@ public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 
 	@Override
 	public ReportManager<EventReport> getReportManager() {
-		return m_reportManager;
+		return eventReportManager;
 	}
 
 	public void setReportManager(ReportManager<EventReport> reportManager) {
-		m_reportManager = reportManager;
+		eventReportManager = reportManager;
 	}
 
 	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {
-		m_atomicMessageConfigManager = atomicMessageConfigManager;
+		this.atomicMessageConfigManager = atomicMessageConfigManager;
+	}
+
+	@Override
+	@Resource(name = "serverConfigManager")
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		super.setServerConfigManager(serverConfigManager);
 	}
 
 	@Override
 	public void initialize(long startTime, long duration, long extraTime) {
 		super.initialize(startTime, duration, extraTime);
 
-		m_typeCountLimit = m_serverConfigManager.getMaxTypeThreshold();
+		typeCountLimit = m_serverConfigManager.getMaxTypeThreshold();
 
 		final long current = System.currentTimeMillis();
 
 		if (startTime < current) {
-			m_nextClearTime = TimeHelper.getCurrentMinute().getTime() + TimeHelper.ONE_MINUTE * 2;
+			nextClearTime = TimeHelper.getCurrentMinute().getTime() + TimeHelper.ONE_MINUTE * 2;
 		} else {
-			m_nextClearTime = startTime + TimeHelper.ONE_MINUTE * 2;
+			nextClearTime = startTime + TimeHelper.ONE_MINUTE * 2;
 		}
 	}
 
@@ -217,14 +232,14 @@ public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 
 	@Override
 	protected void loadReports() {
-		m_reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+		eventReportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 	}
 
 	@Override
 	public void process(MessageTree tree) {
 		String domain = tree.getDomain();
 		String ip = tree.getIpAddress();
-		EventReport report = m_reportManager.getHourlyReport(getStartTime(), domain, true);
+		EventReport report = eventReportManager.getHourlyReport(getStartTime(), domain, true);
 		List<Event> events = tree.findOrCreateEvents();
 
 		for (Event event : events) {
@@ -246,8 +261,8 @@ public class EventAnalyzer extends AbstractMessageAnalyzer<EventReport> {
 			processEvent(report, tree, event, ip, total, fail, batchData);
 		}
 
-		if (System.currentTimeMillis() > m_nextClearTime) {
-			m_nextClearTime = m_nextClearTime + TimeHelper.ONE_MINUTE;
+		if (System.currentTimeMillis() > nextClearTime) {
+			nextClearTime = nextClearTime + TimeHelper.ONE_MINUTE;
 
 			Threads.forGroup("cat").start(new Runnable() {
 

@@ -20,40 +20,56 @@ package com.dianping.cat.consumer.dump;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.statistic.ServerStatisticManager;
+import com.dianping.cat.support.Threads;
+import jakarta.annotation.Resource;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.unidal.cat.message.storage.MessageDumper;
 import org.unidal.cat.message.storage.MessageDumperManager;
 import org.unidal.cat.message.storage.MessageFinderManager;
-import com.dianping.cat.support.Threads;
 
 import java.util.concurrent.TimeUnit;
 
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + DumpAnalyzer.ID)
+@Scope("prototype")
 public class DumpAnalyzer extends AbstractMessageAnalyzer<Object> {
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DumpAnalyzer.class);
 
 	public static final String ID = "dump";
 
-	private ServerStatisticManager m_serverStateManager;
 
-	private MessageDumperManager m_dumperManager;
+	@Resource(name = "serverStatisticManager")
+	private ServerStatisticManager serverStatisticManager;
 
-	private MessageFinderManager m_finderManager;
+	@Resource(name = "messageDumperManager")
+	private MessageDumperManager dumperManager;
 
-	private int m_discradSize = 50000000;
+	@Resource(name = "messageFinderManager")
+	private MessageFinderManager finderManager;
+
+	private int discardSize = 50000000;
+
+	@Override
+	@Resource(name = "serverConfigManager")
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		super.setServerConfigManager(serverConfigManager);
+	}
 
 	private void closeStorage() {
 		int hour = (int) TimeUnit.MILLISECONDS.toHours(m_startTime);
 		Transaction t = Cat.newTransaction("Dumper", "Storage" + hour);
 
 		try {
-			m_finderManager.close(hour);
-			m_dumperManager.close(hour);
+			finderManager.close(hour);
+			dumperManager.close(hour);
 			t.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
 			LOGGER.error("Unable to close message storage, hour={}.", hour, e);
@@ -92,7 +108,7 @@ public class DumpAnalyzer extends AbstractMessageAnalyzer<Object> {
 		super.initialize(startTime, duration, extraTime);
 		int hour = (int) TimeUnit.MILLISECONDS.toHours(startTime);
 
-		m_dumperManager.findOrCreate(hour);
+		dumperManager.findOrCreate(hour);
 	}
 
 	@Override
@@ -113,33 +129,33 @@ public class DumpAnalyzer extends AbstractMessageAnalyzer<Object> {
 	}
 
 	private void processWithStorage(MessageTree tree, MessageId messageId, int hour) {
-		MessageDumper dumper = m_dumperManager.find(hour);
+		MessageDumper dumper = dumperManager.find(hour);
 
 		tree.setFormatMessageId(messageId);
 
 		if (dumper != null) {
 			dumper.process(tree);
 		} else {
-			m_serverStateManager.addPigeonTimeError(1);
+			serverStatisticManager.addPigeonTimeError(1);
 		}
 	}
 
-	public void setServerStateManager(ServerStatisticManager serverStateManager) {
-		m_serverStateManager = serverStateManager;
-	}
-
 	public void setDumperManager(MessageDumperManager dumperManager) {
-		m_dumperManager = dumperManager;
+		this.dumperManager = dumperManager;
 	}
 
 	public void setFinderManager(MessageFinderManager finderManager) {
-		m_finderManager = finderManager;
+		this.finderManager = finderManager;
+	}
+
+	public void setServerStatisticManager(ServerStatisticManager serverStatisticManager) {
+		this.serverStatisticManager = serverStatisticManager;
 	}
 
 	private boolean shouldDiscard(MessageId id) {
 		int index = id.getIndex();
 
-		return index > m_discradSize;
+		return index > discardSize;
 	}
 
 }

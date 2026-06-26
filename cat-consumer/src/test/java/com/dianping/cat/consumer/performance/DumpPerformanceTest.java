@@ -123,7 +123,7 @@ public class DumpPerformanceTest {
 
 		analyzer.setDumperManager(new MockMessageDumperManager());
 		analyzer.setFinderManager(new MockMessageFinderManager());
-		analyzer.setServerStateManager(new ServerStatisticManager());
+		analyzer.setServerStatisticManager(new ServerStatisticManager());
 		analyzer.initialize(System.currentTimeMillis(), 60 * 60 * 1000L, 5 * 60 * 1000L);
 		return analyzer;
 	}

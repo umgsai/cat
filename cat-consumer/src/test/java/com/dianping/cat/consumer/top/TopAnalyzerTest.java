@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dianping.cat.Constants;
+import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.top.model.entity.TopReport;
 import com.dianping.cat.helper.TimeHelper;
@@ -116,7 +117,16 @@ public class TopAnalyzerTest {
 		TopAnalyzer analyzer = new TopAnalyzer();
 
 		analyzer.setReportManager(new MockTopReportManager());
+		analyzer.setServerFilterConfigManager(new MockServerFilterConfigManager());
+		analyzer.setErrorType("Error,RuntimeException,Exception");
 		return analyzer;
+	}
+
+	private static class MockServerFilterConfigManager extends ServerFilterConfigManager {
+		@Override
+		public boolean validateDomain(String domain) {
+			return true;
+		}
 	}
 
 	private static class MockTopReportManager extends MockReportManager<TopReport> {

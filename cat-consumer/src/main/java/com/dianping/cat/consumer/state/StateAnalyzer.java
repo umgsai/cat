@@ -20,7 +20,9 @@ package com.dianping.cat.consumer.state;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.state.model.entity.*;
@@ -38,19 +40,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
+import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + StateAnalyzer.ID)
+@Scope("prototype")
 public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> {
 	public static final String ID = "state";
 
-	private ReportManager<StateReport> m_reportManager;
+	@Resource(name = StateAnalyzer.ID + "ReportManager")
+	private ReportManager<StateReport> stateReportManager;
 
-	private ServerStatisticManager m_serverStateManager;
+	@Resource(name = "serverStatisticManager")
+	private ServerStatisticManager serverStatisticManager;
 
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource(name = "serverFilterConfigManager")
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private ProjectService m_projectService;
+	@Resource(name = "projectService")
+	private ProjectService projectService;
 
-	private String m_ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
+	private String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 
 	private Machine buildStateInfo(Machine machine) {
 		long minute = 1000 * 60;
@@ -64,7 +75,7 @@ public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> {
 			end = current;
 		}
 		for (; start < end; start += minute) {
-			Statistic state = m_serverStateManager.findOrCreateState(start);
+			Statistic state = serverStatisticManager.findOrCreateState(start);
 			Message temp = machine.findOrCreateMessage(start);
 			Map<String, AtomicLong> totals = state.getMessageTotals();
 			Map<String, AtomicLong> totalLosses = state.getMessageTotalLosses();
@@ -155,13 +166,13 @@ public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> {
 	public synchronized void doCheckpoint(boolean atEnd) {
 		long startTime = getStartTime();
 		StateReport stateReport = getReport(Constants.CAT);
-		Map<String, StateReport> reports = m_reportManager.getHourlyReports(startTime);
+		Map<String, StateReport> reports = stateReportManager.getHourlyReports(startTime);
 
 		reports.put(Constants.CAT, stateReport);
 		if (atEnd && !isLocalMode()) {
-			m_reportManager.storeHourlyReports(startTime, StoragePolicy.FILE_AND_DB, m_index);
+			stateReportManager.storeHourlyReports(startTime, StoragePolicy.FILE_AND_DB, m_index);
 		} else {
-			m_reportManager.storeHourlyReports(startTime, StoragePolicy.FILE, m_index);
+			stateReportManager.storeHourlyReports(startTime, StoragePolicy.FILE, m_index);
 		}
 		if (atEnd) {
 			long minute = 1000 * 60;
@@ -169,7 +180,7 @@ public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> {
 			long end = m_startTime - minute * 60;
 
 			for (; start < end; start += minute) {
-				m_serverStateManager.removeState(start);
+				serverStatisticManager.removeState(start);
 			}
 		}
 	}
@@ -181,9 +192,9 @@ public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> {
 		report.setStartTime(new Date(m_startTime));
 		report.setEndTime(new Date(m_startTime + MINUTE * 60 - 1));
 
-		Machine machine = buildStateInfo(report.findOrCreateMachine(m_ip));
-		StateReport stateReport = m_reportManager.getHourlyReport(getStartTime(), Constants.CAT, true);
-		Map<String, ProcessDomain> processDomains = stateReport.findOrCreateMachine(m_ip).getProcessDomains();
+		Machine machine = buildStateInfo(report.findOrCreateMachine(ip));
+		StateReport stateReport = stateReportManager.getHourlyReport(getStartTime(), Constants.CAT, true);
+		Map<String, ProcessDomain> processDomains = stateReport.findOrCreateMachine(ip).getProcessDomains();
 
 		for (Map.Entry<String, ProcessDomain> entry : machine.getProcessDomains().entrySet()) {
 			ProcessDomain processDomain = processDomains.get(entry.getKey());
@@ -197,7 +208,7 @@ public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> {
 
 	@Override
 	public ReportManager<StateReport> getReportManager() {
-		return m_reportManager;
+		return stateReportManager;
 	}
 
 	@Override
@@ -208,23 +219,29 @@ public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> {
 	}
 
 	public void setMIp(String ip) {
-		m_ip = ip;
+		this.ip = ip;
 	}
 
 	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	public void setReportManager(ReportManager<StateReport> reportManager) {
-		m_reportManager = reportManager;
+		stateReportManager = reportManager;
 	}
 
 	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
+		this.serverFilterConfigManager = serverFilterConfigManager;
 	}
 
 	public void setServerStateManager(ServerStatisticManager serverStateManager) {
-		m_serverStateManager = serverStateManager;
+		serverStatisticManager = serverStateManager;
+	}
+
+	@Override
+	@Resource(name = "serverConfigManager")
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		super.setServerConfigManager(serverConfigManager);
 	}
 
 	@Override
@@ -236,17 +253,17 @@ public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> {
 	protected void process(MessageTree tree) {
 		String domain = tree.getDomain();
 
-		if (m_serverFilterConfigManager.validateDomain(domain)) {
-			StateReport report = m_reportManager.getHourlyReport(getStartTime(), Constants.CAT, true);
+		if (serverFilterConfigManager.validateDomain(domain)) {
+			StateReport report = stateReportManager.getHourlyReport(getStartTime(), Constants.CAT, true);
 			String ip = tree.getIpAddress();
 			Machine machine = report.findOrCreateMachine(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 
 			machine.findOrCreateProcessDomain(domain).addIp(ip);
 
-			Project project = m_projectService.findProject(domain);
+			Project project = projectService.findProject(domain);
 
 			if (project == null) {
-				m_projectService.insert(domain);
+				projectService.insert(domain);
 			}
 		}
 	}

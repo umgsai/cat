@@ -19,7 +19,7 @@
 package com.dianping.cat.consumer.cross;
 
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.cross.model.entity.*;
 import com.dianping.cat.message.Event;
@@ -28,11 +28,16 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + CrossAnalyzer.ID)
+@Scope("prototype")
 public class CrossAnalyzer extends AbstractMessageAnalyzer<CrossReport> {
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CrossAnalyzer.class);
 
@@ -40,9 +45,11 @@ public class CrossAnalyzer extends AbstractMessageAnalyzer<CrossReport> {
 
 	public static final String DEFAULT = "unknown";
 
-	protected ReportManager<CrossReport> m_reportManager;
+	@Resource(name = "crossReportManager")
+	protected ReportManager<CrossReport> reportManager;
 
-	protected IpConvertManager m_ipConvertManager;
+	@Resource(name = "ipConvertManager")
+	protected IpConvertManager ipConvertManager;
 
 	private int m_discardLogs = 0;
 
@@ -78,26 +85,22 @@ public class CrossAnalyzer extends AbstractMessageAnalyzer<CrossReport> {
 	@Override
 	public synchronized void doCheckpoint(boolean atEnd) {
 		if (atEnd && !isLocalMode()) {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
+			reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
 
 			LOGGER.info("discard server logview count {}, errorAppName {}", m_discardLogs, m_errorAppName);
 		} else {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+			reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
 	}
 
 	@Override
 	public CrossReport getReport(String domain) {
-		return m_reportManager.getHourlyReport(getStartTime(), domain, false);
+		return reportManager.getHourlyReport(getStartTime(), domain, false);
 	}
 
 	@Override
 	public ReportManager<CrossReport> getReportManager() {
-		return m_reportManager;
-	}
-
-	public void setReportManager(ReportManager<CrossReport> reportManager) {
-		m_reportManager = reportManager;
+		return reportManager;
 	}
 
 	@Override
@@ -111,7 +114,7 @@ public class CrossAnalyzer extends AbstractMessageAnalyzer<CrossReport> {
 
 	@Override
 	protected void loadReports() {
-		m_reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+		reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 	}
 
 	public CrossInfo parseCrossTransaction(Transaction t, MessageTree tree) {
@@ -179,7 +182,7 @@ public class CrossAnalyzer extends AbstractMessageAnalyzer<CrossReport> {
 	@Override
 	public void process(MessageTree tree) {
 		String domain = tree.getDomain();
-		CrossReport report = m_reportManager.getHourlyReport(getStartTime(), domain, true);
+		CrossReport report = reportManager.getHourlyReport(getStartTime(), domain, true);
 
 		report.addIp(tree.getIpAddress());
 
@@ -203,7 +206,7 @@ public class CrossAnalyzer extends AbstractMessageAnalyzer<CrossReport> {
 				CrossInfo serverCrossInfo = convertCrossInfo(tree.getDomain(), crossInfo);
 
 				if (serverCrossInfo != null) {
-					CrossReport serverReport = m_reportManager.getHourlyReport(getStartTime(), targetDomain, true);
+					CrossReport serverReport = reportManager.getHourlyReport(getStartTime(), targetDomain, true);
 
 					updateCrossReport(serverReport, t, serverCrossInfo);
 				}
@@ -214,9 +217,14 @@ public class CrossAnalyzer extends AbstractMessageAnalyzer<CrossReport> {
 	}
 
 	public void setIpConvertManager(IpConvertManager ipConvertManager) {
-		m_ipConvertManager = ipConvertManager;
+		this.ipConvertManager = ipConvertManager;
 	}
 
+	public void setReportManager(ReportManager<CrossReport> reportManager) {
+		this.reportManager = reportManager;
+	}
+
+	@Resource(name = "serverConfigManager")
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
 		m_serverConfigManager = serverConfigManager;
 	}

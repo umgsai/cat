@@ -28,7 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.DatabaseParser;
 import com.dianping.cat.consumer.storage.StorageReportUpdater.StorageUpdateItem;
 import com.dianping.cat.consumer.storage.builder.StorageBuilder;
@@ -38,77 +40,92 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
+import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + StorageAnalyzer.ID)
+@Scope("prototype")
 public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageAnalyzer.class);
 
 	public static final String ID = "storage";
 
-	private ReportManager<StorageReport> m_reportManager;
+	@Resource(name = StorageAnalyzer.ID + "ReportManager")
+	private ReportManager<StorageReport> storageReportManager;
 
-	private DatabaseParser m_databaseParser;
+	@Resource(name = "databaseParser")
+	private DatabaseParser databaseParser;
 
-	private StorageReportUpdater m_updater;
+	@Resource(name = "storageReportUpdater")
+	private StorageReportUpdater storageReportUpdater;
 
-	private Map<String, StorageBuilder> m_storageBuilders;
+	@Resource(name = "storageBuilders")
+	private Map<String, StorageBuilder> storageBuilders;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	@Override
 	public synchronized void doCheckpoint(boolean atEnd) {
 		if (atEnd && !isLocalMode()) {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
-			m_databaseParser.showErrorCon();
+			storageReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
+			databaseParser.showErrorCon();
 		} else {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+			storageReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
 	}
 
 	@Override
 	public StorageReport getReport(String id) {
 		long period = getStartTime();
-		StorageReport report = m_reportManager.getHourlyReport(period, id, false);
+		StorageReport report = storageReportManager.getHourlyReport(period, id, false);
 
-		m_updater.updateStorageIds(id, m_reportManager.getDomains(period), report);
+		storageReportUpdater.updateStorageIds(id, storageReportManager.getDomains(period), report);
 		return report;
 	}
 
 	@Override
 	public ReportManager<StorageReport> getReportManager() {
-		return m_reportManager;
+		return storageReportManager;
 	}
 
 	public void setDatabaseParser(DatabaseParser databaseParser) {
-		m_databaseParser = databaseParser;
+		this.databaseParser = databaseParser;
 	}
 
 	public void setReportManager(ReportManager<StorageReport> reportManager) {
-		m_reportManager = reportManager;
+		storageReportManager = reportManager;
 	}
 
 	public void setUpdater(StorageReportUpdater updater) {
-		m_updater = updater;
+		storageReportUpdater = updater;
 	}
 
 	public void setStorageBuilders(Map<String, StorageBuilder> storageBuilders) {
-		m_storageBuilders = storageBuilders;
+		this.storageBuilders = storageBuilders;
+	}
+
+	@Override
+	@Resource(name = "serverConfigManager")
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		super.setServerConfigManager(serverConfigManager);
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
-		if (m_storageBuilders == null) {
-			m_storageBuilders = Collections.emptyMap();
+		if (storageBuilders == null) {
+			storageBuilders = Collections.emptyMap();
 			LOGGER.warn("Storage analyzer has no configured builders, keep empty builder map.");
 		}
-		m_initialized = true;
+		initialized = true;
 	}
 
 	@Override
@@ -122,7 +139,7 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 
 	@Override
 	protected void loadReports() {
-		m_reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+		storageReportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 	}
 
 	@Override
@@ -133,7 +150,7 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 
 		for (Transaction t : transactions) {
 			String domain = tree.getDomain();
-			Collection<StorageBuilder> builders = m_storageBuilders.values();
+			Collection<StorageBuilder> builders = storageBuilders.values();
 
 			for (StorageBuilder builder : builders) {
 				if (builder.isEligable(t)) {
@@ -141,12 +158,12 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 					String id = item.getId();
 
 					if (StringUtils.isNotEmpty(id)) {
-						StorageReport report = m_reportManager.getHourlyReport(getStartTime(), item.getReportId(), true);
+						StorageReport report = storageReportManager.getHourlyReport(getStartTime(), item.getReportId(), true);
 						StorageUpdateItem param = new StorageUpdateItem();
 
 						param.setDomain(domain).setIp(item.getIp()).setMethod(item.getMethod()).setTransaction(t)
 												.setThreshold(item.getThreshold());
-						m_updater.updateStorageReport(report, param);
+						storageReportUpdater.updateStorageReport(report, param);
 					}
 				}
 			}

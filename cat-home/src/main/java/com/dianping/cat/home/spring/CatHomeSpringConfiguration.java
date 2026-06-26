@@ -393,7 +393,16 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
 @Configuration
 @Import(SpringMvcMigrationConfiguration.class)
-@ComponentScan(basePackageClasses = BusinessAnalyzer.class, includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = BusinessAnalyzer.class), useDefaultFilters = false)
+@ComponentScan(basePackageClasses = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class,
+		DumpAnalyzer.class, DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class,
+		MatrixAnalyzer.class, ProblemAnalyzer.class, StorageAnalyzer.class, TopAnalyzer.class, StateAnalyzer.class,
+		ContainerMessageAnalyzerFactory.class},
+		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
+				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
+					DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class, MatrixAnalyzer.class,
+					ProblemAnalyzer.class, StorageAnalyzer.class, TopAnalyzer.class, StateAnalyzer.class,
+					ContainerMessageAnalyzerFactory.class}),
+		useDefaultFilters = false)
 @MapperScan(basePackages = {
 		"com.dianping.cat.core.config.dao",
 		"com.dianping.cat.core.report.daily.dao",
@@ -421,156 +430,6 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		"com.dianping.cat.core.mybatis.user.define.rule.dao"
 })
 public class CatHomeSpringConfiguration {
-	@Bean
-	public MessageAnalyzerFactory messageAnalyzerFactory() {
-		return new ContainerMessageAnalyzerFactory();
-	}
-
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + CrossAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer crossAnalyzer(
-			@Qualifier(CrossAnalyzer.ID + "ReportManager") ReportManager<CrossReport> crossReportManager,
-			IpConvertManager ipConvertManager, ServerConfigManager serverConfigManager) {
-		CrossAnalyzer analyzer = new CrossAnalyzer();
-
-		analyzer.setReportManager(crossReportManager);
-		analyzer.setIpConvertManager(ipConvertManager);
-		analyzer.setServerConfigManager(serverConfigManager);
-		return analyzer;
-	}
-
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + DumpAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer dumpAnalyzer(ServerStatisticManager serverStatisticManager,
-			@Qualifier("messageDumperManager") MessageDumperManager messageDumperManager,
-			@Qualifier("messageFinderManager") MessageFinderManager messageFinderManager,
-			ServerConfigManager serverConfigManager) {
-		DumpAnalyzer analyzer = new DumpAnalyzer();
-
-		analyzer.setServerStateManager(serverStatisticManager);
-		analyzer.setDumperManager(messageDumperManager);
-		analyzer.setFinderManager(messageFinderManager);
-		analyzer.setServerConfigManager(serverConfigManager);
-		return analyzer;
-	}
-
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + DependencyAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer dependencyAnalyzer(
-			@Qualifier(DependencyAnalyzer.ID + "ReportManager") ReportManager<DependencyReport> dependencyReportManager,
-			ServerFilterConfigManager serverFilterConfigManager, com.dianping.cat.consumer.DatabaseParser databaseParser,
-			ServerConfigManager serverConfigManager) {
-		DependencyAnalyzer analyzer = new DependencyAnalyzer();
-
-		analyzer.setReportManager(dependencyReportManager);
-		analyzer.setServerFilterConfigManager(serverFilterConfigManager);
-		analyzer.setParser(databaseParser);
-		analyzer.setServerConfigManager(serverConfigManager);
-		return analyzer;
-	}
-
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + EventAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer eventAnalyzer(
-			@Qualifier(EventAnalyzer.ID + "ReportManager") ReportManager<EventReport> eventReportManager,
-			AtomicMessageConfigManager atomicMessageConfigManager, ServerConfigManager serverConfigManager) {
-		EventAnalyzer analyzer = new EventAnalyzer();
-
-		analyzer.setReportManager(eventReportManager);
-		analyzer.setAtomicMessageConfigManager(atomicMessageConfigManager);
-		analyzer.setServerConfigManager(serverConfigManager);
-		return analyzer;
-	}
-
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + HeartbeatAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer heartbeatAnalyzer(
-			@Qualifier(HeartbeatAnalyzer.ID + "ReportManager") ReportManager<HeartbeatReport> heartbeatReportManager,
-			ServerFilterConfigManager serverFilterConfigManager, ServerConfigManager serverConfigManager) {
-		HeartbeatAnalyzer analyzer = new HeartbeatAnalyzer();
-
-		analyzer.setReportManager(heartbeatReportManager);
-		analyzer.setServerFilterConfigManager(serverFilterConfigManager);
-		analyzer.setServerConfigManager(serverConfigManager);
-		return analyzer;
-	}
-
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + MatrixAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer matrixAnalyzer(
-			@Qualifier(MatrixAnalyzer.ID + "ReportManager") ReportManager<MatrixReport> matrixReportManager,
-			ServerConfigManager serverConfigManager) {
-		MatrixAnalyzer analyzer = new MatrixAnalyzer();
-
-		analyzer.setReportManager(matrixReportManager);
-		analyzer.setServerConfigManager(serverConfigManager);
-		return analyzer;
-	}
-
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + ProblemAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer problemAnalyzer(
-			@Qualifier(ProblemAnalyzer.ID + "ReportManager") ReportManager<ProblemReport> problemReportManager,
-			@Qualifier(DefaultProblemHandler.ID) ProblemHandler defaultProblemHandler,
-			@Qualifier(LongExecutionProblemHandler.ID) ProblemHandler longExecutionProblemHandler,
-			ServerConfigManager serverConfigManager) {
-		ProblemAnalyzer analyzer = new ProblemAnalyzer();
-
-		analyzer.setReportManager(problemReportManager);
-		analyzer.setHandlers(Arrays.asList(defaultProblemHandler, longExecutionProblemHandler));
-		analyzer.setServerConfigManager(serverConfigManager);
-		return analyzer;
-	}
-
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + StorageAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer storageAnalyzer(
-			@Qualifier(StorageAnalyzer.ID + "ReportManager") ReportManager<StorageReport> storageReportManager,
-			com.dianping.cat.consumer.DatabaseParser databaseParser, StorageReportUpdater storageReportUpdater,
-			ServerConfigManager serverConfigManager,
-			@Qualifier("storageSQLBuilder") StorageBuilder storageSQLBuilder,
-			@Qualifier("storageCacheBuilder") StorageBuilder storageCacheBuilder,
-			@Qualifier("storageRPCBuilder") StorageBuilder storageRPCBuilder) {
-		StorageAnalyzer analyzer = new StorageAnalyzer();
-
-		analyzer.setReportManager(storageReportManager);
-		analyzer.setDatabaseParser(databaseParser);
-		analyzer.setUpdater(storageReportUpdater);
-		analyzer.setStorageBuilders(storageBuilders(storageSQLBuilder, storageCacheBuilder, storageRPCBuilder));
-		analyzer.setServerConfigManager(serverConfigManager);
-		return analyzer;
-	}
-
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + TopAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer topAnalyzer(
-			@Qualifier(TopAnalyzer.ID + "ReportManager") ReportManager<TopReport> topReportManager,
-			ServerFilterConfigManager serverFilterConfigManager, ServerConfigManager serverConfigManager) {
-		TopAnalyzer analyzer = new TopAnalyzer();
-
-		analyzer.setReportManager(topReportManager);
-		analyzer.setServerFilterConfigManager(serverFilterConfigManager);
-		analyzer.setServerConfigManager(serverConfigManager);
-		analyzer.setErrorType("Error,RuntimeException,Exception");
-		return analyzer;
-	}
-
-	@Bean(name = ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + StateAnalyzer.ID)
-	@Scope("prototype")
-	public MessageAnalyzer stateAnalyzer(
-			@Qualifier(StateAnalyzer.ID + "ReportManager") ReportManager<StateReport> stateReportManager,
-			ServerStatisticManager serverStatisticManager, ServerFilterConfigManager serverFilterConfigManager,
-			ProjectService projectService, ServerConfigManager serverConfigManager) {
-		StateAnalyzer analyzer = new StateAnalyzer();
-
-		analyzer.setReportManager(stateReportManager);
-		analyzer.setServerStateManager(serverStatisticManager);
-		analyzer.setServerFilterConfigManager(serverFilterConfigManager);
-		analyzer.setProjectService(projectService);
-		analyzer.setServerConfigManager(serverConfigManager);
-		return analyzer;
-	}
-
 	@Bean(initMethod = "initialize")
 	public MessageAnalyzerManager messageAnalyzerManager(MessageAnalyzerFactory messageAnalyzerFactory,
 			ServerConfigManager serverConfigManager) {
@@ -3033,6 +2892,12 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
+	public List<ProblemHandler> problemHandlers(@Qualifier(DefaultProblemHandler.ID) ProblemHandler defaultProblemHandler,
+			@Qualifier(LongExecutionProblemHandler.ID) ProblemHandler longExecutionProblemHandler) {
+		return Arrays.asList(defaultProblemHandler, longExecutionProblemHandler);
+	}
+
+	@Bean
 	public ProblemReportService problemReportService(HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
 			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
@@ -3101,13 +2966,20 @@ public class CatHomeSpringConfiguration {
 		return new StorageRPCBuilder();
 	}
 
+	@Bean
+	public Map<String, StorageBuilder> storageBuilders(@Qualifier("storageSQLBuilder") StorageBuilder storageSQLBuilder,
+			@Qualifier("storageCacheBuilder") StorageBuilder storageCacheBuilder,
+			@Qualifier("storageRPCBuilder") StorageBuilder storageRPCBuilder) {
+		return buildStorageBuilders(storageSQLBuilder, storageCacheBuilder, storageRPCBuilder);
+	}
+
 	@Bean(initMethod = "initialize")
 	public StorageBuilderManager storageBuilderManager(@Qualifier("storageSQLBuilder") StorageBuilder storageSQLBuilder,
 			@Qualifier("storageCacheBuilder") StorageBuilder storageCacheBuilder,
 			@Qualifier("storageRPCBuilder") StorageBuilder storageRPCBuilder) {
 		StorageBuilderManager manager = new StorageBuilderManager();
 
-		manager.setStorageBuilders(storageBuilders(storageSQLBuilder, storageCacheBuilder, storageRPCBuilder));
+		manager.setStorageBuilders(buildStorageBuilders(storageSQLBuilder, storageCacheBuilder, storageRPCBuilder));
 		return manager;
 	}
 
@@ -4485,7 +4357,7 @@ public class CatHomeSpringConfiguration {
 		contactor.setConfigManager(alertConfigManager);
 	}
 
-	private Map<String, StorageBuilder> storageBuilders(StorageBuilder storageSQLBuilder,
+	private Map<String, StorageBuilder> buildStorageBuilders(StorageBuilder storageSQLBuilder,
 			StorageBuilder storageCacheBuilder, StorageBuilder storageRPCBuilder) {
 		Map<String, StorageBuilder> builders = new LinkedHashMap<String, StorageBuilder>();
 

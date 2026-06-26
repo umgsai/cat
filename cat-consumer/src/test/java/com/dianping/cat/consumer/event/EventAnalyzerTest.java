@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.AtomicMessageConfigManager;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.MockReportManager;
 import com.dianping.cat.consumer.TestHelper;
 import com.dianping.cat.consumer.event.model.entity.EventReport;
@@ -126,6 +127,7 @@ public class EventAnalyzerTest {
 
 		analyzer.setAtomicMessageConfigManager(new MockAtomicMessageConfigManager());
 		analyzer.setReportManager(new MockEventReportManager());
+		analyzer.setServerConfigManager(new MockServerConfigManager());
 		return analyzer;
 	}
 
@@ -133,6 +135,18 @@ public class EventAnalyzerTest {
 		@Override
 		public int getMaxNameThreshold(String domain) {
 			return 200;
+		}
+	}
+
+	private static class MockServerConfigManager extends ServerConfigManager {
+		@Override
+		public int getMaxTypeThreshold() {
+			return 100;
+		}
+
+		@Override
+		public int getTypeNameLengthLimit() {
+			return 1000;
 		}
 	}
 

@@ -27,69 +27,78 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.problem.model.entity.Machine;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
+import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + ProblemAnalyzer.ID)
+@Scope("prototype")
 public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProblemAnalyzer.class);
 
 	public static final String ID = "problem";
 
-	private ReportManager<ProblemReport> m_reportManager;
+	@Resource(name = ProblemAnalyzer.ID + "ReportManager")
+	private ReportManager<ProblemReport> problemReportManager;
 
-	private List<ProblemHandler> m_handlers;
+	@Resource(name = "problemHandlers")
+	private List<ProblemHandler> problemHandlers;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	@Override
 	public synchronized void doCheckpoint(boolean atEnd) {
 		if (atEnd && !isLocalMode()) {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
+			problemReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
 		} else {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+			problemReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
 	}
 
 	public Set<String> getDomains() {
-		return m_reportManager.getDomains(getStartTime());
+		return problemReportManager.getDomains(getStartTime());
 	}
 
 	@Override
 	public ProblemReport getReport(String domain) {
-		return m_reportManager.getHourlyReport(getStartTime(), domain, false);
+		return problemReportManager.getHourlyReport(getStartTime(), domain, false);
 	}
 
 	@Override
 	public ReportManager<ProblemReport> getReportManager() {
-		return m_reportManager;
+		return problemReportManager;
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
-		if (m_handlers == null) {
-			m_handlers = Collections.emptyList();
+		if (problemHandlers == null) {
+			problemHandlers = Collections.emptyList();
 			LOGGER.warn("Problem analyzer has no configured handlers, keep empty handler list.");
 		} else {
 			// Copy the container-provided list before it is read on the hot path.
-			m_handlers = new ArrayList<ProblemHandler>(m_handlers);
+			problemHandlers = new ArrayList<ProblemHandler>(problemHandlers);
 		}
-		m_initialized = true;
+		initialized = true;
 	}
 
 	protected void loadReports() {
-		m_reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+		problemReportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 	}
 
 	@Override
@@ -97,22 +106,28 @@ public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> {
 		ensureInitialized();
 
 		String domain = tree.getDomain();
-		ProblemReport report = m_reportManager.getHourlyReport(getStartTime(), domain, true);
+		ProblemReport report = problemReportManager.getHourlyReport(getStartTime(), domain, true);
 
 		report.addIp(tree.getIpAddress());
 		Machine machine = report.findOrCreateMachine(tree.getIpAddress());
 
-		for (ProblemHandler handler : m_handlers) {
+		for (ProblemHandler handler : problemHandlers) {
 			handler.handle(machine, tree);
 		}
 	}
 
 	public void setHandlers(List<ProblemHandler> handlers) {
-		m_handlers = handlers;
+		problemHandlers = handlers;
 	}
 
 	public void setReportManager(ReportManager<ProblemReport> reportManager) {
-		m_reportManager = reportManager;
+		problemReportManager = reportManager;
+	}
+
+	@Override
+	@Resource(name = "serverConfigManager")
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		super.setServerConfigManager(serverConfigManager);
 	}
 
 }

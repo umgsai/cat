@@ -20,7 +20,8 @@ package com.dianping.cat.consumer.heartbeat;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
-import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.heartbeat.model.entity.Machine;
@@ -31,17 +32,24 @@ import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.status.model.StatusInfoHelper;
 import com.dianping.cat.status.model.entity.*;
+import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + HeartbeatAnalyzer.ID)
+@Scope("prototype")
 public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> {
 	public static final String ID = "heartbeat";
 
-	private ReportManager<HeartbeatReport> m_reportManager;
+	@Resource(name = HeartbeatAnalyzer.ID + "ReportManager")
+	private ReportManager<HeartbeatReport> reportManager;
 
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource(name = "serverFilterConfigManager")
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	private Period buildHeartBeatInfo(Machine machine, Heartbeat heartbeat, long timestamp) {
 		String xml = (String) heartbeat.getData();
@@ -89,20 +97,20 @@ public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> 
 	@Override
 	public synchronized void doCheckpoint(boolean atEnd) {
 		if (atEnd && !isLocalMode()) {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
+			reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
 		} else {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+			reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
 	}
 
 	@Override
 	public HeartbeatReport getReport(String domain) {
-		return m_reportManager.getHourlyReport(getStartTime(), domain, false);
+		return reportManager.getHourlyReport(getStartTime(), domain, false);
 	}
 
 	@Override
 	public ReportManager<HeartbeatReport> getReportManager() {
-		return m_reportManager;
+		return reportManager;
 	}
 
 	@Override
@@ -112,15 +120,15 @@ public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> 
 
 	@Override
 	protected void loadReports() {
-		m_reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+		reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 	}
 
 	@Override
 	protected void process(MessageTree tree) {
 		String domain = tree.getDomain();
 
-		if (m_serverFilterConfigManager.validateDomain(domain)) {
-			HeartbeatReport report = m_reportManager.getHourlyReport(getStartTime(), domain, true);
+		if (serverFilterConfigManager.validateDomain(domain)) {
+			HeartbeatReport report = reportManager.getHourlyReport(getStartTime(), domain, true);
 			report.addIp(tree.getIpAddress());
 			List<Heartbeat> heartbeats = tree.getHeartbeats();
 
@@ -213,11 +221,17 @@ public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> 
 	}
 
 	public void setReportManager(ReportManager<HeartbeatReport> reportManager) {
-		m_reportManager = reportManager;
+		this.reportManager = reportManager;
 	}
 
 	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
+		this.serverFilterConfigManager = serverFilterConfigManager;
+	}
+
+	@Override
+	@Resource(name = "serverConfigManager")
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		super.setServerConfigManager(serverConfigManager);
 	}
 
 }

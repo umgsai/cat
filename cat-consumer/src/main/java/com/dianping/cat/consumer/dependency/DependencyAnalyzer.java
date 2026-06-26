@@ -19,7 +19,9 @@
 package com.dianping.cat.consumer.dependency;
 
 import com.dianping.cat.analysis.AbstractMessageAnalyzer;
+import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.MessageAnalyzer;
+import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.DatabaseParser;
 import com.dianping.cat.consumer.DatabaseParser.Database;
@@ -33,47 +35,55 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 import com.dianping.cat.report.ReportManager;
+import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + DependencyAnalyzer.ID)
+@Scope("prototype")
 public class DependencyAnalyzer extends AbstractMessageAnalyzer<DependencyReport> {
 	public static final String ID = "dependency";
 
-	private ReportManager<DependencyReport> m_reportManager;
+	@Resource(name = DependencyAnalyzer.ID + "ReportManager")
+	private ReportManager<DependencyReport> dependencyReportManager;
 
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource(name = "serverFilterConfigManager")
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private DatabaseParser m_parser;
+	@Resource(name = "databaseParser")
+	private DatabaseParser databaseParser;
 
-	private Set<String> m_types = new HashSet<String>(
+	private Set<String> types = new HashSet<String>(
 	      Arrays.asList("URL", "SQL", "Call", "PigeonCall", "Service", "PigeonService"));
 
-	private Set<String> m_exceptions = new HashSet<String>(Arrays.asList("Exception", "RuntimeException", "Error"));
+	private Set<String> exceptions = new HashSet<String>(Arrays.asList("Exception", "RuntimeException", "Error"));
 
 	@Override
 	public synchronized void doCheckpoint(boolean atEnd) {
 		if (atEnd && !isLocalMode()) {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
+			dependencyReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE_AND_DB, m_index);
 		} else {
-			m_reportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+			dependencyReportManager.storeHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 		}
 	}
 
 	private DependencyReport findOrCreateReport(String domain) {
-		return m_reportManager.getHourlyReport(getStartTime(), domain, true);
+		return dependencyReportManager.getHourlyReport(getStartTime(), domain, true);
 	}
 
 	@Override
 	public DependencyReport getReport(String domain) {
-		return m_reportManager.getHourlyReport(getStartTime(), domain, false);
+		return dependencyReportManager.getHourlyReport(getStartTime(), domain, false);
 	}
 
 	@Override
 	public ReportManager<DependencyReport> getReportManager() {
-		return m_reportManager;
+		return dependencyReportManager;
 	}
 
 	private boolean isCache(String type) {
@@ -91,7 +101,7 @@ public class DependencyAnalyzer extends AbstractMessageAnalyzer<DependencyReport
 
 	@Override
 	protected void loadReports() {
-		m_reportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
+		dependencyReportManager.loadHourlyReports(getStartTime(), StoragePolicy.FILE, m_index);
 	}
 
 	private String parseDatabase(Transaction t) {
@@ -102,7 +112,7 @@ public class DependencyAnalyzer extends AbstractMessageAnalyzer<DependencyReport
 				String type = message.getType();
 
 				if (type.equals("SQL.Database")) {
-					Database database = m_parser.parseDatabase(message.getName());
+					Database database = databaseParser.parseDatabase(message.getName());
 
 					return database != null ? database.getName() : null;
 				}
@@ -139,7 +149,7 @@ public class DependencyAnalyzer extends AbstractMessageAnalyzer<DependencyReport
 	private void processEvent(DependencyReport report, MessageTree tree, Event event) {
 		String type = event.getType();
 
-		if (m_exceptions.contains(type)) {
+		if (exceptions.contains(type)) {
 			long current = event.getTimestamp() / 1000 / 60;
 			int min = (int) (current % (60));
 			Segment segment = report.findOrCreateSegment(min);
@@ -193,7 +203,7 @@ public class DependencyAnalyzer extends AbstractMessageAnalyzer<DependencyReport
 	}
 
 	private void processTransactionType(DependencyReport report, Transaction t, String type) {
-		if (m_types.contains(type) || isCache(type)) {
+		if (types.contains(type) || isCache(type)) {
 			long current = t.getTimestamp() / 1000 / 60;
 			int min = (int) (current % (60));
 			Segment segment = report.findOrCreateSegment(min);
@@ -231,16 +241,10 @@ public class DependencyAnalyzer extends AbstractMessageAnalyzer<DependencyReport
 		}
 	}
 
-	public void setParser(DatabaseParser parser) {
-		m_parser = parser;
-	}
-
-	public void setReportManager(ReportManager<DependencyReport> reportManager) {
-		m_reportManager = reportManager;
-	}
-
-	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
+	@Override
+	@Resource(name = "serverConfigManager")
+	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		super.setServerConfigManager(serverConfigManager);
 	}
 
 }
