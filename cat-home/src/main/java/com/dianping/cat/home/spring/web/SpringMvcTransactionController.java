@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -21,13 +22,18 @@ import javax.servlet.http.HttpServletResponse;
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.sample.SampleConfigManager;
+import com.dianping.cat.consumer.GraphTrendUtil;
+import com.dianping.cat.consumer.transaction.model.entity.GraphTrend;
+import com.dianping.cat.consumer.transaction.model.entity.Machine;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionName;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionType;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
+import com.dianping.cat.mvc.HistoryNav;
 import com.dianping.cat.mvc.UrlNav;
+import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.graph.PieChart;
 import com.dianping.cat.report.graph.svg.GraphBuilder;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
@@ -54,6 +60,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class SpringMvcTransactionController {
+	private final SimpleDateFormat m_dayFormat = new SimpleDateFormat("yyyyMMdd");
+
 	private final SimpleDateFormat m_hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
 
 	private final SimpleDateFormat m_subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -88,8 +96,10 @@ public class SpringMvcTransactionController {
 	@GetMapping("/mvc/r/t")
 	public void transaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Map<String, Object> model = transactionModel(request);
-		String view = "graphs".equals(model.get("action")) ? "/jsp/spring/report/transaction/transactionGraphs.jsp"
-				: "/jsp/spring/report/transaction/transaction.jsp";
+		String action = (String) model.get("action");
+		String view = isHistoryGraphAction(action) ? "/jsp/spring/report/transaction/transactionHistoryGraphs.jsp"
+				: "graphs".equals(action) ? "/jsp/spring/report/transaction/transactionGraphs.jsp"
+						: "/jsp/spring/report/transaction/transaction.jsp";
 
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
 			request.setAttribute(entry.getKey(), entry.getValue());
@@ -114,25 +124,34 @@ public class SpringMvcTransactionController {
 		String queryName = emptyToNull(request.getParameter("queryname"));
 		String sortBy = emptyToNull(request.getParameter("sort"));
 		String group = emptyToNull(request.getParameter("group"));
-		long date = date(request.getParameter("date"), intParameter(request, "step", 0));
+		boolean historyMode = isHistoryAction(action);
+		HistoryDates historyDates = historyMode ? historyDates(request, reportType) : null;
+		long date = historyMode ? historyDates.getDate() : date(request.getParameter("date"), intParameter(request, "step", 0));
 
 		if (StringUtils.isEmpty(group)) {
 			group = m_configManager.queryDefaultGroup(domain);
 		}
+		reportType = historyMode ? historyDates.getReportType() : reportType;
 
-		TransactionReport report = queryHourlyReport(domain, ipAddress, type, date);
+		TransactionReport report = historyMode ? queryHistoryReport(domain, historyDates) : queryHourlyReport(domain, ipAddress, type, date);
+
+		if (report != null && isGroupAction(action)) {
+			report = filterReportByGroup(report, domain, group);
+		}
 
 		if (report != null) {
 			report = m_mergeHelper.mergeAllMachines(report, ipAddress);
 		}
 		if (report == null) {
 			report = new TransactionReport(domain);
-			report.setStartTime(new Date(date));
-			report.setEndTime(new Date(date + TimeHelper.ONE_HOUR));
+			report.setStartTime(historyMode ? historyDates.getStart() : new Date(date));
+			report.setEndTime(historyMode ? historyDates.getEnd() : new Date(date + TimeHelper.ONE_HOUR));
 		}
 
 		if ("graphs".equals(action)) {
 			buildGraphs(model, domain, ipAddress, type, name, date);
+		} else if (isHistoryGraphAction(action)) {
+			buildHistoryGraphs(model, domain, ipAddress, type, name, group, action, historyDates);
 		} else if (StringUtils.isEmpty(type)) {
 			model.put("displayTypeReport", new DisplayTypes().display(sortBy, ipAddress, report));
 		} else {
@@ -154,12 +173,13 @@ public class SpringMvcTransactionController {
 		model.put("encodedType", encode(type));
 		model.put("name", name);
 		model.put("queryName", queryName);
+		model.put("encodedQueryName", encode(queryName));
 		model.put("sortBy", sortBy);
-		model.put("date", m_hourlyFormat.format(new Date(date)));
+		model.put("date", historyMode ? m_dayFormat.format(new Date(date)) : m_hourlyFormat.format(new Date(date)));
 		model.put("longDate", date);
 		model.put("report", report);
-		model.put("reportStart", m_subtitleFormat.format(report.getStartTime()));
-		model.put("reportEnd", m_subtitleFormat.format(report.getEndTime()));
+		model.put("reportStart", m_subtitleFormat.format(historyMode ? historyDates.getStart() : report.getStartTime()));
+		model.put("reportEnd", m_subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
 		model.put("ips", ips);
 		model.put("ipToHostnameStr", new JsonBuilder().toJson(ipToHostname(ips)));
 		model.put("groups", m_configManager.queryDomainGroup(domain));
@@ -169,10 +189,34 @@ public class SpringMvcTransactionController {
 		model.put("navs", UrlNav.values());
 		model.put("navPrefix", "ip=" + ipAddress + "&queryname=" + (queryName == null ? "" : queryName) + "&domain="
 				+ report.getDomain() + (type == null ? "" : "&type=" + encode(type)));
+		model.put("historyMode", historyMode);
+		model.put("historyNavs", HistoryNav.values());
+		model.put("currentNav", HistoryNav.getByName(reportType));
+		model.put("customDate", historyMode ? historyDates.getCustomDate() : "");
 		model.put("baseUri", contextPath + "/mvc/r/t");
 		model.put("sample", sample(report.getDomain()));
 		model.put("model", model);
 		return model;
+	}
+
+	private LineChart buildHistoryLineChart(Date start, Date end, String title, long step, double[] values) {
+		LineChart chart = new LineChart();
+		int size = (int) Math.max(0, (end.getTime() - start.getTime()) / step);
+
+		chart.setStart(start);
+		chart.setSize(size);
+		chart.setStep(step);
+		chart.setSubTitles(Collections.singletonList(buildHistorySubTitle(start, end)));
+		chart.setTitle(title);
+		chart.addValue(values == null ? new double[0] : values);
+		return chart;
+	}
+
+	private String buildHistorySubTitle(Date start, Date end) {
+		SimpleDateFormat from = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat to = new SimpleDateFormat("MM-dd");
+
+		return from.format(start) + "~" + to.format(end);
 	}
 
 	private void buildGraphs(Map<String, Object> model, String domain, String ipAddress, String type, String name,
@@ -195,6 +239,46 @@ public class SpringMvcTransactionController {
 			report = m_mergeHelper.mergeAllNames(report, ipAddress, graphName);
 			buildTransactionNameGraph(model, report, type, graphName, ipAddress);
 		}
+	}
+
+	private void buildHistoryGraphs(Map<String, Object> model, String domain, String ipAddress, String type, String name,
+			String group, String action, HistoryDates dates) {
+		TransactionReport report = queryHistoryReport(domain, dates);
+
+		if (report != null) {
+			if (isGroupAction(action)) {
+				report = filterReportByGroup(report, domain, group);
+			}
+			if (Constants.ALL.equalsIgnoreCase(ipAddress)) {
+				PieGraphChartVisitor chartVisitor = new PieGraphChartVisitor(type, name);
+				DistributionDetailVisitor detailVisitor = new DistributionDetailVisitor(type, name);
+
+				chartVisitor.visitTransactionReport(report);
+				detailVisitor.visitTransactionReport(report);
+				model.put("distributionChart", chartVisitor.getPieChart().getJsonString());
+				model.put("distributionDetails", detailVisitor.getDetails());
+			}
+
+			report = m_mergeHelper.mergeAllMachines(report, ipAddress);
+			buildTransactionTrendGraph(model, report, type, name, ipAddress, dates);
+		}
+	}
+
+	private void buildTransactionTrendGraph(Map<String, Object> model, TransactionReport report, String type, String name,
+			String ipAddress, HistoryDates dates) {
+		GraphTrend graph = findGraphTrend(report, ipAddress, type, name);
+		int duration = graph == null || graph.getDuration() <= 0 ? 1 : graph.getDuration();
+		long step = historyGraphStep(dates.getReportType()) * duration;
+		String display = StringUtils.isEmpty(name) ? type : name;
+
+		model.put("responseTrend", buildHistoryLineChart(dates.getStart(), dates.getEnd(),
+				display + " Response Time (ms)", step, parseDoubles(graph == null ? null : graph.getAvg())).getJsonString());
+		model.put("hitTrend", buildHistoryLineChart(dates.getStart(), dates.getEnd(),
+				display + historyGraphHitTitle(dates.getReportType()), step,
+				parseDoubles(graph == null ? null : graph.getCount())).getJsonString());
+		model.put("errorTrend", buildHistoryLineChart(dates.getStart(), dates.getEnd(),
+				display + historyGraphErrorTitle(dates.getReportType()), step,
+				parseDoubles(graph == null ? null : graph.getFails())).getJsonString());
 	}
 
 	private void buildTransactionNameGraph(Map<String, Object> model, TransactionReport report, String type, String name,
@@ -221,6 +305,17 @@ public class SpringMvcTransactionController {
 		return new JsonBuilder().toJson(chart);
 	}
 
+	private long currentStartDay() {
+		Calendar cal = Calendar.getInstance();
+
+		cal.setTime(new Date());
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTimeInMillis();
+	}
+
 	private long date(String value, int step) {
 		long current = System.currentTimeMillis();
 		long currentHour = current - current % TimeHelper.ONE_HOUR;
@@ -238,6 +333,17 @@ public class SpringMvcTransactionController {
 		return Math.min(result, currentHour);
 	}
 
+	private Date dateParameter(String value) {
+		if (value != null && value.length() > 0) {
+			try {
+				return value.length() == 10 ? m_hourlyFormat.parse(value) : m_dayFormat.parse(value);
+			} catch (ParseException e) {
+				// ignore invalid date and fall back to the same default as old MVC.
+			}
+		}
+		return TimeHelper.getCurrentDay(-1);
+	}
+
 	private Map<String, Department> domainGroups() {
 		Collection<String> domains = m_projectService.findAllDomains();
 
@@ -251,11 +357,110 @@ public class SpringMvcTransactionController {
 		return value;
 	}
 
+	private GraphTrend findGraphTrend(TransactionReport report, String ipAddress, String type, String name) {
+		if (report == null || StringUtils.isEmpty(type)) {
+			return null;
+		}
+		Machine machine = report.findMachine(ipAddress);
+
+		if (machine == null) {
+			return null;
+		}
+		TransactionType transactionType = machine.findType(type);
+
+		if (transactionType == null) {
+			return null;
+		}
+		if (StringUtils.isEmpty(name)) {
+			return transactionType.getGraphTrend();
+		}
+		TransactionName transactionName = transactionType.findName(name);
+
+		return transactionName == null ? null : transactionName.getGraphTrend();
+	}
+
 	private String encode(String value) {
 		if (value == null) {
 			return "";
 		}
 		return URLEncoder.encode(value, StandardCharsets.UTF_8);
+	}
+
+	private TransactionReport filterReportByGroup(TransactionReport report, String domain, String group) {
+		List<String> ips = m_configManager.queryIpByDomainAndGroup(domain, group);
+		List<String> removes = new ArrayList<String>();
+
+		for (Machine machine : report.getMachines().values()) {
+			String ip = machine.getIp();
+
+			if (!ips.contains(ip)) {
+				removes.add(ip);
+			}
+		}
+		for (String ip : removes) {
+			report.getMachines().remove(ip);
+		}
+		return report;
+	}
+
+	private Date historyEndDate(long date, String reportType, String customEnd) {
+		Date custom = parseCustomDate(customEnd);
+
+		if (custom != null) {
+			return custom;
+		}
+		Calendar cal = Calendar.getInstance();
+
+		cal.setTimeInMillis(date);
+		if ("month".equals(reportType)) {
+			cal.add(Calendar.MONTH, 1);
+		} else if ("week".equals(reportType)) {
+			cal.add(Calendar.DATE, 7);
+		} else {
+			cal.add(Calendar.DATE, 1);
+		}
+		return cal.getTime();
+	}
+
+	private String historyGraphErrorTitle(String reportType) {
+		return "day".equals(reportType) ? " Error (count/min)" : " Error (count/day)";
+	}
+
+	private String historyGraphHitTitle(String reportType) {
+		return "day".equals(reportType) ? " Hits (count/min)" : " Hits (count/day)";
+	}
+
+	private long historyGraphStep(String reportType) {
+		return "day".equals(reportType) ? TimeHelper.ONE_MINUTE : TimeHelper.ONE_DAY;
+	}
+
+	private HistoryDates historyDates(HttpServletRequest request, String reportType) {
+		String normalizedReportType = normalizeReportType(reportType);
+		long date = normalizeHistoryDate(dateParameter(request.getParameter("date")).getTime(), normalizedReportType,
+				intParameter(request, "step", 0));
+		Date start = historyStartDate(date, request.getParameter("startDate"));
+		Date end = historyEndDate(date, normalizedReportType, request.getParameter("endDate"));
+
+		return new HistoryDates(start.getTime(), normalizedReportType, start, end);
+	}
+
+	private Date historyStartDate(long date, String customStart) {
+		Date custom = parseCustomDate(customStart);
+
+		return custom == null ? new Date(date) : custom;
+	}
+
+	private boolean isGroupAction(String action) {
+		return "groupReport".equals(action) || "historyGroupReport".equals(action) || "groupGraphs".equals(action)
+				|| "historyGroupGraph".equals(action);
+	}
+
+	private boolean isHistoryAction(String action) {
+		return action != null && action.startsWith("history");
+	}
+
+	private boolean isHistoryGraphAction(String action) {
+		return "historyGraph".equals(action) || "historyGroupGraph".equals(action);
 	}
 
 	private int intParameter(HttpServletRequest request, String name, int defaultValue) {
@@ -269,6 +474,99 @@ public class SpringMvcTransactionController {
 			}
 		}
 		return defaultValue;
+	}
+
+	private String normalizeReportType(String reportType) {
+		if ("month".equals(reportType) || "week".equals(reportType)) {
+			return reportType;
+		}
+		return "day";
+	}
+
+	private long normalizeHistoryDate(long date, String reportType, int step) {
+		Calendar cal = Calendar.getInstance();
+
+		cal.setTimeInMillis(date);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		date = cal.getTimeInMillis();
+
+		if ("month".equals(reportType)) {
+			cal.set(Calendar.DATE, 1);
+			date = cal.getTimeInMillis();
+		} else if ("week".equals(reportType)) {
+			int weekOfDay = cal.get(Calendar.DAY_OF_WEEK) % 7;
+
+			date = date - TimeHelper.ONE_DAY * (weekOfDay % 7);
+			if (date > System.currentTimeMillis()) {
+				date = date - 7 * TimeHelper.ONE_DAY;
+			}
+			cal.setTimeInMillis(date);
+		}
+
+		if (step < 0) {
+			if ("month".equals(reportType)) {
+				cal.add(Calendar.MONTH, step);
+				date = cal.getTimeInMillis();
+			} else if ("week".equals(reportType)) {
+				date = date + 7 * TimeHelper.ONE_DAY * step;
+			} else {
+				date = date + TimeHelper.ONE_DAY * step;
+			}
+		} else {
+			long temp = date;
+
+			if ("month".equals(reportType)) {
+				cal.add(Calendar.MONTH, step);
+				temp = cal.getTimeInMillis();
+			} else if ("week".equals(reportType)) {
+				temp = date + 7 * TimeHelper.ONE_DAY * step;
+			} else {
+				temp = date + TimeHelper.ONE_DAY * step;
+			}
+			if (temp <= currentStartDay()) {
+				date = temp;
+			}
+		}
+		if ("day".equals(reportType) && date == currentStartDay()) {
+			date = date - TimeHelper.ONE_DAY;
+		}
+		return date;
+	}
+
+	private Date parseCustomDate(String value) {
+		if (value != null && value.length() > 0) {
+			try {
+				if (value.length() == 10) {
+					return m_hourlyFormat.parse(value);
+				} else if (value.length() == 8) {
+					return m_dayFormat.parse(value);
+				}
+			} catch (ParseException e) {
+				// ignore invalid custom date.
+			}
+		}
+		return null;
+	}
+
+	private double[] parseDoubles(String value) {
+		if (value == null || value.length() == 0) {
+			return new double[0];
+		}
+		String[] parts = value.split(GraphTrendUtil.GRAPH_SPLITTER);
+		double[] result = new double[parts.length];
+
+		for (int i = 0; i < parts.length; i++) {
+			try {
+				result[i] = Double.parseDouble(parts[i]);
+			} catch (NumberFormatException e) {
+				result[i] = 0.0;
+				Cat.logError(e);
+			}
+		}
+		return result;
 	}
 
 	private Map<String, String> ipToHostname(List<String> ips) {
@@ -313,9 +611,57 @@ public class SpringMvcTransactionController {
 		return m_reportService.queryReport(domain, new Date(date), new Date(date + TimeHelper.ONE_HOUR));
 	}
 
+	private TransactionReport queryHistoryReport(String domain, HistoryDates dates) {
+		return m_reportService.queryReport(domain, dates.getStart(), dates.getEnd());
+	}
+
 	private double sample(String domain) {
 		Domain sampleDomain = m_sampleConfigManager.getConfig().findDomain(domain);
 
 		return sampleDomain == null ? 1.0 : sampleDomain.getSample();
+	}
+
+	private class HistoryDates {
+		private final long m_date;
+
+		private final Date m_displayEnd;
+
+		private final Date m_end;
+
+		private final String m_reportType;
+
+		private final Date m_start;
+
+		private HistoryDates(long date, String reportType, Date start, Date end) {
+			m_date = date;
+			m_reportType = reportType;
+			m_start = start;
+			m_end = end;
+			m_displayEnd = new Date(end.getTime() - 1000);
+		}
+
+		private String getCustomDate() {
+			return "&startDate=" + m_dayFormat.format(m_start) + "&endDate=" + m_dayFormat.format(m_end);
+		}
+
+		private long getDate() {
+			return m_date;
+		}
+
+		private Date getDisplayEnd() {
+			return m_displayEnd;
+		}
+
+		private Date getEnd() {
+			return m_end;
+		}
+
+		private String getReportType() {
+			return m_reportType;
+		}
+
+		private Date getStart() {
+			return m_start;
+		}
 	}
 }
