@@ -55,9 +55,9 @@ public class RouterConfigManager {
 
 	private ContentFetcher m_fetcher;
 
-	private DailyReportRepository m_dailyReportDao;
+	private DailyReportRepository dailyReportRepository;
 
-	private DailyReportContentRepository m_dailyReportContentDao;
+	private DailyReportContentRepository dailyReportContentRepository;
 
 	private long m_configId;
 
@@ -104,11 +104,11 @@ public class RouterConfigManager {
 	}
 
 	public void setDailyReportContentDao(DailyReportContentRepository dailyReportContentDao) {
-		m_dailyReportContentDao = dailyReportContentDao;
+		dailyReportContentRepository = dailyReportContentDao;
 	}
 
 	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
-		m_dailyReportDao = dailyReportDao;
+		dailyReportRepository = dailyReportDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
@@ -383,13 +383,13 @@ public class RouterConfigManager {
 		long time = period.getTime();
 
 		try {
-			DailyReport report = m_dailyReportDao.findByDomainNamePeriod(Constants.CAT, RouterConfigBuilder.ID, period);
+			DailyReport report = dailyReportRepository.findByDomainNamePeriod(Constants.CAT, RouterConfigBuilder.ID, period);
 			long modifyTime = report.getCreationDate().getTime();
 			Pair<RouterConfig, Long> pair = m_routerConfigs.get(time);
 
 			if (pair == null || modifyTime > pair.getValue()) {
 				try {
-					DailyReportContent reportContent = m_dailyReportContentDao.findByPK(report.getId());
+					DailyReportContent reportContent = dailyReportContentRepository.findByPK(report.getId());
 					RouterConfig routerConfig = DefaultNativeParser.parse(reportContent.getContent());
 
 					m_routerConfigs.put(time, Pair.of(routerConfig, modifyTime));

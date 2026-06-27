@@ -18,6 +18,11 @@
  */
 package com.dianping.cat.report.page.cross.task;
 
+import jakarta.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -39,12 +44,14 @@ import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 
+@Component(CrossAnalyzer.ID)
 public class CrossReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrossReportBuilder.class);
 
 	public static final String ID = CrossAnalyzer.ID;
 
-	protected CrossReportService m_reportService;
+	@Resource
+	protected CrossReportService reportService;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -59,7 +66,7 @@ public class CrossReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(crossReport);
-		return m_reportService.insertDailyReport(report, binaryContent);
+		return reportService.insertDailyReport(report, binaryContent);
 	}
 
 	@Override
@@ -80,7 +87,7 @@ public class CrossReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(crossReport);
-		return m_reportService.insertMonthlyReport(report, binaryContent);
+		return reportService.insertMonthlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -97,9 +104,10 @@ public class CrossReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(crossReport);
-		return m_reportService.insertWeeklyReport(report, binaryContent);
+		return reportService.insertWeeklyReport(report, binaryContent);
 	}
 
+	@PostConstruct
 	public void initialize() {
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
@@ -127,7 +135,7 @@ public class CrossReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime += TimeHelper.ONE_DAY) {
 			try {
-				CrossReport reportModel = m_reportService
+				CrossReport reportModel = reportService
 										.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 				reportModel.accept(merger);
 			} catch (Exception e) {
@@ -149,7 +157,7 @@ public class CrossReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			Date date = new Date(startTime);
-			CrossReport reportModel = m_reportService.queryReport(domain, date, new Date(date.getTime()	+ TimeHelper.ONE_HOUR));
+			CrossReport reportModel = reportService.queryReport(domain, date, new Date(date.getTime()	+ TimeHelper.ONE_HOUR));
 
 			reportModel.accept(merger);
 		}
@@ -161,6 +169,6 @@ public class CrossReportBuilder implements TaskBuilder {
 	}
 
 	public void setReportService(CrossReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 }

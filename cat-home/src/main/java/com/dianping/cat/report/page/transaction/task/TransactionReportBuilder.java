@@ -18,6 +18,11 @@
  */
 package com.dianping.cat.report.page.transaction.task;
 
+import jakarta.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 
 import org.slf4j.LoggerFactory;
@@ -40,16 +45,20 @@ import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 
+@Component(TransactionAnalyzer.ID)
 public class TransactionReportBuilder implements TaskBuilder {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TransactionReportBuilder.class);
 
 	public static final String ID = TransactionAnalyzer.ID;
 
-	protected TransactionReportService m_reportService;
+	@Resource
+	protected TransactionReportService reportService;
 
-	protected ServerConfigManager m_serverConfigManager;
+	@Resource
+	protected ServerConfigManager serverConfigManager;
 
-	private AtomicMessageConfigManager m_atomicMessageConfigManager;
+	@Resource
+	private AtomicMessageConfigManager atomicMessageConfigManager;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -66,7 +75,7 @@ public class TransactionReportBuilder implements TaskBuilder {
 			report.setPeriod(period);
 			report.setType(1);
 			byte[] binaryContent = DefaultNativeBuilder.build(transactionReport);
-			return m_reportService.insertDailyReport(report, binaryContent);
+			return reportService.insertDailyReport(report, binaryContent);
 		} catch (Exception e) {
 			SLF4J_LOGGER.error("Unable to build transaction daily report, name={}, domain={}, period={}.", name, domain,
 					period, e);
@@ -101,7 +110,7 @@ public class TransactionReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(transactionReport);
-		return m_reportService.insertMonthlyReport(report, binaryContent);
+		return reportService.insertMonthlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -127,9 +136,10 @@ public class TransactionReportBuilder implements TaskBuilder {
 		report.setType(1);
 
 		byte[] binaryContent = DefaultNativeBuilder.build(transactionReport);
-		return m_reportService.insertWeeklyReport(report, binaryContent);
+		return reportService.insertWeeklyReport(report, binaryContent);
 	}
 
+	@PostConstruct
 	public void initialize() {
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
@@ -164,7 +174,7 @@ public class TransactionReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime += TimeHelper.ONE_DAY) {
 			try {
-				TransactionReport reportModel = m_reportService
+				TransactionReport reportModel = reportService
 										.queryReport(domain, new Date(startTime), new Date(startTime + TimeHelper.ONE_DAY));
 
 				creator.createGraph(reportModel);
@@ -179,8 +189,8 @@ public class TransactionReportBuilder implements TaskBuilder {
 		transactionReport.setStartTime(start);
 		transactionReport.setEndTime(end);
 
-		new TransactionReportCountFilter(m_serverConfigManager.getMaxTypeThreshold(),
-								m_atomicMessageConfigManager.getMaxNameThreshold(domain), m_serverConfigManager.getTypeNameLengthLimit())
+		new TransactionReportCountFilter(serverConfigManager.getMaxTypeThreshold(),
+								atomicMessageConfigManager.getMaxNameThreshold(domain), serverConfigManager.getTypeNameLengthLimit())
 								.visitTransactionReport(transactionReport);
 		return transactionReport;
 	}
@@ -196,7 +206,7 @@ public class TransactionReportBuilder implements TaskBuilder {
 								dailyMerger.getTransactionReport(), 10);
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
-			TransactionReport report = m_reportService
+			TransactionReport report = reportService
 									.queryReport(domain, new Date(startTime), new Date(startTime + TimeHelper.ONE_HOUR));
 
 			graphCreator.createGraph(report);
@@ -210,23 +220,23 @@ public class TransactionReportBuilder implements TaskBuilder {
 		dailyreport.setStartTime(TaskHelper.todayZero(date));
 		dailyreport.setEndTime(end);
 
-		new TransactionReportCountFilter(m_serverConfigManager.getMaxTypeThreshold(),
-								m_atomicMessageConfigManager.getMaxNameThreshold(domain), m_serverConfigManager.getTypeNameLengthLimit())
+		new TransactionReportCountFilter(serverConfigManager.getMaxTypeThreshold(),
+								atomicMessageConfigManager.getMaxNameThreshold(domain), serverConfigManager.getTypeNameLengthLimit())
 								.visitTransactionReport(dailyreport);
 
 		return dailyreport;
 	}
 
 	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {
-		m_atomicMessageConfigManager = atomicMessageConfigManager;
+		this.atomicMessageConfigManager = atomicMessageConfigManager;
 	}
 
 	public void setReportService(TransactionReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 }

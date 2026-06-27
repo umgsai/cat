@@ -18,6 +18,10 @@
  */
 package com.dianping.cat.report.page.dependency.task;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,16 +42,20 @@ import com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder;
 import com.dianping.cat.report.page.dependency.service.DependencyReportService;
 import com.dianping.cat.report.task.TaskBuilder;
 
+@Component(DependencyAnalyzer.ID)
 public class DependencyReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DependencyReportBuilder.class);
 
 	public static final String ID = DependencyAnalyzer.ID;
 
-	private DependencyReportService m_reportService;
+	@Resource
+	private DependencyReportService reportService;
 
-	private TopologyGraphBuilder m_graphBuilder;
+	@Resource
+	private TopologyGraphBuilder topologyGraphBuilder;
 
-	private TopologyGraphRepository m_topologyGraphDao;
+	@Resource
+	private TopologyGraphRepository topologyGraphRepository;
 
 	@Override
 	public boolean buildDailyTask(String name, String reportDomain, Date reportPeriod) {
@@ -60,24 +68,24 @@ public class DependencyReportBuilder implements TaskBuilder {
 				reportPeriod);
 
 		Date end = new Date(reportPeriod.getTime() + TimeHelper.ONE_HOUR);
-		Set<String> domains = m_reportService.queryAllDomainNames(reportPeriod, end, DependencyAnalyzer.ID);
+		Set<String> domains = reportService.queryAllDomainNames(reportPeriod, end, DependencyAnalyzer.ID);
 		boolean result = true;
 
 		LOGGER.info("Preparing dependency topology graph, period={}, domainCount={}.", reportPeriod, domains.size());
-		m_graphBuilder.getGraphs().clear();
+		topologyGraphBuilder.getGraphs().clear();
 		for (String domain : domains) {
-			DependencyReport report = m_reportService.queryReport(domain, reportPeriod, end);
+			DependencyReport report = reportService.queryReport(domain, reportPeriod, end);
 
-			m_graphBuilder.visitDependencyReport(report);
+			topologyGraphBuilder.visitDependencyReport(report);
 		}
 
-		Map<Long, TopologyGraph> graphs = m_graphBuilder.getGraphs();
+		Map<Long, TopologyGraph> graphs = topologyGraphBuilder.getGraphs();
 		for (Entry<Long, TopologyGraph> entry : graphs.entrySet()) {
 			try {
 				Date date = new Date(entry.getKey());
 				TopologyGraph graph = entry.getValue();
 
-				com.dianping.cat.home.dal.report.TopologyGraph proto = m_topologyGraphDao.createLocal();
+				com.dianping.cat.home.dal.report.TopologyGraph proto = topologyGraphRepository.createLocal();
 				String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 
 				proto.setType(3);
@@ -86,7 +94,7 @@ public class DependencyReportBuilder implements TaskBuilder {
 				proto.setIp(ip);
 				proto.setContent(DefaultNativeBuilder.build(graph));
 
-				m_topologyGraphDao.insert(proto);
+				topologyGraphRepository.insert(proto);
 			} catch (Exception e) {
 				result = false;
 				LOGGER.error("Unable to insert dependency topology graph, reportDomain={}, period={}, graphPeriod={}.",
@@ -108,15 +116,15 @@ public class DependencyReportBuilder implements TaskBuilder {
 	}
 
 	public void setGraphBuilder(TopologyGraphBuilder graphBuilder) {
-		m_graphBuilder = graphBuilder;
+		this.topologyGraphBuilder = graphBuilder;
 	}
 
 	public void setReportService(DependencyReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 	public void setTopologyGraphDao(TopologyGraphRepository topologyGraphDao) {
-		m_topologyGraphDao = topologyGraphDao;
+		topologyGraphRepository = topologyGraphDao;
 	}
 
 }

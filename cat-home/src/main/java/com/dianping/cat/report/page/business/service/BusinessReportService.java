@@ -19,6 +19,7 @@
 package com.dianping.cat.report.page.business.service;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
@@ -34,6 +35,7 @@ import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
+@Component
 public class BusinessReportService extends AbstractReportService<BusinessReport> {
 
 	@Override
@@ -62,7 +64,7 @@ public class BusinessReportService extends AbstractReportService<BusinessReport>
 			List<HourlyReport> reports = null;
 
 			try {
-				reports = m_hourlyReportDao.findAllByDomainNamePeriod(period, domain, name);
+				reports = hourlyReportRepository.findAllByDomainNamePeriod(period, domain, name);
 			} catch (RuntimeException e) {
 				Cat.logError(e);
 			}
@@ -88,7 +90,7 @@ public class BusinessReportService extends AbstractReportService<BusinessReport>
 	}
 
 	private BusinessReport queryFromHourlyBinary(long id, Date period, String domain) {
-		HourlyReportContent content = m_hourlyReportContentDao
+		HourlyReportContent content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {

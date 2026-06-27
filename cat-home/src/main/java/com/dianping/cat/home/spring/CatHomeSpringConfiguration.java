@@ -402,8 +402,15 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class, JsonBuilder.class,
 		DomainValidator.class, DefaultValueTranslater.class, DefaultGraphBuilder.class, DependencyItemBuilder.class,
 		TopologyGraphBuilder.class, StorageAlertInfoBuilder.class, ExternalInfoBuilder.class, StorageMergeHelper.class,
-		DatabaseParser.class, IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
-		StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class,
+		StateReportService.class, StateReportBuilder.class, EventReportService.class, EventReportBuilder.class,
+		HeartbeatReportService.class, HeartbeatReportBuilder.class, DependencyReportService.class,
+		DependencyReportBuilder.class, MatrixReportService.class, MatrixReportBuilder.class,
+		TransactionReportService.class, TransactionReportBuilder.class, TopReportService.class,
+		CrossReportService.class, CrossReportBuilder.class, ProblemReportService.class, ProblemReportBuilder.class,
+		StorageReportService.class, StorageReportBuilder.class, BusinessReportService.class,
+		BusinessBaselineReportBuilder.class, DatabaseParser.class, IpConvertManager.class,
+		StorageSQLBuilder.class, StorageCacheBuilder.class, StorageRPCBuilder.class,
+		DefaultProblemHandler.class, LongExecutionProblemHandler.class,
 		AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
 		AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 		DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
@@ -495,9 +502,16 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class,
 					JsonBuilder.class, DomainValidator.class, DefaultValueTranslater.class, DefaultGraphBuilder.class,
 					DependencyItemBuilder.class, TopologyGraphBuilder.class, StorageAlertInfoBuilder.class,
-					ExternalInfoBuilder.class, StorageMergeHelper.class, DatabaseParser.class,
-					IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
-					StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class,
+					ExternalInfoBuilder.class, StorageMergeHelper.class, StateReportService.class,
+					StateReportBuilder.class, EventReportService.class, EventReportBuilder.class,
+					HeartbeatReportService.class, HeartbeatReportBuilder.class, DependencyReportService.class,
+					DependencyReportBuilder.class, MatrixReportService.class, MatrixReportBuilder.class,
+					TransactionReportService.class, TransactionReportBuilder.class, TopReportService.class,
+					CrossReportService.class, CrossReportBuilder.class, ProblemReportService.class,
+					ProblemReportBuilder.class, StorageReportService.class, StorageReportBuilder.class,
+					BusinessReportService.class, BusinessBaselineReportBuilder.class, DatabaseParser.class,
+					IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class, StorageRPCBuilder.class,
+					DefaultProblemHandler.class, LongExecutionProblemHandler.class,
 					AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
 					AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 					DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
@@ -1204,59 +1218,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public StateReportService stateReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		StateReportService service = new StateReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean(name = StateReportBuilder.ID, initMethod = "initialize")
-	public TaskBuilder stateReportBuilder(StateReportService stateReportService, ServerConfigManager serverConfigManager,
-			ServerFilterConfigManager serverFilterConfigManager, ProjectService projectService,
-			HostinfoService hostinfoService) {
-		StateReportBuilder builder = new StateReportBuilder();
-
-		builder.setReportService(stateReportService);
-		builder.setServerConfigManager(serverConfigManager);
-		builder.setServerFilterConfigManager(serverFilterConfigManager);
-		builder.setProjectService(projectService);
-		builder.setHostinfoService(hostinfoService);
-		return builder;
-	}
-
-	@Bean
-	public EventReportService eventReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		EventReportService service = new EventReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean(name = EventReportBuilder.ID, initMethod = "initialize")
-	public TaskBuilder eventReportBuilder(EventReportService eventReportService, ServerConfigManager serverConfigManager,
-			AtomicMessageConfigManager atomicMessageConfigManager) {
-		EventReportBuilder builder = new EventReportBuilder();
-
-		builder.setReportService(eventReportService);
-		builder.setServerConfigManager(serverConfigManager);
-		builder.setAtomicMessageConfigManager(atomicMessageConfigManager);
-		return builder;
-	}
-
-	@Bean
 	public RouterConfigService routerConfigService(RouterConfigManager routerConfigManager,
 			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
 			DailyReportRepository dailyReportRepository, DailyReportContentRepository dailyReportContentRepository,
@@ -1279,42 +1240,6 @@ public class CatHomeSpringConfiguration {
 		return service;
 	}
 
-	@Bean
-	public HeartbeatReportService heartbeatReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		HeartbeatReportService service = new HeartbeatReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean(name = HeartbeatReportBuilder.ID)
-	public TaskBuilder heartbeatReportBuilder(HeartbeatReportService heartbeatReportService) {
-		HeartbeatReportBuilder builder = new HeartbeatReportBuilder();
-
-		builder.setReportService(heartbeatReportService);
-		return builder;
-	}
-
-	@Bean
-	public DependencyReportService dependencyReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		DependencyReportService service = new DependencyReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
 	@Bean(initMethod = "initialize")
 	public TopologyGraphManager topologyGraphManager(@Qualifier("dependencyModelService") ModelService<DependencyReport> dependencyModelService,
 			DependencyItemBuilder dependencyItemBuilder, TopoGraphFormatConfigManager topoGraphFormatConfigManager,
@@ -1330,17 +1255,6 @@ public class CatHomeSpringConfiguration {
 		manager.setProjectService(projectService);
 		manager.setTopologyGraphDao(topologyGraphRepository);
 		return manager;
-	}
-
-	@Bean(name = DependencyReportBuilder.ID)
-	public TaskBuilder dependencyReportBuilder(DependencyReportService dependencyReportService,
-			TopologyGraphBuilder topologyGraphBuilder, TopologyGraphRepository topologyGraphRepository) {
-		DependencyReportBuilder builder = new DependencyReportBuilder();
-
-		builder.setReportService(dependencyReportService);
-		builder.setGraphBuilder(topologyGraphBuilder);
-		builder.setTopologyGraphDao(topologyGraphRepository);
-		return builder;
 	}
 
 	@Bean
@@ -1369,28 +1283,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public MatrixReportService matrixReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		MatrixReportService service = new MatrixReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean(name = MatrixReportBuilder.ID, initMethod = "initialize")
-	public TaskBuilder matrixReportBuilder(MatrixReportService matrixReportService) {
-		MatrixReportBuilder builder = new MatrixReportBuilder();
-
-		builder.setReportService(matrixReportService);
-		return builder;
-	}
-
-	@Bean
 	public HeavyReportService heavyReportService(HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
 			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
@@ -1412,62 +1304,6 @@ public class CatHomeSpringConfiguration {
 		builder.setReportService(heavyReportService);
 		builder.setMatrixReportService(matrixReportService);
 		builder.setConfigManager(serverFilterConfigManager);
-		return builder;
-	}
-
-	@Bean
-	public TransactionReportService transactionReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		TransactionReportService service = new TransactionReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean
-	public TopReportService topReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		TopReportService service = new TopReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean(name = TransactionReportBuilder.ID, initMethod = "initialize")
-	public TaskBuilder transactionReportBuilder(TransactionReportService transactionReportService,
-			ServerConfigManager serverConfigManager, AtomicMessageConfigManager atomicMessageConfigManager) {
-		TransactionReportBuilder builder = new TransactionReportBuilder();
-
-		builder.setReportService(transactionReportService);
-		builder.setServerConfigManager(serverConfigManager);
-		builder.setAtomicMessageConfigManager(atomicMessageConfigManager);
-		return builder;
-	}
-
-	@Bean(name = BusinessBaselineReportBuilder.ID)
-	public TaskBuilder businessBaselineReportBuilder(BusinessReportService businessReportService,
-			BusinessConfigManager businessConfigManager, BaselineConfigManager baselineConfigManager,
-			BusinessPointParser businessPointParser, BaselineCreator baselineCreator, BaselineService baselineService,
-			BusinessKeyHelper businessKeyHelper) {
-		BusinessBaselineReportBuilder builder = new BusinessBaselineReportBuilder();
-
-		builder.setReportService(businessReportService);
-		builder.setConfigManager(businessConfigManager);
-		builder.setBaselineConfigManager(baselineConfigManager);
-		builder.setParser(businessPointParser);
-		builder.setBaselineCreator(baselineCreator);
-		builder.setBaselineService(baselineService);
-		builder.setKeyHelper(businessKeyHelper);
 		return builder;
 	}
 
@@ -1559,28 +1395,6 @@ public class CatHomeSpringConfiguration {
 		service.setWeeklyReportDao(weeklyReportRepository);
 		service.setMonthlyReportDao(monthlyReportRepository);
 		return service;
-	}
-
-	@Bean
-	public CrossReportService crossReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		CrossReportService service = new CrossReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean(name = CrossReportBuilder.ID, initMethod = "initialize")
-	public TaskBuilder crossReportBuilder(CrossReportService crossReportService) {
-		CrossReportBuilder builder = new CrossReportBuilder();
-
-		builder.setReportService(crossReportService);
-		return builder;
 	}
 
 	@Bean
@@ -2352,42 +2166,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public ProblemReportService problemReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		ProblemReportService service = new ProblemReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public TaskBuilder problemReportBuilder(ProblemReportService problemReportService) {
-		ProblemReportBuilder builder = new ProblemReportBuilder();
-
-		builder.setReportService(problemReportService);
-		return builder;
-	}
-
-	@Bean
-	public StorageReportService storageReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		StorageReportService service = new StorageReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean
 	public Map<String, StorageBuilder> storageBuilders(@Qualifier("storageSQLBuilder") StorageBuilder storageSQLBuilder,
 			@Qualifier("storageCacheBuilder") StorageBuilder storageCacheBuilder,
 			@Qualifier("storageRPCBuilder") StorageBuilder storageRPCBuilder) {
@@ -2402,15 +2180,6 @@ public class CatHomeSpringConfiguration {
 
 		manager.setStorageBuilders(buildStorageBuilders(storageSQLBuilder, storageCacheBuilder, storageRPCBuilder));
 		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public TaskBuilder storageReportBuilder(StorageReportService storageReportService, StorageMergeHelper storageMergeHelper) {
-		StorageReportBuilder builder = new StorageReportBuilder();
-
-		builder.setReportService(storageReportService);
-		builder.setStorageMergerHelper(storageMergeHelper);
-		return builder;
 	}
 
 	@Bean(initMethod = "initialize", name = "problem-historical")
@@ -2988,20 +2757,6 @@ public class CatHomeSpringConfiguration {
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
 		return manager;
-	}
-
-	@Bean
-	public BusinessReportService businessReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		BusinessReportService service = new BusinessReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
 	}
 
 	@Bean

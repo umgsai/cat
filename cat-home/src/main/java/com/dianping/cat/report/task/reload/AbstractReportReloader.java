@@ -33,9 +33,9 @@ import com.dianping.cat.mybatis.HourlyReportRepository;
 public abstract class AbstractReportReloader implements ReportReloader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractReportReloader.class);
 
-	protected HourlyReportRepository m_hourlyReportDao;
+	protected HourlyReportRepository hourlyReportRepository;
 
-	protected HourlyReportContentRepository m_hourlyReportContentDao;
+	protected HourlyReportContentRepository hourlyReportContentRepository;
 
 	protected ServerConfigManager m_serverConfigManager;
 
@@ -46,15 +46,15 @@ public abstract class AbstractReportReloader implements ReportReloader {
 	public boolean insertHourlyReport(ReportReloadEntity entity) {
 		try {
 			HourlyReport report = entity.getReport();
-			m_hourlyReportDao.insert(report);
+			hourlyReportRepository.insert(report);
 
 			long id = report.getId();
-			HourlyReportContent proto = m_hourlyReportContentDao.createLocal();
+			HourlyReportContent proto = hourlyReportContentRepository.createLocal();
 
 			proto.setReportId(id);
 			proto.setContent(entity.getReportContent());
 			proto.setPeriod(report.getPeriod());
-			m_hourlyReportContentDao.insert(proto);
+			hourlyReportContentRepository.insert(proto);
 			return true;
 		} catch (RuntimeException e) {
 			HourlyReport report = entity == null ? null : entity.getReport();
@@ -85,11 +85,11 @@ public abstract class AbstractReportReloader implements ReportReloader {
 	}
 
 	public void setHourlyReportContentDao(HourlyReportContentRepository hourlyReportContentDao) {
-		m_hourlyReportContentDao = hourlyReportContentDao;
+		hourlyReportContentRepository = hourlyReportContentDao;
 	}
 
 	public void setHourlyReportDao(HourlyReportRepository hourlyReportDao) {
-		m_hourlyReportDao = hourlyReportDao;
+		hourlyReportRepository = hourlyReportDao;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {

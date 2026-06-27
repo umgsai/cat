@@ -50,7 +50,7 @@ public class ClientReportService extends AbstractReportService<ClientReport> {
 		String name = Constants.REPORT_CLIENT;
 
 		try {
-			DailyReport report = m_dailyReportDao
+			DailyReport report = dailyReportRepository
 									.findByDomainNamePeriod(domain, name, new Date(startTime));
 			return queryFromDailyBinary(report.getId(), domain);
 		} catch (EmptyResultDataAccessException e) {
@@ -67,7 +67,7 @@ public class ClientReportService extends AbstractReportService<ClientReport> {
 	}
 
 	private ClientReport queryFromDailyBinary(long id, String domain) {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
+		DailyReportContent content = dailyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());

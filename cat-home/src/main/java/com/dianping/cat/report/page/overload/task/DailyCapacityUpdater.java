@@ -37,9 +37,9 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 
 	public static final String ID = "daily_capacity_updater";
 
-	private DailyReportContentRepository m_dailyReportContentDao;
+	private DailyReportContentRepository dailyReportContentRepository;
 
-	private DailyReportRepository m_dailyReportDao;
+	private DailyReportRepository dailyReportRepository;
 
 	private OverloadRepository m_overloadDao;
 
@@ -56,7 +56,7 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 		LOGGER.info("Starting daily report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
-			List<DailyReportContent> reports = m_dailyReportContentDao
+			List<DailyReportContent> reports = dailyReportContentRepository
 									.findOverloadReport(maxId);
 
 			for (DailyReportContent content : reports) {
@@ -72,7 +72,7 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 						overload.setReportType(CapacityUpdater.DAILY_TYPE);
 
 						try {
-							DailyReport report = m_dailyReportDao.findByPK(reportId);
+							DailyReport report = dailyReportRepository.findByPK(reportId);
 							overload.setPeriod(report.getPeriod());
 							m_overloadDao.insert(overload);
 						} catch (EmptyResultDataAccessException e) {
@@ -101,11 +101,11 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 	}
 
 	public void setDailyReportContentDao(DailyReportContentRepository dailyReportContentDao) {
-		m_dailyReportContentDao = dailyReportContentDao;
+		dailyReportContentRepository = dailyReportContentDao;
 	}
 
 	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
-		m_dailyReportDao = dailyReportDao;
+		dailyReportRepository = dailyReportDao;
 	}
 
 	public void setOverloadDao(OverloadRepository overloadDao) {

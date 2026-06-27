@@ -18,6 +18,11 @@
  */
 package com.dianping.cat.report.page.storage.task;
 
+import jakarta.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 import java.util.Set;
 
@@ -41,14 +46,17 @@ import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 
+@Component
 public class StorageReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageReportBuilder.class);
 
 	public static final String ID = StorageAnalyzer.ID;
 
-	protected StorageReportService m_reportService;
+	@Resource
+	protected StorageReportService reportService;
 
-	private StorageMergeHelper m_storageMergerHelper;
+	@Resource
+	private StorageMergeHelper storageMergeHelper;
 
 	@Override
 	public boolean buildDailyTask(String name, String reportId, Date period) {
@@ -65,7 +73,7 @@ public class StorageReportBuilder implements TaskBuilder {
 			report.setPeriod(period);
 			report.setType(1);
 			byte[] binaryContent = DefaultNativeBuilder.build(storageReport);
-			return m_reportService.insertDailyReport(report, binaryContent);
+			return reportService.insertDailyReport(report, binaryContent);
 		} catch (Exception e) {
 			LOGGER.error("Unable to build storage daily report, name={}, reportId={}, period={}.", name, reportId, period,
 					e);
@@ -100,7 +108,7 @@ public class StorageReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(storageReport);
-		return m_reportService.insertMonthlyReport(report, binaryContent);
+		return reportService.insertMonthlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -124,7 +132,7 @@ public class StorageReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(storageReport);
-		return m_reportService.insertWeeklyReport(report, binaryContent);
+		return reportService.insertWeeklyReport(report, binaryContent);
 	}
 
 	private StorageReport queryDailyReportsByDuration(String reportId, Date start, Date end) {
@@ -138,7 +146,7 @@ public class StorageReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime += TimeHelper.ONE_DAY) {
 			try {
-				StorageReport reportModel = m_reportService
+				StorageReport reportModel = reportService
 										.queryReport(reportId, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 				reportModel.accept(merger);
 			} catch (Exception e) {
@@ -164,7 +172,7 @@ public class StorageReportBuilder implements TaskBuilder {
 		HistoryStorageReportMerger merger = new HistoryStorageReportMerger(report);
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
-			StorageReport reportModel = m_reportService
+			StorageReport reportModel = reportService
 									.queryReport(reportId, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_HOUR));
 
 			reportModel.accept(merger);
@@ -175,14 +183,14 @@ public class StorageReportBuilder implements TaskBuilder {
 		storageReport.setStartTime(start).setEndTime(end);
 		return storageReport;
 	}
-
+	@PostConstruct
 	public void initialize() {
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
 			@Override
 			public void buildCurrentMonthlyTask(String name, String domain, Date start) {
 				if (Constants.CAT.equals(domain)) {
-					Set<String> ids = m_reportService.queryAllIds(start, TimeHelper.getCurrentDay());
+					Set<String> ids = reportService.queryAllIds(start, TimeHelper.getCurrentDay());
 
 					for (String id : ids) {
 						buildMonthlyTask(name, id, start);
@@ -193,7 +201,7 @@ public class StorageReportBuilder implements TaskBuilder {
 			@Override
 			public void buildCurrentWeeklyTask(String name, String domain, Date start) {
 				if (Constants.CAT.equals(domain)) {
-					Set<String> ids = m_reportService.queryAllIds(start, TimeHelper.getCurrentDay());
+					Set<String> ids = reportService.queryAllIds(start, TimeHelper.getCurrentDay());
 
 					for (String id : ids) {
 						buildWeeklyTask(name, id, start);
@@ -209,11 +217,11 @@ public class StorageReportBuilder implements TaskBuilder {
 	}
 
 	public void setReportService(StorageReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 	public void setStorageMergerHelper(StorageMergeHelper storageMergerHelper) {
-		m_storageMergerHelper = storageMergerHelper;
+		this.storageMergeHelper = storageMergerHelper;
 	}
 
 }

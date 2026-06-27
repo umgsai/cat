@@ -43,13 +43,13 @@ public class TableCapacityService {
 
 	private OverloadRepository m_overloadDao;
 
-	private HourlyReportRepository m_hourlyReportDao;
+	private HourlyReportRepository hourlyReportRepository;
 
-	private DailyReportRepository m_dailyReportDao;
+	private DailyReportRepository dailyReportRepository;
 
-	private WeeklyReportRepository m_weeklyReportDao;
+	private WeeklyReportRepository weeklyReportRepository;
 
-	private MonthlyReportRepository m_monthlyReportDao;
+	private MonthlyReportRepository monthlyReportRepository;
 
 	private OverloadReport generateOverloadReport(Object object, double reportSize, int reportType) {
 		OverloadReport overloadReport = new OverloadReport();
@@ -106,16 +106,16 @@ public class TableCapacityService {
 
 					switch (reportType) {
 					case CapacityUpdater.HOURLY_TYPE:
-						report = m_hourlyReportDao.findByPK(reportId);
+						report = hourlyReportRepository.findByPK(reportId);
 						break;
 					case CapacityUpdater.DAILY_TYPE:
-						report = m_dailyReportDao.findByPK(reportId);
+						report = dailyReportRepository.findByPK(reportId);
 						break;
 					case CapacityUpdater.WEEKLY_TYPE:
-						report = m_weeklyReportDao.findByPK(reportId);
+						report = weeklyReportRepository.findByPK(reportId);
 						break;
 					case CapacityUpdater.MONTHLY_TYPE:
-						report = m_monthlyReportDao.findByPK(reportId);
+						report = monthlyReportRepository.findByPK(reportId);
 						break;
 					}
 					reports.add(generateOverloadReport(report, reportSize, reportType));
@@ -137,15 +137,15 @@ public class TableCapacityService {
 	}
 
 	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
-		m_dailyReportDao = dailyReportDao;
+		dailyReportRepository = dailyReportDao;
 	}
 
 	public void setHourlyReportDao(HourlyReportRepository hourlyReportDao) {
-		m_hourlyReportDao = hourlyReportDao;
+		hourlyReportRepository = hourlyReportDao;
 	}
 
 	public void setMonthlyReportDao(MonthlyReportRepository monthlyReportDao) {
-		m_monthlyReportDao = monthlyReportDao;
+		monthlyReportRepository = monthlyReportDao;
 	}
 
 	public void setOverloadDao(OverloadRepository overloadDao) {
@@ -153,7 +153,7 @@ public class TableCapacityService {
 	}
 
 	public void setWeeklyReportDao(WeeklyReportRepository weeklyReportDao) {
-		m_weeklyReportDao = weeklyReportDao;
+		weeklyReportRepository = weeklyReportDao;
 	}
 
 }

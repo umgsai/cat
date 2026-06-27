@@ -18,6 +18,10 @@
  */
 package com.dianping.cat.report.page.heartbeat.task;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -34,12 +38,14 @@ import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 
+@Component(HeartbeatAnalyzer.ID)
 public class HeartbeatReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatReportBuilder.class);
 
 	public static final String ID = HeartbeatAnalyzer.ID;
 
-	protected HeartbeatReportService m_reportService;
+	@Resource
+	protected HeartbeatReportService reportService;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -56,7 +62,7 @@ public class HeartbeatReportBuilder implements TaskBuilder {
 			report.setType(1);
 			byte[] binaryContent = DefaultNativeBuilder.build(heartbeatReport);
 
-			return m_reportService.insertDailyReport(report, binaryContent);
+			return reportService.insertDailyReport(report, binaryContent);
 		} catch (Exception e) {
 			LOGGER.error("Unable to build heartbeat daily report, name={}, domain={}, period={}.", name, domain, period,
 					e);
@@ -88,7 +94,7 @@ public class HeartbeatReportBuilder implements TaskBuilder {
 		for (; startTime < endTime; startTime += TimeHelper.ONE_HOUR) {
 			LOGGER.info("Merging heartbeat hourly report into daily report, name={}, domain={}, period={}.", name,
 					domain, new Date(startTime));
-			HeartbeatReport report = m_reportService
+			HeartbeatReport report = reportService
 									.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_HOUR));
 
 			report.accept(merger);
@@ -103,6 +109,6 @@ public class HeartbeatReportBuilder implements TaskBuilder {
 	}
 
 	public void setReportService(HeartbeatReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 }

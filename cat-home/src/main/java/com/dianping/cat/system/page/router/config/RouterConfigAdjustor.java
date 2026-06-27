@@ -59,7 +59,7 @@ public class RouterConfigAdjustor {
 
 	private ServerConfigManager m_serverConfigManager;
 
-	private DailyReportRepository m_dailyReportDao;
+	private DailyReportRepository dailyReportRepository;
 
 	public void Adjust(Date period) {
 		Date end = new Date(period.getTime() + TimeHelper.ONE_HOUR);
@@ -268,7 +268,7 @@ public class RouterConfigAdjustor {
 		try {
 			String name = RouterConfigBuilder.ID;
 			String domain = Constants.CAT;
-			List<DailyReport> reports = m_dailyReportDao
+			List<DailyReport> reports = dailyReportRepository
 									.queryLatestReportsByDomainName(domain, name, 1);
 			DailyReport oldReport = reports.get(0);
 			DailyReport dailyReport = new DailyReport();
@@ -279,7 +279,7 @@ public class RouterConfigAdjustor {
 			dailyReport.setName(name);
 			dailyReport.setPeriod(oldReport.getPeriod());
 			dailyReport.setType(oldReport.getType());
-			m_dailyReportDao.deleteByPK(oldReport);
+			dailyReportRepository.deleteByPK(oldReport);
 
 			byte[] binaryContent = DefaultNativeBuilder.build(config);
 
@@ -292,7 +292,7 @@ public class RouterConfigAdjustor {
 	}
 
 	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
-		m_dailyReportDao = dailyReportDao;
+		dailyReportRepository = dailyReportDao;
 	}
 
 	public void setRouterConfigManager(RouterConfigManager configManager) {

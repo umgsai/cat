@@ -1489,3 +1489,111 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+## 31. 第二十三批完成记录
+
+第二十三批扩大到报表服务和定时报表构建链路，目标是把一组核心 `ReportService` 与对应 `TaskBuilder` 从 `CatHomeSpringConfiguration` 的显式 `@Bean` 注册迁移为 `@Component` 注册，同时保留原有任务名和初始化语义。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 `ReportService` 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+StateReportService
+EventReportService
+HeartbeatReportService
+DependencyReportService
+MatrixReportService
+TransactionReportService
+TopReportService
+CrossReportService
+ProblemReportService
+StorageReportService
+BusinessReportService
+```
+
+2. 以下 `TaskBuilder` 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描。原先显式指定 `@Bean(name = ID)` 的 builder 继续使用显式组件名；原先使用默认方法名的 `ProblemReportBuilder`、`StorageReportBuilder` 保留默认组件名，确保 `ReportFacade` 初始化时的 builder alias 计数和旧注册语义一致：
+
+```text
+StateReportBuilder
+EventReportBuilder
+HeartbeatReportBuilder
+DependencyReportBuilder
+MatrixReportBuilder
+TransactionReportBuilder
+CrossReportBuilder
+ProblemReportBuilder
+StorageReportBuilder
+BusinessBaselineReportBuilder
+```
+
+3. 已删除 `CatHomeSpringConfiguration` 中对应的旧 `@Bean` 方法，避免组件扫描注册和配置类注册同时存在。
+
+4. `ReportFacade` 会把 Spring beanName 和 builder 的 `ID` 都加入内部映射，因此保留默认组件名不会影响任务表按 `report_name` 查找 builder。
+
+5. 旧配置方法中带 `initMethod = "initialize"` 的 builder 已改为在原 `initialize()` 方法上使用 `@PostConstruct`，保留启动初始化语义。
+
+6. `AbstractReportService` 中的报表仓储依赖已改为 `@Resource` 字段注入，并保留 setter，方便测试或少量仍由配置类创建的相邻 Bean 继续复用：
+
+```text
+m_hourlyReportDao           -> hourlyReportRepository
+m_hourlyReportContentDao    -> hourlyReportContentRepository
+m_dailyReportDao            -> dailyReportRepository
+m_dailyReportContentDao     -> dailyReportContentRepository
+m_weeklyReportDao           -> weeklyReportRepository
+m_weeklyReportContentDao    -> weeklyReportContentRepository
+m_monthlyReportDao          -> monthlyReportRepository
+m_monthlyReportContentDao   -> monthlyReportContentRepository
+m_domains                   -> domainCache
+```
+
+7. 本批触碰到的 `TaskBuilder` 字段命名已收口为 Java 驼峰命名，并改为 `@Resource` 字段注入：
+
+```text
+m_reportService                 -> reportService
+m_serverConfigManager           -> serverConfigManager
+m_serverFilterConfigManager     -> serverFilterConfigManager
+m_projectService                -> projectService
+m_hostinfoService               -> hostinfoService
+m_atomicMessageConfigManager    -> atomicMessageConfigManager
+m_graphBuilder                  -> topologyGraphBuilder
+m_topologyGraphDao              -> topologyGraphRepository
+m_storageMergerHelper           -> storageMergeHelper
+m_configManager                 -> businessConfigManager
+m_baselineConfigManager         -> baselineConfigManager
+m_parser                        -> businessPointParser
+m_baselineCreator               -> baselineCreator
+m_baselineService               -> baselineService
+m_keyHelper                     -> businessKeyHelper
+```
+
+8. `AbstractReportService` 中原来只调用 `Cat.logError` 的插入、清理和查询异常路径已补充 SLF4J 日志，便于排查报表落库和查询问题。
+
+9. 因 `AbstractReportService` 的 protected 字段改名，继承它的统计报表服务、路由报表服务、报表重载器等引用同步更新；容量统计相关类中同名 DAO 字段也做了驼峰命名清理。
+
+10. 本批仍不迁移以下内容，避免同时改变聚合装配、模型服务和后台任务运行语义：
+
+```text
+ReportManager
+ReportDelegate
+ModelService / LocalModelService / RemoteModelService / CompositeModelService
+ReportReloader 具体注册方法
+Jar/Heavy/Client/Service/Utilization 统计报表 builder
+CurrentReportBuilder、TaskConsumer、TaskManager、ReportFacade 等任务运行时 Bean
+Map/List 聚合 Bean
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

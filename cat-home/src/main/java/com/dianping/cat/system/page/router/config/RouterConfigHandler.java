@@ -57,7 +57,7 @@ public class RouterConfigHandler {
 
 	private RouterConfigService m_reportService;
 
-	private DailyReportRepository m_dailyReportDao;
+	private DailyReportRepository dailyReportRepository;
 
 	private void addServerList(List<Server> servers, Server server) {
 		for (Server s : servers) {
@@ -265,7 +265,7 @@ public class RouterConfigHandler {
 			dailyReport.setPeriod(period);
 			dailyReport.setType(1);
 
-			m_dailyReportDao.deleteByDomainNamePeriod(dailyReport);
+			dailyReportRepository.deleteByDomainNamePeriod(dailyReport);
 			byte[] binaryContent = DefaultNativeBuilder.build(routerConfig);
 
 			m_reportService.insertDailyReport(dailyReport, binaryContent);
@@ -279,7 +279,7 @@ public class RouterConfigHandler {
 	}
 
 	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
-		m_dailyReportDao = dailyReportDao;
+		dailyReportRepository = dailyReportDao;
 	}
 
 	public void setReportService(RouterConfigService reportService) {

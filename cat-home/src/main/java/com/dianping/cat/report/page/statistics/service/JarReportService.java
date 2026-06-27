@@ -47,7 +47,7 @@ public class JarReportService extends AbstractReportService<JarReport> {
 	}
 
 	private JarReport queryFromHourlyBinary(long id, Date period, String domain) {
-		HourlyReportContent content = m_hourlyReportContentDao
+		HourlyReportContent content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {
@@ -66,7 +66,7 @@ public class JarReportService extends AbstractReportService<JarReport> {
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			List<HourlyReport> reports = null;
 			try {
-				reports = m_hourlyReportDao.findAllByDomainNamePeriod(start, domain, name);
+				reports = hourlyReportRepository.findAllByDomainNamePeriod(start, domain, name);
 			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query jar hourly report list, domain={}, period={}.", domain, new Date(startTime),
 						e);

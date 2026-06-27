@@ -56,7 +56,7 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 			String name = Constants.REPORT_ROUTER;
 
 			try {
-				DailyReport report = m_dailyReportDao.findByDomainNamePeriod(domain, name, start);
+				DailyReport report = dailyReportRepository.findByDomainNamePeriod(domain, name, start);
 				RouterConfig config = queryFromDailyBinary(report.getId());
 
 				routerConfigs.put(time, Pair.of(config, report.getCreationDate().getTime()));
@@ -75,7 +75,7 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 	}
 
 	private RouterConfig queryFromDailyBinary(long id) {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
+		DailyReportContent content = dailyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -91,7 +91,7 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 
 	public RouterConfig queryLastReport(String domain) {
 		try {
-			List<DailyReport> reports = m_dailyReportDao
+			List<DailyReport> reports = dailyReportRepository
 									.queryLatestReportsByDomainName(domain, Constants.REPORT_ROUTER, 1);
 
 			if (reports.size() == 0) {

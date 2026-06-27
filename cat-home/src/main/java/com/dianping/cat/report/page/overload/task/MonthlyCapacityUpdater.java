@@ -37,9 +37,9 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 
 	public static final String ID = "monthly_capacity_updater";
 
-	private MonthlyReportRepository m_monthlyReportDao;
+	private MonthlyReportRepository monthlyReportRepository;
 
-	private MonthlyReportContentRepository m_monthlyReportContentDao;
+	private MonthlyReportContentRepository monthlyReportContentRepository;
 
 	private OverloadRepository m_overloadDao;
 
@@ -56,7 +56,7 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 		LOGGER.info("Starting monthly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
-			List<MonthlyReportContent> reports = m_monthlyReportContentDao
+			List<MonthlyReportContent> reports = monthlyReportContentRepository
 									.findOverloadReport(maxId);
 
 			for (MonthlyReportContent content : reports) {
@@ -72,7 +72,7 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 						overload.setReportType(CapacityUpdater.MONTHLY_TYPE);
 
 						try {
-							MonthlyReport report = m_monthlyReportDao.findByPK(reportId);
+							MonthlyReport report = monthlyReportRepository.findByPK(reportId);
 							overload.setPeriod(report.getPeriod());
 							m_overloadDao.insert(overload);
 						} catch (EmptyResultDataAccessException e) {
@@ -101,11 +101,11 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 	}
 
 	public void setMonthlyReportDao(MonthlyReportRepository monthlyReportDao) {
-		m_monthlyReportDao = monthlyReportDao;
+		monthlyReportRepository = monthlyReportDao;
 	}
 
 	public void setMonthlyReportContentDao(MonthlyReportContentRepository monthlyReportContentDao) {
-		m_monthlyReportContentDao = monthlyReportContentDao;
+		monthlyReportContentRepository = monthlyReportContentDao;
 	}
 
 	public void setOverloadDao(OverloadRepository overloadDao) {

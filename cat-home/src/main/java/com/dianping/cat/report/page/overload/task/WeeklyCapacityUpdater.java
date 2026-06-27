@@ -37,9 +37,9 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 
 	public static final String ID = "weekly_capacity_updater";
 
-	private WeeklyReportRepository m_weeklyReportDao;
+	private WeeklyReportRepository weeklyReportRepository;
 
-	private WeeklyReportContentRepository m_weeklyReportContentDao;
+	private WeeklyReportContentRepository weeklyReportContentRepository;
 
 	private OverloadRepository m_overloadDao;
 
@@ -56,7 +56,7 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 		LOGGER.info("Starting weekly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
-			List<WeeklyReportContent> reports = m_weeklyReportContentDao
+			List<WeeklyReportContent> reports = weeklyReportContentRepository
 									.findOverloadReport(maxId);
 
 			for (WeeklyReportContent content : reports) {
@@ -72,7 +72,7 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 						overload.setReportType(CapacityUpdater.WEEKLY_TYPE);
 
 						try {
-							WeeklyReport report = m_weeklyReportDao.findByPK(reportId);
+							WeeklyReport report = weeklyReportRepository.findByPK(reportId);
 							overload.setPeriod(report.getPeriod());
 							m_overloadDao.insert(overload);
 						} catch (EmptyResultDataAccessException e) {
@@ -101,11 +101,11 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 	}
 
 	public void setWeeklyReportDao(WeeklyReportRepository weeklyReportDao) {
-		m_weeklyReportDao = weeklyReportDao;
+		weeklyReportRepository = weeklyReportDao;
 	}
 
 	public void setWeeklyReportContentDao(WeeklyReportContentRepository weeklyReportContentDao) {
-		m_weeklyReportContentDao = weeklyReportContentDao;
+		weeklyReportContentRepository = weeklyReportContentDao;
 	}
 
 	public void setOverloadDao(OverloadRepository overloadDao) {

@@ -62,7 +62,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_DAY) {
 			try {
-				DailyReport report = m_dailyReportDao
+				DailyReport report = dailyReportRepository
 										.findByDomainNamePeriod(domain, name, new Date(startTime));
 				ServiceReport reportModel = queryFromDailyBinary(report.getId(), domain);
 
@@ -83,7 +83,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 	}
 
 	private ServiceReport queryFromDailyBinary(long id, String domain) {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
+		DailyReportContent content = dailyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -93,7 +93,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 	}
 
 	private ServiceReport queryFromHourlyBinary(long id, Date period, String domain) {
-		HourlyReportContent content = m_hourlyReportContentDao
+		HourlyReportContent content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {
@@ -104,7 +104,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 	}
 
 	private ServiceReport queryFromMonthlyBinary(long id, String domain) {
-		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
+		MonthlyReportContent content = monthlyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -114,7 +114,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 	}
 
 	private ServiceReport queryFromWeeklyBinary(long id, String domain) {
-		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
+		WeeklyReportContent content = weeklyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -133,7 +133,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			List<HourlyReport> reports = null;
 			try {
-				reports = m_hourlyReportDao
+				reports = hourlyReportRepository
 										.findAllByDomainNamePeriod(new Date(startTime), domain, name);
 			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query service hourly report list, domain={}, period={}.", domain,
@@ -167,7 +167,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 	@Override
 	public ServiceReport queryMonthlyReport(String domain, Date start) {
 		try {
-			MonthlyReport entity = m_monthlyReportDao
+			MonthlyReport entity = monthlyReportRepository
 									.findReportByDomainNamePeriod(start, domain,	Constants.REPORT_SERVICE);
 			return queryFromMonthlyBinary(entity.getId(), domain);
 		} catch (EmptyResultDataAccessException e) {
@@ -182,7 +182,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 	@Override
 	public ServiceReport queryWeeklyReport(String domain, Date start) {
 		try {
-			WeeklyReport entity = m_weeklyReportDao
+			WeeklyReport entity = weeklyReportRepository
 									.findReportByDomainNamePeriod(start, domain, Constants.REPORT_SERVICE);
 
 			return queryFromWeeklyBinary(entity.getId(), domain);

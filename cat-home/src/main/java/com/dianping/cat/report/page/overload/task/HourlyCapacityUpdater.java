@@ -37,9 +37,9 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 
 	public static final String ID = "hourly_capacity_updater";
 
-	private HourlyReportContentRepository m_hourlyReportContentDao;
+	private HourlyReportContentRepository hourlyReportContentRepository;
 
-	private HourlyReportRepository m_hourlyReportDao;
+	private HourlyReportRepository hourlyReportRepository;
 
 	private OverloadRepository m_overloadDao;
 
@@ -56,7 +56,7 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 		LOGGER.info("Starting hourly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
-			List<HourlyReportContent> reports = m_hourlyReportContentDao
+			List<HourlyReportContent> reports = hourlyReportContentRepository
 									.findOverloadReport(maxId);
 
 			for (HourlyReportContent content : reports) {
@@ -73,7 +73,7 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 
 						HourlyReport hourlyReport;
 						try {
-							hourlyReport = m_hourlyReportDao.findByPK(reportId);
+							hourlyReport = hourlyReportRepository.findByPK(reportId);
 							overload.setPeriod(hourlyReport.getPeriod());
 							m_overloadDao.insert(overload);
 
@@ -103,11 +103,11 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 	}
 
 	public void setHourlyReportContentDao(HourlyReportContentRepository hourlyReportContentDao) {
-		m_hourlyReportContentDao = hourlyReportContentDao;
+		hourlyReportContentRepository = hourlyReportContentDao;
 	}
 
 	public void setHourlyReportDao(HourlyReportRepository hourlyReportDao) {
-		m_hourlyReportDao = hourlyReportDao;
+		hourlyReportRepository = hourlyReportDao;
 	}
 
 	public void setOverloadDao(OverloadRepository overloadDao) {
