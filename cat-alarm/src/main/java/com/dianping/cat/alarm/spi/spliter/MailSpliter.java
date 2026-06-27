@@ -19,7 +19,9 @@
 package com.dianping.cat.alarm.spi.spliter;
 
 import com.dianping.cat.alarm.spi.AlertChannel;
+import org.springframework.stereotype.Component;
 
+@Component("mailSpliter")
 public class MailSpliter implements Spliter {
 
 	public static final String ID = AlertChannel.MAIL.getName();

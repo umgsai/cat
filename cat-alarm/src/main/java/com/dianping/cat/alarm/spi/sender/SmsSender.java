@@ -27,7 +27,9 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.sender.entity.Sender;
 import com.dianping.cat.alarm.spi.AlertChannel;
+import org.springframework.stereotype.Component;
 
+@Component("smsSender")
 public class SmsSender extends AbstractSender {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SmsSender.class);
 
@@ -63,7 +65,7 @@ public class SmsSender extends AbstractSender {
 		String filterContent = message.getContent().replaceAll("(<a href.*(?=</a>)</a>)|(\n)", "");
 		String content = message.getTitle() + " " + filterContent;
 		String urlPrefix = sender.getUrl();
-		String urlPars = m_senderConfigManager.queryParString(sender);
+		String urlPars = senderConfigManager.queryParString(sender);
 
 		try {
 			urlPars = urlPars.replace("${receiver}", URLEncoder.encode(receiver, "utf-8"))

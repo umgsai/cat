@@ -21,7 +21,9 @@ package com.dianping.cat.report.alert.heartbeat;
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
+import org.springframework.stereotype.Component;
 
+@Component("heartbeatDecorator")
 public class HeartbeatDecorator extends Decorator {
 
 	public static final String ID = AlertType.HeartBeat.getName();

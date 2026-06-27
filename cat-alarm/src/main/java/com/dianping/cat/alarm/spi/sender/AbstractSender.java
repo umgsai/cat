@@ -30,13 +30,16 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
 
+import jakarta.annotation.Resource;
+
 public abstract class AbstractSender implements Sender {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractSender.class);
 
-    protected SenderConfigManager m_senderConfigManager;
+    @Resource
+    protected SenderConfigManager senderConfigManager;
 
     public void setSenderConfigManager(SenderConfigManager senderConfigManager) {
-        m_senderConfigManager = senderConfigManager;
+        this.senderConfigManager = senderConfigManager;
     }
 
     private boolean httpGetSend(String successCode, String urlPrefix, String urlPars) {
@@ -147,7 +150,7 @@ public abstract class AbstractSender implements Sender {
     public com.dianping.cat.alarm.sender.entity.Sender querySender() {
         String id = getId();
 
-        return m_senderConfigManager.querySender(id);
+        return senderConfigManager.querySender(id);
     }
 
     private void recordSendLog(String urlPrefix, String paras) {

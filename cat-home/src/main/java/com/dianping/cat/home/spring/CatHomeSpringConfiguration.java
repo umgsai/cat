@@ -144,7 +144,6 @@ import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.decorator.DecoratorManager;
 import com.dianping.cat.alarm.spi.receiver.Contactor;
 import com.dianping.cat.alarm.spi.receiver.ContactorManager;
-import com.dianping.cat.alarm.spi.receiver.ProjectContactor;
 import com.dianping.cat.alarm.spi.rule.DataChecker;
 import com.dianping.cat.alarm.spi.rule.DefaultDataChecker;
 import com.dianping.cat.alarm.service.AlertService;
@@ -409,7 +408,11 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 		DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 		LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
-		AlertExceptionBuilder.class,
+		AlertExceptionBuilder.class, MailSender.class, SmsSender.class, WeixinSender.class,
+		MailSpliter.class, SmsSpliter.class, WeixinSpliter.class, DXSpliter.class,
+		BusinessContactor.class, EventContactor.class, ExceptionContactor.class,
+		HeartbeatContactor.class, TransactionContactor.class, BusinessDecorator.class,
+		EventDecorator.class, ExceptionDecorator.class, HeartbeatDecorator.class, TransactionDecorator.class,
 		com.dianping.cat.report.page.home.JspViewer.class,
 		com.dianping.cat.report.page.monitor.JspViewer.class,
 		com.dianping.cat.report.page.model.JspViewer.class,
@@ -493,7 +496,11 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 					DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 					LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
-					AlertExceptionBuilder.class,
+					AlertExceptionBuilder.class, MailSender.class, SmsSender.class, WeixinSender.class,
+					MailSpliter.class, SmsSpliter.class, WeixinSpliter.class, DXSpliter.class,
+					BusinessContactor.class, EventContactor.class, ExceptionContactor.class,
+					HeartbeatContactor.class, TransactionContactor.class, BusinessDecorator.class,
+					EventDecorator.class, ExceptionDecorator.class, HeartbeatDecorator.class, TransactionDecorator.class,
 					com.dianping.cat.report.page.home.JspViewer.class,
 					com.dianping.cat.report.page.monitor.JspViewer.class,
 					com.dianping.cat.report.page.model.JspViewer.class,
@@ -3190,30 +3197,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public Sender mailSender(SenderConfigManager senderConfigManager) {
-		MailSender sender = new MailSender();
-
-		sender.setSenderConfigManager(senderConfigManager);
-		return sender;
-	}
-
-	@Bean
-	public Sender smsSender(SenderConfigManager senderConfigManager) {
-		SmsSender sender = new SmsSender();
-
-		sender.setSenderConfigManager(senderConfigManager);
-		return sender;
-	}
-
-	@Bean
-	public Sender weixinSender(SenderConfigManager senderConfigManager) {
-		WeixinSender sender = new WeixinSender();
-
-		sender.setSenderConfigManager(senderConfigManager);
-		return sender;
-	}
-
-	@Bean
 	public Map<String, Sender> alertSenders(@Qualifier("mailSender") Sender mailSender,
 			@Qualifier("smsSender") Sender smsSender, @Qualifier("weixinSender") Sender weixinSender) {
 		Map<String, Sender> senders = new LinkedHashMap<String, Sender>();
@@ -3232,26 +3215,6 @@ public class CatHomeSpringConfiguration {
 		manager.setConfigManager(serverConfigManager);
 		manager.setSenders(alertSenders);
 		return manager;
-	}
-
-	@Bean
-	public Spliter mailSpliter() {
-		return new MailSpliter();
-	}
-
-	@Bean
-	public Spliter smsSpliter() {
-		return new SmsSpliter();
-	}
-
-	@Bean
-	public Spliter weixinSpliter() {
-		return new WeixinSpliter();
-	}
-
-	@Bean
-	public Spliter dxSpliter() {
-		return new DXSpliter();
 	}
 
 	@Bean
@@ -3291,46 +3254,6 @@ public class CatHomeSpringConfiguration {
 		return contactors;
 	}
 
-	@Bean
-	public Contactor businessContactor(ProjectService projectService, AlertConfigManager alertConfigManager) {
-		BusinessContactor contactor = new BusinessContactor();
-
-		configureProjectContactor(contactor, projectService, alertConfigManager);
-		return contactor;
-	}
-
-	@Bean
-	public Contactor eventContactor(ProjectService projectService, AlertConfigManager alertConfigManager) {
-		EventContactor contactor = new EventContactor();
-
-		configureProjectContactor(contactor, projectService, alertConfigManager);
-		return contactor;
-	}
-
-	@Bean
-	public Contactor exceptionContactor(ProjectService projectService, AlertConfigManager alertConfigManager) {
-		ExceptionContactor contactor = new ExceptionContactor();
-
-		configureProjectContactor(contactor, projectService, alertConfigManager);
-		return contactor;
-	}
-
-	@Bean
-	public Contactor heartbeatContactor(ProjectService projectService, AlertConfigManager alertConfigManager) {
-		HeartbeatContactor contactor = new HeartbeatContactor();
-
-		configureProjectContactor(contactor, projectService, alertConfigManager);
-		return contactor;
-	}
-
-	@Bean
-	public Contactor transactionContactor(ProjectService projectService, AlertConfigManager alertConfigManager) {
-		TransactionContactor contactor = new TransactionContactor();
-
-		configureProjectContactor(contactor, projectService, alertConfigManager);
-		return contactor;
-	}
-
 	@Bean(initMethod = "initialize")
 	public SpliterManager spliterManager(@Qualifier("alertSpliters") Map<String, Spliter> alertSpliters) {
 		SpliterManager manager = new SpliterManager();
@@ -3361,39 +3284,6 @@ public class CatHomeSpringConfiguration {
 		decorators.put(BusinessDecorator.ID, businessDecorator);
 		decorators.put(ExceptionDecorator.ID, exceptionDecorator);
 		return decorators;
-	}
-
-	@Bean
-	public Decorator businessDecorator(ProjectService projectService, AlertSummaryExecutor alertSummaryExecutor) {
-		BusinessDecorator decorator = new BusinessDecorator();
-
-		decorator.setProjectService(projectService);
-		decorator.setExecutor(alertSummaryExecutor);
-		return decorator;
-	}
-
-	@Bean(initMethod = "initialize")
-	public Decorator exceptionDecorator(ProjectService projectService, AlertSummaryExecutor alertSummaryExecutor) {
-		ExceptionDecorator decorator = new ExceptionDecorator();
-
-		decorator.setProjectService(projectService);
-		decorator.setExecutor(alertSummaryExecutor);
-		return decorator;
-	}
-
-	@Bean(initMethod = "initialize")
-	public Decorator eventDecorator() {
-		return new EventDecorator();
-	}
-
-	@Bean
-	public Decorator heartbeatDecorator() {
-		return new HeartbeatDecorator();
-	}
-
-	@Bean(initMethod = "initialize")
-	public Decorator transactionDecorator() {
-		return new TransactionDecorator();
 	}
 
 	@Bean(initMethod = "initialize")
@@ -3487,12 +3377,6 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public DataSource catDataSource() {
 		return CatHomeSpringDataSourceFactory.createCatDataSource();
-	}
-
-	private void configureProjectContactor(ProjectContactor contactor, ProjectService projectService,
-			AlertConfigManager alertConfigManager) {
-		contactor.setProjectService(projectService);
-		contactor.setConfigManager(alertConfigManager);
 	}
 
 	private Map<String, StorageBuilder> buildStorageBuilders(StorageBuilder storageSQLBuilder,

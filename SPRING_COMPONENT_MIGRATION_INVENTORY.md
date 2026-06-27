@@ -314,6 +314,71 @@ BUILD SUCCESS
 git diff --check 通过
 ```
 
+## 27. 第十九批完成记录
+
+第十九批迁移告警发送链路中的叶子 Bean，范围控制在 sender、spliter、contactor、decorator 的具体实现类。`SenderManager`、`SpliterManager`、`ContactorManager`、`DecoratorManager` 以及 `alertSenders`、`alertSpliters`、`alertContactors`、`alertDecorators` 这些聚合 Bean 暂时保留在 `CatHomeSpringConfiguration` 中，避免一次性扩大聚合关系改造范围。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 sender 已改为 `@Component` 创建，并通过组件扫描白名单注册：
+
+```text
+mailSender
+smsSender
+weixinSender
+```
+
+2. 以下 spliter 已改为 `@Component` 创建，并通过组件扫描白名单注册：
+
+```text
+mailSpliter
+smsSpliter
+weixinSpliter
+dxSpliter
+```
+
+3. 以下 contactor 已改为 `@Component` 创建，并通过组件扫描白名单注册：
+
+```text
+businessContactor
+eventContactor
+exceptionContactor
+heartbeatContactor
+transactionContactor
+```
+
+4. 以下 decorator 已改为 `@Component` 创建，并通过组件扫描白名单注册：
+
+```text
+businessDecorator
+eventDecorator
+exceptionDecorator
+heartbeatDecorator
+transactionDecorator
+```
+
+5. 已删除 `CatHomeSpringConfiguration` 中上述叶子 Bean 的 `@Bean` 方法，保留聚合 Map 和 Manager 的配置方法。
+6. `AbstractSender`、`ProjectContactor`、`ProjectDecorator` 的注入字段已从 `m_` 风格调整为 Java 驼峰命名，并使用 `@Resource` 注入。
+7. `BusinessDecorator`、`ExceptionDecorator` 中的 `m_executor` 已重命名为 `alertSummaryExecutor`，并使用 `@Resource` 注入。
+8. 原先依赖 `@Bean(initMethod = "initialize")` 的 `EventDecorator`、`ExceptionDecorator`、`TransactionDecorator` 已补充 `@PostConstruct`，保持初始化行为不变。
+9. `SenderTest`、`SenderManagerTest` 会实际触发邮件/微信/短信发送逻辑，本批未作为自动化验证运行，避免误发外部告警。
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
 运行时验证：
 
 ```text

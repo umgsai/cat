@@ -34,7 +34,11 @@ import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.alarm.spi.decorator.ProjectDecorator;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("exceptionDecorator")
 public class ExceptionDecorator extends ProjectDecorator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionDecorator.class);
 
@@ -44,10 +48,11 @@ public class ExceptionDecorator extends ProjectDecorator {
 
 	protected DateFormat m_linkFormat = new SimpleDateFormat("yyyyMMddHH");
 
-	private AlertSummaryExecutor m_executor;
+	@Resource
+	private AlertSummaryExecutor alertSummaryExecutor;
 
 	public void setExecutor(AlertSummaryExecutor executor) {
-		m_executor = executor;
+		alertSummaryExecutor = executor;
 	}
 
 	@Override
@@ -68,7 +73,7 @@ public class ExceptionDecorator extends ProjectDecorator {
 		String summaryContext = "";
 
 		try {
-			AlertSummaryExecutor executor = m_executor;
+			AlertSummaryExecutor executor = alertSummaryExecutor;
 
 			summaryContext = executor == null ? null : executor.execute(alert.getGroup(), alert.getDate());
 		} catch (Exception e) {
@@ -117,6 +122,7 @@ public class ExceptionDecorator extends ProjectDecorator {
 		return m_configuration;
 	}
 
+	@PostConstruct
 	public void initialize() {
 		if (m_configuration != null) {
 			return;
