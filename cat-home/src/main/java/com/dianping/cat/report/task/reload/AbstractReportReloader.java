@@ -20,6 +20,8 @@ package com.dianping.cat.report.task.reload;
 
 import java.util.List;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +35,17 @@ import com.dianping.cat.mybatis.HourlyReportRepository;
 public abstract class AbstractReportReloader implements ReportReloader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractReportReloader.class);
 
+	@Resource
 	protected HourlyReportRepository hourlyReportRepository;
 
+	@Resource
 	protected HourlyReportContentRepository hourlyReportContentRepository;
 
-	protected ServerConfigManager m_serverConfigManager;
+	@Resource
+	protected ServerConfigManager serverConfigManager;
 
 	protected int getAnalyzerCount() {
-		return m_serverConfigManager.getThreadsOfRealtimeAnalyzer(getId());
+		return serverConfigManager.getThreadsOfRealtimeAnalyzer(getId());
 	}
 
 	public boolean insertHourlyReport(ReportReloadEntity entity) {
@@ -93,7 +98,7 @@ public abstract class AbstractReportReloader implements ReportReloader {
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 }

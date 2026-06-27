@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.consumer.business.BusinessReportMerger;
@@ -35,9 +39,11 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 
+@Component("businessReportReloader")
 public class BusinessReportReloader extends AbstractReportReloader {
 
-	protected ReportManager<BusinessReport> m_reportManager;
+	@Resource(name = BusinessAnalyzer.ID + "ReportManager")
+	protected ReportManager<BusinessReport> businessReportManager;
 
 	private List<BusinessReport> buildMergedReports(Map<String, List<BusinessReport>> mergedReports) {
 		List<BusinessReport> results = new ArrayList<BusinessReport>();
@@ -70,7 +76,7 @@ public class BusinessReportReloader extends AbstractReportReloader {
 		Map<String, List<BusinessReport>> mergedReports = new HashMap<String, List<BusinessReport>>();
 
 		for (int i = 0; i < getAnalyzerCount(); i++) {
-			Map<String, BusinessReport> reports = m_reportManager.loadLocalReports(time, i);
+			Map<String, BusinessReport> reports = businessReportManager.loadLocalReports(time, i);
 
 			for (Entry<String, BusinessReport> entry : reports.entrySet()) {
 				String domain = entry.getKey();
@@ -107,6 +113,6 @@ public class BusinessReportReloader extends AbstractReportReloader {
 	}
 
 	public void setReportManager(ReportManager<BusinessReport> reportManager) {
-		m_reportManager = reportManager;
+		businessReportManager = reportManager;
 	}
 }

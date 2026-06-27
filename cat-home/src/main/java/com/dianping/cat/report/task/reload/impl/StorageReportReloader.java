@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.storage.StorageAnalyzer;
 import com.dianping.cat.consumer.storage.StorageReportMerger;
@@ -35,9 +39,11 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 
+@Component("storageReportReloader")
 public class StorageReportReloader extends AbstractReportReloader {
 
-	protected ReportManager<StorageReport> m_reportManager;
+	@Resource(name = StorageAnalyzer.ID + "ReportManager")
+	protected ReportManager<StorageReport> storageReportManager;
 
 	private List<StorageReport> buildMergedReports(Map<String, List<StorageReport>> mergedReports) {
 		List<StorageReport> results = new ArrayList<StorageReport>();
@@ -70,7 +76,7 @@ public class StorageReportReloader extends AbstractReportReloader {
 		Map<String, List<StorageReport>> mergedReports = new HashMap<String, List<StorageReport>>();
 
 		for (int i = 0; i < getAnalyzerCount(); i++) {
-			Map<String, StorageReport> reports = m_reportManager.loadLocalReports(time, i);
+			Map<String, StorageReport> reports = storageReportManager.loadLocalReports(time, i);
 
 			for (Entry<String, StorageReport> entry : reports.entrySet()) {
 				String domain = entry.getKey();
@@ -107,6 +113,6 @@ public class StorageReportReloader extends AbstractReportReloader {
 	}
 
 	public void setReportManager(ReportManager<StorageReport> reportManager) {
-		m_reportManager = reportManager;
+		storageReportManager = reportManager;
 	}
 }

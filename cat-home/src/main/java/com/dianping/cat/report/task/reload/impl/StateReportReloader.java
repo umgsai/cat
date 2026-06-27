@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.StateReportMerger;
@@ -35,9 +39,11 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 
+@Component("stateReportReloader")
 public class StateReportReloader extends AbstractReportReloader {
 
-	protected ReportManager<StateReport> m_reportManager;
+	@Resource(name = StateAnalyzer.ID + "ReportManager")
+	protected ReportManager<StateReport> stateReportManager;
 
 	private List<StateReport> buildMergedReports(Map<String, List<StateReport>> mergedReports) {
 		List<StateReport> results = new ArrayList<StateReport>();
@@ -70,7 +76,7 @@ public class StateReportReloader extends AbstractReportReloader {
 		Map<String, List<StateReport>> mergedReports = new HashMap<String, List<StateReport>>();
 
 		for (int i = 0; i < getAnalyzerCount(); i++) {
-			Map<String, StateReport> reports = m_reportManager.loadLocalReports(time, i);
+			Map<String, StateReport> reports = stateReportManager.loadLocalReports(time, i);
 
 			for (Entry<String, StateReport> entry : reports.entrySet()) {
 				String domain = entry.getKey();
@@ -107,6 +113,6 @@ public class StateReportReloader extends AbstractReportReloader {
 	}
 
 	public void setReportManager(ReportManager<StateReport> reportManager) {
-		m_reportManager = reportManager;
+		stateReportManager = reportManager;
 	}
 }

@@ -425,6 +425,11 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
 		AllReportConfigManager.class, ServerFilterConfigManager.class, SampleConfigManager.class,
 		ReportReloadConfigManager.class, AtomicMessageConfigManager.class, TpValueStatisticConfigManager.class,
+		BusinessConfigManager.class,
+		BusinessReportReloader.class, TransactionReportReloader.class, CrossReportReloader.class,
+		DependencyReportReloader.class, EventReportReloader.class, HeartbeatReportReloader.class,
+		MatrixReportReloader.class, ProblemReportReloader.class, StorageReportReloader.class,
+		TopReportReloader.class, StateReportReloader.class,
 		UserConfigManager.class, ResourceConfigManager.class, CookieManager.class, TokenBuilder.class,
 		DefaultCatPropertyProvider.class, TokenManager.class, SessionManager.class, SigninService.class,
 		ProjectService.class, HostinfoService.class, TaskManager.class, DefaultTaskConsumer.class, ReportFacade.class,
@@ -542,7 +547,12 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
 					AllReportConfigManager.class, ServerFilterConfigManager.class, SampleConfigManager.class,
 					ReportReloadConfigManager.class, AtomicMessageConfigManager.class,
-					TpValueStatisticConfigManager.class, UserConfigManager.class, ResourceConfigManager.class,
+					TpValueStatisticConfigManager.class, BusinessConfigManager.class,
+					BusinessReportReloader.class, TransactionReportReloader.class, CrossReportReloader.class,
+					DependencyReportReloader.class, EventReportReloader.class, HeartbeatReportReloader.class,
+					MatrixReportReloader.class, ProblemReportReloader.class, StorageReportReloader.class,
+					TopReportReloader.class, StateReportReloader.class,
+					UserConfigManager.class, ResourceConfigManager.class,
 					CookieManager.class, TokenBuilder.class, DefaultCatPropertyProvider.class,
 					TokenManager.class, SessionManager.class, SigninService.class, ProjectService.class,
 					HostinfoService.class, TaskManager.class, DefaultTaskConsumer.class, ReportFacade.class,
@@ -1006,145 +1016,6 @@ public class CatHomeSpringConfiguration {
 		manager.setValidator(domainValidator);
 		manager.setName(StateAnalyzer.ID);
 		return manager;
-	}
-
-	@Bean
-	public ReportReloader businessReportReloader(
-			@Qualifier(BusinessAnalyzer.ID + "ReportManager") ReportManager<BusinessReport> businessReportManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			ServerConfigManager serverConfigManager) {
-		BusinessReportReloader reloader = new BusinessReportReloader();
-
-		reloader.setReportManager(businessReportManager);
-		configureReportReloader(reloader, hourlyReportRepository, hourlyReportContentRepository, serverConfigManager);
-		return reloader;
-	}
-
-	@Bean
-	public ReportReloader transactionReportReloader(
-			@Qualifier(TransactionAnalyzer.ID + "ReportManager") ReportManager<TransactionReport> transactionReportManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			ServerConfigManager serverConfigManager) {
-		TransactionReportReloader reloader = new TransactionReportReloader();
-
-		reloader.setReportManager(transactionReportManager);
-		configureReportReloader(reloader, hourlyReportRepository, hourlyReportContentRepository, serverConfigManager);
-		return reloader;
-	}
-
-	@Bean
-	public ReportReloader crossReportReloader(
-			@Qualifier(CrossAnalyzer.ID + "ReportManager") ReportManager<CrossReport> crossReportManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			ServerConfigManager serverConfigManager) {
-		CrossReportReloader reloader = new CrossReportReloader();
-
-		reloader.setReportManager(crossReportManager);
-		configureReportReloader(reloader, hourlyReportRepository, hourlyReportContentRepository, serverConfigManager);
-		return reloader;
-	}
-
-	@Bean
-	public ReportReloader dependencyReportReloader(
-			@Qualifier(DependencyAnalyzer.ID + "ReportManager") ReportManager<DependencyReport> dependencyReportManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			ServerConfigManager serverConfigManager) {
-		DependencyReportReloader reloader = new DependencyReportReloader();
-
-		reloader.setReportManager(dependencyReportManager);
-		configureReportReloader(reloader, hourlyReportRepository, hourlyReportContentRepository, serverConfigManager);
-		return reloader;
-	}
-
-	@Bean
-	public ReportReloader eventReportReloader(
-			@Qualifier(EventAnalyzer.ID + "ReportManager") ReportManager<EventReport> eventReportManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			ServerConfigManager serverConfigManager) {
-		EventReportReloader reloader = new EventReportReloader();
-
-		reloader.setReportManager(eventReportManager);
-		configureReportReloader(reloader, hourlyReportRepository, hourlyReportContentRepository, serverConfigManager);
-		return reloader;
-	}
-
-	@Bean
-	public ReportReloader heartbeatReportReloader(
-			@Qualifier(HeartbeatAnalyzer.ID + "ReportManager") ReportManager<HeartbeatReport> heartbeatReportManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			ServerConfigManager serverConfigManager) {
-		HeartbeatReportReloader reloader = new HeartbeatReportReloader();
-
-		reloader.setReportManager(heartbeatReportManager);
-		configureReportReloader(reloader, hourlyReportRepository, hourlyReportContentRepository, serverConfigManager);
-		return reloader;
-	}
-
-	@Bean
-	public ReportReloader matrixReportReloader(
-			@Qualifier(MatrixAnalyzer.ID + "ReportManager") ReportManager<MatrixReport> matrixReportManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			ServerConfigManager serverConfigManager) {
-		MatrixReportReloader reloader = new MatrixReportReloader();
-
-		reloader.setReportManager(matrixReportManager);
-		configureReportReloader(reloader, hourlyReportRepository, hourlyReportContentRepository, serverConfigManager);
-		return reloader;
-	}
-
-	@Bean
-	public ReportReloader problemReportReloader(
-			@Qualifier(ProblemAnalyzer.ID + "ReportManager") ReportManager<ProblemReport> problemReportManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			ServerConfigManager serverConfigManager) {
-		ProblemReportReloader reloader = new ProblemReportReloader();
-
-		reloader.setReportManager(problemReportManager);
-		configureReportReloader(reloader, hourlyReportRepository, hourlyReportContentRepository, serverConfigManager);
-		return reloader;
-	}
-
-	@Bean
-	public ReportReloader storageReportReloader(
-			@Qualifier(StorageAnalyzer.ID + "ReportManager") ReportManager<StorageReport> storageReportManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			ServerConfigManager serverConfigManager) {
-		StorageReportReloader reloader = new StorageReportReloader();
-
-		reloader.setReportManager(storageReportManager);
-		configureReportReloader(reloader, hourlyReportRepository, hourlyReportContentRepository, serverConfigManager);
-		return reloader;
-	}
-
-	@Bean
-	public ReportReloader topReportReloader(
-			@Qualifier(TopAnalyzer.ID + "ReportManager") ReportManager<TopReport> topReportManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			ServerConfigManager serverConfigManager) {
-		TopReportReloader reloader = new TopReportReloader();
-
-		reloader.setReportManager(topReportManager);
-		configureReportReloader(reloader, hourlyReportRepository, hourlyReportContentRepository, serverConfigManager);
-		return reloader;
-	}
-
-	@Bean
-	public ReportReloader stateReportReloader(
-			@Qualifier(StateAnalyzer.ID + "ReportManager") ReportManager<StateReport> stateReportManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			ServerConfigManager serverConfigManager) {
-		StateReportReloader reloader = new StateReportReloader();
-
-		reloader.setReportManager(stateReportManager);
-		configureReportReloader(reloader, hourlyReportRepository, hourlyReportContentRepository, serverConfigManager);
-		return reloader;
-	}
-
-	private void configureReportReloader(AbstractReportReloader reloader, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, ServerConfigManager serverConfigManager) {
-		reloader.setHourlyReportDao(hourlyReportRepository);
-		reloader.setHourlyReportContentDao(hourlyReportContentRepository);
-		reloader.setServerConfigManager(serverConfigManager);
 	}
 
 	@Bean
@@ -2362,16 +2233,6 @@ public class CatHomeSpringConfiguration {
 		decorators.put(BusinessDecorator.ID, businessDecorator);
 		decorators.put(ExceptionDecorator.ID, exceptionDecorator);
 		return decorators;
-	}
-
-	@Bean(initMethod = "initialize")
-	public BusinessConfigManager businessConfigManager(BusinessConfigRepository businessConfigRepository,
-			ServerConfigManager serverConfigManager) {
-		BusinessConfigManager manager = new BusinessConfigManager();
-
-		manager.setConfigDao(businessConfigRepository);
-		manager.setServerConfigManager(serverConfigManager);
-		return manager;
 	}
 
 	@Bean

@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.dependency.DependencyAnalyzer;
 import com.dianping.cat.consumer.dependency.DependencyReportMerger;
@@ -35,9 +39,11 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 
+@Component("dependencyReportReloader")
 public class DependencyReportReloader extends AbstractReportReloader {
 
-	protected ReportManager<DependencyReport> m_reportManager;
+	@Resource(name = DependencyAnalyzer.ID + "ReportManager")
+	protected ReportManager<DependencyReport> dependencyReportManager;
 
 	private List<DependencyReport> buildMergedReports(Map<String, List<DependencyReport>> mergedReports) {
 		List<DependencyReport> results = new ArrayList<DependencyReport>();
@@ -70,7 +76,7 @@ public class DependencyReportReloader extends AbstractReportReloader {
 		Map<String, List<DependencyReport>> mergedReports = new HashMap<String, List<DependencyReport>>();
 
 		for (int i = 0; i < getAnalyzerCount(); i++) {
-			Map<String, DependencyReport> reports = m_reportManager.loadLocalReports(time, i);
+			Map<String, DependencyReport> reports = dependencyReportManager.loadLocalReports(time, i);
 
 			for (Entry<String, DependencyReport> entry : reports.entrySet()) {
 				String domain = entry.getKey();
@@ -107,6 +113,6 @@ public class DependencyReportReloader extends AbstractReportReloader {
 	}
 
 	public void setReportManager(ReportManager<DependencyReport> reportManager) {
-		m_reportManager = reportManager;
+		dependencyReportManager = reportManager;
 	}
 }

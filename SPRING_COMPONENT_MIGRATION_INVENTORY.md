@@ -314,6 +314,78 @@ BUILD SUCCESS
 git diff --check 通过
 ```
 
+## 38. 第三十批完成记录
+
+第三十批迁移 `BusinessConfigManager` 和小时报表 reload 链路中的低风险 `ReportReloader` Bean，目标是继续减少 `CatHomeSpringConfiguration` 中的显式注册，同时保留原有 Bean 名称和初始化语义。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. `BusinessConfigManager` 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描。
+2. `BusinessConfigManager` 原 `initMethod = "initialize"` 已改为 `@PostConstruct`，保留启动加载业务配置和注册 `TimerSyncTask` 的语义。
+3. `BusinessConfigManager` 中的 Spring 注入字段已改为 `@Resource` 字段注入，并按 Java 驼峰命名收口：
+
+```text
+m_configDao           -> businessConfigRepository
+m_serverConfigManager -> serverConfigManager
+m_domains             -> domains
+m_configs             -> configs
+m_alertMachine        -> alertMachine
+m_initialized         -> initialized
+```
+
+4. 以下 `ReportReloader` 已改为 `@Component("...ReportReloader")` 创建，并保留原 `@Bean` 方法名作为 Bean 名称：
+
+```text
+BusinessReportReloader
+TransactionReportReloader
+CrossReportReloader
+DependencyReportReloader
+EventReportReloader
+HeartbeatReportReloader
+MatrixReportReloader
+ProblemReportReloader
+StorageReportReloader
+TopReportReloader
+StateReportReloader
+```
+
+5. `AbstractReportReloader` 中的公共依赖已改为 `@Resource` 字段注入：
+
+```text
+hourlyReportRepository
+hourlyReportContentRepository
+serverConfigManager
+```
+
+6. 各具体 `ReportReloader` 的 `ReportManager` 使用明确 Bean 名注入，例如 `@Resource(name = TransactionAnalyzer.ID + "ReportManager")`，避免同类型泛型擦除后按类型注入不明确。
+7. 各具体 `ReportReloader` 中的 `m_reportManager` 已按报告类型重命名为驼峰字段，例如 `transactionReportManager`、`eventReportManager`、`stateReportManager`。
+8. 已删除 `CatHomeSpringConfiguration` 中 11 个旧 `ReportReloader` `@Bean` 方法、`configureReportReloader` helper，以及旧 `BusinessConfigManager` `@Bean` 方法。
+9. `reportReloaders` 聚合 Map 仍保留在 `CatHomeSpringConfiguration` 中，继续通过旧 Bean 名称组装，避免影响 `ReportReloadTask` 的运行入口。
+10. 本批仍不迁移以下内容：
+
+```text
+ServerConfigManager
+ReportManager / ReportDelegate / ModelService
+存储 bucket / HDFS / message dump 链路
+DataSource / SqlSessionFactory / TransactionTemplate
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
 ## 30. 第二十二批完成记录
 
 第二十二批扩大到告警任务层和告警配置 Manager 层。第二十一批已经迁移告警编排层，本批继续把具体告警任务和规则配置读取类从 `CatHomeSpringConfiguration` 的显式 `@Bean` 注册迁移为组件扫描注册。

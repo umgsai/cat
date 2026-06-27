@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.consumer.event.EventReportMerger;
@@ -35,9 +39,11 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 
+@Component("eventReportReloader")
 public class EventReportReloader extends AbstractReportReloader {
 
-	protected ReportManager<EventReport> m_reportManager;
+	@Resource(name = EventAnalyzer.ID + "ReportManager")
+	protected ReportManager<EventReport> eventReportManager;
 
 	private List<EventReport> buildMergedReports(Map<String, List<EventReport>> mergedReports) {
 		List<EventReport> results = new ArrayList<EventReport>();
@@ -70,7 +76,7 @@ public class EventReportReloader extends AbstractReportReloader {
 		Map<String, List<EventReport>> mergedReports = new HashMap<String, List<EventReport>>();
 
 		for (int i = 0; i < getAnalyzerCount(); i++) {
-			Map<String, EventReport> reports = m_reportManager.loadLocalReports(time, i);
+			Map<String, EventReport> reports = eventReportManager.loadLocalReports(time, i);
 
 			for (Entry<String, EventReport> entry : reports.entrySet()) {
 				String domain = entry.getKey();
@@ -107,6 +113,6 @@ public class EventReportReloader extends AbstractReportReloader {
 	}
 
 	public void setReportManager(ReportManager<EventReport> reportManager) {
-		m_reportManager = reportManager;
+		eventReportManager = reportManager;
 	}
 }
