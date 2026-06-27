@@ -1838,3 +1838,80 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+
+## 35. 第二十七批完成记录
+
+第二十七批迁移 dependency topology graph 链路，承接上一批文档中保留的 `TopologyGraphManager` 独立链路，继续缩减 `CatHomeSpringConfiguration` 中显式 Bean 注册。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+TopologyGraphManager
+TopologyGraphConfigManager
+TopoGraphFormatConfigManager
+```
+
+2. `TopologyGraphManager.initialize()`、`TopologyGraphConfigManager.initialize()`、`TopoGraphFormatConfigManager.initialize()` 已从配置类 `initMethod` 改为 `@PostConstruct`，保留启动初始化语义。
+
+3. `TopologyGraphManager` 中 `ModelService<DependencyReport>` 是同类型多实现，已使用旧 Bean 名称显式注入，避免注入歧义：
+
+```java
+@Resource(name = "dependencyModelService")
+```
+
+4. 已删除 `CatHomeSpringConfiguration` 中对应旧 `@Bean` 方法，避免组件扫描注册和配置类注册同时存在：
+
+```text
+topologyGraphManager
+topologyGraphConfigManager
+topoGraphFormatConfigManager
+```
+
+5. 本批触碰到的旧式字段命名已收口为 Java 驼峰命名，并使用 `@Resource` 字段注入：
+
+```text
+m_service                   -> dependencyModelService
+m_itemBuilder               -> dependencyItemBuilder
+m_configManager             -> topoGraphFormatConfigManager
+m_manager                   -> serverConfigManager
+m_serverFilterConfigManager -> serverFilterConfigManager
+m_projectService            -> projectService
+m_topologyGraphDao          -> topologyGraphRepository
+m_currentBuilder            -> currentBuilder
+m_topologyGraphs            -> topologyGraphs
+m_configDao                 -> configRepository
+m_fetcher                   -> contentFetcher
+m_config                    -> config
+m_configId                  -> configId
+m_df                        -> decimalFormat
+m_fileName                  -> fileName
+m_pigeonCalls               -> pigeonCalls
+m_pigeonServices            -> pigeonServices
+```
+
+6. `TopologyGraphConfigManager` 和 `TopoGraphFormatConfigManager` 中原来只调用 `Cat.logError` 的初始化、插入和存储异常路径，已补充 SLF4J 日志，方便排查拓扑配置加载和保存问题。
+
+7. 本批仍不迁移以下内容：
+
+```text
+ReportManager / ReportDelegate / ModelService
+Map/List 聚合 Bean
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

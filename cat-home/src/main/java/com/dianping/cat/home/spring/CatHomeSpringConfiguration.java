@@ -401,7 +401,8 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
 		BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class, JsonBuilder.class,
 		DomainValidator.class, DefaultValueTranslater.class, DefaultGraphBuilder.class, DependencyItemBuilder.class,
-		TopologyGraphBuilder.class, StorageAlertInfoBuilder.class, ExternalInfoBuilder.class, StorageMergeHelper.class,
+		TopologyGraphBuilder.class, TopologyGraphManager.class, TopologyGraphConfigManager.class,
+		TopoGraphFormatConfigManager.class, StorageAlertInfoBuilder.class, ExternalInfoBuilder.class, StorageMergeHelper.class,
 		StateReportService.class, StateReportBuilder.class, EventReportService.class, EventReportBuilder.class,
 		HeartbeatReportService.class, HeartbeatReportBuilder.class, DependencyReportService.class,
 		DependencyReportBuilder.class, MatrixReportService.class, MatrixReportBuilder.class,
@@ -508,7 +509,8 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
 					BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class,
 					JsonBuilder.class, DomainValidator.class, DefaultValueTranslater.class, DefaultGraphBuilder.class,
-					DependencyItemBuilder.class, TopologyGraphBuilder.class, StorageAlertInfoBuilder.class,
+					DependencyItemBuilder.class, TopologyGraphBuilder.class, TopologyGraphManager.class,
+					TopologyGraphConfigManager.class, TopoGraphFormatConfigManager.class, StorageAlertInfoBuilder.class,
 					ExternalInfoBuilder.class, StorageMergeHelper.class, StateReportService.class,
 					StateReportBuilder.class, EventReportService.class, EventReportBuilder.class,
 					HeartbeatReportService.class, HeartbeatReportBuilder.class, DependencyReportService.class,
@@ -1230,23 +1232,6 @@ public class CatHomeSpringConfiguration {
 
 		builder.setProjectUpdateTask(projectUpdateTask);
 		return builder;
-	}
-
-	@Bean(initMethod = "initialize")
-	public TopologyGraphManager topologyGraphManager(@Qualifier("dependencyModelService") ModelService<DependencyReport> dependencyModelService,
-			DependencyItemBuilder dependencyItemBuilder, TopoGraphFormatConfigManager topoGraphFormatConfigManager,
-			ServerConfigManager serverConfigManager, ServerFilterConfigManager serverFilterConfigManager,
-			ProjectService projectService, TopologyGraphRepository topologyGraphRepository) {
-		TopologyGraphManager manager = new TopologyGraphManager();
-
-		manager.setService(dependencyModelService);
-		manager.setItemBuilder(dependencyItemBuilder);
-		manager.setConfigManager(topoGraphFormatConfigManager);
-		manager.setManager(serverConfigManager);
-		manager.setServerFilterConfigManager(serverFilterConfigManager);
-		manager.setProjectService(projectService);
-		manager.setTopologyGraphDao(topologyGraphRepository);
-		return manager;
 	}
 
 	@Bean
@@ -2441,26 +2426,6 @@ public class CatHomeSpringConfiguration {
 	public StorageGroupConfigManager storageGroupConfigManager(ConfigRepository configRepository,
 			ContentFetcher contentFetcher) {
 		StorageGroupConfigManager manager = new StorageGroupConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public TopologyGraphConfigManager topologyGraphConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher) {
-		TopologyGraphConfigManager manager = new TopologyGraphConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public TopoGraphFormatConfigManager topoGraphFormatConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher) {
-		TopoGraphFormatConfigManager manager = new TopoGraphFormatConfigManager();
 
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
