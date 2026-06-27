@@ -21,7 +21,13 @@ package com.dianping.cat.config.transaction;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -33,67 +39,81 @@ import com.dianping.cat.core.config.Config;
 import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 
+@Component
 public class TpValueStatisticConfigManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TpValueStatisticConfigManager.class);
 
 	public static final String DEFAULT = "default";
 
 	private static final String CONFIG_NAME = "tp-value-statistic-config";
 
-	protected ConfigRepository m_configDao;
+	@Resource
+	protected ConfigRepository configRepository;
 
-	protected ContentFetcher m_fetcher;
+	@Resource
+	protected ContentFetcher contentFetcher;
 
-	private ServerConfigManager m_serverConfigManager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
-	private long m_configId;
+	private long configId;
 
-	private long m_modifyTime;
+	private long modifyTime;
 
-	private TpValueStatisticConfig m_config;
+	private TpValueStatisticConfig config;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public TpValueStatisticConfig getConfig() {
 		ensureInitialized();
-		return m_config;
+		return config;
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME);
+			Config config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
-			m_configId = config.getId();
-			m_modifyTime = config.getModifyDate().getTime();
-			m_config = DefaultSaxParser.parse(content);
+			configId = config.getId();
+			modifyTime = config.getModifyDate().getTime();
+			this.config = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded TP value statistic config from repository, configId={}, modifyTime={}.", configId,
+					modifyTime);
 		} catch (EmptyResultDataAccessException e) {
+			LOGGER.warn("TP value statistic config is missing in repository, loading default content from fetcher.", e);
+
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
+				String content = contentFetcher.getConfigContent(CONFIG_NAME);
+				Config config = configRepository.createLocal();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(content);
-				m_configDao.insert(config);
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
+				configRepository.insert(config);
+				configId = config.getId();
+				this.config = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized TP value statistic config from default content, configId={}.", configId);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to initialize TP value statistic config from default content.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to load TP value statistic config from repository.", e);
 			Cat.logError(e);
 		}
-		if (m_config == null) {
-			m_config = new TpValueStatisticConfig();
+		if (config == null) {
+			config = new TpValueStatisticConfig();
+			LOGGER.warn("TP value statistic config is empty after initialization, using a new empty config.");
 		}
 
 		TimerSyncTask.getInstance().register(new TimerSyncTask.SyncHandler() {
@@ -109,45 +129,49 @@ public class TpValueStatisticConfigManager {
 			}
 
 		});
-		m_initialized = true;
+		initialized = true;
 	}
 
 	public boolean insert(String xml) {
 		ensureInitialized();
 
 		try {
-			m_config = DefaultSaxParser.parse(xml);
+			config = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse TP value statistic config xml for insert. xmlLength={}.",
+					xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 	private void refreshConfig() throws Exception {
-		Config config = m_configDao.findByName(CONFIG_NAME);
+		Config config = configRepository.findByName(CONFIG_NAME);
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
-			if (modifyTime > m_modifyTime) {
+			if (modifyTime > this.modifyTime) {
 				String content = config.getContent();
 				TpValueStatisticConfig tmp = DefaultSaxParser.parse(content);
 
-				m_config = tmp;
-				m_modifyTime = modifyTime;
+				this.config = tmp;
+				this.modifyTime = modifyTime;
+				LOGGER.info("Refreshed TP value statistic config, configId={}, modifyTime={}.", configId,
+						this.modifyTime);
 			}
 		}
 	}
@@ -155,19 +179,19 @@ public class TpValueStatisticConfigManager {
 	private boolean defaultContainsType(String type) {
 		ensureInitialized();
 
-		Domain d = m_config.findDomain("default");
+		Domain d = config.findDomain("default");
 		return d.getTransactionTypes().contains(type);
 	}
 
 	private boolean domainContainsType(String type, String domain) {
 		ensureInitialized();
 
-		Domain d = m_config.findDomain(domain);
+		Domain d = config.findDomain(domain);
 		return d != null && d.getTransactionTypes().contains(type);
 	}
 
 	private boolean matchesPrefix(String type) {
-		for (String prefix : m_serverConfigManager.getForcedStatisticTypePrefixes()) {
+		for (String prefix : serverConfigManager.getForcedStatisticTypePrefixes()) {
 			if (type.startsWith(prefix)) {
 				return true;
 			}
@@ -179,7 +203,9 @@ public class TpValueStatisticConfigManager {
 		try {
 			return defaultContainsType(type) || matchesPrefix(type) || domainContainsType(type, domain);
 		} catch (Exception e) {
-			Cat.logError("no default config in tp9xx config: " + m_config.toString(), e);
+			LOGGER.error("Unable to evaluate TP value statistic config, type={}, domain={}, config={}.", type, domain,
+					config, e);
+			Cat.logError("no default config in tp9xx config: " + config.toString(), e);
 			return false;
 		}
 	}
@@ -187,13 +213,15 @@ public class TpValueStatisticConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = m_configDao.createLocal();
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
+				Config config = configRepository.createLocal();
+				config.setId(configId);
+				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
-				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config);
+				config.setContent(this.config.toString());
+				configRepository.updateByPK(config);
+				LOGGER.info("Stored TP value statistic config, configId={}.", configId);
 			} catch (Exception e) {
+				LOGGER.error("Unable to store TP value statistic config, configId={}.", configId, e);
 				Cat.logError(e);
 				return false;
 			}
@@ -204,7 +232,7 @@ public class TpValueStatisticConfigManager {
 	public Set<String> findTransactionTypesByDomain(String domain) {
 		ensureInitialized();
 
-		Domain d = m_config.findDomain(domain);
+		Domain d = config.findDomain(domain);
 
 		if (d != null) {
 			return d.getTransactionTypes();
@@ -225,7 +253,7 @@ public class TpValueStatisticConfigManager {
 	}
 
 	public void insertOrUpdateByDomain(String domain, Set<String> params) {
-		Domain dd = m_config.findDomain(domain);
+		Domain dd = config.findDomain(domain);
 		Set<String> st = null;
 
 		if (dd == null) {
@@ -236,7 +264,7 @@ public class TpValueStatisticConfigManager {
 		st.clear();
 		st.addAll(params);
 
-		m_config.addDomain(dd);
+		config.addDomain(dd);
 		storeConfig();
 	}
 }

@@ -23,18 +23,24 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.task.TaskManager;
 
+@Component
 public class ReportFacade {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(ReportFacade.class);
 
 	private static final int EXPECTED_REPORT_BUILDER_COUNT = 19;
 
-	private Map<String, TaskBuilder> m_reportBuilders = new HashMap<String, TaskBuilder>();
+	@Resource(name = "taskBuilders")
+	private Map<String, TaskBuilder> taskBuilders = new HashMap<String, TaskBuilder>();
 
 	public boolean builderReport(Task task) {
 		try {
@@ -83,20 +89,23 @@ public class ReportFacade {
 	}
 
 	private TaskBuilder getReportBuilder(String reportName) {
-		return m_reportBuilders.get(reportName);
+		return taskBuilders.get(reportName);
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_reportBuilders.size() < EXPECTED_REPORT_BUILDER_COUNT) {
+		setReportBuilders(taskBuilders);
+
+		if (taskBuilders.size() < EXPECTED_REPORT_BUILDER_COUNT) {
 			String message = String.format("Report facade requires %s Spring task builders but found %s, builders=%s.",
-					EXPECTED_REPORT_BUILDER_COUNT, m_reportBuilders.size(), m_reportBuilders.keySet());
+					EXPECTED_REPORT_BUILDER_COUNT, taskBuilders.size(), taskBuilders.keySet());
 
 			SLF4J_LOGGER.error(message);
 			throw new IllegalStateException(message);
 		}
 
 		SLF4J_LOGGER.info("Initialized report facade from Spring, builderCount={}, builders={}.",
-				m_reportBuilders.size(), m_reportBuilders.keySet());
+				taskBuilders.size(), taskBuilders.keySet());
 	}
 
 	private Map<String, TaskBuilder> buildReportBuilderMap(Map<String, TaskBuilder> springBuilders) {
@@ -130,7 +139,7 @@ public class ReportFacade {
 	}
 
 	public void setReportBuilders(Map<String, TaskBuilder> reportBuilders) {
-		m_reportBuilders = buildReportBuilderMap(reportBuilders);
+		taskBuilders = buildReportBuilderMap(reportBuilders);
 	}
 
 }

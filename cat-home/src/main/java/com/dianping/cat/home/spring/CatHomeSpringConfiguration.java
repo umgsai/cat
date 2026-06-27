@@ -375,7 +375,6 @@ import com.dianping.cat.statistic.ServerStatisticManager;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
-import com.dianping.cat.system.page.login.service.CatPropertyProvider;
 import com.dianping.cat.system.page.login.service.CookieManager;
 import com.dianping.cat.system.page.login.service.DefaultCatPropertyProvider;
 import com.dianping.cat.system.page.login.service.SessionManager;
@@ -424,6 +423,12 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 		DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 		LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
+		AllReportConfigManager.class, ServerFilterConfigManager.class, SampleConfigManager.class,
+		ReportReloadConfigManager.class, AtomicMessageConfigManager.class, TpValueStatisticConfigManager.class,
+		UserConfigManager.class, ResourceConfigManager.class, CookieManager.class, TokenBuilder.class,
+		DefaultCatPropertyProvider.class, TokenManager.class, SessionManager.class, SigninService.class,
+		ProjectService.class, HostinfoService.class, TaskManager.class, DefaultTaskConsumer.class, ReportFacade.class,
+		CurrentReportBuilder.class, ProjectUpdateTask.class, CmdbInfoReloadBuilder.class, ReportReloadTask.class,
 		AlertExceptionBuilder.class, BusinessAlert.class, EventAlert.class, ExceptionAlert.class,
 		HeartbeatAlert.class, TransactionAlert.class, ExceptionRuleConfigManager.class, TransactionRuleConfigManager.class,
 		EventRuleConfigManager.class, HeartbeatRuleConfigManager.class, BusinessRuleConfigManager.class,
@@ -535,6 +540,14 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 					DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 					LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
+					AllReportConfigManager.class, ServerFilterConfigManager.class, SampleConfigManager.class,
+					ReportReloadConfigManager.class, AtomicMessageConfigManager.class,
+					TpValueStatisticConfigManager.class, UserConfigManager.class, ResourceConfigManager.class,
+					CookieManager.class, TokenBuilder.class, DefaultCatPropertyProvider.class,
+					TokenManager.class, SessionManager.class, SigninService.class, ProjectService.class,
+					HostinfoService.class, TaskManager.class, DefaultTaskConsumer.class, ReportFacade.class,
+					CurrentReportBuilder.class, ProjectUpdateTask.class, CmdbInfoReloadBuilder.class,
+					ReportReloadTask.class,
 					AlertExceptionBuilder.class, BusinessAlert.class, EventAlert.class, ExceptionAlert.class,
 					HeartbeatAlert.class, TransactionAlert.class, ExceptionRuleConfigManager.class,
 					TransactionRuleConfigManager.class, EventRuleConfigManager.class, HeartbeatRuleConfigManager.class,
@@ -701,24 +714,6 @@ public class CatHomeSpringConfiguration {
 		bootstrap.setServersUpdaterManager(serversUpdaterManager);
 		bootstrap.setTcpSocketReceiver(tcpSocketReceiver);
 		return bootstrap;
-	}
-
-	@Bean
-	public TaskManager taskManager(TaskRepository taskRepository) {
-		TaskManager manager = new TaskManager();
-
-		manager.setTaskDao(taskRepository);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public AllReportConfigManager allReportConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher) {
-		AllReportConfigManager manager = new AllReportConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
 	}
 
 	@Bean
@@ -1180,60 +1175,9 @@ public class CatHomeSpringConfiguration {
 		return reloaders;
 	}
 
-	@Bean(initMethod = "initialize")
-	public ReportReloadTask reportReloadTask(ReportReloadConfigManager reportReloadConfigManager,
-			@Qualifier("reportReloaders") Map<String, ReportReloader> reportReloaders) {
-		ReportReloadTask task = new ReportReloadTask();
-
-		task.setConfigManager(reportReloadConfigManager);
-		task.setReloaders(reportReloaders);
-		return task;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ReportFacade reportFacade(Map<String, TaskBuilder> taskBuilders) {
-		ReportFacade facade = new ReportFacade();
-
-		facade.setReportBuilders(taskBuilders);
-		return facade;
-	}
-
 	@Bean
-	public DefaultTaskConsumer defaultTaskConsumer(ReportFacade reportFacade, TaskRepository taskRepository) {
-		DefaultTaskConsumer consumer = new DefaultTaskConsumer();
-
-		consumer.setReportFacade(reportFacade);
-		consumer.setTaskDao(taskRepository);
-		return consumer;
-	}
-
-	@Bean(name = CurrentReportBuilder.ID)
-	public TaskBuilder currentReportBuilder(ProjectService projectService,
-			ServerFilterConfigManager serverFilterConfigManager) {
-		CurrentReportBuilder builder = new CurrentReportBuilder();
-
-		builder.setProjectService(projectService);
-		builder.setServerFilterConfigManager(serverFilterConfigManager);
-		return builder;
-	}
-
-	@Bean
-	public ProjectUpdateTask projectUpdateTask(HostinfoService hostinfoService, ProjectService projectService,
-			TransactionReportService transactionReportService) {
-		ProjectUpdateTask task = new ProjectUpdateTask();
-
-		task.setHostInfoService(hostinfoService);
-		task.setProjectService(projectService);
-		task.setReportService(transactionReportService);
-		return task;
-	}
-
-	@Bean(name = CmdbInfoReloadBuilder.ID)
-	public TaskBuilder cmdbInfoReloadBuilder(ProjectUpdateTask projectUpdateTask) {
-		CmdbInfoReloadBuilder builder = new CmdbInfoReloadBuilder();
-
-		builder.setProjectUpdateTask(projectUpdateTask);
-		return builder;
+	public Map<String, TaskBuilder> taskBuilders(Map<String, TaskBuilder> taskBuilders) {
+		return taskBuilders;
 	}
 
 	@Bean
@@ -1638,56 +1582,6 @@ public class CatHomeSpringConfiguration {
 
 		manager.setConfigManager(serverConfigManager);
 		manager.setBucketFactory(reportBucketFactory);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ServerFilterConfigManager serverFilterConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher) {
-		ServerFilterConfigManager manager = new ServerFilterConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public SampleConfigManager sampleConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
-		SampleConfigManager manager = new SampleConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ReportReloadConfigManager reportReloadConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher) {
-		ReportReloadConfigManager manager = new ReportReloadConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public AtomicMessageConfigManager atomicMessageConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher) {
-		AtomicMessageConfigManager manager = new AtomicMessageConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public TpValueStatisticConfigManager tpValueStatisticConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher, ServerConfigManager serverConfigManager) {
-		TpValueStatisticConfigManager manager = new TpValueStatisticConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		manager.setServerConfigManager(serverConfigManager);
 		return manager;
 	}
 
@@ -2468,84 +2362,6 @@ public class CatHomeSpringConfiguration {
 		decorators.put(BusinessDecorator.ID, businessDecorator);
 		decorators.put(ExceptionDecorator.ID, exceptionDecorator);
 		return decorators;
-	}
-
-	@Bean(initMethod = "initialize")
-	public UserConfigManager userConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
-		UserConfigManager manager = new UserConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ResourceConfigManager resourceConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
-		ResourceConfigManager manager = new ResourceConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean
-	public CookieManager cookieManager() {
-		return new CookieManager();
-	}
-
-	@Bean
-	public TokenBuilder tokenBuilder() {
-		return new TokenBuilder();
-	}
-
-	@Bean
-	public CatPropertyProvider catPropertyProvider() {
-		return new DefaultCatPropertyProvider();
-	}
-
-	@Bean
-	public TokenManager tokenManager(CookieManager cookieManager, TokenBuilder tokenBuilder) {
-		TokenManager manager = new TokenManager();
-
-		manager.setCookieManager(cookieManager);
-		manager.setTokenBuilder(tokenBuilder);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public SessionManager sessionManager(CatPropertyProvider catPropertyProvider) {
-		SessionManager manager = new SessionManager();
-
-		manager.setProvider(catPropertyProvider);
-		return manager;
-	}
-
-	@Bean
-	public SigninService signinService(SessionManager sessionManager, TokenManager tokenManager) {
-		SigninService service = new SigninService();
-
-		service.setSessionManager(sessionManager);
-		service.setTokenManager(tokenManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ProjectService projectService(ProjectRepository projectRepository, ServerConfigManager serverConfigManager) {
-		ProjectService service = new ProjectService();
-
-		service.setProjectDao(projectRepository);
-		service.setServerConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean
-	public HostinfoService hostinfoService(HostInfoRepository hostinfoRepository,
-	                                       ServerConfigManager serverConfigManager) {
-		HostinfoService service = new HostinfoService();
-
-		service.setHostinfoDao(hostinfoRepository);
-		service.setServerConfigManager(serverConfigManager);
-		return service;
 	}
 
 	@Bean(initMethod = "initialize")

@@ -18,23 +18,30 @@
  */
 package com.dianping.cat.system.page.login.service;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.system.page.login.spi.ISigninService;
 
+@Component
 public class SigninService implements ISigninService<SigninContext, Credential, Session> {
 
-	private TokenManager m_tokenManager;
+	@Resource
+	private TokenManager tokenManager;
 
-	private SessionManager m_sessionManager;
+	@Resource
+	private SessionManager sessionManager;
 
 	@Override
 	public Session signin(SigninContext ctx, Credential credential) {
-		Token token = m_sessionManager.authenticate(credential);
+		Token token = sessionManager.authenticate(credential);
 
 		if (token != null) {
-			Session session = m_sessionManager.validate(token);
+			Session session = sessionManager.validate(token);
 
 			if (session != null) {
-				m_tokenManager.setToken(ctx, token);
+				tokenManager.setToken(ctx, token);
 			}
 			return session;
 		} else {
@@ -44,15 +51,15 @@ public class SigninService implements ISigninService<SigninContext, Credential, 
 
 	@Override
 	public void signout(SigninContext ctx) {
-		m_tokenManager.removeToken(ctx, Token.TOKEN);
+		tokenManager.removeToken(ctx, Token.TOKEN);
 	}
 
 	@Override
 	public Session validate(SigninContext ctx) {
-		Token token = m_tokenManager.getToken(ctx, Token.TOKEN);
+		Token token = tokenManager.getToken(ctx, Token.TOKEN);
 
 		if (token != null) {
-			Session session = m_sessionManager.validate(token);
+			Session session = sessionManager.validate(token);
 
 			return session;
 		} else {
@@ -61,10 +68,10 @@ public class SigninService implements ISigninService<SigninContext, Credential, 
 	}
 
 	public void setSessionManager(SessionManager sessionManager) {
-		m_sessionManager = sessionManager;
+		this.sessionManager = sessionManager;
 	}
 
 	public void setTokenManager(TokenManager tokenManager) {
-		m_tokenManager = tokenManager;
+		this.tokenManager = tokenManager;
 	}
 }

@@ -25,8 +25,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
 
@@ -36,44 +39,47 @@ import com.dianping.cat.core.dal.Hostinfo;
 import com.dianping.cat.mybatis.HostInfoRepository;
 import com.dianping.cat.helper.TimeHelper;
 
+@Component
 public class HostinfoService {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(HostinfoService.class);
 
 	public static final String UNKNOWN_PROJECT = "UnknownProject";
 
-	private HostInfoRepository m_hostinfoDao;
+	@Resource
+	private HostInfoRepository hostInfoRepository;
 
-	private ServerConfigManager m_manager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
-	private Map<String, String> m_ipDomains = new ConcurrentHashMap<String, String>();
+	private Map<String, String> ipDomains = new ConcurrentHashMap<String, String>();
 
-	private Map<String, Hostinfo> m_hostinfos = new ConcurrentHashMap<String, Hostinfo>();
+	private Map<String, Hostinfo> hostinfos = new ConcurrentHashMap<String, Hostinfo>();
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public Hostinfo createLocal() {
-		return m_hostinfoDao.createLocal();
+		return hostInfoRepository.createLocal();
 	}
 
 	public List<Hostinfo> findAll() {
 		ensureInitialized();
 
-		return new ArrayList<Hostinfo>(m_hostinfos.values());
+		return new ArrayList<Hostinfo>(hostinfos.values());
 	}
 
 	public Hostinfo findByIp(String ip) {
 		ensureInitialized();
 
-		Hostinfo hostinfo = m_hostinfos.get(ip);
+		Hostinfo hostinfo = hostinfos.get(ip);
 
 		if (hostinfo != null) {
 			return hostinfo;
 		} else {
 			try {
-				hostinfo = m_hostinfoDao.findByIp(ip);
+				hostinfo = hostInfoRepository.findByIp(ip);
 
 				if (hostinfo != null) {
-					m_hostinfos.put(ip, hostinfo);
+					hostinfos.put(ip, hostinfo);
 					return hostinfo;
 				} else {
 					return null;
@@ -89,33 +95,33 @@ public class HostinfoService {
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
-		if (m_hostinfoDao == null) {
+		if (hostInfoRepository == null) {
 			throw new IllegalStateException("HostinfoRepository is required for HostinfoService.");
 		}
-		if (m_manager == null) {
+		if (serverConfigManager == null) {
 			throw new IllegalStateException("ServerConfigManager is required for HostinfoService.");
 		}
 
 		Threads.forGroup("Cat").start(new RefreshHost());
-		m_initialized = true;
+		initialized = true;
 		SLF4J_LOGGER.info("HostinfoService started refresh task.");
 	}
 
 	private boolean insert(Hostinfo hostinfo) {
-		int result = m_hostinfoDao.insert(hostinfo);
+		int result = hostInfoRepository.insert(hostinfo);
 
 		if (result == 1) {
-			m_hostinfos.put(hostinfo.getIp(), hostinfo);
+			hostinfos.put(hostinfo.getIp(), hostinfo);
 			return true;
 		} else {
 			return false;
@@ -147,7 +153,7 @@ public class HostinfoService {
 	public String queryDomainByIp(String ip) {
 		ensureInitialized();
 
-		String project = m_ipDomains.get(ip);
+		String project = ipDomains.get(ip);
 
 		if (project == null) {
 			return UNKNOWN_PROJECT;
@@ -160,7 +166,7 @@ public class HostinfoService {
 
 		try {
 			if (validateIp(ip)) {
-				Hostinfo info = m_hostinfos.get(ip);
+				Hostinfo info = hostinfos.get(ip);
 				String hostname = null;
 
 				if (info != null) {
@@ -173,7 +179,7 @@ public class HostinfoService {
 				info = findByIp(ip);
 
 				if (info != null) {
-					m_hostinfos.put(ip, info);
+					hostinfos.put(ip, info);
 					hostname = info.getHostname();
 				}
 				return hostname;
@@ -196,7 +202,7 @@ public class HostinfoService {
 			return ips;
 		}
 
-		for (Hostinfo hostinfo : m_hostinfos.values()) {
+		for (Hostinfo hostinfo : hostinfos.values()) {
 			if (domain.equals(hostinfo.getDomain())) {
 				String ip = hostinfo.getIp();
 
@@ -211,7 +217,7 @@ public class HostinfoService {
 
 	protected void refresh() {
 		try {
-			List<Hostinfo> hostinfos = m_hostinfoDao.findAllIp();
+			List<Hostinfo> hostinfos = hostInfoRepository.findAllIp();
 			Map<String, Hostinfo> tmpHostInfos = new ConcurrentHashMap<String, Hostinfo>();
 			Map<String, String> tmpIpDomains = new ConcurrentHashMap<String, String>();
 
@@ -219,8 +225,8 @@ public class HostinfoService {
 				tmpHostInfos.put(hostinfo.getIp(), hostinfo);
 				tmpIpDomains.put(hostinfo.getIp(), hostinfo.getDomain());
 			}
-			m_hostinfos = tmpHostInfos;
-			m_ipDomains = tmpIpDomains;
+			this.hostinfos = tmpHostInfos;
+			ipDomains = tmpIpDomains;
 			SLF4J_LOGGER.info("Refreshed hostinfo cache, hostCount={}.", hostinfos.size());
 		} catch (RuntimeException e) {
 			SLF4J_LOGGER.error("Unable to refresh hostinfo cache.", e);
@@ -238,17 +244,17 @@ public class HostinfoService {
 		info.setIp(ip);
 		info.setLastModifiedDate(new Date());
 		updateHostinfo(info);
-		m_hostinfos.put(ip, info);
+		hostinfos.put(ip, info);
 		return true;
 	}
 
 	public boolean updateHostinfo(Hostinfo hostinfo) {
 		ensureInitialized();
 
-		m_hostinfos.put(hostinfo.getIp(), hostinfo);
+		hostinfos.put(hostinfo.getIp(), hostinfo);
 
 		try {
-			m_hostinfoDao.updateByPK(hostinfo);
+			hostInfoRepository.updateByPK(hostinfo);
 			SLF4J_LOGGER.info("Updated hostinfo, id={}, domain={}, ip={}.", hostinfo.getId(), hostinfo.getDomain(),
 					hostinfo.getIp());
 			return true;
@@ -261,11 +267,11 @@ public class HostinfoService {
 	}
 
 	public void setHostinfoDao(HostInfoRepository hostinfoDao) {
-		m_hostinfoDao = hostinfoDao;
+		hostInfoRepository = hostinfoDao;
 	}
 
 	public void setServerConfigManager(ServerConfigManager manager) {
-		m_manager = manager;
+		serverConfigManager = manager;
 	}
 
 	private boolean validateIp(String str) {

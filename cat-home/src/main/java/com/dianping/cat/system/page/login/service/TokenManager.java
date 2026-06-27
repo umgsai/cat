@@ -18,27 +18,34 @@
  */
 package com.dianping.cat.system.page.login.service;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.system.page.login.spi.ITokenManager;
 
+@Component
 public class TokenManager implements ITokenManager<SigninContext, Token> {
-	private CookieManager m_cookieManager;
+	@Resource
+	private CookieManager cookieManager;
 
-	private TokenBuilder m_tokenBuilder;
+	@Resource
+	private TokenBuilder tokenBuilder;
 
 	public void setCookieManager(CookieManager cookieManager) {
-		m_cookieManager = cookieManager;
+		this.cookieManager = cookieManager;
 	}
 
 	public void setTokenBuilder(TokenBuilder tokenBuilder) {
-		m_tokenBuilder = tokenBuilder;
+		this.tokenBuilder = tokenBuilder;
 	}
 
 	@Override
 	public Token getToken(SigninContext ctx, String name) {
-		String value = m_cookieManager.getCookie(ctx, name);
+		String value = cookieManager.getCookie(ctx, name);
 
 		if (value != null) {
-			return m_tokenBuilder.parse(ctx, value);
+			return tokenBuilder.parse(ctx, value);
 		} else {
 			return null;
 		}
@@ -46,14 +53,14 @@ public class TokenManager implements ITokenManager<SigninContext, Token> {
 
 	@Override
 	public void removeToken(SigninContext ctx, String name) {
-		m_cookieManager.removeCookie(ctx, name);
+		cookieManager.removeCookie(ctx, name);
 	}
 
 	@Override
 	public void setToken(SigninContext ctx, Token token) {
 		String name = token.getName();
-		String value = m_tokenBuilder.build(ctx, token);
+		String value = tokenBuilder.build(ctx, token);
 
-		m_cookieManager.setCookie(ctx, name, value);
+		cookieManager.setCookie(ctx, name, value);
 	}
 }

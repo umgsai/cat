@@ -24,8 +24,11 @@ package com.dianping.cat.report.task;
 import java.util.Date;
 import java.util.concurrent.locks.LockSupport;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
@@ -33,18 +36,21 @@ import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.mybatis.TaskRepository;
 import com.dianping.cat.message.Transaction;
 
+@Component
 public class DefaultTaskConsumer extends TaskConsumer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTaskConsumer.class);
 
-	private ReportFacade m_reportFacade;
+	@Resource
+	private ReportFacade reportFacade;
 
-	private TaskRepository m_taskDao;
+	@Resource
+	private TaskRepository taskRepository;
 
 	@Override
 	protected Task findDoingTask(String ip) {
 		Task task = null;
 		try {
-			task = m_taskDao.findByStatusConsumer(STATUS_DOING, ip);
+			task = taskRepository.findByStatusConsumer(STATUS_DOING, ip);
 		} catch (RuntimeException e) {
 			LOGGER.error("Unable to find doing task, consumerIp={}.", ip, e);
 		}
@@ -55,7 +61,7 @@ public class DefaultTaskConsumer extends TaskConsumer {
 	protected Task findTodoTask() {
 		Task task = null;
 		try {
-			task = m_taskDao.findByStatusConsumer(STATUS_TODO, null);
+			task = taskRepository.findByStatusConsumer(STATUS_TODO, null);
 		} catch (RuntimeException e) {
 			LOGGER.error("Unable to find todo task.", e);
 		}
@@ -76,7 +82,7 @@ public class DefaultTaskConsumer extends TaskConsumer {
 		try {
 			LOGGER.info("Processing report task, reportName={}, domain={}, type={}, period={}, taskId={}.",
 					doing.getReportName(), doing.getReportDomain(), doing.getTaskType(), doing.getReportPeriod(), doing.getId());
-			result = m_reportFacade.builderReport(doing);
+			result = reportFacade.builderReport(doing);
 			t.setStatus(Transaction.SUCCESS);
 		} catch (Throwable e) {
 			LOGGER.error("Unable to process report task, reportName={}, domain={}, type={}, period={}, taskId={}.",
@@ -115,7 +121,7 @@ public class DefaultTaskConsumer extends TaskConsumer {
 		doing.setEndDate(new Date());
 
 		try {
-			return m_taskDao.updateDoingToDone(doing) == 1;
+			return taskRepository.updateDoingToDone(doing) == 1;
 		} catch (RuntimeException e) {
 			LOGGER.error("Unable to mark task done, reportName={}, domain={}, type={}, period={}, taskId={}.",
 					doing.getReportName(), doing.getReportDomain(), doing.getTaskType(), doing.getReportPeriod(), doing.getId(), e);
@@ -130,7 +136,7 @@ public class DefaultTaskConsumer extends TaskConsumer {
 		doing.setEndDate(new Date());
 
 		try {
-			return m_taskDao.updateDoingToFail(doing) == 1;
+			return taskRepository.updateDoingToFail(doing) == 1;
 		} catch (RuntimeException e) {
 			LOGGER.error("Unable to mark task failed, reportName={}, domain={}, type={}, period={}, taskId={}.",
 					doing.getReportName(), doing.getReportDomain(), doing.getTaskType(), doing.getReportPeriod(), doing.getId(), e);
@@ -146,7 +152,7 @@ public class DefaultTaskConsumer extends TaskConsumer {
 		todo.setStartDate(new Date());
 
 		try {
-			return m_taskDao.updateTodoToDoing(todo) == 1;
+			return taskRepository.updateTodoToDoing(todo) == 1;
 		} catch (RuntimeException e) {
 			LOGGER.error("Unable to claim todo task, reportName={}, domain={}, type={}, period={}, taskId={}, consumer={}.",
 					todo.getReportName(), todo.getReportDomain(), todo.getTaskType(), todo.getReportPeriod(), todo.getId(),
@@ -157,10 +163,10 @@ public class DefaultTaskConsumer extends TaskConsumer {
 	}
 
 	public void setReportFacade(ReportFacade reportFacade) {
-		m_reportFacade = reportFacade;
+		this.reportFacade = reportFacade;
 	}
 
 	public void setTaskDao(TaskRepository taskDao) {
-		m_taskDao = taskDao;
+		taskRepository = taskDao;
 	}
 }

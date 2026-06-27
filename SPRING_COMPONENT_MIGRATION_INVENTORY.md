@@ -1977,3 +1977,67 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+
+## 37. 第二十九批完成记录
+第二十九批扩大到基础配置 Manager、登录权限服务、项目主机服务和任务层轻量 Bean，目标是继续减少 `CatHomeSpringConfiguration` 中显式 `@Bean` 注册数量，同时保持原有初始化时机和 Bean 命名语义。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+AllReportConfigManager
+ServerFilterConfigManager
+SampleConfigManager
+ReportReloadConfigManager
+AtomicMessageConfigManager
+TpValueStatisticConfigManager
+UserConfigManager
+ResourceConfigManager
+CookieManager
+TokenBuilder
+DefaultCatPropertyProvider
+TokenManager
+SessionManager
+SigninService
+ProjectService
+HostinfoService
+TaskManager
+DefaultTaskConsumer
+ReportFacade
+CurrentReportBuilder
+ProjectUpdateTask
+CmdbInfoReloadBuilder
+ReportReloadTask
+```
+
+2. 原先带 `initMethod = "initialize"` 的类已改为 `@PostConstruct`，保留启动初始化语义；`HostinfoService` 原先没有 `initMethod`，本批继续保持懒初始化，避免组件化后提前启动刷新线程。
+3. `CurrentReportBuilder` 和 `CmdbInfoReloadBuilder` 使用 `@Component(ID)` 保留旧 `@Bean(name = ID)` 的任务名语义。
+4. `ReportReloadTask` 使用 `@Resource(name = "reportReloaders")` 注入既有聚合 Map；`ReportFacade` 使用 `@Resource(name = "taskBuilders")` 注入新增的 `taskBuilders` 聚合 Map，并保留原 `TaskBuilder` 别名构建逻辑。
+5. 已删除 `CatHomeSpringConfiguration` 中对应 23 个旧 `@Bean` 方法，避免组件扫描注册和配置类注册同时存在。
+6. 本批触碰到的 Spring 注入字段已按 Java 驼峰命名收口，并使用 `@Resource` 字段注入；原 setter 保留给测试和少量手工构造场景使用。
+7. 对本批触碰且原先只调用 `Cat.logError` 的关键异常路径补充了 SLF4J 日志，覆盖配置加载/保存、任务创建、CMDB 更新等排查入口。
+8. 本批仍不迁移以下内容：
+
+```text
+ServerConfigManager
+BusinessConfigManager
+ReportManager / ReportDelegate / ModelService
+存储 bucket / HDFS / message dump 链路
+DataSource / SqlSessionFactory / TransactionTemplate
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

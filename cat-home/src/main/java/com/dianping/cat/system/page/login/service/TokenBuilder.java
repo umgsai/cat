@@ -24,9 +24,11 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.system.page.login.spi.ITokenBuilder;
 
+@Component
 public class TokenBuilder implements ITokenBuilder<SigninContext, Token> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TokenBuilder.class);
 
