@@ -2,24 +2,30 @@ package com.dianping.cat.mybatis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import jakarta.annotation.Resource;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.mybatis.mapper.MonthReportMapper;
 import com.dianping.cat.mybatis.data.MonthReportDO;
 
+@Component("monthlyReportRepository")
 public class MonthlyReportRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MonthlyReportRepository.class);
 
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 
-	private SqlSessionTemplate m_sqlSessionTemplate;
+	@Resource(name = "sqlSessionTemplate")
+	private SqlSessionTemplate sqlSessionTemplate;
 
-	private TransactionTemplate m_transactionTemplate;
+	@Resource(name = "transactionTemplate")
+	private TransactionTemplate transactionTemplate;
 
 	public MonthlyReport createLocal() {
 		return new MonthlyReport();
@@ -73,9 +79,9 @@ public class MonthlyReportRepository {
 	}
 
 	private MonthReportMapper springMapper() {
-		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
+		SqlSessionTemplate template = sqlSessionTemplate;
 
-		if (sqlSessionTemplate == null) {
+		if (template == null) {
 			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for MonthreportMapper.");
 		}
 
@@ -83,22 +89,22 @@ public class MonthlyReportRepository {
 			LOGGER.info("MonthlyReportRepository is using Spring managed MonthreportMapper.");
 		}
 
-		return sqlSessionTemplate.getMapper(MonthReportMapper.class);
+		return template.getMapper(MonthReportMapper.class);
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		if (m_transactionTemplate == null) {
+		if (transactionTemplate == null) {
 			throw new IllegalStateException("Spring TransactionTemplate is not configured for MonthreportMapper.");
 		}
-		return m_transactionTemplate;
+		return transactionTemplate;
 	}
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		m_sqlSessionTemplate = sqlSessionTemplate;
+		this.sqlSessionTemplate = sqlSessionTemplate;
 	}
 
 	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-		m_transactionTemplate = transactionTemplate;
+		this.transactionTemplate = transactionTemplate;
 	}
 
 	private MonthlyReport requireFound(MonthReportDO record, String field, String value) {

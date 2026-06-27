@@ -1,16 +1,11 @@
 package com.dianping.cat.home.spring;
 
-import java.util.Map;
-
 import javax.sql.DataSource;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
-import org.unidal.cat.message.storage.hdfs.HdfsSystemManager;
-import org.unidal.cat.message.storage.clean.HdfsUploader;
-import org.unidal.cat.message.storage.clean.LogviewProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -24,11 +19,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.DefaultMessageAnalyzerManager;
 import com.dianping.cat.analysis.DefaultMessageHandler;
-import com.dianping.cat.analysis.MessageAnalyzer;
-import com.dianping.cat.analysis.MessageAnalyzerFactory;
-import com.dianping.cat.analysis.MessageAnalyzerManager;
-import com.dianping.cat.analysis.MessageConsumer;
-import com.dianping.cat.analysis.MessageHandler;
 import com.dianping.cat.analysis.RealtimeConsumer;
 import com.dianping.cat.analysis.TcpSocketReceiver;
 import com.dianping.cat.config.AtomicMessageConfigManager;
@@ -73,7 +63,6 @@ import com.dianping.cat.consumer.config.AllReportConfigManager;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionDelegate;
 import com.dianping.cat.mybatis.ConfigRepository;
-import com.dianping.cat.mybatis.SpringBackedRepositorySupport;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
@@ -259,7 +248,6 @@ import com.dianping.cat.report.server.ServersUpdaterManager;
 import com.dianping.cat.report.task.DefaultTaskConsumer;
 import com.dianping.cat.report.task.DefaultRemoteServersUpdater;
 import com.dianping.cat.report.task.ReportFacade;
-import com.dianping.cat.report.service.AbstractReportService;
 import com.dianping.cat.report.task.current.CurrentReportBuilder;
 import com.dianping.cat.report.task.cmdb.CmdbInfoReloadBuilder;
 import com.dianping.cat.report.task.cmdb.ProjectUpdateTask;
@@ -319,7 +307,9 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		HeartbeatAnalyzer.class, HeartbeatDelegate.class, MatrixAnalyzer.class, MatrixDelegate.class,
 		ProblemAnalyzer.class, ProblemDelegate.class, StorageAnalyzer.class, StorageDelegate.class,
 		StorageReportUpdater.class, StorageBuilderManager.class, TopAnalyzer.class, TopDelegate.class, StateAnalyzer.class, StateDelegate.class,
-		ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
+		ContainerMessageAnalyzerFactory.class, DefaultMessageAnalyzerManager.class, RealtimeConsumer.class,
+		DefaultMessageHandler.class, TcpSocketReceiver.class, CatHomeRuntimeBootstrap.class,
+		CatHomeSpringStartupVerifier.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
 		CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
 		BusinessPointParser.class, DomainGroupConfigManager.class, StorageGroupConfigManager.class,
 		HeartbeatDisplayPolicyManager.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
@@ -337,6 +327,14 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		DependencyReportManager.class, EventReportManager.class, HeartbeatReportManager.class,
 		MatrixReportManager.class, ProblemReportManager.class, StorageReportManager.class,
 		TopReportManager.class, StateReportManager.class,
+		ConfigRepository.class, BusinessConfigRepository.class, ProjectRepository.class, HostInfoRepository.class,
+		DailyReportRepository.class, DailyReportContentRepository.class, HourlyReportRepository.class,
+		HourlyReportContentRepository.class, WeeklyReportRepository.class, WeeklyReportContentRepository.class,
+		MonthlyReportRepository.class, MonthlyReportContentRepository.class, OverloadRepository.class,
+		AlertRepository.class, AlterationRepository.class, BaselineRepository.class, TopologyGraphRepository.class,
+		TaskRepository.class, AlertSummaryRepository.class, ConfigModificationRepository.class,
+		MetricGraphRepository.class, MetricScreenRepository.class, ServerAlarmRuleRepository.class,
+		UserDefineRuleRepository.class,
 		HistoricalProblemService.class, HistoricalBusinessService.class, HistoricalEventService.class,
 		HistoricalTransactionService.class, HistoricalHeartbeatService.class, HistoricalTopService.class,
 		HistoricalStateService.class, HistoricalStorageService.class, HistoricalCrossService.class,
@@ -464,7 +462,10 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					StorageAnalyzer.class, StorageDelegate.class, StorageReportUpdater.class,
 					StorageBuilderManager.class,
 					TopAnalyzer.class, TopDelegate.class, StateAnalyzer.class, StateDelegate.class,
-					ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
+					ContainerMessageAnalyzerFactory.class, DefaultMessageAnalyzerManager.class,
+					RealtimeConsumer.class, DefaultMessageHandler.class, TcpSocketReceiver.class,
+					CatHomeRuntimeBootstrap.class, CatHomeSpringStartupVerifier.class,
+					BusinessKeyHelper.class, BusinessDataFetcher.class,
 					CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
 					BusinessPointParser.class, DomainGroupConfigManager.class, StorageGroupConfigManager.class,
 					HeartbeatDisplayPolicyManager.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
@@ -484,6 +485,15 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					DependencyReportManager.class, EventReportManager.class, HeartbeatReportManager.class,
 					MatrixReportManager.class, ProblemReportManager.class, StorageReportManager.class,
 					TopReportManager.class, StateReportManager.class,
+					ConfigRepository.class, BusinessConfigRepository.class, ProjectRepository.class,
+					HostInfoRepository.class, DailyReportRepository.class, DailyReportContentRepository.class,
+					HourlyReportRepository.class, HourlyReportContentRepository.class, WeeklyReportRepository.class,
+					WeeklyReportContentRepository.class, MonthlyReportRepository.class,
+					MonthlyReportContentRepository.class, OverloadRepository.class, AlertRepository.class,
+					AlterationRepository.class, BaselineRepository.class, TopologyGraphRepository.class,
+					TaskRepository.class, AlertSummaryRepository.class, ConfigModificationRepository.class,
+					MetricGraphRepository.class, MetricScreenRepository.class, ServerAlarmRuleRepository.class,
+					UserDefineRuleRepository.class,
 					HistoricalProblemService.class, HistoricalBusinessService.class, HistoricalEventService.class,
 					HistoricalTransactionService.class, HistoricalHeartbeatService.class, HistoricalTopService.class,
 					HistoricalStateService.class, HistoricalStorageService.class, HistoricalCrossService.class,
@@ -613,308 +623,9 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		"com.dianping.cat.mybatis.user.define.rule.dao"
 })
 public class CatHomeSpringConfiguration {
-	@Bean(initMethod = "initialize")
-	public MessageAnalyzerManager messageAnalyzerManager(MessageAnalyzerFactory messageAnalyzerFactory,
-			ServerConfigManager serverConfigManager) {
-		DefaultMessageAnalyzerManager manager = new DefaultMessageAnalyzerManager();
-
-		manager.setAnalyzerFactory(messageAnalyzerFactory);
-		manager.setConfigManager(serverConfigManager);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public MessageConsumer messageConsumer(MessageAnalyzerManager messageAnalyzerManager,
-			ServerStatisticManager serverStatisticManager) {
-		RealtimeConsumer consumer = new RealtimeConsumer();
-
-		consumer.setAnalyzerManager(messageAnalyzerManager);
-		consumer.setServerStateManager(serverStatisticManager);
-		return consumer;
-	}
-
-	@Bean
-	public MessageHandler messageHandler(MessageConsumer messageConsumer) {
-		DefaultMessageHandler handler = new DefaultMessageHandler();
-
-		handler.setConsumer(messageConsumer);
-		return handler;
-	}
-
-	@Bean
-	public TcpSocketReceiver tcpSocketReceiver(ServerConfigManager serverConfigManager, MessageHandler messageHandler,
-			ServerStatisticManager serverStatisticManager) {
-		TcpSocketReceiver receiver = new TcpSocketReceiver();
-
-		receiver.setServerConfigManager(serverConfigManager);
-		receiver.setHandler(messageHandler);
-		receiver.setServerStateManager(serverStatisticManager);
-		return receiver;
-	}
-
-	@Bean(initMethod = "initialize")
-	public HdfsSystemManager hdfsSystemManager(ServerConfigManager serverConfigManager) {
-		HdfsSystemManager manager = new HdfsSystemManager();
-
-		manager.setConfigManager(serverConfigManager);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public HdfsUploader hdfsUploader(HdfsSystemManager hdfsSystemManager, ServerConfigManager serverConfigManager) {
-		HdfsUploader uploader = new HdfsUploader();
-
-		uploader.setFileSystemManager(hdfsSystemManager);
-		uploader.setServerConfigManager(serverConfigManager);
-		return uploader;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LogviewProcessor logviewProcessor(HdfsUploader hdfsUploader, ServerConfigManager serverConfigManager) {
-		LogviewProcessor processor = new LogviewProcessor();
-
-		processor.setHdfsUploader(hdfsUploader);
-		processor.setConfigManager(serverConfigManager);
-		return processor;
-	}
-
-	@Bean(initMethod = "start", destroyMethod = "shutdown")
-	public CatHomeRuntimeBootstrap catHomeRuntimeBootstrap(AlarmManager alarmManager,
-			DefaultTaskConsumer defaultTaskConsumer, LogviewProcessor logviewProcessor, MessageConsumer messageConsumer,
-			ReportReloadTask reportReloadTask, ServerConfigManager serverConfigManager,
-			ServersUpdaterManager serversUpdaterManager, TcpSocketReceiver tcpSocketReceiver) {
-		CatHomeRuntimeBootstrap bootstrap = new CatHomeRuntimeBootstrap();
-
-		bootstrap.setAlarmManager(alarmManager);
-		bootstrap.setTaskConsumer(defaultTaskConsumer);
-		bootstrap.setLogviewProcessor(logviewProcessor);
-		bootstrap.setMessageConsumer(messageConsumer);
-		bootstrap.setReportReloadTask(reportReloadTask);
-		bootstrap.setServerConfigManager(serverConfigManager);
-		bootstrap.setServersUpdaterManager(serversUpdaterManager);
-		bootstrap.setTcpSocketReceiver(tcpSocketReceiver);
-		return bootstrap;
-	}
-
-	@Bean
-	public ConfigRepository configRepository(SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
-		ConfigRepository repository = new ConfigRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public BusinessConfigRepository businessConfigRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		BusinessConfigRepository repository = new BusinessConfigRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public ProjectRepository projectRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		ProjectRepository repository = new ProjectRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public HostInfoRepository hostinfoRepository(SqlSessionTemplate sqlSessionTemplate,
-	                                             TransactionTemplate transactionTemplate) {
-		HostInfoRepository repository = new HostInfoRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public DailyReportRepository dailyReportRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		DailyReportRepository repository = new DailyReportRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public DailyReportContentRepository dailyReportContentRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		DailyReportContentRepository repository = new DailyReportContentRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public HourlyReportRepository hourlyReportRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		HourlyReportRepository repository = new HourlyReportRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public HourlyReportContentRepository hourlyReportContentRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		HourlyReportContentRepository repository = new HourlyReportContentRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public WeeklyReportRepository weeklyReportRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		WeeklyReportRepository repository = new WeeklyReportRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public WeeklyReportContentRepository weeklyReportContentRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		WeeklyReportContentRepository repository = new WeeklyReportContentRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public MonthlyReportRepository monthlyReportRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		MonthlyReportRepository repository = new MonthlyReportRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public MonthlyReportContentRepository monthlyReportContentRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		MonthlyReportContentRepository repository = new MonthlyReportContentRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public OverloadRepository overloadRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		return configureSpringBackedRepository(new OverloadRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean
-	public AlertRepository alertRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		return configureSpringBackedRepository(new AlertRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean
-	public AlterationRepository alterationRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		return configureSpringBackedRepository(new AlterationRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean
-	public BaselineRepository baselineRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		return configureSpringBackedRepository(new BaselineRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean
-	public TopologyGraphRepository topologyGraphRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		return configureSpringBackedRepository(new TopologyGraphRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean
-	public TaskRepository taskRepository(SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
-		TaskRepository repository = new TaskRepository();
-
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	@Bean
-	public AlertSummaryRepository alertSummaryRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		return configureSpringBackedRepository(new AlertSummaryRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean
-	public ConfigModificationRepository configModificationRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		return configureSpringBackedRepository(new ConfigModificationRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean
-	public MetricGraphRepository metricGraphRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		return configureSpringBackedRepository(new MetricGraphRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean
-	public MetricScreenRepository metricScreenRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		return configureSpringBackedRepository(new MetricScreenRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean
-	public ServerAlarmRuleRepository serverAlarmRuleRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		return configureSpringBackedRepository(new ServerAlarmRuleRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean
-	public UserDefineRuleRepository userDefineRuleRepository(SqlSessionTemplate sqlSessionTemplate,
-			TransactionTemplate transactionTemplate) {
-		return configureSpringBackedRepository(new UserDefineRuleRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
 	@Bean
 	public DataSource catDataSource() {
 		return CatHomeSpringDataSourceFactory.createCatDataSource();
-	}
-
-	private <T extends SpringBackedRepositorySupport<?>> T configureSpringBackedRepository(T repository,
-			SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
-		repository.setSqlSessionTemplate(sqlSessionTemplate);
-		repository.setTransactionTemplate(transactionTemplate);
-		return repository;
-	}
-
-	private void configureReportService(AbstractReportService<?> service, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		service.setHourlyReportDao(hourlyReportRepository);
-		service.setHourlyReportContentDao(hourlyReportContentRepository);
-		service.setDailyReportDao(dailyReportRepository);
-		service.setDailyReportContentDao(dailyReportContentRepository);
-		service.setWeeklyReportDao(weeklyReportRepository);
-		service.setWeeklyReportContentDao(weeklyReportContentRepository);
-		service.setMonthlyReportDao(monthlyReportRepository);
-		service.setMonthlyReportContentDao(monthlyReportContentRepository);
 	}
 
 	@Bean
@@ -954,11 +665,6 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
 		return new SqlSessionTemplate(sqlSessionFactory);
-	}
-
-	@Bean(initMethod = "verify")
-	public CatHomeSpringStartupVerifier catHomeSpringStartupVerifier(SqlSessionTemplate sqlSessionTemplate) {
-		return new CatHomeSpringStartupVerifier(sqlSessionTemplate);
 	}
 
 	@Bean

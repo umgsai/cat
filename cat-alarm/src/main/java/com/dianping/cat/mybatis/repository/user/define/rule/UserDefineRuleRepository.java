@@ -5,10 +5,12 @@ import com.dianping.cat.mybatis.user.define.rule.dao.UserDefineRuleMapper;
 import com.dianping.cat.mybatis.user.define.rule.dao.data.UserDefineRuleDO;
 import com.dianping.cat.mybatis.SpringBackedRepositorySupport;
 import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+@Component("userDefineRuleRepository")
 public class UserDefineRuleRepository extends SpringBackedRepositorySupport<UserDefineRuleMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserDefineRuleRepository.class);
 

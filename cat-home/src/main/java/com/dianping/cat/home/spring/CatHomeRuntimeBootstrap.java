@@ -2,8 +2,13 @@ package com.dianping.cat.home.spring;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.unidal.cat.message.storage.clean.LogviewProcessor;
 
 import com.dianping.cat.analysis.MessageConsumer;
@@ -15,119 +20,130 @@ import com.dianping.cat.report.task.DefaultTaskConsumer;
 import com.dianping.cat.report.task.reload.ReportReloadTask;
 import com.dianping.cat.support.Threads;
 
+@Component("catHomeRuntimeBootstrap")
 public class CatHomeRuntimeBootstrap {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CatHomeRuntimeBootstrap.class);
 
-	private final AtomicBoolean m_started = new AtomicBoolean();
+	private final AtomicBoolean started = new AtomicBoolean();
 
-	private final AtomicBoolean m_stopped = new AtomicBoolean();
+	private final AtomicBoolean stopped = new AtomicBoolean();
 
-	private Thread m_shutdownHook;
+	private Thread shutdownHook;
 
-	private AlarmManager m_alarmManager;
+	@Resource(name = "alarmManager")
+	private AlarmManager alarmManager;
 
-	private DefaultTaskConsumer m_taskConsumer;
+	@Resource(name = "defaultTaskConsumer")
+	private DefaultTaskConsumer taskConsumer;
 
-	private LogviewProcessor m_logviewProcessor;
+	@Resource(name = "logviewProcessor")
+	private LogviewProcessor logviewProcessor;
 
-	private MessageConsumer m_messageConsumer;
+	@Resource(name = "messageConsumer")
+	private MessageConsumer messageConsumer;
 
-	private ReportReloadTask m_reportReloadTask;
+	@Resource(name = "reportReloadTask")
+	private ReportReloadTask reportReloadTask;
 
-	private ServerConfigManager m_serverConfigManager;
+	@Resource(name = "serverConfigManager")
+	private ServerConfigManager serverConfigManager;
 
-	private ServersUpdaterManager m_serversUpdaterManager;
+	@Resource(name = "serversUpdaterManager")
+	private ServersUpdaterManager serversUpdaterManager;
 
-	private TcpSocketReceiver m_tcpSocketReceiver;
+	@Resource(name = "tcpSocketReceiver")
+	private TcpSocketReceiver tcpSocketReceiver;
 
+	@PreDestroy
 	public void shutdown() {
-		if (!m_started.get() || !m_stopped.compareAndSet(false, true)) {
+		if (!started.get() || !stopped.compareAndSet(false, true)) {
 			return;
 		}
 
 		try {
-			m_messageConsumer.doCheckpoint();
+			messageConsumer.doCheckpoint();
 		} catch (RuntimeException e) {
 			LOGGER.warn("Unable to checkpoint message consumer during shutdown.", e);
 		}
-		m_tcpSocketReceiver.destory();
+		tcpSocketReceiver.destory();
 		removeShutdownHook();
 		LOGGER.info("CAT home runtime bootstrap stopped.");
 	}
 
+	@PostConstruct
 	public void start() {
-		if (!m_started.compareAndSet(false, true)) {
+		if (!started.compareAndSet(false, true)) {
 			return;
 		}
 
-		if (m_serversUpdaterManager == null) {
+		if (serversUpdaterManager == null) {
 			throw new IllegalStateException("ServersUpdaterManager is required for CAT home runtime bootstrap.");
 		}
 		LOGGER.info("Resolved ServersUpdaterManager for CAT home runtime bootstrap.");
 
 		registerShutdownHook();
-		m_tcpSocketReceiver.init();
-		Threads.forGroup("Cat").start(m_logviewProcessor);
-		Threads.forGroup("Cat").start(m_reportReloadTask);
-		LOGGER.info("isJobMachine: {}", m_serverConfigManager.isJobMachine());
-		if (m_serverConfigManager.isJobMachine()) {
-			Threads.forGroup("Cat").start(m_taskConsumer);
+		tcpSocketReceiver.init();
+		Threads.forGroup("Cat").start(logviewProcessor);
+		Threads.forGroup("Cat").start(reportReloadTask);
+		LOGGER.info("isJobMachine: {}", serverConfigManager.isJobMachine());
+		if (serverConfigManager.isJobMachine()) {
+			Threads.forGroup("Cat").start(taskConsumer);
 		}
-		LOGGER.info("isAlertMachine: {}", m_serverConfigManager.isAlertMachine());
-		if (m_serverConfigManager.isAlertMachine()) {
-			m_alarmManager.startAlarm();
+		LOGGER.info("isAlertMachine: {}", serverConfigManager.isAlertMachine());
+		if (serverConfigManager.isAlertMachine()) {
+			alarmManager.startAlarm();
 		}
 		LOGGER.info("CAT home runtime bootstrap started.");
 	}
 
 	private void registerShutdownHook() {
-		m_shutdownHook = new Thread(this::shutdown);
-		Runtime.getRuntime().addShutdownHook(m_shutdownHook);
+		shutdownHook = new Thread(this::shutdown);
+		Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
 
 	private void removeShutdownHook() {
-		Thread shutdownHook = m_shutdownHook;
+		Thread hook = shutdownHook;
 
-		if (shutdownHook == null || shutdownHook == Thread.currentThread()) {
+		if (hook == null || hook == Thread.currentThread()) {
 			return;
 		}
 
 		try {
-			Runtime.getRuntime().removeShutdownHook(shutdownHook);
+			Runtime.getRuntime().removeShutdownHook(hook);
 		} catch (IllegalStateException e) {
 			// JVM is already shutting down, so the hook no longer needs removal.
 		}
 	}
 
 	public void setAlarmManager(AlarmManager alarmManager) {
-		m_alarmManager = alarmManager;
+		this.alarmManager = alarmManager;
 	}
 
 	public void setLogviewProcessor(LogviewProcessor logviewProcessor) {
-		m_logviewProcessor = logviewProcessor;
+		this.logviewProcessor = logviewProcessor;
 	}
 
 	public void setMessageConsumer(MessageConsumer messageConsumer) {
-		m_messageConsumer = messageConsumer;
+		this.messageConsumer = messageConsumer;
 	}
 
 	public void setReportReloadTask(ReportReloadTask reportReloadTask) {
-		m_reportReloadTask = reportReloadTask;
+		this.reportReloadTask = reportReloadTask;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 	public void setServersUpdaterManager(ServersUpdaterManager serversUpdaterManager) {
-		m_serversUpdaterManager = serversUpdaterManager;
+		this.serversUpdaterManager = serversUpdaterManager;
 	}
 
 	public void setTaskConsumer(DefaultTaskConsumer taskConsumer) {
-		m_taskConsumer = taskConsumer;
+		this.taskConsumer = taskConsumer;
 	}
 
 	public void setTcpSocketReceiver(TcpSocketReceiver tcpSocketReceiver) {
-		m_tcpSocketReceiver = tcpSocketReceiver;
+		this.tcpSocketReceiver = tcpSocketReceiver;
 	}
 }

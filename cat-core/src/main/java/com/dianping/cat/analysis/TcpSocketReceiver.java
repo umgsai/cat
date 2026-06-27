@@ -20,7 +20,10 @@ package com.dianping.cat.analysis;
 
 import java.util.List;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -45,34 +48,38 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
+@Component("tcpSocketReceiver")
 public final class TcpSocketReceiver {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TcpSocketReceiver.class);
 
-	protected ServerConfigManager m_serverConfigManager;
+	@Resource(name = "serverConfigManager")
+	protected ServerConfigManager serverConfigManager;
 
-	private MessageHandler m_handler;
+	@Resource(name = "messageHandler")
+	private MessageHandler messageHandler;
 
-	private ServerStatisticManager m_serverStateManager;
+	@Resource(name = "serverStatisticManager")
+	private ServerStatisticManager serverStatisticManager;
 
-	private ChannelFuture m_future;
+	private ChannelFuture future;
 
-	private EventLoopGroup m_bossGroup;
+	private EventLoopGroup bossGroup;
 
-	private EventLoopGroup m_workerGroup;
+	private EventLoopGroup workerGroup;
 
-	private final int m_port = Integer.getInteger("cat.tcp.port", 2280); // default port number from phone, C:2, A:2, T:8
+	private final int port = Integer.getInteger("cat.tcp.port", 2280); // default port number from phone, C:2, A:2, T:8
 
 	public synchronized void destory() {
 		try {
-			info("start shutdown socket, port " + m_port);
-			if (m_future != null) {
-				m_future.channel().closeFuture();
+			info("start shutdown socket, port " + port);
+			if (future != null) {
+				future.channel().closeFuture();
 			}
-			if (m_bossGroup != null) {
-				m_bossGroup.shutdownGracefully();
+			if (bossGroup != null) {
+				bossGroup.shutdownGracefully();
 			}
-			if (m_workerGroup != null) {
-				m_workerGroup.shutdownGracefully();
+			if (workerGroup != null) {
+				workerGroup.shutdownGracefully();
 			}
 			info("shutdown socket success");
 		} catch (Exception e) {
@@ -91,13 +98,13 @@ public final class TcpSocketReceiver {
 
 	public void init() {
 		try {
-			if (m_handler == null) {
+			if (messageHandler == null) {
 				throw new IllegalStateException("MessageHandler is required for TcpSocketReceiver.");
 			}
-			if (m_serverStateManager == null) {
+			if (serverStatisticManager == null) {
 				throw new IllegalStateException("ServerStatisticManager is required for TcpSocketReceiver.");
 			}
-			startServer(m_port);
+			startServer(port);
 		} catch (Exception e) {
 			error(e.getMessage(), e);
 		}
@@ -108,9 +115,9 @@ public final class TcpSocketReceiver {
 		int threads = 24;
 		ServerBootstrap bootstrap = new ServerBootstrap();
 
-		m_bossGroup = linux ? new EpollEventLoopGroup(threads) : new NioEventLoopGroup(threads);
-		m_workerGroup = linux ? new EpollEventLoopGroup(threads) : new NioEventLoopGroup(threads);
-		bootstrap.group(m_bossGroup, m_workerGroup);
+		bossGroup = linux ? new EpollEventLoopGroup(threads) : new NioEventLoopGroup(threads);
+		workerGroup = linux ? new EpollEventLoopGroup(threads) : new NioEventLoopGroup(threads);
+		bootstrap.group(bossGroup, workerGroup);
 		bootstrap.channel(linux ? EpollServerSocketChannel.class : NioServerSocketChannel.class);
 
 		bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
@@ -128,7 +135,7 @@ public final class TcpSocketReceiver {
 		bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
 
 		try {
-			m_future = bootstrap.bind(port).sync();
+			future = bootstrap.bind(port).sync();
 			info("start netty server!");
 		} catch (Exception e) {
 			error("Started Netty Server Failed:" + port, e);
@@ -136,15 +143,15 @@ public final class TcpSocketReceiver {
 	}
 
 	public void setHandler(MessageHandler handler) {
-		m_handler = handler;
+		messageHandler = handler;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 	public void setServerStateManager(ServerStatisticManager serverStateManager) {
-		m_serverStateManager = serverStateManager;
+		serverStatisticManager = serverStateManager;
 	}
 
 	private void error(String message, Throwable cause) {
@@ -160,7 +167,7 @@ public final class TcpSocketReceiver {
 	}
 
 	private class MessageDecoder extends ByteToMessageDecoder {
-		private long m_processCount;
+		private long processCount;
 
 		@Override
 		protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {
@@ -188,13 +195,13 @@ public final class TcpSocketReceiver {
 					// readBytes.retain();
 					readBytes.resetReaderIndex();
 					tree.setBuffer(readBytes);
-					m_handler.handle(tree);
-					m_processCount++;
+					messageHandler.handle(tree);
+					processCount++;
 
-					long flag = m_processCount % CatConstants.SUCCESS_COUNT;
+					long flag = processCount % CatConstants.SUCCESS_COUNT;
 
 					if (flag == 0) {
-						m_serverStateManager.addMessageTotal(CatConstants.SUCCESS_COUNT);
+						serverStatisticManager.addMessageTotal(CatConstants.SUCCESS_COUNT);
 					}
 				} else {
 					// client message is error
@@ -202,7 +209,7 @@ public final class TcpSocketReceiver {
 					BufReleaseHelper.release(buffer);
 				}
 			} catch (Exception e) {
-				m_serverStateManager.addMessageTotalLoss(1);
+				serverStatisticManager.addMessageTotalLoss(1);
 				error(e.getMessage(), e);
 			}
 		}

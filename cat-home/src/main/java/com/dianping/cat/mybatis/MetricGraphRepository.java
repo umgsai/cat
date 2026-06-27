@@ -4,10 +4,12 @@ import com.dianping.cat.mybatis.data.MetricGraphDO;
 import com.dianping.cat.mybatis.mapper.MetricGraphMapper;
 import com.dianping.cat.home.dal.report.MetricGraph;
 import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+@Component("metricGraphRepository")
 public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricGraphMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MetricGraphRepository.class);
 

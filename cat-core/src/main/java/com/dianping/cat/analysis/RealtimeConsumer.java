@@ -20,7 +20,12 @@ package com.dianping.cat.analysis;
 
 import java.util.List;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.support.Threads;
 
 import com.dianping.cat.Cat;
@@ -29,6 +34,7 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
+@Component("messageConsumer")
 public class RealtimeConsumer implements MessageConsumer {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RealtimeConsumer.class);
 
@@ -36,26 +42,28 @@ public class RealtimeConsumer implements MessageConsumer {
 
 	public static final long HOUR = 60 * MINUTE;
 
-	private MessageAnalyzerManager m_analyzerManager;
+	@Resource(name = "messageAnalyzerManager")
+	private MessageAnalyzerManager messageAnalyzerManager;
 
-	private ServerStatisticManager m_serverStateManager;
+	@Resource(name = "serverStatisticManager")
+	private ServerStatisticManager serverStatisticManager;
 
-	private PeriodManager m_periodManager;
+	private PeriodManager periodManager;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	@Override
 	public void consume(MessageTree tree) {
 		initialize();
 
 		long timestamp = getTimestamp(tree);
-		Period period = m_periodManager.findPeriod(timestamp);
+		Period period = periodManager.findPeriod(timestamp);
 
 		if (period != null) {
 			period.distribute(tree);
 		} else {
 			SLF4J_LOGGER.warn("No realtime period found for message tree, timestamp={}, tree={}.", timestamp, tree);
-			m_serverStateManager.addNetworkTimeError(1);
+			serverStatisticManager.addNetworkTimeError(1);
 		}
 	}
 
@@ -67,7 +75,7 @@ public class RealtimeConsumer implements MessageConsumer {
 
 		try {
 			long currentStartTime = getCurrentStartTime();
-			Period period = m_periodManager.findPeriod(currentStartTime);
+			Period period = periodManager.findPeriod(currentStartTime);
 
 			if (period == null) {
 				SLF4J_LOGGER.warn("No current realtime period found when doing checkpoint, startTime={}.", currentStartTime);
@@ -104,7 +112,7 @@ public class RealtimeConsumer implements MessageConsumer {
 		initialize();
 
 		long currentStartTime = getCurrentStartTime();
-		Period period = m_periodManager.findPeriod(currentStartTime);
+		Period period = periodManager.findPeriod(currentStartTime);
 
 		if (period != null) {
 			return period.getAnalyzer(name);
@@ -124,7 +132,7 @@ public class RealtimeConsumer implements MessageConsumer {
 		initialize();
 
 		long lastStartTime = getCurrentStartTime() - HOUR;
-		Period period = m_periodManager.findPeriod(lastStartTime);
+		Period period = periodManager.findPeriod(lastStartTime);
 
 		return period == null ? null : period.getAnalyzer(name);
 	}
@@ -141,23 +149,24 @@ public class RealtimeConsumer implements MessageConsumer {
 		}
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
-		if (m_analyzerManager == null) {
+		if (messageAnalyzerManager == null) {
 			throw new IllegalStateException("MessageAnalyzerManager is required for RealtimeConsumer.");
 		}
-		if (m_serverStateManager == null) {
+		if (serverStatisticManager == null) {
 			throw new IllegalStateException("ServerStatisticManager is required for RealtimeConsumer.");
 		}
 
-		m_periodManager = new PeriodManager(HOUR, m_analyzerManager, m_serverStateManager);
-		m_periodManager.init();
+		periodManager = new PeriodManager(HOUR, messageAnalyzerManager, serverStatisticManager);
+		periodManager.init();
 
-		Threads.forGroup("Cat").start(m_periodManager);
-		m_initialized = true;
+		Threads.forGroup("Cat").start(periodManager);
+		initialized = true;
 		SLF4J_LOGGER.info("Initialized realtime consumer.");
 	}
 
@@ -166,11 +175,11 @@ public class RealtimeConsumer implements MessageConsumer {
 	}
 
 	public void setAnalyzerManager(MessageAnalyzerManager analyzerManager) {
-		m_analyzerManager = analyzerManager;
+		messageAnalyzerManager = analyzerManager;
 	}
 
 	public void setServerStateManager(ServerStatisticManager serverStateManager) {
-		m_serverStateManager = serverStateManager;
+		serverStatisticManager = serverStateManager;
 	}
 
 }

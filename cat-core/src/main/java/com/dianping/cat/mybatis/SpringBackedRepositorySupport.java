@@ -2,53 +2,57 @@ package com.dianping.cat.mybatis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import jakarta.annotation.Resource;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.springframework.transaction.support.TransactionTemplate;
 
 public abstract class SpringBackedRepositorySupport<T> {
-	private final Class<T> m_mapperClass;
+	private final Class<T> mapperClass;
 
-	private final String m_springMapperMessage;
+	private final String springMapperMessage;
 
-	private final AtomicBoolean m_springMapperLogged = new AtomicBoolean();
+	private final AtomicBoolean springMapperLogged = new AtomicBoolean();
 
-	private SqlSessionTemplate m_sqlSessionTemplate;
+	@Resource(name = "sqlSessionTemplate")
+	private SqlSessionTemplate sqlSessionTemplate;
 
-	private TransactionTemplate m_transactionTemplate;
+	@Resource(name = "transactionTemplate")
+	private TransactionTemplate transactionTemplate;
 
 	protected SpringBackedRepositorySupport(Class<T> mapperClass, String mapperResource,
 			String springMapperMessage) {
-		m_mapperClass = mapperClass;
-		m_springMapperMessage = springMapperMessage;
+		this.mapperClass = mapperClass;
+		this.springMapperMessage = springMapperMessage;
 	}
 
 	protected T springMapper(Logger logger) {
-		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
+		SqlSessionTemplate template = sqlSessionTemplate;
 
-		if (sqlSessionTemplate == null) {
+		if (template == null) {
 			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for "
-					+ m_mapperClass.getName() + ".");
+					+ mapperClass.getName() + ".");
 		}
-		if (m_springMapperLogged.compareAndSet(false, true)) {
-			logger.info(m_springMapperMessage);
+		if (springMapperLogged.compareAndSet(false, true)) {
+			logger.info(springMapperMessage);
 		}
-		return sqlSessionTemplate.getMapper(m_mapperClass);
+		return template.getMapper(mapperClass);
 	}
 
 	protected TransactionTemplate springTransactionTemplate() {
-		if (m_transactionTemplate == null) {
+		if (transactionTemplate == null) {
 			throw new IllegalStateException("Spring TransactionTemplate is not configured for "
-					+ m_mapperClass.getName() + ".");
+					+ mapperClass.getName() + ".");
 		}
-		return m_transactionTemplate;
+		return transactionTemplate;
 	}
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		m_sqlSessionTemplate = sqlSessionTemplate;
+		this.sqlSessionTemplate = sqlSessionTemplate;
 	}
 
 	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-		m_transactionTemplate = transactionTemplate;
+		this.transactionTemplate = transactionTemplate;
 	}
 }

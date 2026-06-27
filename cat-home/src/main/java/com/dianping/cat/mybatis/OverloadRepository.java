@@ -6,10 +6,12 @@ import com.dianping.cat.home.dal.report.Overload;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+@Component("overloadRepository")
 public class OverloadRepository extends SpringBackedRepositorySupport<OverloadMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OverloadRepository.class);
 

@@ -4,10 +4,12 @@ import com.dianping.cat.mybatis.data.AlertSummaryDO;
 import com.dianping.cat.mybatis.mapper.AlertSummaryMapper;
 import com.dianping.cat.home.dal.report.AlertSummary;
 import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+@Component("alertSummaryRepository")
 public class AlertSummaryRepository extends SpringBackedRepositorySupport<AlertSummaryMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryRepository.class);
 

@@ -4,24 +4,30 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import jakarta.annotation.Resource;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.DailyReportContent;
 import com.dianping.cat.mybatis.mapper.DailyReportContentMapper;
 import com.dianping.cat.mybatis.data.DailyReportContentDO;
 
+@Component("dailyReportContentRepository")
 public class DailyReportContentRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DailyReportContentRepository.class);
 
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 
-	private SqlSessionTemplate m_sqlSessionTemplate;
+	@Resource(name = "sqlSessionTemplate")
+	private SqlSessionTemplate sqlSessionTemplate;
 
-	private TransactionTemplate m_transactionTemplate;
+	@Resource(name = "transactionTemplate")
+	private TransactionTemplate transactionTemplate;
 
 	public DailyReportContent createLocal() {
 		return new DailyReportContent();
@@ -82,28 +88,28 @@ public class DailyReportContentRepository {
 	}
 
 	private DailyReportContentMapper springMapper() {
-		if (m_sqlSessionTemplate == null) {
+		if (sqlSessionTemplate == null) {
 			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for DailyReportContentMapper.");
 		}
 		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
 			LOGGER.info("DailyReportContentRepository is using Spring managed DailyReportContentMapper.");
 		}
-		return m_sqlSessionTemplate.getMapper(DailyReportContentMapper.class);
+		return sqlSessionTemplate.getMapper(DailyReportContentMapper.class);
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		if (m_transactionTemplate == null) {
+		if (transactionTemplate == null) {
 			throw new IllegalStateException("Spring TransactionTemplate is not configured for DailyReportContentMapper.");
 		}
-		return m_transactionTemplate;
+		return transactionTemplate;
 	}
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		m_sqlSessionTemplate = sqlSessionTemplate;
+		this.sqlSessionTemplate = sqlSessionTemplate;
 	}
 
 	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-		m_transactionTemplate = transactionTemplate;
+		this.transactionTemplate = transactionTemplate;
 	}
 
 	private DailyReportContent requireFound(DailyReportContentDO record, String field, String value) {

@@ -2,24 +2,30 @@ package com.dianping.cat.mybatis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import jakarta.annotation.Resource;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.mybatis.mapper.TaskMapper;
 import com.dianping.cat.mybatis.data.TaskDO;
 
+@Component("taskRepository")
 public class TaskRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TaskRepository.class);
 
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 
-	private SqlSessionTemplate m_sqlSessionTemplate;
+	@Resource(name = "sqlSessionTemplate")
+	private SqlSessionTemplate sqlSessionTemplate;
 
-	private TransactionTemplate m_transactionTemplate;
+	@Resource(name = "transactionTemplate")
+	private TransactionTemplate transactionTemplate;
 
 	public Task createLocal() {
 		return new Task();
@@ -100,28 +106,28 @@ public class TaskRepository {
 	}
 
 	private TaskMapper springMapper() {
-		if (m_sqlSessionTemplate == null) {
+		if (sqlSessionTemplate == null) {
 			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for TaskMapper.");
 		}
 		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
 			LOGGER.info("TaskRepository is using Spring managed TaskMapper.");
 		}
-		return m_sqlSessionTemplate.getMapper(TaskMapper.class);
+		return sqlSessionTemplate.getMapper(TaskMapper.class);
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		if (m_transactionTemplate == null) {
+		if (transactionTemplate == null) {
 			throw new IllegalStateException("Spring TransactionTemplate is not configured for TaskMapper.");
 		}
-		return m_transactionTemplate;
+		return transactionTemplate;
 	}
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		m_sqlSessionTemplate = sqlSessionTemplate;
+		this.sqlSessionTemplate = sqlSessionTemplate;
 	}
 
 	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-		m_transactionTemplate = transactionTemplate;
+		this.transactionTemplate = transactionTemplate;
 	}
 
 	private Task requireFound(TaskDO record, String field, String value) {
