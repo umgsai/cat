@@ -113,7 +113,6 @@ import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.ProblemDelegate;
 import com.dianping.cat.consumer.problem.DefaultProblemHandler;
 import com.dianping.cat.consumer.problem.LongExecutionProblemHandler;
-import com.dianping.cat.consumer.problem.ProblemHandler;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.StateDelegate;
@@ -121,7 +120,6 @@ import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.consumer.storage.StorageAnalyzer;
 import com.dianping.cat.consumer.storage.StorageDelegate;
 import com.dianping.cat.consumer.storage.StorageReportUpdater;
-import com.dianping.cat.consumer.storage.builder.StorageBuilder;
 import com.dianping.cat.consumer.storage.builder.StorageBuilderManager;
 import com.dianping.cat.consumer.storage.builder.StorageCacheBuilder;
 import com.dianping.cat.consumer.storage.builder.StorageRPCBuilder;
@@ -140,22 +138,18 @@ import com.dianping.cat.mybatis.SpringBackedRepositorySupport;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
-import com.dianping.cat.alarm.spi.decorator.Decorator;
 import com.dianping.cat.alarm.spi.decorator.DecoratorManager;
-import com.dianping.cat.alarm.spi.receiver.Contactor;
 import com.dianping.cat.alarm.spi.receiver.ContactorManager;
 import com.dianping.cat.alarm.spi.rule.DataChecker;
 import com.dianping.cat.alarm.spi.rule.DefaultDataChecker;
 import com.dianping.cat.alarm.service.AlertService;
 import com.dianping.cat.alarm.spi.sender.MailSender;
-import com.dianping.cat.alarm.spi.sender.Sender;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
 import com.dianping.cat.alarm.spi.sender.SmsSender;
 import com.dianping.cat.alarm.spi.sender.WeixinSender;
 import com.dianping.cat.alarm.spi.spliter.DXSpliter;
 import com.dianping.cat.alarm.spi.spliter.MailSpliter;
 import com.dianping.cat.alarm.spi.spliter.SmsSpliter;
-import com.dianping.cat.alarm.spi.spliter.Spliter;
 import com.dianping.cat.alarm.spi.spliter.SpliterManager;
 import com.dianping.cat.alarm.spi.spliter.WeixinSpliter;
 import com.dianping.cat.mybatis.repository.alert.AlertRepository;
@@ -397,7 +391,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		DumpAnalyzer.class, DependencyAnalyzer.class, DependencyDelegate.class, EventAnalyzer.class, EventDelegate.class,
 		HeartbeatAnalyzer.class, HeartbeatDelegate.class, MatrixAnalyzer.class, MatrixDelegate.class,
 		ProblemAnalyzer.class, ProblemDelegate.class, StorageAnalyzer.class, StorageDelegate.class,
-		StorageReportUpdater.class, TopAnalyzer.class, TopDelegate.class, StateAnalyzer.class, StateDelegate.class,
+		StorageReportUpdater.class, StorageBuilderManager.class, TopAnalyzer.class, TopDelegate.class, StateAnalyzer.class, StateDelegate.class,
 		ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
 		CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
 		BusinessPointParser.class, DomainGroupConfigManager.class, StorageGroupConfigManager.class,
@@ -524,6 +518,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					EventAnalyzer.class, EventDelegate.class, HeartbeatAnalyzer.class, HeartbeatDelegate.class,
 					MatrixAnalyzer.class, MatrixDelegate.class, ProblemAnalyzer.class, ProblemDelegate.class,
 					StorageAnalyzer.class, StorageDelegate.class, StorageReportUpdater.class,
+					StorageBuilderManager.class,
 					TopAnalyzer.class, TopDelegate.class, StateAnalyzer.class, StateDelegate.class,
 					ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
 					CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
@@ -1549,29 +1544,6 @@ public class CatHomeSpringConfiguration {
 		return configureSpringBackedRepository(new UserDefineRuleRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
-	@Bean
-	public List<ProblemHandler> problemHandlers(@Qualifier(DefaultProblemHandler.ID) ProblemHandler defaultProblemHandler,
-			@Qualifier(LongExecutionProblemHandler.ID) ProblemHandler longExecutionProblemHandler) {
-		return Arrays.asList(defaultProblemHandler, longExecutionProblemHandler);
-	}
-
-	@Bean
-	public Map<String, StorageBuilder> storageBuilders(@Qualifier("storageSQLBuilder") StorageBuilder storageSQLBuilder,
-			@Qualifier("storageCacheBuilder") StorageBuilder storageCacheBuilder,
-			@Qualifier("storageRPCBuilder") StorageBuilder storageRPCBuilder) {
-		return buildStorageBuilders(storageSQLBuilder, storageCacheBuilder, storageRPCBuilder);
-	}
-
-	@Bean(initMethod = "initialize")
-	public StorageBuilderManager storageBuilderManager(@Qualifier("storageSQLBuilder") StorageBuilder storageSQLBuilder,
-			@Qualifier("storageCacheBuilder") StorageBuilder storageCacheBuilder,
-			@Qualifier("storageRPCBuilder") StorageBuilder storageRPCBuilder) {
-		StorageBuilderManager manager = new StorageBuilderManager();
-
-		manager.setStorageBuilders(buildStorageBuilders(storageSQLBuilder, storageCacheBuilder, storageRPCBuilder));
-		return manager;
-	}
-
 	@Bean(initMethod = "initialize", name = "problem-historical")
 	public ModelService<ProblemReport> historicalProblemService(ProblemReportService problemReportService,
 			ServerConfigManager serverConfigManager) {
@@ -2019,74 +1991,8 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public Map<String, Sender> alertSenders(@Qualifier("mailSender") Sender mailSender,
-			@Qualifier("smsSender") Sender smsSender, @Qualifier("weixinSender") Sender weixinSender) {
-		Map<String, Sender> senders = new LinkedHashMap<String, Sender>();
-
-		senders.put(MailSender.ID, mailSender);
-		senders.put(SmsSender.ID, smsSender);
-		senders.put(WeixinSender.ID, weixinSender);
-		return senders;
-	}
-
-	@Bean
-	public Map<String, Spliter> alertSpliters(@Qualifier("mailSpliter") Spliter mailSpliter,
-			@Qualifier("smsSpliter") Spliter smsSpliter, @Qualifier("weixinSpliter") Spliter weixinSpliter,
-			@Qualifier("dxSpliter") Spliter dxSpliter) {
-		Map<String, Spliter> spliters = new LinkedHashMap<String, Spliter>();
-
-		spliters.put(MailSpliter.ID, mailSpliter);
-		spliters.put(SmsSpliter.ID, smsSpliter);
-		spliters.put(WeixinSpliter.ID, weixinSpliter);
-		spliters.put(DXSpliter.ID, dxSpliter);
-		return spliters;
-	}
-
-	@Bean
-	public Map<String, Contactor> alertContactors(@Qualifier("eventContactor") Contactor eventContactor,
-			@Qualifier("heartbeatContactor") Contactor heartbeatContactor,
-			@Qualifier("transactionContactor") Contactor transactionContactor,
-			@Qualifier("businessContactor") Contactor businessContactor,
-			@Qualifier("exceptionContactor") Contactor exceptionContactor) {
-		Map<String, Contactor> contactors = new LinkedHashMap<String, Contactor>();
-
-		contactors.put(EventContactor.ID, eventContactor);
-		contactors.put(HeartbeatContactor.ID, heartbeatContactor);
-		contactors.put(TransactionContactor.ID, transactionContactor);
-		contactors.put(BusinessContactor.ID, businessContactor);
-		contactors.put(ExceptionContactor.ID, exceptionContactor);
-		return contactors;
-	}
-
-	@Bean
-	public Map<String, Decorator> alertDecorators(@Qualifier("eventDecorator") Decorator eventDecorator,
-			@Qualifier("heartbeatDecorator") Decorator heartbeatDecorator,
-			@Qualifier("transactionDecorator") Decorator transactionDecorator,
-			@Qualifier("businessDecorator") Decorator businessDecorator,
-			@Qualifier("exceptionDecorator") Decorator exceptionDecorator) {
-		Map<String, Decorator> decorators = new LinkedHashMap<String, Decorator>();
-
-		decorators.put(EventDecorator.ID, eventDecorator);
-		decorators.put(HeartbeatDecorator.ID, heartbeatDecorator);
-		decorators.put(TransactionDecorator.ID, transactionDecorator);
-		decorators.put(BusinessDecorator.ID, businessDecorator);
-		decorators.put(ExceptionDecorator.ID, exceptionDecorator);
-		return decorators;
-	}
-
-	@Bean
 	public DataSource catDataSource() {
 		return CatHomeSpringDataSourceFactory.createCatDataSource();
-	}
-
-	private Map<String, StorageBuilder> buildStorageBuilders(StorageBuilder storageSQLBuilder,
-			StorageBuilder storageCacheBuilder, StorageBuilder storageRPCBuilder) {
-		Map<String, StorageBuilder> builders = new LinkedHashMap<String, StorageBuilder>();
-
-		builders.put(storageSQLBuilder.getType(), storageSQLBuilder);
-		builders.put(storageCacheBuilder.getType(), storageCacheBuilder);
-		builders.put(storageRPCBuilder.getType(), storageRPCBuilder);
-		return builders;
 	}
 
 	private <T extends SpringBackedRepositorySupport<?>> T configureSpringBackedRepository(T repository,

@@ -19,7 +19,8 @@
 package com.dianping.cat.alarm.spi.spliter;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -35,8 +36,10 @@ import jakarta.annotation.Resource;
 public class SpliterManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpliterManager.class);
 
-	@Resource(name = "alertSpliters")
-	private Map<String, Spliter> spliters = new HashMap<String, Spliter>();
+	@Resource
+	private List<Spliter> spliterList = Collections.emptyList();
+
+	private Map<String, Spliter> spliters;
 
 	private volatile boolean initialized;
 
@@ -49,12 +52,16 @@ public class SpliterManager {
 			if (initialized) {
 				return;
 			}
-			spliters = copySpliters(spliters);
+			if (spliters == null) {
+				spliters = buildSpliters(spliterList);
+			} else {
+				spliters = copySpliters(spliters);
+			}
 			if (spliters.isEmpty()) {
 				LOGGER.warn("Alert splitter manager has no configured splitters.");
 			} else {
-				LOGGER.info("Initialized alert splitter manager from Spring injection, splitterCount={}.",
-				      spliters.size());
+				LOGGER.info("Initialized alert splitter manager from Spring injection, splitterKeys={}.",
+				      spliters.keySet());
 			}
 			initialized = true;
 		}
@@ -66,11 +73,37 @@ public class SpliterManager {
 		}
 	}
 
+	private Map<String, Spliter> buildSpliters(List<Spliter> spliterList) {
+		Map<String, Spliter> result = new LinkedHashMap<String, Spliter>();
+
+		if (spliterList == null || spliterList.isEmpty()) {
+			return result;
+		}
+		for (Spliter spliter : spliterList) {
+			if (spliter == null) {
+				continue;
+			}
+			String id = spliter.getID();
+
+			if (id == null || id.length() == 0) {
+				LOGGER.warn("Ignore alert splitter without id, splitterClass={}.", spliter.getClass().getName());
+				continue;
+			}
+			Spliter previous = result.put(id, spliter);
+
+			if (previous != null) {
+				LOGGER.warn("Duplicate alert splitter id detected, id={}, previousClass={}, currentClass={}.", id,
+				      previous.getClass().getName(), spliter.getClass().getName());
+			}
+		}
+		return result;
+	}
+
 	private Map<String, Spliter> copySpliters(Map<String, Spliter> spliters) {
 		if (spliters == null || spliters.isEmpty()) {
-			return new HashMap<String, Spliter>();
+			return new LinkedHashMap<String, Spliter>();
 		}
-		return new HashMap<String, Spliter>(spliters);
+		return new LinkedHashMap<String, Spliter>(spliters);
 	}
 
 	public String process(String content, AlertChannel channel) {

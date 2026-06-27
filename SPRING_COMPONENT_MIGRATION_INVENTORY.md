@@ -2246,3 +2246,60 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+
+## 40. 第三十二批完成记录
+
+第三十二批开始收口前面暂留的 List/Map 聚合 Bean，重点处理 storage、problem handler 和告警发送链路。目标是在不改变业务 key 语义的前提下，把聚合逻辑从 `CatHomeSpringConfiguration` 移到实际使用方内部，让配置类继续瘦身。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下聚合 Bean 已从 `CatHomeSpringConfiguration` 删除：
+
+```text
+problemHandlers
+storageBuilders
+storageBuilderManager
+alertSenders
+alertSpliters
+alertContactors
+alertDecorators
+```
+
+2. `StorageBuilderManager` 已改为 `@Component` 注册，并加入 `CatHomeSpringConfiguration` 白名单扫描；原 `@Bean(initMethod = "initialize")` 的初始化语义改为 `@PostConstruct`。
+3. `ProblemAnalyzer` 改为直接注入 `List<ProblemHandler>`，不再依赖 `problemHandlers` 聚合 Bean。
+4. `StorageAnalyzer` 和 `StorageBuilderManager` 改为注入 `List<StorageBuilder>`，初始化时按 `StorageBuilder#getType()` 构建业务 Map，保持旧配置类中按 type 作为 key 的语义。
+5. `SenderManager`、`SpliterManager`、`ContactorManager`、`DecoratorManager` 改为注入对应组件列表，并分别按业务 ID 构建 Map：
+
+```text
+Sender#getId()
+Spliter#getID()
+Contactor#getId()
+Decorator#getId()
+```
+
+6. 本批保留各 Manager 原有 setter，方便测试和少量手工构造场景继续覆盖聚合 Map。
+7. 聚合构建过程补充了关键日志：当组件列表为空、业务 ID 为空或业务 ID 重复时，使用 SLF4J 输出清晰日志，便于启动和运行时排查组件扫描/注入问题。
+8. 本批仍不迁移以下内容：
+
+```text
+ReportManager / ModelService / LocalModelService
+reportReloaders / taskBuilders 等任务入口聚合 Map
+存储 bucket / HDFS / message dump 链路
+DataSource / SqlSessionFactory / TransactionTemplate
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

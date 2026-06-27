@@ -19,7 +19,7 @@
 package com.dianping.cat.alarm.spi.receiver;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +36,10 @@ import jakarta.annotation.Resource;
 public class ContactorManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContactorManager.class);
 
-	@Resource(name = "alertContactors")
-	private Map<String, Contactor> contactors = new HashMap<String, Contactor>();
+	@Resource
+	private List<Contactor> contactorList = Collections.emptyList();
+
+	private Map<String, Contactor> contactors;
 
 	private volatile boolean initialized;
 
@@ -50,12 +52,16 @@ public class ContactorManager {
 			if (initialized) {
 				return;
 			}
-			contactors = copyContactors(contactors);
+			if (contactors == null) {
+				contactors = buildContactors(contactorList);
+			} else {
+				contactors = copyContactors(contactors);
+			}
 			if (contactors.isEmpty()) {
 				LOGGER.warn("Alert contactor manager has no configured contactors.");
 			} else {
-				LOGGER.info("Initialized alert contactor manager from Spring injection, contactorCount={}.",
-				      contactors.size());
+				LOGGER.info("Initialized alert contactor manager from Spring injection, contactorKeys={}.",
+				      contactors.keySet());
 			}
 			initialized = true;
 		}
@@ -67,11 +73,37 @@ public class ContactorManager {
 		}
 	}
 
+	private Map<String, Contactor> buildContactors(List<Contactor> contactorList) {
+		Map<String, Contactor> result = new LinkedHashMap<String, Contactor>();
+
+		if (contactorList == null || contactorList.isEmpty()) {
+			return result;
+		}
+		for (Contactor contactor : contactorList) {
+			if (contactor == null) {
+				continue;
+			}
+			String id = contactor.getId();
+
+			if (id == null || id.length() == 0) {
+				LOGGER.warn("Ignore alert contactor without id, contactorClass={}.", contactor.getClass().getName());
+				continue;
+			}
+			Contactor previous = result.put(id, contactor);
+
+			if (previous != null) {
+				LOGGER.warn("Duplicate alert contactor id detected, id={}, previousClass={}, currentClass={}.", id,
+				      previous.getClass().getName(), contactor.getClass().getName());
+			}
+		}
+		return result;
+	}
+
 	private Map<String, Contactor> copyContactors(Map<String, Contactor> contactors) {
 		if (contactors == null || contactors.isEmpty()) {
-			return new HashMap<String, Contactor>();
+			return new LinkedHashMap<String, Contactor>();
 		}
-		return new HashMap<String, Contactor>(contactors);
+		return new LinkedHashMap<String, Contactor>(contactors);
 	}
 
 	public List<String> queryReceivers(String group, AlertChannel channel, String type) {

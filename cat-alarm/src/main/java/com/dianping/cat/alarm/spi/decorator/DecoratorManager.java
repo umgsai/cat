@@ -19,7 +19,8 @@
 package com.dianping.cat.alarm.spi.decorator;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -37,8 +38,10 @@ import jakarta.annotation.Resource;
 public class DecoratorManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DecoratorManager.class);
 
-	@Resource(name = "alertDecorators")
-	private Map<String, Decorator> decorators = new HashMap<String, Decorator>();
+	@Resource
+	private List<Decorator> decoratorList = Collections.emptyList();
+
+	private Map<String, Decorator> decorators;
 
 	private volatile boolean initialized;
 
@@ -68,12 +71,16 @@ public class DecoratorManager {
 			if (initialized) {
 				return;
 			}
-			decorators = copyDecorators(decorators);
+			if (decorators == null) {
+				decorators = buildDecorators(decoratorList);
+			} else {
+				decorators = copyDecorators(decorators);
+			}
 			if (decorators.isEmpty()) {
 				LOGGER.warn("Alert decorator manager has no configured decorators.");
 			} else {
-				LOGGER.info("Initialized alert decorator manager from Spring injection, decoratorCount={}.",
-				      decorators.size());
+				LOGGER.info("Initialized alert decorator manager from Spring injection, decoratorKeys={}.",
+				      decorators.keySet());
 			}
 			initialized = true;
 		}
@@ -85,11 +92,37 @@ public class DecoratorManager {
 		}
 	}
 
+	private Map<String, Decorator> buildDecorators(List<Decorator> decoratorList) {
+		Map<String, Decorator> result = new LinkedHashMap<String, Decorator>();
+
+		if (decoratorList == null || decoratorList.isEmpty()) {
+			return result;
+		}
+		for (Decorator decorator : decoratorList) {
+			if (decorator == null) {
+				continue;
+			}
+			String id = decorator.getId();
+
+			if (id == null || id.length() == 0) {
+				LOGGER.warn("Ignore alert decorator without id, decoratorClass={}.", decorator.getClass().getName());
+				continue;
+			}
+			Decorator previous = result.put(id, decorator);
+
+			if (previous != null) {
+				LOGGER.warn("Duplicate alert decorator id detected, id={}, previousClass={}, currentClass={}.", id,
+				      previous.getClass().getName(), decorator.getClass().getName());
+			}
+		}
+		return result;
+	}
+
 	private Map<String, Decorator> copyDecorators(Map<String, Decorator> decorators) {
 		if (decorators == null || decorators.isEmpty()) {
-			return new HashMap<String, Decorator>();
+			return new LinkedHashMap<String, Decorator>();
 		}
-		return new HashMap<String, Decorator>(decorators);
+		return new LinkedHashMap<String, Decorator>(decorators);
 	}
 
 	public void setDecorators(Map<String, Decorator> decorators) {
