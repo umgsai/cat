@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.consumer.business.model.entity.BusinessItem;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
@@ -31,20 +32,21 @@ import com.dianping.cat.consumer.business.model.transform.BaseVisitor;
 import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class BusinessDataFetcher {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessDataFetcher.class);
 
-	private BusinessKeyHelper m_keyHelper;
-
-	public void setKeyHelper(BusinessKeyHelper keyHelper) {
-		m_keyHelper = keyHelper;
-	}
+	@Resource
+	private BusinessKeyHelper businessKeyHelper;
 
 	public Map<String, double[]> buildGraphData(BusinessReport businessReport) {
 		BusinessDataBuilder builder = new BusinessDataBuilder();
 
 		if (businessReport == null) {
 			LOGGER.error("Business report is null while building graph data.");
+			return builder.getDatas();
 		}
 		builder.visitBusinessReport(businessReport);
 		return builder.getDatas();
@@ -52,17 +54,18 @@ public class BusinessDataFetcher {
 
 	public class BusinessDataBuilder extends BaseVisitor {
 
-		private Map<String, double[]> m_datas = new LinkedHashMap<String, double[]>();
+		private Map<String, double[]> dataByKey = new LinkedHashMap<String, double[]>();
 
-		private String m_domain;
+		private String domain;
 
 		@Override
 		public void visitBusinessReport(BusinessReport report) {
 			if (report == null) {
 				LOGGER.error("Cannot visit null business report.");
+				return;
 			}
 
-			m_domain = report.getDomain();
+			domain = report.getDomain();
 			super.visitBusinessReport(report);
 		}
 
@@ -82,13 +85,13 @@ public class BusinessDataFetcher {
 				avg[index] = seg.getAvg();
 			}
 
-			m_datas.put(m_keyHelper.generateKey(key, m_domain, MetricType.SUM.getName()), sum);
-			m_datas.put(m_keyHelper.generateKey(key, m_domain, MetricType.COUNT.getName()), count);
-			m_datas.put(m_keyHelper.generateKey(key, m_domain, MetricType.AVG.getName()), avg);
+			dataByKey.put(businessKeyHelper.generateKey(key, domain, MetricType.SUM.getName()), sum);
+			dataByKey.put(businessKeyHelper.generateKey(key, domain, MetricType.COUNT.getName()), count);
+			dataByKey.put(businessKeyHelper.generateKey(key, domain, MetricType.AVG.getName()), avg);
 		}
 
 		public Map<String, double[]> getDatas() {
-			return m_datas;
+			return dataByKey;
 		}
 	}
 

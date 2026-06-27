@@ -18,9 +18,12 @@
  */
 package com.dianping.cat.report.page.business.task;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class BusinessKeyHelper {
 
-	public final String SPLITTER = ":";
+	private static final String SPLITTER = ":";
 
 	public String getType(String key) {
 		int index = key.lastIndexOf(SPLITTER);

@@ -22,11 +22,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.consumer.business.model.entity.BusinessItem;
 import com.dianping.cat.consumer.business.model.entity.Segment;
 import com.dianping.cat.helper.MetricType;
 
+@Component
 public class BusinessPointParser {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessPointParser.class);
 
 	private static final int POINT_NUMBER = 60;
 
@@ -48,6 +54,7 @@ public class BusinessPointParser {
 					values[index] = oneHourValues[minute];
 				}
 			} catch (Exception e) {
+				LOGGER.debug("Unable to build hourly business data, hour={}, metricType={}.", hour, type, e);
 				continue;
 			}
 		}

@@ -396,12 +396,16 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 @ComponentScan(basePackageClasses = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class,
 		DumpAnalyzer.class, DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class,
 		MatrixAnalyzer.class, ProblemAnalyzer.class, StorageAnalyzer.class, TopAnalyzer.class, StateAnalyzer.class,
-		ContainerMessageAnalyzerFactory.class},
+		ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
+		CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
+		BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class},
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
 					DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class, MatrixAnalyzer.class,
 					ProblemAnalyzer.class, StorageAnalyzer.class, TopAnalyzer.class, StateAnalyzer.class,
-					ContainerMessageAnalyzerFactory.class}),
+					ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
+					CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
+					BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class}),
 		useDefaultFilters = false)
 @MapperScan(basePackages = {
 		"com.dianping.cat.mybatis.mapper",
@@ -3868,19 +3872,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public BusinessKeyHelper businessKeyHelper() {
-		return new BusinessKeyHelper();
-	}
-
-	@Bean
-	public BusinessDataFetcher businessDataFetcher(BusinessKeyHelper businessKeyHelper) {
-		BusinessDataFetcher fetcher = new BusinessDataFetcher();
-
-		fetcher.setKeyHelper(businessKeyHelper);
-		return fetcher;
-	}
-
-	@Bean
 	public BusinessGraphCreator businessGraphCreator(CachedBusinessReportService cachedBusinessReportService,
 			BusinessConfigManager businessConfigManager, BusinessDataFetcher businessDataFetcher,
 			ProjectService projectService, BusinessTagConfigManager businessTagConfigManager,
@@ -3900,48 +3891,6 @@ public class CatHomeSpringConfiguration {
 		creator.setDataExtractor(dataExtractor);
 		creator.setAlertManager(spiAlertManager);
 		return creator;
-	}
-
-	@Bean
-	public CachedBusinessReportService cachedBusinessReportService(BusinessReportService businessReportService,
-			@Qualifier("businessModelService") ModelService<BusinessReport> businessModelService) {
-		CachedBusinessReportService service = new CachedBusinessReportService();
-
-		service.setReportService(businessReportService);
-		service.setModelService(businessModelService);
-		return service;
-	}
-
-	@Bean
-	public BusinessReportGroupService businessReportGroupService(
-			@Qualifier("businessModelService") ModelService<BusinessReport> businessModelService) {
-		BusinessReportGroupService service = new BusinessReportGroupService();
-
-		service.setService(businessModelService);
-		return service;
-	}
-
-	@Bean
-	public CustomDataCalculator customDataCalculator(BusinessKeyHelper businessKeyHelper) {
-		CustomDataCalculator calculator = new CustomDataCalculator();
-
-		calculator.setKeyHelper(businessKeyHelper);
-		return calculator;
-	}
-
-	@Bean
-	public BusinessPointParser businessPointParser() {
-		return new BusinessPointParser();
-	}
-
-	@Bean
-	public BaselineConfigManager baselineConfigManager() {
-		return new BaselineConfigManager();
-	}
-
-	@Bean
-	public BaselineCreator baselineCreator() {
-		return new DefaultBaselineCreator();
 	}
 
 	@Bean
