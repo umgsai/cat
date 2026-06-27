@@ -23,9 +23,15 @@ import java.util.Date;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.helper.TimeHelper;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
+@Component
 public class PayloadNormalizer {
 
-	protected ServerConfigManager m_manager;
+	@Resource
+	protected ServerConfigManager serverConfigManager;
 
 	@SuppressWarnings("rawtypes")
 	public void normalize(AbstractReportModel model, AbstractReportPayload payload) {
@@ -52,10 +58,6 @@ public class PayloadNormalizer {
 			model.setDate(start.getTime());
 			model.setCustomDate(start, end);
 		}
-	}
-
-	public void setManager(ServerConfigManager manager) {
-		m_manager = manager;
 	}
 
 }

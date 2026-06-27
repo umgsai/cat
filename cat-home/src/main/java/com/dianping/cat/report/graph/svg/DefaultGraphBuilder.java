@@ -20,19 +20,25 @@ package com.dianping.cat.report.graph.svg;
 
 import java.text.DecimalFormat;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
+@Component("graphBuilder")
 public class DefaultGraphBuilder implements GraphBuilder {
 	private static final int BAR = 1;
 
 	private static final int LINE = 2;
 
-	private ValueTranslater m_translater;
+	@Resource(name = "valueTranslater")
+	private ValueTranslater valueTranslater;
 
-	private int m_type = BAR;
+	private int graphType = BAR;
 
 	@Override
 	public String build(GraphPayload payload) {
 		double[] values = payload.getValues();
-		double maxValue = m_translater.getMaxValue(values);
+		double maxValue = valueTranslater.getMaxValue(values);
 		XmlBuilder b = new XmlBuilder();
 
 		if (maxValue == 0) {
@@ -43,18 +49,14 @@ public class DefaultGraphBuilder implements GraphBuilder {
 		buildCoordinate(payload, b);
 		buildYLabels(payload, b, maxValue);
 		buildXLabels(payload, b);
-		if (m_type == BAR) {
+		if (graphType == BAR) {
 			buildBars(payload, b, maxValue, values);
-		} else if (m_type == LINE) {
+		} else if (graphType == LINE) {
 			buildLines(payload, b, maxValue, values);
 		}
 		buildFooter(payload, b);
 
 		return b.getResult().toString();
-	}
-
-	public void setTranslater(ValueTranslater translater) {
-		m_translater = translater;
 	}
 
 	protected void buildBars(GraphPayload payload, XmlBuilder b, double maxValue, double[] values) {
@@ -69,7 +71,7 @@ public class DefaultGraphBuilder implements GraphBuilder {
 		int w = width - left - right;
 		int cols = payload.getColumns();
 		int xstep = w / cols;
-		int[] pixels = m_translater.translate(h, maxValue, values);
+		int[] pixels = valueTranslater.translate(h, maxValue, values);
 		String idPrefix = payload.getIdPrefix();
 
 		b.tag1("g", "id", "bar", "fill", "red");
@@ -243,7 +245,7 @@ public class DefaultGraphBuilder implements GraphBuilder {
 		int w = width - left - right;
 		int cols = payload.getColumns();
 		int xstep = w / cols;
-		int[] pixels = m_translater.translate(h, maxValue, values);
+		int[] pixels = valueTranslater.translate(h, maxValue, values);
 		String idPrefix = payload.getIdPrefix();
 
 		b.tag1("g", "id", "bar", "fill", "red");
@@ -369,7 +371,7 @@ public class DefaultGraphBuilder implements GraphBuilder {
 	}
 
 	@Override
-	public void setGraphType(int GraphType) {
+	public void setGraphType(int graphType) {
 	}
 
 	private String toCompactString(double value) {
@@ -377,82 +379,82 @@ public class DefaultGraphBuilder implements GraphBuilder {
 	}
 
 	protected static class PathBuilder {
-		private int m_marker;
+		private int marker;
 
-		private StringBuilder m_sb = new StringBuilder(64);
+		private StringBuilder content = new StringBuilder(64);
 
 		public String build() {
-			String result = m_sb.toString();
+			String result = content.toString();
 
-			m_sb.setLength(0);
+			content.setLength(0);
 			return result;
 		}
 
 		public PathBuilder h(int deltaX) {
-			m_sb.append(" h").append(deltaX);
+			content.append(" h").append(deltaX);
 			return this;
 		}
 
 		public PathBuilder m(int deltaX, int deltaY) {
-			m_sb.append(" m").append(deltaX).append(',').append(deltaY);
+			content.append(" m").append(deltaX).append(',').append(deltaY);
 			return this;
 		}
 
 		public PathBuilder mark() {
-			m_marker = m_sb.length();
+			marker = content.length();
 			return this;
 		}
 
 		public PathBuilder moveTo(int x, int y) {
-			m_sb.append('M').append(x).append(',').append(y);
+			content.append('M').append(x).append(',').append(y);
 			return this;
 		}
 
 		public PathBuilder repeat(int count) {
-			int pos = m_sb.length();
+			int pos = content.length();
 
 			for (int i = 0; i < count; i++) {
-				m_sb.append(m_sb.subSequence(m_marker, pos));
+				content.append(content.subSequence(marker, pos));
 			}
 
 			return this;
 		}
 
 		public PathBuilder v(int deltaY) {
-			m_sb.append(" v").append(deltaY);
+			content.append(" v").append(deltaY);
 			return this;
 		}
 	}
 
 	protected static class XmlBuilder {
-		private boolean m_compact;
+		private boolean compact;
 
-		private int m_level;
+		private int level;
 
-		private StringBuilder m_sb = new StringBuilder(8192);
+		private StringBuilder content = new StringBuilder(8192);
 
 		public XmlBuilder add(String text) {
-			m_sb.append(text);
+			content.append(text);
 			return this;
 		}
 
 		public XmlBuilder element(String name, String value) {
 			indent();
-			m_sb.append('<').append(name).append('>');
-			m_sb.append(value);
-			m_sb.append("</").append(name).append(">");
+			content.append('<').append(name).append('>');
+			content.append(value);
+			content.append("</").append(name).append(">");
 			newLine();
 			return this;
 		}
 
 		public StringBuilder getResult() {
-			return m_sb;
+			return content;
 		}
 
 		public XmlBuilder indent() {
-			if (!m_compact) {
-				for (int i = m_level - 1; i >= 0; i--) {
-					m_sb.append("  ");
+			if (!compact) {
+				for (int i = level - 1; i >= 0; i--) {
+					content.append("  ");
 				}
 			}
 
@@ -460,7 +462,7 @@ public class DefaultGraphBuilder implements GraphBuilder {
 		}
 
 		public XmlBuilder newLine() {
-			m_sb.append("\r\n");
+			content.append("\r\n");
 			return this;
 		}
 
@@ -471,7 +473,7 @@ public class DefaultGraphBuilder implements GraphBuilder {
 		public XmlBuilder tag1(String name, Object... attributes) {
 			indent();
 
-			m_sb.append('<').append(name);
+			content.append('<').append(name);
 
 			int len = attributes.length;
 			for (int i = 0; i < len; i += 2) {
@@ -479,20 +481,20 @@ public class DefaultGraphBuilder implements GraphBuilder {
 				Object val = attributes[i + 1];
 
 				if (val != null) {
-					m_sb.append(' ').append(key).append("=\"").append(val).append('"');
+					content.append(' ').append(key).append("=\"").append(val).append('"');
 				}
 			}
 
-			m_sb.append(">");
+			content.append(">");
 			newLine();
-			m_level++;
+			level++;
 			return this;
 		}
 
 		public XmlBuilder tag2(String name) {
-			m_level--;
+			level--;
 			indent();
-			m_sb.append("</").append(name).append(">");
+			content.append("</").append(name).append(">");
 			newLine();
 			return this;
 		}
@@ -500,7 +502,7 @@ public class DefaultGraphBuilder implements GraphBuilder {
 		public XmlBuilder tagWithText(String name, Object text, Object... attributes) {
 			indent();
 
-			m_sb.append('<').append(name);
+			content.append('<').append(name);
 
 			int len = attributes.length;
 			for (int i = 0; i < len; i += 2) {
@@ -508,14 +510,14 @@ public class DefaultGraphBuilder implements GraphBuilder {
 				Object val = attributes[i + 1];
 
 				if (val != null) {
-					m_sb.append(' ').append(key).append("=\"").append(val).append('"');
+					content.append(' ').append(key).append("=\"").append(val).append('"');
 				}
 			}
 
 			if (text == null) {
-				m_sb.append("/>");
+				content.append("/>");
 			} else {
-				m_sb.append('>').append(text).append("</").append(name).append('>');
+				content.append('>').append(text).append("</").append(name).append('>');
 			}
 
 			newLine();

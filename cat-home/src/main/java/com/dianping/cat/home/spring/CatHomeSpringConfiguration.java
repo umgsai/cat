@@ -398,14 +398,18 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		MatrixAnalyzer.class, ProblemAnalyzer.class, StorageAnalyzer.class, TopAnalyzer.class, StateAnalyzer.class,
 		ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
 		CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
-		BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class},
+		BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
+		BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class, JsonBuilder.class,
+		DefaultValueTranslater.class, DefaultGraphBuilder.class},
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
 					DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class, MatrixAnalyzer.class,
 					ProblemAnalyzer.class, StorageAnalyzer.class, TopAnalyzer.class, StateAnalyzer.class,
 					ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
 					CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
-					BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class}),
+					BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
+					BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class,
+					JsonBuilder.class, DefaultValueTranslater.class, DefaultGraphBuilder.class}),
 		useDefaultFilters = false)
 @MapperScan(basePackages = {
 		"com.dianping.cat.mybatis.mapper",
@@ -1160,38 +1164,6 @@ public class CatHomeSpringConfiguration {
 		TopologyGraphBuilder builder = new TopologyGraphBuilder();
 
 		builder.setItemBuilder(dependencyItemBuilder);
-		return builder;
-	}
-
-	@Bean
-	public PayloadNormalizer payloadNormalizer(ServerConfigManager serverConfigManager) {
-		PayloadNormalizer normalizer = new PayloadNormalizer();
-
-		normalizer.setManager(serverConfigManager);
-		return normalizer;
-	}
-
-	@Bean
-	public ReportModelDependencies reportModelDependencies(ProjectService projectService, HostinfoService hostinfoService,
-			SampleConfigManager sampleConfigManager) {
-		return new ReportModelDependencies(projectService, hostinfoService, sampleConfigManager);
-	}
-
-	@Bean
-	public JsonBuilder jsonBuilder() {
-		return new JsonBuilder();
-	}
-
-	@Bean
-	public ValueTranslater valueTranslater() {
-		return new DefaultValueTranslater();
-	}
-
-	@Bean
-	public GraphBuilder graphBuilder(ValueTranslater valueTranslater) {
-		DefaultGraphBuilder builder = new DefaultGraphBuilder();
-
-		builder.setTranslater(valueTranslater);
 		return builder;
 	}
 
@@ -3869,28 +3841,6 @@ public class CatHomeSpringConfiguration {
 		handler.setConfigHtmlParser(configHtmlParser);
 		handler.setRuleDecorator(ruleFTLDecorator);
 		return handler;
-	}
-
-	@Bean
-	public BusinessGraphCreator businessGraphCreator(CachedBusinessReportService cachedBusinessReportService,
-			BusinessConfigManager businessConfigManager, BusinessDataFetcher businessDataFetcher,
-			ProjectService projectService, BusinessTagConfigManager businessTagConfigManager,
-			BusinessKeyHelper businessKeyHelper, CustomDataCalculator customDataCalculator,
-			BaselineService baselineService, DataExtractor dataExtractor,
-			com.dianping.cat.alarm.spi.AlertManager spiAlertManager) {
-		BusinessGraphCreator creator = new BusinessGraphCreator();
-
-		creator.setReportService(cachedBusinessReportService);
-		creator.setConfigManager(businessConfigManager);
-		creator.setDataFetcher(businessDataFetcher);
-		creator.setProjectService(projectService);
-		creator.setTagManager(businessTagConfigManager);
-		creator.setKeyHelper(businessKeyHelper);
-		creator.setCustomDataCalculator(customDataCalculator);
-		creator.setBaselineService(baselineService);
-		creator.setDataExtractor(dataExtractor);
-		creator.setAlertManager(spiAlertManager);
-		return creator;
 	}
 
 	@Bean

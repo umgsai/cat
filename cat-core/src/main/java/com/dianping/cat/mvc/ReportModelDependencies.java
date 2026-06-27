@@ -4,30 +4,31 @@ import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
+@Component
 public class ReportModelDependencies {
-	private final HostinfoService m_hostinfoService;
+	@Resource
+	private HostinfoService hostinfoService;
 
-	private final ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private final SampleConfigManager m_sampleConfigManager;
-
-	public ReportModelDependencies(ProjectService projectService, HostinfoService hostinfoService,
-	      SampleConfigManager sampleConfigManager) {
-		m_projectService = requireNonNull(projectService, ProjectService.class);
-		m_hostinfoService = requireNonNull(hostinfoService, HostinfoService.class);
-		m_sampleConfigManager = requireNonNull(sampleConfigManager, SampleConfigManager.class);
-	}
+	@Resource
+	private SampleConfigManager sampleConfigManager;
 
 	public HostinfoService getHostinfoService() {
-		return m_hostinfoService;
+		return requireNonNull(hostinfoService, HostinfoService.class);
 	}
 
 	public ProjectService getProjectService() {
-		return m_projectService;
+		return requireNonNull(projectService, ProjectService.class);
 	}
 
 	public SampleConfigManager getSampleConfigManager() {
-		return m_sampleConfigManager;
+		return requireNonNull(sampleConfigManager, SampleConfigManager.class);
 	}
 
 	private <T> T requireNonNull(T value, Class<?> type) {

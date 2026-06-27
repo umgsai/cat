@@ -18,6 +18,9 @@
  */
 package com.dianping.cat.report.graph.svg;
 
+import org.springframework.stereotype.Component;
+
+@Component("valueTranslater")
 public class DefaultValueTranslater implements ValueTranslater {
 	@Override
 	public double getMaxValue(double[] values) {

@@ -188,12 +188,12 @@ mvn -pl cat-home -am -DskipTests compile
 第一批完成后应满足：
 
 1. `cat-home` 编译通过。已验证：`mvn -pl cat-home -am -DskipTests compile`，结果 `BUILD SUCCESS`。
-2. Spring 启动时没有同名 Bean 冲突。编译已通过，运行时启动待后续验证。
+2. Spring 启动时没有同名 Bean 冲突。编译已通过；用户已确认应用可以正常启动。
 3. `businessKeyHelper`、`businessDataFetcher`、`customDataCalculator`、`businessPointParser`、`baselineConfigManager`、`baselineCreator`、`cachedBusinessReportService`、`businessReportGroupService` 都由组件扫描创建。已通过白名单 include filter 纳入扫描。
 4. `CatHomeSpringConfiguration` 中不再保留这 8 个 Bean 的 `@Bean` 方法。已完成。
 5. 触碰类中的旧式 `m_` 字段已改为标准 Java 驼峰命名。已完成。
 6. 触碰到的异常处理位置有 SLF4J 上下文日志。已补充 `BusinessDataFetcher`、`CustomDataCalculator`、`BusinessPointParser` 的日志。
-7. 不影响业务页面和告警链路的现有行为。代码层面未主动修改算法和业务语义，页面与运行时行为待后续本地验证。
+7. 不影响业务页面和告警链路的现有行为。代码层面未主动修改算法和业务语义；用户已确认应用可以正常启动。
 
 ## 9. 第一批完成记录
 
@@ -207,6 +207,109 @@ mvn -pl cat-home -am -DskipTests compile
 6. 删除配置类中对应 8 个 `@Bean` 方法。
 7. 本批旧式字段命名已收口，例如 `m_keyHelper`、`m_service`、`m_reportService`、`m_businessReports`。
 8. 补充了本批触碰异常位置的 SLF4J 日志。
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
+运行时验证：
+
+```text
+用户已确认应用可以正常编译并启动。
+```
+
+## 11. 第三批完成记录
+
+第三批选择工具/适配类 Bean，目标是迁移无后台线程、无 prototype、无复杂生命周期的通用组件。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+jsonBuilder -> com.dianping.cat.helper.JsonBuilder
+payloadNormalizer -> com.dianping.cat.mvc.PayloadNormalizer
+reportModelDependencies -> com.dianping.cat.mvc.ReportModelDependencies
+valueTranslater -> com.dianping.cat.report.graph.svg.DefaultValueTranslater
+graphBuilder -> com.dianping.cat.report.graph.svg.DefaultGraphBuilder
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 5 个 `@Bean` 方法：
+
+```text
+payloadNormalizer(...)
+reportModelDependencies(...)
+jsonBuilder()
+valueTranslater()
+graphBuilder(...)
+```
+
+3. `DefaultValueTranslater` 使用 `@Component("valueTranslater")`，保留原 Bean 名。
+4. `DefaultGraphBuilder` 使用 `@Component("graphBuilder")`，保留原 Bean 名。
+5. `DefaultGraphBuilder` 中 `ValueTranslater` 已改为 `@Resource(name = "valueTranslater")` 字段注入。
+6. `PayloadNormalizer` 中 `ServerConfigManager` 已改为 `@Resource` 字段注入。
+7. `ReportModelDependencies` 中 `ProjectService`、`HostinfoService`、`SampleConfigManager` 已改为 `@Resource` 字段注入；getter 中保留原非空校验语义。
+8. `JsonBuilder`、`DefaultGraphBuilder`、`PayloadNormalizer`、`ReportModelDependencies` 中本批触碰的旧式字段命名已改为 Java 驼峰命名。
+9. `DefaultGraphBuilder#setGraphType(...)` 保持原空实现，不改变图表行为。
+10. 因 `cat-core` 本批开始直接使用 `jakarta.annotation.Resource`，已在 `cat-core/pom.xml` 增加 `jakarta.annotation-api` 显式依赖。
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
+## 10. 第二批完成记录
+
+第二批选择 `BusinessGraphCreator` 一个 Bean，目标是验证依赖较多但不涉及后台线程、不涉及 prototype 的普通业务图表 Bean 迁移方式。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. `BusinessGraphCreator` 已加 `@Component`，由组件扫描创建。
+2. `CatHomeSpringConfiguration` 的白名单扫描已加入 `BusinessGraphCreator.class`，未打开全包扫描。
+3. 已删除 `CatHomeSpringConfiguration` 中的 `businessGraphCreator(...)` `@Bean` 方法。
+4. `BusinessGraphCreator` 的 setter 注入已改为 `@Resource` 字段注入。
+5. `BusinessGraphCreator` 中旧式字段命名已收口：
+
+```text
+m_reportService          -> cachedBusinessReportService
+m_configManager          -> businessConfigManager
+m_dataFetcher            -> businessDataFetcher
+m_projectService         -> projectService
+m_tagManager             -> businessTagConfigManager
+m_keyHelper              -> businessKeyHelper
+m_customDataCalculator   -> customDataCalculator
+```
+
+6. `AbstractGraphCreator` 中原先由 `BusinessGraphCreator` 配置方法间接注入的父类依赖已改为 `@Resource` 字段注入：
+
+```text
+m_baselineService -> baselineService
+m_dataExtractor   -> dataExtractor
+m_alertManager    -> alertManager，使用 @Resource(name = "spiAlertManager")
+m_lastMinute      -> lastMinute
+m_extraTime       -> extraTime
+```
+
+7. `BusinessGraphCreator` 原有 SLF4J + `Cat.logError` 异常日志保留；本批没有修改图表算法和业务语义。
 
 验证记录：
 

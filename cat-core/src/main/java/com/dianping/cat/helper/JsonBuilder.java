@@ -26,6 +26,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.springframework.stereotype.Component;
+
 import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -37,9 +39,10 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+@Component
 public class JsonBuilder {
 
-	private FieldNamingStrategy m_fieldNamingStrategy = new FieldNamingStrategy() {
+	private FieldNamingStrategy fieldNamingStrategy = new FieldNamingStrategy() {
 
 		@Override
 		public String translateName(Field f) {
@@ -53,16 +56,16 @@ public class JsonBuilder {
 		}
 	};
 
-	private Gson m_gson = new GsonBuilder().registerTypeAdapter(Timestamp.class, new TimestampTypeAdapter())
-							.setDateFormat("yyyy-MM-dd HH:mm:ss").setFieldNamingStrategy(m_fieldNamingStrategy).create();
+	private Gson gson = new GsonBuilder().registerTypeAdapter(Timestamp.class, new TimestampTypeAdapter())
+							.setDateFormat("yyyy-MM-dd HH:mm:ss").setFieldNamingStrategy(fieldNamingStrategy).create();
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object parse(String json, Class clz) {
-		return m_gson.fromJson(json, clz);
+		return gson.fromJson(json, clz);
 	}
 
 	public String toJson(Object o) {
-		return m_gson.toJson(o);
+		return gson.toJson(o);
 	}
 
 	public class TimestampTypeAdapter implements JsonSerializer<Timestamp>, JsonDeserializer<Timestamp> {
