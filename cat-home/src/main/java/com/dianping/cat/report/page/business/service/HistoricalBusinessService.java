@@ -25,10 +25,14 @@ import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.BaseHistoricalModelService;
 import com.dianping.cat.report.service.ModelRequest;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("business-historical")
 public class HistoricalBusinessService extends BaseHistoricalModelService<BusinessReport> {
 
-	private BusinessReportService m_reportService;
+	@Resource
+	private BusinessReportService reportService;
 
 	public HistoricalBusinessService() {
 		super(BusinessAnalyzer.ID);
@@ -44,11 +48,11 @@ public class HistoricalBusinessService extends BaseHistoricalModelService<Busine
 	}
 
 	private BusinessReport getReportFromDatabase(long date, String domain) {
-		return m_reportService.queryReport(domain, new Date(date), new Date(date + TimeHelper.ONE_HOUR));
+		return reportService.queryReport(domain, new Date(date), new Date(date + TimeHelper.ONE_HOUR));
 	}
 
 	public void setReportService(BusinessReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 }

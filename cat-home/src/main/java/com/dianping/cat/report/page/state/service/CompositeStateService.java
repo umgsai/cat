@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.report.page.state.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.dianping.cat.consumer.state.StateAnalyzer;
@@ -27,10 +28,27 @@ import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.report.service.ModelService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("stateModelService")
 public class CompositeStateService extends BaseCompositeModelService<StateReport> {
+	@Resource(name = "state-historical")
+	private ModelService<StateReport> historicalStateService;
+
 	public CompositeStateService() {
 		super(StateAnalyzer.ID);
+	}
+
+	@Override
+	@PostConstruct
+	public synchronized void initialize() {
+		if (historicalStateService != null) {
+			setServices(Collections.singletonList(historicalStateService));
+		}
+		super.initialize();
 	}
 
 	@Override

@@ -31,37 +31,41 @@ import com.dianping.cat.analysis.MessageAnalyzer;
 import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.mvc.ApiPayload;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 
 public abstract class LocalModelService<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LocalModelService.class);
 
 	public static final int DEFAULT_SIZE = 32 * 1024;
 
-	protected ServerConfigManager m_configManager;
+	@Resource(name = "serverConfigManager")
+	protected ServerConfigManager serverConfigManager;
 
-	private MessageConsumer m_consumer;
+	@Resource(name = "messageConsumer")
+	private MessageConsumer messageConsumer;
 
-	private int m_analyzerCount = 2;
+	private int analyzerCount = 2;
 
-	private String m_defaultDomain = Constants.CAT;
+	private String defaultDomain = Constants.CAT;
 
-	private String m_name;
+	private String name;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public LocalModelService(String name) {
-		m_name = name;
+		this.name = name;
 	}
 
 	public abstract String buildReport(ModelRequest request, ModelPeriod period, String domain, ApiPayload payload)
 							throws Exception;
 
 	public int getAnalyzerCount() {
-		return m_analyzerCount;
+		return analyzerCount;
 	}
 
 	public String getName() {
-		return m_name;
+		return name;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -71,18 +75,18 @@ public abstract class LocalModelService<T> {
 		List<MessageAnalyzer> analyzers = null;
 
 		if (domain == null || domain.length() == 0) {
-			domain = m_defaultDomain;
+			domain = defaultDomain;
 		}
 
-		if (m_consumer == null) {
+		if (messageConsumer == null) {
 			LOGGER.warn("Message consumer is not configured for local model service, service={}, period={}, domain={}.",
-			      m_name, period, domain);
+			      name, period, domain);
 			return null;
 		}
 		if (period.isCurrent()) {
-			analyzers = m_consumer.getCurrentAnalyzer(m_name);
+			analyzers = messageConsumer.getCurrentAnalyzer(name);
 		} else if (period.isLast()) {
-			analyzers = m_consumer.getLastAnalyzer(m_name);
+			analyzers = messageConsumer.getLastAnalyzer(name);
 		}
 
 		if (analyzers == null) {
@@ -108,33 +112,34 @@ public abstract class LocalModelService<T> {
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
-		if (m_configManager == null) {
+		if (serverConfigManager == null) {
 			throw new IllegalStateException("ServerConfigManager is required for " + getClass().getSimpleName() + ".");
 		}
-		if (m_consumer == null) {
+		if (messageConsumer == null) {
 			throw new IllegalStateException("MessageConsumer is required for " + getClass().getSimpleName() + ".");
 		}
-		m_defaultDomain = m_configManager.getConsoleDefaultDomain();
-		m_analyzerCount = m_configManager.getThreadsOfRealtimeAnalyzer(m_name);
-		m_initialized = true;
+		defaultDomain = serverConfigManager.getConsoleDefaultDomain();
+		analyzerCount = serverConfigManager.getThreadsOfRealtimeAnalyzer(name);
+		initialized = true;
 	}
 
 	public void setConfigManager(ServerConfigManager configManager) {
-		m_configManager = configManager;
+		serverConfigManager = configManager;
 	}
 
 	public void setConsumer(MessageConsumer consumer) {
-		m_consumer = consumer;
+		messageConsumer = consumer;
 	}
 
 	public boolean isEligable(ModelRequest request) {
@@ -148,7 +153,7 @@ public abstract class LocalModelService<T> {
 		StringBuilder sb = new StringBuilder(64);
 
 		sb.append(getClass().getSimpleName()).append('[');
-		sb.append("name=").append(m_name);
+		sb.append("name=").append(name);
 		sb.append(']');
 
 		return sb.toString();

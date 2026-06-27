@@ -25,10 +25,14 @@ import com.dianping.cat.consumer.top.model.entity.TopReport;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.BaseHistoricalModelService;
 import com.dianping.cat.report.service.ModelRequest;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("top-historical")
 public class HistoricalTopService extends BaseHistoricalModelService<TopReport> {
 
-	private TopReportService m_reportService;
+	@Resource
+	private TopReportService reportService;
 
 	public HistoricalTopService() {
 		super(TopAnalyzer.ID);
@@ -44,11 +48,11 @@ public class HistoricalTopService extends BaseHistoricalModelService<TopReport> 
 	}
 
 	private TopReport getReportFromDatabase(long timestamp, String domain) throws Exception {
-		return m_reportService.queryReport(domain, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
+		return reportService.queryReport(domain, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
 	}
 
 	public void setReportService(TopReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 }

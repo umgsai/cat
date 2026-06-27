@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.report.page.heartbeat.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
@@ -27,10 +28,27 @@ import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.report.service.ModelService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("heartbeatModelService")
 public class CompositeHeartbeatService extends BaseCompositeModelService<HeartbeatReport> {
+	@Resource(name = "heartbeat-historical")
+	private ModelService<HeartbeatReport> historicalHeartbeatService;
+
 	public CompositeHeartbeatService() {
 		super(HeartbeatAnalyzer.ID);
+	}
+
+	@Override
+	@PostConstruct
+	public synchronized void initialize() {
+		if (historicalHeartbeatService != null) {
+			setServices(Collections.singletonList(historicalHeartbeatService));
+		}
+		super.initialize();
 	}
 
 	@Override

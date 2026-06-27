@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.report.page.storage.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.dianping.cat.consumer.storage.StorageAnalyzer;
@@ -27,10 +28,27 @@ import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.report.service.ModelService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("storageModelService")
 public class CompositeStorageService extends BaseCompositeModelService<StorageReport> {
+	@Resource(name = "storage-historical")
+	private ModelService<StorageReport> historicalStorageService;
+
 	public CompositeStorageService() {
 		super(StorageAnalyzer.ID);
+	}
+
+	@Override
+	@PostConstruct
+	public synchronized void initialize() {
+		if (historicalStorageService != null) {
+			setServices(Collections.singletonList(historicalStorageService));
+		}
+		super.initialize();
 	}
 
 	@Override

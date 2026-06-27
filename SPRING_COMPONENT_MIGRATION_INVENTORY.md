@@ -2303,3 +2303,80 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+
+## 41. 第三十三批完成记录
+
+第三十三批迁移 ModelService 服务层中风险相对可控的一组 Bean，重点处理历史报表服务、组合报表服务和 logview 服务。目标是在保持旧 Bean 名和初始化语义不变的前提下，继续删除 `CatHomeSpringConfiguration` 中的大段显式 `@Bean` 注册。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下历史报表服务已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+problem-historical
+business-historical
+event-historical
+transaction-historical
+heartbeat-historical
+top-historical
+state-historical
+storage-historical
+cross-historical
+matrix-historical
+dependency-historical
+```
+
+2. 以下组合报表服务已改为 `@Component` 创建，并保留旧 `*ModelService` Bean 名：
+
+```text
+problemModelService
+businessModelService
+eventModelService
+transactionModelService
+heartbeatModelService
+topModelService
+stateModelService
+storageModelService
+crossModelService
+matrixModelService
+dependencyModelService
+```
+
+3. logview 服务链路已改为组件化注册：
+
+```text
+localMessageService
+historicalMessageService
+logviewModelService
+```
+
+4. 已删除 `CatHomeSpringConfiguration` 中对应 25 个旧 `@Bean` 方法，避免配置类注册和组件扫描注册同时存在。
+5. `BaseHistoricalModelService`、`BaseCompositeModelService`、`LocalModelService` 已补充 `@Resource` 注入和初始化兜底，保留原 setter，兼容测试和少量手工构造场景。
+6. 组合服务在 `@PostConstruct` 中注入对应 historical 服务后再调用 `super.initialize()`，保持旧配置类中先 `setServices(...)` 再 `initialize()` 的顺序。
+7. 本批触碰到的 Spring 注入字段已按 Java 驼峰命名收口，并使用明确 Bean 名的 `@Resource(name = "...")` 注入，降低字段改名后注入歧义。
+8. logview 本地和历史查询中原先只调用 `Cat.logError` 或缺少上下文的异常/空结果路径，已补充 SLF4J 日志，方便排查消息检索、bucket、HDFS 和渲染问题。
+9. 本批仍不迁移以下内容：
+
+```text
+ReportManager / ReportDelegate
+localProblemService 等本地报表 LocalModelService Bean
+localModelServices 聚合 Map
+存储 bucket / HDFS / message dump 基础设施
+DataSource / SqlSessionFactory / TransactionTemplate
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.report.page.problem.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
@@ -27,10 +28,27 @@ import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.report.service.ModelService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("problemModelService")
 public class CompositeProblemService extends BaseCompositeModelService<ProblemReport> {
+	@Resource(name = "problem-historical")
+	private ModelService<ProblemReport> historicalProblemService;
+
 	public CompositeProblemService() {
 		super(ProblemAnalyzer.ID);
+	}
+
+	@Override
+	@PostConstruct
+	public synchronized void initialize() {
+		if (historicalProblemService != null) {
+			setServices(Collections.singletonList(historicalProblemService));
+		}
+		super.initialize();
 	}
 
 	@Override

@@ -1,9 +1,6 @@
 package com.dianping.cat.home.spring;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -323,7 +320,6 @@ import com.dianping.cat.report.task.DefaultRemoteServersUpdater;
 import com.dianping.cat.report.task.ReportFacade;
 import com.dianping.cat.report.service.AbstractReportService;
 import com.dianping.cat.report.service.LocalModelService;
-import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.current.CurrentReportBuilder;
 import com.dianping.cat.report.task.cmdb.CmdbInfoReloadBuilder;
@@ -406,6 +402,15 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		TransactionReportService.class, TransactionReportBuilder.class, TopReportService.class,
 		CrossReportService.class, CrossReportBuilder.class, ProblemReportService.class, ProblemReportBuilder.class,
 		StorageReportService.class, StorageReportBuilder.class, BusinessReportService.class,
+		HistoricalProblemService.class, HistoricalBusinessService.class, HistoricalEventService.class,
+		HistoricalTransactionService.class, HistoricalHeartbeatService.class, HistoricalTopService.class,
+		HistoricalStateService.class, HistoricalStorageService.class, HistoricalCrossService.class,
+		HistoricalMatrixService.class, HistoricalDependencyService.class, CompositeProblemService.class,
+		CompositeBusinessService.class, CompositeEventService.class, CompositeTransactionService.class,
+		CompositeHeartbeatService.class, CompositeTopService.class, CompositeStateService.class,
+		CompositeStorageService.class, CompositeCrossService.class, CompositeMatrixService.class,
+		CompositeDependencyService.class, LocalMessageService.class, HistoricalMessageService.class,
+		CompositeLogViewService.class,
 		BusinessBaselineReportBuilder.class, JarReportService.class, JarReportBuilder.class,
 		HeavyReportService.class, HeavyReportBuilder.class, ClientReportService.class, ClientReportBuilder.class,
 		ServiceReportService.class, ServiceReportBuilder.class, UtilizationReportService.class,
@@ -536,6 +541,15 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					CrossReportService.class, CrossReportBuilder.class, ProblemReportService.class,
 					ProblemReportBuilder.class, StorageReportService.class, StorageReportBuilder.class,
 					BusinessReportService.class, BusinessBaselineReportBuilder.class, JarReportService.class,
+					HistoricalProblemService.class, HistoricalBusinessService.class, HistoricalEventService.class,
+					HistoricalTransactionService.class, HistoricalHeartbeatService.class, HistoricalTopService.class,
+					HistoricalStateService.class, HistoricalStorageService.class, HistoricalCrossService.class,
+					HistoricalMatrixService.class, HistoricalDependencyService.class, CompositeProblemService.class,
+					CompositeBusinessService.class, CompositeEventService.class, CompositeTransactionService.class,
+					CompositeHeartbeatService.class, CompositeTopService.class, CompositeStateService.class,
+					CompositeStorageService.class, CompositeCrossService.class, CompositeMatrixService.class,
+					CompositeDependencyService.class, LocalMessageService.class, HistoricalMessageService.class,
+					CompositeLogViewService.class,
 					JarReportBuilder.class, HeavyReportService.class, HeavyReportBuilder.class,
 					ClientReportService.class, ClientReportBuilder.class, ServiceReportService.class,
 					ServiceReportBuilder.class, UtilizationReportService.class, UtilizationReportBuilder.class,
@@ -1544,259 +1558,6 @@ public class CatHomeSpringConfiguration {
 		return configureSpringBackedRepository(new UserDefineRuleRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
-	@Bean(initMethod = "initialize", name = "problem-historical")
-	public ModelService<ProblemReport> historicalProblemService(ProblemReportService problemReportService,
-			ServerConfigManager serverConfigManager) {
-		HistoricalProblemService service = new HistoricalProblemService();
-
-		service.setReportService(problemReportService);
-		service.setConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "business-historical")
-	public ModelService<BusinessReport> historicalBusinessService(BusinessReportService businessReportService,
-			ServerConfigManager serverConfigManager) {
-		HistoricalBusinessService service = new HistoricalBusinessService();
-
-		service.setReportService(businessReportService);
-		service.setConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "event-historical")
-	public ModelService<EventReport> historicalEventService(EventReportService eventReportService,
-			ServerConfigManager serverConfigManager) {
-		HistoricalEventService service = new HistoricalEventService();
-
-		service.setReportService(eventReportService);
-		service.setConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "transaction-historical")
-	public ModelService<TransactionReport> historicalTransactionService(
-			TransactionReportService transactionReportService, ServerConfigManager serverConfigManager) {
-		HistoricalTransactionService service = new HistoricalTransactionService();
-
-		service.setReportService(transactionReportService);
-		service.setConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "heartbeat-historical")
-	public ModelService<HeartbeatReport> historicalHeartbeatService(HeartbeatReportService heartbeatReportService,
-			ServerConfigManager serverConfigManager) {
-		HistoricalHeartbeatService service = new HistoricalHeartbeatService();
-
-		service.setReportService(heartbeatReportService);
-		service.setConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "top-historical")
-	public ModelService<TopReport> historicalTopService(TopReportService topReportService,
-			ServerConfigManager serverConfigManager) {
-		HistoricalTopService service = new HistoricalTopService();
-
-		service.setReportService(topReportService);
-		service.setConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "state-historical")
-	public ModelService<StateReport> historicalStateService(StateReportService stateReportService,
-			ServerConfigManager serverConfigManager) {
-		HistoricalStateService service = new HistoricalStateService();
-
-		service.setReportService(stateReportService);
-		service.setConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "storage-historical")
-	public ModelService<StorageReport> historicalStorageService(StorageReportService storageReportService,
-			ServerConfigManager serverConfigManager) {
-		HistoricalStorageService service = new HistoricalStorageService();
-
-		service.setReportService(storageReportService);
-		service.setConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "cross-historical")
-	public ModelService<CrossReport> historicalCrossService(CrossReportService crossReportService,
-			ServerConfigManager serverConfigManager) {
-		HistoricalCrossService service = new HistoricalCrossService();
-
-		service.setReportService(crossReportService);
-		service.setConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "matrix-historical")
-	public ModelService<MatrixReport> historicalMatrixService(MatrixReportService matrixReportService,
-			ServerConfigManager serverConfigManager) {
-		HistoricalMatrixService service = new HistoricalMatrixService();
-
-		service.setReportService(matrixReportService);
-		service.setConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "dependency-historical")
-	public ModelService<DependencyReport> historicalDependencyService(DependencyReportService dependencyReportService,
-			ServerConfigManager serverConfigManager) {
-		HistoricalDependencyService service = new HistoricalDependencyService();
-
-		service.setReportService(dependencyReportService);
-		service.setConfigManager(serverConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ModelService<ProblemReport> problemModelService(
-			@Qualifier("problem-historical") ModelService<ProblemReport> historicalProblemService,
-			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
-		CompositeProblemService service = new CompositeProblemService();
-		List<ModelService<ProblemReport>> services = Collections.singletonList(historicalProblemService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "businessModelService")
-	public ModelService<BusinessReport> businessModelService(
-			@Qualifier("business-historical") ModelService<BusinessReport> historicalBusinessService,
-			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
-		CompositeBusinessService service = new CompositeBusinessService();
-		List<ModelService<BusinessReport>> services = Collections.singletonList(historicalBusinessService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ModelService<EventReport> eventModelService(
-			@Qualifier("event-historical") ModelService<EventReport> historicalEventService,
-			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
-		CompositeEventService service = new CompositeEventService();
-		List<ModelService<EventReport>> services = Collections.singletonList(historicalEventService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ModelService<TransactionReport> transactionModelService(
-			@Qualifier("transaction-historical") ModelService<TransactionReport> historicalTransactionService,
-			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
-		CompositeTransactionService service = new CompositeTransactionService();
-		List<ModelService<TransactionReport>> services = Collections.singletonList(historicalTransactionService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ModelService<HeartbeatReport> heartbeatModelService(
-			@Qualifier("heartbeat-historical") ModelService<HeartbeatReport> historicalHeartbeatService,
-			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
-		CompositeHeartbeatService service = new CompositeHeartbeatService();
-		List<ModelService<HeartbeatReport>> services = Collections.singletonList(historicalHeartbeatService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ModelService<TopReport> topModelService(
-			@Qualifier("top-historical") ModelService<TopReport> historicalTopService,
-			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
-		CompositeTopService service = new CompositeTopService();
-		List<ModelService<TopReport>> services = Collections.singletonList(historicalTopService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ModelService<StateReport> stateModelService(
-			@Qualifier("state-historical") ModelService<StateReport> historicalStateService,
-			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
-		CompositeStateService service = new CompositeStateService();
-		List<ModelService<StateReport>> services = Collections.singletonList(historicalStateService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ModelService<StorageReport> storageModelService(
-			@Qualifier("storage-historical") ModelService<StorageReport> historicalStorageService,
-			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
-		CompositeStorageService service = new CompositeStorageService();
-		List<ModelService<StorageReport>> services = Collections.singletonList(historicalStorageService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "crossModelService")
-	public ModelService<CrossReport> crossModelService(
-			@Qualifier("cross-historical") ModelService<CrossReport> historicalCrossService,
-			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
-		CompositeCrossService service = new CompositeCrossService();
-		List<ModelService<CrossReport>> services = Collections.singletonList(historicalCrossService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "matrixModelService")
-	public ModelService<MatrixReport> matrixModelService(
-			@Qualifier("matrix-historical") ModelService<MatrixReport> historicalMatrixService,
-			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
-		CompositeMatrixService service = new CompositeMatrixService();
-		List<ModelService<MatrixReport>> services = Collections.singletonList(historicalMatrixService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ModelService<DependencyReport> dependencyModelService(
-			@Qualifier("dependency-historical") ModelService<DependencyReport> historicalDependencyService,
-			ServerConfigManager serverConfigManager, RemoteServersManager remoteServersManager) {
-		CompositeDependencyService service = new CompositeDependencyService();
-		List<ModelService<DependencyReport>> services = Collections.singletonList(historicalDependencyService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
-		return service;
-	}
-
 	@Bean(initMethod = "initialize")
 	public LocalModelService<ProblemReport> localProblemService(ServerConfigManager serverConfigManager,
 			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
@@ -1915,47 +1676,6 @@ public class CatHomeSpringConfiguration {
 		service.setConfigManager(serverConfigManager);
 		service.setBucketManager(reportBucketManager);
 		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalMessageService localMessageService(ServerConfigManager serverConfigManager,
-			MessageFinderManager messageFinderManager, @Qualifier("local") BucketManager localBucketManager,
-			@Qualifier("legacyLocalMessageBucketManager") MessageBucketManager localMessageBucketManager,
-			MessageConsumer messageConsumer) {
-		LocalMessageService service = new LocalMessageService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setFinderManager(messageFinderManager);
-		service.setBucketManager(localBucketManager);
-		service.setMessageBucketManager(localMessageBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "historicalMessageService")
-	public ModelService<String> historicalMessageService(ServerConfigManager serverConfigManager,
-			HdfsBucketManager hdfsBucketManager,
-			@Qualifier("hdfsMessageBucketManager") MessageBucketManager hdfsMessageBucketManager) {
-		HistoricalMessageService service = new HistoricalMessageService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(hdfsBucketManager);
-		service.setHdfsBucketManager(hdfsMessageBucketManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize", name = "logviewModelService")
-	public ModelService<String> logviewModelService(ServerConfigManager serverConfigManager,
-			RemoteServersManager remoteServersManager,
-			@Qualifier("localMessageService") LocalMessageService localMessageService,
-			@Qualifier("historicalMessageService") ModelService<String> historicalMessageService) {
-		CompositeLogViewService service = new CompositeLogViewService();
-		List<ModelService<String>> services = Arrays.asList(localMessageService, historicalMessageService);
-
-		service.setServices(services);
-		service.setConfigManager(serverConfigManager);
-		service.setServerManager(remoteServersManager);
 		return service;
 	}
 
