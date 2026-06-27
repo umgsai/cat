@@ -28,8 +28,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -61,24 +63,34 @@ import com.dianping.cat.report.page.statistics.task.heavy.HeavyReportMerger.UrlC
 import com.dianping.cat.report.page.statistics.task.jar.JarReportBuilder;
 import com.dianping.cat.service.ProjectService;
 
+@Component("statisticsHandler")
 public class Handler implements PageHandler<Context> {
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private HeavyReportService m_heavyReportService;
+	@Resource
+	private HeavyReportService heavyReportService;
 
-	private UtilizationReportService m_utilizationReportService;
+	@Resource
+	private UtilizationReportService utilizationReportService;
 
-	private ServiceReportService m_serviceReportService;
+	@Resource
+	private ServiceReportService serviceReportService;
 
-	private ClientReportService m_clientReportService;
+	@Resource
+	private ClientReportService clientReportService;
 
-	private JarReportService m_jarReportService;
+	@Resource
+	private JarReportService jarReportService;
 
-	private ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private AlertSummaryExecutor m_executor;
+	@Resource
+	private AlertSummaryExecutor alertSummaryExecutor;
 
 	private void buildHeavyInfo(Model model, Payload payload) {
 		HeavyReport heavyReport = queryHeavyReport(payload);
@@ -167,7 +179,7 @@ public class Handler implements PageHandler<Context> {
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 
-		m_normalizePayload.normalize(model, payload);
+		normalizePayload.normalize(model, payload);
 		model.setAction(payload.getAction());
 
 		Action action = payload.getAction();
@@ -189,7 +201,7 @@ public class Handler implements PageHandler<Context> {
 			String domain = payload.getSummarydomain();
 
 			if (StringUtils.isNotEmpty(domain)) {
-				String summaryContent = m_executor.execute(domain, payload.getSummarytime(), payload.getSummaryemails());
+				String summaryContent = alertSummaryExecutor.execute(domain, payload.getSummarytime(), payload.getSummaryemails());
 				model.setSummaryContent(summaryContent);
 			}
 			break;
@@ -201,13 +213,13 @@ public class Handler implements PageHandler<Context> {
 			break;
 		}
 		model.setPage(ReportPage.STATISTICS);
-		m_jspViewer.view(ctx, model);
+		jspViewer.view(ctx, model);
 	}
 
 	private void buildClientReport(Model model, Payload payload) {
 		Date startDate = payload.getDay();
 		Date endDate = TimeHelper.addDays(startDate, 1);
-		ClientReport report = m_clientReportService.queryReport(Constants.CAT, startDate, endDate);
+		ClientReport report = clientReportService.queryReport(Constants.CAT, startDate, endDate);
 
 		model.setClientReport(report);
 	}
@@ -215,19 +227,19 @@ public class Handler implements PageHandler<Context> {
 	private HeavyReport queryHeavyReport(Payload payload) {
 		Pair<Date, Date> pair = queryStartEndTime(payload);
 
-		return m_heavyReportService.queryReport(Constants.CAT, pair.getKey(), pair.getValue());
+		return heavyReportService.queryReport(Constants.CAT, pair.getKey(), pair.getValue());
 	}
 
 	private JarReport queryJarReport(Payload payload) {
 		Pair<Date, Date> pair = queryStartEndTime(payload);
 
-		return m_jarReportService.queryReport(Constants.CAT, pair.getKey(), pair.getValue());
+		return jarReportService.queryReport(Constants.CAT, pair.getKey(), pair.getValue());
 	}
 
 	private ServiceReport queryServiceReport(Payload payload) {
 		Pair<Date, Date> pair = queryStartEndTime(payload);
 
-		return m_serviceReportService.queryReport(Constants.CAT, pair.getKey(), pair.getValue());
+		return serviceReportService.queryReport(Constants.CAT, pair.getKey(), pair.getValue());
 	}
 
 	private Pair<Date, Date> queryStartEndTime(Payload payload) {
@@ -252,12 +264,12 @@ public class Handler implements PageHandler<Context> {
 
 	private UtilizationReport queryUtilizationReport(Payload payload) {
 		Pair<Date, Date> pair = queryStartEndTime(payload);
-		UtilizationReport report = m_utilizationReportService.queryReport(Constants.CAT, pair.getKey(), pair.getValue());
+		UtilizationReport report = utilizationReportService.queryReport(Constants.CAT, pair.getKey(), pair.getValue());
 		Collection<com.dianping.cat.home.utilization.entity.Domain> domains = report.getDomains().values();
 
 		for (com.dianping.cat.home.utilization.entity.Domain d : domains) {
 			String domain = d.getId();
-			Project project = m_projectService.findByDomain(domain);
+			Project project = projectService.findByDomain(domain);
 
 			if (project != null) {
 				d.setCmdbId(project.getCmdbDomain());
@@ -291,42 +303,6 @@ public class Handler implements PageHandler<Context> {
 			}
 		});
 		return result;
-	}
-
-	public void setClientReportService(ClientReportService clientReportService) {
-		m_clientReportService = clientReportService;
-	}
-
-	public void setExecutor(AlertSummaryExecutor executor) {
-		m_executor = executor;
-	}
-
-	public void setHeavyReportService(HeavyReportService heavyReportService) {
-		m_heavyReportService = heavyReportService;
-	}
-
-	public void setJarReportService(JarReportService jarReportService) {
-		m_jarReportService = jarReportService;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
-	}
-
-	public void setServiceReportService(ServiceReportService serviceReportService) {
-		m_serviceReportService = serviceReportService;
-	}
-
-	public void setUtilizationReportService(UtilizationReportService utilizationReportService) {
-		m_utilizationReportService = utilizationReportService;
 	}
 
 }

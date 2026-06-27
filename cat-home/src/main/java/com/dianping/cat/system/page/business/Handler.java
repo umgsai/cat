@@ -27,7 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -48,21 +50,29 @@ import com.dianping.cat.system.SystemPage;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
 
+@Component("systemBusinessHandler")
 public class Handler implements PageHandler<Context> {
 
-	protected RuleFTLDecorator m_ruleDecorator;
+	@Resource
+	protected RuleFTLDecorator ruleDecorator;
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private BusinessConfigManager m_configManager;
+	@Resource
+	private BusinessConfigManager businessConfigManager;
 
-	private BusinessTagConfigManager m_tagConfigManger;
+	@Resource
+	private BusinessTagConfigManager businessTagConfigManager;
 
-	private BusinessRuleConfigManager m_alertConfigManager;
+	@Resource
+	private BusinessRuleConfigManager businessRuleConfigManager;
 
-	private ConfigHtmlParser m_configHtmlParser;
+	@Resource
+	private ConfigHtmlParser configHtmlParser;
 
 	@Override
 	@PreInboundActionMeta("login")
@@ -83,14 +93,14 @@ public class Handler implements PageHandler<Context> {
 
 		model.setPage(SystemPage.BUSINESS);
 		model.setAction(action);
-		model.setDomains(m_projectService.findAllDomains());
+		model.setDomains(projectService.findAllDomains());
 
 		switch (action) {
 		case LIST:
 			listConfigs(domain, model);
 			break;
 		case ADD:
-			BusinessReportConfig config = m_configManager.queryConfigByDomain(domain);
+			BusinessReportConfig config = businessConfigManager.queryConfigByDomain(domain);
 
 			if (config != null) {
 				BusinessItemConfig itemConfig = config.findBusinessItemConfig(payload.getKey());
@@ -106,22 +116,22 @@ public class Handler implements PageHandler<Context> {
 		case DELETE:
 			String key = payload.getKey();
 
-			m_configManager.deleteBusinessItem(domain, key);
+			businessConfigManager.deleteBusinessItem(domain, key);
 			listConfigs(domain, model);
 			break;
 		case CustomDelete:
 			key = payload.getKey();
 
-			m_configManager.deleteCustomItem(domain, key);
+			businessConfigManager.deleteCustomItem(domain, key);
 			listConfigs(domain, model);
 			break;
 		case TagConfig:
 			String tagConfig = payload.getContent();
 
 			if (!StringUtils.isEmpty(tagConfig)) {
-				model.setOpState(m_tagConfigManger.store(tagConfig));
+				model.setOpState(businessTagConfigManager.store(tagConfig));
 			}
-			model.setContent(m_configHtmlParser.parse(m_tagConfigManger.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(businessTagConfigManager.getConfig().toString()));
 			break;
 		case AlertRuleAdd:
 			alertRuleAdd(payload, model);
@@ -131,7 +141,7 @@ public class Handler implements PageHandler<Context> {
 			listConfigs(domain, model);
 			break;
 		case CustomAdd:
-			config = m_configManager.queryConfigByDomain(domain);
+			config = businessConfigManager.queryConfigByDomain(domain);
 
 			if (config != null) {
 				CustomConfig itemConfig = config.findCustomConfig(payload.getKey());
@@ -148,7 +158,7 @@ public class Handler implements PageHandler<Context> {
 		}
 
 		if (!ctx.isProcessStopped()) {
-			m_jspViewer.view(ctx, model);
+			jspViewer.view(ctx, model);
 		}
 	}
 
@@ -158,7 +168,7 @@ public class Handler implements PageHandler<Context> {
 		String configs = payload.getContent();
 		String type = payload.getAttributes();
 
-		m_alertConfigManager.updateRule(domain, key, configs, type);
+		businessRuleConfigManager.updateRule(domain, key, configs, type);
 	}
 
 	private void alertRuleAdd(Payload payload, Model model) {
@@ -167,21 +177,21 @@ public class Handler implements PageHandler<Context> {
 		String key = payload.getKey();
 		String domain = payload.getDomain();
 		String type = payload.getAttributes();
-		Rule rule = m_alertConfigManager.queryRule(domain, key, type);
+		Rule rule = businessRuleConfigManager.queryRule(domain, key, type);
 
 		if (rule != null) {
 			ruleId = rule.getId();
 			configsStr = new DefaultJsonBuilder(true).buildArray(rule.getConfigs());
 		}
-		String content = m_ruleDecorator.generateConfigsHtml(configsStr);
+		String content = ruleDecorator.generateConfigsHtml(configsStr);
 
 		model.setId(ruleId);
 		model.setContent(content);
 	}
 
 	private void listConfigs(String domain, Model model) {
-		BusinessReportConfig config = m_configManager.queryConfigByDomain(domain);
-		Map<String, Set<String>> tags = m_tagConfigManger.findTagByDomain(domain);
+		BusinessReportConfig config = businessConfigManager.queryConfigByDomain(domain);
+		Map<String, Set<String>> tags = businessTagConfigManager.findTagByDomain(domain);
 		List<BusinessItemConfig> configs = new ArrayList<BusinessItemConfig>(config.getBusinessItemConfigs().values());
 
 		Collections.sort(configs, new Comparator<BusinessItemConfig>() {
@@ -211,7 +221,7 @@ public class Handler implements PageHandler<Context> {
 		BusinessReportConfig config;
 		BusinessItemConfig itemConfig = payload.getBusinessItemConfig();
 		String key = itemConfig.getId();
-		config = m_configManager.queryConfigByDomain(domain);
+		config = businessConfigManager.queryConfigByDomain(domain);
 		boolean isModify = false;
 		boolean result = false;
 
@@ -222,7 +232,7 @@ public class Handler implements PageHandler<Context> {
 			if (origin != null) {
 				isModify = true;
 				config.addBusinessItemConfig(itemConfig);
-				result = m_configManager.updateConfigByDomain(config);
+				result = businessConfigManager.updateConfigByDomain(config);
 			}
 		}
 
@@ -235,7 +245,7 @@ public class Handler implements PageHandler<Context> {
 			item.setTitle(itemConfig.getTitle());
 			item.setViewOrder(itemConfig.getViewOrder());
 
-			result = m_configManager.insertBusinessConfigIfNotExist(domain, key, item);
+			result = businessConfigManager.insertBusinessConfigIfNotExist(domain, key, item);
 		}
 
 		model.setOpState(result);
@@ -243,49 +253,21 @@ public class Handler implements PageHandler<Context> {
 
 	private void updateCustomConfig(Model model, Payload payload, String domain) {
 		CustomConfig itemConfig = payload.getCustomConfig();
-		BusinessReportConfig config = m_configManager.queryConfigByDomain(domain);
+		BusinessReportConfig config = businessConfigManager.queryConfigByDomain(domain);
 		boolean result = false;
 
 		if (StringUtils.isNotEmpty(itemConfig.getId())) {
 			if (config.getId() != null) {
 				config.addCustomConfig(itemConfig);
-				result = m_configManager.updateConfigByDomain(config);
+				result = businessConfigManager.updateConfigByDomain(config);
 			} else {
 				config.setId(domain);
 				config.addCustomConfig(itemConfig);
-				result = m_configManager.insertConfigByDomain(config);
+				result = businessConfigManager.insertConfigByDomain(config);
 			}
 		}
 
 		model.setOpState(result);
-	}
-
-	public void setAlertConfigManager(BusinessRuleConfigManager alertConfigManager) {
-		m_alertConfigManager = alertConfigManager;
-	}
-
-	public void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
-		m_configHtmlParser = configHtmlParser;
-	}
-
-	public void setConfigManager(BusinessConfigManager configManager) {
-		m_configManager = configManager;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
-	}
-
-	public void setRuleDecorator(RuleFTLDecorator ruleDecorator) {
-		m_ruleDecorator = ruleDecorator;
-	}
-
-	public void setTagConfigManager(BusinessTagConfigManager tagConfigManager) {
-		m_tagConfigManger = tagConfigManager;
 	}
 
 }

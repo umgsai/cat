@@ -25,7 +25,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -59,23 +61,32 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component("transactionHandler")
 public class Handler implements PageHandler<Context> {
 
-	private GraphBuilder m_builder;
+	@Resource
+	private GraphBuilder graphBuilder;
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private XmlViewer m_xmlViewer;
+	@Resource
+	private XmlViewer xmlViewer;
 
-	private TransactionReportService m_reportService;
+	@Resource
+	private TransactionReportService transactionReportService;
 
-	private TransactionMergeHelper m_mergeHelper;
+	@Resource
+	private TransactionMergeHelper transactionMergeHelper;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private DomainGroupConfigManager m_configManager;
+	@Resource
+	private DomainGroupConfigManager domainGroupConfigManager;
 
-	private ModelService<TransactionReport> m_service;
+	@Resource(name = "transactionModelService")
+	private ModelService<TransactionReport> transactionModelService;
 
 	private void buildDistributionInfo(Model model, String type, String name, TransactionReport report) {
 		PieGraphChartVisitor chartVisitor = new PieGraphChartVisitor(type, name);
@@ -108,12 +119,12 @@ public class Handler implements PageHandler<Context> {
 		TransactionName transactionName = t.findOrCreateName(name);
 
 		if (transactionName != null) {
-			String graph1 = m_builder
+			String graph1 = graphBuilder
 			      .build(new DurationPayload("Duration Distribution", "Duration (ms)", "Count", transactionName));
-			String graph2 = m_builder.build(new HitPayload("Hits Over Time", "Time (min)", "Count", transactionName));
-			String graph3 = m_builder.build(new AverageTimePayload("Average Duration Over Time", "Time (min)",
+			String graph2 = graphBuilder.build(new HitPayload("Hits Over Time", "Time (min)", "Count", transactionName));
+			String graph3 = graphBuilder.build(new AverageTimePayload("Average Duration Over Time", "Time (min)",
 			      "Average Duration (ms)", transactionName));
-			String graph4 = m_builder
+			String graph4 = graphBuilder
 			      .build(new FailurePayload("Failures Over Time", "Time (min)", "Count", transactionName));
 
 			model.setGraph1(graph1);
@@ -140,7 +151,7 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private TransactionReport filterReportByGroup(TransactionReport report, String domain, String group) {
-		List<String> ips = m_configManager.queryIpByDomainAndGroup(domain, group);
+		List<String> ips = domainGroupConfigManager.queryIpByDomainAndGroup(domain, group);
 		List<String> removes = new ArrayList<String>();
 
 		for (Machine machine : report.getMachines().values()) {
@@ -170,7 +181,7 @@ public class Handler implements PageHandler<Context> {
 		      .setProperty("name", name)//
 		      .setProperty("ip", ipAddress);
 
-		ModelResponse<TransactionReport> response = m_service.invoke(request);
+		ModelResponse<TransactionReport> response = transactionModelService.invoke(request);
 		TransactionReport report = response.getModel();
 		return report;
 	}
@@ -181,8 +192,8 @@ public class Handler implements PageHandler<Context> {
 		ModelRequest request = new ModelRequest(domain, payload.getDate()).setProperty("type", payload.getType())
 		      .setProperty("ip", ipAddress);
 
-		if (m_service.isEligable(request)) {
-			ModelResponse<TransactionReport> response = m_service.invoke(request);
+		if (transactionModelService.isEligable(request)) {
+			ModelResponse<TransactionReport> response = transactionModelService.invoke(request);
 			TransactionReport report = response.getModel();
 
 			return report;
@@ -218,40 +229,40 @@ public class Handler implements PageHandler<Context> {
 		Date end = payload.getHistoryEndDate();
 
 		if (StringUtils.isEmpty(group)) {
-			group = m_configManager.queryDefaultGroup(domain);
+			group = domainGroupConfigManager.queryDefaultGroup(domain);
 			payload.setGroup(group);
 		}
-		model.setGroupIps(m_configManager.queryIpByDomainAndGroup(domain, group));
-		model.setGroups(m_configManager.queryDomainGroup(payload.getDomain()));
+		model.setGroupIps(domainGroupConfigManager.queryIpByDomainAndGroup(domain, group));
+		model.setGroups(domainGroupConfigManager.queryDomainGroup(payload.getDomain()));
 
 		switch (action) {
 		case HOURLY_REPORT:
 			TransactionReport report = getHourlyReport(payload);
 
 			if (report != null) {
-				report = m_mergeHelper.mergeAllMachines(report, ipAddress);
+				report = transactionMergeHelper.mergeAllMachines(report, ipAddress);
 				model.setReport(report);
 				buildTransactionMetaInfo(model, payload, report);
 			}
 			break;
 		case HISTORY_REPORT:
-			report = m_reportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
+			report = transactionReportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
 
 			if (report != null) {
-				report = m_mergeHelper.mergeAllMachines(report, ipAddress);
+				report = transactionMergeHelper.mergeAllMachines(report, ipAddress);
 				model.setReport(report);
 				buildTransactionMetaInfo(model, payload, report);
 			}
 			break;
 		case HISTORY_GRAPH:
-			report = m_reportService.queryReport(domain, start, end);
+			report = transactionReportService.queryReport(domain, start, end);
 
 			if (report != null) {
 				if (Constants.ALL.equalsIgnoreCase(ip)) {
 					buildDistributionInfo(model, type, name, report);
 				}
 
-				report = m_mergeHelper.mergeAllMachines(report, ip);
+				report = transactionMergeHelper.mergeAllMachines(report, ip);
 				new TransactionTrendGraphBuilder().buildTrendGraph(model, payload, report);
 			}
 			break;
@@ -266,7 +277,7 @@ public class Handler implements PageHandler<Context> {
 					name = Constants.ALL;
 				}
 
-				report = m_mergeHelper.mergeAllNames(report, ip, name);
+				report = transactionMergeHelper.mergeAllNames(report, ip, name);
 
 				model.setReport(report);
 				buildTransactionNameGraph(model, report, type, name, ip);
@@ -278,7 +289,7 @@ public class Handler implements PageHandler<Context> {
 
 			if (report != null) {
 				report = filterReportByGroup(report, domain, group);
-				report = m_mergeHelper.mergeAllMachines(report, ipAddress);
+				report = transactionMergeHelper.mergeAllMachines(report, ipAddress);
 
 				if (report != null) {
 					model.setReport(report);
@@ -288,11 +299,11 @@ public class Handler implements PageHandler<Context> {
 			}
 			break;
 		case HISTORY_GROUP_REPORT:
-			report = m_reportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
+			report = transactionReportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
 
 			if (report != null) {
 				report = filterReportByGroup(report, domain, group);
-				report = m_mergeHelper.mergeAllMachines(report, ipAddress);
+				report = transactionMergeHelper.mergeAllMachines(report, ipAddress);
 
 				if (report != null) {
 					model.setReport(report);
@@ -310,35 +321,35 @@ public class Handler implements PageHandler<Context> {
 				if (name == null || name.length() == 0) {
 					name = Constants.ALL;
 				}
-				report = m_mergeHelper.mergeAllNames(report, ip, name);
+				report = transactionMergeHelper.mergeAllNames(report, ip, name);
 
 				model.setReport(report);
 				buildTransactionNameGraph(model, report, type, name, ip);
 			}
 			break;
 		case HISTORY_GROUP_GRAPH:
-			report = m_reportService.queryReport(domain, start, end);
+			report = transactionReportService.queryReport(domain, start, end);
 
 			if (report != null) {
 				report = filterReportByGroup(report, domain, group);
 
 				buildDistributionInfo(model, type, name, report);
 
-				report = m_mergeHelper.mergeAllMachines(report, ip);
+				report = transactionMergeHelper.mergeAllMachines(report, ip);
 				new TransactionTrendGraphBuilder().buildTrendGraph(model, payload, report);
 			}
 			break;
 		}
 
 		if (payload.isXml()) {
-			m_xmlViewer.view(ctx, model);
+			xmlViewer.view(ctx, model);
 		} else {
-			m_jspViewer.view(ctx, model);
+			jspViewer.view(ctx, model);
 		}
 	}
 
 	private void normalize(Model model, Payload payload) {
-		m_normalizePayload.normalize(model, payload);
+		normalizePayload.normalize(model, payload);
 		model.setPage(ReportPage.TRANSACTION);
 		model.setAction(payload.getAction());
 
@@ -353,38 +364,6 @@ public class Handler implements PageHandler<Context> {
 		} else {
 			payload.setQueryName(null);
 		}
-	}
-
-	public void setBuilder(GraphBuilder builder) {
-		m_builder = builder;
-	}
-
-	public void setConfigManager(DomainGroupConfigManager configManager) {
-		m_configManager = configManager;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setMergeHelper(TransactionMergeHelper mergeHelper) {
-		m_mergeHelper = mergeHelper;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setReportService(TransactionReportService reportService) {
-		m_reportService = reportService;
-	}
-
-	public void setService(ModelService<TransactionReport> service) {
-		m_service = service;
-	}
-
-	public void setXmlViewer(XmlViewer xmlViewer) {
-		m_xmlViewer = xmlViewer;
 	}
 
 	public enum DetailOrder {

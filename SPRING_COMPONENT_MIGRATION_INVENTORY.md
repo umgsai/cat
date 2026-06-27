@@ -220,6 +220,100 @@ mvn -pl cat-home -am -DskipTests compile
 BUILD SUCCESS
 ```
 
+## 24. 第十六批完成记录
+
+第十六批按新的大批量计划迁移剩余页面 `Handler`，覆盖报表页和系统页中依赖较多的控制类。迁移原则仍然是只迁移 `Handler` 本身，暂不迁移 `TaskBuilder`、`ReportService`、`ModelService`、带 `initMethod` 的 Manager、Map/List 聚合 Bean 和 processor 链路。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 18 个 Bean 已改为 `@Component("原Bean名")` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+modelHandler -> com.dianping.cat.report.page.model.Handler
+cacheHandler -> com.dianping.cat.report.page.cache.Handler
+eventHandler -> com.dianping.cat.report.page.event.Handler
+transactionHandler -> com.dianping.cat.report.page.transaction.Handler
+problemHandler -> com.dianping.cat.report.page.problem.Handler
+heartbeatHandler -> com.dianping.cat.report.page.heartbeat.Handler
+businessHandler -> com.dianping.cat.report.page.business.Handler
+logviewHandler -> com.dianping.cat.report.page.logview.Handler
+topHandler -> com.dianping.cat.report.page.top.Handler
+stateHandler -> com.dianping.cat.report.page.state.Handler
+storageHandler -> com.dianping.cat.report.page.storage.Handler
+dependencyHandler -> com.dianping.cat.report.page.dependency.Handler
+statisticsHandler -> com.dianping.cat.report.page.statistics.Handler
+matrixHandler -> com.dianping.cat.report.page.matrix.Handler
+crossHandler -> com.dianping.cat.report.page.cross.Handler
+systemConfigHandler -> com.dianping.cat.system.page.config.Handler
+systemRouterHandler -> com.dianping.cat.system.page.router.Handler
+systemBusinessHandler -> com.dianping.cat.system.page.business.Handler
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 18 个 `@Bean` 工厂方法，避免和组件扫描生成的同名 Bean 冲突。
+
+3. 本批所有迁移类都使用 `@Resource` 字段注入；泛型服务和聚合服务使用显式名称绑定，例如：
+
+```text
+@Resource(name = "transactionModelService")
+@Resource(name = "eventModelService")
+@Resource(name = "problemModelService")
+@Resource(name = "heartbeatModelService")
+@Resource(name = "topModelService")
+@Resource(name = "stateModelService")
+@Resource(name = "storageModelService")
+@Resource(name = "dependencyModelService")
+@Resource(name = "matrixModelService")
+@Resource(name = "crossModelService")
+@Resource(name = "logviewModelService")
+@Resource(name = "localModelServices")
+```
+
+4. 触碰到的旧式字段命名已收口为 Java 驼峰命名，例如：
+
+```text
+m_jspViewer -> jspViewer
+m_reportService -> transactionReportService / eventReportService / problemReportService 等具体名称
+m_service -> transactionModelService / eventModelService / storageModelService 等具体名称
+m_configManager -> domainGroupConfigManager / serverConfigManager / exceptionRuleConfigManager 等具体名称
+m_mergeHelper -> transactionMergeHelper / eventMergeHelper / storageMergeHelper
+m_jsonBuilder -> jsonBuilder
+m_alertInfoBuilder -> storageAlertInfoBuilder
+m_routerConfigHandler -> routerConfigHandler
+m_tagConfigManger -> businessTagConfigManager
+```
+
+5. `systemConfigHandler` 中原来只调用 `Cat.logError` 的配置修改记录异常路径，已补充 SLF4J 日志，便于从应用日志直接定位用户、账号、动作和 cookie 解析问题。
+
+6. 本批保留以下已有 Bean 的配置类注册，不在本批扩大范围：
+
+```text
+heartbeatHistoryGraphs
+stateGraphBuilder
+stateBuilder
+TopologyGraphManager
+RouterConfigManager
+RouterConfigHandler
+各类 ReportService / ModelService
+各类 TaskBuilder
+system config processor 链路
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
 运行时验证：
 
 ```text

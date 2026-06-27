@@ -235,7 +235,6 @@ import com.dianping.cat.report.alert.AlarmManager;
 import com.dianping.cat.report.DomainValidator;
 import com.dianping.cat.report.graph.svg.DefaultGraphBuilder;
 import com.dianping.cat.report.graph.svg.DefaultValueTranslater;
-import com.dianping.cat.report.graph.svg.GraphBuilder;
 import com.dianping.cat.report.graph.svg.ValueTranslater;
 import com.dianping.cat.report.graph.metric.DataExtractor;
 import com.dianping.cat.report.graph.metric.impl.DataExtractorImpl;
@@ -446,6 +445,24 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		com.dianping.cat.report.page.home.Handler.class,
 		com.dianping.cat.report.page.alteration.Handler.class,
 		com.dianping.cat.report.page.alert.Handler.class,
+		com.dianping.cat.report.page.model.Handler.class,
+		com.dianping.cat.report.page.cache.Handler.class,
+		com.dianping.cat.report.page.event.Handler.class,
+		com.dianping.cat.report.page.transaction.Handler.class,
+		com.dianping.cat.report.page.problem.Handler.class,
+		com.dianping.cat.report.page.heartbeat.Handler.class,
+		com.dianping.cat.report.page.business.Handler.class,
+		com.dianping.cat.report.page.logview.Handler.class,
+		com.dianping.cat.report.page.top.Handler.class,
+		com.dianping.cat.report.page.state.Handler.class,
+		com.dianping.cat.report.page.storage.Handler.class,
+		com.dianping.cat.report.page.dependency.Handler.class,
+		com.dianping.cat.report.page.statistics.Handler.class,
+		com.dianping.cat.report.page.matrix.Handler.class,
+		com.dianping.cat.report.page.cross.Handler.class,
+		com.dianping.cat.system.page.config.Handler.class,
+		com.dianping.cat.system.page.router.Handler.class,
+		com.dianping.cat.system.page.business.Handler.class,
 		com.dianping.cat.system.page.permission.Handler.class},
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
@@ -500,6 +517,24 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					com.dianping.cat.report.page.home.Handler.class,
 					com.dianping.cat.report.page.alteration.Handler.class,
 					com.dianping.cat.report.page.alert.Handler.class,
+					com.dianping.cat.report.page.model.Handler.class,
+					com.dianping.cat.report.page.cache.Handler.class,
+					com.dianping.cat.report.page.event.Handler.class,
+					com.dianping.cat.report.page.transaction.Handler.class,
+					com.dianping.cat.report.page.problem.Handler.class,
+					com.dianping.cat.report.page.heartbeat.Handler.class,
+					com.dianping.cat.report.page.business.Handler.class,
+					com.dianping.cat.report.page.logview.Handler.class,
+					com.dianping.cat.report.page.top.Handler.class,
+					com.dianping.cat.report.page.state.Handler.class,
+					com.dianping.cat.report.page.storage.Handler.class,
+					com.dianping.cat.report.page.dependency.Handler.class,
+					com.dianping.cat.report.page.statistics.Handler.class,
+					com.dianping.cat.report.page.matrix.Handler.class,
+					com.dianping.cat.report.page.cross.Handler.class,
+					com.dianping.cat.system.page.config.Handler.class,
+					com.dianping.cat.system.page.router.Handler.class,
+					com.dianping.cat.system.page.business.Handler.class,
 					com.dianping.cat.system.page.permission.Handler.class}),
 		useDefaultFilters = false)
 @MapperScan(basePackages = {
@@ -1238,89 +1273,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public com.dianping.cat.report.page.model.Handler modelHandler(
-			@Qualifier("localModelServices") Map<String, LocalModelService> localModelServices) {
-		com.dianping.cat.report.page.model.Handler handler = new com.dianping.cat.report.page.model.Handler();
-
-		handler.setLocalServices(localModelServices);
-		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.cache.Handler cacheHandler(
-			@Qualifier("eventModelService") ModelService<EventReport> eventModelService,
-			com.dianping.cat.report.page.cache.JspViewer cacheJspViewer,
-			TransactionReportService transactionReportService, EventReportService eventReportService,
-			PayloadNormalizer payloadNormalizer,
-			@Qualifier("transactionModelService") ModelService<TransactionReport> transactionModelService) {
-		com.dianping.cat.report.page.cache.Handler handler = new com.dianping.cat.report.page.cache.Handler();
-
-		handler.setEventService(eventModelService);
-		handler.setJspViewer(cacheJspViewer);
-		handler.setTransactionReportService(transactionReportService);
-		handler.setEventReportService(eventReportService);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setTransactionService(transactionModelService);
-		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.event.Handler eventHandler(GraphBuilder graphBuilder,
-			com.dianping.cat.report.page.event.JspViewer eventJspViewer, EventReportService eventReportService,
-			EventMergeHelper eventMergeHelper, @Qualifier("eventModelService") ModelService<EventReport> eventModelService,
-			PayloadNormalizer payloadNormalizer, DomainGroupConfigManager domainGroupConfigManager) {
-		com.dianping.cat.report.page.event.Handler handler = new com.dianping.cat.report.page.event.Handler();
-
-		handler.setBuilder(graphBuilder);
-		handler.setJspViewer(eventJspViewer);
-		handler.setReportService(eventReportService);
-		handler.setMergeHelper(eventMergeHelper);
-		handler.setService(eventModelService);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setConfigManager(domainGroupConfigManager);
-		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.transaction.Handler transactionHandler(GraphBuilder graphBuilder,
-			com.dianping.cat.report.page.transaction.JspViewer transactionJspViewer,
-			com.dianping.cat.report.page.transaction.XmlViewer transactionXmlViewer,
-			TransactionReportService transactionReportService, TransactionMergeHelper transactionMergeHelper,
-			PayloadNormalizer payloadNormalizer, DomainGroupConfigManager domainGroupConfigManager,
-			@Qualifier("transactionModelService") ModelService<TransactionReport> transactionModelService) {
-		com.dianping.cat.report.page.transaction.Handler handler = new com.dianping.cat.report.page.transaction.Handler();
-
-		handler.setBuilder(graphBuilder);
-		handler.setJspViewer(transactionJspViewer);
-		handler.setXmlViewer(transactionXmlViewer);
-		handler.setReportService(transactionReportService);
-		handler.setMergeHelper(transactionMergeHelper);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setConfigManager(domainGroupConfigManager);
-		handler.setService(transactionModelService);
-		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.problem.Handler problemHandler(
-			com.dianping.cat.report.page.problem.JspViewer problemJspViewer, ServerConfigManager serverConfigManager,
-			ProblemReportService problemReportService,
-			@Qualifier("problemModelService") ModelService<ProblemReport> problemModelService,
-			DomainGroupConfigManager domainGroupConfigManager, PayloadNormalizer payloadNormalizer,
-			JsonBuilder jsonBuilder) {
-		com.dianping.cat.report.page.problem.Handler handler = new com.dianping.cat.report.page.problem.Handler();
-
-		handler.setJspViewer(problemJspViewer);
-		handler.setManager(serverConfigManager);
-		handler.setReportService(problemReportService);
-		handler.setService(problemModelService);
-		handler.setConfigManager(domainGroupConfigManager);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setJsonBuilder(jsonBuilder);
-		return handler;
-	}
-
-	@Bean
 	public com.dianping.cat.report.page.heartbeat.HistoryGraphs heartbeatHistoryGraphs(
 			HeartbeatReportService heartbeatReportService, HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager) {
 		com.dianping.cat.report.page.heartbeat.HistoryGraphs historyGraphs =
@@ -1329,53 +1281,6 @@ public class CatHomeSpringConfiguration {
 		historyGraphs.setReportService(heartbeatReportService);
 		historyGraphs.setManager(heartbeatDisplayPolicyManager);
 		return historyGraphs;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.heartbeat.Handler heartbeatHandler(GraphBuilder graphBuilder,
-			com.dianping.cat.report.page.heartbeat.HistoryGraphs heartbeatHistoryGraphs,
-			com.dianping.cat.report.page.heartbeat.JspViewer heartbeatJspViewer,
-			HeartbeatReportService heartbeatReportService,
-			@Qualifier("heartbeatModelService") ModelService<HeartbeatReport> heartbeatModelService,
-			PayloadNormalizer payloadNormalizer, HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager) {
-		com.dianping.cat.report.page.heartbeat.Handler handler = new com.dianping.cat.report.page.heartbeat.Handler();
-
-		handler.setBuilder(graphBuilder);
-		handler.setHistoryGraphs(heartbeatHistoryGraphs);
-		handler.setJspViewer(heartbeatJspViewer);
-		handler.setReportService(heartbeatReportService);
-		handler.setService(heartbeatModelService);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setManager(heartbeatDisplayPolicyManager);
-		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.business.Handler businessHandler(
-			com.dianping.cat.report.page.business.JspViewer businessJspViewer, PayloadNormalizer payloadNormalizer,
-			ProjectService projectService, BusinessGraphCreator businessGraphCreator,
-			BusinessTagConfigManager businessTagConfigManager) {
-		com.dianping.cat.report.page.business.Handler handler = new com.dianping.cat.report.page.business.Handler();
-
-		handler.setJspViewer(businessJspViewer);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setProjectService(projectService);
-		handler.setGraphCreator(businessGraphCreator);
-		handler.setTagConfigManager(businessTagConfigManager);
-		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.logview.Handler logviewHandler(
-			com.dianping.cat.report.page.logview.JspViewer logviewJspViewer,
-			@Qualifier("logviewModelService") ModelService<String> logviewModelService,
-			ServerConfigManager serverConfigManager) {
-		com.dianping.cat.report.page.logview.Handler handler = new com.dianping.cat.report.page.logview.Handler();
-
-		handler.setJspViewer(logviewJspViewer);
-		handler.setService(logviewModelService);
-		handler.setConfigManager(serverConfigManager);
-		return handler;
 	}
 
 	@Bean
@@ -1397,93 +1302,6 @@ public class CatHomeSpringConfiguration {
 		builder.setRouterManager(routerConfigManager);
 		builder.setStateService(stateModelService);
 		return builder;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.top.Handler topHandler(
-			com.dianping.cat.report.page.top.JspViewer topJspViewer, PayloadNormalizer payloadNormalizer,
-			ExternalInfoBuilder externalInfoBuilder, com.dianping.cat.report.page.state.StateBuilder stateBuilder,
-			@Qualifier("topModelService") ModelService<TopReport> topModelService,
-			@Qualifier("transactionModelService") ModelService<TransactionReport> transactionModelService,
-			@Qualifier("problemModelService") ModelService<ProblemReport> problemModelService,
-			TopReportService topReportService, TransactionMergeHelper transactionMergeHelper,
-			ExceptionRuleConfigManager exceptionRuleConfigManager, JsonBuilder jsonBuilder) {
-		com.dianping.cat.report.page.top.Handler handler = new com.dianping.cat.report.page.top.Handler();
-
-		handler.setJspViewer(topJspViewer);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setExternalInfoBuilder(externalInfoBuilder);
-		handler.setStateBuilder(stateBuilder);
-		handler.setTopService(topModelService);
-		handler.setTransactionService(transactionModelService);
-		handler.setProblemService(problemModelService);
-		handler.setTopReportService(topReportService);
-		handler.setMergeHelper(transactionMergeHelper);
-		handler.setConfigManager(exceptionRuleConfigManager);
-		handler.setBuilder(jsonBuilder);
-		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.state.Handler stateHandler(
-			com.dianping.cat.report.page.state.JspViewer stateJspViewer, StateReportService stateReportService,
-			com.dianping.cat.report.page.state.StateGraphBuilder stateGraphBuilder,
-			com.dianping.cat.report.page.state.StateBuilder stateBuilder,
-			@Qualifier("stateModelService") ModelService<StateReport> stateModelService,
-			PayloadNormalizer payloadNormalizer, ServerFilterConfigManager serverFilterConfigManager) {
-		com.dianping.cat.report.page.state.Handler handler = new com.dianping.cat.report.page.state.Handler();
-
-		handler.setJspViewer(stateJspViewer);
-		handler.setReportService(stateReportService);
-		handler.setStateGraphs(stateGraphBuilder);
-		handler.setStateBuilder(stateBuilder);
-		handler.setService(stateModelService);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setServerFilterConfigManager(serverFilterConfigManager);
-		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.storage.Handler storageHandler(
-			com.dianping.cat.report.page.storage.JspViewer storageJspViewer, StorageReportService storageReportService,
-			PayloadNormalizer payloadNormalizer,
-			@Qualifier("storageModelService") ModelService<StorageReport> storageModelService,
-			StorageMergeHelper storageMergeHelper, StorageGroupConfigManager storageGroupConfigManager,
-			JsonBuilder jsonBuilder, AlterationRepository alterationRepository,
-			com.dianping.cat.alarm.service.AlertService alertService, StorageAlertInfoBuilder storageAlertInfoBuilder,
-			StorageBuilderManager storageBuilderManager) {
-		com.dianping.cat.report.page.storage.Handler handler = new com.dianping.cat.report.page.storage.Handler();
-
-		handler.setJspViewer(storageJspViewer);
-		handler.setReportService(storageReportService);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setService(storageModelService);
-		handler.setMergeHelper(storageMergeHelper);
-		handler.setStorageGroupConfigManager(storageGroupConfigManager);
-		handler.setJsonBuilder(jsonBuilder);
-		handler.setAlterationDao(alterationRepository);
-		handler.setAlertService(alertService);
-		handler.setAlertInfoBuilder(storageAlertInfoBuilder);
-		handler.setStorageBuilderManager(storageBuilderManager);
-		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.dependency.Handler dependencyHandler(
-			@Qualifier("dependencyModelService") ModelService<DependencyReport> dependencyModelService,
-			com.dianping.cat.report.page.dependency.JspViewer dependencyJspViewer,
-			TopologyGraphManager topologyGraphManager, ExternalInfoBuilder externalInfoBuilder,
-			PayloadNormalizer payloadNormalizer, TopoGraphFormatConfigManager topoGraphFormatConfigManager) {
-		com.dianping.cat.report.page.dependency.Handler handler =
-		      new com.dianping.cat.report.page.dependency.Handler();
-
-		handler.setDependencyService(dependencyModelService);
-		handler.setJspViewer(dependencyJspViewer);
-		handler.setGraphManager(topologyGraphManager);
-		handler.setExternalInfoBuilder(externalInfoBuilder);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setFormatConfigManager(topoGraphFormatConfigManager);
-		return handler;
 	}
 
 	@Bean(initMethod = "initialize")
@@ -1537,42 +1355,6 @@ public class CatHomeSpringConfiguration {
 		builder.setHeartbeatReportService(heartbeatReportService);
 		builder.setConfigManager(serverFilterConfigManager);
 		return builder;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.statistics.Handler statisticsHandler(
-			com.dianping.cat.report.page.statistics.JspViewer statisticsJspViewer,
-			HeavyReportService heavyReportService, UtilizationReportService utilizationReportService,
-			ServiceReportService serviceReportService, ClientReportService clientReportService,
-			JarReportService jarReportService, ProjectService projectService, PayloadNormalizer payloadNormalizer,
-			AlertSummaryExecutor alertSummaryExecutor) {
-		com.dianping.cat.report.page.statistics.Handler handler =
-		      new com.dianping.cat.report.page.statistics.Handler();
-
-		handler.setJspViewer(statisticsJspViewer);
-		handler.setHeavyReportService(heavyReportService);
-		handler.setUtilizationReportService(utilizationReportService);
-		handler.setServiceReportService(serviceReportService);
-		handler.setClientReportService(clientReportService);
-		handler.setJarReportService(jarReportService);
-		handler.setProjectService(projectService);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setExecutor(alertSummaryExecutor);
-		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.matrix.Handler matrixHandler(
-			com.dianping.cat.report.page.matrix.JspViewer matrixJspViewer, MatrixReportService matrixReportService,
-			PayloadNormalizer payloadNormalizer,
-			@Qualifier("matrixModelService") ModelService<MatrixReport> matrixModelService) {
-		com.dianping.cat.report.page.matrix.Handler handler = new com.dianping.cat.report.page.matrix.Handler();
-
-		handler.setJspViewer(matrixJspViewer);
-		handler.setReportService(matrixReportService);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setService(matrixModelService);
-		return handler;
 	}
 
 	@Bean
@@ -1766,21 +1548,6 @@ public class CatHomeSpringConfiguration {
 		service.setWeeklyReportDao(weeklyReportRepository);
 		service.setMonthlyReportDao(monthlyReportRepository);
 		return service;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.cross.Handler crossHandler(
-			com.dianping.cat.report.page.cross.JspViewer crossJspViewer, CrossReportService crossReportService,
-			PayloadNormalizer payloadNormalizer, HostinfoService hostinfoService,
-			@Qualifier("crossModelService") ModelService<CrossReport> crossModelService) {
-		com.dianping.cat.report.page.cross.Handler handler = new com.dianping.cat.report.page.cross.Handler();
-
-		handler.setJspViewer(crossJspViewer);
-		handler.setReportService(crossReportService);
-		handler.setNormalizePayload(payloadNormalizer);
-		handler.setHostinfoService(hostinfoService);
-		handler.setService(crossModelService);
-		return handler;
 	}
 
 	@Bean
@@ -3389,33 +3156,6 @@ public class CatHomeSpringConfiguration {
 		return processor;
 	}
 
-	@Bean
-	public com.dianping.cat.system.page.config.Handler systemConfigHandler(
-			com.dianping.cat.system.page.config.JspViewer systemConfigJspViewer,
-			com.dianping.cat.system.page.config.processor.GlobalConfigProcessor globalConfigProcessor,
-			com.dianping.cat.system.page.config.processor.DependencyConfigProcessor dependencyConfigProcessor,
-			com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor exceptionConfigProcessor,
-			com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor heartbeatConfigProcessor,
-			com.dianping.cat.system.page.config.processor.StorageConfigProcessor storageConfigProcessor,
-			com.dianping.cat.system.page.config.processor.TransactionConfigProcessor transactionConfigProcessor,
-			com.dianping.cat.system.page.config.processor.EventConfigProcessor eventConfigProcessor,
-			com.dianping.cat.system.page.config.processor.AlertConfigProcessor alertConfigProcessor,
-			ConfigModificationRepository configModificationRepository) {
-		com.dianping.cat.system.page.config.Handler handler = new com.dianping.cat.system.page.config.Handler();
-
-		handler.setJspViewer(systemConfigJspViewer);
-		handler.setGlobalConfigProcessor(globalConfigProcessor);
-		handler.setTopologyConfigProcessor(dependencyConfigProcessor);
-		handler.setExceptionConfigProcessor(exceptionConfigProcessor);
-		handler.setHeartbeatConfigProcessor(heartbeatConfigProcessor);
-		handler.setStorageConfigProcessor(storageConfigProcessor);
-		handler.setTransactionConfigProcessor(transactionConfigProcessor);
-		handler.setEventConfigProcessor(eventConfigProcessor);
-		handler.setAlertConfigProcessor(alertConfigProcessor);
-		handler.setConfigModificationDao(configModificationRepository);
-		return handler;
-	}
-
 	@Bean(initMethod = "initialize")
 	public RouterConfigManager routerConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher,
 			DailyReportRepository dailyReportRepository, DailyReportContentRepository dailyReportContentRepository) {
@@ -3426,21 +3166,6 @@ public class CatHomeSpringConfiguration {
 		manager.setDailyReportDao(dailyReportRepository);
 		manager.setDailyReportContentDao(dailyReportContentRepository);
 		return manager;
-	}
-
-	@Bean
-	public com.dianping.cat.system.page.router.Handler systemRouterHandler(
-			CachedRouterConfigService cachedRouterConfigService, RouterConfigManager routerConfigManager,
-			SampleConfigManager sampleConfigManager, ServerFilterConfigManager serverFilterConfigManager,
-			RouterConfigHandler routerConfigHandler) {
-		com.dianping.cat.system.page.router.Handler handler = new com.dianping.cat.system.page.router.Handler();
-
-		handler.setCachedReportService(cachedRouterConfigService);
-		handler.setConfigManager(routerConfigManager);
-		handler.setSampleConfigManager(sampleConfigManager);
-		handler.setFilterManager(serverFilterConfigManager);
-		handler.setRouterConfigHandler(routerConfigHandler);
-		return handler;
 	}
 
 	@Bean(initMethod = "initialize")
@@ -3571,25 +3296,6 @@ public class CatHomeSpringConfiguration {
 
 		manager.setConfigDao(businessConfigRepository);
 		return manager;
-	}
-
-	@Bean
-	public com.dianping.cat.system.page.business.Handler systemBusinessHandler(
-			com.dianping.cat.system.page.business.JspViewer systemBusinessJspViewer,
-			ProjectService projectService, BusinessConfigManager businessConfigManager,
-			BusinessTagConfigManager businessTagConfigManager, BusinessRuleConfigManager businessRuleConfigManager,
-			ConfigHtmlParser configHtmlParser,
-			com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator ruleFTLDecorator) {
-		com.dianping.cat.system.page.business.Handler handler = new com.dianping.cat.system.page.business.Handler();
-
-		handler.setJspViewer(systemBusinessJspViewer);
-		handler.setProjectService(projectService);
-		handler.setConfigManager(businessConfigManager);
-		handler.setTagConfigManager(businessTagConfigManager);
-		handler.setAlertConfigManager(businessRuleConfigManager);
-		handler.setConfigHtmlParser(configHtmlParser);
-		handler.setRuleDecorator(ruleFTLDecorator);
-		return handler;
 	}
 
 	@Bean

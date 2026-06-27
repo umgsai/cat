@@ -24,7 +24,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -54,21 +56,29 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component("eventHandler")
 public class Handler implements PageHandler<Context> {
 
-	private GraphBuilder m_builder;
+	@Resource
+	private GraphBuilder graphBuilder;
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private EventReportService m_reportService;
+	@Resource
+	private EventReportService eventReportService;
 
-	private EventMergeHelper m_mergeHelper;
+	@Resource
+	private EventMergeHelper eventMergeHelper;
 
-	private ModelService<EventReport> m_service;
+	@Resource(name = "eventModelService")
+	private ModelService<EventReport> eventModelService;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private DomainGroupConfigManager m_configManager;
+	@Resource
+	private DomainGroupConfigManager domainGroupConfigManager;
 
 	private void buildDistributionInfo(Model model, String type, String name, EventReport report) {
 		PieGraphChartVisitor chartVisitor = new PieGraphChartVisitor(type, name);
@@ -100,8 +110,8 @@ public class Handler implements PageHandler<Context> {
 		EventName eventName = t.findOrCreateName(name);
 
 		if (eventName != null) {
-			String graph1 = m_builder.build(new HitPayload("Hits Over Time", "Time (min)", "Count", eventName));
-			String graph2 = m_builder.build(new FailurePayload("Failures Over Time", "Time (min)", "Count", eventName));
+			String graph1 = graphBuilder.build(new HitPayload("Hits Over Time", "Time (min)", "Count", eventName));
+			String graph2 = graphBuilder.build(new FailurePayload("Failures Over Time", "Time (min)", "Count", eventName));
 
 			model.setGraph1(graph1);
 			model.setGraph2(graph2);
@@ -125,7 +135,7 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private EventReport filterReportByGroup(EventReport report, String domain, String group) {
-		List<String> ips = m_configManager.queryIpByDomainAndGroup(domain, group);
+		List<String> ips = domainGroupConfigManager.queryIpByDomainAndGroup(domain, group);
 		List<String> removes = new ArrayList<String>();
 
 		for (Machine machine : report.getMachines().values()) {
@@ -155,7 +165,7 @@ public class Handler implements PageHandler<Context> {
 		      .setProperty("name", name)//
 		      .setProperty("ip", ipAddress);
 
-		ModelResponse<EventReport> response = m_service.invoke(request);
+		ModelResponse<EventReport> response = eventModelService.invoke(request);
 		EventReport report = response.getModel();
 
 		return report;
@@ -168,8 +178,8 @@ public class Handler implements PageHandler<Context> {
 		      .setProperty("type", payload.getType())//
 		      .setProperty("ip", ipAddress);
 
-		if (m_service.isEligable(request)) {
-			ModelResponse<EventReport> response = m_service.invoke(request);
+		if (eventModelService.isEligable(request)) {
+			ModelResponse<EventReport> response = eventModelService.invoke(request);
 			EventReport report = response.getModel();
 
 			return report;
@@ -203,39 +213,39 @@ public class Handler implements PageHandler<Context> {
 		String ip = payload.getIpAddress();
 
 		if (StringUtils.isEmpty(group)) {
-			group = m_configManager.queryDefaultGroup(domain);
+			group = domainGroupConfigManager.queryDefaultGroup(domain);
 			payload.setGroup(group);
 		}
-		model.setGroupIps(m_configManager.queryIpByDomainAndGroup(domain, group));
-		model.setGroups(m_configManager.queryDomainGroup(payload.getDomain()));
+		model.setGroupIps(domainGroupConfigManager.queryIpByDomainAndGroup(domain, group));
+		model.setGroups(domainGroupConfigManager.queryDomainGroup(payload.getDomain()));
 		switch (action) {
 		case HOURLY_REPORT:
 			EventReport report = getHourlyReport(payload);
 
 			if (report != null) {
-				report = m_mergeHelper.mergeAllIps(report, ipAddress);
+				report = eventMergeHelper.mergeAllIps(report, ipAddress);
 				model.setReport(report);
 				buildEventMetaInfo(model, payload, report);
 			}
 			break;
 		case HISTORY_REPORT:
-			report = m_reportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
+			report = eventReportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
 
 			if (report != null) {
-				report = m_mergeHelper.mergeAllIps(report, ipAddress);
+				report = eventMergeHelper.mergeAllIps(report, ipAddress);
 				model.setReport(report);
 				buildEventMetaInfo(model, payload, report);
 			}
 			break;
 		case HISTORY_GRAPH:
-			report = m_reportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
+			report = eventReportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
 
 			if (report != null) {
 				if (Constants.ALL.equalsIgnoreCase(ipAddress)) {
 					buildDistributionInfo(model, type, name, report);
 				}
 
-				report = m_mergeHelper.mergeAllIps(report, ipAddress);
+				report = eventMergeHelper.mergeAllIps(report, ipAddress);
 
 				new EventTrendGraphBuilder().buildTrendGraph(model, payload, report);
 			}
@@ -248,11 +258,11 @@ public class Handler implements PageHandler<Context> {
 					buildDistributionInfo(model, type, name, report);
 				}
 
-				report = m_mergeHelper.mergeAllIps(report, ipAddress);
+				report = eventMergeHelper.mergeAllIps(report, ipAddress);
 
 				if (name == null || name.length() == 0) {
 					name = Constants.ALL;
-					report = m_mergeHelper.mergeAllNames(report, ip, name);
+					report = eventMergeHelper.mergeAllNames(report, ip, name);
 				}
 				model.setReport(report);
 				buildEventNameGraph(model, report, type, name, ip);
@@ -264,18 +274,18 @@ public class Handler implements PageHandler<Context> {
 
 			if (report != null) {
 				report = filterReportByGroup(report, domain, group);
-				report = m_mergeHelper.mergeAllIps(report, ipAddress);
+				report = eventMergeHelper.mergeAllIps(report, ipAddress);
 				model.setReport(report);
 
 				buildEventMetaInfo(model, payload, report);
 			}
 			break;
 		case HISTORY_GROUP_REPORT:
-			report = m_reportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
+			report = eventReportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
 
 			if (report != null) {
 				report = filterReportByGroup(report, domain, group);
-				report = m_mergeHelper.mergeAllIps(report, ipAddress);
+				report = eventMergeHelper.mergeAllIps(report, ipAddress);
 				model.setReport(report);
 				buildEventMetaInfo(model, payload, report);
 			}
@@ -291,66 +301,38 @@ public class Handler implements PageHandler<Context> {
 				if (name == null || name.length() == 0) {
 					name = Constants.ALL;
 				}
-				report = m_mergeHelper.mergeAllNames(report, ip, name);
+				report = eventMergeHelper.mergeAllNames(report, ip, name);
 				model.setReport(report);
 				buildEventNameGraph(model, report, type, name, ip);
 			}
 			break;
 		case HISTORY_GROUP_GRAPH:
-			report = m_reportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
+			report = eventReportService.queryReport(domain, payload.getHistoryStartDate(), payload.getHistoryEndDate());
 
 			if (report != null) {
 				report = filterReportByGroup(report, domain, group);
 
 				buildDistributionInfo(model, type, name, report);
 
-				report = m_mergeHelper.mergeAllIps(report, ip);
+				report = eventMergeHelper.mergeAllIps(report, ip);
 
 				new EventTrendGraphBuilder().buildTrendGraph(model, payload, report);
 			}
 			break;
 		}
 
-		m_jspViewer.view(ctx, model);
+		jspViewer.view(ctx, model);
 	}
 
 	private void normalize(Model model, Payload payload) {
 		model.setPage(ReportPage.EVENT);
 		model.setAction(payload.getAction());
 
-		m_normalizePayload.normalize(model, payload);
+		normalizePayload.normalize(model, payload);
 
 		if (StringUtils.isEmpty(payload.getType())) {
 			payload.setType(null);
 		}
-	}
-
-	public void setBuilder(GraphBuilder builder) {
-		m_builder = builder;
-	}
-
-	public void setConfigManager(DomainGroupConfigManager configManager) {
-		m_configManager = configManager;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setMergeHelper(EventMergeHelper mergeHelper) {
-		m_mergeHelper = mergeHelper;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setReportService(EventReportService reportService) {
-		m_reportService = reportService;
-	}
-
-	public void setService(ModelService<EventReport> service) {
-		m_service = service;
 	}
 
 	public enum DetailOrder {

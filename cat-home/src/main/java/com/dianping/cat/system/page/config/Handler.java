@@ -24,6 +24,10 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.Date;
 
+import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -44,26 +48,39 @@ import com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor;
 import com.dianping.cat.system.page.config.processor.StorageConfigProcessor;
 import com.dianping.cat.system.page.config.processor.TransactionConfigProcessor;
 
+@Component("systemConfigHandler")
 public class Handler implements PageHandler<Context> {
-	private JspViewer m_jspViewer;
+	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	private GlobalConfigProcessor m_globalConfigProcessor;
+	@Resource
+	private JspViewer jspViewer;
 
-	private DependencyConfigProcessor m_topologyConfigProcessor;
+	@Resource
+	private GlobalConfigProcessor globalConfigProcessor;
 
-	private ExceptionConfigProcessor m_exceptionConfigProcessor;
+	@Resource
+	private DependencyConfigProcessor dependencyConfigProcessor;
 
-	private HeartbeatConfigProcessor m_heartbeatConfigProcessor;
+	@Resource
+	private ExceptionConfigProcessor exceptionConfigProcessor;
 
-	private AlertConfigProcessor m_alertConfigProcessor;
+	@Resource
+	private HeartbeatConfigProcessor heartbeatConfigProcessor;
 
-	private TransactionConfigProcessor m_transactionConfigProcessor;
+	@Resource
+	private AlertConfigProcessor alertConfigProcessor;
 
-	private EventConfigProcessor m_eventConfigProcessor;
+	@Resource
+	private TransactionConfigProcessor transactionConfigProcessor;
 
-	private StorageConfigProcessor m_storageConfigProcessor;
+	@Resource
+	private EventConfigProcessor eventConfigProcessor;
 
-	private ConfigModificationRepository m_configModificationDao;
+	@Resource
+	private StorageConfigProcessor storageConfigProcessor;
+
+	@Resource
+	private ConfigModificationRepository configModificationRepository;
 
 	@Override
 	@PreInboundActionMeta("login")
@@ -102,7 +119,7 @@ public class Handler implements PageHandler<Context> {
 		case ALL_REPORT_CONFIG:
 		case SAMPLE_CONFIG_UPDATE:
 		case REPORT_RELOAD_CONFIG_UPDATE:
-			m_globalConfigProcessor.process(action, payload, model);
+			globalConfigProcessor.process(action, payload, model);
 			break;
 
 		case TOPOLOGY_GRAPH_NODE_CONFIG_LIST:
@@ -114,7 +131,7 @@ public class Handler implements PageHandler<Context> {
 		case TOPOLOGY_GRAPH_EDGE_CONFIG_ADD_OR_UPDATE_SUBMIT:
 		case TOPOLOGY_GRAPH_EDGE_CONFIG_DELETE:
 		case TOPO_GRAPH_FORMAT_CONFIG_UPDATE:
-			m_topologyConfigProcessor.process(action, payload, model);
+			dependencyConfigProcessor.process(action, payload, model);
 			break;
 
 		case EXCEPTION:
@@ -125,7 +142,7 @@ public class Handler implements PageHandler<Context> {
 		case EXCEPTION_EXCLUDE_DELETE:
 		case EXCEPTION_EXCLUDE_ADD:
 		case EXCEPTION_EXCLUDE_UPDATE_SUBMIT:
-			m_exceptionConfigProcessor.process(action, payload, model);
+			exceptionConfigProcessor.process(action, payload, model);
 			break;
 
 		case HEARTBEAT_RULE_CONFIG_LIST:
@@ -133,40 +150,40 @@ public class Handler implements PageHandler<Context> {
 		case HEARTBEAT_RULE_ADD_OR_UPDATE_SUBMIT:
 		case HEARTBEAT_RULE_DELETE:
 		case HEARTBEAT_DISPLAY_POLICY:
-			m_heartbeatConfigProcessor.process(action, payload, model);
+			heartbeatConfigProcessor.process(action, payload, model);
 			break;
 
 		case STORAGE_RULE:
 		case STORAGE_RULE_ADD_OR_UPDATE:
 		case STORAGE_RULE_ADD_OR_UPDATE_SUBMIT:
 		case STORAGE_RULE_DELETE:
-			m_storageConfigProcessor.process(action, payload, model);
+			storageConfigProcessor.process(action, payload, model);
 			break;
 
 		case TRANSACTION_RULE:
 		case TRANSACTION_RULE_ADD_OR_UPDATE:
 		case TRANSACTION_RULE_ADD_OR_UPDATE_SUBMIT:
 		case TRANSACTION_RULE_DELETE:
-			m_transactionConfigProcessor.process(action, payload, model);
+			transactionConfigProcessor.process(action, payload, model);
 			break;
 
 		case EVENT_RULE:
 		case EVENT_RULE_ADD_OR_UPDATE:
 		case EVENT_RULE_ADD_OR_UPDATE_SUBMIT:
 		case EVENT_RULE_DELETE:
-			m_eventConfigProcessor.process(action, payload, model);
+			eventConfigProcessor.process(action, payload, model);
 			break;
 
 		case ALERT_DEFAULT_RECEIVERS:
 		case ALERT_POLICY:
-			m_alertConfigProcessor.process(action, payload, model);
+			alertConfigProcessor.process(action, payload, model);
 			break;
 		}
-		m_jspViewer.view(ctx, model);
+		jspViewer.view(ctx, model);
 	}
 
 	public void store(String userName, String accountName, Payload payload) {
-		ConfigModification modification = m_configModificationDao.createLocal();
+		ConfigModification modification = configModificationRepository.createLocal();
 
 		modification.setUserName(userName);
 		modification.setAccountName(accountName);
@@ -175,8 +192,10 @@ public class Handler implements PageHandler<Context> {
 		modification.setArgument(new JsonBuilder().toJson(payload));
 
 		try {
-			m_configModificationDao.insert(modification);
+			configModificationRepository.insert(modification);
 		} catch (Exception ex) {
+			LOGGER.error("Unable to store config modification, userName={}, accountName={}, action={}.", userName,
+			      accountName, payload.getAction(), ex);
 			Cat.logError(ex);
 		}
 	}
@@ -199,49 +218,10 @@ public class Handler implements PageHandler<Context> {
 
 				store(userName, account, payload);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to store config modification from cookie, cookieValue={}.", cookieValue, ex);
 				Cat.logError("store cookie fail:" + cookieValue, new RuntimeException());
 			}
 		}
-	}
-
-	public void setAlertConfigProcessor(AlertConfigProcessor alertConfigProcessor) {
-		m_alertConfigProcessor = alertConfigProcessor;
-	}
-
-	public void setConfigModificationDao(ConfigModificationRepository configModificationDao) {
-		m_configModificationDao = configModificationDao;
-	}
-
-	public void setEventConfigProcessor(EventConfigProcessor eventConfigProcessor) {
-		m_eventConfigProcessor = eventConfigProcessor;
-	}
-
-	public void setExceptionConfigProcessor(ExceptionConfigProcessor exceptionConfigProcessor) {
-		m_exceptionConfigProcessor = exceptionConfigProcessor;
-	}
-
-	public void setGlobalConfigProcessor(GlobalConfigProcessor globalConfigProcessor) {
-		m_globalConfigProcessor = globalConfigProcessor;
-	}
-
-	public void setHeartbeatConfigProcessor(HeartbeatConfigProcessor heartbeatConfigProcessor) {
-		m_heartbeatConfigProcessor = heartbeatConfigProcessor;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setStorageConfigProcessor(StorageConfigProcessor storageConfigProcessor) {
-		m_storageConfigProcessor = storageConfigProcessor;
-	}
-
-	public void setTopologyConfigProcessor(DependencyConfigProcessor topologyConfigProcessor) {
-		m_topologyConfigProcessor = topologyConfigProcessor;
-	}
-
-	public void setTransactionConfigProcessor(TransactionConfigProcessor transactionConfigProcessor) {
-		m_transactionConfigProcessor = transactionConfigProcessor;
 	}
 
 }

@@ -24,7 +24,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -48,19 +50,26 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component("cacheHandler")
 public class Handler implements PageHandler<Context> {
 
-	private ModelService<EventReport> m_eventService;
+	@Resource(name = "eventModelService")
+	private ModelService<EventReport> eventModelService;
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private TransactionReportService m_transactionReportService;
+	@Resource
+	private TransactionReportService transactionReportService;
 
-	private EventReportService m_eventReportService;
+	@Resource
+	private EventReportService eventReportService;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private ModelService<TransactionReport> m_transactionService;
+	@Resource(name = "transactionModelService")
+	private ModelService<TransactionReport> transactionModelService;
 
 	private CacheReport buildCacheReport(TransactionReport transactionReport, EventReport eventReport, Payload payload) {
 		String type = payload.getType();
@@ -95,7 +104,7 @@ public class Handler implements PageHandler<Context> {
 		String domain = payload.getDomain();
 		Date start = payload.getHistoryStartDate();
 		Date end = payload.getHistoryEndDate();
-		EventReport report = m_eventReportService.queryReport(domain, start, end);
+		EventReport report = eventReportService.queryReport(domain, start, end);
 
 		if (Constants.ALL.equalsIgnoreCase(payload.getIpAddress())) {
 			com.dianping.cat.report.page.event.transform.AllMachineMerger allEvent = new com.dianping.cat.report.page.event.transform.AllMachineMerger();
@@ -116,7 +125,7 @@ public class Handler implements PageHandler<Context> {
 		String domain = payload.getDomain();
 		Date start = payload.getHistoryStartDate();
 		Date end = payload.getHistoryEndDate();
-		TransactionReport report = m_transactionReportService.queryReport(domain, start, end);
+		TransactionReport report = transactionReportService.queryReport(domain, start, end);
 
 		if (report != null) {
 			if (Constants.ALL.equalsIgnoreCase(payload.getIpAddress())) {
@@ -145,12 +154,12 @@ public class Handler implements PageHandler<Context> {
 		EventReport eventReport = null;
 
 		if (StringUtils.isEmpty(type)) {
-			ModelResponse<EventReport> response = m_eventService.invoke(request);
+			ModelResponse<EventReport> response = eventModelService.invoke(request);
 
 			eventReport = response.getModel();
 		} else {
 			request.setProperty("type", type);
-			ModelResponse<EventReport> response = m_eventService.invoke(request);
+			ModelResponse<EventReport> response = eventModelService.invoke(request);
 
 			eventReport = response.getModel();
 		}
@@ -181,7 +190,7 @@ public class Handler implements PageHandler<Context> {
 			request.setProperty("type", type);
 		}
 
-		ModelResponse<TransactionReport> response = m_transactionService.invoke(request);
+		ModelResponse<TransactionReport> response = transactionModelService.invoke(request);
 		TransactionReport report = response.getModel();
 
 		if (report != null) {
@@ -238,38 +247,14 @@ public class Handler implements PageHandler<Context> {
 				model.setPieChart(buildPieChart(model.getReport()));
 			}
 		}
-		m_jspViewer.view(ctx, model);
+		jspViewer.view(ctx, model);
 	}
 
 	private void normalize(Model model, Payload payload) {
-		m_normalizePayload.normalize(model, payload);
+		normalizePayload.normalize(model, payload);
 		model.setAction(payload.getAction());
 		model.setPage(ReportPage.CACHE);
 		model.setQueryName(payload.getQueryName());
-	}
-
-	public void setEventReportService(EventReportService eventReportService) {
-		m_eventReportService = eventReportService;
-	}
-
-	public void setEventService(ModelService<EventReport> eventService) {
-		m_eventService = eventService;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setTransactionReportService(TransactionReportService transactionReportService) {
-		m_transactionReportService = transactionReportService;
-	}
-
-	public void setTransactionService(ModelService<TransactionReport> transactionService) {
-		m_transactionService = transactionService;
 	}
 
 }

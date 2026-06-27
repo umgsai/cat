@@ -21,8 +21,10 @@ package com.dianping.cat.report.page.logview;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -38,20 +40,24 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component("logviewHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private ModelService<String> m_service;
+	@Resource(name = "logviewModelService")
+	private ModelService<String> logviewModelService;
 
-	private ServerConfigManager m_configManager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
 	private boolean checkStorageTime(MessageId msg) {
 		long time = msg.getTimestamp();
 		long current = TimeHelper.getCurrentDay().getTime();
 
-		if (time > current - TimeHelper.ONE_DAY * m_configManager.getHdfsMaxStorageTime()) {
+		if (time > current - TimeHelper.ONE_DAY * serverConfigManager.getHdfsMaxStorageTime()) {
 			return true;
 		} else {
 			return false;
@@ -68,8 +74,8 @@ public class Handler implements PageHandler<Context> {
 										.setProperty("waterfall", String.valueOf(waterfall)) //
 										.setProperty("timestamp", String.valueOf(timestamp));
 
-				if (m_service.isEligable(request)) {
-					ModelResponse<String> response = m_service.invoke(request);
+				if (logviewModelService.isEligable(request)) {
+					ModelResponse<String> response = logviewModelService.invoke(request);
 					String logview = response.getModel();
 
 					return logview;
@@ -144,18 +150,6 @@ public class Handler implements PageHandler<Context> {
 			break;
 		}
 
-		m_jspViewer.view(ctx, model);
-	}
-
-	public void setConfigManager(ServerConfigManager configManager) {
-		m_configManager = configManager;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setService(ModelService<String> service) {
-		m_service = service;
+		jspViewer.view(ctx, model);
 	}
 }

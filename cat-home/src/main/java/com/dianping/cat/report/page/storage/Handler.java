@@ -32,11 +32,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -71,34 +73,46 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component("storageHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private StorageReportService m_reportService;
+	@Resource
+	private StorageReportService storageReportService;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private ModelService<StorageReport> m_service;
+	@Resource(name = "storageModelService")
+	private ModelService<StorageReport> storageModelService;
 
-	private StorageMergeHelper m_mergeHelper;
+	@Resource
+	private StorageMergeHelper storageMergeHelper;
 
-	private StorageGroupConfigManager m_storageGroupConfigManager;
+	@Resource
+	private StorageGroupConfigManager storageGroupConfigManager;
 
-	private JsonBuilder m_jsonBuilder;
+	@Resource
+	private JsonBuilder jsonBuilder;
 
-	private AlterationRepository m_alterationDao;
+	@Resource
+	private AlterationRepository alterationRepository;
 
-	private AlertService m_alertService;
+	@Resource
+	private AlertService alertService;
 
-	private StorageAlertInfoBuilder m_alertInfoBuilder;
+	@Resource
+	private StorageAlertInfoBuilder storageAlertInfoBuilder;
 
-	private StorageBuilderManager m_storageBuilderManager;
+	@Resource
+	private StorageBuilderManager storageBuilderManager;
 
 	private Map<String, Map<String, List<String>>> buildAlertLinks(Map<String, StorageAlertInfo> alertInfos, String type) {
 		Map<String, Map<String, List<String>>> links = new LinkedHashMap<String, Map<String, List<String>>>();
-		String format = m_storageGroupConfigManager.queryLinkFormat(type);
+		String format = storageGroupConfigManager.queryLinkFormat(type);
 
 		if (format != null) {
 			for (Entry<String, StorageAlertInfo> alertInfo : alertInfos.entrySet()) {
@@ -119,7 +133,7 @@ public class Handler implements PageHandler<Context> {
 						linkMap.put(id, ls);
 					}
 					for (String ip : storage.getMachines().keySet()) {
-						String url = m_storageGroupConfigManager.buildUrl(format, id, ip);
+						String url = storageGroupConfigManager.buildUrl(format, id, ip);
 
 						if (url != null) {
 							ls.add(url);
@@ -135,7 +149,7 @@ public class Handler implements PageHandler<Context> {
 		List<Alteration> results = new LinkedList<Alteration>();
 
 		try {
-			List<Alteration> alterations = m_alterationDao.findByTypeDruation(start, end, type);
+			List<Alteration> alterations = alterationRepository.findByTypeDruation(start, end, type);
 
 			for (Alteration alteration : alterations) {
 				results.add(alteration);
@@ -150,7 +164,7 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private void buildDepartments(Payload payload, Model model, StorageReport storageReport) {
-		Map<String, Department> departments = m_storageGroupConfigManager
+		Map<String, Department> departments = storageGroupConfigManager
 								.queryStorageDepartments(SortHelper.sortDomain(storageReport.getIds()), payload.getType());
 
 		model.setDepartments(departments);
@@ -163,10 +177,10 @@ public class Handler implements PageHandler<Context> {
 		visitor.visitStorageReport(storageReport);
 		Map<String, LineChart> lineCharts = visitor.getLineChart();
 
-		model.setCountTrend(m_jsonBuilder.toJson(lineCharts.get(StorageConstants.COUNT)));
-		model.setAvgTrend(m_jsonBuilder.toJson(lineCharts.get(StorageConstants.AVG)));
-		model.setErrorTrend(m_jsonBuilder.toJson(lineCharts.get(StorageConstants.ERROR)));
-		model.setLongTrend(m_jsonBuilder.toJson(lineCharts.get(StorageConstants.LONG)));
+		model.setCountTrend(jsonBuilder.toJson(lineCharts.get(StorageConstants.COUNT)));
+		model.setAvgTrend(jsonBuilder.toJson(lineCharts.get(StorageConstants.AVG)));
+		model.setErrorTrend(jsonBuilder.toJson(lineCharts.get(StorageConstants.ERROR)));
+		model.setLongTrend(jsonBuilder.toJson(lineCharts.get(StorageConstants.LONG)));
 	}
 
 	private Pair<Boolean, Set<String>> buildOperations(Payload payload, Model model, Set<String> defaultValue) {
@@ -275,9 +289,9 @@ public class Handler implements PageHandler<Context> {
 			Date endDate = new Date(end);
 			String type = payload.getType();
 
-			List<Alert> alerts = m_alertService.query(new Date(startDate.getTime() + TimeHelper.ONE_MINUTE),
+			List<Alert> alerts = alertService.query(new Date(startDate.getTime() + TimeHelper.ONE_MINUTE),
 									new Date(endDate.getTime() + TimeHelper.ONE_MINUTE), type);
-			Map<String, StorageAlertInfo> alertInfos = m_alertInfoBuilder
+			Map<String, StorageAlertInfo> alertInfos = storageAlertInfoBuilder
 									.buildStorageAlertInfos(startDate, endDate,	minuteCounts, type, alerts);
 			alertInfos = sortAlertInfos(alertInfos);
 
@@ -292,12 +306,12 @@ public class Handler implements PageHandler<Context> {
 		model.setPage(ReportPage.STORAGE);
 
 		if (!ctx.isProcessStopped()) {
-			m_jspViewer.view(ctx, model);
+			jspViewer.view(ctx, model);
 		}
 	}
 
 	private StorageReport mergeReport(Payload payload, StorageReport storageReport) {
-		storageReport = m_mergeHelper.mergeReport(storageReport, payload.getIpAddress(), Constants.ALL);
+		storageReport = storageMergeHelper.mergeReport(storageReport, payload.getIpAddress(), Constants.ALL);
 		StorageSorter sorter = new StorageSorter(storageReport, payload.getSort());
 
 		return sorter.getSortedReport();
@@ -306,7 +320,7 @@ public class Handler implements PageHandler<Context> {
 	private void normalize(Model model, Payload payload) {
 		model.setPage(ReportPage.STORAGE);
 		model.setAction(payload.getAction());
-		m_normalizePayload.normalize(model, payload);
+		normalizePayload.normalize(model, payload);
 
 		if (payload.getAction() == Action.DASHBOARD) {
 			Integer minute = parseQueryMinute(payload);
@@ -325,7 +339,7 @@ public class Handler implements PageHandler<Context> {
 			model.setMinutes(minutes);
 		} else {
 			if (payload.getOperations() == null) {
-				List<String> defaultMethods = m_storageBuilderManager.getDefaultMethods(payload.getType());
+				List<String> defaultMethods = storageBuilderManager.getDefaultMethods(payload.getType());
 
 				payload.setOperations(buildOperationStr(defaultMethods));
 			}
@@ -350,15 +364,15 @@ public class Handler implements PageHandler<Context> {
 		Date start = payload.getHistoryStartDate();
 		Date end = payload.getHistoryEndDate();
 
-		return m_reportService.queryReport(buildReportId(payload), start, end);
+		return storageReportService.queryReport(buildReportId(payload), start, end);
 	}
 
 	private StorageReport queryHourlyReport(Payload payload) {
 		ModelRequest request = new ModelRequest(buildReportId(payload), payload.getDate())
 								.setProperty("ip",	payload.getIpAddress());
 
-		if (m_service.isEligable(request)) {
-			ModelResponse<StorageReport> response = m_service.invoke(request);
+		if (storageModelService.isEligable(request)) {
+			ModelResponse<StorageReport> response = storageModelService.invoke(request);
 			StorageReport report = response.getModel();
 
 			return report;
@@ -383,7 +397,7 @@ public class Handler implements PageHandler<Context> {
 				}
 			});
 
-			StorageAlertInfo result = m_alertInfoBuilder.makeAlertInfo(alertInfo.getId(), alertInfo.getStartTime());
+			StorageAlertInfo result = storageAlertInfoBuilder.makeAlertInfo(alertInfo.getId(), alertInfo.getStartTime());
 			Map<String, Storage> storages = result.getStorages();
 
 			for (Entry<String, Storage> storage : entries) {
@@ -449,50 +463,6 @@ public class Handler implements PageHandler<Context> {
 				return Integer.parseInt(end) - Integer.parseInt(first);
 			}
 		}
-	}
-
-	public void setAlertInfoBuilder(StorageAlertInfoBuilder alertInfoBuilder) {
-		m_alertInfoBuilder = alertInfoBuilder;
-	}
-
-	public void setAlertService(AlertService alertService) {
-		m_alertService = alertService;
-	}
-
-	public void setAlterationDao(AlterationRepository alterationDao) {
-		m_alterationDao = alterationDao;
-	}
-
-	public void setJsonBuilder(JsonBuilder jsonBuilder) {
-		m_jsonBuilder = jsonBuilder;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setMergeHelper(StorageMergeHelper mergeHelper) {
-		m_mergeHelper = mergeHelper;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setReportService(StorageReportService reportService) {
-		m_reportService = reportService;
-	}
-
-	public void setService(ModelService<StorageReport> service) {
-		m_service = service;
-	}
-
-	public void setStorageBuilderManager(StorageBuilderManager storageBuilderManager) {
-		m_storageBuilderManager = storageBuilderManager;
-	}
-
-	public void setStorageGroupConfigManager(StorageGroupConfigManager storageGroupConfigManager) {
-		m_storageGroupConfigManager = storageGroupConfigManager;
 	}
 
 }

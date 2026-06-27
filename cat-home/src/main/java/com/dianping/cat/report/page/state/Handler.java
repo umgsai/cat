@@ -22,10 +22,12 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Date;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -46,26 +48,34 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component("stateHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private StateReportService m_reportService;
+	@Resource
+	private StateReportService stateReportService;
 
-	private StateGraphBuilder m_stateGraphs;
+	@Resource
+	private StateGraphBuilder stateGraphBuilder;
 
-	private StateBuilder m_stateBuilder;
+	@Resource
+	private StateBuilder stateBuilder;
 
-	private ModelService<StateReport> m_service;
+	@Resource(name = "stateModelService")
+	private ModelService<StateReport> stateModelService;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	private void buildDisplayInfo(Model model, Payload payload, StateReport report) {
 		report = ensureReport(report, payload);
-		StateDisplay display = new StateDisplay(payload.getIpAddress(), m_serverFilterConfigManager.getUnusedDomains());
+		StateDisplay display = new StateDisplay(payload.getIpAddress(), serverFilterConfigManager.getUnusedDomains());
 
 		display.setSortType(payload.getSort());
 		display.visitStateReport(report);
@@ -78,7 +88,7 @@ public class Handler implements PageHandler<Context> {
 		Date start = payload.getHistoryStartDate();
 		Date end = payload.getHistoryEndDate();
 
-		return m_reportService.queryReport(domain, start, end);
+		return stateReportService.queryReport(domain, start, end);
 	}
 
 	private StateReport getHourlyReport(Payload payload) {
@@ -87,8 +97,8 @@ public class Handler implements PageHandler<Context> {
 		ModelRequest request = new ModelRequest(domain, payload.getDate()) //
 								.setProperty("ip", payload.getIpAddress());
 
-		if (m_service.isEligable(request)) {
-			ModelResponse<StateReport> response = m_service.invoke(request);
+		if (stateModelService.isEligable(request)) {
+			ModelResponse<StateReport> response = stateModelService.invoke(request);
 
 			return response.getModel();
 		} else {
@@ -133,7 +143,7 @@ public class Handler implements PageHandler<Context> {
 		switch (action) {
 		case HOURLY:
 			report = getHourlyReport(payload);
-			model.setMessage(m_stateBuilder.buildStateMessage(payload.getDate(), payload.getIpAddress()));
+			model.setMessage(stateBuilder.buildStateMessage(payload.getDate(), payload.getIpAddress()));
 			buildDisplayInfo(model, payload, report);
 			break;
 		case HISTORY:
@@ -143,19 +153,19 @@ public class Handler implements PageHandler<Context> {
 			break;
 		case GRAPH:
 			report = getHourlyReport(payload);
-			pair = m_stateGraphs.buildGraph(payload, key, report);
+			pair = stateGraphBuilder.buildGraph(payload, key, report);
 
 			model.setGraph(new JsonBuilder().toJson(pair.getKey()));
 			model.setPieChart(new JsonBuilder().toJson(pair.getValue()));
 			break;
 		case HISTORY_GRAPH:
-			pair = m_stateGraphs.buildGraph(payload, key);
+			pair = stateGraphBuilder.buildGraph(payload, key);
 
 			model.setGraph(new JsonBuilder().toJson(pair.getKey()));
 			model.setPieChart(new JsonBuilder().toJson(pair.getValue()));
 			break;
 		}
-		m_jspViewer.view(ctx, model);
+		jspViewer.view(ctx, model);
 	}
 
 	private void normalize(Model model, Payload payload) {
@@ -167,35 +177,7 @@ public class Handler implements PageHandler<Context> {
 		if (StringUtils.isEmpty(ip)) {
 			payload.setIpAddress(Constants.ALL);
 		}
-		m_normalizePayload.normalize(model, payload);
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setReportService(StateReportService reportService) {
-		m_reportService = reportService;
-	}
-
-	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
-	}
-
-	public void setService(ModelService<StateReport> service) {
-		m_service = service;
-	}
-
-	public void setStateBuilder(StateBuilder stateBuilder) {
-		m_stateBuilder = stateBuilder;
-	}
-
-	public void setStateGraphs(StateGraphBuilder stateGraphs) {
-		m_stateGraphs = stateGraphs;
+		normalizePayload.normalize(model, payload);
 	}
 
 }
