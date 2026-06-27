@@ -439,6 +439,72 @@ mvn -pl cat-home -am -DskipTests compile
 BUILD SUCCESS
 ```
 
+## 15. 第七批完成记录
+
+第七批选择 ProblemHandler 小批量迁移，验证“命名 Bean + 保留默认配置值 + List 聚合暂留配置类”的迁移方式。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+default-problem -> com.dianping.cat.consumer.problem.DefaultProblemHandler
+long-execution -> com.dianping.cat.consumer.problem.LongExecutionProblemHandler
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 2 个简单 `@Bean` 方法：
+
+```text
+defaultProblemHandler()
+longExecutionProblemHandler(...)
+```
+
+3. `DefaultProblemHandler` 使用 `@Component(DefaultProblemHandler.ID)` 保留原 Bean 名，并在类内保留默认错误类型：
+
+```text
+Error,RuntimeException,Exception
+```
+
+4. `LongExecutionProblemHandler` 使用 `@Component(LongExecutionProblemHandler.ID)` 保留原 Bean 名，`ServerConfigManager` 已改为 `@Resource` 字段注入。
+5. `LongExecutionProblemHandler#setConfigManager(...)` 暂时保留，用于兼容现有单元测试和手动构造路径。
+6. 本批触碰到的旧式字段命名已改为 Java 驼峰命名，并修正了原字段名拼写：
+
+```text
+m_errorTypes                -> errorTypes
+m_configManager             -> serverConfigManager
+m_defaultLongServiceDuration -> defaultLongServiceDuration
+m_defaultLongSqlDuration    -> defaultLongSqlDuration
+m_defaultLongUrlDuration    -> defaultLongUrlDuration
+m_defalutLongCallDuration   -> defaultLongCallDuration
+m_defaultLongCacheDuration  -> defaultLongCacheDuration
+m_longServiceThresholds     -> longServiceThresholds
+m_longSqlThresholds         -> longSqlThresholds
+m_longUrlThresholds         -> longUrlThresholds
+m_longCallThresholds        -> longCallThresholds
+m_longCacheThresholds       -> longCacheThresholds
+m_initialized               -> initialized
+```
+
+7. 以下聚合 Bean 本批继续保留在配置类中，避免改变 List 聚合语义：
+
+```text
+problemHandlers(...)
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
 ## 10. 第二批完成记录
 
 第二批选择 `BusinessGraphCreator` 一个 Bean，目标是验证依赖较多但不涉及后台线程、不涉及 prototype 的普通业务图表 Bean 迁移方式。

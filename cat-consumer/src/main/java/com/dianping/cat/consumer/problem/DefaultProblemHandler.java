@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.consumer.problem.model.entity.Entity;
 import com.dianping.cat.consumer.problem.model.entity.Machine;
 import com.dianping.cat.message.Event;
@@ -31,10 +33,11 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 
+@Component(DefaultProblemHandler.ID)
 public class DefaultProblemHandler extends ProblemHandler {
 	public static final String ID = "default-problem";
 
-	private Set<String> m_errorTypes;
+	private Set<String> errorTypes = parseErrorTypes("Error,RuntimeException,Exception");
 
 	@Override
 	public void handle(Machine machine, MessageTree tree) {
@@ -50,7 +53,7 @@ public class DefaultProblemHandler extends ProblemHandler {
 	}
 
 	private void processEvent(Machine machine, Event message, MessageTree tree) {
-		if (!message.getStatus().equals(Message.SUCCESS) && m_errorTypes.contains(message.getType())) {
+		if (!message.getStatus().equals(Message.SUCCESS) && errorTypes.contains(message.getType())) {
 			String type = ProblemType.ERROR.getName();
 			String status = message.getName();
 
@@ -95,7 +98,11 @@ public class DefaultProblemHandler extends ProblemHandler {
 	}
 
 	public void setErrorType(String type) {
-		m_errorTypes = Stream.of(type.split(",")).map(String::trim).filter(item -> !item.isEmpty()).collect(Collectors.toSet());
+		errorTypes = parseErrorTypes(type);
+	}
+
+	private Set<String> parseErrorTypes(String type) {
+		return Stream.of(type.split(",")).map(String::trim).filter(item -> !item.isEmpty()).collect(Collectors.toSet());
 	}
 
 }

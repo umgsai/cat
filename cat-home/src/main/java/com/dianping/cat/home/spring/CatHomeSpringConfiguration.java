@@ -404,7 +404,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		DefaultValueTranslater.class, DefaultGraphBuilder.class, DependencyItemBuilder.class,
 		TopologyGraphBuilder.class, StorageAlertInfoBuilder.class, ExternalInfoBuilder.class, StorageMergeHelper.class,
 		DatabaseParser.class, IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
-		StorageRPCBuilder.class},
+		StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class},
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
 					DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class, MatrixAnalyzer.class,
@@ -417,7 +417,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					DependencyItemBuilder.class, TopologyGraphBuilder.class, StorageAlertInfoBuilder.class,
 					ExternalInfoBuilder.class, StorageMergeHelper.class, DatabaseParser.class,
 					IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
-					StorageRPCBuilder.class}),
+					StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class}),
 		useDefaultFilters = false)
 @MapperScan(basePackages = {
 		"com.dianping.cat.mybatis.mapper",
@@ -2801,22 +2801,6 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public DataExtractor dataExtractor() {
 		return new DataExtractorImpl();
-	}
-
-	@Bean(name = DefaultProblemHandler.ID)
-	public ProblemHandler defaultProblemHandler() {
-		DefaultProblemHandler handler = new DefaultProblemHandler();
-
-		handler.setErrorType("Error,RuntimeException,Exception");
-		return handler;
-	}
-
-	@Bean(name = LongExecutionProblemHandler.ID)
-	public ProblemHandler longExecutionProblemHandler(ServerConfigManager serverConfigManager) {
-		LongExecutionProblemHandler handler = new LongExecutionProblemHandler();
-
-		handler.setConfigManager(serverConfigManager);
-		return handler;
 	}
 
 	@Bean
