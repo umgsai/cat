@@ -564,6 +564,67 @@ mvn -pl cat-home -am -DskipTests compile
 BUILD SUCCESS
 ```
 
+## 17. 第九批完成记录
+
+第九批选择告警摘要和规则辅助组件迁移，继续避开摘要 builder 初始化链路、摘要执行器和 `TopologyGraphManager` 本身。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+alertInfoBuilder -> com.dianping.cat.report.alert.summary.build.AlertInfoBuilder
+userDefinedRuleManager -> com.dianping.cat.report.alert.spi.config.UserDefinedRuleManager
+baselineService -> com.dianping.cat.report.page.metric.service.DefaultBaselineService
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 3 个简单 `@Bean` 方法：
+
+```text
+alertInfoBuilder(...)
+userDefinedRuleManager(...)
+baselineService(...)
+```
+
+3. `AlertInfoBuilder` 中 `AlertRepository`、`TopologyGraphManager` 已改为 `@Resource` 字段注入。
+4. `UserDefinedRuleManager` 中 `UserDefineRuleRepository` 已改为 `@Resource` 字段注入。
+5. `DefaultBaselineService` 使用 `@Component("baselineService")`，保留原 Bean 名，避免从 `baselineService` 变成 `defaultBaselineService`。
+6. `DefaultBaselineService` 中 `BaselineRepository` 已改为 `@Resource` 字段注入。
+7. 本批触碰到的旧式字段命名已改为 Java 驼峰命名：
+
+```text
+m_alertDao        -> alertRepository
+m_topologyManager -> topologyGraphManager
+m_dao             -> userDefineRuleRepository
+m_baselineDao     -> baselineRepository
+m_baselines       -> baselines
+m_empties         -> empties
+```
+
+8. `DefaultBaselineService` 中原本只调用 `Cat.logError` 的 baseline 查询、插入、解码异常分支，已补充 SLF4J 日志上下文。
+9. 以下 Bean 本批继续保留在配置类中，避免改变初始化和聚合语义：
+
+```text
+RelatedSummaryBuilder/FailureSummaryBuilder/AlterationSummaryBuilder
+AlertSummaryExecutor
+TopologyGraphManager
+RuleConfigManager 相关 Bean
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
 ## 10. 第二批完成记录
 
 第二批选择 `BusinessGraphCreator` 一个 Bean，目标是验证依赖较多但不涉及后台线程、不涉及 prototype 的普通业务图表 Bean 迁移方式。

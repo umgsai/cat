@@ -406,7 +406,8 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		TopologyGraphBuilder.class, StorageAlertInfoBuilder.class, ExternalInfoBuilder.class, StorageMergeHelper.class,
 		DatabaseParser.class, IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
 		StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class,
-		AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class},
+		AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
+		AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class},
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
 					DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class, MatrixAnalyzer.class,
@@ -420,7 +421,8 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					ExternalInfoBuilder.class, StorageMergeHelper.class, DatabaseParser.class,
 					IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
 					StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class,
-					AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class}),
+					AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
+					AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class}),
 		useDefaultFilters = false)
 @MapperScan(basePackages = {
 		"com.dianping.cat.mybatis.mapper",
@@ -3299,15 +3301,6 @@ public class CatHomeSpringConfiguration {
 		return services;
 	}
 
-	@Bean
-	public AlertInfoBuilder alertInfoBuilder(AlertRepository alertRepository, TopologyGraphManager topologyGraphManager) {
-		AlertInfoBuilder builder = new AlertInfoBuilder();
-
-		builder.setAlertDao(alertRepository);
-		builder.setTopologyManager(topologyGraphManager);
-		return builder;
-	}
-
 	@Bean(initMethod = "initialize", name = RelatedSummaryBuilder.ID)
 	public SummaryBuilder relatedSummaryBuilder(AlertInfoBuilder alertInfoBuilder,
 			AlertSummaryService alertSummaryService) {
@@ -3346,22 +3339,6 @@ public class CatHomeSpringConfiguration {
 		executor.setAlterationBuilder(alterationBuilder);
 		executor.setSendManager(senderManager);
 		return executor;
-	}
-
-	@Bean
-	public UserDefinedRuleManager userDefinedRuleManager(UserDefineRuleRepository userDefineRuleRepository) {
-		UserDefinedRuleManager manager = new UserDefinedRuleManager();
-
-		manager.setDao(userDefineRuleRepository);
-		return manager;
-	}
-
-	@Bean
-	public BaselineService baselineService(BaselineRepository baselineRepository) {
-		DefaultBaselineService service = new DefaultBaselineService();
-
-		service.setBaselineDao(baselineRepository);
-		return service;
 	}
 
 	@Bean

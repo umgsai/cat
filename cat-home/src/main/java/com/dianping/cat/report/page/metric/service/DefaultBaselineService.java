@@ -18,7 +18,11 @@
  */
 package com.dianping.cat.report.page.metric.service;
 
+import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,11 +42,15 @@ import com.dianping.cat.mybatis.BaselineRepository;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.task.TaskHelper;
 
+@Component("baselineService")
 public class DefaultBaselineService implements BaselineService {
 
-	private BaselineRepository m_baselineDao;
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBaselineService.class);
 
-	private Map<String, Baseline> m_baselines = new LinkedHashMap<String, Baseline>() {
+	@Resource
+	private BaselineRepository baselineRepository;
+
+	private Map<String, Baseline> baselines = new LinkedHashMap<String, Baseline>() {
 
 		private static final long serialVersionUID = 1L;
 
@@ -52,7 +60,7 @@ public class DefaultBaselineService implements BaselineService {
 		}
 	};
 
-	private Map<String, String> m_empties = new LinkedHashMap<String, String>() {
+	private Map<String, String> empties = new LinkedHashMap<String, String>() {
 
 		private static final long serialVersionUID = 1L;
 
@@ -61,10 +69,6 @@ public class DefaultBaselineService implements BaselineService {
 			return size() > 50000;
 		}
 	};
-
-	public void setBaselineDao(BaselineRepository baselineDao) {
-		m_baselineDao = baselineDao;
-	}
 
 	private double[] decodeBaselines(byte[] datas) throws IOException {
 		double[] result;
@@ -92,24 +96,26 @@ public class DefaultBaselineService implements BaselineService {
 
 	private Map<String, String> getEmpties() {
 		synchronized (this) {
-			return m_empties;
+			return empties;
 		}
 	}
 
 	@Override
 	public boolean hasDailyBaseline(String reportName, String key, Date reportPeriod) {
 		String baselineKey = reportName + ":" + key + ":" + reportPeriod;
-		Baseline baseline = m_baselines.get(baselineKey);
+		Baseline baseline = baselines.get(baselineKey);
 		boolean has = false;
 
 		if (baseline != null) {
 			has = true;
 		} else {
 			try {
-				baseline = m_baselineDao.findByReportNameKeyTime(reportPeriod, reportName, key);
+				baseline = baselineRepository.findByReportNameKeyTime(reportPeriod, reportName, key);
 				has = true;
 			} catch (EmptyResultDataAccessException e) {
 			} catch (Exception e) {
+				LOGGER.warn("Unable to check daily baseline, reportName={}, key={}, reportPeriod={}.", reportName, key,
+				      reportPeriod, e);
 				Cat.logError(e);
 			}
 		}
@@ -120,12 +126,14 @@ public class DefaultBaselineService implements BaselineService {
 	public void insertBaseline(Baseline baseline) {
 		try {
 			baseline.setData(encodeBaselines(baseline.getDataInDoubleArray()));
-			m_baselineDao.insert(baseline);
+			baselineRepository.insert(baseline);
 
 			String baselineKey = baseline.getReportName() + ":" + baseline.getIndexKey() + ":"	+ baseline.getReportPeriod();
 
 			getEmpties().remove(baselineKey);
 		} catch (Exception e) {
+			LOGGER.error("Unable to insert baseline, reportName={}, key={}, reportPeriod={}.", baseline.getReportName(),
+			      baseline.getIndexKey(), baseline.getReportPeriod(), e);
 			Cat.logError(e);
 		}
 	}
@@ -191,15 +199,15 @@ public class DefaultBaselineService implements BaselineService {
 	@Override
 	public double[] queryDailyBaseline(String reportName, String key, Date reportPeriod) {
 		String baselineKey = reportName + ":" + key + ":" + reportPeriod;
-		Baseline baseline = m_baselines.get(baselineKey);
+		Baseline baseline = baselines.get(baselineKey);
 
 		if (baseline == null) {
 			try {
 				boolean has = getEmpties().containsKey(baselineKey);
 
 				if (!has) {
-					baseline = m_baselineDao.findByReportNameKeyTime(reportPeriod, reportName, key);
-					m_baselines.put(baselineKey, baseline);
+					baseline = baselineRepository.findByReportNameKeyTime(reportPeriod, reportName, key);
+					baselines.put(baselineKey, baseline);
 				} else {
 					return null;
 				}
@@ -207,6 +215,8 @@ public class DefaultBaselineService implements BaselineService {
 				getEmpties().put(baselineKey, baselineKey);
 				return null;
 			} catch (Exception e) {
+				LOGGER.warn("Unable to query daily baseline, reportName={}, key={}, reportPeriod={}.", reportName, key,
+				      reportPeriod, e);
 				Cat.logError(e);
 				return null;
 			}
@@ -215,6 +225,8 @@ public class DefaultBaselineService implements BaselineService {
 		try {
 			return decodeBaselines(baseline.getData());
 		} catch (Exception e) {
+			LOGGER.warn("Unable to decode daily baseline, reportName={}, key={}, reportPeriod={}.", reportName, key,
+			      reportPeriod, e);
 			Cat.logError(e);
 			return null;
 		}

@@ -28,6 +28,9 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import jakarta.annotation.Resource;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
@@ -40,6 +43,7 @@ import com.dianping.cat.home.dependency.graph.entity.TopologyGraph;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphManager;
 
+@Component
 public class AlertInfoBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertInfoBuilder.class);
 
@@ -47,9 +51,11 @@ public class AlertInfoBuilder {
 
 	public static final String PREFIX = "dependency_";
 
-	private AlertRepository m_alertDao;
+	@Resource
+	private AlertRepository alertRepository;
 
-	private TopologyGraphManager m_topologyManager;
+	@Resource
+	private TopologyGraphManager topologyGraphManager;
 
 	private Collection<com.dianping.cat.home.alert.summary.entity.Alert> convertToAlert(List<TopologyEdge> edges,
 							Date date) {
@@ -117,7 +123,7 @@ public class AlertInfoBuilder {
 		alertSummary.addCategory(generateCategoryByTimeCateDomain(date, AlertType.Business.getName(), domain));
 		alertSummary.addCategory(generateCategoryByTimeCateDomain(date, AlertType.Exception.getName(), domain));
 
-		TopologyGraphManager topologyManager = m_topologyManager;
+		TopologyGraphManager topologyManager = topologyGraphManager;
 		TopologyGraph topology = topologyManager == null ? new TopologyGraph() : topologyManager.buildTopologyGraph(domain,
 		      date.getTime());
 		int statusThreshold = 2;
@@ -137,7 +143,7 @@ public class AlertInfoBuilder {
 		Date startTime = new Date(date.getTime() - AlertSummaryExecutor.SUMMARY_DURATION);
 
 		try {
-			AlertRepository alertDao = m_alertDao;
+			AlertRepository alertDao = alertRepository;
 
 			if (alertDao == null) {
 				LOGGER.warn("Alert repository is not configured for alert summary category, category={}, domain={}, start={}, end={}.",
@@ -166,7 +172,7 @@ public class AlertInfoBuilder {
 
 		for (String domain : dependencyDomains) {
 			try {
-				AlertRepository alertDao = m_alertDao;
+				AlertRepository alertDao = alertRepository;
 
 				if (alertDao == null) {
 					LOGGER.warn("Alert repository is not configured for dependency alert summary, category={}, domain={}, start={}, end={}.",
@@ -227,11 +233,4 @@ public class AlertInfoBuilder {
 		}
 	}
 
-	public void setAlertDao(AlertRepository alertDao) {
-		m_alertDao = alertDao;
-	}
-
-	public void setTopologyManager(TopologyGraphManager topologyManager) {
-		m_topologyManager = topologyManager;
-	}
 }
