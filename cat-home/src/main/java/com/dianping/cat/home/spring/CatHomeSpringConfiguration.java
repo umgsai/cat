@@ -1,20 +1,9 @@
 package com.dianping.cat.home.spring;
 
-import javax.sql.DataSource;
-
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.SqlSessionTemplate;
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.DefaultMessageAnalyzerManager;
@@ -300,159 +289,12 @@ import com.dianping.cat.system.page.router.service.RouterConfigService;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
 @Configuration
-@Import({SpringMvcMigrationConfiguration.class, SpringStorageComponentConfiguration.class})
-@ComponentScan(basePackageClasses = {BusinessAnalyzer.class, BusinessDelegate.class,
-		TransactionAnalyzer.class, TransactionDelegate.class, CrossAnalyzer.class, CrossDelegate.class,
-		DumpAnalyzer.class, DependencyAnalyzer.class, DependencyDelegate.class, EventAnalyzer.class, EventDelegate.class,
-		HeartbeatAnalyzer.class, HeartbeatDelegate.class, MatrixAnalyzer.class, MatrixDelegate.class,
-		ProblemAnalyzer.class, ProblemDelegate.class, StorageAnalyzer.class, StorageDelegate.class,
-		StorageReportUpdater.class, StorageBuilderManager.class, TopAnalyzer.class, TopDelegate.class, StateAnalyzer.class, StateDelegate.class,
-		ContainerMessageAnalyzerFactory.class, DefaultMessageAnalyzerManager.class, RealtimeConsumer.class,
-		DefaultMessageHandler.class, TcpSocketReceiver.class, CatHomeRuntimeBootstrap.class,
-		CatHomeSpringStartupVerifier.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
-		CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
-		BusinessPointParser.class, DomainGroupConfigManager.class, StorageGroupConfigManager.class,
-		HeartbeatDisplayPolicyManager.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
-		BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class, JsonBuilder.class,
-		DomainValidator.class, DefaultValueTranslater.class, DefaultGraphBuilder.class, DependencyItemBuilder.class,
-		TopologyGraphBuilder.class, TopologyGraphManager.class, TopologyGraphConfigManager.class,
-		TopoGraphFormatConfigManager.class, StorageAlertInfoBuilder.class, ExternalInfoBuilder.class, StorageMergeHelper.class,
-		StateReportService.class, StateReportBuilder.class, EventReportService.class, EventReportBuilder.class,
-		HeartbeatReportService.class, HeartbeatReportBuilder.class, DependencyReportService.class,
-		DependencyReportBuilder.class, MatrixReportService.class, MatrixReportBuilder.class,
-		TransactionReportService.class, TransactionReportBuilder.class, TopReportService.class,
-		CrossReportService.class, CrossReportBuilder.class, ProblemReportService.class, ProblemReportBuilder.class,
-		StorageReportService.class, StorageReportBuilder.class, BusinessReportService.class,
-		BusinessReportManager.class, TransactionReportManager.class, CrossReportManager.class,
-		DependencyReportManager.class, EventReportManager.class, HeartbeatReportManager.class,
-		MatrixReportManager.class, ProblemReportManager.class, StorageReportManager.class,
-		TopReportManager.class, StateReportManager.class,
-		ConfigRepository.class, BusinessConfigRepository.class, ProjectRepository.class, HostInfoRepository.class,
-		DailyReportRepository.class, DailyReportContentRepository.class, HourlyReportRepository.class,
-		HourlyReportContentRepository.class, WeeklyReportRepository.class, WeeklyReportContentRepository.class,
-		MonthlyReportRepository.class, MonthlyReportContentRepository.class, OverloadRepository.class,
-		AlertRepository.class, AlterationRepository.class, BaselineRepository.class, TopologyGraphRepository.class,
-		TaskRepository.class, AlertSummaryRepository.class, ConfigModificationRepository.class,
-		MetricGraphRepository.class, MetricScreenRepository.class, ServerAlarmRuleRepository.class,
-		UserDefineRuleRepository.class,
-		HistoricalProblemService.class, HistoricalBusinessService.class, HistoricalEventService.class,
-		HistoricalTransactionService.class, HistoricalHeartbeatService.class, HistoricalTopService.class,
-		HistoricalStateService.class, HistoricalStorageService.class, HistoricalCrossService.class,
-		HistoricalMatrixService.class, HistoricalDependencyService.class, CompositeProblemService.class,
-		CompositeBusinessService.class, CompositeEventService.class, CompositeTransactionService.class,
-		CompositeHeartbeatService.class, CompositeTopService.class, CompositeStateService.class,
-		CompositeStorageService.class, CompositeCrossService.class, CompositeMatrixService.class,
-		CompositeDependencyService.class, LocalProblemService.class, LocalEventService.class,
-		LocalTransactionService.class, LocalHeartbeatService.class, LocalCrossService.class,
-		LocalMatrixService.class, LocalDependencyService.class, LocalTopService.class,
-		LocalStateService.class, LocalStorageService.class, LocalBusinessService.class,
-		LocalMessageService.class, HistoricalMessageService.class,
-		CompositeLogViewService.class,
-		BusinessBaselineReportBuilder.class, JarReportService.class, JarReportBuilder.class,
-		HeavyReportService.class, HeavyReportBuilder.class, ClientReportService.class, ClientReportBuilder.class,
-		ServiceReportService.class, ServiceReportBuilder.class, UtilizationReportService.class,
-		UtilizationReportBuilder.class, CapacityUpdateStatusManager.class, HourlyCapacityUpdater.class,
-		DailyCapacityUpdater.class, WeeklyCapacityUpdater.class, MonthlyCapacityUpdater.class,
-		CapacityUpdateTask.class, TableCapacityService.class, RouterConfigService.class,
-		CachedRouterConfigService.class, RouterConfigManager.class, RouterConfigHandler.class,
-		RouterConfigAdjustor.class, RouterConfigBuilder.class, DatabaseParser.class, IpConvertManager.class,
-		StorageSQLBuilder.class, StorageCacheBuilder.class, StorageRPCBuilder.class,
-		DefaultProblemHandler.class, LongExecutionProblemHandler.class,
-		AlertSummaryService.class, RelatedSummaryBuilder.class, FailureSummaryBuilder.class,
-		AlterationSummaryBuilder.class, AlertSummaryExecutor.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
-		AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
-		DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
-		LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
-		AllReportConfigManager.class, ServerConfigManager.class, ServerFilterConfigManager.class, SampleConfigManager.class,
-		ReportReloadConfigManager.class, AtomicMessageConfigManager.class, TpValueStatisticConfigManager.class,
-		BusinessConfigManager.class,
-		BusinessReportReloader.class, TransactionReportReloader.class, CrossReportReloader.class,
-		DependencyReportReloader.class, EventReportReloader.class, HeartbeatReportReloader.class,
-		MatrixReportReloader.class, ProblemReportReloader.class, StorageReportReloader.class,
-		TopReportReloader.class, StateReportReloader.class,
-		UserConfigManager.class, ResourceConfigManager.class, CookieManager.class, TokenBuilder.class,
-		DefaultCatPropertyProvider.class, TokenManager.class, SessionManager.class, SigninService.class,
-		ProjectService.class, HostinfoService.class, TaskManager.class, DefaultTaskConsumer.class, ReportFacade.class,
-		CurrentReportBuilder.class, ProjectUpdateTask.class, CmdbInfoReloadBuilder.class, ReportReloadTask.class,
-		AlertExceptionBuilder.class, BusinessAlert.class, EventAlert.class, ExceptionAlert.class,
-		HeartbeatAlert.class, TransactionAlert.class, ExceptionRuleConfigManager.class, TransactionRuleConfigManager.class,
-		EventRuleConfigManager.class, HeartbeatRuleConfigManager.class, BusinessRuleConfigManager.class,
-		BusinessTagConfigManager.class, AlertConfigManager.class, AlertPolicyManager.class, SenderConfigManager.class,
-		MailSender.class, SmsSender.class, WeixinSender.class,
-		MailSpliter.class, SmsSpliter.class, WeixinSpliter.class, DXSpliter.class,
-		BusinessContactor.class, EventContactor.class, ExceptionContactor.class,
-		HeartbeatContactor.class, TransactionContactor.class, BusinessDecorator.class,
-		EventDecorator.class, ExceptionDecorator.class, HeartbeatDecorator.class, TransactionDecorator.class,
-		SenderManager.class, SpliterManager.class, ContactorManager.class, DecoratorManager.class,
-		RemoteServersManager.class, DefaultRemoteServersUpdater.class, ServersUpdaterManager.class,
-		com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator.class,
-		com.dianping.cat.alarm.spi.AlertManager.class, AlarmManager.class,
-		com.dianping.cat.report.page.home.JspViewer.class,
-		com.dianping.cat.report.page.monitor.JspViewer.class,
-		com.dianping.cat.report.page.model.JspViewer.class,
-		com.dianping.cat.report.page.alteration.JspViewer.class,
-		com.dianping.cat.report.page.alert.JspViewer.class,
-		com.dianping.cat.report.page.cache.JspViewer.class,
-		com.dianping.cat.report.page.event.JspViewer.class,
-		com.dianping.cat.report.page.transaction.JspViewer.class,
-		com.dianping.cat.report.page.transaction.XmlViewer.class,
-		com.dianping.cat.report.page.problem.JspViewer.class,
-		com.dianping.cat.report.page.heartbeat.JspViewer.class,
-		com.dianping.cat.report.page.top.JspViewer.class,
-		com.dianping.cat.report.page.business.JspViewer.class,
-		com.dianping.cat.report.page.logview.JspViewer.class,
-		com.dianping.cat.report.page.state.JspViewer.class,
-		com.dianping.cat.report.page.storage.JspViewer.class,
-		com.dianping.cat.report.page.dependency.JspViewer.class,
-		com.dianping.cat.report.page.matrix.JspViewer.class,
-		com.dianping.cat.report.page.statistics.JspViewer.class,
-		com.dianping.cat.report.page.overload.JspViewer.class,
-		com.dianping.cat.report.page.cross.JspViewer.class,
-		com.dianping.cat.system.page.config.JspViewer.class,
-		com.dianping.cat.system.page.business.JspViewer.class,
-		com.dianping.cat.system.page.permission.JspViewer.class,
-		com.dianping.cat.system.page.login.JspViewer.class,
-		com.dianping.cat.system.page.plugin.JspViewer.class,
-		com.dianping.cat.system.page.project.JspViewer.class,
-		com.dianping.cat.report.page.monitor.Handler.class,
-		com.dianping.cat.report.page.overload.Handler.class,
-		com.dianping.cat.system.page.login.Handler.class,
-		com.dianping.cat.system.page.plugin.Handler.class,
-		com.dianping.cat.system.page.project.Handler.class,
-		com.dianping.cat.report.page.home.Handler.class,
-		com.dianping.cat.report.page.alteration.Handler.class,
-		com.dianping.cat.report.page.alert.Handler.class,
-		com.dianping.cat.report.page.model.Handler.class,
-		com.dianping.cat.report.page.cache.Handler.class,
-		com.dianping.cat.report.page.event.Handler.class,
-		com.dianping.cat.report.page.transaction.Handler.class,
-		com.dianping.cat.report.page.problem.Handler.class,
-		com.dianping.cat.report.page.heartbeat.Handler.class,
-		com.dianping.cat.report.page.business.Handler.class,
-		com.dianping.cat.report.page.logview.Handler.class,
-		com.dianping.cat.report.page.top.Handler.class,
-		com.dianping.cat.report.page.state.Handler.class,
-		com.dianping.cat.report.page.storage.Handler.class,
-		com.dianping.cat.report.page.dependency.Handler.class,
-		com.dianping.cat.report.page.statistics.Handler.class,
-		com.dianping.cat.report.page.matrix.Handler.class,
-		com.dianping.cat.report.page.cross.Handler.class,
-		com.dianping.cat.system.page.config.Handler.class,
-		com.dianping.cat.system.page.router.Handler.class,
-		com.dianping.cat.system.page.business.Handler.class,
-		com.dianping.cat.report.page.heartbeat.HistoryGraphs.class,
-		com.dianping.cat.report.page.state.StateGraphBuilder.class,
-		com.dianping.cat.report.page.state.StateBuilder.class,
-		ConfigHtmlParser.class,
-		com.dianping.cat.system.page.config.processor.GlobalConfigProcessor.class,
-		com.dianping.cat.system.page.config.processor.DependencyConfigProcessor.class,
-		com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor.class,
-		com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor.class,
-		com.dianping.cat.system.page.config.processor.StorageConfigProcessor.class,
-		com.dianping.cat.system.page.config.processor.TransactionConfigProcessor.class,
-		com.dianping.cat.system.page.config.processor.EventConfigProcessor.class,
-		com.dianping.cat.system.page.config.processor.AlertConfigProcessor.class,
-		com.dianping.cat.system.page.permission.Handler.class},
+@Import({
+		CatHomeDatabaseConfiguration.class,
+		SpringMvcMigrationConfiguration.class,
+		SpringStorageComponentConfiguration.class
+})
+@ComponentScan(basePackages = "com.dianping.cat",
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 				classes = {BusinessAnalyzer.class, BusinessDelegate.class,
 					TransactionAnalyzer.class, TransactionDelegate.class, CrossAnalyzer.class, CrossDelegate.class,
@@ -616,64 +458,5 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					com.dianping.cat.system.page.config.processor.AlertConfigProcessor.class,
 					com.dianping.cat.system.page.permission.Handler.class}),
 		useDefaultFilters = false)
-@MapperScan(basePackages = {
-		"com.dianping.cat.mybatis.mapper",
-		"com.dianping.cat.mybatis.alert.dao",
-		"com.dianping.cat.mybatis.server.alarm.rule.dao",
-		"com.dianping.cat.mybatis.user.define.rule.dao"
-})
 public class CatHomeSpringConfiguration {
-	@Bean
-	public DataSource catDataSource() {
-		return CatHomeSpringDataSourceFactory.createCatDataSource();
-	}
-
-	@Bean
-	public SqlSessionFactory sqlSessionFactory(DataSource catDataSource) throws Exception {
-		SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
-		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-
-		factory.setDataSource(catDataSource);
-		factory.setMapperLocations(
-				resolver.getResource("classpath:mybatis/mapper/ConfigMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/DailyReportMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/HostInfoMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/HourlyReportMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/WeeklyReportMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/MonthReportMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/ProjectMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/DailyReportContentMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/HourlyReportContentMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/WeeklyReportContentMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/MonthlyReportContentMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/BusinessConfigMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/TaskMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/AlertSummaryMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/ConfigModificationMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/BaselineMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/OverloadMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/TopologyGraphMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/MetricGraphMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/MetricScreenMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/AlterationMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/AlertMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/ServerAlarmRuleMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/UserDefineRuleMapper.xml"));
-		return factory.getObject();
-	}
-
-	@Bean
-	public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
-		return new SqlSessionTemplate(sqlSessionFactory);
-	}
-
-	@Bean
-	public PlatformTransactionManager transactionManager(DataSource catDataSource) {
-		return new DataSourceTransactionManager(catDataSource);
-	}
-
-	@Bean
-	public TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
-		return new TransactionTemplate(transactionManager);
-	}
 }
