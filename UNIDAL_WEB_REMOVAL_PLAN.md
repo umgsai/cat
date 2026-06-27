@@ -62,6 +62,7 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 /r/cross
 /r/state
 /r/top
+/r/overload
 /r/business
 /s/login
 /s/config
@@ -85,7 +86,6 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 /r/alteration
 /r/monitor
 /r/alert
-/r/overload
 /r/storage
 ```
 
@@ -136,15 +136,18 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
    - 状态：已完成 `/mvc/s/permission` 新链路。
    - 已覆盖 `op=user/resource/error`。
 
-2. 报表只读页面：
+2. `/r/overload`
+   - 状态：已完成 `/mvc/r/overload` 新链路。
+   - 已覆盖 `op=view`，复用 `TableCapacityService`，Spring JSP 不再使用 Unidal taglib/WebRes。
+
+3. 报表只读页面：
    - `/r/model`
    - `/r/matrix`
    - `/r/cache`
    - `/r/statistics`
-   - `/r/overload`
    - `/r/storage`
 
-3. 配置或写操作页面：
+4. 配置或写操作页面：
    - `/r/alteration`
    - `/r/monitor`
    - `/r/alert`
