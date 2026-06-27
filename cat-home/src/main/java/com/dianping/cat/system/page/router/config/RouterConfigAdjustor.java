@@ -26,6 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Splitter;
 
 import com.dianping.cat.Cat;
@@ -49,27 +55,34 @@ import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.system.page.router.service.RouterConfigService;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
+@Component
 public class RouterConfigAdjustor {
+	private static final Logger LOGGER = LoggerFactory.getLogger(RouterConfigAdjustor.class);
 
-	private StateReportService m_stateReportService;
+	@Resource
+	private StateReportService stateReportService;
 
-	private RouterConfigManager m_configManager;
+	@Resource
+	private RouterConfigManager routerConfigManager;
 
-	private RouterConfigService m_routerService;
+	@Resource
+	private RouterConfigService routerConfigService;
 
-	private ServerConfigManager m_serverConfigManager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
+	@Resource
 	private DailyReportRepository dailyReportRepository;
 
 	public void Adjust(Date period) {
 		Date end = new Date(period.getTime() + TimeHelper.ONE_HOUR);
-		RouterConfig routerConfig = m_routerService.queryLastReport(Constants.CAT);
-		StateReport report = m_stateReportService.queryHourlyReport(Constants.CAT, period, end);
+		RouterConfig routerConfig = routerConfigService.queryLastReport(Constants.CAT);
+		StateReport report = stateReportService.queryHourlyReport(Constants.CAT, period, end);
 
-		String remoteServers = m_serverConfigManager.getConsoleRemoteServers();
+		String remoteServers = serverConfigManager.getConsoleRemoteServers();
 		List<String> servers = Splitter.on(',').omitEmptyStrings().splitToList(remoteServers);
 
-		AdjustStateReportVisitor visitor = new AdjustStateReportVisitor(m_configManager, servers);
+		AdjustStateReportVisitor visitor = new AdjustStateReportVisitor(routerConfigManager, servers);
 
 		visitor.visitStateReport(report);
 
@@ -156,7 +169,7 @@ public class RouterConfigAdjustor {
 				for (Entry<String, ProcessDomain> e : processDomains.entrySet()) {
 					long count = e.getValue().getTotal();
 					String domain = e.getValue().getName();
-					boolean noExist = m_configManager.notCustomizedDomains(group, domain);
+					boolean noExist = routerConfigManager.notCustomizedDomains(group, domain);
 
 					if (noExist && sum < gap && count <= (gap - sum)) {
 						datas.put(domain, count);
@@ -223,7 +236,7 @@ public class RouterConfigAdjustor {
 
 		for (Machine machine : machines.values()) {
 			long count = machine.getTotal();
-			DefaultServer server = m_configManager.queryServerByIp(machine.getIp());
+			DefaultServer server = routerConfigManager.queryServerByIp(machine.getIp());
 			double weight = server.getWeight();
 			long gap = (long) (count / weight - avg);
 			boolean loss = StateBuilder.checkTooMuchLoss(machine);
@@ -283,9 +296,10 @@ public class RouterConfigAdjustor {
 
 			byte[] binaryContent = DefaultNativeBuilder.build(config);
 
-			m_routerService.insertDailyReport(dailyReport, binaryContent);
+			routerConfigService.insertDailyReport(dailyReport, binaryContent);
 			return true;
 		} catch (RuntimeException e) {
+			LOGGER.error("Unable to update router config to database.", e);
 			Cat.logError(e);
 			return false;
 		}
@@ -296,18 +310,18 @@ public class RouterConfigAdjustor {
 	}
 
 	public void setRouterConfigManager(RouterConfigManager configManager) {
-		m_configManager = configManager;
+		this.routerConfigManager = configManager;
 	}
 
 	public void setRouterService(RouterConfigService routerService) {
-		m_routerService = routerService;
+		this.routerConfigService = routerService;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 	public void setStateReportService(StateReportService stateReportService) {
-		m_stateReportService = stateReportService;
+		this.stateReportService = stateReportService;
 	}
 }

@@ -26,7 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -48,15 +51,20 @@ import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.system.page.router.service.RouterConfigService;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
+@Component
 public class RouterConfigHandler {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RouterConfigHandler.class);
 
-	private StateReportService m_stateReportService;
+	@Resource
+	private StateReportService stateReportService;
 
-	private RouterConfigManager m_configManager;
+	@Resource
+	private RouterConfigManager routerConfigManager;
 
-	private RouterConfigService m_reportService;
+	@Resource
+	private RouterConfigService reportService;
 
+	@Resource
 	private DailyReportRepository dailyReportRepository;
 
 	private void addServerList(List<Server> servers, Server server) {
@@ -70,9 +78,9 @@ public class RouterConfigHandler {
 
 	public RouterConfig buildRouterConfig(String domain, Date period) {
 		Date end = new Date(period.getTime() + TimeHelper.ONE_DAY);
-		StateReport report = m_stateReportService.queryReport(Constants.CAT, period, end);
+		StateReport report = stateReportService.queryReport(Constants.CAT, period, end);
 		RouterConfig routerConfig = new RouterConfig(Constants.CAT);
-		StateReportVisitor visitor = new StateReportVisitor(m_configManager);
+		StateReportVisitor visitor = new StateReportVisitor(routerConfigManager);
 
 		visitor.visitStateReport(report);
 
@@ -117,8 +125,8 @@ public class RouterConfigHandler {
 
 	private Map<String, Map<Server, Long>> findAvaliableGpToSvrs() {
 		Map<String, Map<Server, Long>> results = new HashMap<String, Map<Server, Long>>();
-		Map<String, Server> servers = m_configManager.queryEnableServers();
-		RouterConfig routerConfig = m_configManager.getRouterConfig();
+		Map<String, Server> servers = routerConfigManager.queryEnableServers();
+		RouterConfig routerConfig = routerConfigManager.getRouterConfig();
 		Map<String, ServerGroup> groups = routerConfig.getServerGroups();
 
 		for (Entry<String, NetworkPolicy> entry : routerConfig.getNetworkPolicies().entrySet()) {
@@ -177,7 +185,7 @@ public class RouterConfigHandler {
 	private void processBackServer(Map<Server, Long> servers, RouterConfig routerConfig, Map<String, Long> statistics,
 							String group) {
 		Map<Server, Map<Server, Long>> backServers = new LinkedHashMap<Server, Map<Server, Long>>();
-		Server backUpServer = m_configManager.queryBackUpServer();
+		Server backUpServer = routerConfigManager.queryBackUpServer();
 		Collection<Domain> values = routerConfig.getDomains().values();
 
 		for (Domain domain : values) {
@@ -186,7 +194,7 @@ public class RouterConfigHandler {
 
 				if (serverGroup != null && !serverGroup.getServers().isEmpty()) {
 					List<Server> domainServers = serverGroup.getServers();
-					Domain defaultDomainConfig = m_configManager.getRouterConfig().findDomain(domain.getId());
+					Domain defaultDomainConfig = routerConfigManager.getRouterConfig().findDomain(domain.getId());
 
 					if (checkDomainConfig(group, defaultDomainConfig)) {
 						Server mainServer = serverGroup.getServers().get(0);
@@ -215,7 +223,7 @@ public class RouterConfigHandler {
 		for (Entry<String, Long> entry : statistics.entrySet()) {
 			try {
 				String domainName = entry.getKey();
-				Domain defaultDomainConfig = m_configManager.getRouterConfig().findDomain(domainName);
+				Domain defaultDomainConfig = routerConfigManager.getRouterConfig().findDomain(domainName);
 				Long value = entry.getValue();
 
 				if (checkDomainConfig(group, defaultDomainConfig)) {
@@ -268,7 +276,7 @@ public class RouterConfigHandler {
 			dailyReportRepository.deleteByDomainNamePeriod(dailyReport);
 			byte[] binaryContent = DefaultNativeBuilder.build(routerConfig);
 
-			m_reportService.insertDailyReport(dailyReport, binaryContent);
+			reportService.insertDailyReport(dailyReport, binaryContent);
 			SLF4J_LOGGER.info("Updated router config report, period={}, binarySize={}.", period, binaryContent.length);
 			return true;
 		} catch (Exception e) {
@@ -283,15 +291,15 @@ public class RouterConfigHandler {
 	}
 
 	public void setReportService(RouterConfigService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 	public void setRouterConfigManager(RouterConfigManager configManager) {
-		m_configManager = configManager;
+		this.routerConfigManager = configManager;
 	}
 
 	public void setStateReportService(StateReportService stateReportService) {
-		m_stateReportService = stateReportService;
+		this.stateReportService = stateReportService;
 	}
 
 }

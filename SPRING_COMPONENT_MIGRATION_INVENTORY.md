@@ -1597,3 +1597,244 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+
+## 32. 第二十四批完成记录
+
+第二十四批继续沿着报表服务和定时报表构建链路推进，迁移 statistics 报表相关的 `ReportService` 与 `TaskBuilder`。这批与第二十三批模式一致，但范围限定在统计报表，避免同时改动容量统计、Router 和任务运行时 Bean。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 statistics `ReportService` 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+JarReportService
+HeavyReportService
+ClientReportService
+ServiceReportService
+UtilizationReportService
+```
+
+2. 以下 statistics `TaskBuilder` 已改为 `@Component(ID)` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描，保持旧 `@Bean(name = ID)` 的命名语义：
+
+```text
+JarReportBuilder
+HeavyReportBuilder
+ClientReportBuilder
+ServiceReportBuilder
+UtilizationReportBuilder
+```
+
+3. 已删除 `CatHomeSpringConfiguration` 中对应的旧 `@Bean` 方法，避免组件扫描注册和配置类注册同时存在。
+
+4. 本批触碰到的 `TaskBuilder` 注入字段已改为 Java 驼峰命名，并使用 `@Resource` 字段注入：
+
+```text
+m_reportService              -> reportService
+m_heartbeatReportService     -> heartbeatReportService
+m_matrixReportService        -> matrixReportService
+m_transactionReportService   -> transactionReportService
+m_crossReportService         -> crossReportService
+m_configManager              -> serverFilterConfigManager
+m_configManger               -> serverFilterConfigManager
+m_projectService             -> projectService
+m_mergeHelper                -> transactionMergeHelper
+```
+
+5. 保留 builder setter 方法，便于现有测试或手工装配继续覆盖依赖。
+
+6. `JarReportBuilder.HeartbeatReportVisitor` 内部短生命周期状态字段仍保留原命名，本批不扩大到内部 visitor 状态对象重命名，避免引入无关变化。
+
+7. 本批仍不迁移以下内容：
+
+```text
+CapacityUpdateStatusManager
+HourlyCapacityUpdater / DailyCapacityUpdater / WeeklyCapacityUpdater / MonthlyCapacityUpdater
+CapacityUpdateTask
+TableCapacityService
+RouterConfigHandler / RouterConfigAdjustor / RouterConfigBuilder
+ReportManager / ReportDelegate / ModelService
+Map/List 聚合 Bean
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
+## 33. 第二十五批完成记录
+
+第二十五批迁移 overload/capacity 容量统计任务链路，承接前两批报表 `TaskBuilder` 迁移，继续缩减 `CatHomeSpringConfiguration` 中 report/task 区域的显式注册。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+CapacityUpdateStatusManager
+HourlyCapacityUpdater
+DailyCapacityUpdater
+WeeklyCapacityUpdater
+MonthlyCapacityUpdater
+CapacityUpdateTask
+TableCapacityService
+```
+
+2. 四个 `CapacityUpdater` 实现和 `CapacityUpdateTask` 保留旧显式 Bean 名称：
+
+```text
+HourlyCapacityUpdater.ID
+DailyCapacityUpdater.ID
+WeeklyCapacityUpdater.ID
+MonthlyCapacityUpdater.ID
+CapacityUpdateTask.ID
+```
+
+3. `CapacityUpdateStatusManager.initialize()` 已从配置类 `initMethod` 改为 `@PostConstruct`，保留启动时读取或初始化容量扫描状态的语义。
+
+4. `CapacityUpdateTask` 中四个 `CapacityUpdater` 是同接口多实现，已使用显式名称注入，避免注入歧义：
+
+```text
+@Resource(name = HourlyCapacityUpdater.ID)
+@Resource(name = DailyCapacityUpdater.ID)
+@Resource(name = WeeklyCapacityUpdater.ID)
+@Resource(name = MonthlyCapacityUpdater.ID)
+```
+
+5. 已删除 `CatHomeSpringConfiguration` 中对应的旧 `@Bean` 方法，避免组件扫描注册和配置类注册同时存在。
+
+6. 本批触碰到的旧式字段命名已收口为 Java 驼峰命名，并使用 `@Resource` 字段注入：
+
+```text
+m_configDao         -> configRepository
+m_overloadDao       -> overloadRepository
+m_manager           -> capacityUpdateStatusManager
+m_hourlyStatus      -> hourlyStatus
+m_dailyStatus       -> dailyStatus
+m_weeklyStatus      -> weeklyStatus
+m_monthlyStatus     -> monthlyStatus
+m_configId          -> configId
+m_hourlyUpdater     -> hourlyCapacityUpdater
+m_dailyUpdater      -> dailyCapacityUpdater
+m_weeklyUpdater     -> weeklyCapacityUpdater
+m_monthlyUpdater    -> monthlyCapacityUpdater
+```
+
+7. 本批仍不迁移以下内容：
+
+```text
+RouterConfigHandler / RouterConfigAdjustor / RouterConfigBuilder
+TopologyGraphManager
+ReportManager / ReportDelegate / ModelService
+Map/List 聚合 Bean
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
+## 34. 第二十六批完成记录
+
+第二十六批迁移 router config 链路，承接上一批容量统计任务链路，继续缩减 `CatHomeSpringConfiguration` 中 report/task 相关显式 Bean 注册。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 router config 相关 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+RouterConfigService
+CachedRouterConfigService
+RouterConfigManager
+RouterConfigHandler
+RouterConfigAdjustor
+RouterConfigBuilder
+```
+
+2. `RouterConfigBuilder` 保留旧 `@Bean(name = RouterConfigBuilder.ID)` 的命名语义，改为：
+
+```java
+@Component(RouterConfigBuilder.ID)
+```
+
+3. `CachedRouterConfigService.initialize()` 和 `RouterConfigManager.initialize()` 已从配置类 `initMethod` 改为 `@PostConstruct`，保留启动初始化和定时刷新注册语义。
+
+4. 已删除 `CatHomeSpringConfiguration` 中对应旧 `@Bean` 方法，避免组件扫描注册和配置类注册同时存在：
+
+```text
+routerConfigService
+cachedRouterConfigService
+routerConfigHandler
+routerConfigAdjustor
+routerConfigBuilder
+routerConfigManager
+```
+
+5. 本批触碰到的旧式字段命名已收口为 Java 驼峰命名，并使用 `@Resource` 字段注入：
+
+```text
+m_routerConfigManager    -> routerConfigManager
+m_routerConfigService    -> routerConfigService
+m_routerConfig           -> routerConfig
+m_initialized            -> initialized
+m_routerAdjustor         -> routerConfigAdjustor
+m_reportService          -> reportService
+m_serverConfigManager    -> serverConfigManager
+m_stateReportService     -> stateReportService
+m_configManager          -> routerConfigManager
+m_routerService          -> routerConfigService
+m_configDao              -> configRepository
+m_fetcher                -> contentFetcher
+m_configId               -> configId
+m_modifyTime             -> modifyTime
+m_subNetInfos            -> subNetInfos
+m_ipToGroupInfo          -> ipToGroupInfo
+m_routerConfigs          -> routerConfigs
+```
+
+6. `RouterConfigAdjustor.updateRouterConfigToDB()` 原来只调用 `Cat.logError`，本批补充了 SLF4J error 日志，方便排查 router config 写库失败。
+
+7. 本批仍不迁移以下内容：
+
+```text
+TopologyGraphManager
+ReportManager / ReportDelegate / ModelService
+Map/List 聚合 Bean
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

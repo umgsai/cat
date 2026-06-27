@@ -18,12 +18,15 @@
  */
 package com.dianping.cat.report.page.statistics.task.utilization;
 
+import jakarta.annotation.Resource;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -52,22 +55,29 @@ import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 
+@Component(UtilizationReportBuilder.ID)
 public class UtilizationReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UtilizationReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_UTILIZATION;
 
-	protected UtilizationReportService m_reportService;
+	@Resource
+	protected UtilizationReportService reportService;
 
-	protected TransactionReportService m_transactionReportService;
+	@Resource
+	protected TransactionReportService transactionReportService;
 
-	protected HeartbeatReportService m_heartbeatReportService;
+	@Resource
+	protected HeartbeatReportService heartbeatReportService;
 
-	protected CrossReportService m_crossReportService;
+	@Resource
+	protected CrossReportService crossReportService;
 
-	private TransactionMergeHelper m_mergeHelper;
+	@Resource
+	private TransactionMergeHelper transactionMergeHelper;
 
-	private ServerFilterConfigManager m_configManger;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -85,7 +95,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(utilizationReport);
 
-		return m_reportService.insertDailyReport(report, binaryContent);
+		return reportService.insertDailyReport(report, binaryContent);
 	}
 
 	@Override
@@ -94,32 +104,32 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 		UtilizationReport utilizationReport = new UtilizationReport(Constants.CAT);
 		Date end = new Date(start.getTime() + TimeHelper.ONE_HOUR);
-		Set<String> domains = m_reportService.queryAllDomainNames(start, end, TransactionAnalyzer.ID);
+		Set<String> domains = reportService.queryAllDomainNames(start, end, TransactionAnalyzer.ID);
 		TransactionReportVisitor transactionVisitor = new TransactionReportVisitor().setUtilizationReport(utilizationReport);
 		HeartbeatReportVisitor heartbeatVisitor = new HeartbeatReportVisitor().setUtilizationReport(utilizationReport);
 
 		for (String domainName : domains) {
-			if (m_configManger.validateDomain(domainName)) {
-				TransactionReport transactionReport = m_transactionReportService.queryReport(domainName, start, end);
+			if (serverFilterConfigManager.validateDomain(domainName)) {
+				TransactionReport transactionReport = transactionReportService.queryReport(domainName, start, end);
 				int size = transactionReport.getMachines().size();
 
 				utilizationReport.findOrCreateDomain(domainName).setMachineNumber(size);
-				transactionReport = m_mergeHelper.mergeAllMachines(transactionReport, Constants.ALL);
+				transactionReport = transactionMergeHelper.mergeAllMachines(transactionReport, Constants.ALL);
 				transactionVisitor.visitTransactionReport(transactionReport);
 			}
 		}
 
 		for (String domainName : domains) {
-			if (m_configManger.validateDomain(domainName)) {
-				HeartbeatReport heartbeatReport = m_heartbeatReportService.queryReport(domainName, start, end);
+			if (serverFilterConfigManager.validateDomain(domainName)) {
+				HeartbeatReport heartbeatReport = heartbeatReportService.queryReport(domainName, start, end);
 
 				heartbeatVisitor.visitHeartbeatReport(heartbeatReport);
 			}
 		}
 
 		for (String domainName : domains) {
-			if (m_configManger.validateDomain(domainName)) {
-				CrossReport crossReport = m_crossReportService.queryReport(domainName, start, end);
+			if (serverFilterConfigManager.validateDomain(domainName)) {
+				CrossReport crossReport = crossReportService.queryReport(domainName, start, end);
 				ProjectInfo projectInfo = new ProjectInfo(TimeHelper.ONE_HOUR);
 
 				projectInfo.setClientIp(Constants.ALL);
@@ -160,7 +170,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(utilizationReport);
 
-		return m_reportService.insertHourlyReport(report, binaryContent);
+		return reportService.insertHourlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -178,7 +188,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 		report.setType(1);
 
 		byte[] binaryContent = DefaultNativeBuilder.build(utilizationReport);
-		return m_reportService.insertMonthlyReport(report, binaryContent);
+		return reportService.insertMonthlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -197,7 +207,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(utilizationReport);
 
-		return m_reportService.insertWeeklyReport(report, binaryContent);
+		return reportService.insertWeeklyReport(report, binaryContent);
 	}
 
 	private UtilizationReport queryDailyReportsByDuration(String domain, Date start, Date end) {
@@ -207,7 +217,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime += TimeHelper.ONE_DAY) {
 			try {
-				UtilizationReport reportModel = m_reportService
+				UtilizationReport reportModel = reportService
 										.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 				reportModel.accept(merger);
 			} catch (Exception e) {
@@ -230,7 +240,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			Date date = new Date(startTime);
-			UtilizationReport reportModel = m_reportService
+			UtilizationReport reportModel = reportService
 									.queryReport(domain, date, new Date(date.getTime()	+ TimeHelper.ONE_HOUR));
 
 			reportModel.accept(merger);
@@ -246,28 +256,28 @@ public class UtilizationReportBuilder implements TaskBuilder {
 		return projectName.equalsIgnoreCase(ProjectInfo.ALL_SERVER) || projectName.equalsIgnoreCase("UnknownProject");
 	}
 
-	public void setConfigManager(ServerFilterConfigManager configManger) {
-		m_configManger = configManger;
+	public void setConfigManager(ServerFilterConfigManager configManager) {
+		this.serverFilterConfigManager = configManager;
 	}
 
 	public void setCrossReportService(CrossReportService crossReportService) {
-		m_crossReportService = crossReportService;
+		this.crossReportService = crossReportService;
 	}
 
 	public void setHeartbeatReportService(HeartbeatReportService heartbeatReportService) {
-		m_heartbeatReportService = heartbeatReportService;
+		this.heartbeatReportService = heartbeatReportService;
 	}
 
 	public void setMergeHelper(TransactionMergeHelper mergeHelper) {
-		m_mergeHelper = mergeHelper;
+		this.transactionMergeHelper = mergeHelper;
 	}
 
 	public void setReportService(UtilizationReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 	public void setTransactionReportService(TransactionReportService transactionReportService) {
-		m_transactionReportService = transactionReportService;
+		this.transactionReportService = transactionReportService;
 	}
 
 }

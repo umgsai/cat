@@ -18,11 +18,14 @@
  */
 package com.dianping.cat.report.page.overload.task;
 
+import jakarta.annotation.Resource;
+
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
@@ -32,18 +35,23 @@ import com.dianping.cat.mybatis.DailyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.mybatis.OverloadRepository;
 
+@Component(DailyCapacityUpdater.ID)
 public class DailyCapacityUpdater implements CapacityUpdater {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DailyCapacityUpdater.class);
 
 	public static final String ID = "daily_capacity_updater";
 
+	@Resource
 	private DailyReportContentRepository dailyReportContentRepository;
 
+	@Resource
 	private DailyReportRepository dailyReportRepository;
 
-	private OverloadRepository m_overloadDao;
+	@Resource
+	private OverloadRepository overloadRepository;
 
-	private CapacityUpdateStatusManager m_manager;
+	@Resource
+	private CapacityUpdateStatusManager capacityUpdateStatusManager;
 
 	@Override
 	public String getId() {
@@ -52,7 +60,7 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 
 	@Override
 	public void updateDBCapacity() {
-		long maxId = m_manager.getDailyStatus();
+		long maxId = capacityUpdateStatusManager.getDailyStatus();
 		LOGGER.info("Starting daily report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
@@ -65,7 +73,7 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 					double contentLength = content.getContentLength();
 
 					if (contentLength >= CapacityUpdater.CAPACITY) {
-						Overload overload = m_overloadDao.createLocal();
+						Overload overload = overloadRepository.createLocal();
 
 						overload.setReportId(reportId);
 						overload.setReportSize(contentLength);
@@ -74,7 +82,7 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 						try {
 							DailyReport report = dailyReportRepository.findByPK(reportId);
 							overload.setPeriod(report.getPeriod());
-							m_overloadDao.insert(overload);
+							overloadRepository.insert(overload);
 						} catch (EmptyResultDataAccessException e) {
 							LOGGER.warn("Daily report not found while recording overload report, reportId={}.", reportId);
 						} catch (Exception e) {
@@ -96,24 +104,24 @@ public class DailyCapacityUpdater implements CapacityUpdater {
 				maxId = reports.get(size - 1).getReportId();
 			}
 		}
-		m_manager.updateDailyStatus(maxId);
+		capacityUpdateStatusManager.updateDailyStatus(maxId);
 		LOGGER.info("Finished daily report capacity scan, finalMaxId={}.", maxId);
 	}
 
 	public void setDailyReportContentDao(DailyReportContentRepository dailyReportContentDao) {
-		dailyReportContentRepository = dailyReportContentDao;
+		this.dailyReportContentRepository = dailyReportContentDao;
 	}
 
 	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
-		dailyReportRepository = dailyReportDao;
+		this.dailyReportRepository = dailyReportDao;
 	}
 
 	public void setOverloadDao(OverloadRepository overloadDao) {
-		m_overloadDao = overloadDao;
+		this.overloadRepository = overloadDao;
 	}
 
 	public void setManager(CapacityUpdateStatusManager manager) {
-		m_manager = manager;
+		this.capacityUpdateStatusManager = manager;
 	}
 
 }

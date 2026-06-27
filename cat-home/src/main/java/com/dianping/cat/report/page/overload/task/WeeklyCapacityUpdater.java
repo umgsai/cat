@@ -18,11 +18,14 @@
  */
 package com.dianping.cat.report.page.overload.task;
 
+import jakarta.annotation.Resource;
+
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.WeeklyReport;
@@ -32,18 +35,23 @@ import com.dianping.cat.mybatis.WeeklyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.mybatis.OverloadRepository;
 
+@Component(WeeklyCapacityUpdater.ID)
 public class WeeklyCapacityUpdater implements CapacityUpdater {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WeeklyCapacityUpdater.class);
 
 	public static final String ID = "weekly_capacity_updater";
 
+	@Resource
 	private WeeklyReportRepository weeklyReportRepository;
 
+	@Resource
 	private WeeklyReportContentRepository weeklyReportContentRepository;
 
-	private OverloadRepository m_overloadDao;
+	@Resource
+	private OverloadRepository overloadRepository;
 
-	private CapacityUpdateStatusManager m_manager;
+	@Resource
+	private CapacityUpdateStatusManager capacityUpdateStatusManager;
 
 	@Override
 	public String getId() {
@@ -52,7 +60,7 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 
 	@Override
 	public void updateDBCapacity() {
-		long maxId = m_manager.getWeeklyStatus();
+		long maxId = capacityUpdateStatusManager.getWeeklyStatus();
 		LOGGER.info("Starting weekly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
@@ -65,7 +73,7 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 					double contentLength = content.getContentLength();
 
 					if (contentLength >= CapacityUpdater.CAPACITY) {
-						Overload overload = m_overloadDao.createLocal();
+						Overload overload = overloadRepository.createLocal();
 
 						overload.setReportId(reportId);
 						overload.setReportSize(contentLength);
@@ -74,7 +82,7 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 						try {
 							WeeklyReport report = weeklyReportRepository.findByPK(reportId);
 							overload.setPeriod(report.getPeriod());
-							m_overloadDao.insert(overload);
+							overloadRepository.insert(overload);
 						} catch (EmptyResultDataAccessException e) {
 							LOGGER.warn("Weekly report not found while recording overload report, reportId={}.", reportId);
 						} catch (Exception e) {
@@ -96,24 +104,24 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 				maxId = reports.get(size - 1).getReportId();
 			}
 		}
-		m_manager.updateWeeklyStatus(maxId);
+		capacityUpdateStatusManager.updateWeeklyStatus(maxId);
 		LOGGER.info("Finished weekly report capacity scan, finalMaxId={}.", maxId);
 	}
 
 	public void setWeeklyReportDao(WeeklyReportRepository weeklyReportDao) {
-		weeklyReportRepository = weeklyReportDao;
+		this.weeklyReportRepository = weeklyReportDao;
 	}
 
 	public void setWeeklyReportContentDao(WeeklyReportContentRepository weeklyReportContentDao) {
-		weeklyReportContentRepository = weeklyReportContentDao;
+		this.weeklyReportContentRepository = weeklyReportContentDao;
 	}
 
 	public void setOverloadDao(OverloadRepository overloadDao) {
-		m_overloadDao = overloadDao;
+		this.overloadRepository = overloadDao;
 	}
 
 	public void setManager(CapacityUpdateStatusManager manager) {
-		m_manager = manager;
+		this.capacityUpdateStatusManager = manager;
 	}
 
 }

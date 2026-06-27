@@ -22,8 +22,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.Resource;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +39,12 @@ import com.dianping.cat.home.router.transform.DefaultNativeParser;
 import com.dianping.cat.report.service.AbstractReportService;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 
+@Component
 public class RouterConfigService extends AbstractReportService<RouterConfig> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RouterConfigService.class);
 
-	private RouterConfigManager m_routerConfigManager;
+	@Resource
+	private RouterConfigManager routerConfigManager;
 
 	@Override
 	public RouterConfig makeReport(String domain, Date start, Date end) {
@@ -49,7 +54,7 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 	@Override
 	public RouterConfig queryDailyReport(String domain, Date start, Date end) {
 		long time = start.getTime();
-		Map<Long, Pair<RouterConfig, Long>> routerConfigs = m_routerConfigManager.getRouterConfigs();
+		Map<Long, Pair<RouterConfig, Long>> routerConfigs = routerConfigManager.getRouterConfigs();
 		Pair<RouterConfig, Long> pair = routerConfigs.get(time);
 
 		if (pair == null) {
@@ -122,7 +127,7 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 	}
 
 	public void setRouterConfigManager(RouterConfigManager routerConfigManager) {
-		m_routerConfigManager = routerConfigManager;
+		this.routerConfigManager = routerConfigManager;
 	}
 
 }

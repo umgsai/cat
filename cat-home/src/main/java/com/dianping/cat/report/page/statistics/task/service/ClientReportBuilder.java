@@ -18,11 +18,14 @@
  */
 package com.dianping.cat.report.page.statistics.task.service;
 
+import jakarta.annotation.Resource;
+
 import java.util.Date;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -39,20 +42,26 @@ import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.service.ProjectService;
 
+@Component(ClientReportBuilder.ID)
 public class ClientReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClientReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_CLIENT;
 
-	protected ClientReportService m_reportService;
+	@Resource
+	protected ClientReportService reportService;
 
-	protected TransactionReportService m_transactionReportService;
+	@Resource
+	protected TransactionReportService transactionReportService;
 
-	private ServerFilterConfigManager m_configManger;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private TransactionMergeHelper m_mergeHelper;
+	@Resource
+	private TransactionMergeHelper transactionMergeHelper;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -69,19 +78,19 @@ public class ClientReportBuilder implements TaskBuilder {
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(clientReport);
 
-		return m_reportService.insertDailyReport(report, binaryContent);
+		return reportService.insertDailyReport(report, binaryContent);
 	}
 
 	private ClientReport buildClientReport(Date startTime) {
 		Date endTime = TimeHelper.addDays(startTime, 1);
-		Set<String> domains = m_projectService.findAllDomains();
+		Set<String> domains = projectService.findAllDomains();
 		ClientReportStatistics statistics = new ClientReportStatistics();
 
 		for (String domain : domains) {
 			try {
-				if (m_configManger.validateDomain(domain)) {
-					TransactionReport r = m_transactionReportService.queryReport(domain, startTime, endTime);
-					r = m_mergeHelper.mergeAllMachines(r, Constants.ALL);
+				if (serverFilterConfigManager.validateDomain(domain)) {
+					TransactionReport r = transactionReportService.queryReport(domain, startTime, endTime);
+					r = transactionMergeHelper.mergeAllMachines(r, Constants.ALL);
 
 					if (r != null) {
 						statistics.visitTransactionReport(r);
@@ -111,24 +120,24 @@ public class ClientReportBuilder implements TaskBuilder {
 		throw new RuntimeException("Service client report don't support weekly report!");
 	}
 
-	public void setConfigManager(ServerFilterConfigManager configManger) {
-		m_configManger = configManger;
+	public void setConfigManager(ServerFilterConfigManager configManager) {
+		this.serverFilterConfigManager = configManager;
 	}
 
 	public void setMergeHelper(TransactionMergeHelper mergeHelper) {
-		m_mergeHelper = mergeHelper;
+		this.transactionMergeHelper = mergeHelper;
 	}
 
 	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	public void setReportService(ClientReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 	public void setTransactionReportService(TransactionReportService transactionReportService) {
-		m_transactionReportService = transactionReportService;
+		this.transactionReportService = transactionReportService;
 	}
 
 }

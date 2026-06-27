@@ -408,7 +408,14 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		TransactionReportService.class, TransactionReportBuilder.class, TopReportService.class,
 		CrossReportService.class, CrossReportBuilder.class, ProblemReportService.class, ProblemReportBuilder.class,
 		StorageReportService.class, StorageReportBuilder.class, BusinessReportService.class,
-		BusinessBaselineReportBuilder.class, DatabaseParser.class, IpConvertManager.class,
+		BusinessBaselineReportBuilder.class, JarReportService.class, JarReportBuilder.class,
+		HeavyReportService.class, HeavyReportBuilder.class, ClientReportService.class, ClientReportBuilder.class,
+		ServiceReportService.class, ServiceReportBuilder.class, UtilizationReportService.class,
+		UtilizationReportBuilder.class, CapacityUpdateStatusManager.class, HourlyCapacityUpdater.class,
+		DailyCapacityUpdater.class, WeeklyCapacityUpdater.class, MonthlyCapacityUpdater.class,
+		CapacityUpdateTask.class, TableCapacityService.class, RouterConfigService.class,
+		CachedRouterConfigService.class, RouterConfigManager.class, RouterConfigHandler.class,
+		RouterConfigAdjustor.class, RouterConfigBuilder.class, DatabaseParser.class, IpConvertManager.class,
 		StorageSQLBuilder.class, StorageCacheBuilder.class, StorageRPCBuilder.class,
 		DefaultProblemHandler.class, LongExecutionProblemHandler.class,
 		AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
@@ -509,7 +516,15 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					TransactionReportService.class, TransactionReportBuilder.class, TopReportService.class,
 					CrossReportService.class, CrossReportBuilder.class, ProblemReportService.class,
 					ProblemReportBuilder.class, StorageReportService.class, StorageReportBuilder.class,
-					BusinessReportService.class, BusinessBaselineReportBuilder.class, DatabaseParser.class,
+					BusinessReportService.class, BusinessBaselineReportBuilder.class, JarReportService.class,
+					JarReportBuilder.class, HeavyReportService.class, HeavyReportBuilder.class,
+					ClientReportService.class, ClientReportBuilder.class, ServiceReportService.class,
+					ServiceReportBuilder.class, UtilizationReportService.class, UtilizationReportBuilder.class,
+					CapacityUpdateStatusManager.class, HourlyCapacityUpdater.class, DailyCapacityUpdater.class,
+					WeeklyCapacityUpdater.class, MonthlyCapacityUpdater.class, CapacityUpdateTask.class,
+					TableCapacityService.class, RouterConfigService.class, CachedRouterConfigService.class,
+					RouterConfigManager.class, RouterConfigHandler.class, RouterConfigAdjustor.class,
+					RouterConfigBuilder.class, DatabaseParser.class,
 					IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class, StorageRPCBuilder.class,
 					DefaultProblemHandler.class, LongExecutionProblemHandler.class,
 					AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
@@ -1217,29 +1232,6 @@ public class CatHomeSpringConfiguration {
 		return builder;
 	}
 
-	@Bean
-	public RouterConfigService routerConfigService(RouterConfigManager routerConfigManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			DailyReportRepository dailyReportRepository, DailyReportContentRepository dailyReportContentRepository,
-			WeeklyReportRepository weeklyReportRepository, WeeklyReportContentRepository weeklyReportContentRepository,
-			MonthlyReportRepository monthlyReportRepository, MonthlyReportContentRepository monthlyReportContentRepository) {
-		RouterConfigService service = new RouterConfigService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		service.setRouterConfigManager(routerConfigManager);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public CachedRouterConfigService cachedRouterConfigService(RouterConfigService routerConfigService) {
-		CachedRouterConfigService service = new CachedRouterConfigService();
-
-		service.setRouterConfigService(routerConfigService);
-		return service;
-	}
-
 	@Bean(initMethod = "initialize")
 	public TopologyGraphManager topologyGraphManager(@Qualifier("dependencyModelService") ModelService<DependencyReport> dependencyModelService,
 			DependencyItemBuilder dependencyItemBuilder, TopoGraphFormatConfigManager topoGraphFormatConfigManager,
@@ -1255,268 +1247,6 @@ public class CatHomeSpringConfiguration {
 		manager.setProjectService(projectService);
 		manager.setTopologyGraphDao(topologyGraphRepository);
 		return manager;
-	}
-
-	@Bean
-	public JarReportService jarReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		JarReportService service = new JarReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean(name = JarReportBuilder.ID)
-	public TaskBuilder jarReportBuilder(JarReportService jarReportService, HeartbeatReportService heartbeatReportService,
-			ServerFilterConfigManager serverFilterConfigManager) {
-		JarReportBuilder builder = new JarReportBuilder();
-
-		builder.setReportService(jarReportService);
-		builder.setHeartbeatReportService(heartbeatReportService);
-		builder.setConfigManager(serverFilterConfigManager);
-		return builder;
-	}
-
-	@Bean
-	public HeavyReportService heavyReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		HeavyReportService service = new HeavyReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean(name = HeavyReportBuilder.ID)
-	public TaskBuilder heavyReportBuilder(HeavyReportService heavyReportService, MatrixReportService matrixReportService,
-			ServerFilterConfigManager serverFilterConfigManager) {
-		HeavyReportBuilder builder = new HeavyReportBuilder();
-
-		builder.setReportService(heavyReportService);
-		builder.setMatrixReportService(matrixReportService);
-		builder.setConfigManager(serverFilterConfigManager);
-		return builder;
-	}
-
-	@Bean(initMethod = "initialize")
-	public CapacityUpdateStatusManager capacityUpdateStatusManager(ConfigRepository configRepository,
-			OverloadRepository overloadRepository) {
-		CapacityUpdateStatusManager manager = new CapacityUpdateStatusManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setOverloadDao(overloadRepository);
-		return manager;
-	}
-
-	@Bean(name = HourlyCapacityUpdater.ID)
-	public CapacityUpdater hourlyCapacityUpdater(HourlyReportContentRepository hourlyReportContentRepository,
-			HourlyReportRepository hourlyReportRepository, OverloadRepository overloadRepository,
-			CapacityUpdateStatusManager capacityUpdateStatusManager) {
-		HourlyCapacityUpdater updater = new HourlyCapacityUpdater();
-
-		updater.setHourlyReportContentDao(hourlyReportContentRepository);
-		updater.setHourlyReportDao(hourlyReportRepository);
-		updater.setOverloadDao(overloadRepository);
-		updater.setManager(capacityUpdateStatusManager);
-		return updater;
-	}
-
-	@Bean(name = DailyCapacityUpdater.ID)
-	public CapacityUpdater dailyCapacityUpdater(DailyReportContentRepository dailyReportContentRepository,
-			DailyReportRepository dailyReportRepository, OverloadRepository overloadRepository,
-			CapacityUpdateStatusManager capacityUpdateStatusManager) {
-		DailyCapacityUpdater updater = new DailyCapacityUpdater();
-
-		updater.setDailyReportContentDao(dailyReportContentRepository);
-		updater.setDailyReportDao(dailyReportRepository);
-		updater.setOverloadDao(overloadRepository);
-		updater.setManager(capacityUpdateStatusManager);
-		return updater;
-	}
-
-	@Bean(name = WeeklyCapacityUpdater.ID)
-	public CapacityUpdater weeklyCapacityUpdater(WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, OverloadRepository overloadRepository,
-			CapacityUpdateStatusManager capacityUpdateStatusManager) {
-		WeeklyCapacityUpdater updater = new WeeklyCapacityUpdater();
-
-		updater.setWeeklyReportDao(weeklyReportRepository);
-		updater.setWeeklyReportContentDao(weeklyReportContentRepository);
-		updater.setOverloadDao(overloadRepository);
-		updater.setManager(capacityUpdateStatusManager);
-		return updater;
-	}
-
-	@Bean(name = MonthlyCapacityUpdater.ID)
-	public CapacityUpdater monthlyCapacityUpdater(MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository, OverloadRepository overloadRepository,
-			CapacityUpdateStatusManager capacityUpdateStatusManager) {
-		MonthlyCapacityUpdater updater = new MonthlyCapacityUpdater();
-
-		updater.setMonthlyReportDao(monthlyReportRepository);
-		updater.setMonthlyReportContentDao(monthlyReportContentRepository);
-		updater.setOverloadDao(overloadRepository);
-		updater.setManager(capacityUpdateStatusManager);
-		return updater;
-	}
-
-	@Bean(name = CapacityUpdateTask.ID)
-	public TaskBuilder capacityUpdateTask(@Qualifier(HourlyCapacityUpdater.ID) CapacityUpdater hourlyCapacityUpdater,
-			@Qualifier(DailyCapacityUpdater.ID) CapacityUpdater dailyCapacityUpdater,
-			@Qualifier(WeeklyCapacityUpdater.ID) CapacityUpdater weeklyCapacityUpdater,
-			@Qualifier(MonthlyCapacityUpdater.ID) CapacityUpdater monthlyCapacityUpdater) {
-		CapacityUpdateTask task = new CapacityUpdateTask();
-
-		task.setHourlyUpdater(hourlyCapacityUpdater);
-		task.setDailyUpdater(dailyCapacityUpdater);
-		task.setWeeklyUpdater(weeklyCapacityUpdater);
-		task.setMonthlyUpdater(monthlyCapacityUpdater);
-		return task;
-	}
-
-	@Bean
-	public TableCapacityService tableCapacityService(OverloadRepository overloadRepository,
-			HourlyReportRepository hourlyReportRepository, DailyReportRepository dailyReportRepository,
-			WeeklyReportRepository weeklyReportRepository, MonthlyReportRepository monthlyReportRepository) {
-		TableCapacityService service = new TableCapacityService();
-
-		service.setOverloadDao(overloadRepository);
-		service.setHourlyReportDao(hourlyReportRepository);
-		service.setDailyReportDao(dailyReportRepository);
-		service.setWeeklyReportDao(weeklyReportRepository);
-		service.setMonthlyReportDao(monthlyReportRepository);
-		return service;
-	}
-
-	@Bean
-	public ClientReportService clientReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		ClientReportService service = new ClientReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean
-	public ServiceReportService serviceReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		ServiceReportService service = new ServiceReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean(name = ClientReportBuilder.ID)
-	public TaskBuilder clientReportBuilder(ClientReportService clientReportService,
-			TransactionReportService transactionReportService, ServerFilterConfigManager serverFilterConfigManager,
-			ProjectService projectService, TransactionMergeHelper transactionMergeHelper) {
-		ClientReportBuilder builder = new ClientReportBuilder();
-
-		builder.setReportService(clientReportService);
-		builder.setTransactionReportService(transactionReportService);
-		builder.setConfigManager(serverFilterConfigManager);
-		builder.setProjectService(projectService);
-		builder.setMergeHelper(transactionMergeHelper);
-		return builder;
-	}
-
-	@Bean(name = ServiceReportBuilder.ID)
-	public TaskBuilder serviceReportBuilder(ServiceReportService serviceReportService, CrossReportService crossReportService,
-			ServerFilterConfigManager serverFilterConfigManager) {
-		ServiceReportBuilder builder = new ServiceReportBuilder();
-
-		builder.setReportService(serviceReportService);
-		builder.setCrossReportService(crossReportService);
-		builder.setConfigManager(serverFilterConfigManager);
-		return builder;
-	}
-
-	@Bean
-	public UtilizationReportService utilizationReportService(HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
-			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
-			WeeklyReportContentRepository weeklyReportContentRepository, MonthlyReportRepository monthlyReportRepository,
-			MonthlyReportContentRepository monthlyReportContentRepository) {
-		UtilizationReportService service = new UtilizationReportService();
-
-		configureReportService(service, hourlyReportRepository, hourlyReportContentRepository, dailyReportRepository,
-				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
-				monthlyReportContentRepository);
-		return service;
-	}
-
-	@Bean(name = UtilizationReportBuilder.ID)
-	public TaskBuilder utilizationReportBuilder(UtilizationReportService utilizationReportService,
-			TransactionReportService transactionReportService, HeartbeatReportService heartbeatReportService,
-			CrossReportService crossReportService, TransactionMergeHelper transactionMergeHelper,
-			ServerFilterConfigManager serverFilterConfigManager) {
-		UtilizationReportBuilder builder = new UtilizationReportBuilder();
-
-		builder.setReportService(utilizationReportService);
-		builder.setTransactionReportService(transactionReportService);
-		builder.setHeartbeatReportService(heartbeatReportService);
-		builder.setCrossReportService(crossReportService);
-		builder.setMergeHelper(transactionMergeHelper);
-		builder.setConfigManager(serverFilterConfigManager);
-		return builder;
-	}
-
-	@Bean
-	public RouterConfigHandler routerConfigHandler(StateReportService stateReportService,
-			RouterConfigManager routerConfigManager, RouterConfigService routerConfigService,
-			DailyReportRepository dailyReportRepository) {
-		RouterConfigHandler handler = new RouterConfigHandler();
-
-		handler.setStateReportService(stateReportService);
-		handler.setRouterConfigManager(routerConfigManager);
-		handler.setReportService(routerConfigService);
-		handler.setDailyReportDao(dailyReportRepository);
-		return handler;
-	}
-
-	@Bean
-	public RouterConfigAdjustor routerConfigAdjustor(StateReportService stateReportService,
-			RouterConfigManager routerConfigManager, RouterConfigService routerConfigService,
-			ServerConfigManager serverConfigManager, DailyReportRepository dailyReportRepository) {
-		RouterConfigAdjustor adjustor = new RouterConfigAdjustor();
-
-		adjustor.setStateReportService(stateReportService);
-		adjustor.setRouterConfigManager(routerConfigManager);
-		adjustor.setRouterService(routerConfigService);
-		adjustor.setServerConfigManager(serverConfigManager);
-		adjustor.setDailyReportDao(dailyReportRepository);
-		return adjustor;
-	}
-
-	@Bean(name = RouterConfigBuilder.ID)
-	public TaskBuilder routerConfigBuilder(RouterConfigHandler routerConfigHandler, RouterConfigAdjustor routerConfigAdjustor,
-			RouterConfigService routerConfigService, ServerConfigManager serverConfigManager) {
-		RouterConfigBuilder builder = new RouterConfigBuilder();
-
-		builder.setRouterConfigHandler(routerConfigHandler);
-		builder.setRouterAdjustor(routerConfigAdjustor);
-		builder.setReportService(routerConfigService);
-		builder.setServerConfigManager(serverConfigManager);
-		return builder;
 	}
 
 	@Bean
@@ -2695,18 +2425,6 @@ public class CatHomeSpringConfiguration {
 	@Bean(initMethod = "initialize")
 	public com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator ruleFTLDecorator() {
 		return new com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator();
-	}
-
-	@Bean(initMethod = "initialize")
-	public RouterConfigManager routerConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher,
-			DailyReportRepository dailyReportRepository, DailyReportContentRepository dailyReportContentRepository) {
-		RouterConfigManager manager = new RouterConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		manager.setDailyReportDao(dailyReportRepository);
-		manager.setDailyReportContentDao(dailyReportContentRepository);
-		return manager;
 	}
 
 	@Bean(initMethod = "initialize")

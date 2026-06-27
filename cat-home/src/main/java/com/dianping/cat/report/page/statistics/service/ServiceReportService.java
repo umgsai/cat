@@ -24,6 +24,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -41,6 +42,7 @@ import com.dianping.cat.home.service.transform.DefaultNativeParser;
 import com.dianping.cat.report.page.statistics.task.service.ServiceReportMerger;
 import com.dianping.cat.report.service.AbstractReportService;
 
+@Component
 public class ServiceReportService extends AbstractReportService<ServiceReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceReportService.class);
 
