@@ -1915,3 +1915,65 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+
+## 36. 第二十八批完成记录
+
+第二十八批迁移报表页面配置 Manager，继续收口 `ConfigRepository + ContentFetcher + initialize()` 形态的低风险配置类。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+DomainGroupConfigManager
+StorageGroupConfigManager
+HeartbeatDisplayPolicyManager
+```
+
+2. 三个 Manager 的 `initialize()` 已从配置类 `initMethod` 改为 `@PostConstruct`，保留启动加载配置语义。
+
+3. 已删除 `CatHomeSpringConfiguration` 中对应旧 `@Bean` 方法，避免组件扫描注册和配置类注册同时存在：
+
+```text
+domainGroupConfigManager
+storageGroupConfigManager
+heartbeatDisplayPolicyManager
+```
+
+4. 本批触碰到的旧式字段命名已收口为 Java 驼峰命名，并使用 `@Resource` 字段注入：
+
+```text
+m_configDao       -> configRepository
+m_fetcher         -> contentFetcher
+m_configId        -> configId
+m_domainGroup     -> domainGroup
+m_config          -> config
+m_id              -> id
+m_productlines    -> productlines
+m_storages        -> storages
+```
+
+5. `StorageGroupConfigManager` 和 `HeartbeatDisplayPolicyManager` 中原来只调用 `Cat.logError` 的初始化、插入、存储异常路径，已补充 SLF4J 日志；`DomainGroupConfigManager` 保留并适配已有 SLF4J 日志。
+
+6. 本批仍不迁移以下内容：
+
+```text
+ReportManager / ReportDelegate / ModelService
+Map/List 聚合 Bean
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

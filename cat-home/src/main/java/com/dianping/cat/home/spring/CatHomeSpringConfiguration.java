@@ -398,7 +398,8 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		MatrixAnalyzer.class, ProblemAnalyzer.class, StorageAnalyzer.class, TopAnalyzer.class, StateAnalyzer.class,
 		ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
 		CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
-		BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
+		BusinessPointParser.class, DomainGroupConfigManager.class, StorageGroupConfigManager.class,
+		HeartbeatDisplayPolicyManager.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
 		BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class, JsonBuilder.class,
 		DomainValidator.class, DefaultValueTranslater.class, DefaultGraphBuilder.class, DependencyItemBuilder.class,
 		TopologyGraphBuilder.class, TopologyGraphManager.class, TopologyGraphConfigManager.class,
@@ -506,7 +507,8 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					ProblemAnalyzer.class, StorageAnalyzer.class, TopAnalyzer.class, StateAnalyzer.class,
 					ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
 					CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
-					BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
+					BusinessPointParser.class, DomainGroupConfigManager.class, StorageGroupConfigManager.class,
+					HeartbeatDisplayPolicyManager.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
 					BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class,
 					JsonBuilder.class, DomainValidator.class, DefaultValueTranslater.class, DefaultGraphBuilder.class,
 					DependencyItemBuilder.class, TopologyGraphBuilder.class, TopologyGraphManager.class,
@@ -2410,36 +2412,6 @@ public class CatHomeSpringConfiguration {
 	@Bean(initMethod = "initialize")
 	public com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator ruleFTLDecorator() {
 		return new com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator();
-	}
-
-	@Bean(initMethod = "initialize")
-	public DomainGroupConfigManager domainGroupConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher) {
-		DomainGroupConfigManager manager = new DomainGroupConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public StorageGroupConfigManager storageGroupConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher) {
-		StorageGroupConfigManager manager = new StorageGroupConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher) {
-		HeartbeatDisplayPolicyManager manager = new HeartbeatDisplayPolicyManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
 	}
 
 	@Bean

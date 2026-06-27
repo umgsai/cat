@@ -21,9 +21,13 @@ package com.dianping.cat.report.page;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -35,55 +39,59 @@ import com.dianping.cat.home.group.entity.DomainGroup;
 import com.dianping.cat.home.group.entity.Group;
 import com.dianping.cat.home.group.transform.DefaultSaxParser;
 
+@Component
 public class DomainGroupConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DomainGroupConfigManager.class);
 
 	private static final String CONFIG_NAME = "domainGroup";
 
-	private ConfigRepository m_configDao;
+	@Resource
+	private ConfigRepository configRepository;
 
-	private ContentFetcher m_fetcher;
+	@Resource
+	private ContentFetcher contentFetcher;
 
-	private long m_configId;
+	private long configId;
 
-	private DomainGroup m_domainGroup;
+	private DomainGroup domainGroup;
 
 	public DomainGroup getDomainGroup() {
 		ensureInitialized();
 
-		return m_domainGroup;
+		return domainGroup;
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
+	@PostConstruct
 	public void initialize() {
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME);
-			String content = config.getContent();
+			Config configDO = configRepository.findByName(CONFIG_NAME);
+			String content = configDO.getContent();
 
-			m_configId = config.getId();
-			m_domainGroup = DefaultSaxParser.parse(content);
-			LOGGER.info("Loaded domain group config from repository, configId={}.", m_configId);
+			configId = configDO.getId();
+			domainGroup = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded domain group config from repository, configId={}.", configId);
 		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Domain group config is missing in repository, loading default content from fetcher.", e);
 
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
+				String content = contentFetcher.getConfigContent(CONFIG_NAME);
+				Config configDO = configRepository.createLocal();
 
-				config.setName(CONFIG_NAME);
-				config.setContent(content);
-				m_configDao.insert(config);
+				configDO.setName(CONFIG_NAME);
+				configDO.setContent(content);
+				configRepository.insert(configDO);
 
-				m_configId = config.getId();
-				m_domainGroup = DefaultSaxParser.parse(content);
-				LOGGER.info("Initialized domain group config from default content, configId={}.", m_configId);
+				configId = configDO.getId();
+				domainGroup = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized domain group config from default content, configId={}.", configId);
 			} catch (Exception ex) {
 				LOGGER.error("Unable to initialize domain group config from default content.", ex);
 				Cat.logError(ex);
@@ -92,15 +100,15 @@ public class DomainGroupConfigManager {
 			LOGGER.error("Unable to load domain group config from repository.", e);
 			Cat.logError(e);
 		}
-		if (m_domainGroup == null) {
-			m_domainGroup = new DomainGroup();
+		if (domainGroup == null) {
+			domainGroup = new DomainGroup();
 			LOGGER.warn("Domain group config is empty after initialization, using a new empty config.");
 		}
 	}
 
 	public boolean insert(String xml) {
 		try {
-			m_domainGroup = DefaultSaxParser.parse(xml);
+			domainGroup = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
@@ -114,7 +122,7 @@ public class DomainGroupConfigManager {
 		try {
 			Domain domain = (Domain) new JsonBuilder().parse(json, Domain.class);
 
-			m_domainGroup.addDomain(domain);
+			domainGroup.addDomain(domain);
 			return storeConfig();
 		} catch (Exception e) {
 			LOGGER.error("Unable to parse domain group json for insert. jsonLength={}.", json == null ? 0 : json.length(), e);
@@ -124,7 +132,7 @@ public class DomainGroupConfigManager {
 	}
 
 	public boolean deleteGroup(String domain) {
-		m_domainGroup.removeDomain(domain);
+		domainGroup.removeDomain(domain);
 
 		return storeConfig();
 	}
@@ -142,7 +150,7 @@ public class DomainGroupConfigManager {
 	public Domain queryGroupDomain(String domain) {
 		ensureInitialized();
 
-		Domain domainGroup = m_domainGroup.findDomain(domain);
+		Domain domainGroup = this.domainGroup.findDomain(domain);
 
 		return domainGroup;
 	}
@@ -150,7 +158,7 @@ public class DomainGroupConfigManager {
 	public List<String> queryDomainGroup(String domain) {
 		ensureInitialized();
 
-		Domain domainGroup = m_domainGroup.findDomain(domain);
+		Domain domainGroup = this.domainGroup.findDomain(domain);
 
 		if (domainGroup == null) {
 			return new ArrayList<String>();
@@ -162,7 +170,7 @@ public class DomainGroupConfigManager {
 	public List<String> queryIpByDomainAndGroup(String domain, String group) {
 		ensureInitialized();
 
-		Domain domainInfo = m_domainGroup.findDomain(domain);
+		Domain domainInfo = domainGroup.findDomain(domain);
 
 		if (domainInfo != null) {
 			Group groupInfo = domainInfo.findGroup(group);
@@ -175,9 +183,9 @@ public class DomainGroupConfigManager {
 	}
 
 	private void ensureInitialized() {
-		if (m_domainGroup == null) {
+		if (domainGroup == null) {
 			synchronized (this) {
-				if (m_domainGroup == null) {
+				if (domainGroup == null) {
 					LOGGER.warn("Domain group config is not initialized yet, loading it lazily.");
 					initialize();
 				}
@@ -188,17 +196,17 @@ public class DomainGroupConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = m_configDao.createLocal();
+				Config configDO = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
-				config.setName(CONFIG_NAME);
-				config.setContent(m_domainGroup.toString());
-				m_configDao.updateByPK(config);
-				LOGGER.info("Stored domain group config, configId={}, domainCount={}.", m_configId,
-						m_domainGroup.getDomains().size());
+				configDO.setId(configId);
+				configDO.setKeyId(configId);
+				configDO.setName(CONFIG_NAME);
+				configDO.setContent(domainGroup.toString());
+				configRepository.updateByPK(configDO);
+				LOGGER.info("Stored domain group config, configId={}, domainCount={}.", configId,
+						domainGroup.getDomains().size());
 			} catch (Exception e) {
-				LOGGER.error("Unable to store domain group config, configId={}.", m_configId, e);
+				LOGGER.error("Unable to store domain group config, configId={}.", configId, e);
 				Cat.logError(e);
 				return false;
 			}
