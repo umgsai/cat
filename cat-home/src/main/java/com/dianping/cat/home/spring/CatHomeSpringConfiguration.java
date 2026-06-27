@@ -410,7 +410,28 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 		DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 		LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
-		AlertExceptionBuilder.class},
+		AlertExceptionBuilder.class,
+		com.dianping.cat.report.page.home.JspViewer.class,
+		com.dianping.cat.report.page.monitor.JspViewer.class,
+		com.dianping.cat.report.page.model.JspViewer.class,
+		com.dianping.cat.report.page.alteration.JspViewer.class,
+		com.dianping.cat.report.page.alert.JspViewer.class,
+		com.dianping.cat.report.page.cache.JspViewer.class,
+		com.dianping.cat.report.page.event.JspViewer.class,
+		com.dianping.cat.report.page.transaction.JspViewer.class,
+		com.dianping.cat.report.page.transaction.XmlViewer.class,
+		com.dianping.cat.report.page.problem.JspViewer.class,
+		com.dianping.cat.report.page.heartbeat.JspViewer.class,
+		com.dianping.cat.report.page.top.JspViewer.class,
+		com.dianping.cat.report.page.business.JspViewer.class,
+		com.dianping.cat.report.page.logview.JspViewer.class,
+		com.dianping.cat.report.page.state.JspViewer.class,
+		com.dianping.cat.report.page.storage.JspViewer.class,
+		com.dianping.cat.report.page.dependency.JspViewer.class,
+		com.dianping.cat.report.page.matrix.JspViewer.class,
+		com.dianping.cat.report.page.statistics.JspViewer.class,
+		com.dianping.cat.report.page.overload.JspViewer.class,
+		com.dianping.cat.report.page.cross.JspViewer.class},
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
 					DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class, MatrixAnalyzer.class,
@@ -428,7 +449,28 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 					DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 					LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
-					AlertExceptionBuilder.class}),
+					AlertExceptionBuilder.class,
+					com.dianping.cat.report.page.home.JspViewer.class,
+					com.dianping.cat.report.page.monitor.JspViewer.class,
+					com.dianping.cat.report.page.model.JspViewer.class,
+					com.dianping.cat.report.page.alteration.JspViewer.class,
+					com.dianping.cat.report.page.alert.JspViewer.class,
+					com.dianping.cat.report.page.cache.JspViewer.class,
+					com.dianping.cat.report.page.event.JspViewer.class,
+					com.dianping.cat.report.page.transaction.JspViewer.class,
+					com.dianping.cat.report.page.transaction.XmlViewer.class,
+					com.dianping.cat.report.page.problem.JspViewer.class,
+					com.dianping.cat.report.page.heartbeat.JspViewer.class,
+					com.dianping.cat.report.page.top.JspViewer.class,
+					com.dianping.cat.report.page.business.JspViewer.class,
+					com.dianping.cat.report.page.logview.JspViewer.class,
+					com.dianping.cat.report.page.state.JspViewer.class,
+					com.dianping.cat.report.page.storage.JspViewer.class,
+					com.dianping.cat.report.page.dependency.JspViewer.class,
+					com.dianping.cat.report.page.matrix.JspViewer.class,
+					com.dianping.cat.report.page.statistics.JspViewer.class,
+					com.dianping.cat.report.page.overload.JspViewer.class,
+					com.dianping.cat.report.page.cross.JspViewer.class}),
 		useDefaultFilters = false)
 @MapperScan(basePackages = {
 		"com.dianping.cat.mybatis.mapper",
@@ -1166,11 +1208,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public com.dianping.cat.report.page.home.JspViewer homeJspViewer() {
-		return new com.dianping.cat.report.page.home.JspViewer();
-	}
-
-	@Bean
 	public com.dianping.cat.report.page.home.Handler homeHandler(
 			com.dianping.cat.report.page.home.JspViewer homeJspViewer, MessageConsumer messageConsumer,
 			TcpSocketReceiver tcpSocketReceiver) {
@@ -1183,18 +1220,8 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public com.dianping.cat.report.page.monitor.JspViewer monitorJspViewer() {
-		return new com.dianping.cat.report.page.monitor.JspViewer();
-	}
-
-	@Bean
 	public com.dianping.cat.report.page.monitor.Handler monitorHandler() {
 		return new com.dianping.cat.report.page.monitor.Handler();
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.model.JspViewer modelJspViewer() {
-		return new com.dianping.cat.report.page.model.JspViewer();
 	}
 
 	@Bean
@@ -1204,11 +1231,6 @@ public class CatHomeSpringConfiguration {
 
 		handler.setLocalServices(localModelServices);
 		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.alteration.JspViewer alterationJspViewer() {
-		return new com.dianping.cat.report.page.alteration.JspViewer();
 	}
 
 	@Bean
@@ -1223,11 +1245,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public com.dianping.cat.report.page.alert.JspViewer alertJspViewer() {
-		return new com.dianping.cat.report.page.alert.JspViewer();
-	}
-
-	@Bean
 	public com.dianping.cat.report.page.alert.Handler alertHandler(
 			com.dianping.cat.report.page.alert.JspViewer alertJspViewer, SenderManager senderManager,
 			AlertRepository alertRepository) {
@@ -1237,11 +1254,6 @@ public class CatHomeSpringConfiguration {
 		handler.setSenderManager(senderManager);
 		handler.setAlertDao(alertRepository);
 		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.cache.JspViewer cacheJspViewer() {
-		return new com.dianping.cat.report.page.cache.JspViewer();
 	}
 
 	@Bean
@@ -1263,11 +1275,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public com.dianping.cat.report.page.event.JspViewer eventJspViewer() {
-		return new com.dianping.cat.report.page.event.JspViewer();
-	}
-
-	@Bean
 	public com.dianping.cat.report.page.event.Handler eventHandler(GraphBuilder graphBuilder,
 			com.dianping.cat.report.page.event.JspViewer eventJspViewer, EventReportService eventReportService,
 			EventMergeHelper eventMergeHelper, @Qualifier("eventModelService") ModelService<EventReport> eventModelService,
@@ -1282,16 +1289,6 @@ public class CatHomeSpringConfiguration {
 		handler.setNormalizePayload(payloadNormalizer);
 		handler.setConfigManager(domainGroupConfigManager);
 		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.transaction.JspViewer transactionJspViewer() {
-		return new com.dianping.cat.report.page.transaction.JspViewer();
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.transaction.XmlViewer transactionXmlViewer() {
-		return new com.dianping.cat.report.page.transaction.XmlViewer();
 	}
 
 	@Bean
@@ -1315,11 +1312,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public com.dianping.cat.report.page.problem.JspViewer problemJspViewer() {
-		return new com.dianping.cat.report.page.problem.JspViewer();
-	}
-
-	@Bean
 	public com.dianping.cat.report.page.problem.Handler problemHandler(
 			com.dianping.cat.report.page.problem.JspViewer problemJspViewer, ServerConfigManager serverConfigManager,
 			ProblemReportService problemReportService,
@@ -1336,11 +1328,6 @@ public class CatHomeSpringConfiguration {
 		handler.setNormalizePayload(payloadNormalizer);
 		handler.setJsonBuilder(jsonBuilder);
 		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.heartbeat.JspViewer heartbeatJspViewer() {
-		return new com.dianping.cat.report.page.heartbeat.JspViewer();
 	}
 
 	@Bean
@@ -1374,16 +1361,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public com.dianping.cat.report.page.top.JspViewer topJspViewer() {
-		return new com.dianping.cat.report.page.top.JspViewer();
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.business.JspViewer businessJspViewer() {
-		return new com.dianping.cat.report.page.business.JspViewer();
-	}
-
-	@Bean
 	public com.dianping.cat.report.page.business.Handler businessHandler(
 			com.dianping.cat.report.page.business.JspViewer businessJspViewer, PayloadNormalizer payloadNormalizer,
 			ProjectService projectService, BusinessGraphCreator businessGraphCreator,
@@ -1399,11 +1376,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public com.dianping.cat.report.page.logview.JspViewer logviewJspViewer() {
-		return new com.dianping.cat.report.page.logview.JspViewer();
-	}
-
-	@Bean
 	public com.dianping.cat.report.page.logview.Handler logviewHandler(
 			com.dianping.cat.report.page.logview.JspViewer logviewJspViewer,
 			@Qualifier("logviewModelService") ModelService<String> logviewModelService,
@@ -1414,11 +1386,6 @@ public class CatHomeSpringConfiguration {
 		handler.setService(logviewModelService);
 		handler.setConfigManager(serverConfigManager);
 		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.state.JspViewer stateJspViewer() {
-		return new com.dianping.cat.report.page.state.JspViewer();
 	}
 
 	@Bean
@@ -1487,11 +1454,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public com.dianping.cat.report.page.storage.JspViewer storageJspViewer() {
-		return new com.dianping.cat.report.page.storage.JspViewer();
-	}
-
-	@Bean
 	public com.dianping.cat.report.page.storage.Handler storageHandler(
 			com.dianping.cat.report.page.storage.JspViewer storageJspViewer, StorageReportService storageReportService,
 			PayloadNormalizer payloadNormalizer,
@@ -1514,11 +1476,6 @@ public class CatHomeSpringConfiguration {
 		handler.setAlertInfoBuilder(storageAlertInfoBuilder);
 		handler.setStorageBuilderManager(storageBuilderManager);
 		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.dependency.JspViewer dependencyJspViewer() {
-		return new com.dianping.cat.report.page.dependency.JspViewer();
 	}
 
 	@Bean
@@ -1590,16 +1547,6 @@ public class CatHomeSpringConfiguration {
 		builder.setHeartbeatReportService(heartbeatReportService);
 		builder.setConfigManager(serverFilterConfigManager);
 		return builder;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.matrix.JspViewer matrixJspViewer() {
-		return new com.dianping.cat.report.page.matrix.JspViewer();
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.statistics.JspViewer statisticsJspViewer() {
-		return new com.dianping.cat.report.page.statistics.JspViewer();
 	}
 
 	@Bean
@@ -1818,11 +1765,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public com.dianping.cat.report.page.overload.JspViewer overloadJspViewer() {
-		return new com.dianping.cat.report.page.overload.JspViewer();
-	}
-
-	@Bean
 	public TableCapacityService tableCapacityService(OverloadRepository overloadRepository,
 			HourlyReportRepository hourlyReportRepository, DailyReportRepository dailyReportRepository,
 			WeeklyReportRepository weeklyReportRepository, MonthlyReportRepository monthlyReportRepository) {
@@ -1845,11 +1787,6 @@ public class CatHomeSpringConfiguration {
 		handler.setJspViewer(overloadJspViewer);
 		handler.setTableCapacityService(tableCapacityService);
 		return handler;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.cross.JspViewer crossJspViewer() {
-		return new com.dianping.cat.report.page.cross.JspViewer();
 	}
 
 	@Bean

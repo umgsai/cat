@@ -732,6 +732,67 @@ mvn -pl cat-home -am -DskipTests compile
 BUILD SUCCESS
 ```
 
+## 20. 第十二批完成记录
+
+第十二批选择报表页面 Viewer 迁移，只处理无依赖的 `JspViewer` / `XmlViewer`，继续暂缓 Handler、System 页面 Viewer 和业务服务链路。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+homeJspViewer
+monitorJspViewer
+modelJspViewer
+alterationJspViewer
+alertJspViewer
+cacheJspViewer
+eventJspViewer
+transactionJspViewer
+transactionXmlViewer
+problemJspViewer
+heartbeatJspViewer
+topJspViewer
+businessJspViewer
+logviewJspViewer
+stateJspViewer
+storageJspViewer
+dependencyJspViewer
+matrixJspViewer
+statisticsJspViewer
+overloadJspViewer
+crossJspViewer
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 21 个简单 `@Bean` 方法。
+3. 所有 `JspViewer` 类名相同，因此均使用显式组件名，例如 `@Component("transactionJspViewer")`，避免默认 Bean 名 `jspViewer` 冲突。
+4. `transactionXmlViewer` 使用 `@Component("transactionXmlViewer")` 保留原 Bean 名。
+5. 本批仅迁移 Report 页面 Viewer，不迁移以下内容：
+
+```text
+Handler
+System 页面 Viewer
+ReportService/ModelService
+TaskBuilder
+ReportManager
+带 initMethod 的 Manager
+Map/List 聚合 Bean
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
 ## 10. 第二批完成记录
 
 第二批选择 `BusinessGraphCreator` 一个 Bean，目标是验证依赖较多但不涉及后台线程、不涉及 prototype 的普通业务图表 Bean 迁移方式。
