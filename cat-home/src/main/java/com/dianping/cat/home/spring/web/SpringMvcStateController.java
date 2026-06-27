@@ -82,6 +82,7 @@ public class SpringMvcStateController {
 		Map<String, Object> model = new LinkedHashMap<String, Object>();
 		String contextPath = request.getContextPath();
 		String action = parameter(request, "op", "view");
+		String domain = parameter(request, "domain", Constants.CAT);
 		String ipAddress = parameter(request, "ip", Constants.ALL);
 		String reportType = parameter(request, "reportType", "day");
 		String sort = emptyToNull(request.getParameter("sort"));
@@ -117,8 +118,8 @@ public class SpringMvcStateController {
 
 		model.put("action", action);
 		model.put("contextPath", contextPath);
-		model.put("domain", Constants.CAT);
-		model.put("displayDomain", Constants.CAT);
+		model.put("domain", domain);
+		model.put("displayDomain", domain);
 		model.put("ipAddress", ipAddress);
 		model.put("reportType", reportType);
 		model.put("date", historyMode ? m_dayFormat.format(new Date(date)) : m_hourlyFormat.format(new Date(date)));
@@ -128,7 +129,7 @@ public class SpringMvcStateController {
 		model.put("reportEnd", m_subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
 		model.put("ips", ips);
 		model.put("navs", UrlNav.values());
-		model.put("navPrefix", "domain=cat&ip=" + ipAddress + "&show=" + show);
+		model.put("navPrefix", "domain=" + domain + "&ip=" + ipAddress + "&show=" + show);
 		model.put("historyMode", historyMode);
 		model.put("historyNavs", HistoryNav.values());
 		model.put("currentNav", HistoryNav.getByName(reportType));
