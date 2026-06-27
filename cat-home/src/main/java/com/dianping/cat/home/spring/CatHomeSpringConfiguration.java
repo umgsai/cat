@@ -1,6 +1,5 @@
 package com.dianping.cat.home.spring;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -59,7 +58,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -88,32 +86,24 @@ import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
 import com.dianping.cat.consumer.DatabaseParser;
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.consumer.business.BusinessDelegate;
-import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.consumer.cross.CrossAnalyzer;
 import com.dianping.cat.consumer.cross.CrossDelegate;
 import com.dianping.cat.consumer.cross.IpConvertManager;
-import com.dianping.cat.consumer.cross.model.entity.CrossReport;
 import com.dianping.cat.consumer.dependency.DependencyAnalyzer;
 import com.dianping.cat.consumer.dependency.DependencyDelegate;
-import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
 import com.dianping.cat.consumer.dump.DumpAnalyzer;
 import com.dianping.cat.consumer.event.EventAnalyzer;
 import com.dianping.cat.consumer.event.EventDelegate;
-import com.dianping.cat.consumer.event.model.entity.EventReport;
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
 import com.dianping.cat.consumer.heartbeat.HeartbeatDelegate;
-import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
 import com.dianping.cat.consumer.matrix.MatrixDelegate;
-import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.ProblemDelegate;
 import com.dianping.cat.consumer.problem.DefaultProblemHandler;
 import com.dianping.cat.consumer.problem.LongExecutionProblemHandler;
-import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.StateDelegate;
-import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.consumer.storage.StorageAnalyzer;
 import com.dianping.cat.consumer.storage.StorageDelegate;
 import com.dianping.cat.consumer.storage.StorageReportUpdater;
@@ -121,15 +111,12 @@ import com.dianping.cat.consumer.storage.builder.StorageBuilderManager;
 import com.dianping.cat.consumer.storage.builder.StorageCacheBuilder;
 import com.dianping.cat.consumer.storage.builder.StorageRPCBuilder;
 import com.dianping.cat.consumer.storage.builder.StorageSQLBuilder;
-import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.consumer.top.TopAnalyzer;
 import com.dianping.cat.consumer.top.TopDelegate;
-import com.dianping.cat.consumer.top.model.entity.TopReport;
 import com.dianping.cat.consumer.config.AllReportConfigManager;
 import com.dianping.cat.consumer.dump.LocalMessageBucketManager;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionDelegate;
-import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.mybatis.SpringBackedRepositorySupport;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
@@ -189,7 +176,6 @@ import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.mvc.PayloadNormalizer;
 import com.dianping.cat.mvc.ReportModelDependencies;
 import com.dianping.cat.report.DefaultReportBucketManager;
-import com.dianping.cat.report.DefaultReportManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
 import com.dianping.cat.report.alert.business.BusinessAlert;
@@ -228,6 +214,17 @@ import com.dianping.cat.report.graph.svg.DefaultValueTranslater;
 import com.dianping.cat.report.graph.svg.ValueTranslater;
 import com.dianping.cat.report.graph.metric.DataExtractor;
 import com.dianping.cat.report.graph.metric.impl.DataExtractorImpl;
+import com.dianping.cat.report.manager.BusinessReportManager;
+import com.dianping.cat.report.manager.CrossReportManager;
+import com.dianping.cat.report.manager.DependencyReportManager;
+import com.dianping.cat.report.manager.EventReportManager;
+import com.dianping.cat.report.manager.HeartbeatReportManager;
+import com.dianping.cat.report.manager.MatrixReportManager;
+import com.dianping.cat.report.manager.ProblemReportManager;
+import com.dianping.cat.report.manager.StateReportManager;
+import com.dianping.cat.report.manager.StorageReportManager;
+import com.dianping.cat.report.manager.TopReportManager;
+import com.dianping.cat.report.manager.TransactionReportManager;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager;
 import com.dianping.cat.report.page.dependency.ExternalInfoBuilder;
@@ -319,7 +316,6 @@ import com.dianping.cat.report.task.DefaultTaskConsumer;
 import com.dianping.cat.report.task.DefaultRemoteServersUpdater;
 import com.dianping.cat.report.task.ReportFacade;
 import com.dianping.cat.report.service.AbstractReportService;
-import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.current.CurrentReportBuilder;
 import com.dianping.cat.report.task.cmdb.CmdbInfoReloadBuilder;
 import com.dianping.cat.report.task.cmdb.ProjectUpdateTask;
@@ -342,10 +338,6 @@ import com.dianping.cat.report.LocalReportBucket;
 import com.dianping.cat.report.ReportBucket;
 import com.dianping.cat.report.ReportBucketFactory;
 import com.dianping.cat.report.ReportBucketManager;
-import com.dianping.cat.report.ReportDelegate;
-import com.dianping.cat.report.ReportManager;
-import com.dianping.cat.report.task.reload.AbstractReportReloader;
-import com.dianping.cat.report.task.reload.ReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadTask;
 import com.dianping.cat.report.task.reload.impl.BusinessReportReloader;
 import com.dianping.cat.report.task.reload.impl.CrossReportReloader;
@@ -401,6 +393,10 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		TransactionReportService.class, TransactionReportBuilder.class, TopReportService.class,
 		CrossReportService.class, CrossReportBuilder.class, ProblemReportService.class, ProblemReportBuilder.class,
 		StorageReportService.class, StorageReportBuilder.class, BusinessReportService.class,
+		BusinessReportManager.class, TransactionReportManager.class, CrossReportManager.class,
+		DependencyReportManager.class, EventReportManager.class, HeartbeatReportManager.class,
+		MatrixReportManager.class, ProblemReportManager.class, StorageReportManager.class,
+		TopReportManager.class, StateReportManager.class,
 		HistoricalProblemService.class, HistoricalBusinessService.class, HistoricalEventService.class,
 		HistoricalTransactionService.class, HistoricalHeartbeatService.class, HistoricalTopService.class,
 		HistoricalStateService.class, HistoricalStorageService.class, HistoricalCrossService.class,
@@ -544,6 +540,10 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					CrossReportService.class, CrossReportBuilder.class, ProblemReportService.class,
 					ProblemReportBuilder.class, StorageReportService.class, StorageReportBuilder.class,
 					BusinessReportService.class, BusinessBaselineReportBuilder.class, JarReportService.class,
+					BusinessReportManager.class, TransactionReportManager.class, CrossReportManager.class,
+					DependencyReportManager.class, EventReportManager.class, HeartbeatReportManager.class,
+					MatrixReportManager.class, ProblemReportManager.class, StorageReportManager.class,
+					TopReportManager.class, StateReportManager.class,
 					HistoricalProblemService.class, HistoricalBusinessService.class, HistoricalEventService.class,
 					HistoricalTransactionService.class, HistoricalHeartbeatService.class, HistoricalTopService.class,
 					HistoricalStateService.class, HistoricalStorageService.class, HistoricalCrossService.class,
@@ -754,225 +754,6 @@ public class CatHomeSpringConfiguration {
 		bootstrap.setServersUpdaterManager(serversUpdaterManager);
 		bootstrap.setTcpSocketReceiver(tcpSocketReceiver);
 		return bootstrap;
-	}
-
-	@Bean(name = BusinessAnalyzer.ID + "ReportManager", initMethod = "initialize")
-	@Scope("prototype")
-	public ReportManager<BusinessReport> businessReportManager(
-			@Qualifier("businessDelegate") ReportDelegate<BusinessReport> businessDelegate,
-			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
-		DefaultReportManager<BusinessReport> manager = new DefaultReportManager<BusinessReport>();
-
-		manager.setReportDelegate(businessDelegate);
-		manager.setBucketManager(reportBucketManager);
-		manager.setReportDao(hourlyReportRepository);
-		manager.setReportContentDao(hourlyReportContentRepository);
-		manager.setValidator(domainValidator);
-		manager.setName(BusinessAnalyzer.ID);
-		return manager;
-	}
-
-	@Bean(name = TransactionAnalyzer.ID + "ReportManager", initMethod = "initialize")
-	@Scope("prototype")
-	public ReportManager<TransactionReport> transactionReportManager(
-			@Qualifier("transactionDelegate") ReportDelegate<TransactionReport> transactionDelegate,
-			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
-		DefaultReportManager<TransactionReport> manager = new DefaultReportManager<TransactionReport>();
-
-		manager.setReportDelegate(transactionDelegate);
-		manager.setBucketManager(reportBucketManager);
-		manager.setReportDao(hourlyReportRepository);
-		manager.setReportContentDao(hourlyReportContentRepository);
-		manager.setValidator(domainValidator);
-		manager.setName(TransactionAnalyzer.ID);
-		return manager;
-	}
-
-	@Bean(name = CrossAnalyzer.ID + "ReportManager", initMethod = "initialize")
-	@Scope("prototype")
-	public ReportManager<CrossReport> crossReportManager(
-			@Qualifier("crossDelegate") ReportDelegate<CrossReport> crossDelegate,
-			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
-		DefaultReportManager<CrossReport> manager = new DefaultReportManager<CrossReport>();
-
-		manager.setReportDelegate(crossDelegate);
-		manager.setBucketManager(reportBucketManager);
-		manager.setReportDao(hourlyReportRepository);
-		manager.setReportContentDao(hourlyReportContentRepository);
-		manager.setValidator(domainValidator);
-		manager.setName(CrossAnalyzer.ID);
-		return manager;
-	}
-
-	@Bean(name = DependencyAnalyzer.ID + "ReportManager", initMethod = "initialize")
-	@Scope("prototype")
-	public ReportManager<DependencyReport> dependencyReportManager(
-			@Qualifier("dependencyDelegate") ReportDelegate<DependencyReport> dependencyDelegate,
-			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
-		DefaultReportManager<DependencyReport> manager = new DefaultReportManager<DependencyReport>();
-
-		manager.setReportDelegate(dependencyDelegate);
-		manager.setBucketManager(reportBucketManager);
-		manager.setReportDao(hourlyReportRepository);
-		manager.setReportContentDao(hourlyReportContentRepository);
-		manager.setValidator(domainValidator);
-		manager.setName(DependencyAnalyzer.ID);
-		return manager;
-	}
-
-	@Bean(name = EventAnalyzer.ID + "ReportManager", initMethod = "initialize")
-	@Scope("prototype")
-	public ReportManager<EventReport> eventReportManager(
-			@Qualifier("eventDelegate") ReportDelegate<EventReport> eventDelegate,
-			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
-		DefaultReportManager<EventReport> manager = new DefaultReportManager<EventReport>();
-
-		manager.setReportDelegate(eventDelegate);
-		manager.setBucketManager(reportBucketManager);
-		manager.setReportDao(hourlyReportRepository);
-		manager.setReportContentDao(hourlyReportContentRepository);
-		manager.setValidator(domainValidator);
-		manager.setName(EventAnalyzer.ID);
-		return manager;
-	}
-
-	@Bean(name = HeartbeatAnalyzer.ID + "ReportManager", initMethod = "initialize")
-	@Scope("prototype")
-	public ReportManager<HeartbeatReport> heartbeatReportManager(
-			@Qualifier("heartbeatDelegate") ReportDelegate<HeartbeatReport> heartbeatDelegate,
-			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
-		DefaultReportManager<HeartbeatReport> manager = new DefaultReportManager<HeartbeatReport>();
-
-		manager.setReportDelegate(heartbeatDelegate);
-		manager.setBucketManager(reportBucketManager);
-		manager.setReportDao(hourlyReportRepository);
-		manager.setReportContentDao(hourlyReportContentRepository);
-		manager.setValidator(domainValidator);
-		manager.setName(HeartbeatAnalyzer.ID);
-		return manager;
-	}
-
-	@Bean(name = MatrixAnalyzer.ID + "ReportManager", initMethod = "initialize")
-	@Scope("prototype")
-	public ReportManager<MatrixReport> matrixReportManager(
-			@Qualifier("matrixDelegate") ReportDelegate<MatrixReport> matrixDelegate,
-			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
-		DefaultReportManager<MatrixReport> manager = new DefaultReportManager<MatrixReport>();
-
-		manager.setReportDelegate(matrixDelegate);
-		manager.setBucketManager(reportBucketManager);
-		manager.setReportDao(hourlyReportRepository);
-		manager.setReportContentDao(hourlyReportContentRepository);
-		manager.setValidator(domainValidator);
-		manager.setName(MatrixAnalyzer.ID);
-		return manager;
-	}
-
-	@Bean(name = ProblemAnalyzer.ID + "ReportManager", initMethod = "initialize")
-	@Scope("prototype")
-	public ReportManager<ProblemReport> problemReportManager(
-			@Qualifier("problemDelegate") ReportDelegate<ProblemReport> problemDelegate,
-			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
-		DefaultReportManager<ProblemReport> manager = new DefaultReportManager<ProblemReport>();
-
-		manager.setReportDelegate(problemDelegate);
-		manager.setBucketManager(reportBucketManager);
-		manager.setReportDao(hourlyReportRepository);
-		manager.setReportContentDao(hourlyReportContentRepository);
-		manager.setValidator(domainValidator);
-		manager.setName(ProblemAnalyzer.ID);
-		return manager;
-	}
-
-	@Bean(name = StorageAnalyzer.ID + "ReportManager", initMethod = "initialize")
-	@Scope("prototype")
-	public ReportManager<StorageReport> storageReportManager(
-			@Qualifier("storageDelegate") ReportDelegate<StorageReport> storageDelegate,
-			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
-		DefaultReportManager<StorageReport> manager = new DefaultReportManager<StorageReport>();
-
-		manager.setReportDelegate(storageDelegate);
-		manager.setBucketManager(reportBucketManager);
-		manager.setReportDao(hourlyReportRepository);
-		manager.setReportContentDao(hourlyReportContentRepository);
-		manager.setValidator(domainValidator);
-		manager.setName(StorageAnalyzer.ID);
-		return manager;
-	}
-
-	@Bean(name = TopAnalyzer.ID + "ReportManager", initMethod = "initialize")
-	@Scope("prototype")
-	public ReportManager<TopReport> topReportManager(@Qualifier("topDelegate") ReportDelegate<TopReport> topDelegate,
-			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
-		DefaultReportManager<TopReport> manager = new DefaultReportManager<TopReport>();
-
-		manager.setReportDelegate(topDelegate);
-		manager.setBucketManager(reportBucketManager);
-		manager.setReportDao(hourlyReportRepository);
-		manager.setReportContentDao(hourlyReportContentRepository);
-		manager.setValidator(domainValidator);
-		manager.setName(TopAnalyzer.ID);
-		return manager;
-	}
-
-	@Bean(name = StateAnalyzer.ID + "ReportManager", initMethod = "initialize")
-	@Scope("prototype")
-	public ReportManager<StateReport> stateReportManager(
-			@Qualifier("stateDelegate") ReportDelegate<StateReport> stateDelegate,
-			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
-			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
-		DefaultReportManager<StateReport> manager = new DefaultReportManager<StateReport>();
-
-		manager.setReportDelegate(stateDelegate);
-		manager.setBucketManager(reportBucketManager);
-		manager.setReportDao(hourlyReportRepository);
-		manager.setReportContentDao(hourlyReportContentRepository);
-		manager.setValidator(domainValidator);
-		manager.setName(StateAnalyzer.ID);
-		return manager;
-	}
-
-	@Bean
-	public Map<String, ReportReloader> reportReloaders(@Qualifier("businessReportReloader") ReportReloader businessReportReloader,
-			@Qualifier("transactionReportReloader") ReportReloader transactionReportReloader,
-			@Qualifier("crossReportReloader") ReportReloader crossReportReloader,
-			@Qualifier("dependencyReportReloader") ReportReloader dependencyReportReloader,
-			@Qualifier("eventReportReloader") ReportReloader eventReportReloader,
-			@Qualifier("heartbeatReportReloader") ReportReloader heartbeatReportReloader,
-			@Qualifier("matrixReportReloader") ReportReloader matrixReportReloader,
-			@Qualifier("problemReportReloader") ReportReloader problemReportReloader,
-			@Qualifier("storageReportReloader") ReportReloader storageReportReloader,
-			@Qualifier("topReportReloader") ReportReloader topReportReloader,
-			@Qualifier("stateReportReloader") ReportReloader stateReportReloader) {
-		Map<String, ReportReloader> reloaders = new LinkedHashMap<String, ReportReloader>();
-
-		reloaders.put(businessReportReloader.getId(), businessReportReloader);
-		reloaders.put(transactionReportReloader.getId(), transactionReportReloader);
-		reloaders.put(crossReportReloader.getId(), crossReportReloader);
-		reloaders.put(dependencyReportReloader.getId(), dependencyReportReloader);
-		reloaders.put(eventReportReloader.getId(), eventReportReloader);
-		reloaders.put(heartbeatReportReloader.getId(), heartbeatReportReloader);
-		reloaders.put(matrixReportReloader.getId(), matrixReportReloader);
-		reloaders.put(problemReportReloader.getId(), problemReportReloader);
-		reloaders.put(storageReportReloader.getId(), storageReportReloader);
-		reloaders.put(topReportReloader.getId(), topReportReloader);
-		reloaders.put(stateReportReloader.getId(), stateReportReloader);
-		return reloaders;
-	}
-
-	@Bean
-	public Map<String, TaskBuilder> taskBuilders(Map<String, TaskBuilder> taskBuilders) {
-		return taskBuilders;
 	}
 
 	@Bean

@@ -18,7 +18,9 @@
  */
 package com.dianping.cat.report.task.reload;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,7 +48,39 @@ public class ReportReloadTask implements Task {
 	@Resource
 	private ReportReloadConfigManager reportReloadConfigManager;
 
-	@Resource(name = "reportReloaders")
+	@Resource(name = "businessReportReloader")
+	private ReportReloader businessReportReloader;
+
+	@Resource(name = "transactionReportReloader")
+	private ReportReloader transactionReportReloader;
+
+	@Resource(name = "crossReportReloader")
+	private ReportReloader crossReportReloader;
+
+	@Resource(name = "dependencyReportReloader")
+	private ReportReloader dependencyReportReloader;
+
+	@Resource(name = "eventReportReloader")
+	private ReportReloader eventReportReloader;
+
+	@Resource(name = "heartbeatReportReloader")
+	private ReportReloader heartbeatReportReloader;
+
+	@Resource(name = "matrixReportReloader")
+	private ReportReloader matrixReportReloader;
+
+	@Resource(name = "problemReportReloader")
+	private ReportReloader problemReportReloader;
+
+	@Resource(name = "storageReportReloader")
+	private ReportReloader storageReportReloader;
+
+	@Resource(name = "topReportReloader")
+	private ReportReloader topReportReloader;
+
+	@Resource(name = "stateReportReloader")
+	private ReportReloader stateReportReloader;
+
 	private Map<String, ReportReloader> reportReloaders;
 
 	@Override
@@ -56,11 +90,15 @@ public class ReportReloadTask implements Task {
 
 	@PostConstruct
 	public void initialize() {
+		if (reportReloaders == null) {
+			reportReloaders = buildReportReloaderMap();
+		}
+
 		if (reportReloaders == null || reportReloaders.size() < EXPECTED_RELOADER_COUNT) {
 			String message = String.format(
 					"Report reload task requires %s Spring reloaders but found %s, reloaders=%s.",
 					EXPECTED_RELOADER_COUNT, reportReloaders == null ? 0 : reportReloaders.size(),
-					reportReloaders == null ? java.util.Collections.emptySet() : reportReloaders.keySet());
+					reportReloaders == null ? Collections.emptySet() : reportReloaders.keySet());
 
 			LOGGER.error(message);
 			throw new IllegalStateException(message);
@@ -68,6 +106,42 @@ public class ReportReloadTask implements Task {
 
 		LOGGER.info("Initialized report reload task from Spring, reloaderCount={}, reloaders={}.",
 				reportReloaders.size(), reportReloaders.keySet());
+	}
+
+	private Map<String, ReportReloader> buildReportReloaderMap() {
+		Map<String, ReportReloader> reloaders = new LinkedHashMap<String, ReportReloader>();
+
+		putReloader(reloaders, businessReportReloader, "businessReportReloader");
+		putReloader(reloaders, transactionReportReloader, "transactionReportReloader");
+		putReloader(reloaders, crossReportReloader, "crossReportReloader");
+		putReloader(reloaders, dependencyReportReloader, "dependencyReportReloader");
+		putReloader(reloaders, eventReportReloader, "eventReportReloader");
+		putReloader(reloaders, heartbeatReportReloader, "heartbeatReportReloader");
+		putReloader(reloaders, matrixReportReloader, "matrixReportReloader");
+		putReloader(reloaders, problemReportReloader, "problemReportReloader");
+		putReloader(reloaders, storageReportReloader, "storageReportReloader");
+		putReloader(reloaders, topReportReloader, "topReportReloader");
+		putReloader(reloaders, stateReportReloader, "stateReportReloader");
+		return reloaders;
+	}
+
+	private void putReloader(Map<String, ReportReloader> reloaders, ReportReloader reloader, String fallbackId) {
+		if (reloader == null) {
+			LOGGER.error("Report reloader is not injected, fallbackId={}.", fallbackId);
+			return;
+		}
+		String id = reloader.getId();
+
+		if (id == null || id.length() == 0) {
+			LOGGER.error("Report reloader id is empty, fallbackId={}, className={}.", fallbackId,
+					reloader.getClass().getName());
+			id = fallbackId;
+		}
+		if (reloaders.containsKey(id)) {
+			LOGGER.warn("Duplicate report reloader id found, id={}, oldClass={}, newClass={}.", id,
+					reloaders.get(id).getClass().getName(), reloader.getClass().getName());
+		}
+		reloaders.put(id, reloader);
 	}
 
 	@Override

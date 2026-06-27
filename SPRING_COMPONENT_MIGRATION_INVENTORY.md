@@ -2437,3 +2437,106 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+
+## 43. 第三十五批完成记录
+
+第三十五批迁移小时报表运行链路中的 `ReportManager` Bean。目标是在保持旧 Bean 名、初始化顺序和 `prototype` 生命周期不变的前提下，把 11 个显式 `@Bean` 方法从 `CatHomeSpringConfiguration` 中移出。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 新增 Spring 组件化 `ReportManager` 子类，并保留旧 Bean 名：
+
+```text
+businessReportManager
+transactionReportManager
+crossReportManager
+dependencyReportManager
+eventReportManager
+heartbeatReportManager
+matrixReportManager
+problemReportManager
+storageReportManager
+topReportManager
+stateReportManager
+```
+
+2. 以上 11 个 `ReportManager` 均保留 `prototype` 作用域，避免把每个分析器按小时维护的内存报表状态错误地变为全局共享。
+3. 新增 `AbstractSpringReportManager` 收拢公共依赖注入逻辑，公共依赖使用明确 Bean 名的 `@Resource` 注入：
+
+```text
+reportBucketManager
+hourlyReportRepository
+hourlyReportContentRepository
+domainValidator
+```
+
+4. 各具体 `ReportManager` 只注入自己的 `ReportDelegate`，并在 `@PostConstruct` 中完成旧配置类里的 `setReportDelegate`、`setBucketManager`、`setReportDao`、`setReportContentDao`、`setValidator`、`setName` 初始化语义。
+5. 已删除 `CatHomeSpringConfiguration` 中对应 11 个旧 `@Bean(name = "...ReportManager", initMethod = "initialize")` 方法，并把新组件加入白名单扫描，避免出现 `@Component` 写了但没有生效的问题。
+6. `DefaultReportManager` 内部字段命名已从旧式 `m_` 风格收口为 Java 驼峰命名；对外接口和 setter 保持不变。
+7. `DefaultReportManager` 中本地加载、数据库保存和文件保存路径原先只调用 `Cat.logError` 的异常分支，已补充 SLF4J 日志，方便排查 report bucket、小时报表入库和本地文件写入问题。
+8. 本批仍不迁移以下内容：
+
+```text
+reportReloaders / taskBuilders 等任务入口聚合 Map
+存储 bucket / HDFS / message dump 基础设施
+DataSource / SqlSessionFactory / TransactionTemplate
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
+## 44. 第三十六批完成记录
+
+第三十六批继续收口任务入口聚合 Bean，迁移 `reportReloaders` 和 `taskBuilders` 两个 Map 的组装逻辑。目标是在不改动具体任务执行逻辑的前提下，把配置类中的聚合 Bean 移回实际使用方。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 已删除 `CatHomeSpringConfiguration` 中以下聚合 Bean：
+
+```text
+reportReloaders
+taskBuilders
+```
+
+2. `ReportReloadTask` 改为按明确 bean 名注入 11 个 `ReportReloader`，并在 `@PostConstruct` 中构建 report type 到 reloader 的 `LinkedHashMap`，保留旧配置类中的顺序语义。
+3. `ReportFacade` 改为按明确 bean 名注入 19 个 `TaskBuilder`，并在 `@PostConstruct` 中构建 report name 到 builder 的 `LinkedHashMap`。
+4. `ReportFacade` 保留旧的双入口映射语义：既支持 Spring bean 名，也支持 builder 的 `ID` 常量对应的 report name。`problemReportBuilder`、`storageReportBuilder` 这类默认 bean 名也继续保留映射。
+5. 两个入口都保留原 setter，兼容测试和少量手工构造场景。
+6. 聚合构建过程补充关键 SLF4J 日志：当 reloader/builder 未注入、ID 为空或 key 重复时，启动日志里可以直接看到具体 key 和类名。
+7. 本批仍不迁移以下内容：
+
+```text
+存储 bucket / HDFS / message dump 基础设施
+DataSource / SqlSessionFactory / TransactionTemplate
+各类 Repository 显式 Bean
+MessageAnalyzerManager / MessageConsumer / TcpSocketReceiver 运行时入口
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
