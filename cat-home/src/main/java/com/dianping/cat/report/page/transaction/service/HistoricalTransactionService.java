@@ -25,10 +25,14 @@ import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.BaseHistoricalModelService;
 import com.dianping.cat.report.service.ModelRequest;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("transaction-historical")
 public class HistoricalTransactionService extends BaseHistoricalModelService<TransactionReport> {
 
-	private TransactionReportService m_reportService;
+	@Resource
+	private TransactionReportService reportService;
 
 	public HistoricalTransactionService() {
 		super(TransactionAnalyzer.ID);
@@ -44,11 +48,11 @@ public class HistoricalTransactionService extends BaseHistoricalModelService<Tra
 	}
 
 	private TransactionReport getReportFromDatabase(long timestamp, String domain) throws Exception {
-		return m_reportService.queryReport(domain, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
+		return reportService.queryReport(domain, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
 	}
 
 	public void setReportService(TransactionReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 }

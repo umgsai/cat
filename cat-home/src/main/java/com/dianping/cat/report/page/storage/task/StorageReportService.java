@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
@@ -43,6 +44,7 @@ import com.dianping.cat.core.dal.WeeklyReportContent;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
+@Component
 public class StorageReportService extends AbstractReportService<StorageReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageReportService.class);
 
@@ -90,7 +92,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_DAY) {
 			try {
-				DailyReport report = m_dailyReportDao
+				DailyReport report = dailyReportRepository
 										.findByDomainNamePeriod(id, name, new Date(startTime));
 				StorageReport reportModel = queryFromDailyBinary(report.getId(), id);
 
@@ -110,7 +112,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	}
 
 	private StorageReport queryFromDailyBinary(long id, String domain) {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
+		DailyReportContent content = dailyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -120,7 +122,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	}
 
 	private StorageReport queryFromHourlyBinary(long id, Date period, String reportId) {
-		HourlyReportContent content = m_hourlyReportContentDao
+		HourlyReportContent content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {
@@ -131,7 +133,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	}
 
 	private StorageReport queryFromMonthlyBinary(long id, String reportId) {
-		MonthlyReportContent content = m_monthlyReportContentDao.findByPK(id);
+		MonthlyReportContent content = monthlyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -141,7 +143,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	}
 
 	private StorageReport queryFromWeeklyBinary(long id, String reportId) {
-		WeeklyReportContent content = m_weeklyReportContentDao.findByPK(id);
+		WeeklyReportContent content = weeklyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -160,7 +162,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			List<HourlyReport> reports = null;
 			try {
-				reports = m_hourlyReportDao
+				reports = hourlyReportRepository
 										.findAllByDomainNamePeriod(new Date(startTime), reportId, name);
 			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query storage hourly report list, reportId={}, period={}.", reportId,
@@ -196,7 +198,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	@Override
 	public StorageReport queryMonthlyReport(String reportId, Date start) {
 		try {
-			MonthlyReport entity = m_monthlyReportDao
+			MonthlyReport entity = monthlyReportRepository
 									.findReportByDomainNamePeriod(start, reportId, StorageAnalyzer.ID);
 
 			return queryFromMonthlyBinary(entity.getId(), reportId);
@@ -212,7 +214,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	@Override
 	public StorageReport queryWeeklyReport(String reportId, Date start) {
 		try {
-			WeeklyReport entity = m_weeklyReportDao
+			WeeklyReport entity = weeklyReportRepository
 									.findReportByDomainNamePeriod(start, reportId, StorageAnalyzer.ID);
 
 			return queryFromWeeklyBinary(entity.getId(), reportId);

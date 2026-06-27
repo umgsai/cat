@@ -45,7 +45,6 @@ import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -53,36 +52,35 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class SpringMvcHeartbeatController {
 	private static final int MINUTE_ONE_DAY = 1440;
 
-	private final SimpleDateFormat m_dayFormat = new SimpleDateFormat("yyyyMMdd");
+	private final SimpleDateFormat dayFormat = new SimpleDateFormat("yyyyMMdd");
 
-	private final SimpleDateFormat m_hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
+	private final SimpleDateFormat hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
 
-	private final SimpleDateFormat m_subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-	@Resource
-	private DomainGroupConfigManager m_configManager;
+	private final SimpleDateFormat subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	@Resource
-	private GraphBuilder m_graphBuilder;
+	private DomainGroupConfigManager domainGroupConfigManager;
 
 	@Resource
-	private HeartbeatDisplayPolicyManager m_displayPolicyManager;
+	private GraphBuilder graphBuilder;
 
 	@Resource
-	private HostinfoService m_hostinfoService;
+	private HeartbeatDisplayPolicyManager displayPolicyManager;
 
 	@Resource
-	private ProjectService m_projectService;
+	private HostinfoService hostinfoService;
 
 	@Resource
-	private SampleConfigManager m_sampleConfigManager;
+	private ProjectService projectService;
 
 	@Resource
-	private HeartbeatReportService m_reportService;
+	private SampleConfigManager sampleConfigManager;
 
 	@Resource
-	@Qualifier("heartbeatModelService")
-	private ModelService<HeartbeatReport> m_heartbeatService;
+	private HeartbeatReportService heartbeatReportService;
+
+	@Resource(name = "heartbeatModelService")
+	private ModelService<HeartbeatReport> heartbeatModelService;
 
 	@GetMapping("/mvc/r/h")
 	public void heartbeat(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -135,7 +133,7 @@ public class SpringMvcHeartbeatController {
 				buildExtensionHistoryGraphs(model, domain, realIp, extensionType, historyDates);
 			}
 		} else {
-			HeartbeatSvgGraph heartbeat = new HeartbeatSvgGraph(m_graphBuilder, m_displayPolicyManager).display(report, realIp);
+			HeartbeatSvgGraph heartbeat = new HeartbeatSvgGraph(graphBuilder, displayPolicyManager).display(report, realIp);
 
 			model.put("extensionGraph", heartbeat.getExtensionGraph());
 		}
@@ -149,14 +147,14 @@ public class SpringMvcHeartbeatController {
 		model.put("reportType", reportType);
 		model.put("type", type);
 		model.put("extensionType", extensionType);
-		model.put("date", historyMode ? m_dayFormat.format(new Date(date)) : m_hourlyFormat.format(new Date(date)));
+		model.put("date", historyMode ? dayFormat.format(new Date(date)) : hourlyFormat.format(new Date(date)));
 		model.put("longDate", date);
 		model.put("report", report);
-		model.put("reportStart", m_subtitleFormat.format(historyMode ? historyDates.getStart() : report.getStartTime()));
-		model.put("reportEnd", m_subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
+		model.put("reportStart", subtitleFormat.format(historyMode ? historyDates.getStart() : report.getStartTime()));
+		model.put("reportEnd", subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
 		model.put("ips", ips);
 		model.put("ipToHostnameStr", new JsonBuilder().toJson(ipToHostname(ips)));
-		model.put("groups", m_configManager.queryDomainGroup(domain));
+		model.put("groups", domainGroupConfigManager.queryDomainGroup(domain));
 		model.put("domainGroups", domainGroups());
 		model.put("navs", UrlNav.values());
 		model.put("navPrefix", "ip=" + ipAddress + "&domain=" + report.getDomain());
@@ -195,9 +193,9 @@ public class SpringMvcHeartbeatController {
 
 	private void buildExtensionHistoryGraphs(Map<String, Object> model, String domain, String ip, String extensionType,
 			HistoryDates dates) {
-		HeartbeatReport report = m_reportService.queryReport(domain, dates.getStart(), dates.getEnd());
+		HeartbeatReport report = heartbeatReportService.queryReport(domain, dates.getStart(), dates.getEnd());
 		Map<String, double[]> graphData = buildHeartbeatDatas(report, ip);
-		List<String> metrics = m_displayPolicyManager.sortMetricNames(extensionType, queryMetricNames(report, extensionType));
+		List<String> metrics = displayPolicyManager.sortMetricNames(extensionType, queryMetricNames(report, extensionType));
 		List<LineChart> graphs = extensionGraphs(metrics, graphData, dates.getStart(), dates.getSize());
 
 		model.put("extensionCount", metrics.size());
@@ -222,7 +220,7 @@ public class SpringMvcHeartbeatController {
 
 		if (value != null && value.length() > 0) {
 			try {
-				result = value.length() == 10 ? m_hourlyFormat.parse(value).getTime()
+				result = value.length() == 10 ? hourlyFormat.parse(value).getTime()
 						: new SimpleDateFormat("yyyyMMdd").parse(value).getTime();
 			} catch (ParseException e) {
 				result = currentHour;
@@ -235,7 +233,7 @@ public class SpringMvcHeartbeatController {
 	private Date dateParameter(String value) {
 		if (value != null && value.length() > 0) {
 			try {
-				return value.length() == 10 ? m_hourlyFormat.parse(value) : m_dayFormat.parse(value);
+				return value.length() == 10 ? hourlyFormat.parse(value) : dayFormat.parse(value);
 			} catch (ParseException e) {
 				// ignore invalid date and fall back to the same default as old MVC.
 			}
@@ -253,7 +251,7 @@ public class SpringMvcHeartbeatController {
 			for (String metric : currentExtension.getDetails().keySet()) {
 				extensionMetrics.add(metric);
 				double value = currentExtension.findDetail(metric).getValue();
-				int unit = m_displayPolicyManager.queryUnit(group, metric);
+				int unit = displayPolicyManager.queryUnit(group, metric);
 
 				updateMetricArray(datas, minute, metric, value / unit);
 			}
@@ -261,9 +259,9 @@ public class SpringMvcHeartbeatController {
 	}
 
 	private Map<String, Department> domainGroups() {
-		Collection<String> domains = m_projectService.findAllDomains();
+		Collection<String> domains = projectService.findAllDomains();
 
-		return m_projectService.findDepartments(domains);
+		return projectService.findDepartments(domains);
 	}
 
 	private String emptyToNull(String value) {
@@ -297,7 +295,7 @@ public class SpringMvcHeartbeatController {
 				}
 			}
 		}
-		return m_displayPolicyManager.sortGroupNames(groupNames);
+		return displayPolicyManager.sortGroupNames(groupNames);
 	}
 
 	private HistoryDates historyDates(HttpServletRequest request) {
@@ -363,7 +361,7 @@ public class SpringMvcHeartbeatController {
 		Map<String, String> result = new LinkedHashMap<String, String>();
 
 		for (String ip : ips) {
-			String hostname = m_hostinfoService.queryHostnameByIp(ip);
+			String hostname = hostinfoService.queryHostnameByIp(ip);
 
 			if (hostname != null && !"null".equalsIgnoreCase(hostname)) {
 				result.put(ip, hostname);
@@ -385,9 +383,9 @@ public class SpringMvcHeartbeatController {
 		if (value != null && value.length() > 0) {
 			try {
 				if (value.length() == 10) {
-					return m_hourlyFormat.parse(value);
+					return hourlyFormat.parse(value);
 				} else if (value.length() == 8) {
-					return m_dayFormat.parse(value);
+					return dayFormat.parse(value);
 				}
 			} catch (ParseException e) {
 				// ignore invalid custom date.
@@ -447,8 +445,8 @@ public class SpringMvcHeartbeatController {
 	private HeartbeatReport queryHourlyReport(String domain, String ipAddress, long date) {
 		ModelRequest request = new ModelRequest(domain, date).setProperty("ip", ipAddress);
 
-		if (m_heartbeatService.isEligable(request)) {
-			ModelResponse<HeartbeatReport> response = m_heartbeatService.invoke(request);
+		if (heartbeatModelService.isEligable(request)) {
+			ModelResponse<HeartbeatReport> response = heartbeatModelService.invoke(request);
 
 			return response.getModel();
 		}
@@ -459,7 +457,7 @@ public class SpringMvcHeartbeatController {
 		Date start = new Date(dates.getDate() + 23 * TimeHelper.ONE_HOUR);
 		Date end = new Date(dates.getDate() + 24 * TimeHelper.ONE_HOUR);
 
-		return m_reportService.queryReport(domain, start, end);
+		return heartbeatReportService.queryReport(domain, start, end);
 	}
 
 	private String realIp(String ipAddress, List<String> ips) {
@@ -470,7 +468,7 @@ public class SpringMvcHeartbeatController {
 	}
 
 	private double sample(String domain) {
-		Domain sampleDomain = m_sampleConfigManager.getConfig().findDomain(domain);
+		Domain sampleDomain = sampleConfigManager.getConfig().findDomain(domain);
 
 		return sampleDomain == null ? 1.0 : sampleDomain.getSample();
 	}
@@ -505,7 +503,7 @@ public class SpringMvcHeartbeatController {
 		}
 
 		private String getCustomDate() {
-			return "&startDate=" + m_dayFormat.format(m_start) + "&endDate=" + m_dayFormat.format(m_end);
+			return "&startDate=" + dayFormat.format(m_start) + "&endDate=" + dayFormat.format(m_end);
 		}
 
 		private long getDate() {

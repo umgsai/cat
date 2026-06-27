@@ -23,8 +23,10 @@ import java.nio.charset.StandardCharsets;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.unidal.cat.message.storage.hdfs.HdfsBucketManager;
 
 import com.dianping.cat.Cat;
@@ -40,16 +42,19 @@ import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.report.service.BaseHistoricalModelService;
 import com.dianping.cat.report.service.ModelRequest;
 
+@Component("historicalMessageService")
 public class HistoricalMessageService extends BaseHistoricalModelService<String> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalMessageService.class);
 
-	private HdfsBucketManager m_bucketManager;
+	@Resource
+	private HdfsBucketManager bucketManager;
 
-	private MessageBucketManager m_hdfsBucketManager;
+	@Resource(name = "hdfsMessageBucketManager")
+	private MessageBucketManager hdfsBucketManager;
 
-	private WaterfallMessageCodec m_waterfall = new WaterfallMessageCodec();
+	private WaterfallMessageCodec waterfallCodec = new WaterfallMessageCodec();
 
-	private HtmlMessageCodec m_html = new HtmlMessageCodec();
+	private HtmlMessageCodec htmlCodec = new HtmlMessageCodec();
 
 	public HistoricalMessageService() {
 		super("logview");
@@ -68,12 +73,12 @@ public class HistoricalMessageService extends BaseHistoricalModelService<String>
 	protected String buildOldMessageModel(ModelRequest request) throws Exception {
 		String messageId = request.getProperty("messageId");
 		Cat.logEvent("LoadMessage", "messageTree", Event.SUCCESS, messageId);
-		if (m_hdfsBucketManager == null) {
+		if (hdfsBucketManager == null) {
 			LOGGER.warn("HDFS message bucket manager is not configured for historical old logview lookup, request={}.",
 					request);
 			return null;
 		}
-		MessageTree tree = m_hdfsBucketManager.loadMessage(messageId);
+		MessageTree tree = hdfsBucketManager.loadMessage(messageId);
 
 		if (tree != null) {
 			return toString(request, tree);
@@ -87,11 +92,11 @@ public class HistoricalMessageService extends BaseHistoricalModelService<String>
 		String messageId = request.getProperty("messageId");
 		Cat.logEvent("LoadMessage", "messageTree", Event.SUCCESS, messageId);
 		MessageId id = MessageId.parse(messageId);
-		if (m_bucketManager == null) {
+		if (bucketManager == null) {
 			LOGGER.warn("HDFS bucket manager is not configured for historical new logview lookup, request={}.", request);
 			return null;
 		}
-		MessageTree tree = m_bucketManager.loadMessage(id);
+		MessageTree tree = bucketManager.loadMessage(id);
 
 		if (tree != null) {
 			return toString(request, tree);
@@ -113,9 +118,9 @@ public class HistoricalMessageService extends BaseHistoricalModelService<String>
 
 		try {
 			if (tree.getMessage() instanceof Transaction && request.getProperty("waterfall", "false").equals("true")) {
-				m_waterfall.encode(tree, buf);
+				waterfallCodec.encode(tree, buf);
 			} else {
-				m_html.encode(tree, buf);
+				htmlCodec.encode(tree, buf);
 			}
 			buf.readInt(); // get rid of length
 			return buf.toString(StandardCharsets.UTF_8);
@@ -129,10 +134,10 @@ public class HistoricalMessageService extends BaseHistoricalModelService<String>
 	}
 
 	public void setBucketManager(HdfsBucketManager bucketManager) {
-		m_bucketManager = bucketManager;
+		this.bucketManager = bucketManager;
 	}
 
 	public void setHdfsBucketManager(MessageBucketManager hdfsBucketManager) {
-		m_hdfsBucketManager = hdfsBucketManager;
+		this.hdfsBucketManager = hdfsBucketManager;
 	}
 }

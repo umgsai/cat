@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.report.page.transaction.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
@@ -27,10 +28,27 @@ import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.report.service.ModelService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("transactionModelService")
 public class CompositeTransactionService extends BaseCompositeModelService<TransactionReport> {
+	@Resource(name = "transaction-historical")
+	private ModelService<TransactionReport> historicalTransactionService;
+
 	public CompositeTransactionService() {
 		super(TransactionAnalyzer.ID);
+	}
+
+	@Override
+	@PostConstruct
+	public synchronized void initialize() {
+		if (historicalTransactionService != null) {
+			setServices(Collections.singletonList(historicalTransactionService));
+		}
+		super.initialize();
 	}
 
 	@Override

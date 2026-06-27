@@ -24,8 +24,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
 
@@ -37,6 +40,7 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.report.alert.summary.build.SummaryBuilder;
 
+@Component
 public class AlertSummaryExecutor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryExecutor.class);
 
@@ -44,13 +48,17 @@ public class AlertSummaryExecutor {
 
 	public static final long ALTERATION_DURATION = 30 * TimeHelper.ONE_MINUTE;
 
-	private SummaryBuilder m_relatedBuilder;
+	@Resource(name = "AlertSummaryContentGenerator")
+	private SummaryBuilder relatedBuilder;
 
-	private SummaryBuilder m_failureBuilder;
+	@Resource(name = "FailureDecorator")
+	private SummaryBuilder failureBuilder;
 
-	private SummaryBuilder m_alterationBuilder;
+	@Resource(name = "AlterationSummaryContentGenerator")
+	private SummaryBuilder alterationBuilder;
 
-	private SenderManager m_sendManager;
+	@Resource
+	private SenderManager senderManager;
 
 	private List<String> builderReceivers(String str) {
 		List<String> result = new ArrayList<String>();
@@ -79,9 +87,9 @@ public class AlertSummaryExecutor {
 			LOGGER.info("Generating alert summary, domain={}, date={}.", domain, date);
 			StringBuilder builder = new StringBuilder();
 
-			appendSummary(builder, m_relatedBuilder, domain, date);
-			appendSummary(builder, m_failureBuilder, domain, date);
-			appendSummary(builder, m_alterationBuilder, domain, date);
+			appendSummary(builder, relatedBuilder, domain, date);
+			appendSummary(builder, failureBuilder, domain, date);
+			appendSummary(builder, alterationBuilder, domain, date);
 
 			t.setStatus(Transaction.SUCCESS);
 			return builder.toString();
@@ -117,11 +125,11 @@ public class AlertSummaryExecutor {
 				LOGGER.info("Sending alert summary mail, domain={}, date={}, receiverCount={}.", domain, date,
 						receivers.size());
 
-				if (m_sendManager == null) {
+				if (senderManager == null) {
 					LOGGER.warn("Alert summary sender manager is not configured, skip summary mail, domain={}, date={}.",
 					      domain, date);
 				} else {
-					m_sendManager.sendAlert(AlertChannel.MAIL, message);
+					senderManager.sendAlert(AlertChannel.MAIL, message);
 				}
 			}
 		}
@@ -139,19 +147,19 @@ public class AlertSummaryExecutor {
 	}
 
 	public void setAlterationBuilder(SummaryBuilder alterationBuilder) {
-		m_alterationBuilder = alterationBuilder;
+		this.alterationBuilder = alterationBuilder;
 	}
 
 	public void setFailureBuilder(SummaryBuilder failureBuilder) {
-		m_failureBuilder = failureBuilder;
+		this.failureBuilder = failureBuilder;
 	}
 
 	public void setRelatedBuilder(SummaryBuilder relatedBuilder) {
-		m_relatedBuilder = relatedBuilder;
+		this.relatedBuilder = relatedBuilder;
 	}
 
 	public void setSendManager(SenderManager sendManager) {
-		m_sendManager = sendManager;
+		senderManager = sendManager;
 	}
 
 }

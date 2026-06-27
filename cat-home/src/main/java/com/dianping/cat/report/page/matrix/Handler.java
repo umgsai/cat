@@ -22,6 +22,8 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Date;
 
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -36,15 +38,20 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component("matrixHandler")
 public class Handler implements PageHandler<Context> {
 
-	private MatrixReportService m_reportService;
+	@Resource
+	private MatrixReportService matrixReportService;
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private ModelService<MatrixReport> m_service;
+	@Resource(name = "matrixModelService")
+	private ModelService<MatrixReport> matrixModelService;
 
 	private MatrixReport getHourlyReport(Payload payload) {
 		String domain = payload.getDomain();
@@ -52,8 +59,8 @@ public class Handler implements PageHandler<Context> {
 		ModelRequest request = new ModelRequest(domain, payload.getDate()) //
 								.setProperty("ip", ipAddress);
 
-		if (m_service.isEligable(request)) {
-			ModelResponse<MatrixReport> response = m_service.invoke(request);
+		if (matrixModelService.isEligable(request)) {
+			ModelResponse<MatrixReport> response = matrixModelService.invoke(request);
 			MatrixReport report = response.getModel();
 
 			return report;
@@ -87,12 +94,12 @@ public class Handler implements PageHandler<Context> {
 			model.setMatrix(new DisplayMatrix(report).setSortBy(payload.getSortBy()));
 			break;
 		}
-		m_jspViewer.view(ctx, model);
+		jspViewer.view(ctx, model);
 	}
 
 	private void normalize(Model model, Payload payload) {
 		model.setPage(ReportPage.MATRIX);
-		m_normalizePayload.normalize(model, payload);
+		normalizePayload.normalize(model, payload);
 	}
 
 	private void showSummarizeReport(Model model, Payload payload) {
@@ -100,7 +107,7 @@ public class Handler implements PageHandler<Context> {
 
 		Date start = payload.getHistoryStartDate();
 		Date end = payload.getHistoryEndDate();
-		MatrixReport matrixReport = m_reportService.queryReport(domain, start, end);
+		MatrixReport matrixReport = matrixReportService.queryReport(domain, start, end);
 
 		if (matrixReport == null) {
 			return;
@@ -109,22 +116,6 @@ public class Handler implements PageHandler<Context> {
 		matrixReport.setEndTime(end);
 		model.setReport(matrixReport);
 		model.setMatrix(new DisplayMatrix(matrixReport).setSortBy(payload.getSortBy()));
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setReportService(MatrixReportService reportService) {
-		m_reportService = reportService;
-	}
-
-	public void setService(ModelService<MatrixReport> service) {
-		m_service = service;
 	}
 
 }

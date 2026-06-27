@@ -18,15 +18,21 @@
  */
 package com.dianping.cat.report.alert.business;
 
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class BusinessReportGroupService {
 
-	private ModelService<BusinessReport> m_service;
+	@Resource(name = "businessModelService")
+	private ModelService<BusinessReport> businessModelService;
 
 	private BusinessReport fetchMetricReport(String product, ModelPeriod period, int min, int max) {
 		ModelRequest request = new ModelRequest(product, period.getStartTime()).setProperty("requireAll", "ture");
@@ -34,7 +40,7 @@ public class BusinessReportGroupService {
 		request.setProperty("min", String.valueOf(min));
 		request.setProperty("max", String.valueOf(max));
 
-		ModelResponse<BusinessReport> response = m_service.invoke(request);
+		ModelResponse<BusinessReport> response = businessModelService.invoke(request);
 
 		if (response != null) {
 			return response.getModel();
@@ -81,9 +87,5 @@ public class BusinessReportGroupService {
 
 		reports.setLast(lastReport).setCurrent(currentReport).setDataReady(dataReady);
 		return reports;
-	}
-
-	public void setService(ModelService<BusinessReport> service) {
-		m_service = service;
 	}
 }

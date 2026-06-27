@@ -33,7 +33,10 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.alarm.spi.decorator.Decorator;
+import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
 
+@Component("transactionDecorator")
 public class TransactionDecorator extends Decorator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TransactionDecorator.class);
 
@@ -90,6 +93,7 @@ public class TransactionDecorator extends Decorator {
 		return m_configuration;
 	}
 
+	@PostConstruct
 	public void initialize() {
 		if (m_configuration != null) {
 			return;

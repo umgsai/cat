@@ -19,7 +19,6 @@ import com.dianping.cat.report.service.ModelService;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -28,11 +27,10 @@ public class SpringMvcLogviewController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpringMvcLogviewController.class);
 
 	@Resource
-	private ServerConfigManager m_configManager;
+	private ServerConfigManager serverConfigManager;
 
-	@Resource
-	@Qualifier("logviewModelService")
-	private ModelService<String> m_service;
+	@Resource(name = "logviewModelService")
+	private ModelService<String> logviewModelService;
 
 	@GetMapping("/mvc/r/m/{messageId}")
 	public void logview(HttpServletRequest request, HttpServletResponse response)
@@ -96,7 +94,7 @@ public class SpringMvcLogviewController {
 		long time = msg.getTimestamp();
 		long current = TimeHelper.getCurrentDay().getTime();
 
-		return time > current - TimeHelper.ONE_DAY * m_configManager.getHdfsMaxStorageTime();
+		return time > current - TimeHelper.ONE_DAY * serverConfigManager.getHdfsMaxStorageTime();
 	}
 
 	private String logView(String messageId, boolean waterfall) {
@@ -109,8 +107,8 @@ public class SpringMvcLogviewController {
 		ModelRequest request = new ModelRequest(id.getDomain(), timestamp).setProperty("messageId", messageId)
 				.setProperty("waterfall", String.valueOf(waterfall)).setProperty("timestamp", String.valueOf(timestamp));
 
-		if (m_service.isEligable(request)) {
-			ModelResponse<String> response = m_service.invoke(request);
+		if (logviewModelService.isEligable(request)) {
+			ModelResponse<String> response = logviewModelService.invoke(request);
 
 			return response == null ? null : response.getModel();
 		}
@@ -151,10 +149,10 @@ public class SpringMvcLogviewController {
 	}
 
 	void setConfigManager(ServerConfigManager configManager) {
-		m_configManager = configManager;
+		serverConfigManager = configManager;
 	}
 
 	void setService(ModelService<String> service) {
-		m_service = service;
+		logviewModelService = service;
 	}
 }

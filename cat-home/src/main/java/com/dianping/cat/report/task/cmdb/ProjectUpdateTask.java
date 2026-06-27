@@ -30,10 +30,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import jakarta.annotation.Resource;
+
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import com.dianping.cat.support.Threads.Task;
 
 import com.dianping.cat.Cat;
@@ -48,7 +53,9 @@ import com.dianping.cat.report.page.transaction.service.TransactionReportService
 import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 
+@Component
 public class ProjectUpdateTask implements Task {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectUpdateTask.class);
 
 	private static final String CMDB_DOMAIN_URL = "http://api.cmdb.dp/api/v0.1/projects/s?private_ip=%s";
 
@@ -60,11 +67,14 @@ public class ProjectUpdateTask implements Task {
 
 	private static final String CMDB_HOSTNAME_URL = "http://api.cmdb.dp/api/v0.1/ci/s?q=_type:(vserver;server;tx-vserver),private_ip:%s&fl=hostname";
 
-	private HostinfoService m_hostInfoService;
+	@Resource
+	private HostinfoService hostInfoService;
 
-	private ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private TransactionReportService m_reportService;
+	@Resource
+	private TransactionReportService transactionReportService;
 
 	private boolean checkIfNullOrEqual(String source, int target) {
 		if (source == null || source.equals("null")) {
@@ -91,10 +101,10 @@ public class ProjectUpdateTask implements Task {
 
 	public void deleteUnusedDomainInfo() {
 		try {
-			List<Project> all = m_projectService.findAll();
+			List<Project> all = projectService.findAll();
 			Date start = TimeHelper.getCurrentDay(-30);
 			Date end = TimeHelper.getCurrentDay();
-			Set<String> domainNames = m_reportService.queryAllDomainNames(start, end, TransactionAnalyzer.ID);
+			Set<String> domainNames = transactionReportService.queryAllDomainNames(start, end, TransactionAnalyzer.ID);
 			List<Project> toRemoves = new ArrayList<Project>();
 
 			for (Project project : all) {
@@ -106,10 +116,11 @@ public class ProjectUpdateTask implements Task {
 			}
 
 			for (Project project : toRemoves) {
-				m_projectService.delete(project);
+				projectService.delete(project);
 				Cat.logEvent("DeleteDomainInfo", project.getDomain(), Event.SUCCESS, project.toString());
 			}
 		} catch (RuntimeException e) {
+			LOGGER.error("Unable to delete unused domain info.", e);
 			Cat.logError(e);
 		}
 	}
@@ -260,7 +271,7 @@ public class ProjectUpdateTask implements Task {
 	private List<String> queryIpsFromReport(String domain) {
 		Date startDate = TimeHelper.getCurrentDay(-2);
 		Date endDate = TimeHelper.getCurrentDay();
-		TransactionReport report = m_reportService.queryDailyReport(domain, startDate, endDate);
+		TransactionReport report = transactionReportService.queryDailyReport(domain, startDate, endDate);
 		Set<String> ipSet = report.getMachines().keySet();
 		List<String> ipList = new ArrayList<String>();
 		ipList.addAll(ipSet);
@@ -330,6 +341,7 @@ public class ProjectUpdateTask implements Task {
 			updateHostNameInfo();
 			t2.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
+			LOGGER.error("Unable to update host names from CMDB.", e);
 			t2.setStatus(e);
 		} finally {
 			t2.complete();
@@ -340,6 +352,7 @@ public class ProjectUpdateTask implements Task {
 			updateProjectInfo();
 			t3.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
+			LOGGER.error("Unable to update project info from CMDB.", e);
 			t3.setStatus(e);
 		} finally {
 			t3.complete();
@@ -352,7 +365,7 @@ public class ProjectUpdateTask implements Task {
 
 	private void updateHostNameInfo() {
 		try {
-			List<Hostinfo> infos = m_hostInfoService.findAll();
+			List<Hostinfo> infos = hostInfoService.findAll();
 
 			for (Hostinfo info : infos) {
 				try {
@@ -366,13 +379,16 @@ public class ProjectUpdateTask implements Task {
 
 					if (StringUtils.isEmpty(hostname) || !hostname.equals(cmdbHostname)) {
 						info.setHostname(cmdbHostname);
-						m_hostInfoService.updateHostinfo(info);
+						hostInfoService.updateHostinfo(info);
 					}
 				} catch (Exception e) {
+					LOGGER.warn("Unable to update host name from CMDB, ip={}, domain={}.", info.getIp(),
+							info.getDomain(), e);
 					Cat.logError(e);
 				}
 			}
 		} catch (Throwable e) {
+			LOGGER.error("Unable to update host name info from CMDB.", e);
 			Cat.logError(e);
 		}
 	}
@@ -429,7 +445,7 @@ public class ProjectUpdateTask implements Task {
 
 	private void updateProjectInfo() {
 		try {
-			List<Project> projects = m_projectService.findAll();
+			List<Project> projects = projectService.findAll();
 
 			for (Project pro : projects) {
 				try {
@@ -447,28 +463,31 @@ public class ProjectUpdateTask implements Task {
 						boolean isProjectInfoChange = updateProject(pro);
 
 						if (isProjectInfoChange || isChange) {
-							m_projectService.update(pro);
+							projectService.update(pro);
 						}
 					}
 				} catch (Exception e) {
+					LOGGER.warn("Unable to update project info from CMDB, domain={}, cmdbDomain={}.", pro.getDomain(),
+							pro.getCmdbDomain(), e);
 					Cat.logError(e);
 				}
 			}
 		} catch (Throwable e) {
+			LOGGER.error("Unable to update project info from CMDB.", e);
 			Cat.logError(e);
 		}
 	}
 
 	public void setHostInfoService(HostinfoService hostInfoService) {
-		m_hostInfoService = hostInfoService;
+		this.hostInfoService = hostInfoService;
 	}
 
 	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	public void setReportService(TransactionReportService reportService) {
-		m_reportService = reportService;
+		transactionReportService = reportService;
 	}
 
 }

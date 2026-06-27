@@ -54,44 +54,42 @@ import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class SpringMvcEventController {
-	private final SimpleDateFormat m_dayFormat = new SimpleDateFormat("yyyyMMdd");
+	private final SimpleDateFormat dayFormat = new SimpleDateFormat("yyyyMMdd");
 
-	private final SimpleDateFormat m_hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
+	private final SimpleDateFormat hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
 
-	private final SimpleDateFormat m_subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private final SimpleDateFormat subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-	private final EventGraphBuilder m_eventGraphBuilder = new EventGraphBuilder();
-
-	@Resource
-	private DomainGroupConfigManager m_configManager;
+	private final EventGraphBuilder eventGraphBuilder = new EventGraphBuilder();
 
 	@Resource
-	private GraphBuilder m_graphBuilder;
+	private DomainGroupConfigManager domainGroupConfigManager;
 
 	@Resource
-	private HostinfoService m_hostinfoService;
+	private GraphBuilder graphBuilder;
 
 	@Resource
-	private ProjectService m_projectService;
+	private HostinfoService hostinfoService;
 
 	@Resource
-	private SampleConfigManager m_sampleConfigManager;
+	private ProjectService projectService;
 
 	@Resource
-	private EventMergeHelper m_mergeHelper;
+	private SampleConfigManager sampleConfigManager;
 
 	@Resource
-	private EventReportService m_reportService;
+	private EventMergeHelper eventMergeHelper;
 
 	@Resource
-	@Qualifier("eventModelService")
-	private ModelService<EventReport> m_eventService;
+	private EventReportService eventReportService;
+
+	@Resource(name = "eventModelService")
+	private ModelService<EventReport> eventModelService;
 
 	@GetMapping("/mvc/r/e")
 	public void event(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -128,7 +126,7 @@ public class SpringMvcEventController {
 		long date = historyMode ? historyDates.getDate() : date(request.getParameter("date"), intParameter(request, "step", 0));
 
 		if (StringUtils.isEmpty(group)) {
-			group = m_configManager.queryDefaultGroup(domain);
+			group = domainGroupConfigManager.queryDefaultGroup(domain);
 		}
 		reportType = historyMode ? historyDates.getReportType() : reportType;
 
@@ -139,7 +137,7 @@ public class SpringMvcEventController {
 		}
 
 		if (report != null) {
-			report = m_mergeHelper.mergeAllIps(report, ipAddress);
+			report = eventMergeHelper.mergeAllIps(report, ipAddress);
 		}
 		if (report == null) {
 			report = new EventReport(domain);
@@ -172,16 +170,16 @@ public class SpringMvcEventController {
 		model.put("encodedType", encode(type));
 		model.put("name", name);
 		model.put("sortBy", sortBy);
-		model.put("date", historyMode ? m_dayFormat.format(new Date(date)) : m_hourlyFormat.format(new Date(date)));
+		model.put("date", historyMode ? dayFormat.format(new Date(date)) : hourlyFormat.format(new Date(date)));
 		model.put("longDate", date);
 		model.put("report", report);
-		model.put("reportStart", m_subtitleFormat.format(historyMode ? historyDates.getStart() : report.getStartTime()));
-		model.put("reportEnd", m_subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
+		model.put("reportStart", subtitleFormat.format(historyMode ? historyDates.getStart() : report.getStartTime()));
+		model.put("reportEnd", subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
 		model.put("ips", ips);
 		model.put("ipToHostnameStr", new JsonBuilder().toJson(ipToHostname(ips)));
-		model.put("groups", m_configManager.queryDomainGroup(domain));
+		model.put("groups", domainGroupConfigManager.queryDomainGroup(domain));
 		model.put("group", group);
-		model.put("groupIps", m_configManager.queryIpByDomainAndGroup(domain, group));
+		model.put("groupIps", domainGroupConfigManager.queryIpByDomainAndGroup(domain, group));
 		model.put("domainGroups", domainGroups());
 		model.put("navs", UrlNav.values());
 		model.put("navPrefix", "ip=" + ipAddress + "&domain=" + report.getDomain()
@@ -231,11 +229,11 @@ public class SpringMvcEventController {
 				model.put("distributionDetails", detailVisitor.getDetails());
 			}
 
-			report = m_mergeHelper.mergeAllIps(report, ipAddress);
+			report = eventMergeHelper.mergeAllIps(report, ipAddress);
 			String graphName = StringUtils.isEmpty(name) ? Constants.ALL : name;
 
 			if (StringUtils.isEmpty(name)) {
-				report = m_mergeHelper.mergeAllNames(report, ipAddress, graphName);
+				report = eventMergeHelper.mergeAllNames(report, ipAddress, graphName);
 			}
 			buildEventNameGraph(model, report, type, graphName, ipAddress);
 		}
@@ -259,7 +257,7 @@ public class SpringMvcEventController {
 				model.put("distributionDetails", detailVisitor.getDetails());
 			}
 
-			report = m_mergeHelper.mergeAllIps(report, ipAddress);
+			report = eventMergeHelper.mergeAllIps(report, ipAddress);
 			buildEventTrendGraph(model, report, type, name, ipAddress, dates);
 		}
 	}
@@ -283,7 +281,7 @@ public class SpringMvcEventController {
 		EventType eventType = report.findOrCreateMachine(ip).findOrCreateType(type);
 		EventName eventName = eventType.findOrCreateName(name);
 
-		model.putAll(m_eventGraphBuilder.build(m_graphBuilder, eventName));
+		model.putAll(eventGraphBuilder.build(graphBuilder, eventName));
 	}
 
 	private String buildEventNamePieChart(List<EventNameModel> names) {
@@ -320,7 +318,7 @@ public class SpringMvcEventController {
 
 		if (value != null && value.length() > 0) {
 			try {
-				result = value.length() == 10 ? m_hourlyFormat.parse(value).getTime()
+				result = value.length() == 10 ? hourlyFormat.parse(value).getTime()
 						: new SimpleDateFormat("yyyyMMdd").parse(value).getTime();
 			} catch (ParseException e) {
 				result = currentHour;
@@ -333,7 +331,7 @@ public class SpringMvcEventController {
 	private Date dateParameter(String value) {
 		if (value != null && value.length() > 0) {
 			try {
-				return value.length() == 10 ? m_hourlyFormat.parse(value) : m_dayFormat.parse(value);
+				return value.length() == 10 ? hourlyFormat.parse(value) : dayFormat.parse(value);
 			} catch (ParseException e) {
 				// ignore invalid date and fall back to the same default as old MVC.
 			}
@@ -342,9 +340,9 @@ public class SpringMvcEventController {
 	}
 
 	private Map<String, Department> domainGroups() {
-		Collection<String> domains = m_projectService.findAllDomains();
+		Collection<String> domains = projectService.findAllDomains();
 
-		return m_projectService.findDepartments(domains);
+		return projectService.findDepartments(domains);
 	}
 
 	private String emptyToNull(String value) {
@@ -384,7 +382,7 @@ public class SpringMvcEventController {
 	}
 
 	private EventReport filterReportByGroup(EventReport report, String domain, String group) {
-		List<String> ips = m_configManager.queryIpByDomainAndGroup(domain, group);
+		List<String> ips = domainGroupConfigManager.queryIpByDomainAndGroup(domain, group);
 		List<String> removes = new ArrayList<String>();
 
 		for (Machine machine : report.getMachines().values()) {
@@ -537,9 +535,9 @@ public class SpringMvcEventController {
 		if (value != null && value.length() > 0) {
 			try {
 				if (value.length() == 10) {
-					return m_hourlyFormat.parse(value);
+					return hourlyFormat.parse(value);
 				} else if (value.length() == 8) {
-					return m_dayFormat.parse(value);
+					return dayFormat.parse(value);
 				}
 			} catch (ParseException e) {
 				// ignore invalid custom date.
@@ -570,7 +568,7 @@ public class SpringMvcEventController {
 		Map<String, String> result = new LinkedHashMap<String, String>();
 
 		for (String ip : ips) {
-			String hostname = m_hostinfoService.queryHostnameByIp(ip);
+			String hostname = hostinfoService.queryHostnameByIp(ip);
 
 			if (hostname != null && !"null".equalsIgnoreCase(hostname)) {
 				result.put(ip, hostname);
@@ -592,7 +590,7 @@ public class SpringMvcEventController {
 		String graphName = StringUtils.isEmpty(name) ? "*" : name;
 		ModelRequest request = new ModelRequest(domain, date).setProperty("type", type).setProperty("name", graphName)
 				.setProperty("ip", ipAddress);
-		ModelResponse<EventReport> response = m_eventService.invoke(request);
+		ModelResponse<EventReport> response = eventModelService.invoke(request);
 
 		return response.getModel();
 	}
@@ -600,20 +598,20 @@ public class SpringMvcEventController {
 	private EventReport queryHourlyReport(String domain, String ipAddress, String type, long date) {
 		ModelRequest request = new ModelRequest(domain, date).setProperty("type", type).setProperty("ip", ipAddress);
 
-		if (m_eventService.isEligable(request)) {
-			ModelResponse<EventReport> response = m_eventService.invoke(request);
+		if (eventModelService.isEligable(request)) {
+			ModelResponse<EventReport> response = eventModelService.invoke(request);
 
 			return response.getModel();
 		}
-		return m_reportService.queryReport(domain, new Date(date), new Date(date + TimeHelper.ONE_HOUR));
+		return eventReportService.queryReport(domain, new Date(date), new Date(date + TimeHelper.ONE_HOUR));
 	}
 
 	private EventReport queryHistoryReport(String domain, HistoryDates dates) {
-		return m_reportService.queryReport(domain, dates.getStart(), dates.getEnd());
+		return eventReportService.queryReport(domain, dates.getStart(), dates.getEnd());
 	}
 
 	private double sample(String domain) {
-		Domain sampleDomain = m_sampleConfigManager.getConfig().findDomain(domain);
+		Domain sampleDomain = sampleConfigManager.getConfig().findDomain(domain);
 
 		return sampleDomain == null ? 1.0 : sampleDomain.getSample();
 	}
@@ -638,7 +636,7 @@ public class SpringMvcEventController {
 		}
 
 		private String getCustomDate() {
-			return "&startDate=" + m_dayFormat.format(m_start) + "&endDate=" + m_dayFormat.format(m_end);
+			return "&startDate=" + dayFormat.format(m_start) + "&endDate=" + dayFormat.format(m_end);
 		}
 
 		private long getDate() {

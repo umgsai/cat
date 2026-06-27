@@ -27,7 +27,9 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.sender.entity.Sender;
 import com.dianping.cat.alarm.spi.AlertChannel;
+import org.springframework.stereotype.Component;
 
+@Component("weixinSender")
 public class WeixinSender extends AbstractSender {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WeixinSender.class);
 
@@ -64,7 +66,7 @@ public class WeixinSender extends AbstractSender {
 		String title = message.getTitle().replaceAll(",", " ");
 		String content = message.getContent().replaceAll(",", " ").replaceAll("<a href.*(?=</a>)</a>", "");
 		String urlPrefix = sender.getUrl();
-		String urlPars = m_senderConfigManager.queryParString(sender);
+		String urlPars = senderConfigManager.queryParString(sender);
 
 		try {
 			urlPars = urlPars.replace("${domain}", URLEncoder.encode(domain, "utf-8"))

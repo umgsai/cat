@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import com.dianping.cat.support.Threads.Task;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -56,6 +57,9 @@ import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class HeartbeatAlert implements Task {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatAlert.class);
 
@@ -63,19 +67,26 @@ public class HeartbeatAlert implements Task {
 
 	private static final int DATA_ALREADY_MINUTE = 1;
 
-	protected HeartbeatRuleConfigManager m_ruleConfigManager;
+	@Resource
+	protected HeartbeatRuleConfigManager heartbeatRuleConfigManager;
 
-	protected DataChecker m_dataChecker;
+	@Resource
+	protected DataChecker dataChecker;
 
-	protected AlertManager m_sendManager;
+	@Resource(name = "spiAlertManager")
+	protected AlertManager alertManager;
 
-	private ModelService<HeartbeatReport> m_heartbeatService;
+	@Resource(name = "heartbeatModelService")
+	private ModelService<HeartbeatReport> heartbeatModelService;
 
-	private HeartbeatDisplayPolicyManager m_displayManager;
+	@Resource
+	private HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager;
 
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
 	private Map<String, double[]> buildArrayForExtensions(List<Period> periods) {
 		Map<String, double[]> map = new LinkedHashMap<String, double[]>();
@@ -95,7 +106,7 @@ public class HeartbeatAlert implements Task {
 				try {
 					String groupName = metric.getKey();
 					String metricName = metric.getValue();
-					int unit = m_displayManager.queryUnit(groupName, metricName);
+					int unit = heartbeatDisplayPolicyManager.queryUnit(groupName, metricName);
 					Detail detail = period.findOrCreateExtension(groupName).findOrCreateDetail(metricName);
 
 					array[index] = detail.getValue() / unit;
@@ -115,7 +126,7 @@ public class HeartbeatAlert implements Task {
 		for (String id : map.keySet()) {
 			String[] str = id.split(":");
 
-			if (m_displayManager.isDelta(str[0], str[1])) {
+			if (heartbeatDisplayPolicyManager.isDelta(str[0], str[1])) {
 				double[] sources = map.get(id);
 				double[] targets = new double[60];
 
@@ -220,8 +231,8 @@ public class HeartbeatAlert implements Task {
 		ModelRequest request = new ModelRequest(domain, date).setProperty("min", String.valueOf(start))
 								.setProperty("max", String.valueOf(end)).setProperty("ip", Constants.ALL).setProperty("requireAll", "true");
 
-		if (m_heartbeatService.isEligable(request)) {
-			ModelResponse<HeartbeatReport> response = m_heartbeatService.invoke(request);
+		if (heartbeatModelService.isEligable(request)) {
+			ModelResponse<HeartbeatReport> response = heartbeatModelService.invoke(request);
 
 			if (response != null) {
 				return response.getModel();
@@ -239,12 +250,12 @@ public class HeartbeatAlert implements Task {
 	}
 
 	protected BaseRuleConfigManager getRuleConfigManager() {
-		return m_ruleConfigManager;
+		return heartbeatRuleConfigManager;
 	}
 
 	private void processDomain(String domain) {
 		int minute = calAlreadyMinute();
-		Map<String, List<Config>> configsMap = m_ruleConfigManager.queryConfigsByDomain(domain);
+		Map<String, List<Config>> configsMap = heartbeatRuleConfigManager.queryConfigsByDomain(domain);
 		if (null == configsMap) {
 			return;
 		}
@@ -287,7 +298,7 @@ public class HeartbeatAlert implements Task {
 			for (Entry<String, List<Config>> entry : configsMap.entrySet()) {
 				String metric = entry.getKey();
 				List<Config> configs = entry.getValue();
-				Pair<Integer, List<Condition>> conditionPair = m_ruleConfigManager.convertConditions(configs);
+				Pair<Integer, List<Condition>> conditionPair = heartbeatRuleConfigManager.convertConditions(configs);
 
 				if (conditionPair != null) {
 					int maxMinute = conditionPair.getKey();
@@ -342,7 +353,7 @@ public class HeartbeatAlert implements Task {
 		try {
 			if (values != null) {
 				double[] baseline = new double[maxMinute];
-				List<DataCheckEntity> alerts = m_dataChecker.checkData(values, baseline, conditions);
+				List<DataCheckEntity> alerts = dataChecker.checkData(values, baseline, conditions);
 
 				for (DataCheckEntity alertResult : alerts) {
 					AlertEntity entity = new AlertEntity();
@@ -351,7 +362,7 @@ public class HeartbeatAlert implements Task {
 											.setLevel(alertResult.getAlertLevel());
 					entity.setMetric(metric).setType(getName()).setGroup(domain);
 					entity.getParas().put("ip", ip);
-					m_sendManager.addAlert(entity);
+					alertManager.addAlert(entity);
 				}
 			}
 		} catch (Exception e) {
@@ -370,11 +381,11 @@ public class HeartbeatAlert implements Task {
 			long current = System.currentTimeMillis();
 
 			try {
-				Set<String> domains = m_projectService.findAllDomains();
+				Set<String> domains = projectService.findAllDomains();
 
 				LOGGER.info("Heartbeat alert cycle started, domainCount={}.", domains.size());
 				for (String domain : domains) {
-					if (m_serverFilterConfigManager.validateDomain(domain) && StringUtils.isNotEmpty(domain)) {
+					if (serverFilterConfigManager.validateDomain(domain) && StringUtils.isNotEmpty(domain)) {
 						try {
 							processDomain(domain);
 						} catch (Exception e) {
@@ -409,31 +420,31 @@ public class HeartbeatAlert implements Task {
 	}
 
 	public void setDataChecker(DataChecker dataChecker) {
-		m_dataChecker = dataChecker;
+		this.dataChecker = dataChecker;
 	}
 
 	public void setDisplayManager(HeartbeatDisplayPolicyManager displayManager) {
-		m_displayManager = displayManager;
+		heartbeatDisplayPolicyManager = displayManager;
 	}
 
 	public void setHeartbeatService(ModelService<HeartbeatReport> heartbeatService) {
-		m_heartbeatService = heartbeatService;
+		heartbeatModelService = heartbeatService;
 	}
 
 	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	public void setRuleConfigManager(HeartbeatRuleConfigManager ruleConfigManager) {
-		m_ruleConfigManager = ruleConfigManager;
+		heartbeatRuleConfigManager = ruleConfigManager;
 	}
 
 	public void setSendManager(AlertManager sendManager) {
-		m_sendManager = sendManager;
+		alertManager = sendManager;
 	}
 
 	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
+		this.serverFilterConfigManager = serverFilterConfigManager;
 	}
 
 }

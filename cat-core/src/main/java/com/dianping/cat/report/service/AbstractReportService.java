@@ -28,6 +28,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import jakarta.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.dianping.cat.Cat;
@@ -51,6 +55,7 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
 
 public abstract class AbstractReportService<T> implements ReportService<T> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractReportService.class);
 
 	public static final int s_hourly = 1;
 
@@ -62,23 +67,31 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 
 	public static final int s_customer = 5;
 
-	protected HourlyReportRepository m_hourlyReportDao;
+	@Resource
+	protected HourlyReportRepository hourlyReportRepository;
 
-	protected HourlyReportContentRepository m_hourlyReportContentDao;
+	@Resource
+	protected HourlyReportContentRepository hourlyReportContentRepository;
 
-	protected DailyReportRepository m_dailyReportDao;
+	@Resource
+	protected DailyReportRepository dailyReportRepository;
 
-	protected DailyReportContentRepository m_dailyReportContentDao;
+	@Resource
+	protected DailyReportContentRepository dailyReportContentRepository;
 
-	protected WeeklyReportRepository m_weeklyReportDao;
+	@Resource
+	protected WeeklyReportRepository weeklyReportRepository;
 
-	protected WeeklyReportContentRepository m_weeklyReportContentDao;
+	@Resource
+	protected WeeklyReportContentRepository weeklyReportContentRepository;
 
-	protected MonthlyReportRepository m_monthlyReportDao;
+	@Resource
+	protected MonthlyReportRepository monthlyReportRepository;
 
-	protected MonthlyReportContentRepository m_monthlyReportContentDao;
+	@Resource
+	protected MonthlyReportContentRepository monthlyReportContentRepository;
 
-	private Map<String, Set<String>> m_domains = new LinkedHashMap<String, Set<String>>() {
+	private Map<String, Set<String>> domainCache = new LinkedHashMap<String, Set<String>>() {
 
 		private static final long serialVersionUID = 1L;
 
@@ -116,16 +129,18 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	public boolean insertDailyReport(DailyReport report, byte[] content) {
 		ensureReportRepositories();
 		try {
-			m_dailyReportDao.insert(report);
+			dailyReportRepository.insert(report);
 
 			long id = report.getId();
-			DailyReportContent proto = m_dailyReportContentDao.createLocal();
+			DailyReportContent proto = dailyReportContentRepository.createLocal();
 
 			proto.setReportId(id);
 			proto.setContent(content);
-			m_dailyReportContentDao.insert(proto);
+			dailyReportContentRepository.insert(proto);
 			return true;
 		} catch (RuntimeException e) {
+			LOGGER.error("Unable to insert daily report, domain={}, name={}, period={}.", report.getDomain(),
+					report.getName(), report.getPeriod(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -135,17 +150,19 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	public boolean insertHourlyReport(HourlyReport report, byte[] content) {
 		ensureReportRepositories();
 		try {
-			m_hourlyReportDao.insert(report);
+			hourlyReportRepository.insert(report);
 
 			long id = report.getId();
-			HourlyReportContent proto = m_hourlyReportContentDao.createLocal();
+			HourlyReportContent proto = hourlyReportContentRepository.createLocal();
 
 			proto.setReportId(id);
 			proto.setContent(content);
 			proto.setPeriod(report.getPeriod());
-			m_hourlyReportContentDao.insert(proto);
+			hourlyReportContentRepository.insert(proto);
 			return true;
 		} catch (RuntimeException e) {
+			LOGGER.error("Unable to insert hourly report, domain={}, name={}, period={}.", report.getDomain(),
+					report.getName(), report.getPeriod(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -155,34 +172,38 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	public boolean insertMonthlyReport(MonthlyReport report, byte[] content) {
 		ensureReportRepositories();
 		try {
-			MonthlyReport monthReport = m_monthlyReportDao
+			MonthlyReport monthReport = monthlyReportRepository
 									.findReportByDomainNamePeriod(report.getPeriod(),	report.getDomain(), report.getName());
 
 			if (monthReport != null) {
-				MonthlyReportContent reportContent = m_monthlyReportContentDao.createLocal();
+				MonthlyReportContent reportContent = monthlyReportContentRepository.createLocal();
 
 				reportContent.setKeyReportId(monthReport.getId());
 				reportContent.setReportId(monthReport.getId());
-				m_monthlyReportDao.deleteReportByDomainNamePeriod(report);
-				m_monthlyReportContentDao.deleteByPK(reportContent);
+				monthlyReportRepository.deleteReportByDomainNamePeriod(report);
+				monthlyReportContentRepository.deleteByPK(reportContent);
 			}
 		} catch (EmptyResultDataAccessException e) {
 		} catch (Exception e) {
+			LOGGER.error("Unable to clear existing monthly report, domain={}, name={}, period={}.", report.getDomain(),
+					report.getName(), report.getPeriod(), e);
 			Cat.logError(e);
 		}
 
 		try {
-			m_monthlyReportDao.insert(report);
+			monthlyReportRepository.insert(report);
 
 			long id = report.getId();
-			MonthlyReportContent proto = m_monthlyReportContentDao.createLocal();
+			MonthlyReportContent proto = monthlyReportContentRepository.createLocal();
 
 			proto.setReportId(id);
 			proto.setContent(content);
-			m_monthlyReportContentDao.insert(proto);
+			monthlyReportContentRepository.insert(proto);
 
 			return true;
 		} catch (RuntimeException e) {
+			LOGGER.error("Unable to insert monthly report, domain={}, name={}, period={}.", report.getDomain(),
+					report.getName(), report.getPeriod(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -192,33 +213,37 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	public boolean insertWeeklyReport(WeeklyReport report, byte[] content) {
 		ensureReportRepositories();
 		try {
-			WeeklyReport weeklyReport = m_weeklyReportDao
+			WeeklyReport weeklyReport = weeklyReportRepository
 									.findReportByDomainNamePeriod(report.getPeriod(),	report.getDomain(), report.getName());
 
 			if (weeklyReport != null) {
-				WeeklyReportContent reportContent = m_weeklyReportContentDao.createLocal();
+				WeeklyReportContent reportContent = weeklyReportContentRepository.createLocal();
 
 				reportContent.setKeyReportId(weeklyReport.getId());
 				reportContent.setReportId(weeklyReport.getId());
-				m_weeklyReportContentDao.deleteByPK(reportContent);
-				m_weeklyReportDao.deleteReportByDomainNamePeriod(report);
+				weeklyReportContentRepository.deleteByPK(reportContent);
+				weeklyReportRepository.deleteReportByDomainNamePeriod(report);
 			}
 		} catch (EmptyResultDataAccessException e) {
 		} catch (Exception e) {
+			LOGGER.error("Unable to clear existing weekly report, domain={}, name={}, period={}.", report.getDomain(),
+					report.getName(), report.getPeriod(), e);
 			Cat.logError(e);
 		}
 
 		try {
-			m_weeklyReportDao.insert(report);
+			weeklyReportRepository.insert(report);
 
 			long id = report.getId();
-			WeeklyReportContent proto = m_weeklyReportContentDao.createLocal();
+			WeeklyReportContent proto = weeklyReportContentRepository.createLocal();
 
 			proto.setReportId(id);
 			proto.setContent(content);
-			m_weeklyReportContentDao.insert(proto);
+			weeklyReportContentRepository.insert(proto);
 			return true;
 		} catch (RuntimeException e) {
+			LOGGER.error("Unable to insert weekly report, domain={}, name={}, period={}.", report.getDomain(),
+					report.getName(), report.getPeriod(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -240,12 +265,12 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 
 	private Set<String> queryAllDomains(Date date, String name) {
 		String key = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(date) + ":" + name;
-		Set<String> domains = m_domains.get(key);
+		Set<String> domains = domainCache.get(key);
 
 		if (domains == null) {
 			domains = new HashSet<String>();
 			try {
-				List<HourlyReport> reports = m_hourlyReportDao
+				List<HourlyReport> reports = hourlyReportRepository
 										.findAllByPeriodName(date, name);
 
 				if (reports != null) {
@@ -254,8 +279,9 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 					}
 				}
 				Cat.logEvent("FindDomain", key, Event.SUCCESS, domains.toString());
-				m_domains.put(key, domains);
+				domainCache.put(key, domains);
 			} catch (RuntimeException e) {
+				LOGGER.error("Unable to query report domains, date={}, name={}.", date, name, e);
 				Cat.logError(e);
 			}
 		}
@@ -297,44 +323,44 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	public abstract T queryWeeklyReport(String domain, Date start);
 
 	protected void ensureReportRepositories() {
-		if (m_hourlyReportDao == null || m_hourlyReportContentDao == null || m_dailyReportDao == null
-								|| m_dailyReportContentDao == null || m_weeklyReportDao == null
-								|| m_weeklyReportContentDao == null || m_monthlyReportDao == null
-								|| m_monthlyReportContentDao == null) {
+		if (hourlyReportRepository == null || hourlyReportContentRepository == null || dailyReportRepository == null
+								|| dailyReportContentRepository == null || weeklyReportRepository == null
+								|| weeklyReportContentRepository == null || monthlyReportRepository == null
+								|| monthlyReportContentRepository == null) {
 			throw new IllegalStateException("Report repositories are required for " + getClass().getSimpleName() + ".");
 		}
 	}
 
 	public void setDailyReportContentDao(DailyReportContentRepository dailyReportContentDao) {
-		m_dailyReportContentDao = dailyReportContentDao;
+		dailyReportContentRepository = dailyReportContentDao;
 	}
 
 	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
-		m_dailyReportDao = dailyReportDao;
+		dailyReportRepository = dailyReportDao;
 	}
 
 	public void setHourlyReportContentDao(HourlyReportContentRepository hourlyReportContentDao) {
-		m_hourlyReportContentDao = hourlyReportContentDao;
+		hourlyReportContentRepository = hourlyReportContentDao;
 	}
 
 	public void setHourlyReportDao(HourlyReportRepository hourlyReportDao) {
-		m_hourlyReportDao = hourlyReportDao;
+		hourlyReportRepository = hourlyReportDao;
 	}
 
 	public void setMonthlyReportContentDao(MonthlyReportContentRepository monthlyReportContentDao) {
-		m_monthlyReportContentDao = monthlyReportContentDao;
+		monthlyReportContentRepository = monthlyReportContentDao;
 	}
 
 	public void setMonthlyReportDao(MonthlyReportRepository monthlyReportDao) {
-		m_monthlyReportDao = monthlyReportDao;
+		monthlyReportRepository = monthlyReportDao;
 	}
 
 	public void setWeeklyReportContentDao(WeeklyReportContentRepository weeklyReportContentDao) {
-		m_weeklyReportContentDao = weeklyReportContentDao;
+		weeklyReportContentRepository = weeklyReportContentDao;
 	}
 
 	public void setWeeklyReportDao(WeeklyReportRepository weeklyReportDao) {
-		m_weeklyReportDao = weeklyReportDao;
+		weeklyReportRepository = weeklyReportDao;
 	}
 
 }

@@ -22,8 +22,14 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -35,21 +41,25 @@ import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
+@Component
 public class ServerFilterConfigManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServerFilterConfigManager.class);
 
 	private static final String CONFIG_NAME = "serverFilter";
 
-	protected ConfigRepository m_configDao;
+	@Resource
+	protected ConfigRepository configRepository;
 
-	protected ContentFetcher m_fetcher;
+	@Resource
+	protected ContentFetcher contentFetcher;
 
-	private volatile ServerFilterConfig m_config;
+	private volatile ServerFilterConfig config;
 
-	private long m_configId;
+	private long configId;
 
-	private long m_modifyTime;
+	private long modifyTime;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public boolean discardTransaction(String type, String name) {
 		ensureInitialized();
@@ -57,7 +67,7 @@ public class ServerFilterConfigManager {
 		if ("Cache.web".equals(type) || "ABTest".equals(type)) {
 			return true;
 		}
-		if (m_config.getTransactionTypes().contains(type) && m_config.getTransactionNames().contains(name)) {
+		if (config.getTransactionTypes().contains(type) && config.getTransactionNames().contains(name)) {
 			return true;
 		}
 		return false;
@@ -66,7 +76,7 @@ public class ServerFilterConfigManager {
 	public String getAtomicMatchTypes() {
 		ensureInitialized();
 
-		AtomicTreeConfig atomicTreeConfig = m_config.getAtomicTreeConfig();
+		AtomicTreeConfig atomicTreeConfig = config.getAtomicTreeConfig();
 
 		if (atomicTreeConfig != null) {
 			return atomicTreeConfig.getMatchTypes();
@@ -78,7 +88,7 @@ public class ServerFilterConfigManager {
 	public String getAtomicStartTypes() {
 		ensureInitialized();
 
-		AtomicTreeConfig atomicTreeConfig = m_config.getAtomicTreeConfig();
+		AtomicTreeConfig atomicTreeConfig = config.getAtomicTreeConfig();
 
 		if (atomicTreeConfig != null) {
 			return atomicTreeConfig.getStartTypes();
@@ -89,7 +99,7 @@ public class ServerFilterConfigManager {
 
 	public ServerFilterConfig getConfig() {
 		ensureInitialized();
-		return m_config;
+		return config;
 	}
 
 	public Set<String> getUnusedDomains() {
@@ -97,46 +107,55 @@ public class ServerFilterConfigManager {
 
 		Set<String> unusedDomains = new HashSet<String>();
 
-		unusedDomains.addAll(m_config.getDomains());
+		unusedDomains.addAll(config.getDomains());
 		return unusedDomains;
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME);
+			Config config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
-			m_configId = config.getId();
-			m_modifyTime = config.getModifyDate().getTime();
-			m_config = DefaultSaxParser.parse(content);
+			configId = config.getId();
+			modifyTime = config.getModifyDate().getTime();
+			this.config = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded server filter config from repository, configId={}, modifyTime={}.", configId,
+					modifyTime);
 		} catch (EmptyResultDataAccessException e) {
+			LOGGER.warn("Server filter config is missing in repository, loading default content from fetcher.", e);
+
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
+				String content = contentFetcher.getConfigContent(CONFIG_NAME);
+				Config config = configRepository.createLocal();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(content);
-				m_configDao.insert(config);
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
+				configRepository.insert(config);
+				configId = config.getId();
+				this.config = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized server filter config from default content, configId={}.", configId);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to initialize server filter config from default content.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to load server filter config from repository.", e);
 			Cat.logError(e);
 		}
-		if (m_config == null) {
-			m_config = new ServerFilterConfig();
+		if (config == null) {
+			config = new ServerFilterConfig();
+			LOGGER.warn("Server filter config is empty after initialization, using a new empty config.");
 		}
 		TimerSyncTask.getInstance().register(new SyncHandler() {
 
@@ -150,41 +169,45 @@ public class ServerFilterConfigManager {
 				return CONFIG_NAME;
 			}
 		});
-		m_initialized = true;
+		initialized = true;
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
 	public boolean insert(String xml) {
 		ensureInitialized();
 
 		try {
-			m_config = DefaultSaxParser.parse(xml);
+			config = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to parse server filter config xml for insert. xmlLength={}.",
+					xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
 	}
 
 	private void refreshConfig() throws SAXException, IOException {
-		Config config = m_configDao.findByName(CONFIG_NAME);
+		Config config = configRepository.findByName(CONFIG_NAME);
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
-			if (modifyTime > m_modifyTime) {
+			if (modifyTime > this.modifyTime) {
 				String content = config.getContent();
 				ServerFilterConfig serverConfig = DefaultSaxParser.parse(content);
 
-				m_config = serverConfig;
-				m_modifyTime = modifyTime;
+				this.config = serverConfig;
+				this.modifyTime = modifyTime;
+				LOGGER.info("Refreshed server filter config, configId={}, modifyTime={}.", configId,
+						this.modifyTime);
 			}
 		}
 	}
@@ -193,14 +216,16 @@ public class ServerFilterConfigManager {
 		ensureInitialized();
 
 		try {
-			Config config = m_configDao.createLocal();
+			Config config = configRepository.createLocal();
 
-			config.setId(m_configId);
-			config.setKeyId(m_configId);
+			config.setId(configId);
+			config.setKeyId(configId);
 			config.setName(CONFIG_NAME);
-			config.setContent(m_config.toString());
-			m_configDao.updateByPK(config);
+			config.setContent(this.config.toString());
+			configRepository.updateByPK(config);
+			LOGGER.info("Stored server filter config, configId={}.", configId);
 		} catch (Exception e) {
+			LOGGER.error("Unable to store server filter config, configId={}.", configId, e);
 			Cat.logError(e);
 			return false;
 		}
@@ -210,7 +235,7 @@ public class ServerFilterConfigManager {
 	public boolean validateDomain(String domain) {
 		ensureInitialized();
 
-		return !m_config.getDomains().contains(domain) && !m_config.getCrashLogDomains().containsKey(domain);
+		return !config.getDomains().contains(domain) && !config.getCrashLogDomains().containsKey(domain);
 	}
 
 }

@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
+import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
 
@@ -49,14 +51,18 @@ import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
 import com.dianping.cat.report.ReportPage;
 
+@Component("alertHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private SenderManager m_senderManager;
+	@Resource
+	private SenderManager senderManager;
 
-	private AlertRepository m_alertDao;
+	@Resource
+	private AlertRepository alertRepository;
 
 	private Alert buildAlertEntity(Payload payload) {
 		Alert alertEntity = new Alert();
@@ -115,7 +121,7 @@ public class Handler implements PageHandler<Context> {
 										payload.getContent(), receivers);
 
 				try {
-					boolean result = m_senderManager.sendAlert(AlertChannel.findByName(payload.getChannel()), message);
+					boolean result = senderManager.sendAlert(AlertChannel.findByName(payload.getChannel()), message);
 					if (result) {
 						setAlertResult(model, 1);
 					} else {
@@ -137,7 +143,7 @@ public class Handler implements PageHandler<Context> {
 				Alert alertEntity = buildAlertEntity(payload);
 
 				try {
-					int count = m_alertDao.insert(alertEntity);
+					int count = alertRepository.insert(alertEntity);
 
 					if (count == 0) {
 						LOGGER.warn("Manual alert insert returned zero, domain={}, category={}, metric={}.",
@@ -162,9 +168,10 @@ public class Handler implements PageHandler<Context> {
 			List<Alert> alerts;
 			try {
 				if (StringUtils.isEmpty(alertTypeStr)) {
-					alerts = m_alertDao.queryAlertsByTimeDomain(startTime, endTime, domain);
+					alerts = alertRepository.queryAlertsByTimeDomain(startTime, endTime, domain);
 				} else {
-					alerts = m_alertDao.queryAlertsByTimeDomainCategories(startTime, endTime, domain,	payload.getAlertTypeArray());
+					alerts = alertRepository.queryAlertsByTimeDomainCategories(startTime, endTime, domain,
+					      payload.getAlertTypeArray());
 				}
 			} catch (RuntimeException e) {
 				alerts = new ArrayList<Alert>();
@@ -180,7 +187,7 @@ public class Handler implements PageHandler<Context> {
 		model.setPage(ReportPage.ALERT);
 
 		if (!ctx.isProcessStopped()) {
-			m_jspViewer.view(ctx, model);
+			jspViewer.view(ctx, model);
 		}
 	}
 
@@ -205,18 +212,6 @@ public class Handler implements PageHandler<Context> {
 			model.setAlertResult("{\"status\":500}");
 			break;
 		}
-	}
-
-	public void setAlertDao(AlertRepository alertDao) {
-		m_alertDao = alertDao;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setSenderManager(SenderManager senderManager) {
-		m_senderManager = senderManager;
 	}
 
 	public class AlertDomain {

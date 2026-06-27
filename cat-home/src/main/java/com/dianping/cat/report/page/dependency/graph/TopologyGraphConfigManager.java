@@ -26,9 +26,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.apache.commons.io.FileUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -43,7 +49,10 @@ import com.dianping.cat.home.dependency.config.entity.NodeConfig;
 import com.dianping.cat.home.dependency.config.entity.TopologyGraphConfig;
 import com.dianping.cat.home.dependency.config.transform.DefaultSaxParser;
 
+@Component
 public class TopologyGraphConfigManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TopologyGraphConfigManager.class);
+
 	private static final String AVG_STR = Chinese.RESPONSE_TIME;
 
 	private static final String ERROR_STR = Chinese.EXCEPTION_COUNT;
@@ -60,21 +69,23 @@ public class TopologyGraphConfigManager {
 
 	private static final String CONFIG_NAME = "topologyConfig";
 
-	private ConfigRepository m_configDao;
+	@Resource
+	private ConfigRepository configRepository;
 
-	private ContentFetcher m_fetcher;
+	@Resource
+	private ContentFetcher contentFetcher;
 
-	private TopologyGraphConfig m_config;
+	private TopologyGraphConfig config;
 
-	private DecimalFormat m_df = new DecimalFormat("0.0");
+	private DecimalFormat decimalFormat = new DecimalFormat("0.0");
 
-	private long m_configId;
+	private long configId;
 
-	private String m_fileName;
+	private String fileName;
 
-	private Set<String> m_pigeonCalls = new HashSet<String>(Arrays.asList("Call", "PigeonCall", "PigeonClient"));
+	private Set<String> pigeonCalls = new HashSet<String>(Arrays.asList("Call", "PigeonCall", "PigeonClient"));
 
-	private Set<String> m_pigeonServices = new HashSet<String>(Arrays.asList("Service", "PigeonService", "PigeonServer"));
+	private Set<String> pigeonServices = new HashSet<String>(Arrays.asList("Service", "PigeonService", "PigeonServer"));
 
 	private String buildDes(String... args) {
 		StringBuilder sb = new StringBuilder();
@@ -107,12 +118,12 @@ public class TopologyGraphConfigManager {
 
 			if (avg >= config.getErrorResponseTime() && totalCount > minCount) {
 				errorCode = ERROR;
-				sb.append(buildErrorDes(type, AVG_STR, m_df.format(avg), MILLISECOND)).append(GraphConstrant.ENTER);
+				sb.append(buildErrorDes(type, AVG_STR, decimalFormat.format(avg), MILLISECOND)).append(GraphConstrant.ENTER);
 			} else if (avg >= config.getWarningResponseTime() && totalCount > minCount) {
 				errorCode = WARN;
-				sb.append(buildWarningDes(type, AVG_STR, m_df.format(avg), MILLISECOND)).append(GraphConstrant.ENTER);
+				sb.append(buildWarningDes(type, AVG_STR, decimalFormat.format(avg), MILLISECOND)).append(GraphConstrant.ENTER);
 			} else {
-				sb.append(buildDes(type, AVG_STR, m_df.format(avg), MILLISECOND)).append(GraphConstrant.ENTER);
+				sb.append(buildDes(type, AVG_STR, decimalFormat.format(avg), MILLISECOND)).append(GraphConstrant.ENTER);
 			}
 			if (error >= config.getErrorThreshold() && totalCount > minCount) {
 				errorCode = ERROR;
@@ -157,13 +168,13 @@ public class TopologyGraphConfigManager {
 			}
 			if (avg >= config.getErrorResponseTime() && totalCount > minCount) {
 				errorCode = ERROR;
-				sb.append(buildErrorDes(AVG_STR, m_df.format(avg), MILLISECOND));
+				sb.append(buildErrorDes(AVG_STR, decimalFormat.format(avg), MILLISECOND));
 			} else if (avg >= config.getWarningResponseTime() && totalCount > minCount) {
 				errorCode = WARN;
-				sb.append(buildWarningDes(AVG_STR, m_df.format(avg), MILLISECOND));
+				sb.append(buildWarningDes(AVG_STR, decimalFormat.format(avg), MILLISECOND));
 			} else {
 				if (!type.equalsIgnoreCase("Exception")) {
-					sb.append(buildDes(AVG_STR, m_df.format(avg), MILLISECOND));
+					sb.append(buildDes(AVG_STR, decimalFormat.format(avg), MILLISECOND));
 				}
 			}
 			if (error >= config.getErrorThreshold() && totalCount > minCount) {
@@ -202,7 +213,7 @@ public class TopologyGraphConfigManager {
 	public boolean deleteDomainConfig(String type, String domain) {
 		ensureInitialized();
 
-		NodeConfig types = m_config.getNodeConfigs().get(type);
+		NodeConfig types = config.getNodeConfigs().get(type);
 		types.removeDomainConfig(domain);
 		return storeConfig();
 	}
@@ -211,7 +222,7 @@ public class TopologyGraphConfigManager {
 		ensureInitialized();
 
 		String key = type + ':' + from + ':' + to;
-		m_config.removeEdgeConfig(key);
+		config.removeEdgeConfig(key);
 		return storeConfig();
 	}
 
@@ -219,9 +230,9 @@ public class TopologyGraphConfigManager {
 		String realType = type;
 		if (type.startsWith("Cache.")) {
 			realType = "Cache";
-		} else if (m_pigeonCalls.contains(type)) {
+		} else if (pigeonCalls.contains(type)) {
 			realType = "PigeonCall";
-		} else if (m_pigeonServices.contains(type)) {
+		} else if (pigeonServices.contains(type)) {
 			realType = "PigeonService";
 		}
 		return realType;
@@ -230,87 +241,91 @@ public class TopologyGraphConfigManager {
 	public synchronized TopologyGraphConfig getConfig() {
 		ensureInitialized();
 
-		return m_config;
+		return config;
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_fileName != null) {
+		if (fileName != null) {
 			try {
-				String content = FileUtils.readFileToString(new File(m_fileName), StandardCharsets.UTF_8);
-				m_config = DefaultSaxParser.parse(content);
+				String content = FileUtils.readFileToString(new File(fileName), StandardCharsets.UTF_8);
+				config = DefaultSaxParser.parse(content);
 			} catch (Exception e) {
+				LOGGER.error("Unable to initialize topology graph config from file, fileName={}.", fileName, e);
 				Cat.logError(e);
 			}
 		} else {
 			try {
-				Config config = m_configDao.findByName(CONFIG_NAME);
-				String content = config.getContent();
+				Config configDO = configRepository.findByName(CONFIG_NAME);
+				String content = configDO.getContent();
 
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
+				configId = configDO.getId();
+				config = DefaultSaxParser.parse(content);
 			} catch (EmptyResultDataAccessException e) {
 				try {
-					String content = m_fetcher.getConfigContent(CONFIG_NAME);
-					Config config = m_configDao.createLocal();
+					String content = contentFetcher.getConfigContent(CONFIG_NAME);
+					Config configDO = configRepository.createLocal();
 
-					config.setName(CONFIG_NAME);
-					config.setContent(content);
-					m_configDao.insert(config);
+					configDO.setName(CONFIG_NAME);
+					configDO.setContent(content);
+					configRepository.insert(configDO);
 
-					m_configId = config.getId();
-					m_config = DefaultSaxParser.parse(content);
+					configId = configDO.getId();
+					config = DefaultSaxParser.parse(content);
 				} catch (Exception ex) {
+					LOGGER.error("Unable to create default topology graph config, configName={}.", CONFIG_NAME, ex);
 					Cat.logError(ex);
 				}
 			} catch (Exception e) {
+				LOGGER.error("Unable to initialize topology graph config, configName={}.", CONFIG_NAME, e);
 				Cat.logError(e);
 			}
-			if (m_config == null) {
-				m_config = new TopologyGraphConfig();
+			if (config == null) {
+				config = new TopologyGraphConfig();
 			}
 		}
 	}
 
-	public boolean insertDomainConfig(String type, DomainConfig config) {
+	public boolean insertDomainConfig(String type, DomainConfig domainConfig) {
 		ensureInitialized();
 
-		m_config.findOrCreateNodeConfig(type).addDomainConfig(config);
+		config.findOrCreateNodeConfig(type).addDomainConfig(domainConfig);
 		return storeConfig();
 	}
 
-	public boolean insertDomainDefaultConfig(String type, DomainConfig config) {
+	public boolean insertDomainDefaultConfig(String type, DomainConfig domainConfig) {
 		ensureInitialized();
 
-		NodeConfig node = m_config.findOrCreateNodeConfig(type);
+		NodeConfig node = config.findOrCreateNodeConfig(type);
 
-		node.setDefaultMinCountThreshold(config.getMinCountThreshold());
-		node.setDefaultErrorResponseTime(config.getErrorResponseTime());
-		node.setDefaultErrorThreshold(config.getErrorThreshold());
-		node.setDefaultWarningResponseTime(config.getWarningResponseTime());
-		node.setDefaultWarningThreshold(config.getWarningThreshold());
+		node.setDefaultMinCountThreshold(domainConfig.getMinCountThreshold());
+		node.setDefaultErrorResponseTime(domainConfig.getErrorResponseTime());
+		node.setDefaultErrorThreshold(domainConfig.getErrorThreshold());
+		node.setDefaultWarningResponseTime(domainConfig.getWarningResponseTime());
+		node.setDefaultWarningThreshold(domainConfig.getWarningThreshold());
 		return storeConfig();
 	}
 
-	public boolean insertEdgeConfig(EdgeConfig config) {
+	public boolean insertEdgeConfig(EdgeConfig edgeConfig) {
 		ensureInitialized();
 
-		config.setKey(config.getType() + ":" + config.getFrom() + ":" + config.getTo());
-		m_config.addEdgeConfig(config);
+		edgeConfig.setKey(edgeConfig.getType() + ":" + edgeConfig.getFrom() + ":" + edgeConfig.getTo());
+		config.addEdgeConfig(edgeConfig);
 		return storeConfig();
 	}
 
 	public EdgeConfig queryEdgeConfig(String type, String from, String to) {
 		ensureInitialized();
 
-		EdgeConfig edgeConfig = m_config.findEdgeConfig(type + ":" + from + ":" + to);
+		EdgeConfig edgeConfig = config.findEdgeConfig(type + ":" + from + ":" + to);
 
 		if (edgeConfig == null) {
 			DomainConfig domainConfig = null;
@@ -331,7 +346,7 @@ public class TopologyGraphConfigManager {
 	public DomainConfig queryNodeConfig(String type, String domain) {
 		ensureInitialized();
 
-		NodeConfig typesConfig = m_config.findNodeConfig(type);
+		NodeConfig typesConfig = config.findNodeConfig(type);
 
 		if (typesConfig != null) {
 			DomainConfig config = typesConfig.findDomainConfig(domain);
@@ -351,13 +366,13 @@ public class TopologyGraphConfigManager {
 	}
 
 	public void setFileName(String file) {
-		m_fileName = file;
+		fileName = file;
 	}
 
 	private void ensureInitialized() {
-		if (m_config == null) {
+		if (config == null) {
 			synchronized (this) {
-				if (m_config == null) {
+				if (config == null) {
 					initialize();
 				}
 			}
@@ -367,22 +382,25 @@ public class TopologyGraphConfigManager {
 	private boolean storeConfig() {
 		ensureInitialized();
 
-		if (m_fileName != null) {
+		if (fileName != null) {
 			try {
-				FileUtils.writeStringToFile(new File(m_fileName), m_config.toString(), StandardCharsets.UTF_8);
+				FileUtils.writeStringToFile(new File(fileName), config.toString(), StandardCharsets.UTF_8);
 			} catch (IOException e) {
+				LOGGER.error("Unable to store topology graph config to file, fileName={}.", fileName, e);
 				Cat.logError(e);
 				return false;
 			}
 		} else {
 			try {
-				Config config = m_configDao.createLocal();
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
-				config.setName(CONFIG_NAME);
-				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config);
+				Config configDO = configRepository.createLocal();
+				configDO.setId(configId);
+				configDO.setKeyId(configId);
+				configDO.setName(CONFIG_NAME);
+				configDO.setContent(config.toString());
+				configRepository.updateByPK(configDO);
 			} catch (Exception e) {
+				LOGGER.error("Unable to store topology graph config, configName={}, configId={}.", CONFIG_NAME,
+				      configId, e);
 				Cat.logError(e);
 				return false;
 			}

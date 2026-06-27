@@ -20,6 +20,9 @@ package com.dianping.cat.report.page.metric.task;
 
 import java.util.Arrays;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class BaselineConfigManager {
 
 	public BaselineConfig queryBaseLineConfig(String key) {

@@ -35,12 +35,16 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("localEventService")
 public class LocalEventService extends LocalModelService<EventReport> {
 
 	public static final String ID = EventAnalyzer.ID;
 
-	private ReportBucketManager m_bucketManager;
+	@Resource(name = "reportBucketManager")
+	private ReportBucketManager reportBucketManager;
 
 	public LocalEventService() {
 		super(EventAnalyzer.ID);
@@ -114,11 +118,11 @@ public class LocalEventService extends LocalModelService<EventReport> {
 	}
 
 	private ReportBucketManager getBucketManager() {
-		return m_bucketManager;
+		return reportBucketManager;
 	}
 
 	public void setBucketManager(ReportBucketManager bucketManager) {
-		m_bucketManager = bucketManager;
+		reportBucketManager = bucketManager;
 	}
 
 	public static class EventReportFilter extends com.dianping.cat.consumer.event.model.transform.DefaultXmlBuilder {

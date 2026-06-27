@@ -18,100 +18,108 @@
  */
 package com.dianping.cat.report.page.overload.task;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.mybatis.OverloadRepository;
 
+@Component
 public class CapacityUpdateStatusManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CapacityUpdateStatusManager.class);
 
 	private static final String CONFIG_NAME = "capacityUpdateStatus";
 
-	private ConfigRepository m_configDao;
+	@Resource
+	private ConfigRepository configRepository;
 
-	private OverloadRepository m_overloadDao;
+	@Resource
+	private OverloadRepository overloadRepository;
 
-	private long m_hourlyStatus;
+	private long hourlyStatus;
 
-	private long m_dailyStatus;
+	private long dailyStatus;
 
-	private long m_weeklyStatus;
+	private long weeklyStatus;
 
-	private long m_monthlyStatus;
+	private long monthlyStatus;
 
-	private long m_configId;
+	private long configId;
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		this.configRepository = configDao;
 	}
 
 	public void setOverloadDao(OverloadRepository overloadDao) {
-		m_overloadDao = overloadDao;
+		this.overloadRepository = overloadDao;
 	}
 
 	private String buildConfigContent() {
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("Hourly:").append(m_hourlyStatus).append(";");
-		builder.append("Daily:").append(m_dailyStatus).append(";");
-		builder.append("Weekly:").append(m_weeklyStatus).append(";");
-		builder.append("Monthly:").append(m_monthlyStatus).append(";");
+		builder.append("Hourly:").append(hourlyStatus).append(";");
+		builder.append("Daily:").append(dailyStatus).append(";");
+		builder.append("Weekly:").append(weeklyStatus).append(";");
+		builder.append("Monthly:").append(monthlyStatus).append(";");
 		return builder.toString();
 	}
 
 	private void extractStatus(String content) {
-		m_hourlyStatus = Long.parseLong(content.split("Hourly:")[1].split(";")[0]);
-		m_dailyStatus = Long.parseLong(content.split("Daily:")[1].split(";")[0]);
-		m_weeklyStatus = Long.parseLong(content.split("Weekly:")[1].split(";")[0]);
-		m_monthlyStatus = Long.parseLong(content.split("Monthly:")[1].split(";")[0]);
+		hourlyStatus = Long.parseLong(content.split("Hourly:")[1].split(";")[0]);
+		dailyStatus = Long.parseLong(content.split("Daily:")[1].split(";")[0]);
+		weeklyStatus = Long.parseLong(content.split("Weekly:")[1].split(";")[0]);
+		monthlyStatus = Long.parseLong(content.split("Monthly:")[1].split(";")[0]);
 	}
 
 	public long getDailyStatus() {
-		return m_dailyStatus;
+		return dailyStatus;
 	}
 
 	public long getHourlyStatus() {
-		return m_hourlyStatus;
+		return hourlyStatus;
 	}
 
 	public long getMonthlyStatus() {
-		return m_monthlyStatus;
+		return monthlyStatus;
 	}
 
 	public long getWeeklyStatus() {
-		return m_weeklyStatus;
+		return weeklyStatus;
 	}
 
+	@PostConstruct
 	public void initialize() {
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME);
+			Config config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
-			m_configId = config.getId();
+			configId = config.getId();
 
 			extractStatus(content);
 		} catch (RuntimeException e) {
 			LOGGER.warn("Unable to load capacity update status config, will initialize it from overload table.", e);
 
 			try {
-				m_hourlyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.HOURLY_TYPE)
+				hourlyStatus = overloadRepository.findMaxIdByType(CapacityUpdater.HOURLY_TYPE)
 										.getMaxId();
-				m_dailyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.DAILY_TYPE).getMaxId();
-				m_weeklyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.WEEKLY_TYPE)
+				dailyStatus = overloadRepository.findMaxIdByType(CapacityUpdater.DAILY_TYPE).getMaxId();
+				weeklyStatus = overloadRepository.findMaxIdByType(CapacityUpdater.WEEKLY_TYPE)
 										.getMaxId();
-				m_monthlyStatus = m_overloadDao.findMaxIdByType(CapacityUpdater.MONTHLY_TYPE)
+				monthlyStatus = overloadRepository.findMaxIdByType(CapacityUpdater.MONTHLY_TYPE)
 										.getMaxId();
 
-				Config config = m_configDao.createLocal();
+				Config config = configRepository.createLocal();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(buildConfigContent());
-				m_configDao.insert(config);
+				configRepository.insert(config);
 
-				m_configId = config.getId();
+				configId = config.getId();
 			} catch (RuntimeException ex) {
 				LOGGER.error("Unable to initialize capacity update status config from overload table.", ex);
 				Cat.logError(ex);
@@ -122,13 +130,13 @@ public class CapacityUpdateStatusManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = m_configDao.createLocal();
+				Config config = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
+				config.setId(configId);
+				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(buildConfigContent());
-				m_configDao.updateByPK(config);
+				configRepository.updateByPK(config);
 			} catch (Exception e) {
 				LOGGER.error("Unable to store capacity update status config. content={}", buildConfigContent(), e);
 				Cat.logError(e);
@@ -139,22 +147,22 @@ public class CapacityUpdateStatusManager {
 	}
 
 	public void updateDailyStatus(long dailyStatus) {
-		this.m_dailyStatus = dailyStatus;
+		this.dailyStatus = dailyStatus;
 		storeConfig();
 	}
 
 	public void updateHourlyStatus(long hourlyStatus) {
-		this.m_hourlyStatus = hourlyStatus;
+		this.hourlyStatus = hourlyStatus;
 		storeConfig();
 	}
 
 	public void updateMonthlyStatus(long monthlyStatus) {
-		this.m_monthlyStatus = monthlyStatus;
+		this.monthlyStatus = monthlyStatus;
 		storeConfig();
 	}
 
 	public void updateWeeklyStatus(long weeklyStatus) {
-		this.m_weeklyStatus = weeklyStatus;
+		this.weeklyStatus = weeklyStatus;
 		storeConfig();
 	}
 }

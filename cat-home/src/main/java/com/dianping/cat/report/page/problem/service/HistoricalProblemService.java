@@ -25,10 +25,14 @@ import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.BaseHistoricalModelService;
 import com.dianping.cat.report.service.ModelRequest;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("problem-historical")
 public class HistoricalProblemService extends BaseHistoricalModelService<ProblemReport> {
 
-	private ProblemReportService m_reportService;
+	@Resource
+	private ProblemReportService reportService;
 
 	public HistoricalProblemService() {
 		super(ProblemAnalyzer.ID);
@@ -52,11 +56,11 @@ public class HistoricalProblemService extends BaseHistoricalModelService<Problem
 	}
 
 	private ProblemReportService getReportService() {
-		return m_reportService;
+		return reportService;
 	}
 
 	public void setReportService(ProblemReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 }

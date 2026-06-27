@@ -19,27 +19,36 @@
 package com.dianping.cat.alarm.spi.decorator;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+@Component
 public class DecoratorManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DecoratorManager.class);
 
-	private Map<String, Decorator> m_decorators = new HashMap<String, Decorator>();
+	@Resource
+	private List<Decorator> decoratorList = Collections.emptyList();
 
-	private volatile boolean m_initialized;
+	private Map<String, Decorator> decorators;
+
+	private volatile boolean initialized;
 
 	public Pair<String, String> generateTitleAndContent(AlertEntity alert) {
 		ensureInitialized();
 		AlertType alertType = alert.getType();
-		Decorator decorator = m_decorators.get(alertType.getName());
+		Decorator decorator = decorators.get(alertType.getName());
 
 		if (decorator != null) {
 			String title = decorator.generateTitle(alert);
@@ -48,47 +57,82 @@ public class DecoratorManager {
 			return Pair.of(title, content);
 		} else {
 			LOGGER.error("Alert decorator is not configured, alertType={}, availableDecorators={}.", alertType.getName(),
-			      m_decorators.keySet());
+			      decorators.keySet());
 			throw new RuntimeException("error alert type:" + alert.getType());
 		}
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 		synchronized (this) {
-			if (m_initialized) {
+			if (initialized) {
 				return;
 			}
-			if (m_decorators.isEmpty()) {
+			if (decorators == null) {
+				decorators = buildDecorators(decoratorList);
+			} else {
+				decorators = copyDecorators(decorators);
+			}
+			if (decorators.isEmpty()) {
 				LOGGER.warn("Alert decorator manager has no configured decorators.");
 			} else {
-				LOGGER.info("Initialized alert decorator manager from Spring injection, decoratorCount={}.",
-				      m_decorators.size());
+				LOGGER.info("Initialized alert decorator manager from Spring injection, decoratorKeys={}.",
+				      decorators.keySet());
 			}
-			m_initialized = true;
+			initialized = true;
 		}
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
-	public void setDecorators(Map<String, Decorator> decorators) {
-		if (decorators == null || decorators.isEmpty()) {
-			m_decorators = new HashMap<String, Decorator>();
-		} else {
-			m_decorators = new HashMap<String, Decorator>(decorators);
+	private Map<String, Decorator> buildDecorators(List<Decorator> decoratorList) {
+		Map<String, Decorator> result = new LinkedHashMap<String, Decorator>();
+
+		if (decoratorList == null || decoratorList.isEmpty()) {
+			return result;
 		}
-		LOGGER.info("Configured alert decorators from Spring, decoratorKeys={}.", m_decorators.keySet());
+		for (Decorator decorator : decoratorList) {
+			if (decorator == null) {
+				continue;
+			}
+			String id = decorator.getId();
+
+			if (id == null || id.length() == 0) {
+				LOGGER.warn("Ignore alert decorator without id, decoratorClass={}.", decorator.getClass().getName());
+				continue;
+			}
+			Decorator previous = result.put(id, decorator);
+
+			if (previous != null) {
+				LOGGER.warn("Duplicate alert decorator id detected, id={}, previousClass={}, currentClass={}.", id,
+				      previous.getClass().getName(), decorator.getClass().getName());
+			}
+		}
+		return result;
+	}
+
+	private Map<String, Decorator> copyDecorators(Map<String, Decorator> decorators) {
+		if (decorators == null || decorators.isEmpty()) {
+			return new LinkedHashMap<String, Decorator>();
+		}
+		return new LinkedHashMap<String, Decorator>(decorators);
+	}
+
+	public void setDecorators(Map<String, Decorator> decorators) {
+		this.decorators = copyDecorators(decorators);
+		LOGGER.info("Configured alert decorators from Spring, decoratorKeys={}.", this.decorators.keySet());
 	}
 
 	public Map<String, Decorator> getDecorators() {
 		ensureInitialized();
-		return Collections.unmodifiableMap(m_decorators);
+		return Collections.unmodifiableMap(decorators);
 	}
 
 }

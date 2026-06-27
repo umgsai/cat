@@ -24,8 +24,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -38,18 +40,24 @@ import com.dianping.cat.report.page.business.graph.BusinessGraphCreator;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
+@Component("businessHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private BusinessGraphCreator m_graphCreator;
+	@Resource
+	private BusinessGraphCreator businessGraphCreator;
 
-	private BusinessTagConfigManager m_tagConfigManager;
+	@Resource
+	private BusinessTagConfigManager businessTagConfigManager;
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -89,7 +97,7 @@ public class Handler implements PageHandler<Context> {
 			break;
 		}
 		if (!ctx.isProcessStopped()) {
-			m_jspViewer.view(ctx, model);
+			jspViewer.view(ctx, model);
 		}
 	}
 
@@ -98,39 +106,19 @@ public class Handler implements PageHandler<Context> {
 		LOGGER.info("Building business line charts, type={}, name={}, start={}, end={}.", type, name, start, end);
 
 		if (type == Type.Tag) {
-			allCharts = m_graphCreator.buildGraphByTag(start, end, name);
+			allCharts = businessGraphCreator.buildGraphByTag(start, end, name);
 		} else {
-			allCharts = m_graphCreator.buildGraphByDomain(start, end, name);
+			allCharts = businessGraphCreator.buildGraphByDomain(start, end, name);
 		}
 
 		return allCharts;
 	}
 
 	private void normalize(Model model, Payload payload) {
-		model.setDomains(m_projectService.findAllDomains());
-		model.setTags(m_tagConfigManager.findAllTags());
+		model.setDomains(projectService.findAllDomains());
+		model.setTags(businessTagConfigManager.findAllTags());
 		model.setPage(ReportPage.BUSINESS);
 		model.setAction(payload.getAction());
-		m_normalizePayload.normalize(model, payload);
-	}
-
-	public void setGraphCreator(BusinessGraphCreator graphCreator) {
-		m_graphCreator = graphCreator;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
-	}
-
-	public void setTagConfigManager(BusinessTagConfigManager tagConfigManager) {
-		m_tagConfigManager = tagConfigManager;
+		normalizePayload.normalize(model, payload);
 	}
 }

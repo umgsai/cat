@@ -26,17 +26,20 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.service.ProjectService;
 
+import jakarta.annotation.Resource;
+
 public abstract class ProjectDecorator extends Decorator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectDecorator.class);
 
-	protected ProjectService m_projectService;
+	@Resource
+	protected ProjectService projectService;
 
 	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	private ProjectService getProjectService() {
-		return m_projectService;
+		return projectService;
 	}
 
 	public String buildContactInfo(String domainName) {

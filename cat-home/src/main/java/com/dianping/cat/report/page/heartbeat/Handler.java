@@ -25,9 +25,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -51,22 +53,30 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component("heartbeatHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	private GraphBuilder m_builder;
+	@Resource
+	private GraphBuilder graphBuilder;
 
-	private HistoryGraphs m_historyGraphs;
+	@Resource
+	private HistoryGraphs heartbeatHistoryGraphs;
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private HeartbeatReportService m_reportService;
+	@Resource
+	private HeartbeatReportService heartbeatReportService;
 
-	private ModelService<HeartbeatReport> m_service;
+	@Resource(name = "heartbeatModelService")
+	private ModelService<HeartbeatReport> heartbeatModelService;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private HeartbeatDisplayPolicyManager m_manager;
+	@Resource
+	private HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager;
 
 	private void buildHeartbeatGraphInfo(Model model, HeartbeatSvgGraph displayHeartbeat) {
 		if (displayHeartbeat == null) {
@@ -79,8 +89,8 @@ public class Handler implements PageHandler<Context> {
 	private void buildHistoryGraph(Model model, Payload payload) {
 		Date start = new Date(payload.getDate() + 23 * TimeHelper.ONE_HOUR);
 		Date end = new Date(payload.getDate() + 24 * TimeHelper.ONE_HOUR);
-		HeartbeatReport report = m_reportService.queryReport(payload.getDomain(), start, end);
-		List<String> extensionGroups = m_manager.sortGroupNames(extractExtensionGroups(report));
+		HeartbeatReport report = heartbeatReportService.queryReport(payload.getDomain(), start, end);
+		List<String> extensionGroups = heartbeatDisplayPolicyManager.sortGroupNames(extractExtensionGroups(report));
 
 		model.setExtensionGroups(extensionGroups);
 		model.setReport(report);
@@ -90,7 +100,7 @@ public class Handler implements PageHandler<Context> {
 			payload.setIpAddress(ipAddress);
 			payload.setRealIp(ipAddress);
 		}
-		m_historyGraphs.showHeartBeatGraph(model, payload);
+		heartbeatHistoryGraphs.showHeartBeatGraph(model, payload);
 	}
 
 	private Set<String> extractExtensionGroups(HeartbeatReport report) {
@@ -120,8 +130,8 @@ public class Handler implements PageHandler<Context> {
 		ModelRequest request = new ModelRequest(domain, date) //
 								.setProperty("ip", ipAddress);
 
-		if (m_service.isEligable(request)) {
-			ModelResponse<HeartbeatReport> response = m_service.invoke(request);
+		if (heartbeatModelService.isEligable(request)) {
+			ModelResponse<HeartbeatReport> response = heartbeatModelService.invoke(request);
 			HeartbeatReport report = response.getModel();
 
 			return report;
@@ -157,7 +167,7 @@ public class Handler implements PageHandler<Context> {
 			buildHistoryGraph(model, payload);
 			break;
 		}
-		m_jspViewer.view(ctx, model);
+		jspViewer.view(ctx, model);
 	}
 
 	private void normalize(Model model, Payload payload) {
@@ -171,7 +181,7 @@ public class Handler implements PageHandler<Context> {
 			payload.setRealIp(payload.getIpAddress());
 			model.setIpAddress(payload.getRealIp());
 		}
-		m_normalizePayload.normalize(model, payload);
+		normalizePayload.normalize(model, payload);
 
 		String reportType = payload.getReportType();
 		if ("month".equals(reportType) || "week".equals(reportType)) {
@@ -194,7 +204,7 @@ public class Handler implements PageHandler<Context> {
 				String displayIp = getIpAddress(report, payload);
 
 				payload.setRealIp(displayIp);
-				return new HeartbeatSvgGraph(m_builder, m_manager).display(report, displayIp);
+				return new HeartbeatSvgGraph(graphBuilder, heartbeatDisplayPolicyManager).display(report, displayIp);
 			}
 		} catch (Throwable e) {
 			LOGGER.error("Unable to render heartbeat report, domain={}, ip={}, realIp={}, type={}, period={}, date={}, action={}.",
@@ -204,34 +214,6 @@ public class Handler implements PageHandler<Context> {
 			model.setException(e);
 		}
 		return null;
-	}
-
-	public void setBuilder(GraphBuilder builder) {
-		m_builder = builder;
-	}
-
-	public void setHistoryGraphs(HistoryGraphs historyGraphs) {
-		m_historyGraphs = historyGraphs;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setManager(HeartbeatDisplayPolicyManager manager) {
-		m_manager = manager;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setReportService(HeartbeatReportService reportService) {
-		m_reportService = reportService;
-	}
-
-	public void setService(ModelService<HeartbeatReport> service) {
-		m_service = service;
 	}
 
 	// the detail order of heartbeat is:name min max sum sum2 count_in_minutes

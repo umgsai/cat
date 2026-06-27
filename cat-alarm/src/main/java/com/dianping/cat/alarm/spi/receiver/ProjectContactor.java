@@ -28,18 +28,22 @@ import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.service.ProjectService;
 
+import jakarta.annotation.Resource;
+
 public abstract class ProjectContactor extends DefaultContactor implements Contactor {
 
-	protected ProjectService m_projectService;
+	@Resource
+	protected ProjectService projectService;
 
-	protected AlertConfigManager m_configManager;
+	@Resource
+	protected AlertConfigManager alertConfigManager;
 
 	private AlertConfigManager getConfigManager() {
-		return m_configManager;
+		return alertConfigManager;
 	}
 
 	private ProjectService getProjectService() {
-		return m_projectService;
+		return projectService;
 	}
 
 	@Override
@@ -135,11 +139,11 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 	}
 
 	public void setConfigManager(AlertConfigManager configManager) {
-		m_configManager = configManager;
+		alertConfigManager = configManager;
 	}
 
 	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 }

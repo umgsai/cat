@@ -19,44 +19,45 @@
 package com.dianping.cat.report.alert.spi.config;
 
 
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.alarm.UserDefineRule;
 import com.dianping.cat.mybatis.repository.user.define.rule.UserDefineRuleRepository;
 
+@Component
 public class UserDefinedRuleManager {
 
-	private UserDefineRuleRepository m_dao;
+	@Resource
+	private UserDefineRuleRepository userDefineRuleRepository;
 
 	public String addUserDefineText(String userDefinedText) {
-		UserDefineRule item = m_dao.findMaxId();
+		UserDefineRule item = userDefineRuleRepository.findMaxId();
 		long id = 1;
 		if (item != null) {
 			id = item.getMaxId() + 1;
 		}
 
-		UserDefineRule userDefineRule = m_dao.createLocal();
+		UserDefineRule userDefineRule = userDefineRuleRepository.createLocal();
 
 		userDefineRule.setContent(userDefinedText);
 		userDefineRule.setId(id);
-		m_dao.insert(userDefineRule);
+		userDefineRuleRepository.insert(userDefineRule);
 		return Long.toString(id);
 	}
 
 	public String getUserDefineText(String idStr) {
 		long id = Long.parseLong(idStr);
 
-		UserDefineRule item = m_dao.findByPK(id);
+		UserDefineRule item = userDefineRuleRepository.findByPK(id);
 		return item.getContent();
 	}
 
 	public void removeById(String id) {
-		UserDefineRule item = m_dao.createLocal();
+		UserDefineRule item = userDefineRuleRepository.createLocal();
 
 		item.setId(Long.parseLong(id));
-		m_dao.deleteByPK(item);
-	}
-
-	public void setDao(UserDefineRuleRepository dao) {
-		m_dao = dao;
+		userDefineRuleRepository.deleteByPK(item);
 	}
 
 }

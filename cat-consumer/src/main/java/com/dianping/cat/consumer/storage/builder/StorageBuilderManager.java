@@ -19,23 +19,32 @@
 package com.dianping.cat.consumer.storage.builder;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+@Component
 public class StorageBuilderManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageBuilderManager.class);
 
-	private Map<String, StorageBuilder> m_storageBuilders;
+	@Resource
+	private List<StorageBuilder> storageBuilderList = Collections.emptyList();
 
-	private volatile boolean m_initialized;
+	private Map<String, StorageBuilder> storageBuilders;
+
+	private volatile boolean initialized;
 
 	public List<String> getDefaultMethods(String type) {
 		ensureInitialized();
 
-		StorageBuilder storageBuilder = m_storageBuilders.get(type);
+		StorageBuilder storageBuilder = storageBuilders.get(type);
 
 		if (storageBuilder != null) {
 			return storageBuilder.getDefaultMethods();
@@ -47,28 +56,65 @@ public class StorageBuilderManager {
 	public StorageBuilder getStorageBuilder(String type) {
 		ensureInitialized();
 
-		return m_storageBuilders.get(type);
+		return storageBuilders.get(type);
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	private Map<String, StorageBuilder> buildStorageBuilders(List<StorageBuilder> builders) {
+		Map<String, StorageBuilder> result = new LinkedHashMap<String, StorageBuilder>();
+
+		if (builders == null || builders.isEmpty()) {
+			return result;
+		}
+		for (StorageBuilder builder : builders) {
+			if (builder == null) {
+				continue;
+			}
+			String type = builder.getType();
+
+			if (type == null || type.length() == 0) {
+				LOGGER.warn("Ignore storage builder without type, builderClass={}.", builder.getClass().getName());
+				continue;
+			}
+			StorageBuilder previous = result.put(type, builder);
+
+			if (previous != null) {
+				LOGGER.warn("Duplicate storage builder type detected, type={}, previousClass={}, currentClass={}.", type,
+				      previous.getClass().getName(), builder.getClass().getName());
+			}
+		}
+		return result;
+	}
+
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
-		if (m_storageBuilders == null) {
-			m_storageBuilders = Collections.emptyMap();
-			LOGGER.warn("Storage builder manager has no configured builders, keep empty builder map.");
+		if (storageBuilders == null) {
+			storageBuilders = buildStorageBuilders(storageBuilderList);
+		} else {
+			storageBuilders = new LinkedHashMap<String, StorageBuilder>(storageBuilders);
 		}
-		m_initialized = true;
+		if (storageBuilders.isEmpty()) {
+			LOGGER.warn("Storage builder manager has no configured builders, keep empty builder map.");
+		} else {
+			LOGGER.info("Initialized storage builder manager, builderTypes={}.", storageBuilders.keySet());
+		}
+		initialized = true;
 	}
 
 	public void setStorageBuilders(Map<String, StorageBuilder> storageBuilders) {
-		m_storageBuilders = storageBuilders;
+		if (storageBuilders == null || storageBuilders.isEmpty()) {
+			this.storageBuilders = new LinkedHashMap<String, StorageBuilder>();
+		} else {
+			this.storageBuilders = new LinkedHashMap<String, StorageBuilder>(storageBuilders);
+		}
 	}
 
 }

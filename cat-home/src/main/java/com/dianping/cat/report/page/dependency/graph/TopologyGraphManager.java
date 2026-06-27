@@ -27,8 +27,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
 
@@ -52,27 +57,35 @@ import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.ProjectService;
 
+@Component
 public class TopologyGraphManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TopologyGraphManager.class);
 
-	private ModelService<DependencyReport> m_service;
+	@Resource(name = "dependencyModelService")
+	private ModelService<DependencyReport> dependencyModelService;
 
-	private DependencyItemBuilder m_itemBuilder;
+	@Resource
+	private DependencyItemBuilder dependencyItemBuilder;
 
-	private TopoGraphFormatConfigManager m_configManager;
+	@Resource
+	private TopoGraphFormatConfigManager topoGraphFormatConfigManager;
 
-	private ServerConfigManager m_manager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private TopologyGraphRepository m_topologyGraphDao;
+	@Resource
+	private TopologyGraphRepository topologyGraphRepository;
 
-	private TopologyGraphBuilder m_currentBuilder;
+	private TopologyGraphBuilder currentBuilder;
 
-	private Map<Long, TopologyGraph> m_topologyGraphs = new ConcurrentHashMap<Long, TopologyGraph>();
+	private Map<Long, TopologyGraph> topologyGraphs = new ConcurrentHashMap<Long, TopologyGraph>();
 
 	public Set<TopologyEdge> buildEdges(Set<String> domains, Date start, Date end) {
 		Set<TopologyEdge> result = new HashSet<TopologyEdge>();
@@ -95,7 +108,7 @@ public class TopologyGraphManager {
 				String to = edge.getTarget();
 
 				if (domains.contains(self) && domains.contains(to)) {
-					result.add(m_currentBuilder.cloneEdge(edge));
+					result.add(currentBuilder.cloneEdge(edge));
 				}
 			}
 		}
@@ -108,7 +121,7 @@ public class TopologyGraphManager {
 		Set<String> allDomains = new HashSet<String>();
 
 		if (topologyGraph != null) {
-			List<ProductLine> productLines = m_configManager.queryProduct();
+			List<ProductLine> productLines = topoGraphFormatConfigManager.queryProduct();
 
 			for (ProductLine entry : productLines) {
 				String productId = entry.getId();
@@ -120,7 +133,7 @@ public class TopologyGraphManager {
 
 					allDomains.add(nodeName);
 					if (node != null) {
-						dashboardGraph.addNode(productId, m_currentBuilder.cloneNode(node));
+						dashboardGraph.addNode(productId, currentBuilder.cloneNode(node));
 					}
 				}
 			}
@@ -131,7 +144,7 @@ public class TopologyGraphManager {
 				String to = edge.getTarget();
 
 				if (allDomains.contains(self) && allDomains.contains(to)) {
-					dashboardGraph.addEdge(m_currentBuilder.cloneEdge(edge));
+					dashboardGraph.addEdge(currentBuilder.cloneEdge(edge));
 				}
 			}
 		}
@@ -146,7 +159,7 @@ public class TopologyGraphManager {
 		topologyGraph.setType(GraphConstrant.PROJECT);
 		topologyGraph.setStatus(GraphConstrant.OK);
 
-		if (all != null && m_currentBuilder != null) {
+		if (all != null && currentBuilder != null) {
 			TopologyNode node = all.findTopologyNode(domain);
 
 			if (node != null) {
@@ -159,15 +172,15 @@ public class TopologyGraphManager {
 			for (TopologyEdge edge : edges) {
 				String self = edge.getSelf();
 				String target = edge.getTarget();
-				TopologyEdge cloneEdge = m_currentBuilder.cloneEdge(edge);
+				TopologyEdge cloneEdge = currentBuilder.cloneEdge(edge);
 
 				if (self.equals(domain)) {
 					TopologyNode other = all.findTopologyNode(target);
 
 					if (other != null) {
-						topologyGraph.addTopologyNode(m_currentBuilder.cloneNode(other));
+						topologyGraph.addTopologyNode(currentBuilder.cloneNode(other));
 					} else {
-						topologyGraph.addTopologyNode(m_currentBuilder.createNode(target));
+						topologyGraph.addTopologyNode(currentBuilder.createNode(target));
 					}
 					edge.setOpposite(false);
 					topologyGraph.addTopologyEdge(cloneEdge);
@@ -175,9 +188,9 @@ public class TopologyGraphManager {
 					TopologyNode other = all.findTopologyNode(self);
 
 					if (other != null) {
-						topologyGraph.addTopologyNode(m_currentBuilder.cloneNode(other));
+						topologyGraph.addTopologyNode(currentBuilder.cloneNode(other));
 					} else {
-						topologyGraph.addTopologyNode(m_currentBuilder.createNode(target));
+						topologyGraph.addTopologyNode(currentBuilder.createNode(target));
 					}
 					cloneEdge.setTarget(edge.getSelf());
 					cloneEdge.setSelf(edge.getTarget());
@@ -189,8 +202,9 @@ public class TopologyGraphManager {
 		return topologyGraph;
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_manager.isJobMachine()) {
+		if (serverConfigManager.isJobMachine()) {
 			LOGGER.info("Starting dependency topology graph reload task.");
 			Threads.forGroup("cat").start(new DependencyReloadTask());
 		} else {
@@ -200,7 +214,7 @@ public class TopologyGraphManager {
 
 	public TopologyGraph queryGraphFromDB(long time) {
 		try {
-			com.dianping.cat.home.dal.report.TopologyGraph topologyGraph = m_topologyGraphDao
+			com.dianping.cat.home.dal.report.TopologyGraph topologyGraph = topologyGraphRepository
 									.findByPeriod(new Date(time));
 
 			if (topologyGraph != null) {
@@ -216,15 +230,15 @@ public class TopologyGraphManager {
 	}
 
 	private TopologyGraph queryGraphFromMemory(long time) {
-		TopologyGraph graph = m_topologyGraphs.get(time);
+		TopologyGraph graph = topologyGraphs.get(time);
 		long current = System.currentTimeMillis();
 		long minute = current - current % TimeHelper.ONE_MINUTE;
 
 		if ((minute - time) <= 3 * TimeHelper.ONE_MINUTE && graph == null) {
-			graph = m_topologyGraphs.get(time - TimeHelper.ONE_MINUTE);
+			graph = topologyGraphs.get(time - TimeHelper.ONE_MINUTE);
 
 			if (graph == null) {
-				graph = m_topologyGraphs.get(time - TimeHelper.ONE_MINUTE * 2);
+				graph = topologyGraphs.get(time - TimeHelper.ONE_MINUTE * 2);
 			}
 		}
 		return graph;
@@ -243,11 +257,11 @@ public class TopologyGraphManager {
 	private class DependencyReloadTask implements Task {
 
 		private void buildDependencyInfo(TopologyGraphBuilder builder, String domain) {
-			if (m_serverFilterConfigManager.validateDomain(domain)) {
+			if (serverFilterConfigManager.validateDomain(domain)) {
 				ModelRequest request = new ModelRequest(domain, ModelPeriod.CURRENT.getStartTime());
 
-				if (m_service.isEligable(request)) {
-					ModelResponse<DependencyReport> response = m_service.invoke(request);
+				if (dependencyModelService.isEligable(request)) {
+					ModelResponse<DependencyReport> response = dependencyModelService.invoke(request);
 					DependencyReport report = response.getModel();
 
 					if (report != null) {
@@ -272,8 +286,8 @@ public class TopologyGraphManager {
 				Transaction t = Cat.newTransaction("ReloadTask", "Dependency");
 				long current = System.currentTimeMillis();
 				try {
-					TopologyGraphBuilder builder = new TopologyGraphBuilder().setItemBuilder(m_itemBuilder);
-					Collection<String> domains = m_projectService.findAllDomains();
+					TopologyGraphBuilder builder = new TopologyGraphBuilder().setItemBuilder(dependencyItemBuilder);
+					Collection<String> domains = projectService.findAllDomains();
 
 					for (String domain : domains) {
 						try {
@@ -286,11 +300,11 @@ public class TopologyGraphManager {
 					Map<Long, TopologyGraph> graphs = builder.getGraphs();
 
 					for (Entry<Long, TopologyGraph> entry : graphs.entrySet()) {
-						m_topologyGraphs.put(entry.getKey(), entry.getValue());
+						topologyGraphs.put(entry.getKey(), entry.getValue());
 
-						m_topologyGraphs.remove(entry.getKey() - TimeHelper.ONE_HOUR * 2);
+						topologyGraphs.remove(entry.getKey() - TimeHelper.ONE_HOUR * 2);
 					}
-					m_currentBuilder = builder;
+					currentBuilder = builder;
 					t.setStatus(Transaction.SUCCESS);
 				} catch (Exception e) {
 					LOGGER.error("Unable to reload dependency topology graph.", e);
@@ -317,31 +331,31 @@ public class TopologyGraphManager {
 	}
 
 	public void setConfigManager(TopoGraphFormatConfigManager configManager) {
-		m_configManager = configManager;
+		topoGraphFormatConfigManager = configManager;
 	}
 
 	public void setItemBuilder(DependencyItemBuilder itemBuilder) {
-		m_itemBuilder = itemBuilder;
+		dependencyItemBuilder = itemBuilder;
 	}
 
 	public void setManager(ServerConfigManager manager) {
-		m_manager = manager;
+		serverConfigManager = manager;
 	}
 
 	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
+		this.serverFilterConfigManager = serverFilterConfigManager;
 	}
 
 	public void setService(ModelService<DependencyReport> service) {
-		m_service = service;
+		dependencyModelService = service;
 	}
 
 	public void setTopologyGraphDao(TopologyGraphRepository topologyGraphDao) {
-		m_topologyGraphDao = topologyGraphDao;
+		topologyGraphRepository = topologyGraphDao;
 	}
 
 }

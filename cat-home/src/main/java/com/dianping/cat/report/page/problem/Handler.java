@@ -28,7 +28,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -55,33 +57,41 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component("problemHandler")
 public class Handler implements PageHandler<Context> {
 
 	private static final String DETAIL = "detail";
 
 	private static final String VIEW = "view";
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private ServerConfigManager m_manager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
-	private ProblemReportService m_reportService;
+	@Resource
+	private ProblemReportService problemReportService;
 
-	private ModelService<ProblemReport> m_service;
+	@Resource(name = "problemModelService")
+	private ModelService<ProblemReport> problemModelService;
 
-	private DomainGroupConfigManager m_configManager;
+	@Resource
+	private DomainGroupConfigManager domainGroupConfigManager;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private JsonBuilder m_jsonBuilder;
+	@Resource
+	private JsonBuilder jsonBuilder;
 
 	private void buildDefaultThreshold(Model model, Payload payload) {
-		Map<String, Domain> domains = m_manager.getLongConfigDomains();
+		Map<String, Domain> domains = serverConfigManager.getLongConfigDomains();
 		Domain d = domains.get(payload.getDomain());
 
 		if (d != null) {
 			int longUrlTime =
-									d.getUrlThreshold() == null ? m_manager.getLongUrlDefaultThreshold() : d.getUrlThreshold().intValue();
+									d.getUrlThreshold() == null ? serverConfigManager.getLongUrlDefaultThreshold() : d.getUrlThreshold().intValue();
 
 			if (longUrlTime != 500 && longUrlTime != 1000 && longUrlTime != 2000 && longUrlTime != 3000	&& longUrlTime != 4000
 									&& longUrlTime != 5000) {
@@ -114,7 +124,7 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private ProblemReport filterReportByGroup(ProblemReport report, String domain, String group) {
-		List<String> ips = m_configManager.queryIpByDomainAndGroup(domain, group);
+		List<String> ips = domainGroupConfigManager.queryIpByDomainAndGroup(domain, group);
 		List<String> removes = new ArrayList<String>();
 
 		for (Machine machine : report.getMachines().values()) {
@@ -150,8 +160,8 @@ public class Handler implements PageHandler<Context> {
 		if (!StringUtils.isEmpty(payload.getStatus())) {
 			request.setProperty("name", payload.getStatus());
 		}
-		if (m_service.isEligable(request)) {
-			ModelResponse<ProblemReport> response = m_service.invoke(request);
+		if (problemModelService.isEligable(request)) {
+			ModelResponse<ProblemReport> response = problemModelService.invoke(request);
 			ProblemReport report = response.getModel();
 
 			return report;
@@ -199,11 +209,11 @@ public class Handler implements PageHandler<Context> {
 		problemStatistics.setLongConfig(longConfig);
 
 		if (StringUtils.isEmpty(group)) {
-			group = m_configManager.queryDefaultGroup(domain);
+			group = domainGroupConfigManager.queryDefaultGroup(domain);
 			payload.setGroup(group);
 		}
-		model.setGroupIps(m_configManager.queryIpByDomainAndGroup(domain, group));
-		model.setGroups(m_configManager.queryDomainGroup(payload.getDomain()));
+		model.setGroupIps(domainGroupConfigManager.queryIpByDomainAndGroup(domain, group));
+		model.setGroups(domainGroupConfigManager.queryDomainGroup(payload.getDomain()));
 		switch (action) {
 		case HOULY_REPORT:
 			report = getHourlyReport(payload, VIEW);
@@ -249,7 +259,7 @@ public class Handler implements PageHandler<Context> {
 
 			vistor.visitProblemReport(report);
 			model.setReport(report);
-			model.setErrorsTrend(m_jsonBuilder.toJson(vistor.getGraphItem()));
+			model.setErrorsTrend(jsonBuilder.toJson(vistor.getGraphItem()));
 			buildDistributionChart(model, payload, report);
 			break;
 		case HOURLY_GROUP_REPORT:
@@ -273,7 +283,7 @@ public class Handler implements PageHandler<Context> {
 			start = report.getStartTime();
 			vistor = new HourlyLineChartVisitor(Constants.ALL, type, state, start);
 			vistor.visitProblemReport(report);
-			model.setErrorsTrend(m_jsonBuilder.toJson(vistor.getGraphItem()));
+			model.setErrorsTrend(jsonBuilder.toJson(vistor.getGraphItem()));
 			model.setReport(report);
 			buildDistributionChart(model, payload, report);
 			break;
@@ -310,14 +320,14 @@ public class Handler implements PageHandler<Context> {
 			showDetail(model, payload);
 			break;
 		}
-		m_jspViewer.view(ctx, model);
+		jspViewer.view(ctx, model);
 	}
 
 	private void normalize(Model model, Payload payload) {
 		buildDefaultThreshold(model, payload);
 		model.setPage(ReportPage.PROBLEM);
 		model.setAction(payload.getAction());
-		m_normalizePayload.normalize(model, payload);
+		normalizePayload.normalize(model, payload);
 	}
 
 	private void showDetail(Model model, Payload payload) {
@@ -369,7 +379,7 @@ public class Handler implements PageHandler<Context> {
 		String domain = model.getDomain();
 		Date start = payload.getHistoryStartDate();
 		Date end = payload.getHistoryEndDate();
-		ProblemReport problemReport = m_reportService.queryReport(domain, start, end);
+		ProblemReport problemReport = problemReportService.queryReport(domain, start, end);
 
 		return problemReport;
 	}
@@ -387,31 +397,4 @@ public class Handler implements PageHandler<Context> {
 		DETAIL
 	}
 
-	public void setConfigManager(DomainGroupConfigManager configManager) {
-		m_configManager = configManager;
-	}
-
-	public void setJsonBuilder(JsonBuilder jsonBuilder) {
-		m_jsonBuilder = jsonBuilder;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setManager(ServerConfigManager manager) {
-		m_manager = manager;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setReportService(ProblemReportService reportService) {
-		m_reportService = reportService;
-	}
-
-	public void setService(ModelService<ProblemReport> service) {
-		m_service = service;
-	}
 }

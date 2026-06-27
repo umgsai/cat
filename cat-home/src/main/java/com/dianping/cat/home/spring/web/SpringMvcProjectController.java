@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class SpringMvcProjectController {
 	@Resource
-	private ProjectService m_projectService;
+	private ProjectService projectService;
 
 	@GetMapping("/s/project")
 	public void project(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -42,7 +42,7 @@ public class SpringMvcProjectController {
 
 	String domainsJson() {
 		JsonBuilder builder = new JsonBuilder();
-		Set<String> domains = m_projectService.findAllDomains();
+		Set<String> domains = projectService.findAllDomains();
 		Map<String, Object> jsons = new HashMap<String, Object>();
 
 		jsons.put("domains", domains);
@@ -50,7 +50,7 @@ public class SpringMvcProjectController {
 	}
 
 	void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	private void writeJson(HttpServletResponse response, String content) throws IOException {

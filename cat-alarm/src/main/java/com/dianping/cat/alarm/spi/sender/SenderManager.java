@@ -19,65 +19,110 @@
 package com.dianping.cat.alarm.spi.sender;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Event;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+@Component
 public class SenderManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SenderManager.class);
 
-	private ServerConfigManager m_configManager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
-	private Map<String, Sender> m_senders = new HashMap<String, Sender>();
+	@Resource
+	private List<Sender> senderList = Collections.emptyList();
 
-	private volatile boolean m_initialized;
+	private Map<String, Sender> senders;
 
+	private volatile boolean initialized;
+
+	@PostConstruct
 	public void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 		synchronized (this) {
-			if (m_initialized) {
+			if (initialized) {
 				return;
 			}
-			if (m_senders.isEmpty()) {
+			if (senders == null) {
+				senders = buildSenders(senderList);
+			} else {
+				senders = copySenders(senders);
+			}
+			if (senders.isEmpty()) {
 				LOGGER.warn("Alert sender manager has no configured senders.");
 			} else {
-				LOGGER.info("Initialized alert sender manager from Spring injection, senderCount={}.", m_senders.size());
+				LOGGER.info("Initialized alert sender manager from Spring injection, senderKeys={}.", senders.keySet());
 			}
-			m_initialized = true;
+			initialized = true;
 		}
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
-	public void setSenders(Map<String, Sender> senders) {
-		if (senders == null || senders.isEmpty()) {
-			m_senders = new HashMap<String, Sender>();
-		} else {
-			m_senders = new HashMap<String, Sender>(senders);
+	private Map<String, Sender> buildSenders(List<Sender> senderList) {
+		Map<String, Sender> result = new LinkedHashMap<String, Sender>();
+
+		if (senderList == null || senderList.isEmpty()) {
+			return result;
 		}
-		LOGGER.info("Configured alert senders from Spring, senderKeys={}.", m_senders.keySet());
+		for (Sender sender : senderList) {
+			if (sender == null) {
+				continue;
+			}
+			String id = sender.getId();
+
+			if (id == null || id.length() == 0) {
+				LOGGER.warn("Ignore alert sender without id, senderClass={}.", sender.getClass().getName());
+				continue;
+			}
+			Sender previous = result.put(id, sender);
+
+			if (previous != null) {
+				LOGGER.warn("Duplicate alert sender id detected, id={}, previousClass={}, currentClass={}.", id,
+				      previous.getClass().getName(), sender.getClass().getName());
+			}
+		}
+		return result;
+	}
+
+	private Map<String, Sender> copySenders(Map<String, Sender> senders) {
+		if (senders == null || senders.isEmpty()) {
+			return new LinkedHashMap<String, Sender>();
+		}
+		return new LinkedHashMap<String, Sender>(senders);
+	}
+
+	public void setSenders(Map<String, Sender> senders) {
+		this.senders = copySenders(senders);
+		LOGGER.info("Configured alert senders from Spring, senderKeys={}.", this.senders.keySet());
 	}
 
 	public void setConfigManager(ServerConfigManager configManager) {
-		m_configManager = configManager;
+		serverConfigManager = configManager;
 	}
 
 	public Map<String, Sender> getSenders() {
 		ensureInitialized();
-		return Collections.unmodifiableMap(m_senders);
+		return Collections.unmodifiableMap(senders);
 	}
 
 	public boolean sendAlert(AlertChannel channel, SendMessageEntity message) {
@@ -88,8 +133,8 @@ public class SenderManager {
 			boolean result = false;
 			String str = "nosend";
 
-			if (m_configManager != null && m_configManager.isSendMachine()) {
-				Sender sender = m_senders.get(channelName);
+			if (serverConfigManager != null && serverConfigManager.isSendMachine()) {
+				Sender sender = senders.get(channelName);
 
 				if (sender == null) {
 					LOGGER.warn("Alert sender is not configured, channel={}, messageType={}.", channelName,

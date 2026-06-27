@@ -38,12 +38,16 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("localHeartbeatService")
 public class LocalHeartbeatService extends LocalModelService<HeartbeatReport> {
 
 	public static final String ID = HeartbeatAnalyzer.ID;
 
-	private ReportBucketManager m_bucketManager;
+	@Resource(name = "reportBucketManager")
+	private ReportBucketManager reportBucketManager;
 
 	public LocalHeartbeatService() {
 		super(HeartbeatAnalyzer.ID);
@@ -123,11 +127,11 @@ public class LocalHeartbeatService extends LocalModelService<HeartbeatReport> {
 	}
 
 	private ReportBucketManager getBucketManager() {
-		return m_bucketManager;
+		return reportBucketManager;
 	}
 
 	public void setBucketManager(ReportBucketManager bucketManager) {
-		m_bucketManager = bucketManager;
+		reportBucketManager = bucketManager;
 	}
 
 	public static class HeartBeatReportFilter

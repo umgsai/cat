@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -33,6 +34,7 @@ import com.dianping.cat.home.jar.entity.JarReport;
 import com.dianping.cat.home.jar.transform.DefaultNativeParser;
 import com.dianping.cat.report.service.AbstractReportService;
 
+@Component
 public class JarReportService extends AbstractReportService<JarReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JarReportService.class);
 
@@ -47,7 +49,7 @@ public class JarReportService extends AbstractReportService<JarReport> {
 	}
 
 	private JarReport queryFromHourlyBinary(long id, Date period, String domain) {
-		HourlyReportContent content = m_hourlyReportContentDao
+		HourlyReportContent content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {
@@ -66,7 +68,7 @@ public class JarReportService extends AbstractReportService<JarReport> {
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			List<HourlyReport> reports = null;
 			try {
-				reports = m_hourlyReportDao.findAllByDomainNamePeriod(start, domain, name);
+				reports = hourlyReportRepository.findAllByDomainNamePeriod(start, domain, name);
 			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query jar hourly report list, domain={}, period={}.", domain, new Date(startTime),
 						e);

@@ -20,20 +20,25 @@ package com.dianping.cat.report.task.cmdb;
 
 import java.util.Date;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import com.dianping.cat.support.Threads;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.report.task.TaskBuilder;
 
+@Component(CmdbInfoReloadBuilder.ID)
 public class CmdbInfoReloadBuilder implements TaskBuilder {
 
 	public static final String ID = Constants.CMDB;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CmdbInfoReloadBuilder.class);
 
-	private ProjectUpdateTask m_projectUpdateTask;
+	@Resource
+	private ProjectUpdateTask projectUpdateTask;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -42,12 +47,12 @@ public class CmdbInfoReloadBuilder implements TaskBuilder {
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
-		if (m_projectUpdateTask == null) {
+		if (projectUpdateTask == null) {
 			LOGGER.warn("Project update task is not available, skip cmdb reload task, name={}, domain={}, period={}.",
 					name, domain, period);
 			return false;
 		}
-		Threads.forGroup(Constants.CAT).start(m_projectUpdateTask);
+		Threads.forGroup(Constants.CAT).start(projectUpdateTask);
 		return true;
 	}
 
@@ -62,7 +67,7 @@ public class CmdbInfoReloadBuilder implements TaskBuilder {
 	}
 
 	public void setProjectUpdateTask(ProjectUpdateTask projectUpdateTask) {
-		m_projectUpdateTask = projectUpdateTask;
+		this.projectUpdateTask = projectUpdateTask;
 	}
 
 }

@@ -18,6 +18,11 @@
  */
 package com.dianping.cat.report.page.event.task;
 
+import jakarta.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -41,16 +46,20 @@ import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 
+@Component(EventAnalyzer.ID)
 public class EventReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EventReportBuilder.class);
 
 	public static final String ID = EventAnalyzer.ID;
 
-	protected EventReportService m_reportService;
+	@Resource
+	protected EventReportService reportService;
 
-	protected ServerConfigManager m_serverConfigManager;
+	@Resource
+	protected ServerConfigManager serverConfigManager;
 
-	private AtomicMessageConfigManager m_atomicMessageConfigManager;
+	@Resource
+	private AtomicMessageConfigManager atomicMessageConfigManager;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -66,7 +75,7 @@ public class EventReportBuilder implements TaskBuilder {
 			report.setPeriod(period);
 			report.setType(1);
 			byte[] binaryContent = DefaultNativeBuilder.build(eventReport);
-			return m_reportService.insertDailyReport(report, binaryContent);
+			return reportService.insertDailyReport(report, binaryContent);
 		} catch (Exception e) {
 			LOGGER.error("Unable to build event daily report, name={}, domain={}, period={}.", name, domain, period, e);
 			Cat.logError(e);
@@ -101,7 +110,7 @@ public class EventReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(eventReport);
-		return m_reportService.insertMonthlyReport(report, binaryContent);
+		return reportService.insertMonthlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -126,9 +135,10 @@ public class EventReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(eventReport);
-		return m_reportService.insertWeeklyReport(report, binaryContent);
+		return reportService.insertWeeklyReport(report, binaryContent);
 	}
 
+	@PostConstruct
 	public void initialize() {
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
@@ -161,7 +171,7 @@ public class EventReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime += TimeHelper.ONE_DAY) {
 			try {
-				EventReport reportModel = m_reportService
+				EventReport reportModel = reportService
 										.queryReport(domain, new Date(startTime), new Date(startTime + TimeHelper.ONE_DAY));
 
 				creator.createGraph(reportModel);
@@ -176,8 +186,8 @@ public class EventReportBuilder implements TaskBuilder {
 		eventReport.setStartTime(start);
 		eventReport.setEndTime(end);
 
-		new EventReportCountFilter(m_serverConfigManager.getMaxTypeThreshold(),
-								m_atomicMessageConfigManager.getMaxNameThreshold(domain), m_serverConfigManager.getTypeNameLengthLimit())
+		new EventReportCountFilter(serverConfigManager.getMaxTypeThreshold(),
+								atomicMessageConfigManager.getMaxNameThreshold(domain), serverConfigManager.getTypeNameLengthLimit())
 								.visitEventReport(eventReport);
 		return eventReport;
 	}
@@ -191,7 +201,7 @@ public class EventReportBuilder implements TaskBuilder {
 		EventReportHourlyGraphCreator graphCreator = new EventReportHourlyGraphCreator(merger.getEventReport(), 10);
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
-			EventReport report = m_reportService
+			EventReport report = reportService
 									.queryReport(domain, new Date(startTime), new Date(startTime + TimeHelper.ONE_HOUR));
 
 			graphCreator.createGraph(report);
@@ -205,23 +215,23 @@ public class EventReportBuilder implements TaskBuilder {
 		dailyReport.setStartTime(TaskHelper.todayZero(date));
 		dailyReport.setEndTime(end);
 
-		new EventReportCountFilter(m_serverConfigManager.getMaxTypeThreshold(),
-								m_atomicMessageConfigManager.getMaxNameThreshold(domain), m_serverConfigManager.getTypeNameLengthLimit())
+		new EventReportCountFilter(serverConfigManager.getMaxTypeThreshold(),
+								atomicMessageConfigManager.getMaxNameThreshold(domain), serverConfigManager.getTypeNameLengthLimit())
 								.visitEventReport(dailyReport);
 
 		return dailyReport;
 	}
 
 	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {
-		m_atomicMessageConfigManager = atomicMessageConfigManager;
+		this.atomicMessageConfigManager = atomicMessageConfigManager;
 	}
 
 	public void setReportService(EventReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 }

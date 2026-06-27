@@ -23,8 +23,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import com.dianping.cat.Cat;
@@ -39,68 +43,79 @@ import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
+@Component
 public class AllReportConfigManager {
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AllReportConfigManager.class);
 
 	private static final String CONFIG_NAME = "all-report-config";
 
-	private ConfigRepository m_configDao;
+	@Resource
+	private ConfigRepository configRepository;
 
-	private ContentFetcher m_fetcher;
+	@Resource
+	private ContentFetcher contentFetcher;
 
-	private long m_configId;
+	private long configId;
 
-	private volatile AllConfig m_config;
+	private volatile AllConfig config;
 
-	private long m_modifyTime;
+	private long modifyTime;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public AllConfig getConfig() {
 		ensureInitialized();
-		return m_config;
+		return config;
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME);
+			Config config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
-			m_configId = config.getId();
-			m_config = DefaultSaxParser.parse(content);
-			m_modifyTime = config.getModifyDate().getTime();
+			configId = config.getId();
+			this.config = DefaultSaxParser.parse(content);
+			modifyTime = config.getModifyDate().getTime();
+			LOGGER.info("Loaded all report config from repository, configId={}, modifyTime={}.", configId, modifyTime);
 		} catch (EmptyResultDataAccessException e) {
+			LOGGER.warn("All report config is missing in repository, loading default content from fetcher.", e);
+
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
+				String content = contentFetcher.getConfigContent(CONFIG_NAME);
+				Config config = configRepository.createLocal();
 				Date now = new Date();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(content);
 				config.setModifyDate(now);
-				m_configDao.insert(config);
+				configRepository.insert(config);
 
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
-				m_modifyTime = now.getTime();
+				configId = config.getId();
+				this.config = DefaultSaxParser.parse(content);
+				modifyTime = now.getTime();
+				LOGGER.info("Initialized all report config from default content, configId={}.", configId);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to initialize all report config from default content.", ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to load all report config from repository.", e);
 			Cat.logError(e);
 		}
-		if (m_config == null) {
-			m_config = new AllConfig();
+		if (config == null) {
+			config = new AllConfig();
+			LOGGER.warn("All report config is empty after initialization, using a new empty config.");
 		}
 
 		TimerSyncTask.getInstance().register(new SyncHandler() {
@@ -115,14 +130,14 @@ public class AllReportConfigManager {
 				return CONFIG_NAME;
 			}
 		});
-		m_initialized = true;
+		initialized = true;
 	}
 
 	public boolean insert(String xml) {
 		ensureInitialized();
 
 		try {
-			m_config = DefaultSaxParser.parse(xml);
+			config = DefaultSaxParser.parse(xml);
 			boolean result = storeConfig();
 
 			return result;
@@ -134,16 +149,17 @@ public class AllReportConfigManager {
 	}
 
 	private void refreshConfig() throws SAXException, IOException {
-		Config config = m_configDao.findByName(CONFIG_NAME);
+		Config config = configRepository.findByName(CONFIG_NAME);
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
-			if (modifyTime > m_modifyTime) {
+			if (modifyTime > this.modifyTime) {
 				String content = config.getContent();
 				AllConfig allConfig = DefaultSaxParser.parse(content);
 
-				m_config = allConfig;
-				m_modifyTime = modifyTime;
+				this.config = allConfig;
+				this.modifyTime = modifyTime;
+				LOGGER.info("Refreshed all report config, configId={}, modifyTime={}.", configId, this.modifyTime);
 			}
 		}
 	}
@@ -151,14 +167,16 @@ public class AllReportConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = m_configDao.createLocal();
+				Config config = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
+				config.setId(configId);
+				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
-				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config);
+				config.setContent(this.config.toString());
+				configRepository.updateByPK(config);
+				LOGGER.info("Stored all report config, configId={}.", configId);
 			} catch (Exception e) {
+				LOGGER.error("Unable to store all report config, configId={}.", configId, e);
 				Cat.logError(e);
 				return false;
 			}
@@ -169,7 +187,7 @@ public class AllReportConfigManager {
 	public boolean validate(String reportName, String type) {
 		ensureInitialized();
 
-		Report report = m_config.getReports().get(reportName);
+		Report report = config.getReports().get(reportName);
 
 		if (report != null) {
 			Map<String, Type> types = report.getTypes();
@@ -183,7 +201,7 @@ public class AllReportConfigManager {
 	public boolean validate(String reportName, String type, String name) {
 		ensureInitialized();
 
-		Report report = m_config.getReports().get(reportName);
+		Report report = config.getReports().get(reportName);
 
 		if (report != null) {
 			Map<String, Type> types = report.getTypes();
@@ -205,11 +223,11 @@ public class AllReportConfigManager {
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
 }

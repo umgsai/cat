@@ -24,6 +24,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -34,6 +35,10 @@ import com.dianping.cat.home.exception.entity.ExceptionLimit;
 import com.dianping.cat.home.exception.entity.ExceptionRuleConfig;
 import com.dianping.cat.home.exception.transform.DefaultSaxParser;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+@Component
 public class ExceptionRuleConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionRuleConfigManager.class);
 
@@ -43,64 +48,67 @@ public class ExceptionRuleConfigManager {
 
 	public static String TOTAL_STRING = "Total";
 
-	private ConfigRepository m_configDao;
+	@Resource
+	private ConfigRepository configRepository;
 
-	private ContentFetcher m_fetcher;
+	@Resource
+	private ContentFetcher contentFetcher;
 
-	private long m_configId;
+	private long configId;
 
-	private ExceptionRuleConfig m_exceptionRuleConfig;
+	private ExceptionRuleConfig exceptionRuleConfig;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
 	public boolean deleteExceptionExclude(String domain, String exceptionName) {
-		m_exceptionRuleConfig.removeExceptionExclude(domain + ":" + exceptionName);
+		exceptionRuleConfig.removeExceptionExclude(domain + ":" + exceptionName);
 
 		return storeConfig();
 	}
 
 	public boolean deleteExceptionLimit(String domain, String exceptionName) {
-		m_exceptionRuleConfig.removeExceptionLimit(domain + ":" + exceptionName);
+		exceptionRuleConfig.removeExceptionLimit(domain + ":" + exceptionName);
 
 		return storeConfig();
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 		synchronized (this) {
-			if (m_initialized) {
+			if (initialized) {
 				return;
 			}
 
 			try {
 				LOGGER.info("Initializing exception rule config manager, configName={}.", CONFIG_NAME);
-				Config config = m_configDao.findByName(CONFIG_NAME);
+				Config config = configRepository.findByName(CONFIG_NAME);
 				String content = config.getContent();
-				m_configId = config.getId();
-				m_exceptionRuleConfig = DefaultSaxParser.parse(content);
+				configId = config.getId();
+				exceptionRuleConfig = DefaultSaxParser.parse(content);
 			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Exception rule config not found in repository, loading default content, configName={}.",
 				      CONFIG_NAME);
 				try {
-					String content = m_fetcher.getConfigContent(CONFIG_NAME);
-					Config config = m_configDao.createLocal();
+					String content = contentFetcher.getConfigContent(CONFIG_NAME);
+					Config config = configRepository.createLocal();
 
 					config.setName(CONFIG_NAME);
 					config.setContent(content);
-					m_configDao.insert(config);
+					configRepository.insert(config);
 
-					m_configId = config.getId();
-					m_exceptionRuleConfig = DefaultSaxParser.parse(content);
+					configId = config.getId();
+					exceptionRuleConfig = DefaultSaxParser.parse(content);
 				} catch (Exception ex) {
 					LOGGER.error("Unable to create default exception rule config, configName={}.", CONFIG_NAME, ex);
 					Cat.logError(ex);
@@ -109,16 +117,16 @@ public class ExceptionRuleConfigManager {
 				LOGGER.error("Unable to initialize exception rule config, configName={}.", CONFIG_NAME, e);
 				Cat.logError(e);
 			}
-			if (m_exceptionRuleConfig == null) {
+			if (exceptionRuleConfig == null) {
 				LOGGER.warn("Exception rule config is empty after initialization, using an empty config.");
-				m_exceptionRuleConfig = new ExceptionRuleConfig();
+				exceptionRuleConfig = new ExceptionRuleConfig();
 			}
-			m_initialized = true;
+			initialized = true;
 		}
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
@@ -138,7 +146,7 @@ public class ExceptionRuleConfigManager {
 		ensureInitialized();
 		String id = exclude.getDomain() + ":" + exclude.getName();
 
-		m_exceptionRuleConfig.getExceptionExcludes().put(id, exclude);
+		exceptionRuleConfig.getExceptionExcludes().put(id, exclude);
 		return storeConfig();
 	}
 
@@ -146,36 +154,36 @@ public class ExceptionRuleConfigManager {
 		ensureInitialized();
 		String id = limit.getDomain() + ":" + limit.getName();
 
-		m_exceptionRuleConfig.getExceptionLimits().put(id, limit);
+		exceptionRuleConfig.getExceptionLimits().put(id, limit);
 		return storeConfig();
 	}
 
 	public List<ExceptionExclude> queryAllExceptionExcludes() {
 		ensureInitialized();
-		return new ArrayList<ExceptionExclude>(m_exceptionRuleConfig.getExceptionExcludes().values());
+		return new ArrayList<ExceptionExclude>(exceptionRuleConfig.getExceptionExcludes().values());
 	}
 
 	public List<ExceptionLimit> queryAllExceptionLimits() {
 		ensureInitialized();
-		return new ArrayList<ExceptionLimit>(m_exceptionRuleConfig.getExceptionLimits().values());
+		return new ArrayList<ExceptionLimit>(exceptionRuleConfig.getExceptionLimits().values());
 	}
 
 	public ExceptionExclude queryExceptionExclude(String domain, String exceptionName) {
 		ensureInitialized();
-		ExceptionExclude exceptionExclude = m_exceptionRuleConfig.findExceptionExclude(domain + ":" + exceptionName);
+		ExceptionExclude exceptionExclude = exceptionRuleConfig.findExceptionExclude(domain + ":" + exceptionName);
 
 		if (exceptionExclude == null) {
-			exceptionExclude = m_exceptionRuleConfig.findExceptionExclude(DEFAULT_STRING + ":" + exceptionName);
+			exceptionExclude = exceptionRuleConfig.findExceptionExclude(DEFAULT_STRING + ":" + exceptionName);
 		}
 		return exceptionExclude;
 	}
 
 	public ExceptionLimit queryExceptionLimit(String domain, String exceptionName) {
 		ensureInitialized();
-		ExceptionLimit exceptionLimit = m_exceptionRuleConfig.findExceptionLimit(domain + ":" + exceptionName);
+		ExceptionLimit exceptionLimit = exceptionRuleConfig.findExceptionLimit(domain + ":" + exceptionName);
 
 		if (exceptionLimit == null) {
-			exceptionLimit = m_exceptionRuleConfig.findExceptionLimit(DEFAULT_STRING + ":" + exceptionName);
+			exceptionLimit = exceptionRuleConfig.findExceptionLimit(DEFAULT_STRING + ":" + exceptionName);
 		}
 		return exceptionLimit;
 	}
@@ -183,16 +191,16 @@ public class ExceptionRuleConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = m_configDao.createLocal();
+				Config config = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
+				config.setId(configId);
+				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
-				config.setContent(m_exceptionRuleConfig.toString());
-				m_configDao.updateByPK(config);
+				config.setContent(exceptionRuleConfig.toString());
+				configRepository.updateByPK(config);
 			} catch (Exception e) {
 				LOGGER.error("Unable to store exception rule config, configName={}, configId={}.", CONFIG_NAME,
-				      m_configId, e);
+				      configId, e);
 				Cat.logError(e);
 				return false;
 			}

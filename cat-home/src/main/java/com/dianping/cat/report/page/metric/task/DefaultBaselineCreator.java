@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component("baselineCreator")
 public class DefaultBaselineCreator implements BaselineCreator {
 
 	public double computeAvg(List<Double> data) {

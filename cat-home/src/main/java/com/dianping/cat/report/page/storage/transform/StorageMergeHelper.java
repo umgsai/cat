@@ -18,9 +18,12 @@
  */
 package com.dianping.cat.report.page.storage.transform;
 
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 
+@Component
 public class StorageMergeHelper {
 
 	public StorageReport mergeAllDomains(StorageReport storageReport, String domain) {

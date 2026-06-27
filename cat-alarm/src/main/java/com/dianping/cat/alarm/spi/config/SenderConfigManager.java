@@ -23,6 +23,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.sender.entity.Par;
@@ -33,63 +34,70 @@ import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.mybatis.ConfigRepository;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+@Component
 public class SenderConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SenderConfigManager.class);
 
 	private static final String CONFIG_NAME = "senderConfig";
 
-	private ConfigRepository m_configDao;
+	@Resource
+	private ConfigRepository configRepository;
 
-	private ContentFetcher m_fetcher;
+	@Resource
+	private ContentFetcher contentFetcher;
 
-	private long m_configId;
+	private long configId;
 
-	private SenderConfig m_senderConfig;
+	private SenderConfig senderConfig;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
 	public SenderConfig getConfig() {
 		ensureInitialized();
-		return m_senderConfig;
+		return senderConfig;
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 		synchronized (this) {
-			if (m_initialized) {
+			if (initialized) {
 				return;
 			}
 			try {
-				Config config = m_configDao.findByName(CONFIG_NAME);
+				Config config = configRepository.findByName(CONFIG_NAME);
 				String content = config.getContent();
 
-				m_senderConfig = DefaultSaxParser.parse(content);
-				m_configId = config.getId();
-				LOGGER.info("Loaded sender config from repository, configId={}.", m_configId);
+				senderConfig = DefaultSaxParser.parse(content);
+				configId = config.getId();
+				LOGGER.info("Loaded sender config from repository, configId={}.", configId);
 			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Sender config is missing in repository, loading default content from fetcher.", e);
 
 				try {
-					String content = m_fetcher.getConfigContent(CONFIG_NAME);
-					Config config = m_configDao.createLocal();
+					String content = contentFetcher.getConfigContent(CONFIG_NAME);
+					Config config = configRepository.createLocal();
 
 					config.setName(CONFIG_NAME);
 					config.setContent(content);
-					m_configDao.insert(config);
+					configRepository.insert(config);
 
-					m_senderConfig = DefaultSaxParser.parse(content);
-					m_configId = config.getId();
-					LOGGER.info("Initialized sender config from default content, configId={}.", m_configId);
+					senderConfig = DefaultSaxParser.parse(content);
+					configId = config.getId();
+					LOGGER.info("Initialized sender config from default content, configId={}.", configId);
 				} catch (Exception ex) {
 					LOGGER.error("Unable to initialize sender config from default content.", ex);
 					Cat.logError(ex);
@@ -98,23 +106,23 @@ public class SenderConfigManager {
 				LOGGER.error("Unable to load sender config from repository.", e);
 				Cat.logError(e);
 			}
-			if (m_senderConfig == null) {
-				m_senderConfig = new SenderConfig();
+			if (senderConfig == null) {
+				senderConfig = new SenderConfig();
 				LOGGER.warn("Sender config is empty after initialization, using a new empty config.");
 			}
-			m_initialized = true;
+			initialized = true;
 		}
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
 	public boolean insert(Sender sender) {
 		ensureInitialized();
-		m_senderConfig.getSenders().put(sender.getId(), sender);
+		senderConfig.getSenders().put(sender.getId(), sender);
 
 		return storeConfig();
 	}
@@ -122,7 +130,7 @@ public class SenderConfigManager {
 	public boolean insert(String xml) {
 		ensureInitialized();
 		try {
-			m_senderConfig = DefaultSaxParser.parse(xml);
+			senderConfig = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
@@ -162,12 +170,12 @@ public class SenderConfigManager {
 
 	public Sender querySender(String id) {
 		ensureInitialized();
-		return m_senderConfig.getSenders().get(id);
+		return senderConfig.getSenders().get(id);
 	}
 
 	public boolean remove(String id) {
 		ensureInitialized();
-		m_senderConfig.removeSender(id);
+		senderConfig.removeSender(id);
 
 		return storeConfig();
 	}
@@ -175,17 +183,17 @@ public class SenderConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = m_configDao.createLocal();
+				Config config = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
+				config.setId(configId);
+				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
-				config.setContent(m_senderConfig.toString());
-				m_configDao.updateByPK(config);
-				LOGGER.info("Stored sender config, configId={}, senderCount={}.", m_configId,
-						m_senderConfig.getSenders().size());
+				config.setContent(senderConfig.toString());
+				configRepository.updateByPK(config);
+				LOGGER.info("Stored sender config, configId={}, senderCount={}.", configId,
+						senderConfig.getSenders().size());
 			} catch (Exception e) {
-				LOGGER.error("Unable to store sender config, configId={}.", m_configId, e);
+				LOGGER.error("Unable to store sender config, configId={}.", configId, e);
 				Cat.logError(e);
 				return false;
 			}

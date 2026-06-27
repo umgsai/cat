@@ -22,11 +22,17 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.mybatis.TaskRepository;
+import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.Calendar;
 import java.util.Date;
 
+@Component
 public class TaskManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TaskManager.class);
 
 	public static final int REPORT_HOUR = 0;
 
@@ -42,7 +48,8 @@ public class TaskManager {
 
 	private static final int STATUS_TODO = 1;
 
-	private TaskRepository m_taskDao;
+	@Resource
+	private TaskRepository taskRepository;
 
 	public boolean createTask(Date period, String domain, String name, TaskCreationPolicy policy) {
 		ensureTaskDao();
@@ -78,6 +85,8 @@ public class TaskManager {
 			}
 			return true;
 		} catch (RuntimeException e) {
+			LOGGER.error("Unable to create report task, period={}, domain={}, name={}, policy={}.", period, domain,
+					name, policy, e);
 			Cat.logError(e);
 			return false;
 		}
@@ -85,7 +94,7 @@ public class TaskManager {
 
 	protected void insertToDatabase(Date period, String domain, String name, int reportType) {
 		ensureTaskDao();
-		Task task = m_taskDao.createLocal();
+		Task task = taskRepository.createLocal();
 
 		task.setCreationDate(new Date());
 		task.setProducer(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
@@ -94,17 +103,17 @@ public class TaskManager {
 		task.setReportPeriod(period);
 		task.setStatus(STATUS_TODO);
 		task.setTaskType(reportType);
-		m_taskDao.insert(task);
+		taskRepository.insert(task);
 	}
 
 	private void ensureTaskDao() {
-		if (m_taskDao == null) {
+		if (taskRepository == null) {
 			throw new IllegalStateException("TaskRepository is required for TaskManager.");
 		}
 	}
 
 	public void setTaskDao(TaskRepository taskDao) {
-		m_taskDao = taskDao;
+		taskRepository = taskDao;
 	}
 
 	public enum TaskProlicy implements TaskCreationPolicy {

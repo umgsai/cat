@@ -24,12 +24,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -38,12 +40,15 @@ import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.SystemPage;
 
+@Component("systemProjectHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	public ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -62,7 +67,7 @@ public class Handler implements PageHandler<Context> {
 		switch (action) {
 		case DOMAINS:
 			JsonBuilder jb = new JsonBuilder();
-			Set<String> domains = m_projectService.findAllDomains();
+			Set<String> domains = projectService.findAllDomains();
 			Map<String, Object> jsons = new HashMap<String, Object>();
 
 			jsons.put("domains", domains);
@@ -76,13 +81,13 @@ public class Handler implements PageHandler<Context> {
 					project.setDomain(Constants.CAT);
 				}
 
-				Project temp = m_projectService.findByDomain(project.getDomain());
+				Project temp = projectService.findByDomain(project.getDomain());
 
 				if (temp == null) {
-					m_projectService.insert(project);
+					projectService.insert(project);
 					LOGGER.info("Inserted project config, domain={}.", project.getDomain());
 				} else {
-					m_projectService.update(project);
+					projectService.update(project);
 					LOGGER.info("Updated project config, domain={}.", project.getDomain());
 				}
 				model.setContent(UpdateStatus.SUCCESS.getStatusJson());
@@ -99,15 +104,8 @@ public class Handler implements PageHandler<Context> {
 		model.setPage(SystemPage.PROJECT);
 
 		if (!ctx.isProcessStopped()) {
-			m_jspViewer.view(ctx, model);
+			jspViewer.view(ctx, model);
 		}
 	}
 
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
-	}
 }

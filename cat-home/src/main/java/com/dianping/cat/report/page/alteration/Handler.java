@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.storage.builder.StorageSQLBuilder;
@@ -48,16 +50,19 @@ import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.mybatis.AlterationRepository;
 import com.dianping.cat.report.ReportPage;
 
+@Component("alterationHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
 	private final static String EMPTY = "N/A";
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private AlterationRepository m_alterationDao;
+	@Resource
+	private AlterationRepository alterationRepository;
 
-	private SimpleDateFormat m_sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private Alteration buildAlteration(Payload payload) {
 		String type = payload.getType();
@@ -138,7 +143,7 @@ public class Handler implements PageHandler<Context> {
 			} else {
 				Alteration alt = buildAlteration(payload);
 				try {
-					int count = m_alterationDao.insert(alt);
+					int count = alterationRepository.insert(alt);
 
 					if (count == 0) {
 						LOGGER.warn("Alteration insert returned zero, type={}, domain={}, title={}.", alt.getType(),
@@ -167,9 +172,9 @@ public class Handler implements PageHandler<Context> {
 
 			try {
 				if (altTypes == null) {
-					alts = m_alterationDao.findByDtdh(startTime, endTime, type, domain, hostname);
+					alts = alterationRepository.findByDtdh(startTime, endTime, type, domain, hostname);
 				} else {
-					alts = m_alterationDao
+					alts = alterationRepository
 											.findByDtdhTypes(startTime, endTime, type, domain, hostname, altTypes);
 				}
 			} catch (EmptyResultDataAccessException e) {
@@ -187,7 +192,7 @@ public class Handler implements PageHandler<Context> {
 		model.setPage(ReportPage.ALTERATION);
 
 		if (!ctx.isProcessStopped()) {
-			m_jspViewer.view(ctx, model);
+			jspViewer.view(ctx, model);
 		}
 	}
 
@@ -249,7 +254,7 @@ public class Handler implements PageHandler<Context> {
 			}
 		}
 		if (payload.getAlterationDate() == null) {
-			payload.setAlterationDate(m_sdf.format(new Date()));
+			payload.setAlterationDate(dateFormat.format(new Date()));
 		}
 		if (StringUtils.isEmpty(payload.getUser())) {
 			payload.setUrl(EMPTY);
@@ -277,14 +282,6 @@ public class Handler implements PageHandler<Context> {
 		} else if (status == 2) {
 			model.setInsertResult("{\"status\":500, \"errorMessage\":\"lack args\"}");
 		}
-	}
-
-	public void setAlterationDao(AlterationRepository alterationDao) {
-		m_alterationDao = alterationDao;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
 	}
 
 	public static class AlterationDomain {

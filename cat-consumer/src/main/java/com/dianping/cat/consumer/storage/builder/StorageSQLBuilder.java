@@ -21,12 +21,16 @@ package com.dianping.cat.consumer.storage.builder;
 import java.util.Arrays;
 import java.util.List;
 
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.consumer.DatabaseParser;
 import com.dianping.cat.consumer.DatabaseParser.Database;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
+@Component("storageSQLBuilder")
 public class StorageSQLBuilder implements StorageBuilder {
 
 	public final static String ID = "SQL";
@@ -35,7 +39,8 @@ public class StorageSQLBuilder implements StorageBuilder {
 
 	public final static List<String> DEFAULT_METHODS = Arrays.asList("select", "delete", "insert", "update");
 
-	private DatabaseParser m_databaseParser;
+	@Resource
+	private DatabaseParser databaseParser;
 
 	@Override
 	public StorageItem build(Transaction t) {
@@ -52,7 +57,7 @@ public class StorageSQLBuilder implements StorageBuilder {
 					method = message.getName().toLowerCase();
 				}
 				if (type.equals("SQL.Database")) {
-					Database database = m_databaseParser.parseDatabase(message.getName());
+					Database database = databaseParser.parseDatabase(message.getName());
 
 					if (database != null) {
 						ip = database.getIp();
@@ -77,10 +82,6 @@ public class StorageSQLBuilder implements StorageBuilder {
 	@Override
 	public boolean isEligable(Transaction t) {
 		return "SQL".equals(t.getType());
-	}
-
-	public void setDatabaseParser(DatabaseParser databaseParser) {
-		m_databaseParser = databaseParser;
 	}
 
 }

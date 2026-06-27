@@ -18,6 +18,8 @@
  */
 package com.dianping.cat.report.page.statistics.task.jar;
 
+import jakarta.annotation.Resource;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -28,6 +30,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
@@ -46,6 +49,7 @@ import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.page.statistics.service.JarReportService;
 import com.dianping.cat.report.task.TaskBuilder;
 
+@Component(JarReportBuilder.ID)
 public class JarReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JarReportBuilder.class);
 
@@ -56,11 +60,14 @@ public class JarReportBuilder implements TaskBuilder {
 													"zebra-api", "swallow-client", "swallow-consumerclient",	"swallow-producerclient", "platform-sdk",
 													"squirrel-client");
 
-	private JarReportService m_reportService;
+	@Resource
+	private JarReportService reportService;
 
-	private HeartbeatReportService m_heartbeatReportService;
+	@Resource
+	private HeartbeatReportService heartbeatReportService;
 
-	private ServerFilterConfigManager m_configManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -72,14 +79,14 @@ public class JarReportBuilder implements TaskBuilder {
 		LOGGER.info("Building jar hourly report, name={}, domain={}, period={}.", name, domain, period);
 
 		Date end = new Date(period.getTime() + TimeHelper.ONE_HOUR);
-		Set<String> domains = m_reportService.queryAllDomainNames(period, end, HeartbeatAnalyzer.ID);
+		Set<String> domains = reportService.queryAllDomainNames(period, end, HeartbeatAnalyzer.ID);
 		JarReport jarReport = new JarReport();
 		HeartbeatReportVisitor visitor = new HeartbeatReportVisitor(jarReport);
 
 		LOGGER.info("Preparing jar report from heartbeat reports, period={}, domainCount={}.", period, domains.size());
 		for (String domainName : domains) {
-			if (m_configManager.validateDomain(domainName)) {
-				HeartbeatReport heartbeatReport = m_heartbeatReportService.queryReport(domainName, period, end);
+			if (serverFilterConfigManager.validateDomain(domainName)) {
+				HeartbeatReport heartbeatReport = heartbeatReportService.queryReport(domainName, period, end);
 
 				visitor.visitHeartbeatReport(heartbeatReport);
 			}
@@ -96,7 +103,7 @@ public class JarReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(jarReport);
-		return m_reportService.insertHourlyReport(report, binaryContent);
+		return reportService.insertHourlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -110,15 +117,15 @@ public class JarReportBuilder implements TaskBuilder {
 	}
 
 	public void setConfigManager(ServerFilterConfigManager configManager) {
-		m_configManager = configManager;
+		this.serverFilterConfigManager = configManager;
 	}
 
 	public void setHeartbeatReportService(HeartbeatReportService heartbeatReportService) {
-		m_heartbeatReportService = heartbeatReportService;
+		this.heartbeatReportService = heartbeatReportService;
 	}
 
 	public void setReportService(JarReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 	public class HeartbeatReportVisitor extends BaseVisitor {

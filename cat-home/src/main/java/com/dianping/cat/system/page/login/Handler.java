@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.web.jsp.function.CodecFunction;
@@ -35,6 +36,7 @@ import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 import org.unidal.web.mvc.model.entity.InboundActionModel;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.system.SystemContext;
 import com.dianping.cat.system.SystemPage;
@@ -44,12 +46,15 @@ import com.dianping.cat.system.page.login.service.Session;
 import com.dianping.cat.system.page.login.service.SigninContext;
 import com.dianping.cat.system.page.login.service.SigninService;
 
+@Component("systemLoginHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private SigninService m_signinService;
+	@Resource
+	private SigninService signinService;
 
 	private SigninContext createSigninContext(Context ctx) {
 		return new SigninContext(ctx.getHttpServletRequest(), ctx.getHttpServletResponse());
@@ -69,7 +74,7 @@ public class Handler implements PageHandler<Context> {
 			if (account != null && account.length() != 0 && password != null) {
 				SigninContext sc = createSigninContext(ctx);
 				Credential credential = new Credential(account, password);
-				Session session = m_signinService.signin(sc, credential);
+				Session session = signinService.signin(sc, credential);
 
 				if (session == null) {
 					LOGGER.warn("User login failed, account={}.", account);
@@ -87,14 +92,14 @@ public class Handler implements PageHandler<Context> {
 		} else if (action == Action.LOGOUT) {
 			SigninContext sc = createSigninContext(ctx);
 
-			m_signinService.signout(sc);
+			signinService.signout(sc);
 			LOGGER.info("User logout requested.");
 			redirect(ctx, payload);
 			return;
 		} else {
 			if (shouldLogin(ctx)) {
 				SigninContext sc = createSigninContext(ctx);
-				Session session = m_signinService.validate(sc);
+				Session session = signinService.validate(sc);
 
 				if (session != null) {
 					ActionContext<?> parent = ctx.getParent();
@@ -169,7 +174,7 @@ public class Handler implements PageHandler<Context> {
 			}
 		}
 
-		m_jspViewer.view(ctx, model);
+		jspViewer.view(ctx, model);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -225,11 +230,4 @@ public class Handler implements PageHandler<Context> {
 		ctx.stopProcess();
 	}
 
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setSigninService(SigninService signinService) {
-		m_signinService = signinService;
-	}
 }

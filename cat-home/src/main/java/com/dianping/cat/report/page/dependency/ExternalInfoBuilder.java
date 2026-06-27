@@ -21,6 +21,11 @@ package com.dianping.cat.report.page.dependency;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
@@ -32,15 +37,21 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component
 public class ExternalInfoBuilder {
 
-	protected ServerConfigManager m_serverConfigManager;
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExternalInfoBuilder.class);
 
-	private ModelService<ProblemReport> m_problemservice;
+	@Resource
+	protected ServerConfigManager serverConfigManager;
 
-	private DependencyReportService m_reportService;
+	@Resource(name = "problemModelService")
+	private ModelService<ProblemReport> problemModelService;
 
-	private SimpleDateFormat m_dateFormat = new SimpleDateFormat("yyyyMMddHH");
+	@Resource
+	private DependencyReportService dependencyReportService;
+
+	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH");
 
 	public void buildExceptionInfoOnGraph(Payload payload, Model model, TopologyGraph graph) {
 		if (graph.getStatus() != GraphConstrant.OK) {
@@ -80,32 +91,20 @@ public class ExternalInfoBuilder {
 
 	private String buildTopologyNodeLink(Payload payload, Model model, String domain) {
 		return String.format("?op=dependencyGraph&minute=%s&domain=%s&date=%s", model.getMinute(), domain,
-								m_dateFormat.format(new Date(payload.getDate())));
+								dateFormat.format(new Date(payload.getDate())));
 	}
 
 	private ProblemReport queryProblemReport(Payload payload, String domain) {
 		String date = String.valueOf(payload.getDate());
 		ModelRequest request = new ModelRequest(domain, payload.getDate()) //
 								.setProperty("date", date).setProperty("type", "view");
-		if (m_problemservice.isEligable(request)) {
-			ModelResponse<ProblemReport> response = m_problemservice.invoke(request);
+		if (problemModelService.isEligable(request)) {
+			ModelResponse<ProblemReport> response = problemModelService.invoke(request);
 
 			return response.getModel();
 		} else {
+			LOGGER.error("No eligible problem model service registered, request={}", request);
 			throw new RuntimeException("Internal error: no eligible problem service registered for " + request + "!");
 		}
 	}
-
-	public void setProblemService(ModelService<ProblemReport> problemService) {
-		m_problemservice = problemService;
-	}
-
-	public void setReportService(DependencyReportService reportService) {
-		m_reportService = reportService;
-	}
-
-	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
-	}
-
 }

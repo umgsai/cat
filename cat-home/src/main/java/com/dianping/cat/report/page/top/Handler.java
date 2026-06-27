@@ -30,9 +30,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -62,30 +64,42 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component("topHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private ExternalInfoBuilder m_externalInfoBuilder;
+	@Resource
+	private ExternalInfoBuilder externalInfoBuilder;
 
-	private StateBuilder m_stateBuilder;
+	@Resource
+	private StateBuilder stateBuilder;
 
-	private ModelService<TopReport> m_topService;
+	@Resource(name = "topModelService")
+	private ModelService<TopReport> topModelService;
 
-	private ModelService<TransactionReport> m_transactionService;
+	@Resource(name = "transactionModelService")
+	private ModelService<TransactionReport> transactionModelService;
 
-	private ModelService<ProblemReport> m_problemService;
+	@Resource(name = "problemModelService")
+	private ModelService<ProblemReport> problemModelService;
 
-	private TopReportService m_topReportService;
+	@Resource
+	private TopReportService topReportService;
 
-	private TransactionMergeHelper m_mergeHelper;
+	@Resource
+	private TransactionMergeHelper transactionMergeHelper;
 
-	private ExceptionRuleConfigManager m_configManager;
+	@Resource
+	private ExceptionRuleConfigManager exceptionRuleConfigManager;
 
-	private JsonBuilder m_builder;
+	@Resource
+	private JsonBuilder jsonBuilder;
 
 	private void buildExceptionDashboard(Model model, Payload payload, long date) {
 		model.setReportStart(new Date(payload.getDate()));
@@ -96,7 +110,7 @@ public class Handler implements PageHandler<Context> {
 		TopReport report = queryTopReport(payload);
 
 		List<String> excludeDomains = Arrays.asList(Constants.FRONT_END);
-		TopMetric topMetric = new TopMetric(minuteCount, payload.getTopCounts(), m_configManager, excludeDomains);
+		TopMetric topMetric = new TopMetric(minuteCount, payload.getTopCounts(), exceptionRuleConfigManager, excludeDomains);
 		Date end = new Date(payload.getDate() + TimeHelper.ONE_MINUTE * minute);
 		Date start = new Date(end.getTime() - TimeHelper.ONE_MINUTE * minuteCount);
 
@@ -142,17 +156,17 @@ public class Handler implements PageHandler<Context> {
 		if (action == Action.HEALTH) {
 			DomainInfo info = buildDomainInfo(payload, model);
 
-			ctx.getHttpServletResponse().getWriter().write(m_builder.toJson(info));
+			ctx.getHttpServletResponse().getWriter().write(jsonBuilder.toJson(info));
 		} else {
 			buildExceptionDashboard(model, payload, date);
-			model.setMessage(m_stateBuilder.buildStateMessage(payload.getDate(), payload.getIpAddress()));
+			model.setMessage(stateBuilder.buildStateMessage(payload.getDate(), payload.getIpAddress()));
 
 			if (action == Action.VIEW) {
 				if (!ctx.isProcessStopped()) {
-					m_jspViewer.view(ctx, model);
+					jspViewer.view(ctx, model);
 				}
 			} else if (action == Action.API) {
-				ctx.getHttpServletResponse().getWriter().write(m_builder.toJson(model.getTopMetric()));
+				ctx.getHttpServletResponse().getWriter().write(jsonBuilder.toJson(model.getTopMetric()));
 			}
 		}
 	}
@@ -160,7 +174,7 @@ public class Handler implements PageHandler<Context> {
 	private void normalize(Model model, Payload payload) {
 		model.setPage(ReportPage.TOP);
 		model.setAction(Action.VIEW);
-		m_normalizePayload.normalize(model, payload);
+		normalizePayload.normalize(model, payload);
 
 		int minute = parseQueryMinute(payload);
 		int maxMinute = 60;
@@ -238,15 +252,15 @@ public class Handler implements PageHandler<Context> {
 		ModelRequest request = new ModelRequest(domain, payload.getDate()) //
 								.setProperty("date", date);
 
-		if (m_topService.isEligable(request)) {
-			ModelResponse<TopReport> response = m_topService.invoke(request);
+		if (topModelService.isEligable(request)) {
+			ModelResponse<TopReport> response = topModelService.invoke(request);
 			TopReport report = response.getModel();
 
 			if (report == null || report.getDomains().size() == 0) {
-				report = m_topReportService
+				report = topReportService
 										.queryReport(domain, new Date(payload.getDate()),	new Date(payload.getDate() + TimeHelper.ONE_HOUR));
 			}
-			report.accept(new TopExceptionExclude(m_configManager));
+			report.accept(new TopExceptionExclude(exceptionRuleConfigManager));
 			return report;
 		} else {
 			throw new RuntimeException("Internal error: no eligible top service registered for " + request + "!");
@@ -285,11 +299,11 @@ public class Handler implements PageHandler<Context> {
 		ModelRequest request = new ModelRequest(domain, date).setProperty("type", type).setProperty("name", Constants.ALL)
 								.setProperty("ip", ipAddress);
 
-		if (m_transactionService.isEligable(request)) {
-			ModelResponse<TransactionReport> response = m_transactionService.invoke(request);
+		if (transactionModelService.isEligable(request)) {
+			ModelResponse<TransactionReport> response = transactionModelService.invoke(request);
 			TransactionReport report = response.getModel();
 
-			report = m_mergeHelper.mergeAllMachines(report, ipAddress);
+			report = transactionMergeHelper.mergeAllMachines(report, ipAddress);
 			return report;
 		} else {
 			throw new RuntimeException("Internal error: no eligible transaction service registered for " + request + "!");
@@ -302,58 +316,14 @@ public class Handler implements PageHandler<Context> {
 		if (!Constants.ALL.equals(ipAddress)) {
 			request.setProperty("ip", ipAddress);
 		}
-		if (m_problemService.isEligable(request)) {
-			ModelResponse<ProblemReport> response = m_problemService.invoke(request);
+		if (problemModelService.isEligable(request)) {
+			ModelResponse<ProblemReport> response = problemModelService.invoke(request);
 			ProblemReport report = response.getModel();
 
 			return report;
 		} else {
 			throw new RuntimeException("Internal error: no eligible problem service registered for " + request + "!");
 		}
-	}
-
-	public void setBuilder(JsonBuilder builder) {
-		m_builder = builder;
-	}
-
-	public void setConfigManager(ExceptionRuleConfigManager configManager) {
-		m_configManager = configManager;
-	}
-
-	public void setExternalInfoBuilder(ExternalInfoBuilder externalInfoBuilder) {
-		m_externalInfoBuilder = externalInfoBuilder;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setMergeHelper(TransactionMergeHelper mergeHelper) {
-		m_mergeHelper = mergeHelper;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setProblemService(ModelService<ProblemReport> problemService) {
-		m_problemService = problemService;
-	}
-
-	public void setStateBuilder(StateBuilder stateBuilder) {
-		m_stateBuilder = stateBuilder;
-	}
-
-	public void setTopReportService(TopReportService topReportService) {
-		m_topReportService = topReportService;
-	}
-
-	public void setTopService(ModelService<TopReport> topService) {
-		m_topService = topService;
-	}
-
-	public void setTransactionService(ModelService<TransactionReport> transactionService) {
-		m_transactionService = transactionService;
 	}
 
 }

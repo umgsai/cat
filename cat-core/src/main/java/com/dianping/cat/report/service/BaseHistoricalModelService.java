@@ -21,45 +21,49 @@ package com.dianping.cat.report.service;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 
 public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalSupport
 						implements ModelService<T> {
 
-	protected ServerConfigManager m_configManager;
+	@Resource(name = "serverConfigManager")
+	protected ServerConfigManager serverConfigManager;
 
-	private boolean m_localMode = true;
+	private boolean localMode = true;
 
-	private String m_name;
+	private String name;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public BaseHistoricalModelService(String name) {
-		m_name = name;
+		this.name = name;
 	}
 
 	protected abstract T buildModel(ModelRequest request) throws Exception;
 
 	@Override
 	public String getName() {
-		return m_name;
+		return name;
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
-		if (m_configManager == null) {
+		if (serverConfigManager == null) {
 			throw new IllegalStateException("ServerConfigManager is required for " + getClass().getSimpleName() + ".");
 		}
-		m_localMode = m_configManager.isLocalMode();
-		m_initialized = true;
+		localMode = serverConfigManager.isLocalMode();
+		initialized = true;
 	}
 
 	@Override
@@ -94,11 +98,11 @@ public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalS
 	}
 
 	protected boolean isLocalMode() {
-		return m_localMode;
+		return localMode;
 	}
 
 	public void setConfigManager(ServerConfigManager configManager) {
-		m_configManager = configManager;
+		serverConfigManager = configManager;
 	}
 
 	@Override
@@ -106,7 +110,7 @@ public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalS
 		StringBuilder sb = new StringBuilder(64);
 
 		sb.append(getClass().getSimpleName()).append('[');
-		sb.append("name=").append(m_name).append(']');
+		sb.append("name=").append(name).append(']');
 
 		return sb.toString();
 	}

@@ -18,28 +18,49 @@
  */
 package com.dianping.cat.report.page.logview.service;
 
+import java.util.Arrays;
 import java.util.List;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.report.service.ModelService;
 
+@Component("logviewModelService")
 public class CompositeLogViewService extends BaseCompositeModelService<String> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CompositeLogViewService.class);
+
+	@Resource(name = "localMessageService")
+	private ModelService<String> localMessageService;
+
+	@Resource(name = "historicalMessageService")
+	private ModelService<String> historicalMessageService;
 
 	public CompositeLogViewService() {
 		super("logview");
 	}
 
 	@Override
+	@PostConstruct
+	public synchronized void initialize() {
+		if (localMessageService != null && historicalMessageService != null) {
+			setServices(Arrays.asList(localMessageService, historicalMessageService));
+		}
+		super.initialize();
+	}
+
+	@Override
 	protected BaseRemoteModelService<String> createRemoteService() {
 		RemoteLogViewService service = new RemoteLogViewService();
 
-		service.setManager(m_configManager);
+		service.setManager(serverConfigManager);
 		return service;
 	}
 

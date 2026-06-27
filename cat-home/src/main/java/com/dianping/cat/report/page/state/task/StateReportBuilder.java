@@ -18,6 +18,11 @@
  */
 package com.dianping.cat.report.page.state.task;
 
+import jakarta.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 import java.util.Set;
 
@@ -47,20 +52,26 @@ import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.Curre
 import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 
+@Component(StateAnalyzer.ID)
 public class StateReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StateReportBuilder.class);
 
 	public static final String ID = StateAnalyzer.ID;
 
-	protected StateReportService m_reportService;
+	@Resource
+	protected StateReportService reportService;
 
-	protected ServerConfigManager m_serverConfigManager;
+	@Resource
+	protected ServerConfigManager serverConfigManager;
 
-	protected ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource
+	protected ServerFilterConfigManager serverFilterConfigManager;
 
-	private ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private HostinfoService m_hostinfoService;
+	@Resource
+	private HostinfoService hostinfoService;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -76,14 +87,14 @@ public class StateReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(stateReport);
-		return m_reportService.insertDailyReport(report, binaryContent);
+		return reportService.insertDailyReport(report, binaryContent);
 	}
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
 		LOGGER.info("Building state hourly report side effects, name={}, domain={}, period={}.", name, domain, period);
 
-		StateReport stateReport = m_reportService
+		StateReport stateReport = reportService
 								.queryReport(domain, period, new Date(period.getTime()	+ TimeHelper.ONE_HOUR));
 
 		new StateReportVisitor().visitStateReport(stateReport);
@@ -105,7 +116,7 @@ public class StateReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(stateReport);
-		return m_reportService.insertMonthlyReport(report, binaryContent);
+		return reportService.insertMonthlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -125,9 +136,10 @@ public class StateReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(stateReport);
-		return m_reportService.insertWeeklyReport(report, binaryContent);
+		return reportService.insertWeeklyReport(report, binaryContent);
 	}
 
+	@PostConstruct
 	public void initialize() {
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
@@ -159,7 +171,7 @@ public class StateReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime += TimeHelper.ONE_DAY) {
 			try {
-				StateReport reportModel = m_reportService
+				StateReport reportModel = reportService
 										.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 
 				reportModel.accept(merger);
@@ -184,7 +196,7 @@ public class StateReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			Date date = new Date(startTime);
-			StateReport reportModel = m_reportService.queryReport(domain, date, new Date(date.getTime()	+ TimeHelper.ONE_HOUR));
+			StateReport reportModel = reportService.queryReport(domain, date, new Date(date.getTime()	+ TimeHelper.ONE_HOUR));
 
 			reportModel.accept(merger);
 		}
@@ -197,47 +209,47 @@ public class StateReportBuilder implements TaskBuilder {
 	}
 
 	private void updateProjectAndHost(String domain, String ip) {
-		if (m_serverFilterConfigManager.validateDomain(domain)) {
-			if (!m_projectService.contains(domain)) {
+		if (serverFilterConfigManager.validateDomain(domain)) {
+			if (!projectService.contains(domain)) {
 				LOGGER.info("State report discovered new project domain, domain={}, ip={}.", domain, ip);
-				m_projectService.insert(domain);
+				projectService.insert(domain);
 
 			}
-			Hostinfo info = m_hostinfoService.findByIp(ip);
+			Hostinfo info = hostinfoService.findByIp(ip);
 
 			if (info == null) {
 				LOGGER.info("State report discovered new host, domain={}, ip={}.", domain, ip);
-				m_hostinfoService.insert(domain, ip);
+				hostinfoService.insert(domain, ip);
 			} else {
 				String oldDomain = info.getDomain();
 
 				if (!domain.equals(oldDomain) && !Constants.CAT.equals(oldDomain)) {
 					LOGGER.warn("State report updates host domain, ip={}, oldDomain={}, newDomain={}.", ip, oldDomain,
 							domain);
-					m_hostinfoService.update(info.getId(), domain, ip);
+					hostinfoService.update(info.getId(), domain, ip);
 				}
 			}
 		}
 	}
 
 	public void setHostinfoService(HostinfoService hostinfoService) {
-		m_hostinfoService = hostinfoService;
+		this.hostinfoService = hostinfoService;
 	}
 
 	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	public void setReportService(StateReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
+		this.serverFilterConfigManager = serverFilterConfigManager;
 	}
 
 	public static class ClearDetailInfo extends BaseVisitor {
@@ -256,7 +268,7 @@ public class StateReportBuilder implements TaskBuilder {
 			Set<String> ips = processDomain.getIps();
 
 			for (String ip : ips) {
-				if (m_serverFilterConfigManager.validateDomain(domain) && m_serverConfigManager.validateIp(ip)) {
+				if (serverFilterConfigManager.validateDomain(domain) && serverConfigManager.validateIp(ip)) {
 					updateProjectAndHost(domain, ip);
 				}
 			}

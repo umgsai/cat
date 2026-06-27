@@ -24,8 +24,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -37,7 +43,9 @@ import com.dianping.cat.home.storage.entity.StorageGroup;
 import com.dianping.cat.home.storage.entity.StorageGroupConfig;
 import com.dianping.cat.home.storage.transform.DefaultSaxParser;
 
+@Component
 public class StorageGroupConfigManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(StorageGroupConfigManager.class);
 
 	public static final String IP_FORMAT = "${ip}";
 
@@ -47,18 +55,21 @@ public class StorageGroupConfigManager {
 
 	private static final String CONFIG_NAME = "storageGroup";
 
-	private ConfigRepository m_configDao;
+	@Resource
+	private ConfigRepository configRepository;
 
-	private ContentFetcher m_fetcher;
+	@Resource
+	private ContentFetcher contentFetcher;
 
-	private long m_configId;
+	private long configId;
 
-	private StorageGroupConfig m_config;
+	private StorageGroupConfig config;
 
 	public String buildUrl(String format, String id, String ip) {
 		try {
 			return format.replace(ID_FORMAT, URLEncoder.encode(id, "utf-8")).replace(IP_FORMAT,	URLEncoder.encode(ip, "utf-8"));
 		} catch (Exception e) {
+			LOGGER.error("Unable to build storage link url, id={}, ip={}.", id, ip, e);
 			Cat.logError("can't encode [id: " + id + "] [ip: " + ip + "]", e);
 			return null;
 		}
@@ -67,52 +78,56 @@ public class StorageGroupConfigManager {
 	public StorageGroupConfig getConfig() {
 		ensureInitialized();
 
-		return m_config;
+		return config;
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
+	@PostConstruct
 	public void initialize() {
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME);
-			String content = config.getContent();
+			Config configDO = configRepository.findByName(CONFIG_NAME);
+			String content = configDO.getContent();
 
-			m_configId = config.getId();
-			m_config = DefaultSaxParser.parse(content);
+			configId = configDO.getId();
+			config = DefaultSaxParser.parse(content);
 		} catch (EmptyResultDataAccessException e) {
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
+				String content = contentFetcher.getConfigContent(CONFIG_NAME);
+				Config configDO = configRepository.createLocal();
 
-				config.setName(CONFIG_NAME);
-				config.setContent(content);
-				m_configDao.insert(config);
+				configDO.setName(CONFIG_NAME);
+				configDO.setContent(content);
+				configRepository.insert(configDO);
 
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
+				configId = configDO.getId();
+				config = DefaultSaxParser.parse(content);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to create default storage group config, configName={}.", CONFIG_NAME, ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize storage group config, configName={}.", CONFIG_NAME, e);
 			Cat.logError(e);
 		}
-		if (m_config == null) {
-			m_config = new StorageGroupConfig();
+		if (config == null) {
+			config = new StorageGroupConfig();
 		}
 	}
 
 	public boolean insert(String xml) {
 		try {
-			m_config = DefaultSaxParser.parse(xml);
+			config = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to insert storage group config, xmlLength={}.", xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -165,7 +180,7 @@ public class StorageGroupConfigManager {
 	public StorageGroup queryStorageGroup(String type) {
 		ensureInitialized();
 
-		StorageGroup group = m_config.getStorageGroups().get(type);
+		StorageGroup group = config.getStorageGroups().get(type);
 
 		if (group != null) {
 			return group;
@@ -175,9 +190,9 @@ public class StorageGroupConfigManager {
 	}
 
 	private void ensureInitialized() {
-		if (m_config == null) {
+		if (config == null) {
 			synchronized (this) {
-				if (m_config == null) {
+				if (config == null) {
 					initialize();
 				}
 			}
@@ -189,15 +204,17 @@ public class StorageGroupConfigManager {
 			ensureInitialized();
 
 			try {
-				Config config = m_configDao.createLocal();
+				Config configDO = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
-				config.setName(CONFIG_NAME);
-				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config);
+				configDO.setId(configId);
+				configDO.setKeyId(configId);
+				configDO.setName(CONFIG_NAME);
+				configDO.setContent(config.toString());
+				configRepository.updateByPK(configDO);
 				return true;
 			} catch (Exception e) {
+				LOGGER.error("Unable to store storage group config, configName={}, configId={}.", CONFIG_NAME, configId,
+				      e);
 				Cat.logError(e);
 				return false;
 			}
@@ -206,55 +223,55 @@ public class StorageGroupConfigManager {
 
 	public static class Department {
 
-		private String m_id;
+		private String id;
 
-		private Map<String, Productline> m_productlines = new LinkedHashMap<String, Productline>();
+		private Map<String, Productline> productlines = new LinkedHashMap<String, Productline>();
 
 		public Department(String id) {
-			m_id = id;
+			this.id = id;
 		}
 
 		public Productline findOrCreateProductline(String productline) {
-			Productline product = m_productlines.get(productline);
+			Productline product = productlines.get(productline);
 
 			if (product == null) {
 				product = new Productline(productline);
 
-				m_productlines.put(productline, product);
+				productlines.put(productline, product);
 			}
 			return product;
 		}
 
 		public String getId() {
-			return m_id;
+			return id;
 		}
 
 		public Map<String, Productline> getProductlines() {
-			return m_productlines;
+			return productlines;
 		}
 	}
 
 	public static class Productline {
 
-		private String m_id;
+		private String id;
 
-		private List<String> m_storages = new LinkedList<String>();
+		private List<String> storages = new LinkedList<String>();
 
 		public Productline(String id) {
-			m_id = id;
+			this.id = id;
 		}
 
 		public List<String> addStorage(String storage) {
-			m_storages.add(storage);
-			return m_storages;
+			storages.add(storage);
+			return storages;
 		}
 
 		public String getId() {
-			return m_id;
+			return id;
 		}
 
 		public List<String> getStorages() {
-			return m_storages;
+			return storages;
 		}
 	}
 }

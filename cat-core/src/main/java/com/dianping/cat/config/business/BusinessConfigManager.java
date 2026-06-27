@@ -25,9 +25,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -39,22 +43,25 @@ import com.dianping.cat.mybatis.mapper.BusinessConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
+@Component
 public class BusinessConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessConfigManager.class);
 
 	public final static String BASE_CONFIG = "base";
 
-	private BusinessConfigRepository m_configDao;
+	@Resource
+	private BusinessConfigRepository businessConfigRepository;
 
-	private ServerConfigManager m_serverConfigManager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
-	private Map<String, Set<String>> m_domains = new ConcurrentHashMap<String, Set<String>>();
+	private Map<String, Set<String>> domains = new ConcurrentHashMap<String, Set<String>>();
 
-	private Map<String, BusinessReportConfig> m_configs = new ConcurrentHashMap<String, BusinessReportConfig>();
+	private Map<String, BusinessReportConfig> configs = new ConcurrentHashMap<String, BusinessReportConfig>();
 
-	private boolean m_alertMachine;
+	private boolean alertMachine;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	private BusinessItemConfig buildBusinessItemConfig(String key, ConfigItem item) {
 		BusinessItemConfig config = new BusinessItemConfig();
@@ -72,15 +79,15 @@ public class BusinessConfigManager {
 		ensureInitialized();
 
 		try {
-			BusinessConfig config = m_configDao.findByNameDomain(BASE_CONFIG, domain);
+			BusinessConfig config = businessConfigRepository.findByNameDomain(BASE_CONFIG, domain);
 			BusinessReportConfig businessReportConfig = DefaultSaxParser.parse(config.getContent());
 
 			businessReportConfig.removeBusinessItemConfig(key);
 			config.setContent(businessReportConfig.toString());
 			config.setUpdatetime(new Date());
-			m_configDao.updateByPK(config);
+			businessConfigRepository.updateByPK(config);
 
-			Set<String> itemIds = m_domains.get(domain);
+			Set<String> itemIds = domains.get(domain);
 
 			itemIds.remove(key);
 			cacheConfigs(businessReportConfig, domain);
@@ -96,14 +103,14 @@ public class BusinessConfigManager {
 		ensureInitialized();
 
 		try {
-			BusinessConfig config = m_configDao.findByNameDomain(BASE_CONFIG, domain);
+			BusinessConfig config = businessConfigRepository.findByNameDomain(BASE_CONFIG, domain);
 			BusinessReportConfig businessReportConfig = DefaultSaxParser.parse(config.getContent());
 
 			businessReportConfig.removeCustomConfig(key);
 			config.setContent(businessReportConfig.toString());
 			config.setUpdatetime(new Date());
 
-			m_configDao.updateByPK(config);
+			businessConfigRepository.updateByPK(config);
 			cacheConfigs(businessReportConfig, domain);
 		} catch (Exception e) {
 			LOGGER.error("Unable to delete business custom config, domain={}, key={}.", domain, key, e);
@@ -115,25 +122,26 @@ public class BusinessConfigManager {
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
-		if (m_serverConfigManager == null) {
+		if (serverConfigManager == null) {
 			throw new IllegalStateException("ServerConfigManager is required for BusinessConfigManager.");
 		}
-		if (m_configDao == null) {
+		if (businessConfigRepository == null) {
 			throw new IllegalStateException("BusinessConfigRepository is required for BusinessConfigManager.");
 		}
 
-		m_alertMachine = m_serverConfigManager.isAlertMachine();
-		LOGGER.info("Initializing business config manager, alertMachine={}.", m_alertMachine);
+		alertMachine = serverConfigManager.isAlertMachine();
+		LOGGER.info("Initializing business config manager, alertMachine={}.", alertMachine);
 
 		loadData();
 
@@ -149,20 +157,20 @@ public class BusinessConfigManager {
 				return BASE_CONFIG;
 			}
 		});
-		m_initialized = true;
+		initialized = true;
 	}
 
 	public void setConfigDao(BusinessConfigRepository configDao) {
-		m_configDao = configDao;
+		businessConfigRepository = configDao;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 	private void loadData() {
 		try {
-			List<BusinessConfig> configs = m_configDao.findByName(BASE_CONFIG);
+			List<BusinessConfig> configs = businessConfigRepository.findByName(BASE_CONFIG);
 			Map<String, Set<String>> domains = new ConcurrentHashMap<String, Set<String>>();
 
 			for (BusinessConfig config : configs) {
@@ -180,8 +188,9 @@ public class BusinessConfigManager {
 				}
 			}
 
-			m_domains = domains;
-			LOGGER.info("Loaded business configs, configCount={}, domainCount={}.", configs.size(), m_domains.size());
+			this.domains = domains;
+			LOGGER.info("Loaded business configs, configCount={}, domainCount={}.", configs.size(),
+					this.domains.size());
 		} catch (Exception e) {
 			LOGGER.error("Unable to load business configs.", e);
 			Cat.logError(e);
@@ -189,8 +198,8 @@ public class BusinessConfigManager {
 	}
 
 	private void cacheConfigs(BusinessReportConfig businessReportConfig, String domain) {
-		if (m_alertMachine) {
-			m_configs.put(domain, businessReportConfig);
+		if (alertMachine) {
+			configs.put(domain, businessReportConfig);
 		}
 	}
 
@@ -198,37 +207,37 @@ public class BusinessConfigManager {
 		ensureInitialized();
 
 		try {
-			if (!m_domains.containsKey(domain)) {
+			if (!domains.containsKey(domain)) {
 				BusinessReportConfig config = new BusinessReportConfig();
 				config.setId(domain);
 
 				BusinessItemConfig businessItemConfig = buildBusinessItemConfig(key, item);
 				config.addBusinessItemConfig(businessItemConfig);
 
-				BusinessConfig businessConfig = m_configDao.createLocal();
+				BusinessConfig businessConfig = businessConfigRepository.createLocal();
 				businessConfig.setName(BASE_CONFIG);
 				businessConfig.setDomain(domain);
 				businessConfig.setContent(config.toString());
 				businessConfig.setUpdatetime(new Date());
-				m_configDao.insert(businessConfig);
+				businessConfigRepository.insert(businessConfig);
 
 				Set<String> itemIds = new HashSet<String>();
 				itemIds.add(key);
-				m_domains.put(domain, itemIds);
+				domains.put(domain, itemIds);
 				cacheConfigs(config, domain);
 				LOGGER.info("Inserted new business config, domain={}, key={}.", domain, key);
 			} else {
-				Set<String> itemIds = m_domains.get(domain);
+				Set<String> itemIds = domains.get(domain);
 
 				if (!itemIds.contains(key)) {
-					BusinessConfig businessConfig = m_configDao
+					BusinessConfig businessConfig = businessConfigRepository
 											.findByNameDomain(BASE_CONFIG, domain);
 					BusinessReportConfig config = DefaultSaxParser.parse(businessConfig.getContent());
 					BusinessItemConfig businessItemConfig = buildBusinessItemConfig(key, item);
 
 					config.addBusinessItemConfig(businessItemConfig);
 					businessConfig.setContent(config.toString());
-					m_configDao.updateByPK(businessConfig);
+					businessConfigRepository.updateByPK(businessConfig);
 
 					itemIds.add(key);
 					cacheConfigs(config, domain);
@@ -250,10 +259,10 @@ public class BusinessConfigManager {
 		BusinessReportConfig businessReportConfig = null;
 
 		try {
-			if (m_alertMachine) {
-				businessReportConfig = m_configs.get(domain);
+			if (alertMachine) {
+				businessReportConfig = configs.get(domain);
 			} else {
-				BusinessConfig config = m_configDao.findByNameDomain(BASE_CONFIG, domain);
+				BusinessConfig config = businessConfigRepository.findByNameDomain(BASE_CONFIG, domain);
 
 				businessReportConfig = DefaultSaxParser.parse(config.getContent());
 			}
@@ -273,7 +282,7 @@ public class BusinessConfigManager {
 	public boolean updateConfigByDomain(BusinessReportConfig config) {
 		ensureInitialized();
 
-		BusinessConfig proto = m_configDao.createLocal();
+		BusinessConfig proto = businessConfigRepository.createLocal();
 		String domain = config.getId();
 
 		proto.setDomain(domain);
@@ -281,7 +290,7 @@ public class BusinessConfigManager {
 		proto.setContent(config.toString());
 
 		try {
-			m_configDao.updateBaseConfigByDomain(proto);
+			businessConfigRepository.updateBaseConfigByDomain(proto);
 			cacheConfigs(config, domain);
 			LOGGER.info("Updated business config, domain={}.", domain);
 			return true;
@@ -296,7 +305,7 @@ public class BusinessConfigManager {
 	public boolean insertConfigByDomain(BusinessReportConfig config) {
 		ensureInitialized();
 
-		BusinessConfig proto = m_configDao.createLocal();
+		BusinessConfig proto = businessConfigRepository.createLocal();
 		String domain = config.getId();
 
 		proto.setDomain(domain);
@@ -305,7 +314,7 @@ public class BusinessConfigManager {
 		proto.setUpdatetime(new Date());
 
 		try {
-			m_configDao.insert(proto);
+			businessConfigRepository.insert(proto);
 			cacheConfigs(config, domain);
 			LOGGER.info("Inserted business config, domain={}.", domain);
 			return true;

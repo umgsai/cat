@@ -18,6 +18,8 @@
  */
 package com.dianping.cat.report.page.overload.task;
 
+import jakarta.annotation.Resource;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +27,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
@@ -38,18 +41,24 @@ import com.dianping.cat.mybatis.DailyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.mybatis.OverloadRepository;
 
+@Component
 public class TableCapacityService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TableCapacityService.class);
 
-	private OverloadRepository m_overloadDao;
+	@Resource
+	private OverloadRepository overloadRepository;
 
-	private HourlyReportRepository m_hourlyReportDao;
+	@Resource
+	private HourlyReportRepository hourlyReportRepository;
 
-	private DailyReportRepository m_dailyReportDao;
+	@Resource
+	private DailyReportRepository dailyReportRepository;
 
-	private WeeklyReportRepository m_weeklyReportDao;
+	@Resource
+	private WeeklyReportRepository weeklyReportRepository;
 
-	private MonthlyReportRepository m_monthlyReportDao;
+	@Resource
+	private MonthlyReportRepository monthlyReportRepository;
 
 	private OverloadReport generateOverloadReport(Object object, double reportSize, int reportType) {
 		OverloadReport overloadReport = new OverloadReport();
@@ -94,7 +103,7 @@ public class TableCapacityService {
 		List<OverloadReport> reports = new ArrayList<OverloadReport>();
 
 		try {
-			List<Overload> overloads = m_overloadDao
+			List<Overload> overloads = overloadRepository
 									.findIdAndSizeByDuration(startTime, endTime);
 
 			for (Overload overload : overloads) {
@@ -106,16 +115,16 @@ public class TableCapacityService {
 
 					switch (reportType) {
 					case CapacityUpdater.HOURLY_TYPE:
-						report = m_hourlyReportDao.findByPK(reportId);
+						report = hourlyReportRepository.findByPK(reportId);
 						break;
 					case CapacityUpdater.DAILY_TYPE:
-						report = m_dailyReportDao.findByPK(reportId);
+						report = dailyReportRepository.findByPK(reportId);
 						break;
 					case CapacityUpdater.WEEKLY_TYPE:
-						report = m_weeklyReportDao.findByPK(reportId);
+						report = weeklyReportRepository.findByPK(reportId);
 						break;
 					case CapacityUpdater.MONTHLY_TYPE:
-						report = m_monthlyReportDao.findByPK(reportId);
+						report = monthlyReportRepository.findByPK(reportId);
 						break;
 					}
 					reports.add(generateOverloadReport(report, reportSize, reportType));
@@ -137,23 +146,23 @@ public class TableCapacityService {
 	}
 
 	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
-		m_dailyReportDao = dailyReportDao;
+		this.dailyReportRepository = dailyReportDao;
 	}
 
 	public void setHourlyReportDao(HourlyReportRepository hourlyReportDao) {
-		m_hourlyReportDao = hourlyReportDao;
+		this.hourlyReportRepository = hourlyReportDao;
 	}
 
 	public void setMonthlyReportDao(MonthlyReportRepository monthlyReportDao) {
-		m_monthlyReportDao = monthlyReportDao;
+		this.monthlyReportRepository = monthlyReportDao;
 	}
 
 	public void setOverloadDao(OverloadRepository overloadDao) {
-		m_overloadDao = overloadDao;
+		this.overloadRepository = overloadDao;
 	}
 
 	public void setWeeklyReportDao(WeeklyReportRepository weeklyReportDao) {
-		m_weeklyReportDao = weeklyReportDao;
+		this.weeklyReportRepository = weeklyReportDao;
 	}
 
 }

@@ -22,9 +22,11 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
@@ -32,10 +34,12 @@ import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.mybatis.repository.alert.AlertRepository;
 
+@Component
 public class AlertService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertService.class);
 
-	private AlertRepository m_alertDao;
+	@Resource
+	private AlertRepository alertRepository;
 
 	private Alert buildAlert(AlertEntity alertEntity, SendMessageEntity message) {
 		Alert alert = new Alert();
@@ -54,7 +58,7 @@ public class AlertService {
 		List<Alert> alerts = new LinkedList<Alert>();
 
 		try {
-			alerts = m_alertDao.queryAlertsByTimeCategory(start, end, type);
+			alerts = alertRepository.queryAlertsByTimeCategory(start, end, type);
 		} catch (EmptyResultDataAccessException e) {
 			// ignore
 		} catch (Exception e) {
@@ -69,7 +73,7 @@ public class AlertService {
 		Alert alert = buildAlert(alertEntity, message);
 
 		try {
-			int count = m_alertDao.insert(alert);
+			int count = alertRepository.insert(alert);
 
 			if (count != 1) {
 				LOGGER.error("Unexpected alert insert count, count={}, domain={}, category={}, metric={}.", count,
@@ -83,7 +87,4 @@ public class AlertService {
 		}
 	}
 
-	public void setAlertDao(AlertRepository alertDao) {
-		m_alertDao = alertDao;
-	}
 }

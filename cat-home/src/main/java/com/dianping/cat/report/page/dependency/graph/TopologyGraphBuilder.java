@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.consumer.dependency.model.entity.Dependency;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
@@ -37,19 +38,23 @@ import com.dianping.cat.home.dependency.graph.entity.TopologyEdge;
 import com.dianping.cat.home.dependency.graph.entity.TopologyGraph;
 import com.dianping.cat.home.dependency.graph.entity.TopologyNode;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class TopologyGraphBuilder extends BaseVisitor {
 
-	private DependencyItemBuilder m_itemBuilder;
+	@Resource
+	private DependencyItemBuilder dependencyItemBuilder;
 
-	private String m_domain;
+	private String domain;
 
-	private Map<Long, TopologyGraph> m_graphs = new HashMap<Long, TopologyGraph>();
+	private Map<Long, TopologyGraph> graphs = new HashMap<Long, TopologyGraph>();
 
-	private int m_minute;
+	private int minute;
 
-	private Date m_date;
+	private Date date;
 
-	private Set<String> m_pigeonServices = new HashSet<String>(Arrays.asList("Service", "PigeonService", "PigeonServer"));
+	private Set<String> pigeonServiceTypes = new HashSet<String>(Arrays.asList("Service", "PigeonService", "PigeonServer"));
 
 	public TopologyEdge cloneEdge(TopologyEdge edge) {
 		TopologyEdge result = new TopologyEdge();
@@ -79,23 +84,23 @@ public class TopologyGraphBuilder extends BaseVisitor {
 	}
 
 	public TopologyNode createNode(String domain) {
-		return m_itemBuilder.createNode(domain);
+		return dependencyItemBuilder.createNode(domain);
 	}
 
 	private TopologyGraph findOrCreateGraph() {
-		long time = m_date.getTime() + m_minute * TimeHelper.ONE_MINUTE;
-		TopologyGraph graph = m_graphs.get(time);
+		long time = date.getTime() + minute * TimeHelper.ONE_MINUTE;
+		TopologyGraph graph = graphs.get(time);
 
 		if (graph == null) {
 			graph = new TopologyGraph();
-			m_graphs.put(time, graph);
+			graphs.put(time, graph);
 		}
 
 		return graph;
 	}
 
 	public Map<Long, TopologyGraph> getGraphs() {
-		return m_graphs;
+		return graphs;
 	}
 
 	public String mergeDes(String old, String des) {
@@ -142,8 +147,8 @@ public class TopologyGraphBuilder extends BaseVisitor {
 	public void visitDependency(Dependency dependency) {
 		String type = dependency.getType();
 
-		if (!m_pigeonServices.contains(type)) {
-			TopologyEdge edge = m_itemBuilder.buildEdge(m_domain, dependency);
+		if (!pigeonServiceTypes.contains(type)) {
+			TopologyEdge edge = dependencyItemBuilder.buildEdge(domain, dependency);
 			TopologyGraph graph = findOrCreateGraph();
 			TopologyEdge old = graph.findTopologyEdge(edge.getKey());
 
@@ -152,27 +157,27 @@ public class TopologyGraphBuilder extends BaseVisitor {
 				String target = dependency.getTarget();
 				TopologyNode nodeOld = graph.findTopologyNode(target);
 
-				graph.getNodes().put(target, mergeNode(nodeOld, m_itemBuilder.createDatabaseNode(target)));
+				graph.getNodes().put(target, mergeNode(nodeOld, dependencyItemBuilder.createDatabaseNode(target)));
 			} else if ("Cache".equals(type)) {
 				String target = dependency.getTarget();
 				TopologyNode nodeOld = graph.findTopologyNode(target);
 
-				graph.getNodes().put(target, mergeNode(nodeOld, m_itemBuilder.createCacheNode(target)));
+				graph.getNodes().put(target, mergeNode(nodeOld, dependencyItemBuilder.createCacheNode(target)));
 			}
 		}
 	}
 
 	@Override
 	public void visitDependencyReport(DependencyReport dependencyReport) {
-		m_date = dependencyReport.getStartTime();
-		m_domain = dependencyReport.getDomain();
+		date = dependencyReport.getStartTime();
+		domain = dependencyReport.getDomain();
 		super.visitDependencyReport(dependencyReport);
 	}
 
 	@Override
 	public void visitIndex(Index index) {
 		TopologyGraph graph = findOrCreateGraph();
-		TopologyNode node = m_itemBuilder.buildNode(m_domain, index);
+		TopologyNode node = dependencyItemBuilder.buildNode(domain, index);
 		TopologyNode old = graph.findTopologyNode(node.getId());
 
 		graph.getNodes().put(node.getId(), mergeNode(old, node));
@@ -180,12 +185,12 @@ public class TopologyGraphBuilder extends BaseVisitor {
 
 	@Override
 	public void visitSegment(Segment segment) {
-		m_minute = segment.getId();
+		minute = segment.getId();
 		super.visitSegment(segment);
 	}
 
 	public TopologyGraphBuilder setItemBuilder(DependencyItemBuilder itemBuilder) {
-		m_itemBuilder = itemBuilder;
+		dependencyItemBuilder = itemBuilder;
 		return this;
 	}
 

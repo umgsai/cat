@@ -18,7 +18,13 @@
  */
 package com.dianping.cat.report.page.dependency.config;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,24 +40,28 @@ import com.dianping.cat.home.dependency.format.entity.ProductLine;
 import com.dianping.cat.home.dependency.format.entity.TopoGraphFormatConfig;
 import com.dianping.cat.home.dependency.format.transform.DefaultSaxParser;
 
+@Component
 public class TopoGraphFormatConfigManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TopoGraphFormatConfigManager.class);
 
 	private static final String CONFIG_NAME = "topoGraphFormat";
 
-	private ConfigRepository m_configDao;
+	@Resource
+	private ConfigRepository configRepository;
 
-	private ContentFetcher m_fetcher;
+	@Resource
+	private ContentFetcher contentFetcher;
 
-	private long m_configId;
+	private long configId;
 
-	private TopoGraphFormatConfig m_config;
+	private TopoGraphFormatConfig config;
 
 	public String buildFormatJson() {
 		ensureInitialized();
 
 		Map<String, Map<String, Integer>> map = new HashMap<String, Map<String, Integer>>();
 
-		for (ProductLine productline : m_config.getProductLines()) {
+		for (ProductLine productline : config.getProductLines()) {
 			Map<String, Integer> p = new HashMap<String, Integer>();
 
 			map.put(productline.getId(), p);
@@ -63,60 +73,65 @@ public class TopoGraphFormatConfigManager {
 	public TopoGraphFormatConfig getConfig() {
 		ensureInitialized();
 
-		return m_config;
+		return config;
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
+	@PostConstruct
 	public void initialize() {
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME);
-			String content = config.getContent();
+			Config configDO = configRepository.findByName(CONFIG_NAME);
+			String content = configDO.getContent();
 
-			m_configId = config.getId();
-			m_config = DefaultSaxParser.parse(content);
+			configId = configDO.getId();
+			config = DefaultSaxParser.parse(content);
 		} catch (EmptyResultDataAccessException e) {
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
+				String content = contentFetcher.getConfigContent(CONFIG_NAME);
+				Config configDO = configRepository.createLocal();
 
-				config.setName(CONFIG_NAME);
-				config.setContent(content);
-				m_configDao.insert(config);
+				configDO.setName(CONFIG_NAME);
+				configDO.setContent(content);
+				configRepository.insert(configDO);
 
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
+				configId = configDO.getId();
+				config = DefaultSaxParser.parse(content);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to create default topology graph format config, configName={}.", CONFIG_NAME, ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize topology graph format config, configName={}.", CONFIG_NAME, e);
 			Cat.logError(e);
 		}
-		if (m_config == null) {
-			m_config = new TopoGraphFormatConfig();
+		if (config == null) {
+			config = new TopoGraphFormatConfig();
 		}
 	}
 
 	public boolean insert(String xml) {
 		try {
-			m_config = DefaultSaxParser.parse(xml);
+			config = DefaultSaxParser.parse(xml);
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to insert topology graph format config, xmlLength={}.", xml == null ? 0 : xml.length(),
+			      e);
 			Cat.logError(e);
 			return false;
 		}
 	}
 
 	private void ensureInitialized() {
-		if (m_config == null) {
+		if (config == null) {
 			synchronized (this) {
-				if (m_config == null) {
+				if (config == null) {
 					initialize();
 				}
 			}
@@ -126,20 +141,22 @@ public class TopoGraphFormatConfigManager {
 	public List<ProductLine> queryProduct() {
 		ensureInitialized();
 
-		return m_config.getProductLines();
+		return config.getProductLines();
 	}
 
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = m_configDao.createLocal();
+				Config configDO = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
-				config.setName(CONFIG_NAME);
-				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config);
+				configDO.setId(configId);
+				configDO.setKeyId(configId);
+				configDO.setName(CONFIG_NAME);
+				configDO.setContent(config.toString());
+				configRepository.updateByPK(configDO);
 			} catch (Exception e) {
+				LOGGER.error("Unable to store topology graph format config, configName={}, configId={}.", CONFIG_NAME,
+				      configId, e);
 				Cat.logError(e);
 				return false;
 			}

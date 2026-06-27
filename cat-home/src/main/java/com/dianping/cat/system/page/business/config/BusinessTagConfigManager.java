@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -37,40 +38,45 @@ import com.dianping.cat.home.business.entity.BusinessTagConfig;
 import com.dianping.cat.home.business.entity.Tag;
 import com.dianping.cat.home.business.transform.DefaultSaxParser;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+@Component
 public class BusinessTagConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessTagConfigManager.class);
 
 	public final static String TAG_CONFIG = "tag";
 
-	private BusinessConfigRepository m_configDao;
+	@Resource
+	private BusinessConfigRepository businessConfigRepository;
 
-	private long m_configId;
+	private long configId;
 
-	private BusinessTagConfig m_tagConfig = new BusinessTagConfig();
+	private BusinessTagConfig tagConfig = new BusinessTagConfig();
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public void setConfigDao(BusinessConfigRepository configDao) {
-		m_configDao = configDao;
+		businessConfigRepository = configDao;
 	}
 
 	public Set<String> findAllTags() {
 		ensureInitialized();
 
-		return m_tagConfig.getTags().keySet();
+		return tagConfig.getTags().keySet();
 	}
 
 	public Tag findTag(String id) {
 		ensureInitialized();
 
-		return m_tagConfig.findTag(id);
+		return tagConfig.findTag(id);
 	}
 
 	public Map<String, Set<String>> findTagByDomain(String domain) {
 		ensureInitialized();
 
 		Map<String, Set<String>> domainTags = new HashMap<String, Set<String>>();
-		Map<String, Tag> tags = m_tagConfig.getTags();
+		Map<String, Tag> tags = tagConfig.getTags();
 
 		for (Tag tag : tags.values()) {
 			List<BusinessItem> items = tag.getBusinessItems();
@@ -94,56 +100,57 @@ public class BusinessTagConfigManager {
 
 	public BusinessTagConfig getConfig() {
 		ensureInitialized();
-		return m_tagConfig;
+		return tagConfig;
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
 		try {
-			List<BusinessConfig> result = m_configDao.findByName(TAG_CONFIG);
+			List<BusinessConfig> result = businessConfigRepository.findByName(TAG_CONFIG);
 
 			if (result.size() > 0) {
 				BusinessConfig config = result.get(0);
-				m_configId = config.getId();
-				m_tagConfig = DefaultSaxParser.parse(config.getContent());
-				LOGGER.info("Loaded business tag config from repository, configId={}, tagCount={}.", m_configId,
-						m_tagConfig.getTags().size());
+				configId = config.getId();
+				tagConfig = DefaultSaxParser.parse(config.getContent());
+				LOGGER.info("Loaded business tag config from repository, configId={}, tagCount={}.", configId,
+						tagConfig.getTags().size());
 			} else {
-				m_tagConfig = new BusinessTagConfig();
+				tagConfig = new BusinessTagConfig();
 
-				BusinessConfig config = m_configDao.createLocal();
+				BusinessConfig config = businessConfigRepository.createLocal();
 
 				config.setName(TAG_CONFIG);
 				config.setDomain(Constants.CAT);
-				config.setContent(m_tagConfig.toString());
+				config.setContent(tagConfig.toString());
 				config.setUpdatetime(new Date());
 
-				m_configDao.insert(config);
-				m_configId = config.getId();
-				LOGGER.info("Initialized empty business tag config, configId={}.", m_configId);
+				businessConfigRepository.insert(config);
+				configId = config.getId();
+				LOGGER.info("Initialized empty business tag config, configId={}.", configId);
 			}
 
 		} catch (Exception e) {
 			LOGGER.error("Unable to initialize business tag config.", e);
 			Cat.logError(e);
 		}
-		m_initialized = true;
+		initialized = true;
 	}
 
 	public boolean store(String xml) {
 		ensureInitialized();
 
 		try {
-			m_tagConfig = DefaultSaxParser.parse(xml);
+			tagConfig = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
@@ -157,19 +164,19 @@ public class BusinessTagConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				BusinessConfig config = m_configDao.createLocal();
+				BusinessConfig config = businessConfigRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
+				config.setId(configId);
+				config.setKeyId(configId);
 				config.setName(TAG_CONFIG);
 				config.setDomain(Constants.CAT);
-				config.setContent(m_tagConfig.toString());
+				config.setContent(tagConfig.toString());
 				config.setUpdatetime(new Date());
-				m_configDao.updateByPK(config);
-				LOGGER.info("Stored business tag config, configId={}, tagCount={}.", m_configId,
-						m_tagConfig.getTags().size());
+				businessConfigRepository.updateByPK(config);
+				LOGGER.info("Stored business tag config, configId={}, tagCount={}.", configId,
+						tagConfig.getTags().size());
 			} catch (Exception e) {
-				LOGGER.error("Unable to store business tag config, configId={}.", m_configId, e);
+				LOGGER.error("Unable to store business tag config, configId={}.", configId, e);
 				Cat.logError(e);
 				return false;
 			}

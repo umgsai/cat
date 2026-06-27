@@ -18,6 +18,13 @@
  */
 package com.dianping.cat.consumer.transaction;
 
+import java.util.Date;
+import java.util.Map;
+
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.AtomicMessageConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -31,22 +38,25 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
-import java.util.Date;
-import java.util.Map;
-
+@Component("transactionDelegate")
 public class TransactionDelegate implements ReportDelegate<TransactionReport> {
 
-	private TaskManager m_taskManager;
+	@Resource
+	private TaskManager taskManager;
 
-	private ServerFilterConfigManager m_configManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private AllReportConfigManager m_transactionManager;
+	@Resource
+	private AllReportConfigManager allReportConfigManager;
 
-	private ServerConfigManager m_serverConfigManager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
-	private AtomicMessageConfigManager m_atomicMessageConfigManager;
+	@Resource
+	private AtomicMessageConfigManager atomicMessageConfigManager;
 
-	private TransactionStatisticsComputer m_computer = new TransactionStatisticsComputer();
+	private TransactionStatisticsComputer transactionStatisticsComputer = new TransactionStatisticsComputer();
 
 	@Override
 	public void afterLoad(Map<String, TransactionReport> reports) {
@@ -63,11 +73,11 @@ public class TransactionDelegate implements ReportDelegate<TransactionReport> {
 
 	@Override
 	public String buildXml(TransactionReport report) {
-		report.accept(m_computer);
+		report.accept(transactionStatisticsComputer);
 
-		new TransactionReportCountFilter(m_serverConfigManager.getMaxTypeThreshold(),
-								m_atomicMessageConfigManager.getMaxNameThreshold(report.getDomain()),
-								m_serverConfigManager.getTypeNameLengthLimit()).visitTransactionReport(report);
+		new TransactionReportCountFilter(serverConfigManager.getMaxTypeThreshold(),
+								atomicMessageConfigManager.getMaxNameThreshold(report.getDomain()),
+								serverConfigManager.getTypeNameLengthLimit()).visitTransactionReport(report);
 
 		return report.toString();
 	}
@@ -76,8 +86,8 @@ public class TransactionDelegate implements ReportDelegate<TransactionReport> {
 	public boolean createHourlyTask(TransactionReport report) {
 		String domain = report.getDomain();
 
-		if (domain.equals(Constants.ALL) || m_configManager.validateDomain(domain)) {
-			return m_taskManager.createTask(report.getStartTime(), domain, TransactionAnalyzer.ID,
+		if (domain.equals(Constants.ALL) || serverFilterConfigManager.validateDomain(domain)) {
+			return taskManager.createTask(report.getStartTime(), domain, TransactionAnalyzer.ID,
 			      TaskProlicy.ALL_EXCLUED_HOURLY);
 		} else {
 			return true;
@@ -118,22 +128,22 @@ public class TransactionDelegate implements ReportDelegate<TransactionReport> {
 	}
 
 	public void setTaskManager(TaskManager taskManager) {
-		m_taskManager = taskManager;
+		this.taskManager = taskManager;
 	}
 
 	public void setConfigManager(ServerFilterConfigManager configManager) {
-		m_configManager = configManager;
+		serverFilterConfigManager = configManager;
 	}
 
 	public void setTransactionManager(AllReportConfigManager transactionManager) {
-		m_transactionManager = transactionManager;
+		allReportConfigManager = transactionManager;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {
-		m_atomicMessageConfigManager = atomicMessageConfigManager;
+		this.atomicMessageConfigManager = atomicMessageConfigManager;
 	}
 }

@@ -18,7 +18,9 @@
  */
 package com.dianping.cat.system.page.login.service;
 
-// Component
+import org.springframework.stereotype.Component;
+
+@Component
 public class DefaultCatPropertyProvider implements CatPropertyProvider {
 	public String getProperty(final String name, final String defaultValue) {
 		String value = null;

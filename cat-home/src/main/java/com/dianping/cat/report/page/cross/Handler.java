@@ -22,7 +22,9 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Date;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -41,16 +43,22 @@ import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.service.HostinfoService;
 
+@Component("crossHandler")
 public class Handler implements PageHandler<Context> {
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private CrossReportService m_reportService;
+	@Resource
+	private CrossReportService crossReportService;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private HostinfoService m_hostinfoService;
+	@Resource
+	private HostinfoService hostinfoService;
 
-	private ModelService<CrossReport> m_service;
+	@Resource(name = "crossModelService")
+	private ModelService<CrossReport> crossModelService;
 
 	private CrossReport getHourlyReport(Payload payload) {
 		String domain = payload.getDomain();
@@ -58,8 +66,8 @@ public class Handler implements PageHandler<Context> {
 		ModelRequest request = new ModelRequest(domain, payload.getDate()) //
 								.setProperty("ip", ipAddress);
 
-		if (m_service.isEligable(request)) {
-			ModelResponse<CrossReport> response = m_service.invoke(request);
+		if (crossModelService.isEligable(request)) {
+			ModelResponse<CrossReport> response = crossModelService.invoke(request);
 			CrossReport report = response.getModel();
 
 			return report;
@@ -74,7 +82,7 @@ public class Handler implements PageHandler<Context> {
 		Date start = payload.getHistoryStartDate();
 		Date end = payload.getHistoryEndDate();
 
-		return m_reportService.queryReport(domain, start, end);
+		return crossReportService.queryReport(domain, start, end);
 	}
 
 	@Override
@@ -108,7 +116,7 @@ public class Handler implements PageHandler<Context> {
 			CrossReport hostReport = getHourlyReport(payload);
 			HostInfo hostInfo = new HostInfo(payload.getHourDuration());
 
-			hostInfo.setHostinfoService(m_hostinfoService);
+			hostInfo.setHostinfoService(hostinfoService);
 			hostInfo.setClientIp(model.getIpAddress()).setCallSortBy(model.getCallSort())
 									.setServiceSortBy(model.getServiceSort());
 			hostInfo.setProjectName(payload.getProjectName());
@@ -120,7 +128,7 @@ public class Handler implements PageHandler<Context> {
 			CrossReport methodReport = getHourlyReport(payload);
 			MethodInfo methodInfo = new MethodInfo(payload.getHourDuration());
 
-			methodInfo.setHostinfoService(m_hostinfoService);
+			methodInfo.setHostinfoService(hostinfoService);
 			methodInfo.setClientIp(model.getIpAddress()).setCallSortBy(model.getCallSort())
 									.setServiceSortBy(model.getServiceSort()).setRemoteProject(payload.getProjectName());
 			methodInfo.setRemoteIp(payload.getRemoteIp()).setQuery(model.getQueryName());
@@ -142,7 +150,7 @@ public class Handler implements PageHandler<Context> {
 			CrossReport historyHostReport = getSummarizeReport(payload);
 			HostInfo historyHostInfo = new HostInfo(historyTime);
 
-			historyHostInfo.setHostinfoService(m_hostinfoService);
+			historyHostInfo.setHostinfoService(hostinfoService);
 			historyHostInfo.setClientIp(model.getIpAddress()).setCallSortBy(model.getCallSort())
 									.setServiceSortBy(model.getServiceSort());
 			historyHostInfo.setProjectName(payload.getProjectName());
@@ -154,7 +162,7 @@ public class Handler implements PageHandler<Context> {
 			CrossReport historyMethodReport = getSummarizeReport(payload);
 			MethodInfo historyMethodInfo = new MethodInfo(historyTime);
 
-			historyMethodInfo.setHostinfoService(m_hostinfoService);
+			historyMethodInfo.setHostinfoService(hostinfoService);
 			historyMethodInfo.setClientIp(model.getIpAddress()).setCallSortBy(model.getCallSort())
 									.setServiceSortBy(model.getServiceSort()).setRemoteProject(payload.getProjectName());
 			historyMethodInfo.setRemoteIp(payload.getRemoteIp()).setQuery(model.getQueryName());
@@ -177,7 +185,7 @@ public class Handler implements PageHandler<Context> {
 			model.setInfo(info.getInfo());
 			break;
 		}
-		m_jspViewer.view(ctx, model);
+		jspViewer.view(ctx, model);
 	}
 
 	private boolean isHistory(Payload payload) {
@@ -189,7 +197,7 @@ public class Handler implements PageHandler<Context> {
 	private void normalize(Model model, Payload payload) {
 		model.setPage(ReportPage.CROSS);
 		model.setAction(payload.getAction());
-		m_normalizePayload.normalize(model, payload);
+		normalizePayload.normalize(model, payload);
 		model.setCallSort(payload.getCallSort());
 		model.setServiceSort(payload.getServiceSort());
 		model.setQueryName(payload.getQueryName());
@@ -212,23 +220,4 @@ public class Handler implements PageHandler<Context> {
 		}
 	}
 
-	public void setHostinfoService(HostinfoService hostinfoService) {
-		m_hostinfoService = hostinfoService;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
-	}
-
-	public void setReportService(CrossReportService reportService) {
-		m_reportService = reportService;
-	}
-
-	public void setService(ModelService<CrossReport> service) {
-		m_service = service;
-	}
 }

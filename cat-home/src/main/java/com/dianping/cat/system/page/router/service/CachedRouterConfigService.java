@@ -18,25 +18,32 @@
  */
 package com.dianping.cat.system.page.router.service;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.home.router.entity.RouterConfig;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
+@Component
 public class CachedRouterConfigService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CachedRouterConfigService.class);
 
-	private RouterConfigService m_routerConfigService;
+	@Resource
+	private RouterConfigService routerConfigService;
 
-	private volatile RouterConfig m_routerConfig;
+	private volatile RouterConfig routerConfig;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
@@ -54,25 +61,25 @@ public class CachedRouterConfigService {
 				refresh();
 			}
 		});
-		m_initialized = true;
+		initialized = true;
 		LOGGER.info("Initialized cached router config service.");
 	}
 
 	public RouterConfig queryLastRouterConfig() {
 		initialize();
 
-		return m_routerConfig;
+		return routerConfig;
 	}
 
 	public void refresh() {
-		if (m_routerConfigService == null) {
+		if (routerConfigService == null) {
 			LOGGER.warn("Skip router config refresh because RouterConfigService is unavailable.");
 			return;
 		}
-		m_routerConfig = m_routerConfigService.queryLastReport(Constants.CAT);
+		routerConfig = routerConfigService.queryLastReport(Constants.CAT);
 	}
 
 	public void setRouterConfigService(RouterConfigService routerConfigService) {
-		m_routerConfigService = routerConfigService;
+		this.routerConfigService = routerConfigService;
 	}
 }

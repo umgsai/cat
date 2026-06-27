@@ -18,11 +18,14 @@
  */
 package com.dianping.cat.report.page.statistics.task.heavy;
 
+import jakarta.annotation.Resource;
+
 import java.util.Date;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -42,16 +45,20 @@ import com.dianping.cat.report.page.statistics.service.HeavyReportService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 
+@Component(HeavyReportBuilder.ID)
 public class HeavyReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeavyReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_HEAVY;
 
-	protected HeavyReportService m_reportService;
+	@Resource
+	protected HeavyReportService reportService;
 
-	protected MatrixReportService m_matrixReportService;
+	@Resource
+	protected MatrixReportService matrixReportService;
 
-	private ServerFilterConfigManager m_configManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -67,7 +74,7 @@ public class HeavyReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(heavyReport);
-		return m_reportService.insertDailyReport(report, binaryContent);
+		return reportService.insertDailyReport(report, binaryContent);
 	}
 
 	@Override
@@ -77,13 +84,13 @@ public class HeavyReportBuilder implements TaskBuilder {
 		HeavyReport heavyReport = new HeavyReport(Constants.CAT);
 		MatrixReportVisitor visitor = new MatrixReportVisitor().setReport(heavyReport);
 		Date end = new Date(start.getTime() + TimeHelper.ONE_HOUR);
-		Set<String> domains = m_reportService.queryAllDomainNames(start, end, MatrixAnalyzer.ID);
+		Set<String> domains = reportService.queryAllDomainNames(start, end, MatrixAnalyzer.ID);
 
 		heavyReport.setStartTime(start);
 		heavyReport.setEndTime(end);
 		for (String domainName : domains) {
-			if (m_configManager.validateDomain(domainName)) {
-				MatrixReport matrixReport = m_matrixReportService.queryReport(domainName, start, end);
+			if (serverFilterConfigManager.validateDomain(domainName)) {
+				MatrixReport matrixReport = matrixReportService.queryReport(domainName, start, end);
 
 				visitor.visitMatrixReport(matrixReport);
 			}
@@ -98,7 +105,7 @@ public class HeavyReportBuilder implements TaskBuilder {
 		report.setPeriod(start);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(heavyReport);
-		return m_reportService.insertHourlyReport(report, binaryContent);
+		return reportService.insertHourlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -115,7 +122,7 @@ public class HeavyReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(heavyReport);
-		return m_reportService.insertMonthlyReport(report, binaryContent);
+		return reportService.insertMonthlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -133,7 +140,7 @@ public class HeavyReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(heavyReport);
-		return m_reportService.insertWeeklyReport(report, binaryContent);
+		return reportService.insertWeeklyReport(report, binaryContent);
 	}
 
 	private HeavyReport queryDailyReportsByDuration(String domain, Date start, Date end) {
@@ -143,7 +150,7 @@ public class HeavyReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime += TimeHelper.ONE_DAY) {
 			try {
-				HeavyReport reportModel = m_reportService
+				HeavyReport reportModel = reportService
 										.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 				reportModel.accept(merger);
 			} catch (Exception e) {
@@ -165,7 +172,7 @@ public class HeavyReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			Date date = new Date(startTime);
-			HeavyReport reportModel = m_reportService.queryReport(domain, date, new Date(date.getTime()	+ TimeHelper.ONE_HOUR));
+			HeavyReport reportModel = reportService.queryReport(domain, date, new Date(date.getTime()	+ TimeHelper.ONE_HOUR));
 
 			reportModel.accept(merger);
 		}
@@ -175,15 +182,15 @@ public class HeavyReportBuilder implements TaskBuilder {
 	}
 
 	public void setConfigManager(ServerFilterConfigManager configManager) {
-		m_configManager = configManager;
+		this.serverFilterConfigManager = configManager;
 	}
 
 	public void setMatrixReportService(MatrixReportService matrixReportService) {
-		m_matrixReportService = matrixReportService;
+		this.matrixReportService = matrixReportService;
 	}
 
 	public void setReportService(HeavyReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 }

@@ -18,6 +18,13 @@
  */
 package com.dianping.cat.consumer.dependency;
 
+import java.util.Date;
+import java.util.Map;
+
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
 import com.dianping.cat.consumer.dependency.model.transform.DefaultNativeBuilder;
@@ -27,12 +34,11 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
-import java.util.Date;
-import java.util.Map;
-
+@Component("dependencyDelegate")
 public class DependencyDelegate implements ReportDelegate<DependencyReport> {
 
-	private TaskManager m_taskManager;
+	@Resource
+	private TaskManager taskManager;
 
 	@Override
 	public void afterLoad(Map<String, DependencyReport> reports) {
@@ -54,7 +60,7 @@ public class DependencyDelegate implements ReportDelegate<DependencyReport> {
 
 	@Override
 	public boolean createHourlyTask(DependencyReport report) {
-		return m_taskManager.createTask(report.getStartTime(), Constants.CAT, DependencyAnalyzer.ID, TaskProlicy.HOULY);
+		return taskManager.createTask(report.getStartTime(), Constants.CAT, DependencyAnalyzer.ID, TaskProlicy.HOULY);
 	}
 
 	@Override
@@ -91,6 +97,6 @@ public class DependencyDelegate implements ReportDelegate<DependencyReport> {
 	}
 
 	public void setTaskManager(TaskManager taskManager) {
-		m_taskManager = taskManager;
+		this.taskManager = taskManager;
 	}
 }

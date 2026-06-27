@@ -26,10 +26,14 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.page.storage.task.StorageReportService;
 import com.dianping.cat.report.service.BaseHistoricalModelService;
 import com.dianping.cat.report.service.ModelRequest;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("storage-historical")
 public class HistoricalStorageService extends BaseHistoricalModelService<StorageReport> {
 
-	private StorageReportService m_reportService;
+	@Resource
+	private StorageReportService reportService;
 
 	public HistoricalStorageService() {
 		super(StorageAnalyzer.ID);
@@ -45,11 +49,11 @@ public class HistoricalStorageService extends BaseHistoricalModelService<Storage
 	}
 
 	private StorageReport getReportFromDatabase(long timestamp, String id) throws Exception {
-		return m_reportService.queryReport(id, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
+		return reportService.queryReport(id, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
 	}
 
 	public void setReportService(StorageReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 }

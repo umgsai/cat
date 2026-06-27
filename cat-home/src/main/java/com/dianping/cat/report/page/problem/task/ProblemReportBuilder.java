@@ -18,6 +18,11 @@
  */
 package com.dianping.cat.report.page.problem.task;
 
+import jakarta.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -40,12 +45,14 @@ import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 
+@Component
 public class ProblemReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProblemReportBuilder.class);
 
 	public static final String ID = ProblemAnalyzer.ID;
 
-	protected ProblemReportService m_reportService;
+	@Resource
+	protected ProblemReportService reportService;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -62,7 +69,7 @@ public class ProblemReportBuilder implements TaskBuilder {
 			report.setType(1);
 			byte[] binaryContent = DefaultNativeBuilder.build(problemReport);
 
-			return m_reportService.insertDailyReport(report, binaryContent);
+			return reportService.insertDailyReport(report, binaryContent);
 		} catch (RuntimeException e) {
 			LOGGER.error("Unable to build problem daily report, name={}, domain={}, period={}.", name, domain, period, e);
 			Cat.logError(e);
@@ -91,7 +98,7 @@ public class ProblemReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(problemReport);
-		return m_reportService.insertMonthlyReport(report, binaryContent);
+		return reportService.insertMonthlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -108,9 +115,10 @@ public class ProblemReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(problemReport);
-		return m_reportService.insertWeeklyReport(report, binaryContent);
+		return reportService.insertWeeklyReport(report, binaryContent);
 	}
 
+	@PostConstruct
 	public void initialize() {
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
@@ -143,7 +151,7 @@ public class ProblemReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime += TimeHelper.ONE_DAY) {
 			try {
-				ProblemReport reportModel = m_reportService
+				ProblemReport reportModel = reportService
 										.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 
 				creator.createGraph(reportModel);
@@ -168,7 +176,7 @@ public class ProblemReportBuilder implements TaskBuilder {
 		ProblemReportHourlyGraphCreator graphCreator = new ProblemReportHourlyGraphCreator(merger.getProblemReport(), 10);
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
-			ProblemReport report = m_reportService
+			ProblemReport report = reportService
 									.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_HOUR));
 
 			graphCreator.createGraph(report);
@@ -185,6 +193,6 @@ public class ProblemReportBuilder implements TaskBuilder {
 	}
 
 	public void setReportService(ProblemReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 }

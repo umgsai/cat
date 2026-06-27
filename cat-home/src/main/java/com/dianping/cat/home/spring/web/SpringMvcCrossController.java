@@ -38,36 +38,34 @@ import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class SpringMvcCrossController {
-	private final SimpleDateFormat m_dayFormat = new SimpleDateFormat("yyyyMMdd");
+	private final SimpleDateFormat dayFormat = new SimpleDateFormat("yyyyMMdd");
 
-	private final SimpleDateFormat m_hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
+	private final SimpleDateFormat hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
 
-	private final SimpleDateFormat m_subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-	@Resource
-	private DomainGroupConfigManager m_configManager;
+	private final SimpleDateFormat subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	@Resource
-	private HostinfoService m_hostinfoService;
+	private DomainGroupConfigManager domainGroupConfigManager;
 
 	@Resource
-	private ProjectService m_projectService;
+	private HostinfoService hostinfoService;
 
 	@Resource
-	private SampleConfigManager m_sampleConfigManager;
+	private ProjectService projectService;
 
 	@Resource
-	private CrossReportService m_reportService;
+	private SampleConfigManager sampleConfigManager;
 
 	@Resource
-	@Qualifier("crossModelService")
-	private ModelService<CrossReport> m_crossService;
+	private CrossReportService crossReportService;
+
+	@Resource(name = "crossModelService")
+	private ModelService<CrossReport> crossModelService;
 
 	@GetMapping("/mvc/r/cross")
 	public void cross(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -117,13 +115,13 @@ public class SpringMvcCrossController {
 
 		if (isHostAction(action)) {
 			hostInfo = new HostInfo(duration);
-			hostInfo.setHostinfoService(m_hostinfoService);
+			hostInfo.setHostinfoService(hostinfoService);
 			hostInfo.setClientIp(ipAddress).setCallSortBy(callSort).setServiceSortBy(serviceSort);
 			hostInfo.setProjectName(project);
 			hostInfo.visitCrossReport(report);
 		} else if (isMethodAction(action)) {
 			methodInfo = new MethodInfo(duration);
-			methodInfo.setHostinfoService(m_hostinfoService);
+			methodInfo.setHostinfoService(hostinfoService);
 			methodInfo.setClientIp(ipAddress).setCallSortBy(callSort).setServiceSortBy(serviceSort);
 			methodInfo.setRemoteProject(project);
 			methodInfo.setRemoteIp(remoteIp).setQuery(queryName);
@@ -140,11 +138,11 @@ public class SpringMvcCrossController {
 		model.put("displayDomain", domain);
 		model.put("ipAddress", ipAddress);
 		model.put("reportType", reportType);
-		model.put("date", historyMode ? m_dayFormat.format(new Date(date)) : m_hourlyFormat.format(new Date(date)));
+		model.put("date", historyMode ? dayFormat.format(new Date(date)) : hourlyFormat.format(new Date(date)));
 		model.put("longDate", date);
 		model.put("report", report);
-		model.put("reportStart", m_subtitleFormat.format(historyMode ? historyDates.getStart() : report.getStartTime()));
-		model.put("reportEnd", m_subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
+		model.put("reportStart", subtitleFormat.format(historyMode ? historyDates.getStart() : report.getStartTime()));
+		model.put("reportEnd", subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
 		model.put("ips", ips);
 		model.put("projectInfo", projectInfo);
 		model.put("hostInfo", hostInfo);
@@ -156,7 +154,7 @@ public class SpringMvcCrossController {
 		model.put("remoteIp", remoteIp);
 		model.put("queryName", queryName);
 		model.put("ipToHostnameStr", new JsonBuilder().toJson(ipToHostname(ips)));
-		model.put("groups", m_configManager.queryDomainGroup(domain));
+		model.put("groups", domainGroupConfigManager.queryDomainGroup(domain));
 		model.put("domainGroups", domainGroups());
 		model.put("navs", UrlNav.values());
 		model.put("navPrefix", "ip=" + ipAddress + "&domain=" + report.getDomain() + "&callSort=" + callSort
@@ -188,7 +186,7 @@ public class SpringMvcCrossController {
 
 		if (value != null && value.length() > 0) {
 			try {
-				result = value.length() == 10 ? m_hourlyFormat.parse(value).getTime()
+				result = value.length() == 10 ? hourlyFormat.parse(value).getTime()
 						: new SimpleDateFormat("yyyyMMdd").parse(value).getTime();
 			} catch (ParseException e) {
 				result = currentHour;
@@ -201,7 +199,7 @@ public class SpringMvcCrossController {
 	private Date dateParameter(String value) {
 		if (value != null && value.length() > 0) {
 			try {
-				return value.length() == 10 ? m_hourlyFormat.parse(value) : m_dayFormat.parse(value);
+				return value.length() == 10 ? hourlyFormat.parse(value) : dayFormat.parse(value);
 			} catch (ParseException e) {
 				// ignore invalid date and fall back to the same default as old MVC.
 			}
@@ -210,9 +208,9 @@ public class SpringMvcCrossController {
 	}
 
 	private Map<String, Department> domainGroups() {
-		Collection<String> domains = m_projectService.findAllDomains();
+		Collection<String> domains = projectService.findAllDomains();
 
-		return m_projectService.findDepartments(domains);
+		return projectService.findDepartments(domains);
 	}
 
 	private Date historyEndDate(long date, String reportType, String customEnd) {
@@ -364,7 +362,7 @@ public class SpringMvcCrossController {
 		Map<String, String> result = new LinkedHashMap<String, String>();
 
 		for (String ip : ips) {
-			String hostname = m_hostinfoService.queryHostnameByIp(ip);
+			String hostname = hostinfoService.queryHostnameByIp(ip);
 
 			if (hostname != null && !"null".equalsIgnoreCase(hostname)) {
 				result.put(ip, hostname);
@@ -386,9 +384,9 @@ public class SpringMvcCrossController {
 		if (value != null && value.length() > 0) {
 			try {
 				if (value.length() == 10) {
-					return m_hourlyFormat.parse(value);
+					return hourlyFormat.parse(value);
 				} else if (value.length() == 8) {
-					return m_dayFormat.parse(value);
+					return dayFormat.parse(value);
 				}
 			} catch (ParseException e) {
 				// ignore invalid custom date.
@@ -400,8 +398,8 @@ public class SpringMvcCrossController {
 	private CrossReport queryHourlyReport(String domain, String ipAddress, long date) {
 		ModelRequest request = new ModelRequest(domain, date).setProperty("ip", ipAddress);
 
-		if (m_crossService.isEligable(request)) {
-			ModelResponse<CrossReport> response = m_crossService.invoke(request);
+		if (crossModelService.isEligable(request)) {
+			ModelResponse<CrossReport> response = crossModelService.invoke(request);
 
 			return response.getModel();
 		}
@@ -409,11 +407,11 @@ public class SpringMvcCrossController {
 	}
 
 	private CrossReport queryHistoryReport(String domain, HistoryDates dates) {
-		return m_reportService.queryReport(domain, dates.getStart(), dates.getEnd());
+		return crossReportService.queryReport(domain, dates.getStart(), dates.getEnd());
 	}
 
 	private double sample(String domain) {
-		Domain sampleDomain = m_sampleConfigManager.getConfig().findDomain(domain);
+		Domain sampleDomain = sampleConfigManager.getConfig().findDomain(domain);
 
 		return sampleDomain == null ? 1.0 : sampleDomain.getSample();
 	}
@@ -438,7 +436,7 @@ public class SpringMvcCrossController {
 		}
 
 		private String getCustomDate() {
-			return "&startDate=" + m_dayFormat.format(m_start) + "&endDate=" + m_dayFormat.format(m_end);
+			return "&startDate=" + dayFormat.format(m_start) + "&endDate=" + dayFormat.format(m_end);
 		}
 
 		private long getDate() {

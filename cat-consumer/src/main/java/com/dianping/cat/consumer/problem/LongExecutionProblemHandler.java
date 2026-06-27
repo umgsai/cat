@@ -22,8 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.configuration.server.entity.Domain;
@@ -33,34 +35,36 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 
+@Component(LongExecutionProblemHandler.ID)
 public class LongExecutionProblemHandler extends ProblemHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LongExecutionProblemHandler.class);
 
 	public static final String ID = "long-execution";
 
-	private ServerConfigManager m_configManager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
-	private int[] m_defaultLongServiceDuration = { 50, 100, 500, 1000, 3000, 5000 };
+	private int[] defaultLongServiceDuration = { 50, 100, 500, 1000, 3000, 5000 };
 
-	private int[] m_defaultLongSqlDuration = { 100, 500, 1000, 3000, 5000 };
+	private int[] defaultLongSqlDuration = { 100, 500, 1000, 3000, 5000 };
 
-	private int[] m_defaultLongUrlDuration = { 1000, 2000, 3000, 5000 };
+	private int[] defaultLongUrlDuration = { 1000, 2000, 3000, 5000 };
 
-	private int[] m_defalutLongCallDuration = { 100, 500, 1000, 3000, 5000 };
+	private int[] defaultLongCallDuration = { 100, 500, 1000, 3000, 5000 };
 
-	private int[] m_defaultLongCacheDuration = { 10, 50, 100, 500 };
+	private int[] defaultLongCacheDuration = { 10, 50, 100, 500 };
 
-	private Map<String, Integer> m_longServiceThresholds = new HashMap<String, Integer>();
+	private Map<String, Integer> longServiceThresholds = new HashMap<String, Integer>();
 
-	private Map<String, Integer> m_longSqlThresholds = new HashMap<String, Integer>();
+	private Map<String, Integer> longSqlThresholds = new HashMap<String, Integer>();
 
-	private Map<String, Integer> m_longUrlThresholds = new HashMap<String, Integer>();
+	private Map<String, Integer> longUrlThresholds = new HashMap<String, Integer>();
 
-	private Map<String, Integer> m_longCallThresholds = new HashMap<String, Integer>();
+	private Map<String, Integer> longCallThresholds = new HashMap<String, Integer>();
 
-	private Map<String, Integer> m_longCacheThresholds = new HashMap<String, Integer>();
+	private Map<String, Integer> longCacheThresholds = new HashMap<String, Integer>();
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public int computeLongDuration(long duration, String domain, int[] defaultLongDuration,
 							Map<String, Integer> longThresholds) {
@@ -95,25 +99,25 @@ public class LongExecutionProblemHandler extends ProblemHandler {
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
-		if (m_configManager == null) {
+		if (serverConfigManager == null) {
 			LOGGER.warn("Server config manager is not configured for long execution problem handler.");
-			m_initialized = true;
+			initialized = true;
 			return;
 		}
-		Map<String, Domain> domains = m_configManager.getLongConfigDomains();
+		Map<String, Domain> domains = serverConfigManager.getLongConfigDomains();
 
-		m_longServiceThresholds.clear();
-		m_longUrlThresholds.clear();
-		m_longSqlThresholds.clear();
+		longServiceThresholds.clear();
+		longUrlThresholds.clear();
+		longSqlThresholds.clear();
 
 		for (Domain domain : domains.values()) {
 			Integer serviceThreshold = domain.getServiceThreshold();
@@ -121,22 +125,22 @@ public class LongExecutionProblemHandler extends ProblemHandler {
 			Integer sqlThreshold = domain.getSqlThreshold();
 
 			if (serviceThreshold != null) {
-				m_longServiceThresholds.put(domain.getName(), serviceThreshold);
+				longServiceThresholds.put(domain.getName(), serviceThreshold);
 			}
 			if (urlThreshold != null) {
-				m_longUrlThresholds.put(domain.getName(), urlThreshold);
+				longUrlThresholds.put(domain.getName(), urlThreshold);
 			}
 			if (sqlThreshold != null) {
-				m_longSqlThresholds.put(domain.getName(), sqlThreshold);
+				longSqlThresholds.put(domain.getName(), sqlThreshold);
 			}
 		}
-		m_initialized = true;
+		initialized = true;
 	}
 
 	private void processLongCache(Machine machine, Transaction transaction, MessageTree tree) {
 		long duration = ((Transaction) transaction).getDurationInMillis();
-		long nomarizeDuration = computeLongDuration(duration, tree.getDomain(), m_defaultLongCacheDuration,
-								m_longCacheThresholds);
+		long nomarizeDuration = computeLongDuration(duration, tree.getDomain(), defaultLongCacheDuration,
+								longCacheThresholds);
 
 		if (nomarizeDuration > 0) {
 			String type = ProblemType.LONG_CACHE.getName();
@@ -151,7 +155,7 @@ public class LongExecutionProblemHandler extends ProblemHandler {
 		long duration = transaction.getDurationInMillis();
 		String domain = tree.getDomain();
 
-		long nomarizeDuration = computeLongDuration(duration, domain, m_defalutLongCallDuration, m_longCallThresholds);
+		long nomarizeDuration = computeLongDuration(duration, domain, defaultLongCallDuration, longCallThresholds);
 		if (nomarizeDuration > 0) {
 			String type = ProblemType.LONG_CALL.getName();
 			String status = transaction.getName();
@@ -164,7 +168,7 @@ public class LongExecutionProblemHandler extends ProblemHandler {
 	private void processLongService(Machine machine, Transaction transaction, MessageTree tree) {
 		long duration = transaction.getDurationInMillis();
 		String domain = tree.getDomain();
-		long nomarizeDuration = computeLongDuration(duration, domain, m_defaultLongServiceDuration,	m_longServiceThresholds);
+		long nomarizeDuration = computeLongDuration(duration, domain, defaultLongServiceDuration, longServiceThresholds);
 
 		if (nomarizeDuration > 0) {
 			String type = ProblemType.LONG_SERVICE.getName();
@@ -179,7 +183,7 @@ public class LongExecutionProblemHandler extends ProblemHandler {
 		long duration = transaction.getDurationInMillis();
 		String domain = tree.getDomain();
 
-		long nomarizeDuration = computeLongDuration(duration, domain, m_defaultLongSqlDuration, m_longSqlThresholds);
+		long nomarizeDuration = computeLongDuration(duration, domain, defaultLongSqlDuration, longSqlThresholds);
 		if (nomarizeDuration > 0) {
 			String type = ProblemType.LONG_SQL.getName();
 			String status = transaction.getName();
@@ -193,7 +197,7 @@ public class LongExecutionProblemHandler extends ProblemHandler {
 		long duration = (transaction).getDurationInMillis();
 		String domain = tree.getDomain();
 
-		long nomarizeDuration = computeLongDuration(duration, domain, m_defaultLongUrlDuration, m_longUrlThresholds);
+		long nomarizeDuration = computeLongDuration(duration, domain, defaultLongUrlDuration, longUrlThresholds);
 		if (nomarizeDuration > 0) {
 			String type = ProblemType.LONG_URL.getName();
 			String status = transaction.getName();
@@ -210,9 +214,9 @@ public class LongExecutionProblemHandler extends ProblemHandler {
 			processLongCache(machine, transaction, tree);
 		} else if (type.equals("SQL")) {
 			processLongSql(machine, transaction, tree);
-		} else if (m_configManager.isRpcClient(type)) {
+		} else if (serverConfigManager.isRpcClient(type)) {
 			processLongCall(machine, transaction, tree);
-		} else if (m_configManager.isRpcServer(type)) {
+		} else if (serverConfigManager.isRpcServer(type)) {
 			processLongService(machine, transaction, tree);
 		} else if ("URL".equals(type)) {
 			processLongUrl(machine, transaction, tree);
@@ -228,7 +232,7 @@ public class LongExecutionProblemHandler extends ProblemHandler {
 	}
 
 	public void setConfigManager(ServerConfigManager configManager) {
-		m_configManager = configManager;
+		serverConfigManager = configManager;
 	}
 
 }

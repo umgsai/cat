@@ -22,39 +22,45 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.mybatis.ProjectRepository;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 public class ProjectService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectService.class);
 
 	public static final String DEFAULT = "Default";
 
-	private ProjectRepository m_projectDao;
+	@Resource
+	private ProjectRepository projectRepository;
 
-	private ServerConfigManager m_manager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
-	private ConcurrentHashMap<String, String> m_domains = new ConcurrentHashMap<String, String>();
+	private ConcurrentHashMap<String, String> domains = new ConcurrentHashMap<String, String>();
 
-	private ConcurrentHashMap<String, Project> m_domainToProjects = new ConcurrentHashMap<String, Project>();
+	private ConcurrentHashMap<String, Project> domainToProjects = new ConcurrentHashMap<String, Project>();
 
-	private ConcurrentHashMap<String, Project> m_cmdbToProjects = new ConcurrentHashMap<String, Project>();
+	private ConcurrentHashMap<String, Project> cmdbToProjects = new ConcurrentHashMap<String, Project>();
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public boolean contains(String domain) {
 		ensureInitialized();
 
-		return m_domains.containsKey(domain);
+		return domains.containsKey(domain);
 	}
 
 	public Project create() {
-		return m_projectDao.createLocal();
+		return projectRepository.createLocal();
 	}
 
 	public boolean delete(Project project) {
@@ -63,7 +69,7 @@ public class ProjectService {
 		long id = project.getId();
 		String domainName = null;
 
-		for (Entry<String, Project> entry : m_domainToProjects.entrySet()) {
+		for (Entry<String, Project> entry : domainToProjects.entrySet()) {
 			Project pro = entry.getValue();
 
 			if (pro.getId() == id) {
@@ -73,17 +79,17 @@ public class ProjectService {
 		}
 
 		try {
-			m_projectDao.deleteByPK(project);
+			projectRepository.deleteByPK(project);
 
 			if (domainName != null) {
-				m_domainToProjects.remove(domainName);
-				m_domains.remove(domainName);
+				domainToProjects.remove(domainName);
+				domains.remove(domainName);
 			}
 
 			String cmdbDomain = project.getCmdbDomain();
 
 			if (cmdbDomain != null) {
-				m_cmdbToProjects.remove(cmdbDomain);
+				cmdbToProjects.remove(cmdbDomain);
 			}
 
 			return true;
@@ -97,27 +103,27 @@ public class ProjectService {
 	public List<Project> findAll() {
 		ensureInitialized();
 
-		return new ArrayList<Project>(m_domainToProjects.values());
+		return new ArrayList<Project>(domainToProjects.values());
 	}
 
 	public Set<String> findAllDomains() {
 		ensureInitialized();
 
-		return m_domains.keySet();
+		return domains.keySet();
 	}
 
 	public Project findByDomain(String domainName) {
 		ensureInitialized();
 
-		Project project = m_domainToProjects.get(domainName);
+		Project project = domainToProjects.get(domainName);
 
 		if (project != null) {
 			return project;
 		} else {
 			try {
-				Project pro = m_projectDao.findByDomain(domainName);
+				Project pro = projectRepository.findByDomain(domainName);
 
-				m_domainToProjects.put(pro.getDomain(), pro);
+				domainToProjects.put(pro.getDomain(), pro);
 				return project;
 			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Project is missing or unavailable by domain={}.", domainName, e);
@@ -161,49 +167,50 @@ public class ProjectService {
 	public Project findProject(String domain) {
 		ensureInitialized();
 
-		Project project = m_domainToProjects.get(domain);
+		Project project = domainToProjects.get(domain);
 
 		if (project == null) {
-			project = m_cmdbToProjects.get(domain);
+			project = cmdbToProjects.get(domain);
 		}
 		return project;
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
-		if (!m_manager.isLocalMode()) {
+		if (!serverConfigManager.isLocalMode()) {
 			LOGGER.info("Initializing ProjectService in remote mode.");
 			refresh();
 		} else {
 			LOGGER.info("Initializing ProjectService in local mode; skip database refresh.");
 		}
-		m_initialized = true;
+		initialized = true;
 	}
 
 	public void setProjectDao(ProjectRepository projectDao) {
-		m_projectDao = projectDao;
+		projectRepository = projectDao;
 	}
 
 	public void setServerConfigManager(ServerConfigManager manager) {
-		m_manager = manager;
+		serverConfigManager = manager;
 	}
 
 	public boolean insert(Project project) {
 		ensureInitialized();
 
-		m_domainToProjects.put(project.getDomain(), project);
+		domainToProjects.put(project.getDomain(), project);
 
 		try {
-			int result = m_projectDao.insert(project);
+			int result = projectRepository.insert(project);
 
 			if (result == 1) {
 				LOGGER.info("Inserted project, domain={}, id={}.", project.getDomain(), project.getId());
@@ -231,7 +238,7 @@ public class ProjectService {
 
 		try {
 			insert(project);
-			m_domains.put(domain, domain);
+			domains.put(domain, domain);
 
 			return true;
 		} catch (Exception ex) {
@@ -243,7 +250,7 @@ public class ProjectService {
 
 	protected void refresh() {
 		try {
-			List<Project> projects = m_projectDao.findAll();
+			List<Project> projects = projectRepository.findAll();
 			ConcurrentHashMap<String, Project> tmpDomainProjects = new ConcurrentHashMap<String, Project>();
 			ConcurrentHashMap<String, Project> tmpCmdbProjects = new ConcurrentHashMap<String, Project>();
 			ConcurrentHashMap<String, String> tmpDomains = new ConcurrentHashMap<String, String>();
@@ -260,9 +267,9 @@ public class ProjectService {
 					tmpCmdbProjects.put(cmdb, project);
 				}
 			}
-			m_domains = tmpDomains;
-			m_domainToProjects = tmpDomainProjects;
-			m_cmdbToProjects = tmpCmdbProjects;
+			domains = tmpDomains;
+			domainToProjects = tmpDomainProjects;
+			cmdbToProjects = tmpCmdbProjects;
 			LOGGER.info("Refreshed projects, projectCount={}, cmdbDomainCount={}.", projects.size(),
 					tmpCmdbProjects.size());
 		} catch (RuntimeException e) {
@@ -274,10 +281,10 @@ public class ProjectService {
 	public boolean update(Project project) {
 		ensureInitialized();
 
-		m_domainToProjects.put(project.getDomain(), project);
+		domainToProjects.put(project.getDomain(), project);
 
 		try {
-			m_projectDao.updateByPK(project);
+			projectRepository.updateByPK(project);
 			LOGGER.info("Updated project, domain={}, id={}.", project.getDomain(), project.getId());
 			return true;
 		} catch (RuntimeException e) {

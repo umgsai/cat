@@ -25,14 +25,18 @@ import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.alarm.spi.decorator.ProjectDecorator;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("businessDecorator")
 public class BusinessDecorator extends ProjectDecorator {
 	public static final String ID = AlertType.Business.getName();
 
-	private AlertSummaryExecutor m_executor;
+	@Resource
+	private AlertSummaryExecutor alertSummaryExecutor;
 
 	public void setExecutor(AlertSummaryExecutor executor) {
-		m_executor = executor;
+		alertSummaryExecutor = executor;
 	}
 
 	@Override
@@ -47,7 +51,7 @@ public class BusinessDecorator extends ProjectDecorator {
 		sb.append(alert.getContent());
 		sb.append(buildContactInfo(alert.getDomain()));
 
-		AlertSummaryExecutor executor = m_executor;
+		AlertSummaryExecutor executor = alertSummaryExecutor;
 		String summaryContext = executor == null ? null : executor.execute(alert.getDomain(), alertDate);
 		if (summaryContext != null) {
 			sb.append("<br/>").append(summaryContext);

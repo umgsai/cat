@@ -31,19 +31,24 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.page.metric.service.BaselineService;
 
+import jakarta.annotation.Resource;
+
 public abstract class AbstractGraphCreator {
-	protected BaselineService m_baselineService;
+	@Resource
+	protected BaselineService baselineService;
 
-	protected DataExtractor m_dataExtractor;
+	@Resource
+	protected DataExtractor dataExtractor;
 
-	protected AlertManager m_alertManager;
+	@Resource(name = "spiAlertManager")
+	protected AlertManager alertManager;
 
-	protected int m_lastMinute = 6;
+	protected int lastMinute = 6;
 
-	protected int m_extraTime = 1;
+	protected int extraTime = 1;
 
 	protected void addLastMinuteData(Map<Long, Double> current, Map<Long, Double> all, int minute, Date end) {
-		int step = m_dataExtractor.getStep();
+		int step = dataExtractor.getStep();
 
 		if (step == 1) {
 			return;
@@ -51,7 +56,7 @@ public abstract class AbstractGraphCreator {
 		long endTime = 0;
 		long currentTime = System.currentTimeMillis();
 		if (end.getTime() > currentTime) {
-			endTime = currentTime - currentTime % TimeHelper.ONE_MINUTE - m_extraTime * TimeHelper.ONE_MINUTE;
+			endTime = currentTime - currentTime % TimeHelper.ONE_MINUTE - extraTime * TimeHelper.ONE_MINUTE;
 		} else {
 			endTime = end.getTime();
 		}
@@ -197,7 +202,7 @@ public abstract class AbstractGraphCreator {
 		long endLong = end.getTime();
 
 		for (; startLong < endLong; startLong += TimeHelper.ONE_HOUR) {
-			double[] values = m_baselineService.queryHourlyBaseline(name, key, new Date(startLong));
+			double[] values = baselineService.queryHourlyBaseline(name, key, new Date(startLong));
 
 			if (values != null) {
 				for (int j = 0; j < values.length; j++) {
@@ -213,7 +218,7 @@ public abstract class AbstractGraphCreator {
 		if (isCurrentMode(endDate)) {
 			// remove the minute of future
 			Map<String, double[]> newCurrentValues = new LinkedHashMap<String, double[]>();
-			int step = m_dataExtractor.getStep();
+			int step = dataExtractor.getStep();
 
 			if (step <= 0) {
 				return allCurrentValues;
@@ -232,15 +237,4 @@ public abstract class AbstractGraphCreator {
 		return allCurrentValues;
 	}
 
-	public void setAlertManager(AlertManager alertManager) {
-		m_alertManager = alertManager;
-	}
-
-	public void setBaselineService(BaselineService baselineService) {
-		m_baselineService = baselineService;
-	}
-
-	public void setDataExtractor(DataExtractor dataExtractor) {
-		m_dataExtractor = dataExtractor;
-	}
 }

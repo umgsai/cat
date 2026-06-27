@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.report.page.event.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.dianping.cat.consumer.event.EventAnalyzer;
@@ -27,10 +28,27 @@ import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.report.service.ModelService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("eventModelService")
 public class CompositeEventService extends BaseCompositeModelService<EventReport> {
+	@Resource(name = "event-historical")
+	private ModelService<EventReport> historicalEventService;
+
 	public CompositeEventService() {
 		super(EventAnalyzer.ID);
+	}
+
+	@Override
+	@PostConstruct
+	public synchronized void initialize() {
+		if (historicalEventService != null) {
+			setServices(Collections.singletonList(historicalEventService));
+		}
+		super.initialize();
 	}
 
 	@Override

@@ -25,10 +25,14 @@ import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.BaseHistoricalModelService;
 import com.dianping.cat.report.service.ModelRequest;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("dependency-historical")
 public class HistoricalDependencyService extends BaseHistoricalModelService<DependencyReport> {
 
-	private DependencyReportService m_reportService;
+	@Resource
+	private DependencyReportService reportService;
 
 	public HistoricalDependencyService() {
 		super(DependencyAnalyzer.ID);
@@ -44,11 +48,11 @@ public class HistoricalDependencyService extends BaseHistoricalModelService<Depe
 	}
 
 	private DependencyReport getReportFromDatabase(long timestamp, String domain) throws Exception {
-		return m_reportService.queryReport(domain, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
+		return reportService.queryReport(domain, new Date(timestamp), new Date(timestamp + TimeHelper.ONE_HOUR));
 	}
 
 	public void setReportService(DependencyReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 }

@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.report.page.cross.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.dianping.cat.consumer.cross.CrossAnalyzer;
@@ -27,10 +28,27 @@ import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.report.service.ModelService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("crossModelService")
 public class CompositeCrossService extends BaseCompositeModelService<CrossReport> {
+	@Resource(name = "cross-historical")
+	private ModelService<CrossReport> historicalCrossService;
+
 	public CompositeCrossService() {
 		super(CrossAnalyzer.ID);
+	}
+
+	@Override
+	@PostConstruct
+	public synchronized void initialize() {
+		if (historicalCrossService != null) {
+			setServices(Collections.singletonList(historicalCrossService));
+		}
+		super.initialize();
 	}
 
 	@Override

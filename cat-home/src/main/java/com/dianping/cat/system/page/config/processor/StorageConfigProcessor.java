@@ -18,10 +18,13 @@
  */
 package com.dianping.cat.system.page.config.processor;
 
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.system.page.config.Action;
 import com.dianping.cat.system.page.config.Model;
 import com.dianping.cat.system.page.config.Payload;
 
+@Component("storageConfigProcessor")
 public class StorageConfigProcessor extends BaseProcesser {
 
 

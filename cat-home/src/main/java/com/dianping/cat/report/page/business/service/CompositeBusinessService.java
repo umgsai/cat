@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.report.page.business.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
@@ -27,11 +28,27 @@ import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.report.service.ModelService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("businessModelService")
 public class CompositeBusinessService extends BaseCompositeModelService<BusinessReport> {
+	@Resource(name = "business-historical")
+	private ModelService<BusinessReport> historicalBusinessService;
 
 	public CompositeBusinessService() {
 		super(BusinessAnalyzer.ID);
+	}
+
+	@Override
+	@PostConstruct
+	public synchronized void initialize() {
+		if (historicalBusinessService != null) {
+			setServices(Collections.singletonList(historicalBusinessService));
+		}
+		super.initialize();
 	}
 
 	@Override

@@ -19,53 +19,100 @@
 package com.dianping.cat.alarm.spi.receiver;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.alarm.spi.AlertChannel;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+@Component
 public class ContactorManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ContactorManager.class);
 
-	private Map<String, Contactor> m_contactors = new HashMap<String, Contactor>();
+	@Resource
+	private List<Contactor> contactorList = Collections.emptyList();
 
-	private volatile boolean m_initialized;
+	private Map<String, Contactor> contactors;
 
+	private volatile boolean initialized;
+
+	@PostConstruct
 	public void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 		synchronized (this) {
-			if (m_initialized) {
+			if (initialized) {
 				return;
 			}
-			if (m_contactors.isEmpty()) {
+			if (contactors == null) {
+				contactors = buildContactors(contactorList);
+			} else {
+				contactors = copyContactors(contactors);
+			}
+			if (contactors.isEmpty()) {
 				LOGGER.warn("Alert contactor manager has no configured contactors.");
 			} else {
-				LOGGER.info("Initialized alert contactor manager from Spring injection, contactorCount={}.",
-				      m_contactors.size());
+				LOGGER.info("Initialized alert contactor manager from Spring injection, contactorKeys={}.",
+				      contactors.keySet());
 			}
-			m_initialized = true;
+			initialized = true;
 		}
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	private Map<String, Contactor> buildContactors(List<Contactor> contactorList) {
+		Map<String, Contactor> result = new LinkedHashMap<String, Contactor>();
+
+		if (contactorList == null || contactorList.isEmpty()) {
+			return result;
+		}
+		for (Contactor contactor : contactorList) {
+			if (contactor == null) {
+				continue;
+			}
+			String id = contactor.getId();
+
+			if (id == null || id.length() == 0) {
+				LOGGER.warn("Ignore alert contactor without id, contactorClass={}.", contactor.getClass().getName());
+				continue;
+			}
+			Contactor previous = result.put(id, contactor);
+
+			if (previous != null) {
+				LOGGER.warn("Duplicate alert contactor id detected, id={}, previousClass={}, currentClass={}.", id,
+				      previous.getClass().getName(), contactor.getClass().getName());
+			}
+		}
+		return result;
+	}
+
+	private Map<String, Contactor> copyContactors(Map<String, Contactor> contactors) {
+		if (contactors == null || contactors.isEmpty()) {
+			return new LinkedHashMap<String, Contactor>();
+		}
+		return new LinkedHashMap<String, Contactor>(contactors);
+	}
+
 	public List<String> queryReceivers(String group, AlertChannel channel, String type) {
 		ensureInitialized();
-		Contactor contactor = m_contactors.get(type);
+		Contactor contactor = contactors.get(type);
 
 		if (contactor == null) {
 			LOGGER.error("Alert contactor is not configured, type={}, channel={}, group={}, availableContactors={}.", type,
-			      channel, group, m_contactors.keySet());
+			      channel, group, contactors.keySet());
 			throw new IllegalStateException("Alert contactor is not configured for type: " + type);
 		}
 		if (AlertChannel.MAIL == channel) {
@@ -83,17 +130,13 @@ public class ContactorManager {
 	}
 
 	public void setContactors(Map<String, Contactor> contactors) {
-		if (contactors == null || contactors.isEmpty()) {
-			m_contactors = new HashMap<String, Contactor>();
-		} else {
-			m_contactors = new HashMap<String, Contactor>(contactors);
-		}
-		LOGGER.info("Configured alert contactors from Spring, contactorKeys={}.", m_contactors.keySet());
+		this.contactors = copyContactors(contactors);
+		LOGGER.info("Configured alert contactors from Spring, contactorKeys={}.", this.contactors.keySet());
 	}
 
 	public Map<String, Contactor> getContactors() {
 		ensureInitialized();
-		return Collections.unmodifiableMap(m_contactors);
+		return Collections.unmodifiableMap(contactors);
 	}
 
 }

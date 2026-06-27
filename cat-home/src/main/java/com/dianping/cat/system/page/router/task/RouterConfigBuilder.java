@@ -20,6 +20,10 @@ package com.dianping.cat.system.page.router.task;
 
 import java.util.Date;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
@@ -31,21 +35,26 @@ import com.dianping.cat.system.page.router.config.RouterConfigAdjustor;
 import com.dianping.cat.system.page.router.config.RouterConfigHandler;
 import com.dianping.cat.system.page.router.service.RouterConfigService;
 
+@Component(RouterConfigBuilder.ID)
 public class RouterConfigBuilder implements TaskBuilder {
 
 	public static final String ID = Constants.REPORT_ROUTER;
 
-	private RouterConfigHandler m_routerConfigHandler;
+	@Resource
+	private RouterConfigHandler routerConfigHandler;
 
-	private RouterConfigAdjustor m_routerAdjustor;
+	@Resource
+	private RouterConfigAdjustor routerConfigAdjustor;
 
-	private RouterConfigService m_reportService;
+	@Resource
+	private RouterConfigService reportService;
 
-	private ServerConfigManager m_serverConfigManager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
-		RouterConfig routerConfig = m_routerConfigHandler.buildRouterConfig(domain, period);
+		RouterConfig routerConfig = routerConfigHandler.buildRouterConfig(domain, period);
 		DailyReport dailyReport = new DailyReport();
 
 		dailyReport.setCreationDate(new Date());
@@ -56,14 +65,14 @@ public class RouterConfigBuilder implements TaskBuilder {
 		dailyReport.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(routerConfig);
 
-		m_reportService.insertDailyReport(dailyReport, binaryContent);
+		reportService.insertDailyReport(dailyReport, binaryContent);
 		return true;
 	}
 
 	@Override
 	public boolean buildHourlyTask(String name, String domain, Date period) {
-		if (m_serverConfigManager.isRouterAdjustEnabled()) {
-			m_routerAdjustor.Adjust(period);
+		if (serverConfigManager.isRouterAdjustEnabled()) {
+			routerConfigAdjustor.Adjust(period);
 		}
 		return true;
 	}
@@ -79,18 +88,18 @@ public class RouterConfigBuilder implements TaskBuilder {
 	}
 
 	public void setReportService(RouterConfigService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 	public void setRouterAdjustor(RouterConfigAdjustor routerAdjustor) {
-		m_routerAdjustor = routerAdjustor;
+		this.routerConfigAdjustor = routerAdjustor;
 	}
 
 	public void setRouterConfigHandler(RouterConfigHandler routerConfigHandler) {
-		m_routerConfigHandler = routerConfigHandler;
+		this.routerConfigHandler = routerConfigHandler;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 }

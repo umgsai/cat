@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
 import com.dianping.cat.consumer.heartbeat.HeartbeatReportMerger;
@@ -35,9 +39,11 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 
+@Component("heartbeatReportReloader")
 public class HeartbeatReportReloader extends AbstractReportReloader {
 
-	protected ReportManager<HeartbeatReport> m_reportManager;
+	@Resource(name = HeartbeatAnalyzer.ID + "ReportManager")
+	protected ReportManager<HeartbeatReport> heartbeatReportManager;
 
 	private List<HeartbeatReport> buildMergedReports(Map<String, List<HeartbeatReport>> mergedReports) {
 		List<HeartbeatReport> results = new ArrayList<HeartbeatReport>();
@@ -70,7 +76,7 @@ public class HeartbeatReportReloader extends AbstractReportReloader {
 		Map<String, List<HeartbeatReport>> mergedReports = new HashMap<String, List<HeartbeatReport>>();
 
 		for (int i = 0; i < getAnalyzerCount(); i++) {
-			Map<String, HeartbeatReport> reports = m_reportManager.loadLocalReports(time, i);
+			Map<String, HeartbeatReport> reports = heartbeatReportManager.loadLocalReports(time, i);
 
 			for (Entry<String, HeartbeatReport> entry : reports.entrySet()) {
 				String domain = entry.getKey();
@@ -107,6 +113,6 @@ public class HeartbeatReportReloader extends AbstractReportReloader {
 	}
 
 	public void setReportManager(ReportManager<HeartbeatReport> reportManager) {
-		m_reportManager = reportManager;
+		heartbeatReportManager = reportManager;
 	}
 }

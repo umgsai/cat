@@ -19,10 +19,12 @@
 package com.dianping.cat.report.page.transaction.transform;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 
+@Component
 public class TransactionMergeHelper {
 
 	public TransactionReport mergeAllMachines(TransactionReport report, String ipAddress) {

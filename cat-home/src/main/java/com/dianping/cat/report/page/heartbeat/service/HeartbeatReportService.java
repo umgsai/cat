@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
@@ -41,6 +42,7 @@ import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
+@Component
 public class HeartbeatReportService extends AbstractReportService<HeartbeatReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatReportService.class);
 
@@ -62,7 +64,7 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_DAY) {
 			try {
-				DailyReport report = m_dailyReportDao
+				DailyReport report = dailyReportRepository
 										.findByDomainNamePeriod(domain, name, new Date(startTime));
 				HeartbeatReport reportModel = queryFromDailyBinary(report.getId(), domain);
 
@@ -85,7 +87,7 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 	}
 
 	private HeartbeatReport queryFromDailyBinary(long id, String domain) {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
+		DailyReportContent content = dailyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -95,7 +97,7 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 	}
 
 	private HeartbeatReport queryFromHourlyBinary(long id, Date period, String domain) {
-		HourlyReportContent content = m_hourlyReportContentDao
+		HourlyReportContent content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {
@@ -115,7 +117,7 @@ public class HeartbeatReportService extends AbstractReportService<HeartbeatRepor
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			List<HourlyReport> reports = null;
 			try {
-				reports = m_hourlyReportDao
+				reports = hourlyReportRepository
 										.findAllByDomainNamePeriod(new Date(startTime), domain, name);
 			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query heartbeat hourly report list, domain={}, period={}.", domain,

@@ -27,8 +27,10 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -45,22 +47,28 @@ import com.dianping.cat.system.page.router.config.RouterConfigHandler;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 import com.dianping.cat.system.page.router.service.CachedRouterConfigService;
 
+@Component("systemRouterHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	private CachedRouterConfigService m_cachedReportService;
+	@Resource
+	private CachedRouterConfigService cachedRouterConfigService;
 
-	private RouterConfigManager m_configManager;
+	@Resource
+	private RouterConfigManager routerConfigManager;
 
-	private SampleConfigManager m_sampleConfigManager;
+	@Resource
+	private SampleConfigManager sampleConfigManager;
 
-	private ServerFilterConfigManager m_filterManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private RouterConfigHandler m_routerConfigHandler;
+	@Resource
+	private RouterConfigHandler routerConfigHandler;
 
 	private String buildRouterInfo(String ip, String domain, RouterConfig config) {
-		String group = m_configManager.queryServerGroupByIp(ip);
-		Domain domainConfig = m_configManager.getRouterConfig().findDomain(domain);
+		String group = routerConfigManager.queryServerGroupByIp(ip);
+		Domain domainConfig = routerConfigManager.getRouterConfig().findDomain(domain);
 		List<Server> servers = new ArrayList<Server>();
 
 		if (domainConfigNotExist(group, domainConfig)) {
@@ -78,7 +86,7 @@ public class Handler implements PageHandler<Context> {
 			}
 
 			if (servers.isEmpty()) {
-				servers = m_configManager.queryServersByDomain(group, domain);
+				servers = routerConfigManager.queryServersByDomain(group, domain);
 			}
 		} else {
 			servers = domainConfig.findGroup(group).getServers();
@@ -88,7 +96,7 @@ public class Handler implements PageHandler<Context> {
 
 	private double buildSampleInfo(String domain) {
 		double defaultValue = 1.0;
-		com.dianping.cat.sample.entity.Domain domainConfig = m_sampleConfigManager.getConfig().findDomain(domain);
+		com.dianping.cat.sample.entity.Domain domainConfig = sampleConfigManager.getConfig().findDomain(domain);
 
 		if (domainConfig != null) {
 			defaultValue = domainConfig.getSample();
@@ -123,7 +131,7 @@ public class Handler implements PageHandler<Context> {
 		Model model = new Model(ctx);
 		Payload payload = ctx.getPayload();
 		Action action = payload.getAction();
-		RouterConfig report = m_cachedReportService.queryLastRouterConfig();
+		RouterConfig report = cachedRouterConfigService.queryLastRouterConfig();
 		String domain = payload.getDomain();
 		String ip = payload.getIp();
 
@@ -140,7 +148,7 @@ public class Handler implements PageHandler<Context> {
 			break;
 		case BUILD:
 			Date period = TimeHelper.getCurrentDay(-1);
-			boolean ret = m_routerConfigHandler.updateRouterConfig(period);
+			boolean ret = routerConfigHandler.updateRouterConfig(period);
 
 			model.setContent(String.valueOf(ret));
 			break;
@@ -156,32 +164,12 @@ public class Handler implements PageHandler<Context> {
 	private Map<String, String> buildKvs(RouterConfig report, String domain, String ip) {
 		Map<String, String> kvs = new HashMap<String, String>();
 
-		kvs.put("block", String.valueOf(m_configManager.shouldBlock(ip)));
+		kvs.put("block", String.valueOf(routerConfigManager.shouldBlock(ip)));
 		kvs.put("routers", buildRouterInfo(ip, domain, report));
 		kvs.put("sample", String.valueOf(buildSampleInfo(domain)));
-		kvs.put("startTransactionTypes", m_filterManager.getAtomicStartTypes());
-		kvs.put("matchTransactionTypes", m_filterManager.getAtomicMatchTypes());
+		kvs.put("startTransactionTypes", serverFilterConfigManager.getAtomicStartTypes());
+		kvs.put("matchTransactionTypes", serverFilterConfigManager.getAtomicMatchTypes());
 
 		return kvs;
-	}
-
-	public void setCachedReportService(CachedRouterConfigService cachedReportService) {
-		m_cachedReportService = cachedReportService;
-	}
-
-	public void setConfigManager(RouterConfigManager configManager) {
-		m_configManager = configManager;
-	}
-
-	public void setFilterManager(ServerFilterConfigManager filterManager) {
-		m_filterManager = filterManager;
-	}
-
-	public void setRouterConfigHandler(RouterConfigHandler routerConfigHandler) {
-		m_routerConfigHandler = routerConfigHandler;
-	}
-
-	public void setSampleConfigManager(SampleConfigManager sampleConfigManager) {
-		m_sampleConfigManager = sampleConfigManager;
 	}
 }

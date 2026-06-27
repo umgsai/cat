@@ -23,7 +23,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.dianping.cat.consumer.business.BusinessAnalyzer;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.ModelPeriod;
@@ -31,9 +32,12 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class CachedBusinessReportService {
 
-	private final Map<String, BusinessReport> m_businessReports = new LinkedHashMap<String, BusinessReport>() {
+	private final Map<String, BusinessReport> businessReports = new LinkedHashMap<String, BusinessReport>() {
 
 		private static final long serialVersionUID = 1L;
 
@@ -43,9 +47,11 @@ public class CachedBusinessReportService {
 		}
 	};
 
-	private BusinessReportService m_reportService;
+	@Resource
+	private BusinessReportService businessReportService;
 
-	private ModelService<BusinessReport> m_service;
+	@Resource(name = "businessModelService")
+	private ModelService<BusinessReport> businessModelService;
 
 	public BusinessReport queryBusinessReport(String domain, Date start) {
 		long time = start.getTime();
@@ -54,8 +60,8 @@ public class CachedBusinessReportService {
 		if (period == ModelPeriod.CURRENT || period == ModelPeriod.LAST) {
 			ModelRequest request = new ModelRequest(domain, time);
 
-			if (m_service.isEligable(request)) {
-				ModelResponse<BusinessReport> response = m_service.invoke(request);
+			if (businessModelService.isEligable(request)) {
+				ModelResponse<BusinessReport> response = businessModelService.invoke(request);
 				BusinessReport report = response.getModel();
 
 				return report == null ? new BusinessReport(domain) : report;
@@ -69,26 +75,18 @@ public class CachedBusinessReportService {
 
 	private BusinessReport getReportFromCache(String domain, long time) {
 		String key = domain + time;
-		BusinessReport result = m_businessReports.get(key);
+		BusinessReport result = businessReports.get(key);
 
 		if (result == null) {
 			Date start = new Date(time);
 			Date end = new Date(time + TimeHelper.ONE_HOUR);
 
-			result = m_reportService.queryReport(domain, start, end);
+			result = businessReportService.queryReport(domain, start, end);
 			if (result == null) {
 				result = new BusinessReport(domain);
 			}
-			m_businessReports.put(key, result);
+			businessReports.put(key, result);
 		}
 		return result;
-	}
-
-	public void setModelService(ModelService<BusinessReport> service) {
-		m_service = service;
-	}
-
-	public void setReportService(BusinessReportService reportService) {
-		m_reportService = reportService;
 	}
 }

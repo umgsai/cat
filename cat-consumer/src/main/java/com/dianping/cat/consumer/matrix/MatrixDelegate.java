@@ -21,6 +21,10 @@ package com.dianping.cat.consumer.matrix;
 import java.util.Date;
 import java.util.Map;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.matrix.model.transform.DefaultNativeBuilder;
@@ -30,11 +34,14 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
+@Component("matrixDelegate")
 public class MatrixDelegate implements ReportDelegate<MatrixReport> {
 
-	private TaskManager m_taskManager;
+	@Resource
+	private TaskManager taskManager;
 
-	private ServerFilterConfigManager m_configManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	@Override
 	public void afterLoad(Map<String, MatrixReport> reports) {
@@ -58,8 +65,8 @@ public class MatrixDelegate implements ReportDelegate<MatrixReport> {
 	public boolean createHourlyTask(MatrixReport report) {
 		String domain = report.getDomain();
 
-		if (m_configManager.validateDomain(domain)) {
-			return m_taskManager.createTask(report.getStartTime(), domain, MatrixAnalyzer.ID,	TaskProlicy.ALL_EXCLUED_HOURLY);
+		if (serverFilterConfigManager.validateDomain(domain)) {
+			return taskManager.createTask(report.getStartTime(), domain, MatrixAnalyzer.ID,	TaskProlicy.ALL_EXCLUED_HOURLY);
 		} else {
 			return true;
 		}
@@ -101,10 +108,10 @@ public class MatrixDelegate implements ReportDelegate<MatrixReport> {
 	}
 
 	public void setTaskManager(TaskManager taskManager) {
-		m_taskManager = taskManager;
+		this.taskManager = taskManager;
 	}
 
 	public void setConfigManager(ServerFilterConfigManager configManager) {
-		m_configManager = configManager;
+		serverFilterConfigManager = configManager;
 	}
 }

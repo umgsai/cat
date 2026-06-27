@@ -19,12 +19,16 @@
 package com.dianping.cat.report.page.dependency.graph;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.consumer.dependency.model.entity.Dependency;
 import com.dianping.cat.consumer.dependency.model.entity.Index;
 import com.dianping.cat.home.dependency.graph.entity.TopologyEdge;
 import com.dianping.cat.home.dependency.graph.entity.TopologyNode;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class DependencyItemBuilder {
 
 	private static final int OK = GraphConstrant.OK;
@@ -35,7 +39,8 @@ public class DependencyItemBuilder {
 
 	private static final String CACHE = GraphConstrant.CACHE;
 
-	private TopologyGraphConfigManager m_graphConfigManager;
+	@Resource
+	private TopologyGraphConfigManager topologyGraphConfigManager;
 
 	public TopologyEdge buildEdge(String domain, Dependency dependency) {
 		TopologyEdge edge = new TopologyEdge();
@@ -47,7 +52,7 @@ public class DependencyItemBuilder {
 		edge.setOpposite(false);
 		edge.setWeight(1);
 
-		Pair<Integer, String> state = m_graphConfigManager.buildEdgeState(domain, dependency);
+		Pair<Integer, String> state = topologyGraphConfigManager.buildEdgeState(domain, dependency);
 
 		edge.setStatus(state.getKey());
 		edge.setDes(state.getValue());
@@ -60,7 +65,7 @@ public class DependencyItemBuilder {
 		node.setType(PROJECT);
 		node.setWeight(1);
 
-		Pair<Integer, String> state = m_graphConfigManager.buildNodeState(domain, index);
+		Pair<Integer, String> state = topologyGraphConfigManager.buildNodeState(domain, index);
 
 		node.setStatus(state.getKey());
 		node.setDes(state.getValue());
@@ -92,10 +97,6 @@ public class DependencyItemBuilder {
 		node.setType(PROJECT);
 		node.setWeight(1);
 		return node;
-	}
-
-	public void setGraphConfigManager(TopologyGraphConfigManager graphConfigManager) {
-		m_graphConfigManager = graphConfigManager;
 	}
 
 }

@@ -31,57 +31,60 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.report.server.RemoteServersManager;
+import jakarta.annotation.Resource;
 
 public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSupport
 						implements ModelService<T> {
 
-	protected ServerConfigManager m_configManager;
+	@Resource(name = "serverConfigManager")
+	protected ServerConfigManager serverConfigManager;
 
-	private RemoteServersManager m_serverManager;
+	@Resource(name = "remoteServersManager")
+	private RemoteServersManager remoteServersManager;
 
-	private List<ModelService<T>> m_services;
+	private List<ModelService<T>> services;
 
-	private List<ModelService<T>> m_allServices = new ArrayList<ModelService<T>>();
+	private List<ModelService<T>> allServices = new ArrayList<ModelService<T>>();
 
-	private String m_name;
+	private String name;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public BaseCompositeModelService(String name) {
-		m_name = name;
+		this.name = name;
 	}
 
 	protected abstract BaseRemoteModelService<T> createRemoteService();
 
 	@Override
 	public String getName() {
-		return m_name;
+		return name;
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
-		if (m_configManager == null) {
+		if (serverConfigManager == null) {
 			throw new IllegalStateException("ServerConfigManager is required for " + getClass().getSimpleName() + ".");
 		}
-		if (m_serverManager == null) {
+		if (remoteServersManager == null) {
 			throw new IllegalStateException("RemoteServersManager is required for " + getClass().getSimpleName() + ".");
 		}
-		m_allServices.clear();
+		allServices.clear();
 
-		if (m_services != null) {
-			m_allServices.addAll(m_services);
+		if (services != null) {
+			allServices.addAll(services);
 		}
 
-		String remoteServers = m_configManager.getConsoleRemoteServers();
+		String remoteServers = serverConfigManager.getConsoleRemoteServers();
 		List<String> endpoints = splitEndpoints(remoteServers);
 
 		for (String endpoint : endpoints) {
@@ -92,11 +95,11 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 
 			remote.setHost(host);
 			remote.setPort(port);
-			remote.setServerConfigManager(m_configManager);
-			remote.setRemoteServersManager(m_serverManager);
-			m_allServices.add(remote);
+			remote.setServerConfigManager(serverConfigManager);
+			remote.setRemoteServersManager(remoteServersManager);
+			allServices.add(remote);
 		}
-		m_initialized = true;
+		initialized = true;
 	}
 
 	private String buildHost(String endpoint, int pos) {
@@ -138,7 +141,7 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 		t.addData("request", request);
 		t.addData("thread", Thread.currentThread());
 
-		for (final ModelService<T> service : m_allServices) {
+		for (final ModelService<T> service : allServices) {
 			if (!service.isEligable(request)) {
 				continue;
 			}
@@ -149,7 +152,7 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 			}
 			requireSize++;
 
-			m_configManager.getModelServiceExecutorService().submit(new Runnable() {
+			serverConfigManager.getModelServiceExecutorService().submit(new Runnable() {
 				@Override
 				public void run() {
 					try {
@@ -201,7 +204,7 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 	public boolean isEligable(ModelRequest request) {
 		ensureInitialized();
 
-		for (ModelService<T> service : m_allServices) {
+		for (ModelService<T> service : allServices) {
 			if (service.isEligable(request)) {
 				return true;
 			}
@@ -217,21 +220,21 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 		StringBuilder sb = new StringBuilder(64);
 
 		sb.append(getClass().getSimpleName()).append('[');
-		sb.append("name=").append(m_name);
+		sb.append("name=").append(name);
 		sb.append(']');
 
 		return sb.toString();
 	}
 
 	public void setServices(List<ModelService<T>> services) {
-		m_services = services;
+		this.services = services;
 	}
 
 	public void setConfigManager(ServerConfigManager configManager) {
-		m_configManager = configManager;
+		serverConfigManager = configManager;
 	}
 
 	public void setServerManager(RemoteServersManager serverManager) {
-		m_serverManager = serverManager;
+		remoteServersManager = serverManager;
 	}
 }

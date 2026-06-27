@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
 import com.dianping.cat.consumer.matrix.MatrixReportMerger;
@@ -35,9 +39,11 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 
+@Component("matrixReportReloader")
 public class MatrixReportReloader extends AbstractReportReloader {
 
-	protected ReportManager<MatrixReport> m_reportManager;
+	@Resource(name = MatrixAnalyzer.ID + "ReportManager")
+	protected ReportManager<MatrixReport> matrixReportManager;
 
 	private List<MatrixReport> buildMergedReports(Map<String, List<MatrixReport>> mergedReports) {
 		List<MatrixReport> results = new ArrayList<MatrixReport>();
@@ -70,7 +76,7 @@ public class MatrixReportReloader extends AbstractReportReloader {
 		Map<String, List<MatrixReport>> mergedReports = new HashMap<String, List<MatrixReport>>();
 
 		for (int i = 0; i < getAnalyzerCount(); i++) {
-			Map<String, MatrixReport> reports = m_reportManager.loadLocalReports(time, i);
+			Map<String, MatrixReport> reports = matrixReportManager.loadLocalReports(time, i);
 
 			for (Entry<String, MatrixReport> entry : reports.entrySet()) {
 				String domain = entry.getKey();
@@ -107,6 +113,6 @@ public class MatrixReportReloader extends AbstractReportReloader {
 	}
 
 	public void setReportManager(ReportManager<MatrixReport> reportManager) {
-		m_reportManager = reportManager;
+		matrixReportManager = reportManager;
 	}
 }

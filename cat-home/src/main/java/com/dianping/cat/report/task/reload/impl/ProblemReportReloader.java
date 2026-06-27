@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.problem.ProblemAnalyzer;
 import com.dianping.cat.consumer.problem.ProblemReportMerger;
@@ -35,9 +39,11 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 
+@Component("problemReportReloader")
 public class ProblemReportReloader extends AbstractReportReloader {
 
-	protected ReportManager<ProblemReport> m_reportManager;
+	@Resource(name = ProblemAnalyzer.ID + "ReportManager")
+	protected ReportManager<ProblemReport> problemReportManager;
 
 	private List<ProblemReport> buildMergedReports(Map<String, List<ProblemReport>> mergedReports) {
 		List<ProblemReport> results = new ArrayList<ProblemReport>();
@@ -70,7 +76,7 @@ public class ProblemReportReloader extends AbstractReportReloader {
 		Map<String, List<ProblemReport>> mergedReports = new HashMap<String, List<ProblemReport>>();
 
 		for (int i = 0; i < getAnalyzerCount(); i++) {
-			Map<String, ProblemReport> reports = m_reportManager.loadLocalReports(time, i);
+			Map<String, ProblemReport> reports = problemReportManager.loadLocalReports(time, i);
 
 			for (Entry<String, ProblemReport> entry : reports.entrySet()) {
 				String domain = entry.getKey();
@@ -107,6 +113,6 @@ public class ProblemReportReloader extends AbstractReportReloader {
 	}
 
 	public void setReportManager(ReportManager<ProblemReport> reportManager) {
-		m_reportManager = reportManager;
+		problemReportManager = reportManager;
 	}
 }

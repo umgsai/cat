@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.spi.AlertEntity;
@@ -56,22 +57,32 @@ import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class BusinessGraphCreator extends AbstractGraphCreator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessGraphCreator.class);
 
-	private CachedBusinessReportService m_reportService;
+	@Resource
+	private CachedBusinessReportService cachedBusinessReportService;
 
-	private BusinessConfigManager m_configManager;
+	@Resource
+	private BusinessConfigManager businessConfigManager;
 
-	private BusinessDataFetcher m_dataFetcher;
+	@Resource
+	private BusinessDataFetcher businessDataFetcher;
 
-	private ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private BusinessTagConfigManager m_tagManager;
+	@Resource
+	private BusinessTagConfigManager businessTagConfigManager;
 
-	private BusinessKeyHelper m_keyHelper;
+	@Resource
+	private BusinessKeyHelper businessKeyHelper;
 
-	private CustomDataCalculator m_customDataCalculator;
+	@Resource
+	private CustomDataCalculator customDataCalculator;
 
 	private Pair<String, Boolean> buildTitleAndPrivilege(BusinessReportConfig businessReportConfig, String itemId,
 														 String type) {
@@ -97,18 +108,18 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 
 	private Map<String, LineChart> buildCharts(final Map<String, double[]> datas, Map<String, double[]> baseLines,
 							Date start, Date end, Map<String, BusinessReportConfig> configs) {
-		Map<String, double[]> allCurrentValues = m_dataExtractor.extract(datas);
+		Map<String, double[]> allCurrentValues = dataExtractor.extract(datas);
 		Map<String, double[]> dataWithOutFutures = removeFutureData(end, allCurrentValues);
 
 		Map<String, LineChart> charts = new LinkedHashMap<String, LineChart>();
-		List<AlertEntity> alertKeys = m_alertManager.queryLastestAlarmKey(5);
-		int step = m_dataExtractor.getStep();
+		List<AlertEntity> alertKeys = alertManager.queryLastestAlarmKey(5);
+		int step = dataExtractor.getStep();
 
 		for (Entry<String, double[]> entry : dataWithOutFutures.entrySet()) {
 			try {
 				String key = entry.getKey();
 				double[] value = entry.getValue();
-				String domain = m_keyHelper.getDomain(key);
+				String domain = businessKeyHelper.getDomain(key);
 				BusinessReportConfig config = configs.get(domain);
 				LineChart lineChart = new LineChart();
 
@@ -121,9 +132,9 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 				Map<Long, Double> all = convertToMap(datas.get(key), start, 1);
 				Map<Long, Double> current = convertToMap(dataWithOutFutures.get(key), start, step);
 
-				addLastMinuteData(current, all, m_lastMinute, end);
+				addLastMinuteData(current, all, lastMinute, end);
 				lineChart.add(Chinese.CURRENT_VALUE, current);
-				lineChart.add(Chinese.BASELINE_VALUE, convertToMap(m_dataExtractor.extract(baselines), start, step));
+				lineChart.add(Chinese.BASELINE_VALUE, convertToMap(dataExtractor.extract(baselines), start, step));
 				charts.put(key, lineChart);
 			} catch (Exception e) {
 				LOGGER.error("Unable to build business line chart, key={}, start={}, end={}.", entry.getKey(), start, end,
@@ -136,7 +147,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 
 	protected String buildContactInfo(String domainName) {
 		try {
-			Project project = m_projectService.findByDomain(domainName);
+			Project project = projectService.findByDomain(domainName);
 
 			if (project != null) {
 				String owners = project.getOwner();
@@ -162,7 +173,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 	public Map<String, LineChart> buildGraphByDomain(Date start, Date end, String domain) {
 		LOGGER.info("Building business graph by domain, domain={}, start={}, end={}.", domain, start, end);
 
-		BusinessReportConfig config = m_configManager.queryConfigByDomain(domain);
+		BusinessReportConfig config = businessConfigManager.queryConfigByDomain(domain);
 		HashMap<String, LineChart> result = new LinkedHashMap<String, LineChart>();
 
 		if (config != null) {
@@ -188,7 +199,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 	public Map<String, LineChart> buildGraphByTag(Date start, Date end, String tag) {
 		LOGGER.info("Building business graph by tag, tag={}, start={}, end={}.", tag, start, end);
 
-		Tag tagConfig = m_tagManager.findTag(tag);
+		Tag tagConfig = businessTagConfigManager.findTag(tag);
 
 		if (tagConfig != null) {
 			List<BusinessItem> items = tagConfig.getBusinessItems();
@@ -209,7 +220,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 
 				for (String key : businessItemConfigItem.getValue()) {
 					for (MetricType metricType : MetricType.values()) {
-						String id = m_keyHelper.generateKey(key, domain, metricType.getName());
+						String id = businessKeyHelper.generateKey(key, domain, metricType.getName());
 						double[] baseline = queryBaseline(BusinessAnalyzer.ID, id, start, end);
 						baseLines.put(id, baseline);
 						double[] data = all.get(id);
@@ -247,7 +258,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 			Set<String> businessItemConfig = businessItemConfigs.get(domain);
 
 			if (config == null) {
-				config = m_configManager.queryConfigByDomain(domain);
+				config = businessConfigManager.queryConfigByDomain(domain);
 
 				if (config != null) {
 					configs.put(domain, config);
@@ -281,7 +292,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 		}
 
 		Map<String, double[]> values = new LinkedHashMap<String, double[]>();
-		Map<String, double[]> datas = m_dataFetcher.buildGraphData(report);
+		Map<String, double[]> datas = businessDataFetcher.buildGraphData(report);
 		Map<String, BusinessItemConfig> businessItemConfigs = config.getBusinessItemConfigs();
 		List<BusinessItemConfig> items = new ArrayList<BusinessItemConfig>(businessItemConfigs.values());
 
@@ -297,15 +308,15 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 			String key = itemConfig.getId();
 
 			if (itemConfig.getShowAvg()) {
-				String avgKey = m_keyHelper.generateKey(key, report.getDomain(), MetricType.AVG.name());
+				String avgKey = businessKeyHelper.generateKey(key, report.getDomain(), MetricType.AVG.name());
 				putKey(datas, values, avgKey);
 			}
 			if (itemConfig.getShowCount()) {
-				String countKey = m_keyHelper.generateKey(key, report.getDomain(), MetricType.COUNT.name());
+				String countKey = businessKeyHelper.generateKey(key, report.getDomain(), MetricType.COUNT.name());
 				putKey(datas, values, countKey);
 			}
 			if (itemConfig.getShowSum()) {
-				String sumKey = m_keyHelper.generateKey(key, report.getDomain(), MetricType.SUM.name());
+				String sumKey = businessKeyHelper.generateKey(key, report.getDomain(), MetricType.SUM.name());
 				putKey(datas, values, sumKey);
 			}
 		}
@@ -316,8 +327,8 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 	private void buildLineChartTitle(List<AlertEntity> alertKeys, LineChart chart, String key,
 							BusinessReportConfig businessReportConfig) {
 		String domain = businessReportConfig.getId();
-		String itemId = m_keyHelper.getBusinessItemId(key);
-		String type = m_keyHelper.getType(key);
+		String itemId = businessKeyHelper.getBusinessItemId(key);
+		String type = businessKeyHelper.getType(key);
 		Pair<String, Boolean> titleAndPrivilege = buildTitleAndPrivilege(businessReportConfig, itemId, type);
 		String title = titleAndPrivilege.getKey();
 
@@ -364,7 +375,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 		int index = 0;
 
 		for (; start < end; start += TimeHelper.ONE_HOUR) {
-			BusinessReport report = m_reportService.queryBusinessReport(domain, new Date(start));
+			BusinessReport report = cachedBusinessReportService.queryBusinessReport(domain, new Date(start));
 			Map<String, double[]> currentValues = buildGraphData(report, config);
 
 			mergeMap(oldCurrentValues, currentValues, totalSize, index);
@@ -383,14 +394,15 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 			try {
 				String pattern = customConfig.getPattern();
 
-				List<CustomInfo> customInfos = m_customDataCalculator.translatePattern(pattern);
+				List<CustomInfo> customInfos = customDataCalculator.translatePattern(pattern);
 
 				for (CustomInfo customInfo : customInfos) {
-					String customKey = m_keyHelper.generateKey(customInfo.getKey(), customInfo.getDomain(),	customInfo.getType());
+					String customKey = businessKeyHelper.generateKey(customInfo.getKey(), customInfo.getDomain(),
+							customInfo.getType());
 					baseLineCache.put(customKey, queryBaseline(BusinessAnalyzer.ID, customKey, start, end));
 				}
-				double[] baseLine = m_customDataCalculator.calculate(pattern, customInfos, baseLineCache, totalSize);
-				String key = m_keyHelper.generateKey(customConfig.getId(), currentDomain, MetricType.AVG.getName());
+				double[] baseLine = customDataCalculator.calculate(pattern, customInfos, baseLineCache, totalSize);
+				String key = businessKeyHelper.generateKey(customConfig.getId(), currentDomain, MetricType.AVG.getName());
 
 				customBaseLines.put(key, baseLine);
 			} catch (Exception e) {
@@ -415,20 +427,20 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 		for (CustomConfig customConfig : customConfigs.values()) {
 			try {
 				String pattern = customConfig.getPattern();
-				List<CustomInfo> customInfos = m_customDataCalculator.translatePattern(pattern);
+				List<CustomInfo> customInfos = customDataCalculator.translatePattern(pattern);
 
 				for (CustomInfo customInfo : customInfos) {
 					String domain = customInfo.getDomain();
 
 					if (!domains.contains(domain)) {
-						BusinessReportConfig config = m_configManager.queryConfigByDomain(domain);
+						BusinessReportConfig config = businessConfigManager.queryConfigByDomain(domain);
 
 						domains.add(domain);
 						businessItemDataCache.putAll(prepareBusinessItemDatas(start, end, domain, config));
 					}
 				}
-				double[] data = m_customDataCalculator.calculate(pattern, customInfos, businessItemDataCache, totalSize);
-				String key = m_keyHelper.generateKey(customConfig.getId(), currentDomain, MetricType.AVG.getName());
+				double[] data = customDataCalculator.calculate(pattern, customInfos, businessItemDataCache, totalSize);
+				String key = businessKeyHelper.generateKey(customConfig.getId(), currentDomain, MetricType.AVG.getName());
 
 				customDatas.put(key, data);
 			} catch (Exception e) {
@@ -440,31 +452,4 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 		return customDatas;
 	}
 
-	public void setConfigManager(BusinessConfigManager configManager) {
-		m_configManager = configManager;
-	}
-
-	public void setCustomDataCalculator(CustomDataCalculator customDataCalculator) {
-		m_customDataCalculator = customDataCalculator;
-	}
-
-	public void setDataFetcher(BusinessDataFetcher dataFetcher) {
-		m_dataFetcher = dataFetcher;
-	}
-
-	public void setKeyHelper(BusinessKeyHelper keyHelper) {
-		m_keyHelper = keyHelper;
-	}
-
-	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
-	}
-
-	public void setReportService(CachedBusinessReportService reportService) {
-		m_reportService = reportService;
-	}
-
-	public void setTagManager(BusinessTagConfigManager tagManager) {
-		m_tagManager = tagManager;
-	}
 }

@@ -29,8 +29,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -44,12 +46,49 @@ import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
 
 @SuppressWarnings("rawtypes")
+@Component("modelHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	public Map<String, LocalModelService> m_localServices;
+	@Resource(name = "localProblemService")
+	private LocalModelService problemService;
 
-	private volatile boolean m_initialized;
+	@Resource(name = "localEventService")
+	private LocalModelService eventService;
+
+	@Resource(name = "localTransactionService")
+	private LocalModelService transactionService;
+
+	@Resource(name = "localHeartbeatService")
+	private LocalModelService heartbeatService;
+
+	@Resource(name = "localCrossService")
+	private LocalModelService crossService;
+
+	@Resource(name = "localMatrixService")
+	private LocalModelService matrixService;
+
+	@Resource(name = "localDependencyService")
+	private LocalModelService dependencyService;
+
+	@Resource(name = "localTopService")
+	private LocalModelService topService;
+
+	@Resource(name = "localStateService")
+	private LocalModelService stateService;
+
+	@Resource(name = "localStorageService")
+	private LocalModelService storageService;
+
+	@Resource(name = "localBusinessService")
+	private LocalModelService businessService;
+
+	@Resource(name = "localMessageService")
+	private LocalModelService messageService;
+
+	private Map<String, LocalModelService> localServices = Collections.emptyMap();
+
+	private volatile boolean initialized;
 
 	private byte[] compress(String str) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream(1024 * 32);
@@ -90,7 +129,7 @@ public class Handler implements PageHandler<Context> {
 				request = new ModelRequest(domain, period.getStartTime());
 			}
 			String xml = "";
-			LocalModelService service = m_localServices.get(report);
+			LocalModelService service = localServices.get(report);
 
 			if (service != null) {
 				xml = service.getReport(request, period, domain, payload);
@@ -114,29 +153,56 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	public synchronized void initialize() {
-		if (!m_initialized) {
-			if (m_localServices == null || m_localServices.isEmpty()) {
-				m_localServices = new HashMap<String, LocalModelService>();
-				LOGGER.warn("Model page handler has no local model services configured.");
-			} else {
-				LOGGER.info("Initialized model page handler from Spring injection, localServiceCount={}.",
-				      m_localServices.size());
-			}
-			m_initialized = true;
+		if (!initialized) {
+			localServices = buildLocalServices();
+			LOGGER.info("Initialized model page handler from Spring injection, localServiceCount={}.",
+			      localServices.size());
+			initialized = true;
 		}
 	}
 
-	public void setLocalServices(Map<String, LocalModelService> localServices) {
-		if (localServices == null || localServices.isEmpty()) {
-			m_localServices = new HashMap<String, LocalModelService>();
-		} else {
-			m_localServices = new HashMap<String, LocalModelService>(localServices);
+	private Map<String, LocalModelService> buildLocalServices() {
+		Map<String, LocalModelService> result = new HashMap<String, LocalModelService>();
+
+		addLocalService(result, problemService);
+		addLocalService(result, eventService);
+		addLocalService(result, transactionService);
+		addLocalService(result, heartbeatService);
+		addLocalService(result, crossService);
+		addLocalService(result, matrixService);
+		addLocalService(result, dependencyService);
+		addLocalService(result, topService);
+		addLocalService(result, stateService);
+		addLocalService(result, storageService);
+		addLocalService(result, businessService);
+		addLocalService(result, messageService);
+		return result;
+	}
+
+	private void addLocalService(Map<String, LocalModelService> services, LocalModelService service) {
+		if (service == null) {
+			LOGGER.warn("Ignoring null local model service while building model service map.");
+			return;
 		}
-		LOGGER.info("Configured local model services from Spring, localServiceKeys={}.", m_localServices.keySet());
+
+		String name = service.getName();
+
+		if (name == null || name.length() == 0) {
+			LOGGER.warn("Ignoring local model service with empty name, serviceClass={}.", service.getClass().getName());
+			return;
+		}
+
+		LocalModelService previous = services.put(name, service);
+
+		if (previous != null) {
+			LOGGER.warn("Duplicate local model service name detected, name={}, previousClass={}, currentClass={}.",
+			      name, previous.getClass().getName(), service.getClass().getName());
+		}
 	}
 
 	public Map<String, LocalModelService> getLocalServices() {
-		return Collections.unmodifiableMap(m_localServices);
+		initialize();
+		return Collections.unmodifiableMap(localServices);
 	}
 
 }

@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
@@ -35,6 +36,7 @@ import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
+@Component
 public class DependencyReportService extends AbstractReportService<DependencyReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DependencyReportService.class);
 
@@ -53,7 +55,7 @@ public class DependencyReportService extends AbstractReportService<DependencyRep
 	}
 
 	private DependencyReport queryFromHourlyBinary(long id, Date period, String domain) {
-		HourlyReportContent content = m_hourlyReportContentDao
+		HourlyReportContent content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {
@@ -73,7 +75,7 @@ public class DependencyReportService extends AbstractReportService<DependencyRep
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			List<HourlyReport> reports = null;
 			try {
-				reports = m_hourlyReportDao
+				reports = hourlyReportRepository
 										.findAllByDomainNamePeriod(new Date(startTime), domain, name);
 			} catch (RuntimeException e) {
 				LOGGER.error("Unable to query dependency hourly report list, domain={}, period={}.", domain,

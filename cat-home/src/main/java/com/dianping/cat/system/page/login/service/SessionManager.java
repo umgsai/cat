@@ -22,6 +22,9 @@ import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import javax.naming.Context;
 import javax.naming.directory.Attributes;
 import javax.naming.ldap.InitialLdapContext;
@@ -29,27 +32,31 @@ import javax.naming.ldap.InitialLdapContext;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.system.page.login.spi.ISessionManager;
 import com.google.common.base.Function;
 
+@Component
 public class SessionManager implements ISessionManager<Session, Token, Credential> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
 
-	private CatPropertyProvider m_provider;
+	@Resource
+	private CatPropertyProvider provider;
 
 	private Function<Credential, Token> tokenCreator;
 
 	public SessionManager() {
-		m_provider = new DefaultCatPropertyProvider();
+		provider = new DefaultCatPropertyProvider();
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_provider == null) {
+		if (provider == null) {
 			throw new IllegalStateException("CatPropertyProvider must be configured.");
 		}
 
-		AuthType type = AuthType.valueOf(m_provider.getProperty("CAT_AUTH_TYPE", "ADMIN_PWD"));
+		AuthType type = AuthType.valueOf(provider.getProperty("CAT_AUTH_TYPE", "ADMIN_PWD"));
 
 		switch (type) {
 		case NOP:
@@ -62,15 +69,15 @@ public class SessionManager implements ISessionManager<Session, Token, Credentia
 			};
 			break;
 		case LDAP:
-			final String ldapUrl = m_provider.getProperty("CAT_LDAP_URL", null);
+			final String ldapUrl = provider.getProperty("CAT_LDAP_URL", null);
 			if (StringUtils.isBlank(ldapUrl)) {
 				throw new IllegalArgumentException("required CAT_LDAP_URL");
 			}
-			final String userDnTpl = m_provider.getProperty("CAT_LDAP_USER_DN_TPL", null);
+			final String userDnTpl = provider.getProperty("CAT_LDAP_USER_DN_TPL", null);
 			if (StringUtils.isBlank(userDnTpl)) {
 				throw new IllegalArgumentException("required CAT_LDAP_USER_DN_TPL");
 			}
-			final String userDisplayAttr = m_provider.getProperty("CAT_LDAP_USER_DISPLAY_ATTR", null);
+			final String userDisplayAttr = provider.getProperty("CAT_LDAP_USER_DISPLAY_ATTR", null);
 			final Pattern pattern = Pattern.compile("\\{0}");
 			final Matcher userDnTplMatcher = pattern.matcher(userDnTpl);
 			final String[] attrs = userDisplayAttr == null ? null : new String[] { userDisplayAttr };
@@ -114,7 +121,7 @@ public class SessionManager implements ISessionManager<Session, Token, Credentia
 			};
 			break;
 		case ADMIN_PWD:
-			final String p = m_provider.getProperty("CAT_ADMIN_PWD", "admin");
+			final String p = provider.getProperty("CAT_ADMIN_PWD", "admin");
 
 			tokenCreator = new Function<Credential, Token>() {
 				@Override
@@ -141,7 +148,7 @@ public class SessionManager implements ISessionManager<Session, Token, Credentia
 	}
 
 	public void setProvider(CatPropertyProvider provider) {
-		m_provider = provider;
+		this.provider = provider;
 	}
 
 	@Override

@@ -21,23 +21,28 @@ package com.dianping.cat.report.page.overload;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
+import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.report.page.overload.task.TableCapacityService;
 
+@Component("overloadHandler")
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private TableCapacityService m_tableCapacityService;
+	@Resource
+	private TableCapacityService tableCapacityService;
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -56,7 +61,7 @@ public class Handler implements PageHandler<Context> {
 		switch (action) {
 		case VIEW:
 			try {
-				model.setReports(m_tableCapacityService.queryOverloadReports(payload.getStartTime(), payload.getEndTime()));
+				model.setReports(tableCapacityService.queryOverloadReports(payload.getStartTime(), payload.getEndTime()));
 			} catch (Exception e) {
 				LOGGER.error("Unable to query overload reports, startTime={}, endTime={}.", payload.getStartTime(),
 				      payload.getEndTime(), e);
@@ -69,15 +74,8 @@ public class Handler implements PageHandler<Context> {
 		model.setPage(ReportPage.OVERLOAD);
 
 		if (!ctx.isProcessStopped()) {
-			m_jspViewer.view(ctx, model);
+			jspViewer.view(ctx, model);
 		}
 	}
 
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setTableCapacityService(TableCapacityService tableCapacityService) {
-		m_tableCapacityService = tableCapacityService;
-	}
 }

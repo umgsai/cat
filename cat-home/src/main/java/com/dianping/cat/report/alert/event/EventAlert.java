@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import com.dianping.cat.support.Threads.Task;
 
 import com.google.common.base.Splitter;
@@ -55,6 +56,9 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class EventAlert implements Task {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(EventAlert.class);
 
@@ -70,15 +74,20 @@ public class EventAlert implements Task {
 
 	private static String FAIL_RATIO = "failRatio";
 
-	protected EventRuleConfigManager m_ruleConfigManager;
+	@Resource
+	protected EventRuleConfigManager eventRuleConfigManager;
 
-	protected DataChecker m_dataChecker;
+	@Resource
+	protected DataChecker dataChecker;
 
-	protected AlertManager m_sendManager;
+	@Resource(name = "spiAlertManager")
+	protected AlertManager alertManager;
 
-	private ModelService<EventReport> m_service;
+	@Resource(name = "eventModelService")
+	private ModelService<EventReport> eventModelService;
 
-	private EventMergeHelper m_mergeHelper;
+	@Resource
+	private EventMergeHelper eventMergeHelper;
 
 	private double[] buildArrayData(int start, int end, String type, String name, String monitor, EventReport report) {
 		EventType t = report.findOrCreateMachine(Constants.ALL).findOrCreateType(type);
@@ -116,7 +125,7 @@ public class EventAlert implements Task {
 	private List<DataCheckEntity> computeAlertForRule(String domain, String type, String name, String monitor,
 							List<Config> configs) {
 		List<DataCheckEntity> results = new ArrayList<DataCheckEntity>();
-		Pair<Integer, List<Condition>> conditionPair = m_ruleConfigManager.convertConditions(configs);
+		Pair<Integer, List<Condition>> conditionPair = eventRuleConfigManager.convertConditions(configs);
 		int minute = calAlreadyMinute();
 		Map<String, String> pars = new HashMap<String, String>();
 
@@ -142,7 +151,7 @@ public class EventAlert implements Task {
 				if (report != null) {
 					double[] data = buildArrayData(start, end, type, name, monitor, report);
 
-					results.addAll(m_dataChecker.checkData(data, conditions));
+					results.addAll(dataChecker.checkData(data, conditions));
 				}
 			} else if (minute < 0) {
 				int start = 60 + minute + 1 - (maxMinute);
@@ -156,7 +165,7 @@ public class EventAlert implements Task {
 				if (report != null) {
 					double[] data = buildArrayData(start, end, type, name, monitor, report);
 
-					results.addAll(m_dataChecker.checkData(data, conditions));
+					results.addAll(dataChecker.checkData(data, conditions));
 				}
 			} else {
 				int currentStart = 0, currentEnd = minute;
@@ -179,7 +188,7 @@ public class EventAlert implements Task {
 					double[] lastValue = buildArrayData(lastStart, lastEnd, type, name, monitor, lastReport);
 
 					double[] data = mergerArray(lastValue, currentValue);
-					results.addAll(m_dataChecker.checkData(data, conditions));
+					results.addAll(dataChecker.checkData(data, conditions));
 				}
 			}
 		}
@@ -192,12 +201,12 @@ public class EventAlert implements Task {
 
 		request.getProperties().putAll(pars);
 
-		ModelResponse<EventReport> response = m_service.invoke(request);
+		ModelResponse<EventReport> response = eventModelService.invoke(request);
 
 		if (response != null) {
 			EventReport report = response.getModel();
 
-			return m_mergeHelper.mergeAllNames(report, Constants.ALL, pars.get("name"));
+			return eventMergeHelper.mergeAllNames(report, Constants.ALL, pars.get("name"));
 		} else {
 			return null;
 		}
@@ -242,7 +251,7 @@ public class EventAlert implements Task {
 			entity.setDate(alertResult.getAlertTime()).setContent(alertResult.getContent())
 									.setLevel(alertResult.getAlertLevel());
 			entity.setMetric(type + "-" + name + "-" + monitor).setType(getName()).setGroup(domain);
-			m_sendManager.addAlert(entity);
+			alertManager.addAlert(entity);
 		}
 	}
 
@@ -255,7 +264,7 @@ public class EventAlert implements Task {
 			long current = System.currentTimeMillis();
 
 			try {
-				MonitorRules monitorRules = m_ruleConfigManager.getMonitorRules();
+				MonitorRules monitorRules = eventRuleConfigManager.getMonitorRules();
 				Map<String, Rule> rules = monitorRules.getRules();
 
 				SLF4J_LOGGER.info("Event alert cycle started, ruleCount={}.", rules.size());
@@ -297,23 +306,23 @@ public class EventAlert implements Task {
 	}
 
 	public void setDataChecker(DataChecker dataChecker) {
-		m_dataChecker = dataChecker;
+		this.dataChecker = dataChecker;
 	}
 
 	public void setMergeHelper(EventMergeHelper mergeHelper) {
-		m_mergeHelper = mergeHelper;
+		eventMergeHelper = mergeHelper;
 	}
 
 	public void setRuleConfigManager(EventRuleConfigManager ruleConfigManager) {
-		m_ruleConfigManager = ruleConfigManager;
+		eventRuleConfigManager = ruleConfigManager;
 	}
 
 	public void setSendManager(AlertManager sendManager) {
-		m_sendManager = sendManager;
+		alertManager = sendManager;
 	}
 
 	public void setService(ModelService<EventReport> service) {
-		m_service = service;
+		eventModelService = service;
 	}
 
 }

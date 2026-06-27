@@ -18,11 +18,14 @@
  */
 package com.dianping.cat.report.page.overload.task;
 
+import jakarta.annotation.Resource;
+
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.HourlyReport;
@@ -32,18 +35,23 @@ import com.dianping.cat.mybatis.HourlyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.mybatis.OverloadRepository;
 
+@Component(HourlyCapacityUpdater.ID)
 public class HourlyCapacityUpdater implements CapacityUpdater {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HourlyCapacityUpdater.class);
 
 	public static final String ID = "hourly_capacity_updater";
 
-	private HourlyReportContentRepository m_hourlyReportContentDao;
+	@Resource
+	private HourlyReportContentRepository hourlyReportContentRepository;
 
-	private HourlyReportRepository m_hourlyReportDao;
+	@Resource
+	private HourlyReportRepository hourlyReportRepository;
 
-	private OverloadRepository m_overloadDao;
+	@Resource
+	private OverloadRepository overloadRepository;
 
-	private CapacityUpdateStatusManager m_manager;
+	@Resource
+	private CapacityUpdateStatusManager capacityUpdateStatusManager;
 
 	@Override
 	public String getId() {
@@ -52,11 +60,11 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 
 	@Override
 	public void updateDBCapacity() {
-		long maxId = m_manager.getHourlyStatus();
+		long maxId = capacityUpdateStatusManager.getHourlyStatus();
 		LOGGER.info("Starting hourly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
-			List<HourlyReportContent> reports = m_hourlyReportContentDao
+			List<HourlyReportContent> reports = hourlyReportContentRepository
 									.findOverloadReport(maxId);
 
 			for (HourlyReportContent content : reports) {
@@ -65,7 +73,7 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 					double contentLength = content.getContentLength();
 
 					if (contentLength >= CapacityUpdater.CAPACITY) {
-						Overload overload = m_overloadDao.createLocal();
+						Overload overload = overloadRepository.createLocal();
 
 						overload.setReportId(reportId);
 						overload.setReportSize(contentLength);
@@ -73,9 +81,9 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 
 						HourlyReport hourlyReport;
 						try {
-							hourlyReport = m_hourlyReportDao.findByPK(reportId);
+							hourlyReport = hourlyReportRepository.findByPK(reportId);
 							overload.setPeriod(hourlyReport.getPeriod());
-							m_overloadDao.insert(overload);
+							overloadRepository.insert(overload);
 
 						} catch (EmptyResultDataAccessException e) {
 							LOGGER.warn("Hourly report not found while recording overload report, reportId={}.", reportId);
@@ -98,24 +106,24 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 				maxId = reports.get(size - 1).getReportId();
 			}
 		}
-		m_manager.updateHourlyStatus(maxId);
+		capacityUpdateStatusManager.updateHourlyStatus(maxId);
 		LOGGER.info("Finished hourly report capacity scan, finalMaxId={}.", maxId);
 	}
 
 	public void setHourlyReportContentDao(HourlyReportContentRepository hourlyReportContentDao) {
-		m_hourlyReportContentDao = hourlyReportContentDao;
+		this.hourlyReportContentRepository = hourlyReportContentDao;
 	}
 
 	public void setHourlyReportDao(HourlyReportRepository hourlyReportDao) {
-		m_hourlyReportDao = hourlyReportDao;
+		this.hourlyReportRepository = hourlyReportDao;
 	}
 
 	public void setOverloadDao(OverloadRepository overloadDao) {
-		m_overloadDao = overloadDao;
+		this.overloadRepository = overloadDao;
 	}
 
 	public void setManager(CapacityUpdateStatusManager manager) {
-		m_manager = manager;
+		this.capacityUpdateStatusManager = manager;
 	}
 
 }

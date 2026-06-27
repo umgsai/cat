@@ -18,32 +18,40 @@
  */
 package com.dianping.cat.report.page.overload.task;
 
+import jakarta.annotation.Resource;
+
 import java.util.Date;
 
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.report.task.TaskBuilder;
 
+@Component(CapacityUpdateTask.ID)
 public class CapacityUpdateTask implements TaskBuilder {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(CapacityUpdateTask.class);
 
 	public static final String ID = Constants.REPORT_DATABASE_CAPACITY;
 
-	private CapacityUpdater m_hourlyUpdater;
+	@Resource(name = HourlyCapacityUpdater.ID)
+	private CapacityUpdater hourlyCapacityUpdater;
 
-	private CapacityUpdater m_dailyUpdater;
+	@Resource(name = DailyCapacityUpdater.ID)
+	private CapacityUpdater dailyCapacityUpdater;
 
-	private CapacityUpdater m_weeklyUpdater;
+	@Resource(name = WeeklyCapacityUpdater.ID)
+	private CapacityUpdater weeklyCapacityUpdater;
 
-	private CapacityUpdater m_monthlyUpdater;
+	@Resource(name = MonthlyCapacityUpdater.ID)
+	private CapacityUpdater monthlyCapacityUpdater;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
 		try {
 			SLF4J_LOGGER.info("Starting daily capacity update task, name={}, domain={}, period={}.", name, domain, period);
-			m_dailyUpdater.updateDBCapacity();
+			dailyCapacityUpdater.updateDBCapacity();
 			SLF4J_LOGGER.info("Finished daily capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			return true;
 		} catch (RuntimeException e) {
@@ -58,7 +66,7 @@ public class CapacityUpdateTask implements TaskBuilder {
 	public boolean buildHourlyTask(String name, String domain, Date period) {
 		try {
 			SLF4J_LOGGER.info("Starting hourly capacity update task, name={}, domain={}, period={}.", name, domain, period);
-			m_hourlyUpdater.updateDBCapacity();
+			hourlyCapacityUpdater.updateDBCapacity();
 			SLF4J_LOGGER.info("Finished hourly capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			return true;
 		} catch (RuntimeException e) {
@@ -74,7 +82,7 @@ public class CapacityUpdateTask implements TaskBuilder {
 		try {
 			SLF4J_LOGGER.info("Starting monthly capacity update task, name={}, domain={}, period={}.", name, domain,
 			      period);
-			m_monthlyUpdater.updateDBCapacity();
+			monthlyCapacityUpdater.updateDBCapacity();
 			SLF4J_LOGGER.info("Finished monthly capacity update task, name={}, domain={}, period={}.", name, domain,
 			      period);
 			return true;
@@ -90,7 +98,7 @@ public class CapacityUpdateTask implements TaskBuilder {
 	public boolean buildWeeklyTask(String name, String domain, Date period) {
 		try {
 			SLF4J_LOGGER.info("Starting weekly capacity update task, name={}, domain={}, period={}.", name, domain, period);
-			m_weeklyUpdater.updateDBCapacity();
+			weeklyCapacityUpdater.updateDBCapacity();
 			SLF4J_LOGGER.info("Finished weekly capacity update task, name={}, domain={}, period={}.", name, domain, period);
 			return true;
 		} catch (RuntimeException e) {
@@ -102,19 +110,19 @@ public class CapacityUpdateTask implements TaskBuilder {
 	}
 
 	public void setDailyUpdater(CapacityUpdater dailyUpdater) {
-		m_dailyUpdater = dailyUpdater;
+		this.dailyCapacityUpdater = dailyUpdater;
 	}
 
 	public void setHourlyUpdater(CapacityUpdater hourlyUpdater) {
-		m_hourlyUpdater = hourlyUpdater;
+		this.hourlyCapacityUpdater = hourlyUpdater;
 	}
 
 	public void setMonthlyUpdater(CapacityUpdater monthlyUpdater) {
-		m_monthlyUpdater = monthlyUpdater;
+		this.monthlyCapacityUpdater = monthlyUpdater;
 	}
 
 	public void setWeeklyUpdater(CapacityUpdater weeklyUpdater) {
-		m_weeklyUpdater = weeklyUpdater;
+		this.weeklyCapacityUpdater = weeklyUpdater;
 	}
 
 }

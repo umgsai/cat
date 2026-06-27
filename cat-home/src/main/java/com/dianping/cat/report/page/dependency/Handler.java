@@ -38,7 +38,9 @@ import com.dianping.cat.report.page.dependency.graph.TopologyGraphManager;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -50,21 +52,28 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
+@Component("dependencyHandler")
 public class Handler implements PageHandler<Context> {
 
 	public static final List<String> NORMAL_URLS = Arrays.asList("/cat/r", "/cat/r/", "/cat/r/dependency");
 
-	private ModelService<DependencyReport> m_dependencyService;
+	@Resource(name = "dependencyModelService")
+	private ModelService<DependencyReport> dependencyModelService;
 
-	private TopologyGraphManager m_graphManager;
+	@Resource
+	private TopologyGraphManager topologyGraphManager;
 
-	private ExternalInfoBuilder m_externalInfoBuilder;
+	@Resource
+	private ExternalInfoBuilder externalInfoBuilder;
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private PayloadNormalizer m_normalizePayload;
+	@Resource
+	private PayloadNormalizer normalizePayload;
 
-	private TopoGraphFormatConfigManager m_formatConfigManager;
+	@Resource
+	private TopoGraphFormatConfigManager topoGraphFormatConfigManager;
 
 	private Segment buildAllSegmentsInfo(DependencyReport report) {
 		Segment result = new Segment();
@@ -89,7 +98,7 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private void buildDependencyDashboard(Model model, Payload payload, Date reportTime) {
-		ProductLinesDashboard dashboardGraph = m_graphManager.buildDependencyDashboard(reportTime.getTime());
+		ProductLinesDashboard dashboardGraph = topologyGraphManager.buildDependencyDashboard(reportTime.getTime());
 		Map<String, List<TopologyNode>> nodes = dashboardGraph.getNodes();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH");
 		String minute = String.valueOf(parseQueryMinute(payload));
@@ -107,7 +116,7 @@ public class Handler implements PageHandler<Context> {
 		model.setReportEnd(new Date(payload.getDate() + TimeHelper.ONE_HOUR - 1));
 		model.setDashboardGraph(dashboardGraph.toJson());
 		model.setDashboardGraphData(dashboardGraph);
-		model.setFormat(m_formatConfigManager.buildFormatJson());
+		model.setFormat(topoGraphFormatConfigManager.buildFormatJson());
 	}
 
 	private void buildDependencyLineChart(Model model, Payload payload, Date reportTime) {
@@ -158,11 +167,11 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	private void buildProjectTopology(Model model, Payload payload, Date reportTime) {
-		TopologyGraph topologyGraph = m_graphManager.buildTopologyGraph(model.getDomain(), reportTime.getTime());
+		TopologyGraph topologyGraph = topologyGraphManager.buildTopologyGraph(model.getDomain(), reportTime.getTime());
 		DependencyReport report = queryDependencyReport(payload);
 
 		buildHourlyReport(report, model, payload);
-		m_externalInfoBuilder.buildExceptionInfoOnGraph(payload, model, topologyGraph);
+		externalInfoBuilder.buildExceptionInfoOnGraph(payload, model, topologyGraph);
 		model.setReportStart(new Date(payload.getDate()));
 		model.setReportEnd(new Date(payload.getDate() + TimeHelper.ONE_HOUR - 1));
 		String build = new DefaultJsonBuilder().build(topologyGraph);
@@ -201,7 +210,7 @@ public class Handler implements PageHandler<Context> {
 				buildDependencyDashboard(model, payload, reportTime);
 				break;
 			}
-			m_jspViewer.view(ctx, model);
+			jspViewer.view(ctx, model);
 		}
 	}
 
@@ -209,7 +218,7 @@ public class Handler implements PageHandler<Context> {
 		model.setPage(ReportPage.DEPENDENCY);
 		model.setAction(payload.getAction());
 
-		m_normalizePayload.normalize(model, payload);
+		normalizePayload.normalize(model, payload);
 
 		int minute = parseQueryMinute(payload);
 		int maxMinute = 60;
@@ -245,8 +254,8 @@ public class Handler implements PageHandler<Context> {
 		String domain = payload.getDomain();
 		ModelRequest request = new ModelRequest(domain, payload.getDate());
 
-		if (m_dependencyService.isEligable(request)) {
-			ModelResponse<DependencyReport> response = m_dependencyService.invoke(request);
+		if (dependencyModelService.isEligable(request)) {
+			ModelResponse<DependencyReport> response = dependencyModelService.invoke(request);
 			DependencyReport report = response.getModel();
 
 			if (report != null && report.getStartTime() == null) {
@@ -264,30 +273,6 @@ public class Handler implements PageHandler<Context> {
 		String actionUrl = url.split("\\?")[0];
 
 		return NORMAL_URLS.contains(actionUrl);
-	}
-
-	public void setDependencyService(ModelService<DependencyReport> dependencyService) {
-		m_dependencyService = dependencyService;
-	}
-
-	public void setExternalInfoBuilder(ExternalInfoBuilder externalInfoBuilder) {
-		m_externalInfoBuilder = externalInfoBuilder;
-	}
-
-	public void setFormatConfigManager(TopoGraphFormatConfigManager formatConfigManager) {
-		m_formatConfigManager = formatConfigManager;
-	}
-
-	public void setGraphManager(TopologyGraphManager graphManager) {
-		m_graphManager = graphManager;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setNormalizePayload(PayloadNormalizer normalizePayload) {
-		m_normalizePayload = normalizePayload;
 	}
 
 }

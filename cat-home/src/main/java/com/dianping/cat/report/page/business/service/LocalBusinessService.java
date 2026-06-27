@@ -33,12 +33,16 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("localBusinessService")
 public class LocalBusinessService extends LocalModelService<BusinessReport> {
 
 	public static final String ID = BusinessAnalyzer.ID;
 
-	private ReportBucketManager m_bucketManager;
+	@Resource(name = "reportBucketManager")
+	private ReportBucketManager reportBucketManager;
 
 	public LocalBusinessService() {
 		super(BusinessAnalyzer.ID);
@@ -110,11 +114,11 @@ public class LocalBusinessService extends LocalModelService<BusinessReport> {
 	}
 
 	private ReportBucketManager getBucketManager() {
-		return m_bucketManager;
+		return reportBucketManager;
 	}
 
 	public void setBucketManager(ReportBucketManager bucketManager) {
-		m_bucketManager = bucketManager;
+		reportBucketManager = bucketManager;
 	}
 
 	public static class BusinessReportFilter extends	com.dianping.cat.consumer.business.model.transform.DefaultXmlBuilder {

@@ -49,7 +49,7 @@ public class ProblemAnalyzer extends AbstractMessageAnalyzer<ProblemReport> {
 	@Resource(name = ProblemAnalyzer.ID + "ReportManager")
 	private ReportManager<ProblemReport> problemReportManager;
 
-	@Resource(name = "problemHandlers")
+	@Resource
 	private List<ProblemHandler> problemHandlers;
 
 	private volatile boolean initialized;

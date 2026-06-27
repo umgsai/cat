@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.report.page.dependency.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.dianping.cat.consumer.dependency.DependencyAnalyzer;
@@ -27,10 +28,27 @@ import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.report.service.ModelService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("dependencyModelService")
 public class CompositeDependencyService extends BaseCompositeModelService<DependencyReport> {
+	@Resource(name = "dependency-historical")
+	private ModelService<DependencyReport> historicalDependencyService;
+
 	public CompositeDependencyService() {
 		super(DependencyAnalyzer.ID);
+	}
+
+	@Override
+	@PostConstruct
+	public synchronized void initialize() {
+		if (historicalDependencyService != null) {
+			setServices(Collections.singletonList(historicalDependencyService));
+		}
+		super.initialize();
 	}
 
 	@Override

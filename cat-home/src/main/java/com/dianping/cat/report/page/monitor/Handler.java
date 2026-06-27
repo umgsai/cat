@@ -25,7 +25,9 @@ import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
+import org.springframework.stereotype.Component;
 
+@Component("monitorHandler")
 public class Handler implements PageHandler<Context> {
 
 	@Override

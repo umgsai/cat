@@ -20,6 +20,7 @@ package com.dianping.cat.report.alert;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import com.dianping.cat.support.Threads;
 
 import com.dianping.cat.report.alert.business.BusinessAlert;
@@ -28,45 +29,53 @@ import com.dianping.cat.report.alert.exception.ExceptionAlert;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatAlert;
 import com.dianping.cat.report.alert.transaction.TransactionAlert;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class AlarmManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlarmManager.class);
 
-	private BusinessAlert m_businessAlert;
+	@Resource
+	private BusinessAlert businessAlert;
 
-	private EventAlert m_eventAlert;
+	@Resource
+	private EventAlert eventAlert;
 
-	private ExceptionAlert m_exceptionAlert;
+	@Resource
+	private ExceptionAlert exceptionAlert;
 
-	private HeartbeatAlert m_heartbeatAlert;
+	@Resource
+	private HeartbeatAlert heartbeatAlert;
 
-	private TransactionAlert m_transactionAlert;
+	@Resource
+	private TransactionAlert transactionAlert;
 
 	public void startAlarm() {
-		Threads.forGroup("cat").start(m_businessAlert);
-		Threads.forGroup("cat").start(m_exceptionAlert);
-		Threads.forGroup("cat").start(m_heartbeatAlert);
-		Threads.forGroup("cat").start(m_transactionAlert);
-		Threads.forGroup("cat").start(m_eventAlert);
+		Threads.forGroup("cat").start(businessAlert);
+		Threads.forGroup("cat").start(exceptionAlert);
+		Threads.forGroup("cat").start(heartbeatAlert);
+		Threads.forGroup("cat").start(transactionAlert);
+		Threads.forGroup("cat").start(eventAlert);
 		LOGGER.info("Started alert tasks, alerts=[business,exception,heartbeat,transaction,event].");
 	}
 
 	public void setBusinessAlert(BusinessAlert businessAlert) {
-		m_businessAlert = businessAlert;
+		this.businessAlert = businessAlert;
 	}
 
 	public void setEventAlert(EventAlert eventAlert) {
-		m_eventAlert = eventAlert;
+		this.eventAlert = eventAlert;
 	}
 
 	public void setExceptionAlert(ExceptionAlert exceptionAlert) {
-		m_exceptionAlert = exceptionAlert;
+		this.exceptionAlert = exceptionAlert;
 	}
 
 	public void setHeartbeatAlert(HeartbeatAlert heartbeatAlert) {
-		m_heartbeatAlert = heartbeatAlert;
+		this.heartbeatAlert = heartbeatAlert;
 	}
 
 	public void setTransactionAlert(TransactionAlert transactionAlert) {
-		m_transactionAlert = transactionAlert;
+		this.transactionAlert = transactionAlert;
 	}
 }

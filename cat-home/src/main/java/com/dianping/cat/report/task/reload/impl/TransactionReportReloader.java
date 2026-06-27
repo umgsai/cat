@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionReportMerger;
@@ -35,9 +39,11 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 
+@Component("transactionReportReloader")
 public class TransactionReportReloader extends AbstractReportReloader {
 
-	protected ReportManager<TransactionReport> m_reportManager;
+	@Resource(name = TransactionAnalyzer.ID + "ReportManager")
+	protected ReportManager<TransactionReport> transactionReportManager;
 
 	private List<TransactionReport> buildMergedReports(Map<String, List<TransactionReport>> mergedReports) {
 		List<TransactionReport> results = new ArrayList<TransactionReport>();
@@ -70,7 +76,7 @@ public class TransactionReportReloader extends AbstractReportReloader {
 		Map<String, List<TransactionReport>> mergedReports = new HashMap<String, List<TransactionReport>>();
 
 		for (int i = 0; i < getAnalyzerCount(); i++) {
-			Map<String, TransactionReport> reports = m_reportManager.loadLocalReports(time, i);
+			Map<String, TransactionReport> reports = transactionReportManager.loadLocalReports(time, i);
 
 			for (Entry<String, TransactionReport> entry : reports.entrySet()) {
 				String domain = entry.getKey();
@@ -107,6 +113,6 @@ public class TransactionReportReloader extends AbstractReportReloader {
 	}
 
 	public void setReportManager(ReportManager<TransactionReport> reportManager) {
-		m_reportManager = reportManager;
+		transactionReportManager = reportManager;
 	}
 }

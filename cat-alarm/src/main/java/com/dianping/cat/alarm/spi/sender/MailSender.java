@@ -29,7 +29,9 @@ import org.slf4j.LoggerFactory;
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.sender.entity.Sender;
 import com.dianping.cat.alarm.spi.AlertChannel;
+import org.springframework.stereotype.Component;
 
+@Component("mailSender")
 public class MailSender extends AbstractSender {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MailSender.class);
 
@@ -65,7 +67,7 @@ public class MailSender extends AbstractSender {
 		String title = message.getTitle().replaceAll(",", " ");
 		String content = message.getContent().replaceAll(",", " ");
 		String urlPrefix = sender.getUrl();
-		String urlPars = m_senderConfigManager.queryParString(sender);
+		String urlPars = senderConfigManager.queryParString(sender);
 		String time = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
 
 		try {

@@ -18,6 +18,11 @@
  */
 package com.dianping.cat.report.page.matrix.task;
 
+import jakarta.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -40,12 +45,14 @@ import com.dianping.cat.report.task.TaskHelper;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask;
 import com.dianping.cat.report.task.current.CurrentWeeklyMonthlyReportTask.CurrentWeeklyMonthlyTask;
 
+@Component(MatrixAnalyzer.ID)
 public class MatrixReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MatrixReportBuilder.class);
 
 	public static final String ID = MatrixAnalyzer.ID;
 
-	protected MatrixReportService m_reportService;
+	@Resource
+	protected MatrixReportService reportService;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -60,7 +67,7 @@ public class MatrixReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(matrixReport);
-		return m_reportService.insertDailyReport(report, binaryContent);
+		return reportService.insertDailyReport(report, binaryContent);
 	}
 
 	@Override
@@ -81,7 +88,7 @@ public class MatrixReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(matrixReport);
-		return m_reportService.insertMonthlyReport(report, binaryContent);
+		return reportService.insertMonthlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -98,9 +105,10 @@ public class MatrixReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(matrixReport);
-		return m_reportService.insertWeeklyReport(report, binaryContent);
+		return reportService.insertWeeklyReport(report, binaryContent);
 	}
 
+	@PostConstruct
 	public void initialize() {
 		CurrentWeeklyMonthlyReportTask.getInstance().register(new CurrentWeeklyMonthlyTask() {
 
@@ -128,7 +136,7 @@ public class MatrixReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime += TimeHelper.ONE_DAY) {
 			try {
-				MatrixReport reportModel = m_reportService
+				MatrixReport reportModel = reportService
 										.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 
 				reportModel.accept(merger);
@@ -153,7 +161,7 @@ public class MatrixReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			Date date = new Date(startTime);
-			MatrixReport reportModel = m_reportService.queryReport(domain, date, new Date(date.getTime()	+ TimeHelper.ONE_HOUR));
+			MatrixReport reportModel = reportService.queryReport(domain, date, new Date(date.getTime()	+ TimeHelper.ONE_HOUR));
 
 			reportModel.accept(merger);
 		}
@@ -166,7 +174,7 @@ public class MatrixReportBuilder implements TaskBuilder {
 	}
 
 	public void setReportService(MatrixReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 }

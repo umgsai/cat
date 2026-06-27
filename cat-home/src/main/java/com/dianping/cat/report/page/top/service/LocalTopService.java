@@ -32,12 +32,16 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("localTopService")
 public class LocalTopService extends LocalModelService<TopReport> {
 
 	public static final String ID = TopAnalyzer.ID;
 
-	private ReportBucketManager m_bucketManager;
+	@Resource(name = "reportBucketManager")
+	private ReportBucketManager reportBucketManager;
 
 	public LocalTopService() {
 		super(TopAnalyzer.ID);
@@ -108,11 +112,11 @@ public class LocalTopService extends LocalModelService<TopReport> {
 	}
 
 	private ReportBucketManager getBucketManager() {
-		return m_bucketManager;
+		return reportBucketManager;
 	}
 
 	public void setBucketManager(ReportBucketManager bucketManager) {
-		m_bucketManager = bucketManager;
+		reportBucketManager = bucketManager;
 	}
 
 	public static class TopReportFilter extends com.dianping.cat.consumer.top.model.transform.DefaultXmlBuilder {

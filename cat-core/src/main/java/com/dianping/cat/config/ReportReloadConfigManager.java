@@ -24,9 +24,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -39,6 +43,7 @@ import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
+@Component
 public class ReportReloadConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReportReloadConfigManager.class);
 
@@ -46,56 +51,59 @@ public class ReportReloadConfigManager {
 
 	private static final String DEFAULT = "default";
 
-	protected ConfigRepository m_configDao;
+	@Resource
+	protected ConfigRepository configRepository;
 
-	protected ContentFetcher m_fetcher;
+	@Resource
+	protected ContentFetcher contentFetcher;
 
-	private long m_configId;
+	private long configId;
 
-	private long m_modifyTime;
+	private long modifyTime;
 
-	private ReportReloadConfig m_config;
+	private ReportReloadConfig config;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public ReportReloadConfig getConfig() {
 		ensureInitialized();
-		return m_config;
+		return config;
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME);
+			Config config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
-			m_configId = config.getId();
-			m_modifyTime = config.getModifyDate().getTime();
-			m_config = DefaultSaxParser.parse(content);
-			LOGGER.info("Loaded report reload config from repository, configId={}, modifyTime={}.", m_configId,
-					m_modifyTime);
+			configId = config.getId();
+			modifyTime = config.getModifyDate().getTime();
+			this.config = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded report reload config from repository, configId={}, modifyTime={}.", configId,
+					modifyTime);
 		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Report reload config is missing in repository, loading default content from fetcher.", e);
 
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
+				String content = contentFetcher.getConfigContent(CONFIG_NAME);
+				Config config = configRepository.createLocal();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(content);
-				m_configDao.insert(config);
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
-				LOGGER.info("Initialized report reload config from default content, configId={}.", m_configId);
+				configRepository.insert(config);
+				configId = config.getId();
+				this.config = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized report reload config from default content, configId={}.", configId);
 			} catch (Exception ex) {
 				LOGGER.error("Unable to initialize report reload config from default content.", ex);
 				Cat.logError(ex);
@@ -104,8 +112,8 @@ public class ReportReloadConfigManager {
 			LOGGER.error("Unable to load report reload config from repository.", e);
 			Cat.logError(e);
 		}
-		if (m_config == null) {
-			m_config = new ReportReloadConfig();
+		if (config == null) {
+			config = new ReportReloadConfig();
 			LOGGER.warn("Report reload config is empty after initialization, using a new empty config.");
 		}
 
@@ -121,14 +129,14 @@ public class ReportReloadConfigManager {
 				refreshConfig();
 			}
 		});
-		m_initialized = true;
+		initialized = true;
 	}
 
 	public boolean insert(String xml) {
 		ensureInitialized();
 
 		try {
-			m_config = DefaultSaxParser.parse(xml);
+			config = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
@@ -142,11 +150,11 @@ public class ReportReloadConfigManager {
 	public List<Date> queryByReportType(String type) {
 		ensureInitialized();
 
-		ReportType reportType = m_config.findReportType(type);
+		ReportType reportType = config.findReportType(type);
 		ArrayList<Date> results = new ArrayList<Date>();
 
 		if (reportType == null) {
-			reportType = m_config.findReportType(DEFAULT);
+			reportType = config.findReportType(DEFAULT);
 		}
 
 		if (reportType != null) {
@@ -169,25 +177,25 @@ public class ReportReloadConfigManager {
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
 	private void refreshConfig() throws Exception {
-		Config config = m_configDao.findByName(CONFIG_NAME);
+		Config config = configRepository.findByName(CONFIG_NAME);
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
-			if (modifyTime > m_modifyTime) {
+			if (modifyTime > this.modifyTime) {
 				String content = config.getContent();
 				ReportReloadConfig reportReloadConfig = DefaultSaxParser.parse(content);
 
-				m_config = reportReloadConfig;
-				m_modifyTime = modifyTime;
-				LOGGER.info("Refreshed report reload config, configId={}, modifyTime={}.", m_configId, m_modifyTime);
+				this.config = reportReloadConfig;
+				this.modifyTime = modifyTime;
+				LOGGER.info("Refreshed report reload config, configId={}, modifyTime={}.", configId, this.modifyTime);
 			}
 		}
 	}
@@ -195,16 +203,16 @@ public class ReportReloadConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = m_configDao.createLocal();
+				Config config = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
+				config.setId(configId);
+				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
-				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config);
-				LOGGER.info("Stored report reload config, configId={}.", m_configId);
+				config.setContent(this.config.toString());
+				configRepository.updateByPK(config);
+				LOGGER.info("Stored report reload config, configId={}.", configId);
 			} catch (Exception e) {
-				LOGGER.error("Unable to store report reload config, configId={}.", m_configId, e);
+				LOGGER.error("Unable to store report reload config, configId={}.", configId, e);
 				Cat.logError(e);
 				return false;
 			}

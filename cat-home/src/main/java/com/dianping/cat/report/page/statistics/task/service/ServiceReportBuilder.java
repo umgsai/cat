@@ -18,6 +18,8 @@
  */
 package com.dianping.cat.report.page.statistics.task.service;
 
+import jakarta.annotation.Resource;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -48,18 +51,22 @@ import com.dianping.cat.report.page.statistics.service.ServiceReportService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.TaskHelper;
 
+@Component(ServiceReportBuilder.ID)
 public class ServiceReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceReportBuilder.class);
 
 	public static final String ID = Constants.REPORT_SERVICE;
 
-	protected ServiceReportService m_reportService;
+	@Resource
+	protected ServiceReportService reportService;
 
-	protected CrossReportService m_crossReportService;
+	@Resource
+	protected CrossReportService crossReportService;
 
 	Map<String, Domain> stat = new HashMap<String, Domain>();
 
-	private ServerFilterConfigManager m_configManger;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -76,7 +83,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(serviceReport);
 
-		return m_reportService.insertDailyReport(report, binaryContent);
+		return reportService.insertDailyReport(report, binaryContent);
 	}
 
 	@Override
@@ -85,11 +92,11 @@ public class ServiceReportBuilder implements TaskBuilder {
 
 		ServiceReport serviceReport = new ServiceReport(Constants.CAT);
 		Date end = new Date(start.getTime() + TimeHelper.ONE_HOUR);
-		Set<String> domains = m_reportService.queryAllDomainNames(start, end, CrossAnalyzer.ID);
+		Set<String> domains = reportService.queryAllDomainNames(start, end, CrossAnalyzer.ID);
 
 		for (String domainName : domains) {
-			if (m_configManger.validateDomain(domainName)) {
-				CrossReport crossReport = m_crossReportService.queryReport(domainName, start, end);
+			if (serverFilterConfigManager.validateDomain(domainName)) {
+				CrossReport crossReport = crossReportService.queryReport(domainName, start, end);
 				ProjectInfo projectInfo = new ProjectInfo(TimeHelper.ONE_HOUR);
 
 				projectInfo.setClientIp(Constants.ALL);
@@ -112,7 +119,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 		report.setPeriod(start);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(serviceReport);
-		return m_reportService.insertHourlyReport(report, binaryContent);
+		return reportService.insertHourlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -128,7 +135,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(serviceReport);
-		return m_reportService.insertMonthlyReport(report, binaryContent);
+		return reportService.insertMonthlyReport(report, binaryContent);
 	}
 
 	@Override
@@ -146,7 +153,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 		report.setPeriod(period);
 		report.setType(1);
 		byte[] binaryContent = DefaultNativeBuilder.build(serviceReport);
-		return m_reportService.insertWeeklyReport(report, binaryContent);
+		return reportService.insertWeeklyReport(report, binaryContent);
 	}
 
 	public void merge(Domain domain, TypeDetailInfo info) {
@@ -167,7 +174,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime += TimeHelper.ONE_DAY) {
 			try {
-				ServiceReport reportModel = m_reportService
+				ServiceReport reportModel = reportService
 										.queryReport(domain, new Date(startTime), new Date(startTime	+ TimeHelper.ONE_DAY));
 				reportModel.accept(merger);
 			} catch (Exception e) {
@@ -190,7 +197,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			Date date = new Date(startTime);
-			ServiceReport reportModel = m_reportService
+			ServiceReport reportModel = reportService
 									.queryReport(domain, date, new Date(date.getTime()	+ TimeHelper.ONE_HOUR));
 
 			reportModel.accept(merger);
@@ -208,16 +215,16 @@ public class ServiceReportBuilder implements TaskBuilder {
 								.equalsIgnoreCase("UnknownProject");
 	}
 
-	public void setConfigManager(ServerFilterConfigManager configManger) {
-		m_configManger = configManger;
+	public void setConfigManager(ServerFilterConfigManager configManager) {
+		this.serverFilterConfigManager = configManager;
 	}
 
 	public void setCrossReportService(CrossReportService crossReportService) {
-		m_crossReportService = crossReportService;
+		this.crossReportService = crossReportService;
 	}
 
 	public void setReportService(ServiceReportService reportService) {
-		m_reportService = reportService;
+		this.reportService = reportService;
 	}
 
 }

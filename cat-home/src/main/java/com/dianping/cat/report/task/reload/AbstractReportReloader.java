@@ -20,6 +20,8 @@ package com.dianping.cat.report.task.reload;
 
 import java.util.List;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,28 +35,31 @@ import com.dianping.cat.mybatis.HourlyReportRepository;
 public abstract class AbstractReportReloader implements ReportReloader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractReportReloader.class);
 
-	protected HourlyReportRepository m_hourlyReportDao;
+	@Resource
+	protected HourlyReportRepository hourlyReportRepository;
 
-	protected HourlyReportContentRepository m_hourlyReportContentDao;
+	@Resource
+	protected HourlyReportContentRepository hourlyReportContentRepository;
 
-	protected ServerConfigManager m_serverConfigManager;
+	@Resource
+	protected ServerConfigManager serverConfigManager;
 
 	protected int getAnalyzerCount() {
-		return m_serverConfigManager.getThreadsOfRealtimeAnalyzer(getId());
+		return serverConfigManager.getThreadsOfRealtimeAnalyzer(getId());
 	}
 
 	public boolean insertHourlyReport(ReportReloadEntity entity) {
 		try {
 			HourlyReport report = entity.getReport();
-			m_hourlyReportDao.insert(report);
+			hourlyReportRepository.insert(report);
 
 			long id = report.getId();
-			HourlyReportContent proto = m_hourlyReportContentDao.createLocal();
+			HourlyReportContent proto = hourlyReportContentRepository.createLocal();
 
 			proto.setReportId(id);
 			proto.setContent(entity.getReportContent());
 			proto.setPeriod(report.getPeriod());
-			m_hourlyReportContentDao.insert(proto);
+			hourlyReportContentRepository.insert(proto);
 			return true;
 		} catch (RuntimeException e) {
 			HourlyReport report = entity == null ? null : entity.getReport();
@@ -85,15 +90,15 @@ public abstract class AbstractReportReloader implements ReportReloader {
 	}
 
 	public void setHourlyReportContentDao(HourlyReportContentRepository hourlyReportContentDao) {
-		m_hourlyReportContentDao = hourlyReportContentDao;
+		hourlyReportContentRepository = hourlyReportContentDao;
 	}
 
 	public void setHourlyReportDao(HourlyReportRepository hourlyReportDao) {
-		m_hourlyReportDao = hourlyReportDao;
+		hourlyReportRepository = hourlyReportDao;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 }

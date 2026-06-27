@@ -19,9 +19,11 @@
 package com.dianping.cat.report.page.overload;
 
 import org.unidal.web.mvc.view.BaseJspViewer;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.report.ReportPage;
 
+@Component("overloadJspViewer")
 public class JspViewer extends BaseJspViewer<ReportPage, Action, Context, Model> {
 	@Override
 	protected String getJspFilePath(Context ctx, Model model) {

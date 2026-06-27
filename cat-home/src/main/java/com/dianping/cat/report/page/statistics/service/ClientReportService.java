@@ -23,6 +23,7 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -32,6 +33,7 @@ import com.dianping.cat.home.service.client.entity.ClientReport;
 import com.dianping.cat.home.service.client.transform.DefaultNativeParser;
 import com.dianping.cat.report.service.AbstractReportService;
 
+@Component
 public class ClientReportService extends AbstractReportService<ClientReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClientReportService.class);
 
@@ -50,7 +52,7 @@ public class ClientReportService extends AbstractReportService<ClientReport> {
 		String name = Constants.REPORT_CLIENT;
 
 		try {
-			DailyReport report = m_dailyReportDao
+			DailyReport report = dailyReportRepository
 									.findByDomainNamePeriod(domain, name, new Date(startTime));
 			return queryFromDailyBinary(report.getId(), domain);
 		} catch (EmptyResultDataAccessException e) {
@@ -67,7 +69,7 @@ public class ClientReportService extends AbstractReportService<ClientReport> {
 	}
 
 	private ClientReport queryFromDailyBinary(long id, String domain) {
-		DailyReportContent content = m_dailyReportContentDao.findByPK(id);
+		DailyReportContent content = dailyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());

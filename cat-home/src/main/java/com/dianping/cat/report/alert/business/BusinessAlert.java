@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import com.dianping.cat.support.Threads.Task;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -56,6 +57,9 @@ import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class BusinessAlert implements Task {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessAlert.class);
 
@@ -65,34 +69,45 @@ public class BusinessAlert implements Task {
 
 	private static final int DATA_AREADY_MINUTE = 1;
 
-	protected BaseRuleHelper m_baseRuleHelper;
+	@Resource
+	protected BaseRuleHelper baseRuleHelper;
 
-	private BusinessRuleConfigManager m_alertConfigManager;
+	@Resource
+	private BusinessRuleConfigManager businessRuleConfigManager;
 
-	private BusinessConfigManager m_configManager;
+	@Resource
+	private BusinessConfigManager businessConfigManager;
 
-	private BusinessTagConfigManager m_tagConfigManager;
+	@Resource
+	private BusinessTagConfigManager businessTagConfigManager;
 
-	private BusinessReportGroupService m_service;
+	@Resource
+	private BusinessReportGroupService businessReportGroupService;
 
-	private ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private AlertManager m_sendManager;
+	@Resource(name = "spiAlertManager")
+	private AlertManager alertManager;
 
-	private BusinessKeyHelper m_keyHelper;
+	@Resource
+	private BusinessKeyHelper businessKeyHelper;
 
-	private BaselineService m_baselineService;
+	@Resource
+	private BaselineService baselineService;
 
-	private DataChecker m_dataChecker;
+	@Resource
+	private DataChecker dataChecker;
 
-	private CustomDataCalculator m_customDataCalculator;
+	@Resource
+	private CustomDataCalculator customDataCalculator;
 
 	private void buidMonitorConfigs(String domain, String key,	Map<String, Map<MetricType, List<Config>>> monitorConfigs,
 							Map<MetricType, List<Config>> defaultRules) {
 		Map<MetricType, List<Config>> monitorConfigsByItem = new HashMap<MetricType, List<Config>>();
 
 		for (MetricType type : MetricType.values()) {
-			List<Config> configs = m_alertConfigManager.queryConfigs(domain, key, type);
+			List<Config> configs = businessRuleConfigManager.queryConfigs(domain, key, type);
 
 			if (configs != null && configs.size() > 0) {
 				monitorConfigsByItem.put(type, configs);
@@ -114,7 +129,7 @@ public class BusinessAlert implements Task {
 		for (BusinessItemConfig config : itemConfigs.values()) {
 			if (needAlert(config, domain)) {
 				String key = config.getId();
-				Map<MetricType, List<Config>> defaultRules = m_alertConfigManager.getDefaultRules(config);
+				Map<MetricType, List<Config>> defaultRules = businessRuleConfigManager.getDefaultRules(config);
 
 				buidMonitorConfigs(domain, key, monitorConfigs, defaultRules);
 			}
@@ -123,7 +138,7 @@ public class BusinessAlert implements Task {
 		for (CustomConfig config : customConfigs.values()) {
 			if (needAlert(config, domain)) {
 				String key = config.getId();
-				Map<MetricType, List<Config>> defaultRules = m_alertConfigManager.getDefaultRulesForCustomItem();
+				Map<MetricType, List<Config>> defaultRules = businessRuleConfigManager.getDefaultRulesForCustomItem();
 
 				buidMonitorConfigs(domain, key, monitorConfigs, defaultRules);
 			}
@@ -148,7 +163,7 @@ public class BusinessAlert implements Task {
 		if (config.isAlarm()) {
 			return true;
 		}
-		Set<String> tags = m_tagConfigManager.findTagByDomain(domain).get(config.getId());
+		Set<String> tags = businessTagConfigManager.findTagByDomain(domain).get(config.getId());
 
 		if (tags != null && tags.contains(DEFAULT_TAG)) {
 			return true;
@@ -161,7 +176,7 @@ public class BusinessAlert implements Task {
 		if (config.isAlarm()) {
 			return true;
 		}
-		Set<String> tags = m_tagConfigManager.findTagByDomain(domain).get(config.getId());
+		Set<String> tags = businessTagConfigManager.findTagByDomain(domain).get(config.getId());
 
 		if (tags != null && tags.contains(DEFAULT_TAG)) {
 			return true;
@@ -176,7 +191,7 @@ public class BusinessAlert implements Task {
 
 		for (Entry<MetricType, List<Config>> alertConfigEntry : alertConfig.entrySet()) {
 			MetricType type = alertConfigEntry.getKey();
-			String metricKey = m_keyHelper.generateKey(id, domain, type.getName());
+			String metricKey = businessKeyHelper.generateKey(id, domain, type.getName());
 			List<DataCheckEntity> tmpResults = processMetricType(minute, alertConfigEntry.getValue(), reportGroup,	metricKey,
 									type);
 
@@ -188,23 +203,23 @@ public class BusinessAlert implements Task {
 	private List<DataCheckEntity> processCustomItem(BusinessReportGroup currentReportGroup, List<Config> configs,
 							int minute, String key, CustomConfig customConfig, int maxDuration) {
 		try {
-			Pair<Integer, List<Condition>> conditionPair = m_baseRuleHelper.convertConditions(configs);
+			Pair<Integer, List<Condition>> conditionPair = baseRuleHelper.convertConditions(configs);
 			Map<String, double[]> businessItemDataCache = new HashMap<String, double[]>();
 			Map<String, double[]> baseLineCache = new HashMap<String, double[]>();
 			Map<String, BusinessReportGroup> reportGroupCache = new HashMap<String, BusinessReportGroup>();
 
-			reportGroupCache.put(m_keyHelper.getDomain(key), currentReportGroup);
+			reportGroupCache.put(businessKeyHelper.getDomain(key), currentReportGroup);
 
 			if (conditionPair != null) {
 				int ruleMinute = conditionPair.getKey();
 				String pattern = customConfig.getPattern();
-				List<CustomInfo> customInfos = m_customDataCalculator.translatePattern(pattern);
+				List<CustomInfo> customInfos = customDataCalculator.translatePattern(pattern);
 
 				for (CustomInfo customInfo : customInfos) {
 					String domain = customInfo.getDomain();
 
 					if (!reportGroupCache.containsKey(domain)) {
-						BusinessReportGroup tmpReportGroup = m_service.prepareDatas(domain, minute, maxDuration);
+						BusinessReportGroup tmpReportGroup = businessReportGroupService.prepareDatas(domain, minute, maxDuration);
 						reportGroupCache.put(domain, tmpReportGroup);
 					}
 				}
@@ -213,19 +228,19 @@ public class BusinessAlert implements Task {
 					String domain = customInfo.getDomain();
 					String type = customInfo.getType();
 					String id = customInfo.getKey();
-					String metricKey = m_keyHelper.generateKey(id, domain, type);
+					String metricKey = businessKeyHelper.generateKey(id, domain, type);
 					BusinessReportGroup reportGroup = reportGroupCache.get(domain);
 					double[] value = reportGroup.extractData(minute, ruleMinute, id, MetricType.getTypeByName(type));
-					double[] baseline = m_baselineService.queryBaseline(minute, ruleMinute, metricKey, BusinessAnalyzer.ID);
+					double[] baseline = baselineService.queryBaseline(minute, ruleMinute, metricKey, BusinessAnalyzer.ID);
 					businessItemDataCache.put(metricKey, value);
 					baseLineCache.put(metricKey, baseline);
 				}
 
-				double[] currentData = m_customDataCalculator.calculate(pattern, customInfos, businessItemDataCache,	ruleMinute);
-				double[] currentBaseLine = m_customDataCalculator.calculate(pattern, customInfos, baseLineCache, ruleMinute);
+				double[] currentData = customDataCalculator.calculate(pattern, customInfos, businessItemDataCache,	ruleMinute);
+				double[] currentBaseLine = customDataCalculator.calculate(pattern, customInfos, baseLineCache, ruleMinute);
 				List<Condition> conditions = conditionPair.getValue();
 
-				return m_dataChecker.checkData(currentData, currentBaseLine, conditions);
+				return dataChecker.checkData(currentData, currentBaseLine, conditions);
 			}
 		} catch (Exception e) {
 			LOGGER.error("Unable to process custom business alert item, key={}, minute={}, maxDuration={}, pattern={}.",
@@ -236,7 +251,7 @@ public class BusinessAlert implements Task {
 	}
 
 	private void processDomain(String domain) {
-		BusinessReportConfig businessReportConfig = m_configManager.queryConfigByDomain(domain);
+		BusinessReportConfig businessReportConfig = businessConfigManager.queryConfigByDomain(domain);
 		AlarmRule monitorConfigs = buildMonitorConfigs(domain, businessReportConfig);
 		int minute = calAlreadyMinute();
 		int maxDuration = monitorConfigs.calMaxRuleMinute();
@@ -244,7 +259,7 @@ public class BusinessAlert implements Task {
 		if (maxDuration > 0) {
 			LOGGER.info("Processing business alert domain, domain={}, minute={}, maxDuration={}.", domain, minute,
 					maxDuration);
-			BusinessReportGroup reportGroup = m_service.prepareDatas(domain, minute, maxDuration);
+			BusinessReportGroup reportGroup = businessReportGroupService.prepareDatas(domain, minute, maxDuration);
 
 			if (reportGroup.isDataReady()) {
 				Collection<BusinessItemConfig> configs = businessReportConfig.getBusinessItemConfigs().values();
@@ -266,7 +281,7 @@ public class BusinessAlert implements Task {
 					MetricType customType = MetricType.AVG;
 
 					if (alertConfig != null) {
-						String metricKey = m_keyHelper.generateKey(id, domain, customType.getName());
+						String metricKey = businessKeyHelper.generateKey(id, domain, customType.getName());
 						List<DataCheckEntity> results = processCustomItem(reportGroup, alertConfig.get(customType), minute,	metricKey,
 												customConfig, maxDuration);
 						sendBusinessAlerts(domain, customConfig.getId(), results);
@@ -278,15 +293,15 @@ public class BusinessAlert implements Task {
 
 	private List<DataCheckEntity> processMetricType(int minute, List<Config> configs, BusinessReportGroup reportGroup,
 							String metricKey, MetricType type) {
-		Pair<Integer, List<Condition>> conditionPair = m_baseRuleHelper.convertConditions(configs);
+		Pair<Integer, List<Condition>> conditionPair = baseRuleHelper.convertConditions(configs);
 
 		if (conditionPair != null) {
 			int ruleMinute = conditionPair.getKey();
-			double[] value = reportGroup.extractData(minute, ruleMinute, m_keyHelper.getBusinessItemId(metricKey), type);
-			double[] baseline = m_baselineService.queryBaseline(minute, ruleMinute, metricKey, BusinessAnalyzer.ID);
+			double[] value = reportGroup.extractData(minute, ruleMinute, businessKeyHelper.getBusinessItemId(metricKey), type);
+			double[] baseline = baselineService.queryBaseline(minute, ruleMinute, metricKey, BusinessAnalyzer.ID);
 			List<Condition> conditions = conditionPair.getValue();
 
-			return m_dataChecker.checkData(value, baseline, conditions);
+			return dataChecker.checkData(value, baseline, conditions);
 		} else {
 			return new ArrayList<DataCheckEntity>();
 		}
@@ -301,7 +316,7 @@ public class BusinessAlert implements Task {
 			long current = System.currentTimeMillis();
 
 			try {
-				Set<String> domains = m_projectService.findAllDomains();
+				Set<String> domains = projectService.findAllDomains();
 
 				LOGGER.info("Business alert cycle started, domainCount={}.", domains.size());
 				for (String domain : domains) {
@@ -342,7 +357,7 @@ public class BusinessAlert implements Task {
 									.setLevel(alertResult.getAlertLevel());
 			entity.setMetric(metricName).setType(getName()).setDomain(domain).setGroup(domain);
 			entity.setContactGroup(domain);
-			m_sendManager.addAlert(entity);
+			alertManager.addAlert(entity);
 		}
 		if (!alertResults.isEmpty()) {
 			LOGGER.info("Business alerts queued, domain={}, metric={}, alertCount={}.", domain, metricName,
@@ -355,47 +370,47 @@ public class BusinessAlert implements Task {
 	}
 
 	public void setAlertConfigManager(BusinessRuleConfigManager alertConfigManager) {
-		m_alertConfigManager = alertConfigManager;
+		businessRuleConfigManager = alertConfigManager;
 	}
 
 	public void setBaseRuleHelper(BaseRuleHelper baseRuleHelper) {
-		m_baseRuleHelper = baseRuleHelper;
+		this.baseRuleHelper = baseRuleHelper;
 	}
 
 	public void setBaselineService(BaselineService baselineService) {
-		m_baselineService = baselineService;
+		this.baselineService = baselineService;
 	}
 
 	public void setConfigManager(BusinessConfigManager configManager) {
-		m_configManager = configManager;
+		businessConfigManager = configManager;
 	}
 
 	public void setCustomDataCalculator(CustomDataCalculator customDataCalculator) {
-		m_customDataCalculator = customDataCalculator;
+		this.customDataCalculator = customDataCalculator;
 	}
 
 	public void setDataChecker(DataChecker dataChecker) {
-		m_dataChecker = dataChecker;
+		this.dataChecker = dataChecker;
 	}
 
 	public void setKeyHelper(BusinessKeyHelper keyHelper) {
-		m_keyHelper = keyHelper;
+		businessKeyHelper = keyHelper;
 	}
 
 	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	public void setSendManager(AlertManager sendManager) {
-		m_sendManager = sendManager;
+		alertManager = sendManager;
 	}
 
 	public void setService(BusinessReportGroupService service) {
-		m_service = service;
+		businessReportGroupService = service;
 	}
 
 	public void setTagConfigManager(BusinessTagConfigManager tagConfigManager) {
-		m_tagConfigManager = tagConfigManager;
+		businessTagConfigManager = tagConfigManager;
 	}
 
 }

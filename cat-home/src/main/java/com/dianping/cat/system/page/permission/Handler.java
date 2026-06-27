@@ -21,24 +21,31 @@ package com.dianping.cat.system.page.permission;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.system.SystemPage;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
 
+@Component("systemPermissionHandler")
 public class Handler implements PageHandler<Context> {
 
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private UserConfigManager m_userConfigManager;
+	@Resource
+	private UserConfigManager userConfigManager;
 
-	private ResourceConfigManager m_resourceConfigManager;
+	@Resource
+	private ResourceConfigManager resourceConfigManager;
 
-	private ConfigHtmlParser m_configHtmlParser;
+	@Resource
+	private ConfigHtmlParser configHtmlParser;
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -61,38 +68,22 @@ public class Handler implements PageHandler<Context> {
 		case USER:
 			String userConfig = payload.getContent();
 			if (!StringUtils.isEmpty(userConfig)) {
-				model.setOpState(m_userConfigManager.insert(userConfig));
+				model.setOpState(userConfigManager.insert(userConfig));
 			}
-			model.setContent(m_configHtmlParser.parse(m_userConfigManager.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(userConfigManager.getConfig().toString()));
 			break;
 		case RESOURCE:
 			String resourceConfig = payload.getContent();
 			if (!StringUtils.isEmpty(resourceConfig)) {
-				model.setOpState(m_resourceConfigManager.insert(resourceConfig));
+				model.setOpState(resourceConfigManager.insert(resourceConfig));
 			}
-			model.setContent(m_configHtmlParser.parse(m_resourceConfigManager.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(resourceConfigManager.getConfig().toString()));
 			break;
 		case ERROR:
 			break;
 		}
 		if (!ctx.isProcessStopped()) {
-			m_jspViewer.view(ctx, model);
+			jspViewer.view(ctx, model);
 		}
-	}
-
-	public void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
-		m_configHtmlParser = configHtmlParser;
-	}
-
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setResourceConfigManager(ResourceConfigManager resourceConfigManager) {
-		m_resourceConfigManager = resourceConfigManager;
-	}
-
-	public void setUserConfigManager(UserConfigManager userConfigManager) {
-		m_userConfigManager = userConfigManager;
 	}
 }

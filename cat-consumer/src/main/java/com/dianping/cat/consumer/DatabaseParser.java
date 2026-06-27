@@ -25,23 +25,25 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 
+@Component
 public class DatabaseParser {
 
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DatabaseParser.class);
 
-	private Set<String> m_errorConnections = new HashSet<String>();
+	private Set<String> errorConnections = new HashSet<String>();
 
-	private Map<String, Database> m_connections = new LinkedHashMap<String, Database>();
+	private Map<String, Database> connections = new LinkedHashMap<String, Database>();
 
 	public Database parseDatabase(String connection) {
-		Database database = m_connections.get(connection);
+		Database database = connections.get(connection);
 
-		if (database == null && StringUtils.isNotEmpty(connection) && !m_errorConnections.contains(connection)) {
+		if (database == null && StringUtils.isNotEmpty(connection) && !errorConnections.contains(connection)) {
 			try {
 				if (connection.contains("jdbc:mysql://")) {
 					String con = connection.split("jdbc:mysql://")[1];
@@ -58,7 +60,7 @@ public class DatabaseParser {
 					String name = con.substring(con.indexOf("/") + 1);
 					database = new Database(name, ip);
 
-					m_connections.put(connection, database);
+					connections.put(connection, database);
 				} else if (connection.contains("jdbc:oracle")) {
 					String[] tabs = connection.split(":");
 					String ip = "Default";
@@ -72,13 +74,14 @@ public class DatabaseParser {
 
 					database = new Database(name, ip);
 
-					m_connections.put(connection, database);
+					connections.put(connection, database);
 				} else {
-					m_errorConnections.add(connection);
+					errorConnections.add(connection);
 					logUnrecognizedConnection(connection);
 				}
 			} catch (Exception e) {
-				m_errorConnections.add(connection);
+				errorConnections.add(connection);
+				LOGGER.warn("Unable to parse jdbc connection string: {}", connection, e);
 				Cat.logError(connection, e);
 			}
 		}
@@ -86,10 +89,10 @@ public class DatabaseParser {
 	}
 
 	public void showErrorCon() {
-		if (!m_connections.isEmpty()) {
+		if (!connections.isEmpty()) {
 			Transaction t = Cat.newTransaction("Connection", "Error");
 
-			for (String con : m_errorConnections) {
+			for (String con : errorConnections) {
 				Cat.logEvent("Connection", "Error", Event.SUCCESS, con);
 			}
 			t.setStatus(Transaction.SUCCESS);

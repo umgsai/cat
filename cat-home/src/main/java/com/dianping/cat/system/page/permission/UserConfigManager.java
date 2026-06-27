@@ -18,9 +18,13 @@
  */
 package com.dianping.cat.system.page.permission;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -32,6 +36,7 @@ import com.dianping.cat.home.user.transform.DefaultSaxParser;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
+@Component
 public class UserConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserConfigManager.class);
 
@@ -39,34 +44,36 @@ public class UserConfigManager {
 
 	private static final String CONFIG_NAME = "user-config";
 
-	protected ConfigRepository m_configDao;
+	@Resource
+	protected ConfigRepository configRepository;
 
-	protected ContentFetcher m_fetcher;
+	@Resource
+	protected ContentFetcher contentFetcher;
 
-	private long m_configId;
+	private long configId;
 
-	private long m_modifyTime;
+	private long modifyTime;
 
-	private UserConfig m_config;
+	private UserConfig config;
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
 	public UserConfig getConfig() {
 		ensureInitialized();
 
-		return m_config;
+		return config;
 	}
 
 	public int getRole(String user) {
 		ensureInitialized();
 
-		User usr = m_config.findUser(user);
+		User usr = config.findUser(user);
 
 		if (usr != null) {
 			return usr.getRole();
@@ -75,28 +82,29 @@ public class UserConfigManager {
 		return DEFAULT_ROLE;
 	}
 
+	@PostConstruct
 	public void initialize() {
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME);
+			Config config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
-			m_configId = config.getId();
-			m_modifyTime = config.getModifyDate().getTime();
-			m_config = DefaultSaxParser.parse(content);
-			LOGGER.info("Loaded user config from repository, configId={}, modifyTime={}.", m_configId, m_modifyTime);
+			configId = config.getId();
+			modifyTime = config.getModifyDate().getTime();
+			this.config = DefaultSaxParser.parse(content);
+			LOGGER.info("Loaded user config from repository, configId={}, modifyTime={}.", configId, modifyTime);
 		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("User config is missing in repository, loading default content from fetcher.", e);
 
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
+				String content = contentFetcher.getConfigContent(CONFIG_NAME);
+				Config config = configRepository.createLocal();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(content);
-				m_configDao.insert(config);
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
-				LOGGER.info("Initialized user config from default content, configId={}.", m_configId);
+				configRepository.insert(config);
+				configId = config.getId();
+				this.config = DefaultSaxParser.parse(content);
+				LOGGER.info("Initialized user config from default content, configId={}.", configId);
 			} catch (Exception ex) {
 				LOGGER.error("Unable to initialize user config from default content.", ex);
 				Cat.logError(ex);
@@ -105,8 +113,8 @@ public class UserConfigManager {
 			LOGGER.error("Unable to load user config from repository.", e);
 			Cat.logError(e);
 		}
-		if (m_config == null) {
-			m_config = new UserConfig();
+		if (config == null) {
+			config = new UserConfig();
 			LOGGER.warn("User config is empty after initialization, using a new empty config.");
 		}
 
@@ -126,25 +134,25 @@ public class UserConfigManager {
 	}
 
 	private void refreshConfig() throws Exception {
-		Config config = m_configDao.findByName(CONFIG_NAME);
+		Config config = configRepository.findByName(CONFIG_NAME);
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
-			if (modifyTime > m_modifyTime) {
+			if (modifyTime > this.modifyTime) {
 				String content = config.getContent();
 				UserConfig userConfig = DefaultSaxParser.parse(content);
-				m_config = userConfig;
-				m_modifyTime = modifyTime;
-				LOGGER.info("Refreshed user config, configId={}, modifyTime={}, userCount={}.", m_configId,
-						m_modifyTime, m_config.getUsers().size());
+				this.config = userConfig;
+				this.modifyTime = modifyTime;
+				LOGGER.info("Refreshed user config, configId={}, modifyTime={}, userCount={}.", configId,
+						this.modifyTime, this.config.getUsers().size());
 			}
 		}
 	}
 
 	private void ensureInitialized() {
-		if (m_config == null) {
+		if (config == null) {
 			synchronized (this) {
-				if (m_config == null) {
+				if (config == null) {
 					LOGGER.warn("User config is not initialized yet, loading it lazily.");
 					initialize();
 				}
@@ -154,7 +162,7 @@ public class UserConfigManager {
 
 	public boolean insert(String xml) {
 		try {
-			m_config = DefaultSaxParser.parse(xml);
+			config = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
@@ -167,16 +175,16 @@ public class UserConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = m_configDao.createLocal();
+				Config config = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
+				config.setId(configId);
+				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
-				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config);
-				LOGGER.info("Stored user config, configId={}, userCount={}.", m_configId, m_config.getUsers().size());
+				config.setContent(this.config.toString());
+				configRepository.updateByPK(config);
+				LOGGER.info("Stored user config, configId={}, userCount={}.", configId, this.config.getUsers().size());
 			} catch (Exception e) {
-				LOGGER.error("Unable to store user config, configId={}.", m_configId, e);
+				LOGGER.error("Unable to store user config, configId={}.", configId, e);
 				Cat.logError(e);
 				return false;
 			}

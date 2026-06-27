@@ -334,6 +334,14 @@ public class SpringMvcConfigControllerTest {
 			return true;
 		}
 
+		@Override
+		public List<String> queryAlertMetrics() {
+			List<String> metrics = new ArrayList<String>();
+
+			metrics.add("System:Heap");
+			return metrics;
+		}
+
 		String getInserted() {
 			return m_inserted;
 		}

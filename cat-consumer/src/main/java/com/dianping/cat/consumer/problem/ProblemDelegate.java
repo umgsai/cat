@@ -18,6 +18,16 @@
  */
 package com.dianping.cat.consumer.problem;
 
+import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import jakarta.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
@@ -28,15 +38,15 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Map.Entry;
-
+@Component("problemDelegate")
 public class ProblemDelegate implements ReportDelegate<ProblemReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProblemDelegate.class);
 
-	private TaskManager m_taskManager;
+	@Resource
+	private TaskManager taskManager;
 
-	private ServerFilterConfigManager m_configManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	@Override
 	public void afterLoad(Map<String, ProblemReport> reports) {
@@ -53,6 +63,8 @@ public class ProblemDelegate implements ReportDelegate<ProblemReport> {
 				problemReportURLFilter.visitProblemReport(report);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to filter problem reports before saving, reportCount={}.",
+					reports == null ? 0 : reports.size(), e);
 			Cat.logError(e);
 		}
 	}
@@ -71,8 +83,8 @@ public class ProblemDelegate implements ReportDelegate<ProblemReport> {
 	public boolean createHourlyTask(ProblemReport report) {
 		String domain = report.getDomain();
 
-		if (m_configManager.validateDomain(domain)) {
-			return m_taskManager.createTask(report.getStartTime(), domain, ProblemAnalyzer.ID,	TaskProlicy.ALL_EXCLUED_HOURLY);
+		if (serverFilterConfigManager.validateDomain(domain)) {
+			return taskManager.createTask(report.getStartTime(), domain, ProblemAnalyzer.ID,	TaskProlicy.ALL_EXCLUED_HOURLY);
 		} else {
 			return true;
 		}
@@ -112,10 +124,10 @@ public class ProblemDelegate implements ReportDelegate<ProblemReport> {
 	}
 
 	public void setTaskManager(TaskManager taskManager) {
-		m_taskManager = taskManager;
+		this.taskManager = taskManager;
 	}
 
 	public void setConfigManager(ServerFilterConfigManager configManager) {
-		m_configManager = configManager;
+		serverFilterConfigManager = configManager;
 	}
 }

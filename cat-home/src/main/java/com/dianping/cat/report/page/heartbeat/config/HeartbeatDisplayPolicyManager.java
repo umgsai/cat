@@ -18,7 +18,13 @@
  */
 package com.dianping.cat.report.page.heartbeat.config;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,69 +43,77 @@ import com.dianping.cat.home.heartbeat.entity.HeartbeatDisplayPolicy;
 import com.dianping.cat.home.heartbeat.entity.Metric;
 import com.dianping.cat.home.heartbeat.transform.DefaultSaxParser;
 
+@Component
 public class HeartbeatDisplayPolicyManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatDisplayPolicyManager.class);
 
 	private static final int K = 1024;
 
 	private static final String CONFIG_NAME = "heartbeat-display-policy";
 
-	private ConfigRepository m_configDao;
+	@Resource
+	private ConfigRepository configRepository;
 
-	private ContentFetcher m_fetcher;
+	@Resource
+	private ContentFetcher contentFetcher;
 
-	private long m_configId;
+	private long configId;
 
-	private HeartbeatDisplayPolicy m_config;
+	private HeartbeatDisplayPolicy config;
 
 	public HeartbeatDisplayPolicy getHeartbeatDisplayPolicy() {
 		ensureInitialized();
 
-		return m_config;
+		return config;
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
+	@PostConstruct
 	public void initialize() {
 		try {
-			Config config = m_configDao.findByName(CONFIG_NAME);
-			String content = config.getContent();
+			Config configDO = configRepository.findByName(CONFIG_NAME);
+			String content = configDO.getContent();
 
-			m_configId = config.getId();
-			m_config = DefaultSaxParser.parse(content);
+			configId = configDO.getId();
+			config = DefaultSaxParser.parse(content);
 		} catch (EmptyResultDataAccessException e) {
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
+				String content = contentFetcher.getConfigContent(CONFIG_NAME);
+				Config configDO = configRepository.createLocal();
 
-				config.setName(CONFIG_NAME);
-				config.setContent(content);
-				m_configDao.insert(config);
+				configDO.setName(CONFIG_NAME);
+				configDO.setContent(content);
+				configRepository.insert(configDO);
 
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
+				configId = configDO.getId();
+				config = DefaultSaxParser.parse(content);
 			} catch (Exception ex) {
+				LOGGER.error("Unable to create default heartbeat display policy, configName={}.", CONFIG_NAME, ex);
 				Cat.logError(ex);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Unable to initialize heartbeat display policy, configName={}.", CONFIG_NAME, e);
 			Cat.logError(e);
 		}
-		if (m_config == null) {
-			m_config = new HeartbeatDisplayPolicy();
+		if (config == null) {
+			config = new HeartbeatDisplayPolicy();
 		}
 	}
 
 	public boolean insert(String xml) {
 		try {
-			m_config = DefaultSaxParser.parse(xml);
+			config = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
+			LOGGER.error("Unable to insert heartbeat display policy, xmlLength={}.", xml == null ? 0 : xml.length(), e);
 			Cat.logError(e);
 			return false;
 		}
@@ -108,7 +122,7 @@ public class HeartbeatDisplayPolicyManager {
 	public boolean isDelta(String groupName, String metricName) {
 		ensureInitialized();
 
-		Group group = m_config.findGroup(groupName);
+		Group group = config.findGroup(groupName);
 
 		if (group != null) {
 			Metric metric = group.findMetric(metricName);
@@ -123,7 +137,7 @@ public class HeartbeatDisplayPolicyManager {
 	public Metric queryMetric(String groupName, String metricName) {
 		ensureInitialized();
 
-		Group group = m_config.findGroup(groupName);
+		Group group = config.findGroup(groupName);
 
 		if (group != null) {
 			Metric metric = group.findMetric(metricName);
@@ -140,7 +154,7 @@ public class HeartbeatDisplayPolicyManager {
 
 		List<String> metrics = new ArrayList<String>();
 
-		for (Group group : m_config.getGroups().values()) {
+		for (Group group : config.getGroups().values()) {
 			String groupId = group.getId();
 
 			for (Metric metric : group.getMetrics().values()) {
@@ -155,7 +169,7 @@ public class HeartbeatDisplayPolicyManager {
 	public int queryUnit(String groupName, String metricName) {
 		ensureInitialized();
 
-		Group group = m_config.findGroup(groupName);
+		Group group = config.findGroup(groupName);
 
 		if (group != null) {
 			Metric metric = group.findMetric(metricName);
@@ -182,7 +196,7 @@ public class HeartbeatDisplayPolicyManager {
 
 		List<Group> groups = new ArrayList<Group>();
 
-		for (Entry<String, Group> entry : m_config.getGroups().entrySet()) {
+		for (Entry<String, Group> entry : config.getGroups().entrySet()) {
 			if (originGroupNames.contains(entry.getKey())) {
 				groups.add(entry.getValue());
 			}
@@ -214,7 +228,7 @@ public class HeartbeatDisplayPolicyManager {
 	public List<String> sortMetricNames(String groupName, List<String> originMetricNames) {
 		ensureInitialized();
 
-		Group group = m_config.findGroup(groupName);
+		Group group = config.findGroup(groupName);
 		List<String> result = new ArrayList<String>();
 
 		if (group != null) {
@@ -249,9 +263,9 @@ public class HeartbeatDisplayPolicyManager {
 	}
 
 	private void ensureInitialized() {
-		if (m_config == null) {
+		if (config == null) {
 			synchronized (this) {
-				if (m_config == null) {
+				if (config == null) {
 					initialize();
 				}
 			}
@@ -263,14 +277,16 @@ public class HeartbeatDisplayPolicyManager {
 			ensureInitialized();
 
 			try {
-				Config config = m_configDao.createLocal();
+				Config configDO = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
-				config.setName(CONFIG_NAME);
-				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config);
+				configDO.setId(configId);
+				configDO.setKeyId(configId);
+				configDO.setName(CONFIG_NAME);
+				configDO.setContent(config.toString());
+				configRepository.updateByPK(configDO);
 			} catch (Exception e) {
+				LOGGER.error("Unable to store heartbeat display policy, configName={}, configId={}.", CONFIG_NAME,
+				      configId, e);
 				Cat.logError(e);
 				return false;
 			}

@@ -18,6 +18,9 @@
  */
 package com.dianping.cat.system.page.router.config;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.content.ContentFetcher;
@@ -38,12 +41,14 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
+@Component
 public class RouterConfigManager {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RouterConfigManager.class);
 
@@ -51,25 +56,29 @@ public class RouterConfigManager {
 
 	private static final String CONFIG_NAME = "routerConfig";
 
-	private ConfigRepository m_configDao;
+	@Resource
+	private ConfigRepository configRepository;
 
-	private ContentFetcher m_fetcher;
+	@Resource
+	private ContentFetcher contentFetcher;
 
-	private DailyReportRepository m_dailyReportDao;
+	@Resource
+	private DailyReportRepository dailyReportRepository;
 
-	private DailyReportContentRepository m_dailyReportContentDao;
+	@Resource
+	private DailyReportContentRepository dailyReportContentRepository;
 
-	private long m_configId;
+	private long configId;
 
-	private volatile RouterConfig m_routerConfig;
+	private volatile RouterConfig routerConfig;
 
-	private long m_modifyTime;
+	private long modifyTime;
 
-	private Map<String, List<SubnetInfo>> m_subNetInfos = new HashMap<String, List<SubnetInfo>>();
+	private Map<String, List<SubnetInfo>> subNetInfos = new HashMap<String, List<SubnetInfo>>();
 
-	private Map<String, String> m_ipToGroupInfo = new HashMap<String, String>();
+	private Map<String, String> ipToGroupInfo = new HashMap<String, String>();
 
-	private Map<Long, Pair<RouterConfig, Long>> m_routerConfigs = new LinkedHashMap<Long, Pair<RouterConfig, Long>>() {
+	private Map<Long, Pair<RouterConfig, Long>> routerConfigs = new LinkedHashMap<Long, Pair<RouterConfig, Long>>() {
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -78,7 +87,7 @@ public class RouterConfigManager {
 		}
 	};
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	private void addServerList(List<Server> servers, Server server) {
 		for (Server s : servers) {
@@ -91,65 +100,66 @@ public class RouterConfigManager {
 
 	public RouterConfig getRouterConfig() {
 		ensureInitialized();
-		return m_routerConfig;
+		return routerConfig;
 	}
 
 	public Map<Long, Pair<RouterConfig, Long>> getRouterConfigs() {
 		ensureInitialized();
-		return m_routerConfigs;
+		return routerConfigs;
 	}
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setDailyReportContentDao(DailyReportContentRepository dailyReportContentDao) {
-		m_dailyReportContentDao = dailyReportContentDao;
+		dailyReportContentRepository = dailyReportContentDao;
 	}
 
 	public void setDailyReportDao(DailyReportRepository dailyReportDao) {
-		m_dailyReportDao = dailyReportDao;
+		dailyReportRepository = dailyReportDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
 		try {
 			SLF4J_LOGGER.info("Initializing router config manager, configName={}.", CONFIG_NAME);
-			Config config = m_configDao.findByName(CONFIG_NAME);
+			Config config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
-			m_configId = config.getId();
-			m_routerConfig = DefaultSaxParser.parse(content);
-			m_modifyTime = config.getModifyDate().getTime();
+			configId = config.getId();
+			routerConfig = DefaultSaxParser.parse(content);
+			modifyTime = config.getModifyDate().getTime();
 		} catch (EmptyResultDataAccessException e) {
 			SLF4J_LOGGER.warn("Router config not found in repository, loading default content, configName={}.",
 			      CONFIG_NAME);
 			try {
-				String content = m_fetcher.getConfigContent(CONFIG_NAME);
-				Config config = m_configDao.createLocal();
+				String content = contentFetcher.getConfigContent(CONFIG_NAME);
+				Config config = configRepository.createLocal();
 				Date now = new Date();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(content);
 				config.setModifyDate(now);
-				m_configDao.insert(config);
+				configRepository.insert(config);
 
-				m_configId = config.getId();
-				m_routerConfig = DefaultSaxParser.parse(content);
-				m_modifyTime = now.getTime();
+				configId = config.getId();
+				routerConfig = DefaultSaxParser.parse(content);
+				modifyTime = now.getTime();
 			} catch (Exception ex) {
 				SLF4J_LOGGER.error("Unable to create default router config, configName={}.", CONFIG_NAME, ex);
 				Cat.logError(ex);
@@ -158,9 +168,9 @@ public class RouterConfigManager {
 			SLF4J_LOGGER.error("Unable to initialize router config, configName={}.", CONFIG_NAME, e);
 			Cat.logError(e);
 		}
-		if (m_routerConfig == null) {
+		if (routerConfig == null) {
 			SLF4J_LOGGER.warn("Router config is empty after initialization, using an empty config.");
-			m_routerConfig = new RouterConfig();
+			routerConfig = new RouterConfig();
 		}
 
 		refreshNetInfo();
@@ -178,7 +188,7 @@ public class RouterConfigManager {
 				refreshReportInfo();
 			}
 		});
-		m_initialized = true;
+		initialized = true;
 	}
 
 	public boolean insert(String xml) {
@@ -188,7 +198,7 @@ public class RouterConfigManager {
 			RouterConfig routerConfig = DefaultSaxParser.parse(xml);
 
 			if (validate(routerConfig)) {
-				m_routerConfig = routerConfig;
+				this.routerConfig = routerConfig;
 				boolean result = storeConfig();
 
 				if (result) {
@@ -217,7 +227,7 @@ public class RouterConfigManager {
 	public boolean notCustomizedDomains(String group, String domain) {
 		ensureInitialized();
 
-		Domain domainConfig = m_routerConfig.findDomain(domain);
+		Domain domainConfig = routerConfig.findDomain(domain);
 
 		return notCustomizedDomains(group, domainConfig);
 	}
@@ -225,13 +235,13 @@ public class RouterConfigManager {
 	public Server queryBackUpServer() {
 		ensureInitialized();
 
-		return new Server().setId(m_routerConfig.getBackupServer()).setPort(m_routerConfig.getBackupServerPort());
+		return new Server().setId(routerConfig.getBackupServer()).setPort(routerConfig.getBackupServerPort());
 	}
 
 	public Map<String, Server> queryEnableServers() {
 		ensureInitialized();
 
-		return queryEnableServers(m_routerConfig);
+		return queryEnableServers(routerConfig);
 	}
 
 	private Map<String, Server> queryEnableServers(RouterConfig routerConfig) {
@@ -250,7 +260,7 @@ public class RouterConfigManager {
 	}
 
 	private String queryGroupBySubnet(String ip) {
-		for (Entry<String, List<SubnetInfo>> entry : m_subNetInfos.entrySet()) {
+		for (Entry<String, List<SubnetInfo>> entry : subNetInfos.entrySet()) {
 			List<SubnetInfo> subnetInfos = entry.getValue();
 			String group = entry.getKey();
 
@@ -270,7 +280,7 @@ public class RouterConfigManager {
 	public DefaultServer queryServerByIp(String ip) {
 		ensureInitialized();
 
-		DefaultServer server = m_routerConfig.getDefaultServers().get(ip);
+		DefaultServer server = routerConfig.getDefaultServers().get(ip);
 
 		if (server != null) {
 			return server;
@@ -281,7 +291,7 @@ public class RouterConfigManager {
 	public String queryServerGroupByIp(String ip) {
 		ensureInitialized();
 
-		String group = m_ipToGroupInfo.get(ip);
+		String group = ipToGroupInfo.get(ip);
 
 		if (group == null) {
 			group = queryGroupBySubnet(ip);
@@ -290,7 +300,7 @@ public class RouterConfigManager {
 				group = DEFAULT;
 			}
 
-			m_ipToGroupInfo.put(ip, group);
+			ipToGroupInfo.put(ip, group);
 		}
 		return group;
 	}
@@ -298,14 +308,14 @@ public class RouterConfigManager {
 	public List<Server> queryServersByDomain(String group, String domain) {
 		ensureInitialized();
 
-		Domain domainConfig = m_routerConfig.findDomain(domain);
+		Domain domainConfig = routerConfig.findDomain(domain);
 		List<Server> result = new ArrayList<Server>();
 		boolean noExist = notCustomizedDomains(group, domainConfig);
 
 		if (noExist) {
 			List<Server> servers = new ArrayList<Server>();
 			Map<String, Server> enables = queryEnableServers();
-			ServerGroup serverGroup = m_routerConfig.getServerGroups().get(group);
+			ServerGroup serverGroup = routerConfig.getServerGroups().get(group);
 
 			if (serverGroup != null) {
 				for (GroupServer s : serverGroup.getGroupServers().values()) {
@@ -336,15 +346,15 @@ public class RouterConfigManager {
 	}
 
 	private void refreshConfigInfo() throws SAXException, IOException {
-		Config config = m_configDao.findByName(CONFIG_NAME);
+		Config config = configRepository.findByName(CONFIG_NAME);
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
-			if (modifyTime > m_modifyTime) {
+			if (modifyTime > this.modifyTime) {
 				String content = config.getContent();
 
-				m_routerConfig = DefaultSaxParser.parse(content);
-				m_modifyTime = modifyTime;
+				routerConfig = DefaultSaxParser.parse(content);
+				this.modifyTime = modifyTime;
 				refreshNetInfo();
 				SLF4J_LOGGER.info("Refreshed router config, configName={}, modifyTime={}.", CONFIG_NAME, modifyTime);
 			}
@@ -354,7 +364,7 @@ public class RouterConfigManager {
 	private void refreshNetInfo() {
 		Map<String, List<SubnetInfo>> subNetInfos = new HashMap<String, List<SubnetInfo>>();
 
-		for (Entry<String, NetworkPolicy> netPolicy : m_routerConfig.getNetworkPolicies().entrySet()) {
+		for (Entry<String, NetworkPolicy> netPolicy : routerConfig.getNetworkPolicies().entrySet()) {
 			ArrayList<SubnetInfo> infos = new ArrayList<SubnetInfo>();
 
 			if (!DEFAULT.equals(netPolicy.getKey())) {
@@ -374,8 +384,8 @@ public class RouterConfigManager {
 			}
 		}
 
-		m_subNetInfos = subNetInfos;
-		m_ipToGroupInfo = new HashMap<String, String>();
+		this.subNetInfos = subNetInfos;
+		ipToGroupInfo = new HashMap<String, String>();
 	}
 
 	private void refreshReportInfo() throws Exception {
@@ -383,16 +393,16 @@ public class RouterConfigManager {
 		long time = period.getTime();
 
 		try {
-			DailyReport report = m_dailyReportDao.findByDomainNamePeriod(Constants.CAT, RouterConfigBuilder.ID, period);
+			DailyReport report = dailyReportRepository.findByDomainNamePeriod(Constants.CAT, RouterConfigBuilder.ID, period);
 			long modifyTime = report.getCreationDate().getTime();
-			Pair<RouterConfig, Long> pair = m_routerConfigs.get(time);
+			Pair<RouterConfig, Long> pair = routerConfigs.get(time);
 
 			if (pair == null || modifyTime > pair.getValue()) {
 				try {
-					DailyReportContent reportContent = m_dailyReportContentDao.findByPK(report.getId());
+					DailyReportContent reportContent = dailyReportContentRepository.findByPK(report.getId());
 					RouterConfig routerConfig = DefaultNativeParser.parse(reportContent.getContent());
 
-					m_routerConfigs.put(time, Pair.of(routerConfig, modifyTime));
+					routerConfigs.put(time, Pair.of(routerConfig, modifyTime));
 					Cat.logEvent("ReloadConfig", "router");
 				} catch (EmptyResultDataAccessException ignored) {
 					SLF4J_LOGGER.warn("Router report content not found while refreshing report cache, reportId={}.",
@@ -408,7 +418,7 @@ public class RouterConfigManager {
 		ensureInitialized();
 
 		String group = queryServerGroupByIp(ip);
-		NetworkPolicy networkPolicy = m_routerConfig.findNetworkPolicy(group);
+		NetworkPolicy networkPolicy = routerConfig.findNetworkPolicy(group);
 
 		if (networkPolicy != null) {
 			return networkPolicy.isBlock();
@@ -420,16 +430,16 @@ public class RouterConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = m_configDao.createLocal();
+				Config config = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
+				config.setId(configId);
+				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
-				config.setContent(m_routerConfig.toString());
-				m_configDao.updateByPK(config);
+				config.setContent(routerConfig.toString());
+				configRepository.updateByPK(config);
 			} catch (Exception e) {
 				SLF4J_LOGGER.error("Unable to store router config, configName={}, configId={}.", CONFIG_NAME,
-				      m_configId, e);
+				      configId, e);
 				Cat.logError(e);
 				return false;
 			}

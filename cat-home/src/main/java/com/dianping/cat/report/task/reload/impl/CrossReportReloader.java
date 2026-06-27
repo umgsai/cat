@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.cross.CrossAnalyzer;
 import com.dianping.cat.consumer.cross.CrossReportMerger;
@@ -35,9 +39,11 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
 
+@Component("crossReportReloader")
 public class CrossReportReloader extends AbstractReportReloader {
 
-	protected ReportManager<CrossReport> m_reportManager;
+	@Resource(name = CrossAnalyzer.ID + "ReportManager")
+	protected ReportManager<CrossReport> crossReportManager;
 
 	private List<CrossReport> buildMergedReports(Map<String, List<CrossReport>> mergedReports) {
 		List<CrossReport> results = new ArrayList<CrossReport>();
@@ -70,7 +76,7 @@ public class CrossReportReloader extends AbstractReportReloader {
 		Map<String, List<CrossReport>> mergedReports = new HashMap<String, List<CrossReport>>();
 
 		for (int i = 0; i < getAnalyzerCount(); i++) {
-			Map<String, CrossReport> reports = m_reportManager.loadLocalReports(time, i);
+			Map<String, CrossReport> reports = crossReportManager.loadLocalReports(time, i);
 
 			for (Entry<String, CrossReport> entry : reports.entrySet()) {
 				String domain = entry.getKey();
@@ -107,6 +113,6 @@ public class CrossReportReloader extends AbstractReportReloader {
 	}
 
 	public void setReportManager(ReportManager<CrossReport> reportManager) {
-		m_reportManager = reportManager;
+		crossReportManager = reportManager;
 	}
 }

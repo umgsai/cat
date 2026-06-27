@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.consumer.heartbeat.model.entity.Extension;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.heartbeat.model.entity.Machine;
@@ -36,17 +39,20 @@ import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 
+@Component("heartbeatHistoryGraphs")
 public class HistoryGraphs {
 
 	public static final int K = 1024;
 
 	private static final int MINUTE_ONE_DAY = 1440;
 
-	private HeartbeatReportService m_reportService;
+	@Resource
+	private HeartbeatReportService heartbeatReportService;
 
-	private HeartbeatDisplayPolicyManager m_manager;
+	@Resource
+	private HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager;
 
-	private Set<String> m_extensionMetrics = new HashSet<String>();
+	private Set<String> extensionMetrics = new HashSet<String>();
 
 	private void addMachineDataToMap(Map<String, double[]> datas, Machine machine) {
 		for (Period period : machine.getPeriods()) {
@@ -58,7 +64,7 @@ public class HistoryGraphs {
 	}
 
 	private Map<String, double[]> buildHeartbeatDatas(HeartbeatReport report, String ip) {
-		m_extensionMetrics = new HashSet<String>();
+		extensionMetrics = new HashSet<String>();
 		Map<String, double[]> datas = new HashMap<String, double[]>();
 		Machine machine = report.findMachine(ip);
 
@@ -75,7 +81,7 @@ public class HistoryGraphs {
 		convertToDeltaArrayPerHour(datas, "OldGcCount");
 		convertToDeltaArrayPerHour(datas, "CatMessageSize");
 		convertToDeltaArrayPerHour(datas, "CatMessageOverflow");
-		for (String metric : m_extensionMetrics) {
+		for (String metric : extensionMetrics) {
 			convertToDeltaArrayPerHour(datas, metric);
 		}
 	}
@@ -104,9 +110,9 @@ public class HistoryGraphs {
 			Extension currentExtension = period.findExtension(group);
 
 			for (String metric : currentExtension.getDetails().keySet()) {
-				m_extensionMetrics.add(metric);
+				extensionMetrics.add(metric);
 				double value = currentExtension.findDetail(metric).getValue();
-				int unit = m_manager.queryUnit(group, metric);
+				int unit = heartbeatDisplayPolicyManager.queryUnit(group, metric);
 				double actualValue = value / unit;
 
 				updateMetricArray(datas, minute, metric, actualValue);
@@ -156,23 +162,15 @@ public class HistoryGraphs {
 		Date start = payload.getHistoryStartDate();
 		Date end = payload.getHistoryEndDate();
 		int size = (int) ((end.getTime() - start.getTime()) / TimeHelper.ONE_HOUR * 60);
-		HeartbeatReport report = m_reportService.queryReport(payload.getDomain(), start, end);
+		HeartbeatReport report = heartbeatReportService.queryReport(payload.getDomain(), start, end);
 		Map<String, double[]> graphData = buildHeartbeatDatas(report, payload.getIpAddress());
 
 		String groupName = payload.getExtensionType();
-		List<String> metrics = m_manager.sortMetricNames(groupName, queryMetricNames(report, groupName));
+		List<String> metrics = heartbeatDisplayPolicyManager.sortMetricNames(groupName, queryMetricNames(report, groupName));
 		List<LineChart> graphs = getExtensionGraphs(metrics, graphData, start, size);
 
 		model.setExtensionCount(metrics.size());
 		model.setExtensionHistoryGraphs(new JsonBuilder().toJson(graphs));
-	}
-
-	public void setManager(HeartbeatDisplayPolicyManager manager) {
-		m_manager = manager;
-	}
-
-	public void setReportService(HeartbeatReportService reportService) {
-		m_reportService = reportService;
 	}
 
 	private void updateMetricArray(Map<String, double[]> datas, int minute, String metricName, double value) {

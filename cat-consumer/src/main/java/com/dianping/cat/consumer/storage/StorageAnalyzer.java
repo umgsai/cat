@@ -20,6 +20,7 @@ package com.dianping.cat.consumer.storage;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +61,9 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 	@Resource(name = "storageReportUpdater")
 	private StorageReportUpdater storageReportUpdater;
 
-	@Resource(name = "storageBuilders")
+	@Resource
+	private List<StorageBuilder> storageBuilderList = Collections.emptyList();
+
 	private Map<String, StorageBuilder> storageBuilders;
 
 	private volatile boolean initialized;
@@ -117,12 +120,42 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 		}
 	}
 
+	private Map<String, StorageBuilder> buildStorageBuilders(List<StorageBuilder> builders) {
+		Map<String, StorageBuilder> result = new LinkedHashMap<String, StorageBuilder>();
+
+		if (builders == null || builders.isEmpty()) {
+			return result;
+		}
+		for (StorageBuilder builder : builders) {
+			if (builder == null) {
+				continue;
+			}
+			String type = builder.getType();
+
+			if (type == null || type.length() == 0) {
+				LOGGER.warn("Ignore storage builder without type, builderClass={}.", builder.getClass().getName());
+				continue;
+			}
+			StorageBuilder previous = result.put(type, builder);
+
+			if (previous != null) {
+				LOGGER.warn("Duplicate storage builder type detected, type={}, previousClass={}, currentClass={}.", type,
+				      previous.getClass().getName(), builder.getClass().getName());
+			}
+		}
+		return result;
+	}
+
 	public synchronized void initialize() {
 		if (initialized) {
 			return;
 		}
 		if (storageBuilders == null) {
-			storageBuilders = Collections.emptyMap();
+			storageBuilders = buildStorageBuilders(storageBuilderList);
+		} else {
+			storageBuilders = new LinkedHashMap<String, StorageBuilder>(storageBuilders);
+		}
+		if (storageBuilders.isEmpty()) {
 			LOGGER.warn("Storage analyzer has no configured builders, keep empty builder map.");
 		}
 		initialized = true;

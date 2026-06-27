@@ -22,8 +22,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import com.dianping.cat.support.Threads;
 
 import com.dianping.cat.Cat;
@@ -33,14 +36,17 @@ import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.service.ProjectService;
 
+@Component(CurrentReportBuilder.ID)
 public class CurrentReportBuilder implements TaskBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CurrentReportBuilder.class);
 
 	public static final String ID = Constants.CURRENT_REPORT;
 
-	private ProjectService m_projectService;
+	@Resource
+	private ProjectService projectService;
 
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
@@ -49,11 +55,11 @@ public class CurrentReportBuilder implements TaskBuilder {
 		CurrentWeeklyMonthlyReportTask reportTask = CurrentWeeklyMonthlyReportTask.getInstance();
 
 		try {
-			List<Project> projects = m_projectService.findAll();
+			List<Project> projects = projectService.findAll();
 			List<String> domains = new ArrayList<String>();
 
 			for (Project project : projects) {
-				if (m_serverFilterConfigManager.validateDomain(project.getDomain())) {
+				if (serverFilterConfigManager.validateDomain(project.getDomain())) {
 					domains.add(project.getDomain());
 				}
 			}
@@ -85,10 +91,10 @@ public class CurrentReportBuilder implements TaskBuilder {
 	}
 
 	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
+		this.serverFilterConfigManager = serverFilterConfigManager;
 	}
 }

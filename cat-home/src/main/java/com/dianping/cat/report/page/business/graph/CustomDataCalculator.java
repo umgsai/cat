@@ -26,11 +26,18 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlExpression;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.report.page.business.task.BusinessKeyHelper;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class CustomDataCalculator {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CustomDataCalculator.class);
 
 	private static final String START = "${";
 
@@ -40,11 +47,8 @@ public class CustomDataCalculator {
 
 	private final JexlEngine jexl = new JexlBuilder().cache(512).strict(true).silent(false).create();
 
-	private BusinessKeyHelper m_keyHelper;
-
-	public void setKeyHelper(BusinessKeyHelper keyHelper) {
-		m_keyHelper = keyHelper;
-	}
+	@Resource
+	private BusinessKeyHelper businessKeyHelper;
 
 	public List<CustomInfo> translatePattern(String pattern) {
 		List<CustomInfo> infos = new ArrayList<CustomInfo>();
@@ -60,13 +64,13 @@ public class CustomDataCalculator {
 			if (start >= 0 && end > 0 && start < end) {
 				CustomInfo customInfo = new CustomInfo();
 
-				String subStr = pattern.substring(start + 2, end);
-				String[] strs = subStr.split(SPLITTER);
+				String subPattern = pattern.substring(start + 2, end);
+				String[] parts = subPattern.split(SPLITTER);
 
-				if (strs != null && strs.length == 3) {
-					customInfo.setDomain(strs[0].trim());
-					customInfo.setKey(strs[1].trim());
-					customInfo.setType(strs[2].trim().toUpperCase());
+				if (parts.length == 3) {
+					customInfo.setDomain(parts[0].trim());
+					customInfo.setKey(parts[1].trim());
+					customInfo.setType(parts[2].trim().toUpperCase());
 					customInfo.setPattern(pattern.substring(start, end + 1));
 
 					infos.add(customInfo);
@@ -97,7 +101,8 @@ public class CustomDataCalculator {
 
 				for (CustomInfo customInfo : customInfos) {
 					String customPattern = customInfo.getPattern();
-					String itemId = m_keyHelper.generateKey(customInfo.getKey(), customInfo.getDomain(),	customInfo.getType());
+					String itemId = businessKeyHelper.generateKey(customInfo.getKey(), customInfo.getDomain(),
+							customInfo.getType());
 					double[] sourceData = businessItemData.get(itemId);
 
 					if (sourceData != null) {
@@ -107,8 +112,9 @@ public class CustomDataCalculator {
 
 				result[i] = calculate(expression);
 			} catch (JexlException ex) {
-				// Ignore
+				LOGGER.debug("Unable to calculate business custom expression, index={}, pattern={}.", i, pattern, ex);
 			} catch (Exception e) {
+				LOGGER.warn("Unable to calculate business custom data, index={}, pattern={}.", i, pattern, e);
 				Cat.logError(e);
 			}
 		}

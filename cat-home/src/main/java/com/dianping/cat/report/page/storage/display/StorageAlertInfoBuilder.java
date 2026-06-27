@@ -26,6 +26,11 @@ import java.util.Map;
 
 import com.google.common.base.Splitter;
 
+import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.Alert;
 import com.dianping.cat.alarm.service.AlertService;
@@ -39,11 +44,15 @@ import com.dianping.cat.home.storage.alert.entity.StorageAlertInfo;
 import com.dianping.cat.home.storage.alert.entity.Target;
 import com.dianping.cat.report.page.storage.StorageConstants;
 
+@Component
 public class StorageAlertInfoBuilder {
 
-	private AlertService m_alertService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(StorageAlertInfoBuilder.class);
 
-	private SimpleDateFormat m_sdf = new SimpleDateFormat("HH:mm");
+	@Resource
+	private AlertService alertService;
+
+	private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
 	public int buildLevel(int level, int other) {
 		return level > other ? level : other;
@@ -57,12 +66,17 @@ public class StorageAlertInfoBuilder {
 			long time = alert.getAlertTime().getTime();
 			long current = time - time % TimeHelper.ONE_MINUTE - TimeHelper.ONE_MINUTE;
 			Date date = new Date(current);
-			StorageAlertInfo alertInfo = results.get(m_sdf.format(date));
+			StorageAlertInfo alertInfo = results.get(dateFormat.format(date));
 
 			if (alertInfo != null) {
 				parseAlertEntity(alert, alertInfo);
 			} else {
-				Cat.logError(new RuntimeException("Error date in alert: " + alert.toString() + ", alert date: " + date));
+				RuntimeException exception =
+				      new RuntimeException("Error date in alert: " + alert.toString() + ", alert date: " + date);
+
+				LOGGER.warn("Storage alert date is outside prepared range, alert={}, alertDate={}, start={}, end={}, type={}",
+				      alert, date, start, end, type, exception);
+				Cat.logError(exception);
 			}
 		}
 		return results;
@@ -106,7 +120,7 @@ public class StorageAlertInfoBuilder {
 		Map<String, StorageAlertInfo> results = new LinkedHashMap<String, StorageAlertInfo>();
 
 		for (long s = start; s <= end; s += TimeHelper.ONE_MINUTE) {
-			String title = m_sdf.format(new Date(s));
+			String title = dateFormat.format(new Date(s));
 			StorageAlertInfo blankAlertInfo = makeAlertInfo(type, new Date(start));
 
 			results.put(title, blankAlertInfo);
@@ -126,7 +140,4 @@ public class StorageAlertInfoBuilder {
 		}
 	}
 
-	public void setAlertService(AlertService alertService) {
-		m_alertService = alertService;
-	}
 }

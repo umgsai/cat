@@ -18,6 +18,7 @@
  */
 package com.dianping.cat.report.page.top.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.dianping.cat.consumer.top.TopAnalyzer;
@@ -27,10 +28,27 @@ import com.dianping.cat.report.service.BaseCompositeModelService;
 import com.dianping.cat.report.service.BaseRemoteModelService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
+import com.dianping.cat.report.service.ModelService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("topModelService")
 public class CompositeTopService extends BaseCompositeModelService<TopReport> {
+	@Resource(name = "top-historical")
+	private ModelService<TopReport> historicalTopService;
+
 	public CompositeTopService() {
 		super(TopAnalyzer.ID);
+	}
+
+	@Override
+	@PostConstruct
+	public synchronized void initialize() {
+		if (historicalTopService != null) {
+			setServices(Collections.singletonList(historicalTopService));
+		}
+		super.initialize();
 	}
 
 	@Override

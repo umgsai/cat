@@ -18,6 +18,13 @@
  */
 package com.dianping.cat.consumer.heartbeat;
 
+import java.util.Date;
+import java.util.Map;
+
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.heartbeat.model.transform.DefaultNativeBuilder;
@@ -27,14 +34,14 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
-import java.util.Date;
-import java.util.Map;
-
+@Component("heartbeatDelegate")
 public class HeartbeatDelegate implements ReportDelegate<HeartbeatReport> {
 
-	private TaskManager m_taskManager;
+	@Resource
+	private TaskManager taskManager;
 
-	private ServerFilterConfigManager m_manager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	@Override
 	public void afterLoad(Map<String, HeartbeatReport> reports) {
@@ -58,8 +65,8 @@ public class HeartbeatDelegate implements ReportDelegate<HeartbeatReport> {
 	public boolean createHourlyTask(HeartbeatReport report) {
 		String domain = report.getDomain();
 
-		if (m_manager.validateDomain(domain)) {
-			return m_taskManager.createTask(report.getStartTime(), domain, HeartbeatAnalyzer.ID, TaskProlicy.DAILY);
+		if (serverFilterConfigManager.validateDomain(domain)) {
+			return taskManager.createTask(report.getStartTime(), domain, HeartbeatAnalyzer.ID, TaskProlicy.DAILY);
 		} else {
 			return true;
 		}
@@ -99,10 +106,10 @@ public class HeartbeatDelegate implements ReportDelegate<HeartbeatReport> {
 	}
 
 	public void setTaskManager(TaskManager taskManager) {
-		m_taskManager = taskManager;
+		this.taskManager = taskManager;
 	}
 
 	public void setConfigManager(ServerFilterConfigManager manager) {
-		m_manager = manager;
+		serverFilterConfigManager = manager;
 	}
 }

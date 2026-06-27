@@ -18,6 +18,9 @@
  */
 package com.dianping.cat.system.page.config;
 
+import org.springframework.stereotype.Component;
+
+@Component("configHtmlParser")
 public class ConfigHtmlParser {
 
 	public String parse(String content) {

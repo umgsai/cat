@@ -22,7 +22,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.rule.entity.MetricItem;
@@ -34,11 +37,10 @@ import com.dianping.cat.system.page.config.Model;
 
 public class BaseProcesser {
 
-	protected RuleFTLDecorator m_ruleDecorator;
+	private static final Logger LOGGER = LoggerFactory.getLogger(BaseProcesser.class);
 
-	public void setRuleDecorator(RuleFTLDecorator ruleDecorator) {
-		m_ruleDecorator = ruleDecorator;
-	}
+	@Resource(name = "ruleFTLDecorator")
+	protected RuleFTLDecorator ruleDecorator;
 
 	public boolean addSubmitRule(BaseRuleConfigManager manager, String id, String metrics, String configs) {
 		try {
@@ -46,6 +48,7 @@ public class BaseProcesser {
 
 			return manager.insert(xmlContent);
 		} catch (Exception ex) {
+			LOGGER.error("Unable to add or update rule, id={}, metrics={}.", id, metrics, ex);
 			Cat.logError(ex);
 			return false;
 		}
@@ -58,6 +61,8 @@ public class BaseProcesser {
 
 			return manager.insert(xmlContent);
 		} catch (Exception ex) {
+			LOGGER.error("Unable to add or update rule with available flag, id={}, metrics={}, available={}.", id,
+			      metrics, available, ex);
 			Cat.logError(ex);
 			return false;
 		}
@@ -68,6 +73,8 @@ public class BaseProcesser {
 			String xmlContent = manager.deleteRule(key);
 			return manager.insert(xmlContent);
 		} catch (Exception ex) {
+			LOGGER.error("Unable to delete rule, key={}.", key, ex);
+			Cat.logError(ex);
 			return false;
 		}
 	}
@@ -91,7 +98,7 @@ public class BaseProcesser {
 				model.setConfigHeader(configHeader);
 			}
 		}
-		String content = m_ruleDecorator.generateConfigsHtml(configsStr);
+		String content = ruleDecorator.generateConfigsHtml(configsStr);
 
 		model.setContent(content);
 		model.setId(ruleId);
@@ -128,80 +135,80 @@ public class BaseProcesser {
 	}
 
 	public class RuleItem {
-		private String m_id;
+		private String id;
 
-		private boolean m_available;
+		private boolean available;
 
-		private String m_productlineText;
+		private String productlineText;
 
-		private String m_metricText;
+		private String metricText;
 
-		private boolean m_monitorCount;
+		private boolean monitorCount;
 
-		private boolean m_monitorSum;
+		private boolean monitorSum;
 
-		private boolean m_monitorAvg;
+		private boolean monitorAvg;
 
 		public RuleItem(String id, String productlineText, String metricText) {
-			m_id = id;
-			m_productlineText = productlineText;
-			m_metricText = metricText;
+			this.id = id;
+			this.productlineText = productlineText;
+			this.metricText = metricText;
 		}
 
 		public String getId() {
-			return m_id;
+			return id;
 		}
 
 		public void setId(String id) {
-			m_id = id;
+			this.id = id;
 		}
 
 		public boolean isAvailable() {
-			return m_available;
+			return available;
 		}
 
 		public void setAvailable(boolean available) {
-			m_available = available;
+			this.available = available;
 		}
 
 		public String getMetricText() {
-			return m_metricText;
+			return metricText;
 		}
 
 		public void setMetricText(String metricText) {
-			m_metricText = metricText;
+			this.metricText = metricText;
 		}
 
 		public String getProductlineText() {
-			return m_productlineText;
+			return productlineText;
 		}
 
 		public void setProductlineText(String productlineText) {
-			m_productlineText = productlineText;
+			this.productlineText = productlineText;
 		}
 
 		public boolean isMonitorAvg() {
-			return m_monitorAvg;
+			return monitorAvg;
 		}
 
 		public void setMonitorAvg(boolean monitorAvg) {
-			m_monitorAvg = monitorAvg;
+			this.monitorAvg = monitorAvg;
 		}
 
 		public boolean isMonitorCount() {
-			return m_monitorCount;
+			return monitorCount;
 		}
 
 		public void setMonitorCount(boolean monitorCount) {
-			m_monitorCount = monitorCount;
+			this.monitorCount = monitorCount;
 		}
 
 		public boolean isMonitorSum() {
-			return m_monitorSum;
+			return monitorSum;
 		}
 
 		public void setMonitorSum(boolean monitorSum) {
-			m_monitorSum = monitorSum;
+			this.monitorSum = monitorSum;
 		}
 	}
 
