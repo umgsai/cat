@@ -505,6 +505,65 @@ mvn -pl cat-home -am -DskipTests compile
 BUILD SUCCESS
 ```
 
+## 16. 第八批完成记录
+
+第八批选择告警基础薄服务/工具类迁移，继续避开告警发送主链路、初始化 manager 和聚合 Bean。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+alertSummaryService -> com.dianping.cat.report.alert.summary.AlertSummaryService
+alertService -> com.dianping.cat.alarm.service.AlertService
+dataChecker -> com.dianping.cat.alarm.spi.rule.DefaultDataChecker
+baseRuleHelper -> com.dianping.cat.report.alert.config.BaseRuleHelper
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 4 个简单 `@Bean` 方法：
+
+```text
+alertSummaryService(...)
+alertService(...)
+dataChecker()
+baseRuleHelper()
+```
+
+3. `AlertSummaryService` 中 `AlertSummaryRepository` 已改为 `@Resource` 字段注入。
+4. `AlertService` 中 `AlertRepository` 已改为 `@Resource` 字段注入。
+5. `DefaultDataChecker`、`BaseRuleHelper` 为无状态工具类，仅加 `@Component`。
+6. `cat-alarm/pom.xml` 已显式增加 `spring-context` 和 `jakarta.annotation-api` 依赖，避免组件注解依赖传递依赖偶然可见。
+7. 本批触碰到的旧式字段命名已改为 Java 驼峰命名：
+
+```text
+m_alertSummaryDao -> alertSummaryRepository
+m_alertDao        -> alertRepository
+```
+
+8. 以下 Bean 本批继续保留在配置类中，避免改变初始化和告警链路语义：
+
+```text
+spiAlertManager(...)
+AlarmManager
+BusinessAlert/EventAlert/ExceptionAlert/HeartbeatAlert/TransactionAlert
+RuleConfigManager 相关 Bean
+SenderManager/ContactorManager/SpliterManager/DecoratorManager
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
 ## 10. 第二批完成记录
 
 第二批选择 `BusinessGraphCreator` 一个 Bean，目标是验证依赖较多但不涉及后台线程、不涉及 prototype 的普通业务图表 Bean 迁移方式。

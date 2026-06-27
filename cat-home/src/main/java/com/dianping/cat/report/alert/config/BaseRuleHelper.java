@@ -26,11 +26,13 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.rule.entity.Condition;
 import com.dianping.cat.alarm.rule.entity.Config;
 
+@Component
 public class BaseRuleHelper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BaseRuleHelper.class);
 

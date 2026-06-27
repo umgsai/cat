@@ -20,15 +20,20 @@ package com.dianping.cat.report.alert.summary;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import jakarta.annotation.Resource;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.dal.report.AlertSummary;
 import com.dianping.cat.mybatis.AlertSummaryRepository;
 
+@Component
 public class AlertSummaryService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertSummaryService.class);
 
-	private AlertSummaryRepository m_alertSummaryDao;
+	@Resource
+	private AlertSummaryRepository alertSummaryRepository;
 
 	public void insert(com.dianping.cat.home.alert.summary.entity.AlertSummary alertSummary) {
 		AlertSummary summary = new AlertSummary();
@@ -39,16 +44,12 @@ public class AlertSummaryService {
 		summary.setContent(content);
 
 		try {
-			m_alertSummaryDao.insert(summary);
+			alertSummaryRepository.insert(summary);
 		} catch (RuntimeException e) {
 			LOGGER.error("Unable to insert alert summary, domain={}, alertTime={}.", alertSummary.getDomain(),
 					alertSummary.getAlertDate(), e);
 			Cat.logError("insert alert summary error: " + content, e);
 		}
-	}
-
-	public void setAlertSummaryDao(AlertSummaryRepository alertSummaryDao) {
-		m_alertSummaryDao = alertSummaryDao;
 	}
 
 }

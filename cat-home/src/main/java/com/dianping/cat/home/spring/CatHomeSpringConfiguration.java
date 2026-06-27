@@ -147,6 +147,7 @@ import com.dianping.cat.alarm.spi.receiver.ContactorManager;
 import com.dianping.cat.alarm.spi.receiver.ProjectContactor;
 import com.dianping.cat.alarm.spi.rule.DataChecker;
 import com.dianping.cat.alarm.spi.rule.DefaultDataChecker;
+import com.dianping.cat.alarm.service.AlertService;
 import com.dianping.cat.alarm.spi.sender.MailSender;
 import com.dianping.cat.alarm.spi.sender.Sender;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
@@ -404,7 +405,8 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		DefaultValueTranslater.class, DefaultGraphBuilder.class, DependencyItemBuilder.class,
 		TopologyGraphBuilder.class, StorageAlertInfoBuilder.class, ExternalInfoBuilder.class, StorageMergeHelper.class,
 		DatabaseParser.class, IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
-		StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class},
+		StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class,
+		AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class},
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
 					DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class, MatrixAnalyzer.class,
@@ -417,7 +419,8 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					DependencyItemBuilder.class, TopologyGraphBuilder.class, StorageAlertInfoBuilder.class,
 					ExternalInfoBuilder.class, StorageMergeHelper.class, DatabaseParser.class,
 					IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
-					StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class}),
+					StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class,
+					AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class}),
 		useDefaultFilters = false)
 @MapperScan(basePackages = {
 		"com.dianping.cat.mybatis.mapper",
@@ -2662,25 +2665,9 @@ public class CatHomeSpringConfiguration {
 		return configureSpringBackedRepository(new UserDefineRuleRepository(), sqlSessionTemplate, transactionTemplate);
 	}
 
-	@Bean
-	public AlertSummaryService alertSummaryService(AlertSummaryRepository alertSummaryRepository) {
-		AlertSummaryService service = new AlertSummaryService();
-
-		service.setAlertSummaryDao(alertSummaryRepository);
-		return service;
-	}
-
-	@Bean
-	public com.dianping.cat.alarm.service.AlertService alertService(AlertRepository alertRepository) {
-		com.dianping.cat.alarm.service.AlertService service = new com.dianping.cat.alarm.service.AlertService();
-
-		service.setAlertDao(alertRepository);
-		return service;
-	}
-
 	@Bean(initMethod = "initialize")
 	public com.dianping.cat.alarm.spi.AlertManager spiAlertManager(SpliterManager spliterManager,
-			SenderManager senderManager, com.dianping.cat.alarm.service.AlertService alertService,
+			SenderManager senderManager, AlertService alertService,
 			AlertPolicyManager alertPolicyManager, DecoratorManager decoratorManager, ContactorManager contactorManager,
 			ServerConfigManager serverConfigManager) {
 		com.dianping.cat.alarm.spi.AlertManager manager = new com.dianping.cat.alarm.spi.AlertManager();
@@ -2706,11 +2693,6 @@ public class CatHomeSpringConfiguration {
 		manager.setHeartbeatAlert(heartbeatAlert);
 		manager.setTransactionAlert(transactionAlert);
 		return manager;
-	}
-
-	@Bean
-	public DataChecker dataChecker() {
-		return new DefaultDataChecker();
 	}
 
 	@Bean
@@ -3683,11 +3665,6 @@ public class CatHomeSpringConfiguration {
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
 		return manager;
-	}
-
-	@Bean
-	public BaseRuleHelper baseRuleHelper() {
-		return new BaseRuleHelper();
 	}
 
 	@Bean(initMethod = "initialize")
