@@ -40,6 +40,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcLogviewController m_logviewController;
 
+	private SpringMvcPermissionController m_permissionController;
+
 	private SpringMvcPluginController m_pluginController;
 
 	private SpringMvcProjectController m_projectController;
@@ -76,6 +78,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		m_homeController = context.getBean(SpringMvcHomeController.class);
 		m_loginController = context.getBean(SpringMvcLoginController.class);
 		m_logviewController = context.getBean(SpringMvcLogviewController.class);
+		m_permissionController = context.getBean(SpringMvcPermissionController.class);
 		m_pluginController = context.getBean(SpringMvcPluginController.class);
 		m_projectController = context.getBean(SpringMvcProjectController.class);
 		m_problemController = context.getBean(SpringMvcProblemController.class);
@@ -105,6 +108,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/s/login", m_loginController::login);
 		register(routes, "GET", "/s/business", m_businessController::business);
 		register(routes, "GET", "/s/config", m_configController::config);
+		register(routes, "GET", "/s/permission", m_permissionController::permission);
 		register(routes, "GET", "/s/plugin", m_pluginController::plugin);
 		register(routes, "GET", "/s/plugin/chrome", m_pluginController::chrome);
 		register(routes, "GET", "/s/project", m_projectController::project);
@@ -121,6 +125,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "POST", "/s/business", m_businessController::business);
 		register(routes, "POST", "/s/config", m_configController::config);
 		register(routes, "POST", "/s/login", m_loginController::submit);
+		register(routes, "POST", "/s/permission", m_permissionController::permission);
 
 		return Collections.unmodifiableMap(routes);
 	}

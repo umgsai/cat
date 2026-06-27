@@ -5,7 +5,7 @@
 <c:set var="projectConfigActive" value="${activeConfigMenu eq 'projects' || activeConfigMenu eq 'domainGroupConfigs'}" />
 <c:set var="applicationConfigActive" value="${activeConfigMenu eq 'businessConfig' || activeConfigMenu eq 'businessTag' || activeConfigMenu eq 'displayPolicy'}" />
 <c:set var="alertConfigActive" value="${activeConfigMenu eq 'transactionRule' || activeConfigMenu eq 'eventRule' || activeConfigMenu eq 'heartbeatRule'}" />
-<c:set var="overallConfigActive" value="${activeConfigMenu eq 'alertPolicy' || activeConfigMenu eq 'alertDefaultReceivers' || activeConfigMenu eq 'alertSenderConfig' || activeConfigMenu eq 'serverConfigUpdate' || activeConfigMenu eq 'sampleConfigUpdate' || activeConfigMenu eq 'routerConfigUpdate'}" />
+<c:set var="overallConfigActive" value="${activeConfigMenu eq 'alertPolicy' || activeConfigMenu eq 'alertDefaultReceivers' || activeConfigMenu eq 'alertSenderConfig' || activeConfigMenu eq 'serverConfigUpdate' || activeConfigMenu eq 'sampleConfigUpdate' || activeConfigMenu eq 'routerConfigUpdate' || activeConfigMenu eq 'resourceUpdate' || activeConfigMenu eq 'userUpdate'}" />
 <div id="sidebar" class="sidebar responsive">
 	<script type="text/javascript">
 		try { ace.settings.check('sidebar', 'fixed'); } catch(e) {}
@@ -136,6 +136,18 @@
 				<li id="routerConfigUpdate" class="${activeConfigMenu eq 'routerConfigUpdate' ? 'active' : ''}">
 					<a href="${contextPath}/mvc/s/config?op=routerConfigUpdate">
 						<i class="menu-icon fa fa-caret-right"></i>客户端路由
+					</a>
+					<b class="arrow"></b>
+				</li>
+				<li id="resourceUpdate" class="${activeConfigMenu eq 'resourceUpdate' ? 'active' : ''}">
+					<a href="${contextPath}/mvc/s/permission?op=resource">
+						<i class="menu-icon fa fa-caret-right"></i>资源权限配置
+					</a>
+					<b class="arrow"></b>
+				</li>
+				<li id="userUpdate" class="${activeConfigMenu eq 'userUpdate' ? 'active' : ''}">
+					<a href="${contextPath}/mvc/s/permission?op=user">
+						<i class="menu-icon fa fa-caret-right"></i>用户权限配置
 					</a>
 					<b class="arrow"></b>
 				</li>

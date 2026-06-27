@@ -14,7 +14,7 @@
 		<filter-class>com.dianping.cat.system.page.permission.PermissionFilter</filter-class>
 		<init-param>
 			<param-name>errorPage</param-name>
-			<param-value>/s/permission?op=error</param-value>
+			<param-value>/mvc/s/permission?op=error</param-value>
 		</init-param>
 		<init-param>
 			<param-name>login</param-name>
@@ -97,4 +97,3 @@
 		</taglib>
 	</jsp-config>
 </web-app>
-
