@@ -392,9 +392,12 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
 @Configuration
 @Import(SpringMvcMigrationConfiguration.class)
-@ComponentScan(basePackageClasses = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class,
-		DumpAnalyzer.class, DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class,
-		MatrixAnalyzer.class, ProblemAnalyzer.class, StorageAnalyzer.class, TopAnalyzer.class, StateAnalyzer.class,
+@ComponentScan(basePackageClasses = {BusinessAnalyzer.class, BusinessDelegate.class,
+		TransactionAnalyzer.class, TransactionDelegate.class, CrossAnalyzer.class, CrossDelegate.class,
+		DumpAnalyzer.class, DependencyAnalyzer.class, DependencyDelegate.class, EventAnalyzer.class, EventDelegate.class,
+		HeartbeatAnalyzer.class, HeartbeatDelegate.class, MatrixAnalyzer.class, MatrixDelegate.class,
+		ProblemAnalyzer.class, ProblemDelegate.class, StorageAnalyzer.class, StorageDelegate.class,
+		StorageReportUpdater.class, TopAnalyzer.class, TopDelegate.class, StateAnalyzer.class, StateDelegate.class,
 		ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
 		CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
 		BusinessPointParser.class, DomainGroupConfigManager.class, StorageGroupConfigManager.class,
@@ -512,9 +515,13 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		com.dianping.cat.system.page.config.processor.AlertConfigProcessor.class,
 		com.dianping.cat.system.page.permission.Handler.class},
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
-				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
-					DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class, MatrixAnalyzer.class,
-					ProblemAnalyzer.class, StorageAnalyzer.class, TopAnalyzer.class, StateAnalyzer.class,
+				classes = {BusinessAnalyzer.class, BusinessDelegate.class,
+					TransactionAnalyzer.class, TransactionDelegate.class, CrossAnalyzer.class, CrossDelegate.class,
+					DumpAnalyzer.class, DependencyAnalyzer.class, DependencyDelegate.class,
+					EventAnalyzer.class, EventDelegate.class, HeartbeatAnalyzer.class, HeartbeatDelegate.class,
+					MatrixAnalyzer.class, MatrixDelegate.class, ProblemAnalyzer.class, ProblemDelegate.class,
+					StorageAnalyzer.class, StorageDelegate.class, StorageReportUpdater.class,
+					TopAnalyzer.class, TopDelegate.class, StateAnalyzer.class, StateDelegate.class,
 					ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
 					CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
 					BusinessPointParser.class, DomainGroupConfigManager.class, StorageGroupConfigManager.class,
@@ -726,123 +733,10 @@ public class CatHomeSpringConfiguration {
 		return bootstrap;
 	}
 
-	@Bean
-	public ReportDelegate<BusinessReport> businessDelegate(TaskManager taskManager) {
-		BusinessDelegate delegate = new BusinessDelegate();
-
-		delegate.setTaskManager(taskManager);
-		return delegate;
-	}
-
-	@Bean
-	public ReportDelegate<TransactionReport> transactionDelegate(TaskManager taskManager,
-			ServerFilterConfigManager serverFilterConfigManager, AllReportConfigManager allReportConfigManager,
-			ServerConfigManager serverConfigManager, AtomicMessageConfigManager atomicMessageConfigManager) {
-		TransactionDelegate delegate = new TransactionDelegate();
-
-		delegate.setTaskManager(taskManager);
-		delegate.setConfigManager(serverFilterConfigManager);
-		delegate.setTransactionManager(allReportConfigManager);
-		delegate.setServerConfigManager(serverConfigManager);
-		delegate.setAtomicMessageConfigManager(atomicMessageConfigManager);
-		return delegate;
-	}
-
-	@Bean
-	public ReportDelegate<CrossReport> crossDelegate(TaskManager taskManager,
-			ServerFilterConfigManager serverFilterConfigManager) {
-		CrossDelegate delegate = new CrossDelegate();
-
-		delegate.setTaskManager(taskManager);
-		delegate.setServerFilterConfigManager(serverFilterConfigManager);
-		return delegate;
-	}
-
-	@Bean
-	public ReportDelegate<DependencyReport> dependencyDelegate(TaskManager taskManager) {
-		DependencyDelegate delegate = new DependencyDelegate();
-
-		delegate.setTaskManager(taskManager);
-		return delegate;
-	}
-
-	@Bean
-	public ReportDelegate<EventReport> eventDelegate(TaskManager taskManager,
-			ServerFilterConfigManager serverFilterConfigManager, AllReportConfigManager allReportConfigManager,
-			ServerConfigManager serverConfigManager, AtomicMessageConfigManager atomicMessageConfigManager) {
-		EventDelegate delegate = new EventDelegate();
-
-		delegate.setTaskManager(taskManager);
-		delegate.setConfigManager(serverFilterConfigManager);
-		delegate.setAllManager(allReportConfigManager);
-		delegate.setServerConfigManager(serverConfigManager);
-		delegate.setAtomicMessageConfigManager(atomicMessageConfigManager);
-		return delegate;
-	}
-
-	@Bean
-	public ReportDelegate<HeartbeatReport> heartbeatDelegate(TaskManager taskManager,
-			ServerFilterConfigManager serverFilterConfigManager) {
-		HeartbeatDelegate delegate = new HeartbeatDelegate();
-
-		delegate.setTaskManager(taskManager);
-		delegate.setConfigManager(serverFilterConfigManager);
-		return delegate;
-	}
-
-	@Bean
-	public ReportDelegate<MatrixReport> matrixDelegate(TaskManager taskManager,
-			ServerFilterConfigManager serverFilterConfigManager) {
-		MatrixDelegate delegate = new MatrixDelegate();
-
-		delegate.setTaskManager(taskManager);
-		delegate.setConfigManager(serverFilterConfigManager);
-		return delegate;
-	}
-
-	@Bean
-	public ReportDelegate<ProblemReport> problemDelegate(TaskManager taskManager,
-			ServerFilterConfigManager serverFilterConfigManager) {
-		ProblemDelegate delegate = new ProblemDelegate();
-
-		delegate.setTaskManager(taskManager);
-		delegate.setConfigManager(serverFilterConfigManager);
-		return delegate;
-	}
-
-	@Bean
-	public StorageReportUpdater storageReportUpdater() {
-		return new StorageReportUpdater();
-	}
-
-	@Bean
-	public ReportDelegate<StorageReport> storageDelegate(TaskManager taskManager,
-			ServerFilterConfigManager serverFilterConfigManager, StorageReportUpdater storageReportUpdater) {
-		StorageDelegate delegate = new StorageDelegate();
-
-		delegate.setTaskManager(taskManager);
-		delegate.setConfigManager(serverFilterConfigManager);
-		delegate.setReportUpdater(storageReportUpdater);
-		return delegate;
-	}
-
-	@Bean
-	public ReportDelegate<TopReport> topDelegate() {
-		return new TopDelegate();
-	}
-
-	@Bean
-	public ReportDelegate<StateReport> stateDelegate(TaskManager taskManager, ReportBucketManager reportBucketManager) {
-		StateDelegate delegate = new StateDelegate();
-
-		delegate.setTaskManager(taskManager);
-		delegate.setBucketManager(reportBucketManager);
-		return delegate;
-	}
-
 	@Bean(name = BusinessAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	@Scope("prototype")
-	public ReportManager<BusinessReport> businessReportManager(ReportDelegate<BusinessReport> businessDelegate,
+	public ReportManager<BusinessReport> businessReportManager(
+			@Qualifier("businessDelegate") ReportDelegate<BusinessReport> businessDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<BusinessReport> manager = new DefaultReportManager<BusinessReport>();
@@ -859,9 +753,9 @@ public class CatHomeSpringConfiguration {
 	@Bean(name = TransactionAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	@Scope("prototype")
 	public ReportManager<TransactionReport> transactionReportManager(
-			ReportDelegate<TransactionReport> transactionDelegate, ReportBucketManager reportBucketManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			DomainValidator domainValidator) {
+			@Qualifier("transactionDelegate") ReportDelegate<TransactionReport> transactionDelegate,
+			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<TransactionReport> manager = new DefaultReportManager<TransactionReport>();
 
 		manager.setReportDelegate(transactionDelegate);
@@ -875,7 +769,8 @@ public class CatHomeSpringConfiguration {
 
 	@Bean(name = CrossAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	@Scope("prototype")
-	public ReportManager<CrossReport> crossReportManager(ReportDelegate<CrossReport> crossDelegate,
+	public ReportManager<CrossReport> crossReportManager(
+			@Qualifier("crossDelegate") ReportDelegate<CrossReport> crossDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<CrossReport> manager = new DefaultReportManager<CrossReport>();
@@ -892,9 +787,9 @@ public class CatHomeSpringConfiguration {
 	@Bean(name = DependencyAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	@Scope("prototype")
 	public ReportManager<DependencyReport> dependencyReportManager(
-			ReportDelegate<DependencyReport> dependencyDelegate, ReportBucketManager reportBucketManager,
-			HourlyReportRepository hourlyReportRepository, HourlyReportContentRepository hourlyReportContentRepository,
-			DomainValidator domainValidator) {
+			@Qualifier("dependencyDelegate") ReportDelegate<DependencyReport> dependencyDelegate,
+			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
+			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<DependencyReport> manager = new DefaultReportManager<DependencyReport>();
 
 		manager.setReportDelegate(dependencyDelegate);
@@ -908,7 +803,8 @@ public class CatHomeSpringConfiguration {
 
 	@Bean(name = EventAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	@Scope("prototype")
-	public ReportManager<EventReport> eventReportManager(ReportDelegate<EventReport> eventDelegate,
+	public ReportManager<EventReport> eventReportManager(
+			@Qualifier("eventDelegate") ReportDelegate<EventReport> eventDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<EventReport> manager = new DefaultReportManager<EventReport>();
@@ -924,7 +820,8 @@ public class CatHomeSpringConfiguration {
 
 	@Bean(name = HeartbeatAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	@Scope("prototype")
-	public ReportManager<HeartbeatReport> heartbeatReportManager(ReportDelegate<HeartbeatReport> heartbeatDelegate,
+	public ReportManager<HeartbeatReport> heartbeatReportManager(
+			@Qualifier("heartbeatDelegate") ReportDelegate<HeartbeatReport> heartbeatDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<HeartbeatReport> manager = new DefaultReportManager<HeartbeatReport>();
@@ -940,7 +837,8 @@ public class CatHomeSpringConfiguration {
 
 	@Bean(name = MatrixAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	@Scope("prototype")
-	public ReportManager<MatrixReport> matrixReportManager(ReportDelegate<MatrixReport> matrixDelegate,
+	public ReportManager<MatrixReport> matrixReportManager(
+			@Qualifier("matrixDelegate") ReportDelegate<MatrixReport> matrixDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<MatrixReport> manager = new DefaultReportManager<MatrixReport>();
@@ -956,7 +854,8 @@ public class CatHomeSpringConfiguration {
 
 	@Bean(name = ProblemAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	@Scope("prototype")
-	public ReportManager<ProblemReport> problemReportManager(ReportDelegate<ProblemReport> problemDelegate,
+	public ReportManager<ProblemReport> problemReportManager(
+			@Qualifier("problemDelegate") ReportDelegate<ProblemReport> problemDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<ProblemReport> manager = new DefaultReportManager<ProblemReport>();
@@ -972,7 +871,8 @@ public class CatHomeSpringConfiguration {
 
 	@Bean(name = StorageAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	@Scope("prototype")
-	public ReportManager<StorageReport> storageReportManager(ReportDelegate<StorageReport> storageDelegate,
+	public ReportManager<StorageReport> storageReportManager(
+			@Qualifier("storageDelegate") ReportDelegate<StorageReport> storageDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<StorageReport> manager = new DefaultReportManager<StorageReport>();
@@ -988,7 +888,7 @@ public class CatHomeSpringConfiguration {
 
 	@Bean(name = TopAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	@Scope("prototype")
-	public ReportManager<TopReport> topReportManager(ReportDelegate<TopReport> topDelegate,
+	public ReportManager<TopReport> topReportManager(@Qualifier("topDelegate") ReportDelegate<TopReport> topDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<TopReport> manager = new DefaultReportManager<TopReport>();
@@ -1004,7 +904,8 @@ public class CatHomeSpringConfiguration {
 
 	@Bean(name = StateAnalyzer.ID + "ReportManager", initMethod = "initialize")
 	@Scope("prototype")
-	public ReportManager<StateReport> stateReportManager(ReportDelegate<StateReport> stateDelegate,
+	public ReportManager<StateReport> stateReportManager(
+			@Qualifier("stateDelegate") ReportDelegate<StateReport> stateDelegate,
 			ReportBucketManager reportBucketManager, HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DomainValidator domainValidator) {
 		DefaultReportManager<StateReport> manager = new DefaultReportManager<StateReport>();

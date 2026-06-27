@@ -23,10 +23,12 @@ import com.dianping.cat.consumer.top.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.consumer.top.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.top.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.Map;
 
+@Component("topDelegate")
 public class TopDelegate implements ReportDelegate<TopReport> {
 
 	@Override

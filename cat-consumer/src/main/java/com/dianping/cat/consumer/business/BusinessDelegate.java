@@ -21,6 +21,10 @@ package com.dianping.cat.consumer.business;
 import java.util.Date;
 import java.util.Map;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.consumer.business.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.consumer.business.model.transform.DefaultNativeParser;
@@ -29,9 +33,11 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
+@Component("businessDelegate")
 public class BusinessDelegate implements ReportDelegate<BusinessReport> {
 
-	private TaskManager m_taskManager;
+	@Resource
+	private TaskManager taskManager;
 
 	@Override
 	public void afterLoad(Map<String, BusinessReport> reports) {
@@ -86,11 +92,11 @@ public class BusinessDelegate implements ReportDelegate<BusinessReport> {
 
 	@Override
 	public boolean createHourlyTask(BusinessReport report) {
-		return m_taskManager.createTask(report.getStartTime(), report.getDomain(), BusinessAnalyzer.ID, TaskProlicy.DAILY);
+		return taskManager.createTask(report.getStartTime(), report.getDomain(), BusinessAnalyzer.ID, TaskProlicy.DAILY);
 	}
 
 	public void setTaskManager(TaskManager taskManager) {
-		m_taskManager = taskManager;
+		this.taskManager = taskManager;
 	}
 
 }

@@ -18,6 +18,15 @@
  */
 package com.dianping.cat.consumer.event;
 
+import java.util.Date;
+import java.util.Map;
+
+import jakarta.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.AtomicMessageConfigManager;
@@ -32,22 +41,26 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
-import java.util.Date;
-import java.util.Map;
-
+@Component("eventDelegate")
 public class EventDelegate implements ReportDelegate<EventReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(EventDelegate.class);
 
-	private TaskManager m_taskManager;
+	@Resource
+	private TaskManager taskManager;
 
-	private ServerFilterConfigManager m_configManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private AllReportConfigManager m_allManager;
+	@Resource
+	private AllReportConfigManager allReportConfigManager;
 
-	private ServerConfigManager m_serverConfigManager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
 
-	private AtomicMessageConfigManager m_atomicMessageConfigManager;
+	@Resource
+	private AtomicMessageConfigManager atomicMessageConfigManager;
 
-	private final EventTpsStatisticsComputer m_computer = new EventTpsStatisticsComputer();
+	private final EventTpsStatisticsComputer eventTpsStatisticsComputer = new EventTpsStatisticsComputer();
 
 	@Override
 	public void afterLoad(Map<String, EventReport> reports) {
@@ -69,11 +82,11 @@ public class EventDelegate implements ReportDelegate<EventReport> {
 
 	@Override
 	public String buildXml(EventReport report) {
-		report.accept(m_computer);
+		report.accept(eventTpsStatisticsComputer);
 
-		new EventReportCountFilter(m_serverConfigManager.getMaxTypeThreshold(),
-								m_atomicMessageConfigManager.getMaxNameThreshold(report.getDomain()),
-								m_serverConfigManager.getTypeNameLengthLimit()).visitEventReport(report);
+		new EventReportCountFilter(serverConfigManager.getMaxTypeThreshold(),
+								atomicMessageConfigManager.getMaxNameThreshold(report.getDomain()),
+								serverConfigManager.getTypeNameLengthLimit()).visitEventReport(report);
 
 		return report.toString();
 	}
@@ -82,7 +95,7 @@ public class EventDelegate implements ReportDelegate<EventReport> {
 		if (reports.size() > 0) {
 			EventReport first = reports.values().iterator().next();
 			EventReport all = makeReport(Constants.ALL, first.getStartTime().getTime(), Constants.HOUR);
-			EventReportTypeAggregator visitor = new EventReportTypeAggregator(all, m_allManager);
+			EventReportTypeAggregator visitor = new EventReportTypeAggregator(all, allReportConfigManager);
 
 			try {
 				for (EventReport report : reports.values()) {
@@ -95,6 +108,7 @@ public class EventDelegate implements ReportDelegate<EventReport> {
 					}
 				}
 			} catch (Exception e) {
+				LOGGER.error("Unable to create aggregated event report, reportCount={}.", reports.size(), e);
 				Cat.logError(e);
 			}
 			return all;
@@ -107,8 +121,8 @@ public class EventDelegate implements ReportDelegate<EventReport> {
 	public boolean createHourlyTask(EventReport report) {
 		String domain = report.getDomain();
 
-		if (domain.equals(Constants.ALL) || m_configManager.validateDomain(domain)) {
-			return m_taskManager.createTask(report.getStartTime(), domain, EventAnalyzer.ID, TaskProlicy.ALL_EXCLUED_HOURLY);
+		if (domain.equals(Constants.ALL) || serverFilterConfigManager.validateDomain(domain)) {
+			return taskManager.createTask(report.getStartTime(), domain, EventAnalyzer.ID, TaskProlicy.ALL_EXCLUED_HOURLY);
 		} else {
 			return true;
 		}
@@ -148,22 +162,22 @@ public class EventDelegate implements ReportDelegate<EventReport> {
 	}
 
 	public void setTaskManager(TaskManager taskManager) {
-		m_taskManager = taskManager;
+		this.taskManager = taskManager;
 	}
 
 	public void setConfigManager(ServerFilterConfigManager configManager) {
-		m_configManager = configManager;
+		serverFilterConfigManager = configManager;
 	}
 
 	public void setAllManager(AllReportConfigManager allManager) {
-		m_allManager = allManager;
+		allReportConfigManager = allManager;
 	}
 
 	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 	public void setAtomicMessageConfigManager(AtomicMessageConfigManager atomicMessageConfigManager) {
-		m_atomicMessageConfigManager = atomicMessageConfigManager;
+		this.atomicMessageConfigManager = atomicMessageConfigManager;
 	}
 }

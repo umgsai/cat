@@ -18,6 +18,13 @@
  */
 package com.dianping.cat.consumer.cross;
 
+import java.util.Date;
+import java.util.Map;
+
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.cross.model.entity.CrossReport;
 import com.dianping.cat.consumer.cross.model.transform.DefaultNativeBuilder;
@@ -27,14 +34,14 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
-import java.util.Date;
-import java.util.Map;
-
+@Component("crossDelegate")
 public class CrossDelegate implements ReportDelegate<CrossReport> {
 
-	private TaskManager m_taskManager;
+	@Resource
+	private TaskManager taskManager;
 
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	@Override
 	public void afterLoad(Map<String, CrossReport> reports) {
@@ -58,8 +65,8 @@ public class CrossDelegate implements ReportDelegate<CrossReport> {
 	public boolean createHourlyTask(CrossReport report) {
 		String domain = report.getDomain();
 
-		if (m_serverFilterConfigManager.validateDomain(domain)) {
-			return m_taskManager.createTask(report.getStartTime(), domain, CrossAnalyzer.ID,	TaskProlicy.ALL_EXCLUED_HOURLY);
+		if (serverFilterConfigManager.validateDomain(domain)) {
+			return taskManager.createTask(report.getStartTime(), domain, CrossAnalyzer.ID,	TaskProlicy.ALL_EXCLUED_HOURLY);
 		} else {
 			return true;
 		}
@@ -99,10 +106,10 @@ public class CrossDelegate implements ReportDelegate<CrossReport> {
 	}
 
 	public void setTaskManager(TaskManager taskManager) {
-		m_taskManager = taskManager;
+		this.taskManager = taskManager;
 	}
 
 	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
+		this.serverFilterConfigManager = serverFilterConfigManager;
 	}
 }

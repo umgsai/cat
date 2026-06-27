@@ -314,6 +314,73 @@ BUILD SUCCESS
 git diff --check 通过
 ```
 
+## 39. 第三十一批完成记录
+
+第三十一批迁移报表保存链路中的 `ReportDelegate` 及相邻的 `StorageReportUpdater`，目标是在不触碰 `ReportManager` 生命周期的前提下，继续减少 `CatHomeSpringConfiguration` 中的显式 `@Bean` 注册数量。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 `ReportDelegate` 已改为 `@Component("...Delegate")` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+BusinessDelegate
+TransactionDelegate
+CrossDelegate
+DependencyDelegate
+EventDelegate
+HeartbeatDelegate
+MatrixDelegate
+ProblemDelegate
+StorageDelegate
+TopDelegate
+StateDelegate
+```
+
+2. `StorageReportUpdater` 已改为 `@Component` 创建，并加入白名单扫描；`StorageDelegate` 通过 `@Resource` 注入它。
+3. 已删除 `CatHomeSpringConfiguration` 中对应 11 个 `ReportDelegate` 旧 `@Bean` 方法，以及 `StorageReportUpdater` 旧 `@Bean` 方法。
+4. `ReportManager` 仍保留在 `CatHomeSpringConfiguration` 中，并在构造参数上使用明确的 `@Qualifier("...Delegate")`，避免多个 `ReportDelegate` Bean 因泛型擦除导致注入歧义。
+5. 本批触碰到的注入字段和普通状态字段已按 Java 驼峰命名收口，例如：
+
+```text
+m_taskManager                -> taskManager
+m_configManager              -> serverFilterConfigManager
+m_serverFilterConfigManager  -> serverFilterConfigManager
+m_transactionManager         -> allReportConfigManager
+m_allManager                 -> allReportConfigManager
+m_serverConfigManager        -> serverConfigManager
+m_atomicMessageConfigManager -> atomicMessageConfigManager
+m_computer                   -> transactionStatisticsComputer / eventTpsStatisticsComputer
+m_reportUpdater              -> storageReportUpdater
+m_bucketManager              -> reportBucketManager
+```
+
+6. `StorageReportUpdater.StorageUpdateItem` 内部字段也已从 `m_` 命名改为驼峰命名。
+7. 对本批触碰且原先只调用 `Cat.logError` 的异常路径补充了 SLF4J 日志，覆盖 `EventDelegate#createAggregatedReport` 和 `ProblemDelegate#beforeSave`。
+8. 本批仍不迁移以下内容：
+
+```text
+ReportManager / ReportDelegate 聚合之外的 ModelService
+ServerConfigManager
+存储 bucket / HDFS / message dump 链路
+DataSource / SqlSessionFactory / TransactionTemplate
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
 ## 38. 第三十批完成记录
 
 第三十批迁移 `BusinessConfigManager` 和小时报表 reload 链路中的低风险 `ReportReloader` Bean，目标是继续减少 `CatHomeSpringConfiguration` 中的显式注册，同时保留原有 Bean 名称和初始化语义。

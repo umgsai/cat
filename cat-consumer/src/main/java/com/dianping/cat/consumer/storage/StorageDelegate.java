@@ -18,6 +18,15 @@
  */
 package com.dianping.cat.consumer.storage;
 
+import java.util.Date;
+import java.util.Map;
+
+import jakarta.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.consumer.storage.model.transform.DefaultNativeBuilder;
@@ -26,20 +35,19 @@ import com.dianping.cat.consumer.storage.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Date;
-import java.util.Map;
-
+@Component("storageDelegate")
 public class StorageDelegate implements ReportDelegate<StorageReport> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageDelegate.class);
 
-	private TaskManager m_taskManager;
+	@Resource
+	private TaskManager taskManager;
 
-	private ServerFilterConfigManager m_configManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private StorageReportUpdater m_reportUpdater;
+	@Resource
+	private StorageReportUpdater storageReportUpdater;
 
 	@Override
 	public void afterLoad(Map<String, StorageReport> reports) {
@@ -49,7 +57,7 @@ public class StorageDelegate implements ReportDelegate<StorageReport> {
 	public void beforeSave(Map<String, StorageReport> reports) {
 		for (StorageReport report : reports.values()) {
 
-			m_reportUpdater.updateStorageIds(report.getId(), reports.keySet(), report);
+			storageReportUpdater.updateStorageIds(report.getId(), reports.keySet(), report);
 		}
 	}
 
@@ -67,8 +75,8 @@ public class StorageDelegate implements ReportDelegate<StorageReport> {
 	public boolean createHourlyTask(StorageReport report) {
 		String id = report.getId();
 
-		if (m_configManager.validateDomain(id)) {
-			return m_taskManager.createTask(report.getStartTime(), id, StorageAnalyzer.ID, TaskProlicy.ALL_EXCLUED_HOURLY);
+		if (serverFilterConfigManager.validateDomain(id)) {
+			return taskManager.createTask(report.getStartTime(), id, StorageAnalyzer.ID, TaskProlicy.ALL_EXCLUED_HOURLY);
 		} else {
 			return true;
 		}
@@ -118,15 +126,15 @@ public class StorageDelegate implements ReportDelegate<StorageReport> {
 	}
 
 	public void setTaskManager(TaskManager taskManager) {
-		m_taskManager = taskManager;
+		this.taskManager = taskManager;
 	}
 
 	public void setConfigManager(ServerFilterConfigManager configManager) {
-		m_configManager = configManager;
+		serverFilterConfigManager = configManager;
 	}
 
 	public void setReportUpdater(StorageReportUpdater reportUpdater) {
-		m_reportUpdater = reportUpdater;
+		storageReportUpdater = reportUpdater;
 	}
 
 }

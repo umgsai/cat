@@ -25,7 +25,9 @@ import com.dianping.cat.consumer.storage.model.entity.Operation;
 import com.dianping.cat.consumer.storage.model.entity.Segment;
 import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.message.Transaction;
+import org.springframework.stereotype.Component;
 
+@Component
 public class StorageReportUpdater {
 
 	public void updateStorageIds(String id, Set<String> ids, StorageReport report) {
@@ -74,58 +76,58 @@ public class StorageReportUpdater {
 
 	public static class StorageUpdateItem {
 
-		private String m_ip;
+		private String ip;
 
-		private String m_domain;
+		private String domain;
 
-		private String m_method;
+		private String method;
 
-		private Transaction m_transaction;
+		private Transaction transaction;
 
-		private long m_threshold;
+		private long threshold;
 
 		public String getDomain() {
-			return m_domain;
+			return domain;
 		}
 
 		public StorageUpdateItem setDomain(String domain) {
-			m_domain = domain;
+			this.domain = domain;
 			return this;
 		}
 
 		public String getIp() {
-			return m_ip;
+			return ip;
 		}
 
 		public StorageUpdateItem setIp(String ip) {
-			m_ip = ip;
+			this.ip = ip;
 			return this;
 		}
 
 		public String getMethod() {
-			return m_method;
+			return method;
 		}
 
 		public StorageUpdateItem setMethod(String method) {
-			m_method = method;
+			this.method = method;
 			return this;
 		}
 
 		public long getThreshold() {
-			return m_threshold;
+			return threshold;
 		}
 
 		public StorageUpdateItem setThreshold(long threshold) {
-			m_threshold = threshold;
+			this.threshold = threshold;
 			return this;
 		}
 
 		public Transaction getTransaction() {
-			return m_transaction;
+			return transaction;
 		}
 
 		public StorageUpdateItem setTransaction(Transaction transaction) {
-			m_transaction = transaction;
+			this.transaction = transaction;
 			return this;
 		}
 	}

@@ -18,6 +18,14 @@
  */
 package com.dianping.cat.consumer.state;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
+
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.consumer.state.model.transform.DefaultNativeBuilder;
@@ -28,15 +36,14 @@ import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
-
+@Component("stateDelegate")
 public class StateDelegate implements ReportDelegate<StateReport> {
 
-	private TaskManager m_taskManager;
+	@Resource
+	private TaskManager taskManager;
 
-	private ReportBucketManager m_bucketManager;
+	@Resource
+	private ReportBucketManager reportBucketManager;
 
 	@Override
 	public void afterLoad(Map<String, StateReport> reports) {
@@ -61,28 +68,28 @@ public class StateDelegate implements ReportDelegate<StateReport> {
 		Date startTime = report.getStartTime();
 		String domain = report.getDomain();
 
-		m_taskManager.createTask(startTime, domain, StateAnalyzer.ID, TaskProlicy.ALL);
-		m_taskManager.createTask(startTime, domain, Constants.REPORT_ROUTER, TaskProlicy.HOULY);
-		m_taskManager.createTask(startTime, domain, Constants.APP_DATABASE_PRUNER, TaskProlicy.DAILY);
-		m_taskManager.createTask(startTime, domain, Constants.METRIC_GRAPH_PRUNER, TaskProlicy.DAILY);
-		m_taskManager.createTask(startTime, domain, Constants.WEB_DATABASE_PRUNER, TaskProlicy.DAILY);
-		// m_taskManager.createTask(startTime, domain, Constants.CMDB, TaskProlicy.HOULY);
-		m_taskManager.createTask(startTime, domain, Constants.REPORT_DATABASE_CAPACITY, TaskProlicy.ALL);
-		m_taskManager.createTask(startTime, domain, Constants.REPORT_JAR, TaskProlicy.HOULY);
-		m_taskManager.createTask(startTime, domain, Constants.REPORT_HEAVY, TaskProlicy.ALL);
-		m_taskManager.createTask(startTime, domain, Constants.REPORT_UTILIZATION, TaskProlicy.ALL);
-		m_taskManager.createTask(startTime, domain, Constants.REPORT_SERVICE, TaskProlicy.ALL);
+		taskManager.createTask(startTime, domain, StateAnalyzer.ID, TaskProlicy.ALL);
+		taskManager.createTask(startTime, domain, Constants.REPORT_ROUTER, TaskProlicy.HOULY);
+		taskManager.createTask(startTime, domain, Constants.APP_DATABASE_PRUNER, TaskProlicy.DAILY);
+		taskManager.createTask(startTime, domain, Constants.METRIC_GRAPH_PRUNER, TaskProlicy.DAILY);
+		taskManager.createTask(startTime, domain, Constants.WEB_DATABASE_PRUNER, TaskProlicy.DAILY);
+		// taskManager.createTask(startTime, domain, Constants.CMDB, TaskProlicy.HOULY);
+		taskManager.createTask(startTime, domain, Constants.REPORT_DATABASE_CAPACITY, TaskProlicy.ALL);
+		taskManager.createTask(startTime, domain, Constants.REPORT_JAR, TaskProlicy.HOULY);
+		taskManager.createTask(startTime, domain, Constants.REPORT_HEAVY, TaskProlicy.ALL);
+		taskManager.createTask(startTime, domain, Constants.REPORT_UTILIZATION, TaskProlicy.ALL);
+		taskManager.createTask(startTime, domain, Constants.REPORT_SERVICE, TaskProlicy.ALL);
 
 		Calendar cal = Calendar.getInstance();
 		int hour = cal.get(Calendar.HOUR_OF_DAY);
 
 		// for daily report aggreation done
 		if (hour >= 4) {
-			m_taskManager.createTask(startTime, domain, Constants.CURRENT_REPORT, TaskProlicy.DAILY);
-			m_taskManager.createTask(startTime, domain, Constants.REPORT_CLIENT, TaskProlicy.DAILY);
+			taskManager.createTask(startTime, domain, Constants.CURRENT_REPORT, TaskProlicy.DAILY);
+			taskManager.createTask(startTime, domain, Constants.REPORT_CLIENT, TaskProlicy.DAILY);
 		}
 		// clear local report
-		m_bucketManager.clearOldReports();
+		reportBucketManager.clearOldReports();
 		return true;
 	}
 
@@ -120,10 +127,10 @@ public class StateDelegate implements ReportDelegate<StateReport> {
 	}
 
 	public void setTaskManager(TaskManager taskManager) {
-		m_taskManager = taskManager;
+		this.taskManager = taskManager;
 	}
 
 	public void setBucketManager(ReportBucketManager bucketManager) {
-		m_bucketManager = bucketManager;
+		reportBucketManager = bucketManager;
 	}
 }
