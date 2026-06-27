@@ -23,12 +23,14 @@ import com.dianping.cat.alarm.rule.entity.MetricItem;
 import com.dianping.cat.alarm.rule.entity.Rule;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.report.alert.spi.config.BaseRuleConfigManager;
+import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+@Component
 public class HeartbeatRuleConfigManager extends BaseRuleConfigManager {
 
 	private static final String CONFIG_NAME = "heartbeatRuleConfig";
@@ -82,7 +84,7 @@ public class HeartbeatRuleConfigManager extends BaseRuleConfigManager {
 		ensureInitialized();
 		Map<String, Map<Integer, List<Rule>>> rules = new HashMap<String, Map<Integer, List<Rule>>>();
 
-		for (Rule rule : m_config.getRules().values()) {
+		for (Rule rule : monitorRules.getRules().values()) {
 			if (rule.getAvailable() != null && !rule.getAvailable()) {
 				continue;
 			}

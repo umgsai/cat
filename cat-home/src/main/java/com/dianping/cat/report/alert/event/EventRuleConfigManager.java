@@ -19,7 +19,9 @@
 package com.dianping.cat.report.alert.event;
 
 import com.dianping.cat.report.alert.spi.config.BaseRuleConfigManager;
+import org.springframework.stereotype.Component;
 
+@Component
 public class EventRuleConfigManager extends BaseRuleConfigManager {
 
 	private static final String CONFIG_NAME = "eventRule";

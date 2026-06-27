@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.rule.entity.Condition;
@@ -43,6 +44,10 @@ import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+@Component
 public class BusinessRuleConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessRuleConfigManager.class);
 
@@ -52,14 +57,15 @@ public class BusinessRuleConfigManager {
 
 	private static final String SPLITTER = ":";
 
-	Map<String, MonitorRules> m_rules = new ConcurrentHashMap<String, MonitorRules>();
+	Map<String, MonitorRules> rules = new ConcurrentHashMap<String, MonitorRules>();
 
-	private BusinessConfigRepository m_configDao;
+	@Resource
+	private BusinessConfigRepository businessConfigRepository;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public void setConfigDao(BusinessConfigRepository configDao) {
-		m_configDao = configDao;
+		businessConfigRepository = configDao;
 	}
 
 	private List<Config> buildDefaultConfigs() {
@@ -113,12 +119,13 @@ public class BusinessRuleConfigManager {
 		return configs;
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 		synchronized (this) {
-			if (m_initialized) {
+			if (initialized) {
 				return;
 			}
 
@@ -137,19 +144,19 @@ public class BusinessRuleConfigManager {
 					loadData();
 				}
 			});
-			m_initialized = true;
+			initialized = true;
 		}
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
 
 	private void loadData() {
 		try {
-			List<BusinessConfig> configs = m_configDao.findByName(ALERT_CONFIG);
+			List<BusinessConfig> configs = businessConfigRepository.findByName(ALERT_CONFIG);
 			Map<String, MonitorRules> rules = new ConcurrentHashMap<String, MonitorRules>();
 
 			for (BusinessConfig config : configs) {
@@ -163,8 +170,8 @@ public class BusinessRuleConfigManager {
 					Cat.logError(e);
 				}
 			}
-			m_rules = rules;
-			LOGGER.info("Loaded business alert rule configs, count={}.", m_rules.size());
+			this.rules = rules;
+			LOGGER.info("Loaded business alert rule configs, count={}.", this.rules.size());
 		} catch (RuntimeException e) {
 			LOGGER.error("Unable to load business alert rule configs from repository.", e);
 			Cat.logError(e);
@@ -186,12 +193,12 @@ public class BusinessRuleConfigManager {
 
 	public MonitorRules queryMonitorRules(String domain) {
 		ensureInitialized();
-		return m_rules.get(domain);
+		return rules.get(domain);
 	}
 
 	public Rule queryRule(String domain, String key, String type) {
 		ensureInitialized();
-		MonitorRules rule = m_rules.get(domain);
+		MonitorRules rule = rules.get(domain);
 
 		if (rule != null) {
 			return rule.findRule(generateRuleId(key, type));
@@ -213,26 +220,26 @@ public class BusinessRuleConfigManager {
 			rule.setDynamicAttribute(TYPE, type);
 
 			boolean isExist = true;
-			MonitorRules domainRule = m_rules.get(domain);
+			MonitorRules domainRule = rules.get(domain);
 
 			if (domainRule == null) {
 				domainRule = new MonitorRules();
-				m_rules.put(domain, domainRule);
+				rules.put(domain, domainRule);
 				isExist = false;
 			}
 
 			domainRule.getRules().put(rule.getId(), rule);
 
-			BusinessConfig proto = m_configDao.createLocal();
+			BusinessConfig proto = businessConfigRepository.createLocal();
 			proto.setDomain(domain);
 			proto.setContent(domainRule.toString());
 			proto.setName(ALERT_CONFIG);
 			proto.setUpdatetime(new Date());
 
 			if (isExist) {
-				m_configDao.updateBaseConfigByDomain(proto);
+				businessConfigRepository.updateBaseConfigByDomain(proto);
 			} else {
-				m_configDao.insert(proto);
+				businessConfigRepository.insert(proto);
 			}
 		} catch (Exception e) {
 			LOGGER.error("Unable to update business alert rule, domain={}, key={}, type={}.", domain, key, type, e);

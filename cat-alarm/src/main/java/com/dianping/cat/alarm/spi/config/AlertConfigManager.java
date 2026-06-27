@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.alarm.receiver.entity.AlertConfig;
@@ -31,27 +32,33 @@ import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.mybatis.ConfigRepository;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+@Component
 public class AlertConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlertConfigManager.class);
 
 	private static final String CONFIG_NAME = "alertConfig";
 
-	private ConfigRepository m_configDao;
+	@Resource
+	private ConfigRepository configRepository;
 
-	private ContentFetcher m_fetcher;
+	@Resource
+	private ContentFetcher contentFetcher;
 
-	private long m_configId;
+	private long configId;
 
-	private AlertConfig m_config;
+	private AlertConfig alertConfig;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
 	public String buildReceiverContentByOnOff(String originXml, String allOnOrOff) {
@@ -78,38 +85,39 @@ public class AlertConfigManager {
 
 	public AlertConfig getAlertConfig() {
 		ensureInitialized();
-		return m_config;
+		return alertConfig;
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 		synchronized (this) {
-			if (m_initialized) {
+			if (initialized) {
 				return;
 			}
 			try {
-				Config config = m_configDao.findByName(CONFIG_NAME);
+				Config config = configRepository.findByName(CONFIG_NAME);
 				String content = config.getContent();
 
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
-				LOGGER.info("Loaded alert config from repository, configId={}.", m_configId);
+				configId = config.getId();
+				alertConfig = DefaultSaxParser.parse(content);
+				LOGGER.info("Loaded alert config from repository, configId={}.", configId);
 			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Alert config is missing in repository, loading default content from fetcher.", e);
 
 				try {
-					String content = m_fetcher.getConfigContent(CONFIG_NAME);
-					Config config = m_configDao.createLocal();
+					String content = contentFetcher.getConfigContent(CONFIG_NAME);
+					Config config = configRepository.createLocal();
 
 					config.setName(CONFIG_NAME);
 					config.setContent(content);
-					m_configDao.insert(config);
+					configRepository.insert(config);
 
-					m_configId = config.getId();
-					m_config = DefaultSaxParser.parse(content);
-					LOGGER.info("Initialized alert config from default content, configId={}.", m_configId);
+					configId = config.getId();
+					alertConfig = DefaultSaxParser.parse(content);
+					LOGGER.info("Initialized alert config from default content, configId={}.", configId);
 				} catch (Exception ex) {
 					LOGGER.error("Unable to initialize alert config from default content.", ex);
 					Cat.logError(ex);
@@ -118,16 +126,16 @@ public class AlertConfigManager {
 				LOGGER.error("Unable to load alert config from repository.", e);
 				Cat.logError(e);
 			}
-			if (m_config == null) {
-				m_config = new AlertConfig();
+			if (alertConfig == null) {
+				alertConfig = new AlertConfig();
 				LOGGER.warn("Alert config is empty after initialization, using a new empty config.");
 			}
-			m_initialized = true;
+			initialized = true;
 		}
 	}
 
 	private void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
@@ -135,7 +143,7 @@ public class AlertConfigManager {
 	public boolean insert(String xml) {
 		ensureInitialized();
 		try {
-			m_config = DefaultSaxParser.parse(xml);
+			alertConfig = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
@@ -147,23 +155,23 @@ public class AlertConfigManager {
 
 	public Receiver queryReceiverById(String id) {
 		ensureInitialized();
-		return m_config.getReceivers().get(id);
+		return alertConfig.getReceivers().get(id);
 	}
 
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = m_configDao.createLocal();
+				Config config = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
+				config.setId(configId);
+				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
-				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config);
-				LOGGER.info("Stored alert config, configId={}, receiverCount={}.", m_configId,
-						m_config.getReceivers().size());
+				config.setContent(alertConfig.toString());
+				configRepository.updateByPK(config);
+				LOGGER.info("Stored alert config, configId={}, receiverCount={}.", configId,
+						alertConfig.getReceivers().size());
 			} catch (Exception e) {
-				LOGGER.error("Unable to store alert config, configId={}.", m_configId, e);
+				LOGGER.error("Unable to store alert config, configId={}.", configId, e);
 				Cat.logError(e);
 				return false;
 			}

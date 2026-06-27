@@ -54,70 +54,78 @@ import com.dianping.cat.report.alert.spi.AlarmRule;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 public abstract class BaseRuleConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BaseRuleConfigManager.class);
 
-	protected ConfigRepository m_configDao;
+	@Resource
+	protected ConfigRepository configRepository;
 
-	protected UserDefinedRuleManager m_manager;
+	@Resource
+	protected UserDefinedRuleManager userDefinedRuleManager;
 
-	protected BaseRuleHelper m_helper;
+	@Resource
+	protected BaseRuleHelper baseRuleHelper;
 
-	protected ContentFetcher m_fetcher;
+	@Resource
+	protected ContentFetcher contentFetcher;
 
-	protected long m_configId;
+	protected long configId;
 
-	protected MonitorRules m_config;
+	protected MonitorRules monitorRules;
 
-	private long m_modifyTime;
+	private long modifyTime;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
 	public void setHelper(BaseRuleHelper helper) {
-		m_helper = helper;
+		baseRuleHelper = helper;
 	}
 
 	public void setUserDefinedRuleManager(UserDefinedRuleManager manager) {
-		m_manager = manager;
+		userDefinedRuleManager = manager;
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 		synchronized (this) {
-			if (m_initialized) {
+			if (initialized) {
 				return;
 			}
 
 			LOGGER.info("Initializing alert rule config manager, configName={}.", getConfigName());
 			try {
-				com.dianping.cat.core.config.Config config = m_configDao.findByName(getConfigName());
+				com.dianping.cat.core.config.Config config = configRepository.findByName(getConfigName());
 				String content = config.getContent();
 
-				m_configId = config.getId();
-				m_config = DefaultSaxParser.parse(content);
+				configId = config.getId();
+				monitorRules = DefaultSaxParser.parse(content);
 			} catch (EmptyResultDataAccessException e) {
 				LOGGER.warn("Alert rule config not found in repository, loading default content, configName={}.",
 				      getConfigName());
 				try {
-					String content = m_fetcher.getConfigContent(getConfigName());
-					com.dianping.cat.core.config.Config config = m_configDao.createLocal();
+					String content = contentFetcher.getConfigContent(getConfigName());
+					com.dianping.cat.core.config.Config config = configRepository.createLocal();
 
 					config.setName(getConfigName());
 					config.setContent(content);
-					m_configDao.insert(config);
+					configRepository.insert(config);
 
-					m_configId = config.getId();
-					m_config = DefaultSaxParser.parse(content);
+					configId = config.getId();
+					monitorRules = DefaultSaxParser.parse(content);
 				} catch (Exception ex) {
 					LOGGER.error("Unable to create default alert rule config, configName={}.", getConfigName(), ex);
 					Cat.logError(ex);
@@ -126,19 +134,19 @@ public abstract class BaseRuleConfigManager {
 				LOGGER.error("Unable to initialize alert rule config, configName={}.", getConfigName(), e);
 				Cat.logError(e);
 			}
-			if (m_config == null) {
+			if (monitorRules == null) {
 				LOGGER.warn("Alert rule config is empty after initialization, using an empty config, configName={}.",
 				      getConfigName());
-				m_config = new MonitorRules();
+				monitorRules = new MonitorRules();
 			}
 
 			registerHandler();
-			m_initialized = true;
+			initialized = true;
 		}
 	}
 
 	protected void ensureInitialized() {
-		if (!m_initialized) {
+		if (!initialized) {
 			initialize();
 		}
 	}
@@ -160,16 +168,16 @@ public abstract class BaseRuleConfigManager {
 	}
 
 	private void refreshConfig() throws SAXException, IOException {
-		com.dianping.cat.core.config.Config config = m_configDao.findByName(getConfigName());
+		com.dianping.cat.core.config.Config config = configRepository.findByName(getConfigName());
 
 		long modifyTime = config.getModifyDate().getTime();
 
 		synchronized (this) {
-			if (modifyTime > m_modifyTime) {
+			if (modifyTime > this.modifyTime) {
 				String content = config.getContent();
 
-				m_config = DefaultSaxParser.parse(content);
-				m_modifyTime = modifyTime;
+				monitorRules = DefaultSaxParser.parse(content);
+				this.modifyTime = modifyTime;
 				LOGGER.info("Refreshed alert rule config, configName={}, modifyTime={}.", getConfigName(), modifyTime);
 			}
 		}
@@ -188,7 +196,7 @@ public abstract class BaseRuleConfigManager {
 
 	public Pair<Integer, List<Condition>> convertConditions(List<Config> configs) {
 		ensureInitialized();
-		return m_helper.convertConditions(configs);
+		return baseRuleHelper.convertConditions(configs);
 	}
 
 	private Rule copyRule(Rule rule) {
@@ -209,7 +217,7 @@ public abstract class BaseRuleConfigManager {
 						try {
 							String id = subCondition.getText();
 
-							m_manager.removeById(id);
+							userDefinedRuleManager.removeById(id);
 						} catch (RuntimeException e) {
 							LOGGER.error("Unable to remove user defined alert rule text, configName={}, id={}.",
 							      getConfigName(), subCondition.getText(), e);
@@ -231,7 +239,7 @@ public abstract class BaseRuleConfigManager {
 						try {
 							String id = subCondition.getText();
 
-							subCondition.setText(m_manager.getUserDefineText(id));
+							subCondition.setText(userDefinedRuleManager.getUserDefineText(id));
 						} catch (RuntimeException e) {
 							LOGGER.error("Unable to read user defined alert rule text, configName={}, id={}.",
 							      getConfigName(), subCondition.getText(), e);
@@ -261,7 +269,7 @@ public abstract class BaseRuleConfigManager {
 						try {
 							String userDefinedText = subCondition.getText();
 
-							subCondition.setText(m_manager.addUserDefineText(userDefinedText));
+							subCondition.setText(userDefinedRuleManager.addUserDefineText(userDefinedText));
 						} catch (RuntimeException e) {
 							LOGGER.error("Unable to store user defined alert rule text, configName={}.",
 							      getConfigName(), e);
@@ -292,13 +300,13 @@ public abstract class BaseRuleConfigManager {
 
 	public String deleteRule(String key) {
 		ensureInitialized();
-		Rule rule = m_config.getRules().get(key);
+		Rule rule = monitorRules.getRules().get(key);
 
 		if (rule != null) {
 			decorateConfigOnDelete(rule.getConfigs());
-			m_config.getRules().remove(key);
+			monitorRules.getRules().remove(key);
 		}
-		return m_config.toString();
+		return monitorRules.toString();
 	}
 
 	private void extractConfigsByProduct(String product, Rule rule,
@@ -373,13 +381,13 @@ public abstract class BaseRuleConfigManager {
 
 	public MonitorRules getMonitorRules() {
 		ensureInitialized();
-		return m_config;
+		return monitorRules;
 	}
 
 	public boolean insert(String xml) {
 		ensureInitialized();
 		try {
-			m_config = DefaultSaxParser.parse(xml);
+			monitorRules = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
@@ -394,7 +402,7 @@ public abstract class BaseRuleConfigManager {
 		ensureInitialized();
 		Map<String, Map<Integer, Map<MetricType, List<Config>>>> configs = new HashMap<String, Map<Integer, Map<MetricType, List<Config>>>>();
 
-		for (Rule rule : m_config.getRules().values()) {
+		for (Rule rule : monitorRules.getRules().values()) {
 			extractConfigsByProduct(product, rule, configs);
 		}
 		Map<String, Map<MetricType, List<Config>>> maxPriority = extractMaxPriorityConfigs(configs);
@@ -404,7 +412,7 @@ public abstract class BaseRuleConfigManager {
 
 	public Rule queryRule(String key) {
 		ensureInitialized();
-		Rule rule = m_config.getRules().get(key);
+		Rule rule = monitorRules.getRules().get(key);
 
 		if (rule != null) {
 			return copyRule(rule);
@@ -416,16 +424,16 @@ public abstract class BaseRuleConfigManager {
 	protected boolean storeConfig() {
 		synchronized (this) {
 			try {
-				com.dianping.cat.core.config.Config config = m_configDao.createLocal();
+				com.dianping.cat.core.config.Config config = configRepository.createLocal();
 
-				config.setId(m_configId);
-				config.setKeyId(m_configId);
+				config.setId(configId);
+				config.setKeyId(configId);
 				config.setName(getConfigName());
-				config.setContent(m_config.toString());
-				m_configDao.updateByPK(config);
+				config.setContent(monitorRules.toString());
+				configRepository.updateByPK(config);
 			} catch (Exception e) {
 				LOGGER.error("Unable to store alert rule config, configName={}, configId={}.", getConfigName(),
-				      m_configId, e);
+				      configId, e);
 				Cat.logError(e);
 				return false;
 			}
@@ -445,8 +453,8 @@ public abstract class BaseRuleConfigManager {
 			rule.addConfig(config);
 		}
 		decorateConfigOnStore(rule.getConfigs());
-		m_config.getRules().put(id, rule);
-		return m_config.toString();
+		monitorRules.getRules().put(id, rule);
+		return monitorRules.toString();
 	}
 
 	public String updateRule(String id, String metricsStr, String configsStr,
@@ -463,8 +471,8 @@ public abstract class BaseRuleConfigManager {
 			rule.addConfig(config);
 		}
 		decorateConfigOnStore(rule.getConfigs());
-		m_config.getRules().put(id, rule);
-		return m_config.toString();
+		monitorRules.getRules().put(id, rule);
+		return monitorRules.toString();
 	}
 
 	public int validate(String productText, String metricKeyText, String product, String metricKey) {

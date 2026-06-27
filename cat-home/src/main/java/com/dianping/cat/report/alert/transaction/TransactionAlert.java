@@ -44,6 +44,7 @@ import com.dianping.cat.report.service.ModelService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import com.dianping.cat.support.Threads.Task;
 
 import com.google.common.base.Splitter;
@@ -54,6 +55,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class TransactionAlert implements Task {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TransactionAlert.class);
 
@@ -69,15 +73,20 @@ public class TransactionAlert implements Task {
 
 	private static final String FAIL_RATIO = "failRatio";
 
-	protected TransactionRuleConfigManager m_ruleConfigManager;
+	@Resource
+	protected TransactionRuleConfigManager transactionRuleConfigManager;
 
-	protected DataChecker m_dataChecker;
+	@Resource
+	protected DataChecker dataChecker;
 
-	protected AlertManager m_sendManager;
+	@Resource(name = "spiAlertManager")
+	protected AlertManager alertManager;
 
-	private ModelService<TransactionReport> m_service;
+	@Resource(name = "transactionModelService")
+	private ModelService<TransactionReport> transactionModelService;
 
-	private TransactionMergeHelper m_mergeHelper;
+	@Resource
+	private TransactionMergeHelper transactionMergeHelper;
 
 	private double[] buildArrayData(int start, int end, String type, String name, String monitor,
 	      TransactionReport report) {
@@ -123,7 +132,7 @@ public class TransactionAlert implements Task {
 	private List<DataCheckEntity> computeAlertForRule(String domain, String type, String name, String monitor,
 	      List<Config> configs) {
 		List<DataCheckEntity> results = new ArrayList<DataCheckEntity>();
-		Pair<Integer, List<Condition>> conditionPair = m_ruleConfigManager.convertConditions(configs);
+		Pair<Integer, List<Condition>> conditionPair = transactionRuleConfigManager.convertConditions(configs);
 		int minute = calAlreadyMinute();
 		Map<String, String> pars = new HashMap<String, String>();
 
@@ -149,7 +158,7 @@ public class TransactionAlert implements Task {
 				if (report != null) {
 					double[] data = buildArrayData(start, end, type, name, monitor, report);
 
-					results.addAll(m_dataChecker.checkData(data, conditions));
+					results.addAll(dataChecker.checkData(data, conditions));
 				}
 			} else if (minute < 0) {
 				int start = 60 + minute + 1 - (maxMinute);
@@ -163,7 +172,7 @@ public class TransactionAlert implements Task {
 				if (report != null) {
 					double[] data = buildArrayData(start, end, type, name, monitor, report);
 
-					results.addAll(m_dataChecker.checkData(data, conditions));
+					results.addAll(dataChecker.checkData(data, conditions));
 				}
 			} else {
 				int currentStart = 0;
@@ -186,7 +195,7 @@ public class TransactionAlert implements Task {
 					double[] lastValue = buildArrayData(lastStart, lastEnd, type, name, monitor, lastReport);
 
 					double[] data = mergerArray(lastValue, currentValue);
-					results.addAll(m_dataChecker.checkData(data, conditions));
+					results.addAll(dataChecker.checkData(data, conditions));
 				}
 			}
 		}
@@ -199,12 +208,12 @@ public class TransactionAlert implements Task {
 
 		request.getProperties().putAll(pars);
 
-		ModelResponse<TransactionReport> response = m_service.invoke(request);
+		ModelResponse<TransactionReport> response = transactionModelService.invoke(request);
 
 		if (response != null) {
 			TransactionReport report = response.getModel();
 
-			return m_mergeHelper.mergeAllNames(report, Constants.ALL, pars.get("name"));
+			return transactionMergeHelper.mergeAllNames(report, Constants.ALL, pars.get("name"));
 		} else {
 			return null;
 		}
@@ -247,7 +256,7 @@ public class TransactionAlert implements Task {
 			entity.setDate(alertResult.getAlertTime()).setContent(alertResult.getContent())
 			      .setLevel(alertResult.getAlertLevel());
 			entity.setMetric(type + "-" + name + "-" + monitor).setType(getName()).setGroup(domain);
-			m_sendManager.addAlert(entity);
+			alertManager.addAlert(entity);
 		}
 	}
 
@@ -260,7 +269,7 @@ public class TransactionAlert implements Task {
 			long current = System.currentTimeMillis();
 
 			try {
-				MonitorRules monitorRules = m_ruleConfigManager.getMonitorRules();
+				MonitorRules monitorRules = transactionRuleConfigManager.getMonitorRules();
 				Map<String, Rule> rules = monitorRules.getRules();
 
 				SLF4J_LOGGER.info("Transaction alert cycle started, ruleCount={}.", rules.size());
@@ -302,23 +311,23 @@ public class TransactionAlert implements Task {
 	}
 
 	public void setDataChecker(DataChecker dataChecker) {
-		m_dataChecker = dataChecker;
+		this.dataChecker = dataChecker;
 	}
 
 	public void setMergeHelper(TransactionMergeHelper mergeHelper) {
-		m_mergeHelper = mergeHelper;
+		transactionMergeHelper = mergeHelper;
 	}
 
 	public void setRuleConfigManager(TransactionRuleConfigManager ruleConfigManager) {
-		m_ruleConfigManager = ruleConfigManager;
+		transactionRuleConfigManager = ruleConfigManager;
 	}
 
 	public void setSendManager(AlertManager sendManager) {
-		m_sendManager = sendManager;
+		alertManager = sendManager;
 	}
 
 	public void setService(ModelService<TransactionReport> service) {
-		m_service = service;
+		transactionModelService = service;
 	}
 
 }

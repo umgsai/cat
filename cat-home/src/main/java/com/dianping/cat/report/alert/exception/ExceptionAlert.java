@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import com.dianping.cat.support.Threads.Task;
 
 import com.dianping.cat.Cat;
@@ -46,6 +47,9 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+import jakarta.annotation.Resource;
+
+@Component
 public class ExceptionAlert implements Task {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionAlert.class);
 
@@ -53,17 +57,21 @@ public class ExceptionAlert implements Task {
 
 	protected static final int ALERT_PERIOD = 1;
 
-	protected ExceptionRuleConfigManager m_exceptionConfigManager;
+	@Resource
+	protected ExceptionRuleConfigManager exceptionRuleConfigManager;
 
-	protected AlertExceptionBuilder m_alertBuilder;
+	@Resource
+	protected AlertExceptionBuilder alertExceptionBuilder;
 
-	protected ModelService<TopReport> m_topService;
+	@Resource(name = "topModelService")
+	protected ModelService<TopReport> topModelService;
 
-	protected AlertManager m_sendManager;
+	@Resource(name = "spiAlertManager")
+	protected AlertManager alertManager;
 
 	protected TopMetric buildTopMetric(Date date) {
 		TopReport topReport = queryTopReport(date);
-		TopMetric topMetric = new TopMetric(ALERT_PERIOD, Integer.MAX_VALUE, m_exceptionConfigManager);
+		TopMetric topMetric = new TopMetric(ALERT_PERIOD, Integer.MAX_VALUE, exceptionRuleConfigManager);
 
 		topMetric.setStart(date).setEnd(new Date(date.getTime() + TimeHelper.ONE_MINUTE - 1));
 		topMetric.visitTopReport(topReport);
@@ -75,7 +83,7 @@ public class ExceptionAlert implements Task {
 	}
 
 	private void handleExceptions(List<Item> itemList) {
-		Map<String, List<AlertException>> alertExceptions = m_alertBuilder.buildAlertExceptions(itemList);
+		Map<String, List<AlertException>> alertExceptions = alertExceptionBuilder.buildAlertExceptions(itemList);
 
 		//告警开关
 		if (alertExceptions.isEmpty()) {
@@ -93,7 +101,7 @@ public class ExceptionAlert implements Task {
 
 					entity.setDate(new Date()).setContent(exception.toString()).setLevel(exception.getType());
 					entity.setMetric(metricName).setType(getName()).setGroup(domain);
-					m_sendManager.addAlert(entity);
+					alertManager.addAlert(entity);
 				}
 				LOGGER.info("Exception alerts queued, domain={}, alertCount={}.", domain, exceptions.size());
 			} catch (Exception e) {
@@ -108,11 +116,11 @@ public class ExceptionAlert implements Task {
 		String date = String.valueOf(start.getTime());
 		ModelRequest request = new ModelRequest(domain, start.getTime()).setProperty("date", date);
 
-		if (m_topService.isEligable(request)) {
-			ModelResponse<TopReport> response = m_topService.invoke(request);
+		if (topModelService.isEligable(request)) {
+			ModelResponse<TopReport> response = topModelService.invoke(request);
 			TopReport report = response.getModel();
 
-			report.accept(new TopExceptionExclude(m_exceptionConfigManager));
+			report.accept(new TopExceptionExclude(exceptionRuleConfigManager));
 			return report;
 		} else {
 			throw new RuntimeException("Internal error: no eligable top service registered for " + request + "!");
@@ -172,18 +180,18 @@ public class ExceptionAlert implements Task {
 	}
 
 	public void setAlertBuilder(AlertExceptionBuilder alertBuilder) {
-		m_alertBuilder = alertBuilder;
+		alertExceptionBuilder = alertBuilder;
 	}
 
 	public void setExceptionConfigManager(ExceptionRuleConfigManager exceptionConfigManager) {
-		m_exceptionConfigManager = exceptionConfigManager;
+		exceptionRuleConfigManager = exceptionConfigManager;
 	}
 
 	public void setSendManager(AlertManager sendManager) {
-		m_sendManager = sendManager;
+		alertManager = sendManager;
 	}
 
 	public void setTopService(ModelService<TopReport> topService) {
-		m_topService = topService;
+		topModelService = topService;
 	}
 }

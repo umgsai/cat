@@ -314,6 +314,67 @@ BUILD SUCCESS
 git diff --check 通过
 ```
 
+## 30. 第二十二批完成记录
+
+第二十二批扩大到告警任务层和告警配置 Manager 层。第二十一批已经迁移告警编排层，本批继续把具体告警任务和规则配置读取类从 `CatHomeSpringConfiguration` 的显式 `@Bean` 注册迁移为组件扫描注册。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下告警任务类已经改为 `@Component` 注册，并加入 `CatHomeSpringConfiguration` 的保守扫描白名单：
+
+```text
+BusinessAlert
+EventAlert
+ExceptionAlert
+HeartbeatAlert
+TransactionAlert
+```
+
+2. 以下规则/配置 Manager 已经改为 `@Component` 注册；原来依赖 `initMethod = "initialize"` 的类改为在 `initialize()` 上使用 `@PostConstruct`：
+
+```text
+BaseRuleConfigManager
+TransactionRuleConfigManager
+EventRuleConfigManager
+HeartbeatRuleConfigManager
+BusinessRuleConfigManager
+ExceptionRuleConfigManager
+BusinessTagConfigManager
+AlertConfigManager
+AlertPolicyManager
+SenderConfigManager
+```
+
+3. 已删除 `CatHomeSpringConfiguration` 中对应的旧 `@Bean` 工厂方法，避免组件扫描后出现重复 Bean。
+
+4. 本批触碰到的旧式字段命名已经收口为 Java 驼峰命名，并改为 `@Resource` 字段注入。存在同类型多 Bean 的依赖使用显式名称，避免注入歧义：
+
+```text
+spiAlertManager
+eventModelService
+transactionModelService
+heartbeatModelService
+topModelService
+```
+
+5. 本批未运行告警任务的真实循环测试，避免触发实际告警发送和分钟级后台循环；通过编译和静态 diff 检查验证迁移结果。
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
 ## 29. 第二十一批完成记录
 
 第二十一批迁移告警编排层 Bean。前两批已经完成告警发送链路的叶子实现和 Manager 聚合层迁移，本批继续迁移 `com.dianping.cat.alarm.spi.AlertManager` 和 `com.dianping.cat.report.alert.AlarmManager`，但暂不迁移具体告警任务类 `BusinessAlert`、`EventAlert`、`ExceptionAlert`、`HeartbeatAlert`、`TransactionAlert`，避免同时改动告警扫描线程的业务依赖。

@@ -408,7 +408,11 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 		DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 		LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
-		AlertExceptionBuilder.class, MailSender.class, SmsSender.class, WeixinSender.class,
+		AlertExceptionBuilder.class, BusinessAlert.class, EventAlert.class, ExceptionAlert.class,
+		HeartbeatAlert.class, TransactionAlert.class, ExceptionRuleConfigManager.class, TransactionRuleConfigManager.class,
+		EventRuleConfigManager.class, HeartbeatRuleConfigManager.class, BusinessRuleConfigManager.class,
+		BusinessTagConfigManager.class, AlertConfigManager.class, AlertPolicyManager.class, SenderConfigManager.class,
+		MailSender.class, SmsSender.class, WeixinSender.class,
 		MailSpliter.class, SmsSpliter.class, WeixinSpliter.class, DXSpliter.class,
 		BusinessContactor.class, EventContactor.class, ExceptionContactor.class,
 		HeartbeatContactor.class, TransactionContactor.class, BusinessDecorator.class,
@@ -498,7 +502,11 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 					DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 					LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
-					AlertExceptionBuilder.class, MailSender.class, SmsSender.class, WeixinSender.class,
+					AlertExceptionBuilder.class, BusinessAlert.class, EventAlert.class, ExceptionAlert.class,
+					HeartbeatAlert.class, TransactionAlert.class, ExceptionRuleConfigManager.class,
+					TransactionRuleConfigManager.class, EventRuleConfigManager.class, HeartbeatRuleConfigManager.class,
+					BusinessRuleConfigManager.class, BusinessTagConfigManager.class, AlertConfigManager.class,
+					AlertPolicyManager.class, SenderConfigManager.class, MailSender.class, SmsSender.class, WeixinSender.class,
 					MailSpliter.class, SmsSpliter.class, WeixinSpliter.class, DXSpliter.class,
 					BusinessContactor.class, EventContactor.class, ExceptionContactor.class,
 					HeartbeatContactor.class, TransactionContactor.class, BusinessDecorator.class,
@@ -2338,91 +2346,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public BusinessAlert businessAlert(BusinessConfigManager businessConfigManager,
-			BusinessRuleConfigManager businessRuleConfigManager, BusinessTagConfigManager businessTagConfigManager,
-			BusinessReportGroupService businessReportGroupService, ProjectService projectService,
-			com.dianping.cat.alarm.spi.AlertManager spiAlertManager, BusinessKeyHelper businessKeyHelper,
-			BaselineService baselineService, DataChecker dataChecker, CustomDataCalculator customDataCalculator,
-			BaseRuleHelper baseRuleHelper) {
-		BusinessAlert alert = new BusinessAlert();
-
-		alert.setConfigManager(businessConfigManager);
-		alert.setAlertConfigManager(businessRuleConfigManager);
-		alert.setTagConfigManager(businessTagConfigManager);
-		alert.setService(businessReportGroupService);
-		alert.setProjectService(projectService);
-		alert.setSendManager(spiAlertManager);
-		alert.setKeyHelper(businessKeyHelper);
-		alert.setBaselineService(baselineService);
-		alert.setDataChecker(dataChecker);
-		alert.setCustomDataCalculator(customDataCalculator);
-		alert.setBaseRuleHelper(baseRuleHelper);
-		return alert;
-	}
-
-	@Bean
-	public EventAlert eventAlert(EventRuleConfigManager eventRuleConfigManager, DataChecker dataChecker,
-			com.dianping.cat.alarm.spi.AlertManager spiAlertManager,
-			@Qualifier("eventModelService") ModelService<EventReport> eventModelService,
-			EventMergeHelper eventMergeHelper) {
-		EventAlert alert = new EventAlert();
-
-		alert.setRuleConfigManager(eventRuleConfigManager);
-		alert.setDataChecker(dataChecker);
-		alert.setSendManager(spiAlertManager);
-		alert.setService(eventModelService);
-		alert.setMergeHelper(eventMergeHelper);
-		return alert;
-	}
-
-	@Bean
-	public ExceptionAlert exceptionAlert(ExceptionRuleConfigManager exceptionRuleConfigManager,
-			AlertExceptionBuilder alertExceptionBuilder,
-			@Qualifier("topModelService") ModelService<TopReport> topModelService,
-			com.dianping.cat.alarm.spi.AlertManager spiAlertManager) {
-		ExceptionAlert alert = new ExceptionAlert();
-
-		alert.setExceptionConfigManager(exceptionRuleConfigManager);
-		alert.setAlertBuilder(alertExceptionBuilder);
-		alert.setTopService(topModelService);
-		alert.setSendManager(spiAlertManager);
-		return alert;
-	}
-
-	@Bean
-	public HeartbeatAlert heartbeatAlert(HeartbeatRuleConfigManager heartbeatRuleConfigManager, DataChecker dataChecker,
-			com.dianping.cat.alarm.spi.AlertManager spiAlertManager,
-			@Qualifier("heartbeatModelService") ModelService<HeartbeatReport> heartbeatModelService,
-			HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager,
-			ServerFilterConfigManager serverFilterConfigManager, ProjectService projectService) {
-		HeartbeatAlert alert = new HeartbeatAlert();
-
-		alert.setRuleConfigManager(heartbeatRuleConfigManager);
-		alert.setDataChecker(dataChecker);
-		alert.setSendManager(spiAlertManager);
-		alert.setHeartbeatService(heartbeatModelService);
-		alert.setDisplayManager(heartbeatDisplayPolicyManager);
-		alert.setServerFilterConfigManager(serverFilterConfigManager);
-		alert.setProjectService(projectService);
-		return alert;
-	}
-
-	@Bean
-	public TransactionAlert transactionAlert(TransactionRuleConfigManager transactionRuleConfigManager,
-			DataChecker dataChecker, com.dianping.cat.alarm.spi.AlertManager spiAlertManager,
-			@Qualifier("transactionModelService") ModelService<TransactionReport> transactionModelService,
-			TransactionMergeHelper transactionMergeHelper) {
-		TransactionAlert alert = new TransactionAlert();
-
-		alert.setRuleConfigManager(transactionRuleConfigManager);
-		alert.setDataChecker(dataChecker);
-		alert.setSendManager(spiAlertManager);
-		alert.setService(transactionModelService);
-		alert.setMergeHelper(transactionMergeHelper);
-		return alert;
-	}
-
-	@Bean
 	public List<ProblemHandler> problemHandlers(@Qualifier(DefaultProblemHandler.ID) ProblemHandler defaultProblemHandler,
 			@Qualifier(LongExecutionProblemHandler.ID) ProblemHandler longExecutionProblemHandler) {
 		return Arrays.asList(defaultProblemHandler, longExecutionProblemHandler);
@@ -3067,86 +2990,6 @@ public class CatHomeSpringConfiguration {
 		return manager;
 	}
 
-	@Bean(initMethod = "initialize")
-	public ExceptionRuleConfigManager exceptionRuleConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher) {
-		ExceptionRuleConfigManager manager = new ExceptionRuleConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public AlertConfigManager alertConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
-		AlertConfigManager manager = new AlertConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public AlertPolicyManager alertPolicyManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
-		AlertPolicyManager manager = new AlertPolicyManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public TransactionRuleConfigManager transactionRuleConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher, UserDefinedRuleManager userDefinedRuleManager, BaseRuleHelper baseRuleHelper) {
-		TransactionRuleConfigManager manager = new TransactionRuleConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		manager.setUserDefinedRuleManager(userDefinedRuleManager);
-		manager.setHelper(baseRuleHelper);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public EventRuleConfigManager eventRuleConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher,
-			UserDefinedRuleManager userDefinedRuleManager, BaseRuleHelper baseRuleHelper) {
-		EventRuleConfigManager manager = new EventRuleConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		manager.setUserDefinedRuleManager(userDefinedRuleManager);
-		manager.setHelper(baseRuleHelper);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public HeartbeatRuleConfigManager heartbeatRuleConfigManager(ConfigRepository configRepository,
-			ContentFetcher contentFetcher, UserDefinedRuleManager userDefinedRuleManager, BaseRuleHelper baseRuleHelper) {
-		HeartbeatRuleConfigManager manager = new HeartbeatRuleConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		manager.setUserDefinedRuleManager(userDefinedRuleManager);
-		manager.setHelper(baseRuleHelper);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public BusinessRuleConfigManager businessRuleConfigManager(BusinessConfigRepository businessConfigRepository) {
-		BusinessRuleConfigManager manager = new BusinessRuleConfigManager();
-
-		manager.setConfigDao(businessConfigRepository);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public BusinessTagConfigManager businessTagConfigManager(BusinessConfigRepository businessConfigRepository) {
-		BusinessTagConfigManager manager = new BusinessTagConfigManager();
-
-		manager.setConfigDao(businessConfigRepository);
-		return manager;
-	}
-
 	@Bean
 	public BusinessReportService businessReportService(HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
@@ -3159,15 +3002,6 @@ public class CatHomeSpringConfiguration {
 				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
 				monthlyReportContentRepository);
 		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public SenderConfigManager senderConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
-		SenderConfigManager manager = new SenderConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
 	}
 
 	@Bean
