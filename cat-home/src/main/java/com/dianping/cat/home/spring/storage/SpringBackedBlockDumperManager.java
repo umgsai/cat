@@ -6,8 +6,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
 import org.unidal.cat.message.storage.BlockDumper;
 import org.unidal.cat.message.storage.BlockDumperManager;
 import org.unidal.cat.message.storage.BucketManager;
@@ -15,20 +19,25 @@ import org.unidal.cat.message.storage.BucketManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
+@Primary
+@Component("blockDumperManager")
 public class SpringBackedBlockDumperManager implements BlockDumperManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpringBackedBlockDumperManager.class);
 
-	private final Map<Integer, BlockDumper> m_dumpers = new LinkedHashMap<Integer, BlockDumper>();
+	private final Map<Integer, BlockDumper> dumpers = new LinkedHashMap<Integer, BlockDumper>();
 
-	private BucketManager m_bucketManager;
+	@Resource(name = "local")
+	private BucketManager bucketManager;
 
-	private ServerConfigManager m_configManager;
+	@Resource(name = "serverConfigManager")
+	private ServerConfigManager configManager;
 
-	private ServerStatisticManager m_statisticManager;
+	@Resource(name = "serverStatisticManager")
+	private ServerStatisticManager statisticManager;
 
 	@Override
 	public synchronized void close(int hour) {
-		BlockDumper dumper = m_dumpers.remove(hour);
+		BlockDumper dumper = dumpers.remove(hour);
 
 		if (dumper != null) {
 			try {
@@ -41,16 +50,16 @@ public class SpringBackedBlockDumperManager implements BlockDumperManager {
 
 	@Override
 	public BlockDumper findOrCreate(int hour) {
-		BlockDumper dumper = m_dumpers.get(hour);
+		BlockDumper dumper = dumpers.get(hour);
 
 		if (dumper == null) {
 			synchronized (this) {
-				dumper = m_dumpers.get(hour);
+				dumper = dumpers.get(hour);
 
 				if (dumper == null) {
 					dumper = newDumper();
 					dumper.initialize(hour);
-					m_dumpers.put(hour, dumper);
+					dumpers.put(hour, dumper);
 
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					LOGGER.info("Created block dumper {}.", sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
@@ -63,21 +72,21 @@ public class SpringBackedBlockDumperManager implements BlockDumperManager {
 	private BlockDumper newDumper() {
 		SpringBackedBlockDumper dumper = new SpringBackedBlockDumper();
 
-		dumper.setBucketManager(m_bucketManager);
-		dumper.setConfigManager(m_configManager);
-		dumper.setStatisticManager(m_statisticManager);
+		dumper.setBucketManager(bucketManager);
+		dumper.setConfigManager(configManager);
+		dumper.setStatisticManager(statisticManager);
 		return dumper;
 	}
 
 	public void setBucketManager(BucketManager bucketManager) {
-		m_bucketManager = bucketManager;
+		this.bucketManager = bucketManager;
 	}
 
 	public void setConfigManager(ServerConfigManager configManager) {
-		m_configManager = configManager;
+		this.configManager = configManager;
 	}
 
 	public void setStatisticManager(ServerStatisticManager statisticManager) {
-		m_statisticManager = statisticManager;
+		this.statisticManager = statisticManager;
 	}
 }

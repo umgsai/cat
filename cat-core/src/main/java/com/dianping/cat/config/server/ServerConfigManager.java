@@ -31,11 +31,14 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.apache.commons.io.FileUtils;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.LoggerFactory;
-import com.dianping.cat.support.Threads;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Splitter;
@@ -55,9 +58,11 @@ import com.dianping.cat.configuration.server.entity.StorageConfig;
 import com.dianping.cat.configuration.server.transform.DefaultSaxParser;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.mybatis.ConfigRepository;
+import com.dianping.cat.support.Threads;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
+@Component
 public class ServerConfigManager {
 	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(ServerConfigManager.class);
 
@@ -83,38 +88,40 @@ public class ServerConfigManager {
 
 	private static final long DEFAULT_HDFS_FILE_MAX_SIZE = 128 * 1024 * 1024L; // 128M
 
-	public ExecutorService m_threadPool;
+	public ExecutorService threadPool;
 
-	protected ConfigRepository m_configDao;
+	@Resource(name = "configRepository")
+	protected ConfigRepository configRepository;
 
-	protected ContentFetcher m_fetcher;
+	@Resource(name = "contentFetcher")
+	protected ContentFetcher contentFetcher;
 
-	private long m_configId;
+	private long configId;
 
-	private long m_modifyTime;
+	private long modifyTime;
 
-	private volatile ServerConfig m_config;
+	private volatile ServerConfig serverConfig;
 
-	private volatile Server m_server;
+	private volatile Server currentServer;
 
-	private Set<String> m_forcedStatisticTypePrefixes = new HashSet<>();
+	private Set<String> forcedStatisticTypePrefixes = new HashSet<>();
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
-	private volatile boolean m_initializing;
+	private volatile boolean initializing;
 
 	public void setConfigDao(ConfigRepository configDao) {
-		m_configDao = configDao;
+		configRepository = configDao;
 	}
 
 	public void setFetcher(ContentFetcher fetcher) {
-		m_fetcher = fetcher;
+		contentFetcher = fetcher;
 	}
 
 	public ServerConfig getConfig() {
 		initialize();
 
-		return m_config;
+		return serverConfig;
 	}
 
 	public String getConsoleDefaultDomain() {
@@ -152,8 +159,8 @@ public class ServerConfigManager {
 	}
 
 	public String getHarfsBaseDir(String id) {
-		if (m_server != null) {
-			HarfsConfig harfsConfig = m_server.getStorage().findHarfs(id);
+		if (currentServer != null) {
+			HarfsConfig harfsConfig = currentServer.getStorage().findHarfs(id);
 
 			if (harfsConfig != null) {
 				String baseDir = harfsConfig.getBaseDir();
@@ -167,8 +174,8 @@ public class ServerConfigManager {
 	}
 
 	public long getHarfsFileMaxSize(String id) {
-		if (m_server != null) {
-			HarfsConfig hdfsConfig = m_server.getStorage().findHarfs(id);
+		if (currentServer != null) {
+			HarfsConfig hdfsConfig = currentServer.getStorage().findHarfs(id);
 
 			return toLong(hdfsConfig == null ? null : hdfsConfig.getMaxSize(), DEFAULT_HDFS_FILE_MAX_SIZE);
 		} else {
@@ -177,8 +184,8 @@ public class ServerConfigManager {
 	}
 
 	public String getHarfsServerUri(String id) {
-		if (m_server != null) {
-			HarfsConfig hdfsConfig = m_server.getStorage().findHarfs(id);
+		if (currentServer != null) {
+			HarfsConfig hdfsConfig = currentServer.getStorage().findHarfs(id);
 
 			if (hdfsConfig != null) {
 				String serverUri = hdfsConfig.getServerUri();
@@ -193,8 +200,8 @@ public class ServerConfigManager {
 	}
 
 	public String getHdfsBaseDir(String id) {
-		if (m_server != null) {
-			HdfsConfig hdfsConfig = m_server.getStorage().findHdfs(id);
+		if (currentServer != null) {
+			HdfsConfig hdfsConfig = currentServer.getStorage().findHdfs(id);
 
 			if (hdfsConfig != null) {
 				String baseDir = hdfsConfig.getBaseDir();
@@ -208,8 +215,8 @@ public class ServerConfigManager {
 	}
 
 	public String getHdfsLocalBaseDir(String id) {
-		if (m_server != null) {
-			StorageConfig storage = m_server.getStorage();
+		if (currentServer != null) {
+			StorageConfig storage = currentServer.getStorage();
 
 			return new File(storage.getLocalBaseDir(), id).getPath();
 		} else if (id == null) {
@@ -220,8 +227,8 @@ public class ServerConfigManager {
 	}
 
 	public int getHdfsMaxStorageTime() {
-		if (m_server != null) {
-			StorageConfig storage = m_server.getStorage();
+		if (currentServer != null) {
+			StorageConfig storage = currentServer.getStorage();
 
 			return storage.getMaxHdfsStorageTime();
 		} else {
@@ -230,10 +237,10 @@ public class ServerConfigManager {
 	}
 
 	public Map<String, String> getHdfsProperties() {
-		if (m_server != null) {
+		if (currentServer != null) {
 			Map<String, String> properties = new HashMap<String, String>();
 
-			for (Property p : m_server.getStorage().getProperties().values()) {
+			for (Property p : currentServer.getStorage().getProperties().values()) {
 				properties.put(p.getName(), p.getValue());
 			}
 
@@ -244,8 +251,8 @@ public class ServerConfigManager {
 	}
 
 	public String getHdfsServerUri(String id) {
-		if (m_server != null) {
-			HdfsConfig hdfsConfig = m_server.getStorage().findHdfs(id);
+		if (currentServer != null) {
+			HdfsConfig hdfsConfig = currentServer.getStorage().findHdfs(id);
 
 			if (hdfsConfig != null) {
 				String serverUri = hdfsConfig.getServerUri();
@@ -260,8 +267,8 @@ public class ServerConfigManager {
 	}
 
 	public int getHdfsUploadThreadCount() {
-		if (m_server != null) {
-			StorageConfig storage = m_server.getStorage();
+		if (currentServer != null) {
+			StorageConfig storage = currentServer.getStorage();
 
 			return storage.getUploadThread();
 		} else {
@@ -270,8 +277,8 @@ public class ServerConfigManager {
 	}
 
 	public int getHdfsUploadThreadsCount() {
-		if (m_server != null) {
-			StorageConfig storage = m_server.getStorage();
+		if (currentServer != null) {
+			StorageConfig storage = currentServer.getStorage();
 
 			return storage.getUploadThread();
 		} else {
@@ -280,8 +287,8 @@ public class ServerConfigManager {
 	}
 
 	public int getLocalReportStroageTime() {
-		if (m_server != null) {
-			StorageConfig storage = m_server.getStorage();
+		if (currentServer != null) {
+			StorageConfig storage = currentServer.getStorage();
 
 			return storage.getLocalReportStorageTime();
 		} else {
@@ -290,8 +297,8 @@ public class ServerConfigManager {
 	}
 
 	public int getLogViewStroageTime() {
-		if (m_server != null) {
-			StorageConfig storage = m_server.getStorage();
+		if (currentServer != null) {
+			StorageConfig storage = currentServer.getStorage();
 
 			return storage.getLocalLogivewStorageTime();
 		} else {
@@ -300,8 +307,8 @@ public class ServerConfigManager {
 	}
 
 	public Map<String, Domain> getLongConfigDomains() {
-		if (m_server != null) {
-			LongConfig longConfig = m_server.getConsumer().getLongConfig();
+		if (currentServer != null) {
+			LongConfig longConfig = currentServer.getConsumer().getLongConfig();
 
 			if (longConfig != null) {
 				return longConfig.getDomains();
@@ -311,8 +318,8 @@ public class ServerConfigManager {
 	}
 
 	public int getLongUrlDefaultThreshold() {
-		if (m_server != null) {
-			LongConfig longConfig = m_server.getConsumer().getLongConfig();
+		if (currentServer != null) {
+			LongConfig longConfig = currentServer.getConsumer().getLongConfig();
 
 			if (longConfig != null) {
 				return longConfig.getDefaultSqlThreshold();
@@ -330,7 +337,7 @@ public class ServerConfigManager {
 	}
 
 	public ExecutorService getModelServiceExecutorService() {
-		return m_threadPool;
+		return threadPool;
 	}
 
 	public int getModelServiceThreads() {
@@ -338,12 +345,12 @@ public class ServerConfigManager {
 	}
 
 	public String getProperty(String name, String defaultValue) {
-		if (!m_initialized && !m_initializing) {
+		if (!initialized && !initializing) {
 			initialize();
 		}
 
-		if (m_server != null) {
-			Property property = m_server.findProperty(name);
+		if (currentServer != null) {
+			Property property = currentServer.findProperty(name);
 
 			if (property != null) {
 				return property.getValue();
@@ -367,7 +374,7 @@ public class ServerConfigManager {
 	public ServerConfig getServerConfig() {
 		initialize();
 
-		return m_config;
+		return serverConfig;
 	}
 
 	public int getBlockDumpThread() {
@@ -394,35 +401,36 @@ public class ServerConfigManager {
 		return Integer.parseInt(getProperty(name + "-analyzer-threads", "2"));
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
-		m_initializing = true;
+		initializing = true;
 
 		try {
 			try {
-				Config config = m_configDao.findByName(CONFIG_NAME);
-				String content = config.getContent();
+				Config dbConfig = configRepository.findByName(CONFIG_NAME);
+				String content = dbConfig.getContent();
 
-				m_configId = config.getId();
-				m_modifyTime = config.getModifyDate().getTime();
-				m_config = DefaultSaxParser.parse(content);
-				SLF4J_LOGGER.info("Loaded server config from repository, configId={}, modifyTime={}.", m_configId,
-						m_modifyTime);
+				configId = dbConfig.getId();
+				modifyTime = dbConfig.getModifyDate().getTime();
+				serverConfig = DefaultSaxParser.parse(content);
+				SLF4J_LOGGER.info("Loaded server config from repository, configId={}, modifyTime={}.", configId,
+						modifyTime);
 			} catch (EmptyResultDataAccessException e) {
 				SLF4J_LOGGER.warn("Server config is missing in repository, loading default content from fetcher.", e);
 
 				try {
-					String content = m_fetcher.getConfigContent(CONFIG_NAME);
-					Config config = m_configDao.createLocal();
+					String content = contentFetcher.getConfigContent(CONFIG_NAME);
+					Config dbConfig = configRepository.createLocal();
 
-					config.setName(CONFIG_NAME);
-					config.setContent(content);
-					m_configDao.insert(config);
-					m_configId = config.getId();
-					m_config = DefaultSaxParser.parse(content);
-					SLF4J_LOGGER.info("Initialized server config from default content, configId={}.", m_configId);
+					dbConfig.setName(CONFIG_NAME);
+					dbConfig.setContent(content);
+					configRepository.insert(dbConfig);
+					configId = dbConfig.getId();
+					serverConfig = DefaultSaxParser.parse(content);
+					SLF4J_LOGGER.info("Initialized server config from default content, configId={}.", configId);
 				} catch (Exception ex) {
 					SLF4J_LOGGER.error("Unable to initialize server config from default content.", ex);
 					Cat.logError(ex);
@@ -432,7 +440,7 @@ public class ServerConfigManager {
 				Cat.logError(e);
 			}
 
-			if (m_config == null) {
+			if (serverConfig == null) {
 				try {
 					File localServerFile = new File(Cat.getCatHome(), "server.xml");
 
@@ -444,12 +452,12 @@ public class ServerConfigManager {
 				}
 			}
 
-			if (m_config == null) {
-				m_config = new ServerConfig();
+			if (serverConfig == null) {
+				serverConfig = new ServerConfig();
 				SLF4J_LOGGER.warn("Server config is empty after initialization, using a new empty config.");
 			}
 
-			m_config.accept(new ServerConfigValidator());
+			serverConfig.accept(new ServerConfigValidator());
 
 			try {
 				refreshServer();
@@ -472,41 +480,41 @@ public class ServerConfigManager {
 					refreshConfig();
 				}
 			});
-			m_initialized = true;
+			initialized = true;
 		} finally {
-			m_initializing = false;
+			initializing = false;
 		}
 	}
 
 	public void initialize(File configFile) throws Exception {
-		m_initializing = true;
+		initializing = true;
 
 		try {
 			if (configFile != null && configFile.canRead()) {
 				SLF4J_LOGGER.info("Loading configuration file({}) ...", configFile.getCanonicalPath());
 
 				String xml = FileUtils.readFileToString(configFile, StandardCharsets.UTF_8);
-				m_config = DefaultSaxParser.parse(xml);
+				serverConfig = DefaultSaxParser.parse(xml);
 				SLF4J_LOGGER.info("Loaded server config from local file, path={}.", configFile.getCanonicalPath());
 			} else {
 				if (configFile != null) {
 					SLF4J_LOGGER.warn("Server config local file is not readable, path={}.", configFile.getCanonicalPath());
 				}
 
-				m_config = new ServerConfig();
+				serverConfig = new ServerConfig();
 			}
-			m_config.accept(new ServerConfigValidator());
+			serverConfig.accept(new ServerConfigValidator());
 			refreshServer();
 			prepare();
-			m_initialized = true;
+			initialized = true;
 		} finally {
-			m_initializing = false;
+			initializing = false;
 		}
 	}
 
 	public boolean insert(String xml) {
 		try {
-			m_config = DefaultSaxParser.parse(xml);
+			serverConfig = DefaultSaxParser.parse(xml);
 
 			return storeConfig();
 		} catch (Exception e) {
@@ -526,8 +534,8 @@ public class ServerConfigManager {
 	}
 
 	public boolean isHarMode() {
-		if (m_server != null) {
-			return m_server.getStorage().isHarMode();
+		if (currentServer != null) {
+			return currentServer.getStorage().isHarMode();
 		} else {
 			return false;
 		}
@@ -573,69 +581,69 @@ public class ServerConfigManager {
 		SLF4J_LOGGER.info("CAT server is running with alert,{}", isAlertMachine());
 		SLF4J_LOGGER.info("CAT server is running with job,{}", isJobMachine());
 
-		if (m_server != null) {
-			SLF4J_LOGGER.info("{}", m_server);
+		if (currentServer != null) {
+			SLF4J_LOGGER.info("{}", currentServer);
 
 			if (isLocalMode()) {
-				m_threadPool = Threads.forPool().getFixedThreadPool("Cat-ModelService", 5);
+				threadPool = Threads.forPool().getFixedThreadPool("Cat-ModelService", 5);
 			} else {
-				m_threadPool = Threads.forPool().getFixedThreadPool("Cat-ModelService", getModelServiceThreads());
+				threadPool = Threads.forPool().getFixedThreadPool("Cat-ModelService", getModelServiceThreads());
 			}
 		}
 	}
 
 	private void refreshConfig() throws Exception {
-		Config config = m_configDao.findByName(CONFIG_NAME);
-		long modifyTime = config.getModifyDate().getTime();
+		Config dbConfig = configRepository.findByName(CONFIG_NAME);
+		long remoteModifyTime = dbConfig.getModifyDate().getTime();
 
 		synchronized (this) {
-			if (modifyTime > m_modifyTime) {
-				ServerConfig serverConfig = DefaultSaxParser.parse(config.getContent());
-				serverConfig.accept(new ServerConfigValidator());
+			if (remoteModifyTime > modifyTime) {
+				ServerConfig latestServerConfig = DefaultSaxParser.parse(dbConfig.getContent());
+				latestServerConfig.accept(new ServerConfigValidator());
 
-				m_config = serverConfig;
-				m_modifyTime = modifyTime;
+				serverConfig = latestServerConfig;
+				modifyTime = remoteModifyTime;
 
 				refreshServer();
-				SLF4J_LOGGER.info("Refreshed server config, configId={}, modifyTime={}.", m_configId, m_modifyTime);
+				SLF4J_LOGGER.info("Refreshed server config, configId={}, modifyTime={}.", configId, modifyTime);
 			}
 		}
 	}
 
 	private void refreshServer() throws SAXException, IOException {
 		String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
-		ServerConfig config = DefaultSaxParser.parse(m_config.toString());
-		Server defaultServer = config.findServer(DEFAULT).setId(ip);
-		Server server = config.findServer(ip);
+		ServerConfig runtimeConfig = DefaultSaxParser.parse(serverConfig.toString());
+		Server defaultServer = runtimeConfig.findServer(DEFAULT).setId(ip);
+		Server matchedServer = runtimeConfig.findServer(ip);
 
-		if (server != null && defaultServer != null) {
-			ServerConfigVisitor visitor = new ServerConfigVisitor(server);
+		if (matchedServer != null && defaultServer != null) {
+			ServerConfigVisitor visitor = new ServerConfigVisitor(matchedServer);
 
 			visitor.visitServer(defaultServer);
 		}
-		m_server = defaultServer;
+		currentServer = defaultServer;
 
 		String forcedStatisticTypePrefixStr = getProperty("forced-statistic-type-prefixes", "Cellar.,Squirrel.");
-		List<String> forcedStatisticTypePrefixes = Splitter.on(',').omitEmptyStrings()
+		List<String> configuredPrefixes = Splitter.on(',').omitEmptyStrings()
 				.splitToList(forcedStatisticTypePrefixStr);
-		m_forcedStatisticTypePrefixes = new HashSet<>(forcedStatisticTypePrefixes);
+		forcedStatisticTypePrefixes = new HashSet<>(configuredPrefixes);
 		SLF4J_LOGGER.info("Refreshed server runtime config, localIp={}, forcedStatisticTypePrefixes={}.", ip,
-				m_forcedStatisticTypePrefixes);
+				forcedStatisticTypePrefixes);
 	}
 
 	public boolean storeConfig() {
 		try {
-			Config config = m_configDao.createLocal();
+			Config dbConfig = configRepository.createLocal();
 
-			config.setId(m_configId);
-			config.setKeyId(m_configId);
-			config.setName(CONFIG_NAME);
-			config.setContent(m_config.toString());
-			m_configDao.updateByPK(config);
+			dbConfig.setId(configId);
+			dbConfig.setKeyId(configId);
+			dbConfig.setName(CONFIG_NAME);
+			dbConfig.setContent(serverConfig.toString());
+			configRepository.updateByPK(dbConfig);
 			refreshServer();
-			SLF4J_LOGGER.info("Stored server config, configId={}.", m_configId);
+			SLF4J_LOGGER.info("Stored server config, configId={}.", configId);
 		} catch (Exception e) {
-			SLF4J_LOGGER.error("Unable to store server config, configId={}.", m_configId, e);
+			SLF4J_LOGGER.error("Unable to store server config, configId={}.", configId, e);
 			Cat.logError(e);
 			return false;
 		}
@@ -672,7 +680,7 @@ public class ServerConfigManager {
 	}
 
 	public Set<String> getForcedStatisticTypePrefixes() {
-		return m_forcedStatisticTypePrefixes;
+		return forcedStatisticTypePrefixes;
 	}
 
 }

@@ -2540,3 +2540,110 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+
+## 45. 第三十七批完成记录
+第三十七批开始收口配置管理入口，本批只迁移 `ServerConfigManager`。目标是在保留旧 Bean 名称、初始化时机和配置加载行为不变的前提下，减少 `CatHomeSpringConfiguration` 中的显式 Bean 注册。
+状态：已完成，完成时间 2026-06-27。
+完成内容：
+1. `ServerConfigManager` 已改为 `@Component` 组件，由 Spring 通过白名单扫描创建默认 bean 名称 `serverConfigManager`。
+2. 旧配置类中的 `@Bean(initMethod = "initialize") serverConfigManager(...)` 已删除，避免同类型 Bean 重复注册。
+3. 旧 `initMethod = "initialize"` 语义由 `@PostConstruct` 承接，启动后仍会完成 server-config 读取、默认配置兜底、server.xml 兜底、运行态 server 刷新和定时刷新注册。
+4. `ConfigRepository` 和 `ContentFetcher` 依赖改为明确 bean 名称的 `@Resource` 注入：
+```text
+configRepository
+contentFetcher
+```
+5. `ServerConfigManager` 内部旧式 `m_` 字段命名已收口为 Java 驼峰命名；配置实体与运行态配置分别使用更清晰的 `serverConfig`、`currentServer`，避免与数据库 `Config` 局部变量互相遮蔽。
+6. 原有 setter 保留，兼容测试和少量手工构造场景。
+7. 本批仍不迁移以下内容：
+```text
+ConfigRepository / 其他 Repository 显式 Bean
+DataSource / SqlSessionFactory / TransactionTemplate
+存储 bucket / HDFS / message dump 基础设施
+MessageAnalyzerManager / MessageConsumer / TcpSocketReceiver 运行时入口
+```
+
+验证记录：
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
+## 46. 第三十八批完成记录
+第三十八批大范围收口存储与消息桶基础设施 Bean。目标是在保留旧 Bean 名称、`@Primary` 语义、初始化时机和工厂创建逻辑不变的前提下，把 `CatHomeSpringConfiguration` 中一整段 storage/message bucket/report bucket 显式注册迁移到 `cat-home` 的 Spring 适配组件中。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 新增 `SpringStorageComponentConfiguration`，由 `CatHomeSpringConfiguration` 通过 `@Import` 引入，集中扫描 `com.dianping.cat.home.spring.storage` 下的存储适配组件。
+2. 以下旧消息存储链路 Bean 已从配置类迁出，并保留原 Bean 名：
+```text
+legacyMessageBucketFactory
+legacyLocalMessageBucketManager
+messageFinderManager
+messageDumperManager
+legacyMessageProcessorFactory
+legacyMessageDumperFactory
+legacyMessageDumperManager
+blockDumperManager
+legacyBlockWriterFactory
+legacyBlockDumperFactory
+legacyBlockDumperManager
+```
+3. `messageDumperManager` 和 `blockDumperManager` 继续保留 `@Primary` 语义，避免同接口下 legacy manager 被默认注入。
+4. 以下 local/hdfs bucket 链路 Bean 已迁出配置类，并用明确 bean 名的 `@Resource` 注入依赖：
+```text
+storageConfiguration
+localMessagePathBuilder
+hdfsMessagePathBuilder
+byteBufCache
+localMessageBucketFactory
+local
+localTokenMappingFactory
+localTokenMappingManager
+localIndexFactory
+localIndexManager
+hdfsTokenMappingFactory
+hdfsTokenMappingManager
+hdfsIndexFactory
+hdfsMessageConsumerFinder
+hdfsIndexManager
+hdfsBucketFactory
+hdfsBucketManager
+hdfsLogviewFileSystemManager
+hdfsMessageBucketFactory
+hdfsMessageBucketManager
+```
+5. 以下 report bucket 链路 Bean 已迁出配置类：
+```text
+reportBucketFactory
+reportBucketManager
+```
+6. 原来在配置类中的 lambda/匿名工厂已改为命名组件，方便后续定位依赖、补日志和继续重构。
+7. `SpringBackedMessageDumperManager`、`SpringBackedBlockDumperManager` 内部旧式 `m_` 字段命名已收口为 Java 驼峰命名，并改为 `@Resource` 注入。
+8. 本批仍不迁移以下内容：
+```text
+DataSource / SqlSessionFactory / TransactionTemplate
+各类 Repository 显式 Bean
+MessageAnalyzerManager / MessageConsumer / TcpSocketReceiver / CatHomeRuntimeBootstrap 运行时入口
+HdfsSystemManager / HdfsUploader / LogviewProcessor
+```
+
+验证记录：
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

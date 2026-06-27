@@ -6,35 +6,46 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
+import org.unidal.cat.message.storage.BlockDumperManager;
+import org.unidal.cat.message.storage.BucketManager;
+import org.unidal.cat.message.storage.MessageFinderManager;
 import org.unidal.cat.message.storage.MessageDumper;
 import org.unidal.cat.message.storage.MessageDumperManager;
 
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.statistic.ServerStatisticManager;
-import org.unidal.cat.message.storage.BlockDumperManager;
-import org.unidal.cat.message.storage.BucketManager;
-import org.unidal.cat.message.storage.MessageFinderManager;
 
+@Primary
+@Component("messageDumperManager")
 public class SpringBackedMessageDumperManager implements MessageDumperManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpringBackedMessageDumperManager.class);
 
-	private final Map<Integer, MessageDumper> m_dumpers = new LinkedHashMap<Integer, MessageDumper>();
+	private final Map<Integer, MessageDumper> dumpers = new LinkedHashMap<Integer, MessageDumper>();
 
-	private BlockDumperManager m_blockDumperManager;
+	@Resource(name = "blockDumperManager")
+	private BlockDumperManager blockDumperManager;
 
-	private BucketManager m_bucketManager;
+	@Resource(name = "local")
+	private BucketManager bucketManager;
 
-	private MessageFinderManager m_finderManager;
+	@Resource(name = "messageFinderManager")
+	private MessageFinderManager finderManager;
 
-	private ServerConfigManager m_configManager;
+	@Resource(name = "serverConfigManager")
+	private ServerConfigManager configManager;
 
-	private ServerStatisticManager m_statisticManager;
+	@Resource(name = "serverStatisticManager")
+	private ServerStatisticManager statisticManager;
 
 	@Override
 	public synchronized void close(int hour) {
-		MessageDumper dumper = m_dumpers.remove(hour);
+		MessageDumper dumper = dumpers.remove(hour);
 
 		if (dumper != null) {
 			try {
@@ -47,21 +58,21 @@ public class SpringBackedMessageDumperManager implements MessageDumperManager {
 
 	@Override
 	public MessageDumper find(int hour) {
-		return m_dumpers.get(hour);
+		return dumpers.get(hour);
 	}
 
 	@Override
 	public MessageDumper findOrCreate(int hour) {
-		MessageDumper dumper = m_dumpers.get(hour);
+		MessageDumper dumper = dumpers.get(hour);
 
 		if (dumper == null) {
 			synchronized (this) {
-				dumper = m_dumpers.get(hour);
+				dumper = dumpers.get(hour);
 
 				if (dumper == null) {
 					dumper = newDumper();
 					dumper.initialize(hour);
-					m_dumpers.put(hour, dumper);
+					dumpers.put(hour, dumper);
 
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					LOGGER.info("Created message dumper {}.", sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
@@ -74,31 +85,31 @@ public class SpringBackedMessageDumperManager implements MessageDumperManager {
 	private MessageDumper newDumper() {
 		SpringBackedMessageDumper dumper = new SpringBackedMessageDumper();
 
-		dumper.setBlockDumperManager(m_blockDumperManager);
-		dumper.setBucketManager(m_bucketManager);
-		dumper.setConfigManager(m_configManager);
-		dumper.setFinderManager(m_finderManager);
-		dumper.setStatisticManager(m_statisticManager);
+		dumper.setBlockDumperManager(blockDumperManager);
+		dumper.setBucketManager(bucketManager);
+		dumper.setConfigManager(configManager);
+		dumper.setFinderManager(finderManager);
+		dumper.setStatisticManager(statisticManager);
 		return dumper;
 	}
 
 	public void setBlockDumperManager(BlockDumperManager blockDumperManager) {
-		m_blockDumperManager = blockDumperManager;
+		this.blockDumperManager = blockDumperManager;
 	}
 
 	public void setBucketManager(BucketManager bucketManager) {
-		m_bucketManager = bucketManager;
+		this.bucketManager = bucketManager;
 	}
 
 	public void setConfigManager(ServerConfigManager configManager) {
-		m_configManager = configManager;
+		this.configManager = configManager;
 	}
 
 	public void setFinderManager(MessageFinderManager finderManager) {
-		m_finderManager = finderManager;
+		this.finderManager = finderManager;
 	}
 
 	public void setStatisticManager(ServerStatisticManager statisticManager) {
-		m_statisticManager = statisticManager;
+		this.statisticManager = statisticManager;
 	}
 }

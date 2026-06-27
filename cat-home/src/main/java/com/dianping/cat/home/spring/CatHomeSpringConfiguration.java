@@ -8,48 +8,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
-import org.unidal.cat.message.storage.Bucket;
-import org.unidal.cat.message.storage.BucketFactory;
-import org.unidal.cat.message.storage.BucketManager;
-import org.unidal.cat.message.storage.BlockDumperManager;
-import org.unidal.cat.message.storage.BlockDumperFactory;
-import org.unidal.cat.message.storage.BlockWriterFactory;
-import org.unidal.cat.message.storage.IndexFactory;
-import org.unidal.cat.message.storage.IndexManager;
-import org.unidal.cat.message.storage.MessageDumperManager;
-import org.unidal.cat.message.storage.MessageDumperFactory;
-import org.unidal.cat.message.storage.MessageFinderManager;
-import org.unidal.cat.message.storage.MessageProcessorFactory;
-import org.unidal.cat.message.storage.StorageConfiguration;
-import org.unidal.cat.message.storage.TokenMappingFactory;
-import org.unidal.cat.message.storage.TokenMappingManager;
-import org.unidal.cat.message.storage.internals.ByteBufCache;
-import org.unidal.cat.message.storage.internals.DefaultBlockDumper;
-import org.unidal.cat.message.storage.internals.DefaultBlockDumperManager;
-import org.unidal.cat.message.storage.internals.DefaultBlockWriter;
-import org.unidal.cat.message.storage.internals.DefaultMessageFinderManager;
-import org.unidal.cat.message.storage.internals.DefaultMessageDumper;
-import org.unidal.cat.message.storage.internals.DefaultMessageDumperManager;
-import org.unidal.cat.message.storage.internals.DefaultMessageProcessor;
-import org.unidal.cat.message.storage.internals.DefaultByteBufCache;
-import org.unidal.cat.message.storage.internals.DefaultStorageConfiguration;
-import org.unidal.cat.message.storage.hdfs.HdfsBucket;
-import org.unidal.cat.message.storage.hdfs.HdfsBucketManager;
-import org.unidal.cat.message.storage.hdfs.HdfsFileBuilder;
-import org.unidal.cat.message.storage.hdfs.HdfsIndex;
-import org.unidal.cat.message.storage.hdfs.HdfsIndexManager;
-import org.unidal.cat.message.storage.hdfs.HdfsMessageConsumerFinder;
 import org.unidal.cat.message.storage.hdfs.HdfsSystemManager;
-import org.unidal.cat.message.storage.hdfs.HdfsTokenMapping;
-import org.unidal.cat.message.storage.hdfs.HdfsTokenMappingManager;
-import org.unidal.cat.message.storage.hdfs.MessageConsumerFinder;
-import org.unidal.cat.message.storage.local.LocalBucket;
-import org.unidal.cat.message.storage.local.LocalBucketManager;
-import org.unidal.cat.message.storage.local.LocalFileBuilder;
-import org.unidal.cat.message.storage.local.LocalIndex;
-import org.unidal.cat.message.storage.local.LocalIndexManager;
-import org.unidal.cat.message.storage.local.LocalTokenMapping;
-import org.unidal.cat.message.storage.local.LocalTokenMappingManager;
 import org.unidal.cat.message.storage.clean.HdfsUploader;
 import org.unidal.cat.message.storage.clean.LogviewProcessor;
 import org.springframework.context.annotation.Bean;
@@ -57,8 +16,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -77,7 +34,6 @@ import com.dianping.cat.analysis.TcpSocketReceiver;
 import com.dianping.cat.config.AtomicMessageConfigManager;
 import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.config.business.BusinessConfigManager;
-import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.config.content.LocalResourceContentFetcher;
 import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -114,7 +70,6 @@ import com.dianping.cat.consumer.storage.builder.StorageSQLBuilder;
 import com.dianping.cat.consumer.top.TopAnalyzer;
 import com.dianping.cat.consumer.top.TopDelegate;
 import com.dianping.cat.consumer.config.AllReportConfigManager;
-import com.dianping.cat.consumer.dump.LocalMessageBucketManager;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.TransactionDelegate;
 import com.dianping.cat.mybatis.ConfigRepository;
@@ -160,22 +115,11 @@ import com.dianping.cat.mybatis.WeeklyReportContentRepository;
 import com.dianping.cat.mybatis.WeeklyReportRepository;
 import com.dianping.cat.mybatis.DailyReportRepository;
 import com.dianping.cat.helper.JsonBuilder;
-import com.dianping.cat.hadoop.hdfs.FileSystemManager;
-import com.dianping.cat.hadoop.hdfs.HdfsMessageBucketFactory;
-import com.dianping.cat.hadoop.hdfs.HdfsMessageBucketManager;
-import com.dianping.cat.hadoop.hdfs.bucket.AbstractHdfsMessageBucket;
-import com.dianping.cat.hadoop.hdfs.bucket.HarfsMessageBucket;
-import com.dianping.cat.hadoop.hdfs.bucket.HdfsMessageBucket;
-import com.dianping.cat.home.spring.storage.SpringBackedBlockDumperManager;
-import com.dianping.cat.home.spring.storage.SpringBackedMessageDumperManager;
+import com.dianping.cat.home.spring.storage.SpringStorageComponentConfiguration;
 import com.dianping.cat.message.DefaultPathBuilder;
 import com.dianping.cat.message.PathBuilder;
-import com.dianping.cat.message.storage.LocalMessageBucket;
-import com.dianping.cat.message.storage.MessageBucketFactory;
-import com.dianping.cat.message.storage.MessageBucketManager;
 import com.dianping.cat.mvc.PayloadNormalizer;
 import com.dianping.cat.mvc.ReportModelDependencies;
-import com.dianping.cat.report.DefaultReportBucketManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
 import com.dianping.cat.report.alert.business.BusinessAlert;
@@ -334,10 +278,6 @@ import com.dianping.cat.report.page.transaction.service.HistoricalTransactionSer
 import com.dianping.cat.report.page.transaction.service.LocalTransactionService;
 import com.dianping.cat.report.page.transaction.task.TransactionReportBuilder;
 import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper;
-import com.dianping.cat.report.LocalReportBucket;
-import com.dianping.cat.report.ReportBucket;
-import com.dianping.cat.report.ReportBucketFactory;
-import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.task.reload.ReportReloadTask;
 import com.dianping.cat.report.task.reload.impl.BusinessReportReloader;
 import com.dianping.cat.report.task.reload.impl.CrossReportReloader;
@@ -372,7 +312,7 @@ import com.dianping.cat.system.page.router.service.RouterConfigService;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
 @Configuration
-@Import(SpringMvcMigrationConfiguration.class)
+@Import({SpringMvcMigrationConfiguration.class, SpringStorageComponentConfiguration.class})
 @ComponentScan(basePackageClasses = {BusinessAnalyzer.class, BusinessDelegate.class,
 		TransactionAnalyzer.class, TransactionDelegate.class, CrossAnalyzer.class, CrossDelegate.class,
 		DumpAnalyzer.class, DependencyAnalyzer.class, DependencyDelegate.class, EventAnalyzer.class, EventDelegate.class,
@@ -425,7 +365,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 		DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 		LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
-		AllReportConfigManager.class, ServerFilterConfigManager.class, SampleConfigManager.class,
+		AllReportConfigManager.class, ServerConfigManager.class, ServerFilterConfigManager.class, SampleConfigManager.class,
 		ReportReloadConfigManager.class, AtomicMessageConfigManager.class, TpValueStatisticConfigManager.class,
 		BusinessConfigManager.class,
 		BusinessReportReloader.class, TransactionReportReloader.class, CrossReportReloader.class,
@@ -573,7 +513,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 					DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 					LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
-					AllReportConfigManager.class, ServerFilterConfigManager.class, SampleConfigManager.class,
+					AllReportConfigManager.class, ServerConfigManager.class, ServerFilterConfigManager.class, SampleConfigManager.class,
 					ReportReloadConfigManager.class, AtomicMessageConfigManager.class,
 					TpValueStatisticConfigManager.class, BusinessConfigManager.class,
 					BusinessReportReloader.class, TransactionReportReloader.class, CrossReportReloader.class,
@@ -763,402 +703,6 @@ public class CatHomeSpringConfiguration {
 		repository.setSqlSessionTemplate(sqlSessionTemplate);
 		repository.setTransactionTemplate(transactionTemplate);
 		return repository;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ServerConfigManager serverConfigManager(ConfigRepository configRepository, ContentFetcher contentFetcher) {
-		ServerConfigManager manager = new ServerConfigManager();
-
-		manager.setConfigDao(configRepository);
-		manager.setFetcher(contentFetcher);
-		return manager;
-	}
-
-	@Bean
-	public MessageBucketFactory legacyMessageBucketFactory() {
-		return (baseDir, dataFile) -> {
-			LocalMessageBucket bucket = new LocalMessageBucket();
-
-			bucket.setBaseDir(baseDir);
-			bucket.initialize(dataFile);
-			return bucket;
-		};
-	}
-
-	@Bean(initMethod = "initialize", name = "legacyLocalMessageBucketManager")
-	public MessageBucketManager localMessageBucketManager(ServerConfigManager serverConfigManager, PathBuilder pathBuilder,
-			ServerStatisticManager serverStatisticManager, MessageBucketFactory legacyMessageBucketFactory) {
-		LocalMessageBucketManager manager = new LocalMessageBucketManager();
-
-		manager.setConfigManager(serverConfigManager);
-		manager.setPathBuilder(pathBuilder);
-		manager.setServerStateManager(serverStatisticManager);
-		manager.setBucketFactory(legacyMessageBucketFactory);
-		return manager;
-	}
-
-	@Bean
-	public MessageFinderManager messageFinderManager() {
-		return new DefaultMessageFinderManager();
-	}
-
-	@Bean
-	@Primary
-	public MessageDumperManager messageDumperManager(BlockDumperManager blockDumperManager,
-			BucketManager localBucketManager, MessageFinderManager messageFinderManager,
-			ServerConfigManager serverConfigManager, ServerStatisticManager serverStatisticManager) {
-		SpringBackedMessageDumperManager manager = new SpringBackedMessageDumperManager();
-
-		manager.setBlockDumperManager(blockDumperManager);
-		manager.setBucketManager(localBucketManager);
-		manager.setConfigManager(serverConfigManager);
-		manager.setFinderManager(messageFinderManager);
-		manager.setStatisticManager(serverStatisticManager);
-		return manager;
-	}
-
-	@Bean
-	public MessageProcessorFactory legacyMessageProcessorFactory(BlockDumperManager blockDumperManager,
-			MessageFinderManager messageFinderManager, ServerConfigManager serverConfigManager) {
-		return (hour, index, queue) -> {
-			DefaultMessageProcessor processor = new DefaultMessageProcessor();
-
-			processor.setBlockDumperManager(blockDumperManager);
-			processor.setFinderManager(messageFinderManager);
-			processor.setConfigManager(serverConfigManager);
-			processor.initialize(hour, index, queue);
-			return processor;
-		};
-	}
-
-	@Bean
-	public MessageDumperFactory legacyMessageDumperFactory(BlockDumperManager blockDumperManager,
-			BucketManager localBucketManager, MessageProcessorFactory legacyMessageProcessorFactory,
-			ServerConfigManager serverConfigManager, ServerStatisticManager serverStatisticManager) {
-		return hour -> {
-			DefaultMessageDumper dumper = new DefaultMessageDumper();
-
-			dumper.setBlockDumperManager(blockDumperManager);
-			dumper.setBucketManager(localBucketManager);
-			dumper.setConfigManager(serverConfigManager);
-			dumper.setMessageProcessorFactory(legacyMessageProcessorFactory);
-			dumper.setStatisticManager(serverStatisticManager);
-			dumper.initialize(hour);
-			return dumper;
-		};
-	}
-
-	@Bean(initMethod = "initialize", name = "legacyMessageDumperManager")
-	public MessageDumperManager legacyMessageDumperManager(MessageDumperFactory legacyMessageDumperFactory) {
-		DefaultMessageDumperManager manager = new DefaultMessageDumperManager();
-
-		manager.setMessageDumperFactory(legacyMessageDumperFactory);
-		return manager;
-	}
-
-	@Bean
-	@Primary
-	public BlockDumperManager blockDumperManager(BucketManager localBucketManager,
-			ServerConfigManager serverConfigManager, ServerStatisticManager serverStatisticManager) {
-		SpringBackedBlockDumperManager manager = new SpringBackedBlockDumperManager();
-
-		manager.setBucketManager(localBucketManager);
-		manager.setConfigManager(serverConfigManager);
-		manager.setStatisticManager(serverStatisticManager);
-		return manager;
-	}
-
-	@Bean
-	public BlockWriterFactory legacyBlockWriterFactory(BucketManager localBucketManager,
-			ServerStatisticManager serverStatisticManager) {
-		return (hour, index, queue) -> {
-			DefaultBlockWriter writer = new DefaultBlockWriter();
-
-			writer.setBucketManager(localBucketManager);
-			writer.setStatisticManager(serverStatisticManager);
-			writer.initialize(hour, index, queue);
-			return writer;
-		};
-	}
-
-	@Bean
-	public BlockDumperFactory legacyBlockDumperFactory(BlockWriterFactory legacyBlockWriterFactory,
-			ServerConfigManager serverConfigManager, ServerStatisticManager serverStatisticManager) {
-		return hour -> {
-			DefaultBlockDumper dumper = new DefaultBlockDumper();
-
-			dumper.setBlockWriterFactory(legacyBlockWriterFactory);
-			dumper.setConfigManager(serverConfigManager);
-			dumper.setStatisticManager(serverStatisticManager);
-			dumper.initialize(hour);
-			return dumper;
-		};
-	}
-
-	@Bean(name = "legacyBlockDumperManager")
-	public BlockDumperManager legacyBlockDumperManager(BlockDumperFactory legacyBlockDumperFactory) {
-		DefaultBlockDumperManager manager = new DefaultBlockDumperManager();
-
-		manager.setBlockDumperFactory(legacyBlockDumperFactory);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public StorageConfiguration storageConfiguration() {
-		return new DefaultStorageConfiguration();
-	}
-
-	@Bean
-	public org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder(StorageConfiguration storageConfiguration) {
-		LocalFileBuilder builder = new LocalFileBuilder();
-
-		builder.setConfig(storageConfiguration);
-		return builder;
-	}
-
-	@Bean
-	public org.unidal.cat.message.storage.PathBuilder hdfsMessagePathBuilder(HdfsSystemManager hdfsSystemManager) {
-		HdfsFileBuilder builder = new HdfsFileBuilder();
-
-		builder.setFileSystemManager(hdfsSystemManager);
-		return builder;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ByteBufCache byteBufCache() {
-		DefaultByteBufCache cache = new DefaultByteBufCache();
-
-		return cache;
-	}
-
-	@Bean
-	public BucketFactory localMessageBucketFactory(
-			@Qualifier("localMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
-			ByteBufCache byteBufCache, ServerConfigManager serverConfigManager) {
-		return new BucketFactory() {
-			@Override
-			public Bucket createBucket(String domain, String ip, int hour, boolean writeMode) {
-				LocalBucket bucket = new LocalBucket();
-
-				bucket.setPathBuilder(localMessagePathBuilder);
-				bucket.setBufCache(byteBufCache);
-				bucket.setConfig(serverConfigManager);
-				return bucket;
-			}
-		};
-	}
-
-	@Bean("local")
-	public BucketManager localBucketManager(
-			@Qualifier("localMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
-			@Qualifier("localMessageBucketFactory") BucketFactory localMessageBucketFactory) {
-		LocalBucketManager manager = new LocalBucketManager();
-
-		manager.setPathBuilder(localMessagePathBuilder);
-		manager.setBucketFactory(localMessageBucketFactory);
-		return manager;
-	}
-
-	@Bean
-	public TokenMappingFactory localTokenMappingFactory(
-			@Qualifier("localMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder) {
-		return (hour, ip) -> {
-			LocalTokenMapping mapping = new LocalTokenMapping();
-
-			mapping.setPathBuilder(localMessagePathBuilder);
-			mapping.open(hour, ip);
-			return mapping;
-		};
-	}
-
-	@Bean(name = "localTokenMappingManager")
-	public TokenMappingManager localTokenMappingManager(
-			@Qualifier("localTokenMappingFactory") TokenMappingFactory localTokenMappingFactory) {
-		LocalTokenMappingManager manager = new LocalTokenMappingManager();
-
-		manager.setTokenMappingFactory(localTokenMappingFactory);
-		return manager;
-	}
-
-	@Bean
-	public IndexFactory localIndexFactory(
-			@Qualifier("localMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
-			ByteBufCache byteBufCache,
-			@Qualifier("localTokenMappingManager") TokenMappingManager localTokenMappingManager) {
-		return (domain, ip, hour) -> {
-			LocalIndex index = new LocalIndex();
-
-			index.setPathBuilder(localMessagePathBuilder);
-			index.setBufCache(byteBufCache);
-			index.setTokenMappingManager(localTokenMappingManager);
-			index.initialize(domain, ip, hour);
-			return index;
-		};
-	}
-
-	@Bean(name = "localIndexManager")
-	public IndexManager localIndexManager(
-			@Qualifier("localMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder localMessagePathBuilder,
-			@Qualifier("localIndexFactory") IndexFactory localIndexFactory) {
-		LocalIndexManager manager = new LocalIndexManager();
-
-		manager.setPathBuilder(localMessagePathBuilder);
-		manager.setIndexFactory(localIndexFactory);
-		return manager;
-	}
-
-	@Bean
-	public TokenMappingFactory hdfsTokenMappingFactory(
-			@Qualifier("hdfsMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder hdfsMessagePathBuilder,
-			HdfsSystemManager hdfsSystemManager) {
-		return (hour, ip) -> {
-			HdfsTokenMapping mapping = new HdfsTokenMapping();
-
-			mapping.setPathBuilder(hdfsMessagePathBuilder);
-			mapping.setFileSystemManager(hdfsSystemManager);
-			mapping.open(hour, ip);
-			return mapping;
-		};
-	}
-
-	@Bean(name = "hdfsTokenMappingManager")
-	public TokenMappingManager hdfsTokenMappingManager(
-			@Qualifier("hdfsTokenMappingFactory") TokenMappingFactory hdfsTokenMappingFactory) {
-		HdfsTokenMappingManager manager = new HdfsTokenMappingManager();
-
-		manager.setTokenMappingFactory(hdfsTokenMappingFactory);
-		return manager;
-	}
-
-	@Bean
-	public IndexFactory hdfsIndexFactory(
-			@Qualifier("hdfsMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder hdfsMessagePathBuilder,
-			HdfsSystemManager hdfsSystemManager, ServerConfigManager serverConfigManager,
-			@Qualifier("hdfsTokenMappingManager") TokenMappingManager hdfsTokenMappingManager) {
-		return (domain, ip, hour) -> {
-			HdfsIndex index = new HdfsIndex();
-
-			index.setPathBuilder(hdfsMessagePathBuilder);
-			index.setFileSystemManager(hdfsSystemManager);
-			index.setServerConfigManager(serverConfigManager);
-			index.setTokenMappingManager(hdfsTokenMappingManager);
-			index.initialize(domain, ip, hour);
-			return index;
-		};
-	}
-
-	@Bean
-	public MessageConsumerFinder hdfsMessageConsumerFinder(HdfsSystemManager hdfsSystemManager) {
-		HdfsMessageConsumerFinder finder = new HdfsMessageConsumerFinder();
-
-		finder.setFileSystemManager(hdfsSystemManager);
-		return finder;
-	}
-
-	@Bean(initMethod = "initialize")
-	public HdfsIndexManager hdfsIndexManager(ServerConfigManager serverConfigManager, HdfsSystemManager hdfsSystemManager,
-			@Qualifier("hdfsMessageConsumerFinder") MessageConsumerFinder hdfsMessageConsumerFinder,
-			@Qualifier("hdfsIndexFactory") IndexFactory hdfsIndexFactory) {
-		HdfsIndexManager manager = new HdfsIndexManager();
-
-		manager.setConfigManager(serverConfigManager);
-		manager.setFileSystemManager(hdfsSystemManager);
-		manager.setConsumerFinder(hdfsMessageConsumerFinder);
-		manager.setIndexFactory(hdfsIndexFactory);
-		return manager;
-	}
-
-	@Bean
-	public BucketFactory hdfsBucketFactory(
-			@Qualifier("hdfsMessagePathBuilder") org.unidal.cat.message.storage.PathBuilder hdfsMessagePathBuilder,
-			HdfsSystemManager hdfsSystemManager, ServerConfigManager serverConfigManager) {
-		return (domain, ip, hour, writeMode) -> {
-			HdfsBucket bucket = new HdfsBucket();
-
-			bucket.setPathBuilder(hdfsMessagePathBuilder);
-			bucket.setFileSystemManager(hdfsSystemManager);
-			bucket.setServerConfigManager(serverConfigManager);
-			bucket.initialize(domain, ip, hour, writeMode);
-			return bucket;
-		};
-	}
-
-	@Bean(initMethod = "initialize")
-	public HdfsBucketManager hdfsBucketManager(ServerConfigManager serverConfigManager, HdfsSystemManager hdfsSystemManager,
-			@Qualifier("hdfsMessageConsumerFinder") MessageConsumerFinder hdfsMessageConsumerFinder,
-			@Qualifier("hdfsBucketFactory") BucketFactory hdfsBucketFactory) {
-		HdfsBucketManager manager = new HdfsBucketManager();
-
-		manager.setConfigManager(serverConfigManager);
-		manager.setFileSystemManager(hdfsSystemManager);
-		manager.setConsumerFinder(hdfsMessageConsumerFinder);
-		manager.setBucketFactory(hdfsBucketFactory);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public FileSystemManager hdfsLogviewFileSystemManager(ServerConfigManager serverConfigManager) {
-		FileSystemManager manager = new FileSystemManager();
-
-		manager.setConfigManager(serverConfigManager);
-		return manager;
-	}
-
-	@Bean
-	public HdfsMessageBucketFactory hdfsMessageBucketFactory(FileSystemManager hdfsLogviewFileSystemManager) {
-		return (type, dataFile, date) -> {
-			AbstractHdfsMessageBucket bucket;
-
-			if (HdfsMessageBucketManager.HARFS_BUCKET.equals(type)) {
-				bucket = new HarfsMessageBucket();
-			} else if (HdfsMessageBucketManager.HDFS_BUCKET.equals(type)) {
-				bucket = new HdfsMessageBucket();
-			} else {
-				throw new IllegalArgumentException("Unsupported HDFS message bucket type: " + type);
-			}
-			bucket.setFileSystemManager(hdfsLogviewFileSystemManager);
-			bucket.initialize(dataFile, date);
-			return bucket;
-		};
-	}
-
-	@Bean(initMethod = "initialize", name = "hdfsMessageBucketManager")
-	public MessageBucketManager hdfsMessageBucketManager(FileSystemManager hdfsLogviewFileSystemManager,
-			PathBuilder pathBuilder, ServerConfigManager serverConfigManager,
-			HdfsMessageBucketFactory hdfsMessageBucketFactory) {
-		HdfsMessageBucketManager manager = new HdfsMessageBucketManager();
-
-		manager.setFileSystemManager(hdfsLogviewFileSystemManager);
-		manager.setPathBuilder(pathBuilder);
-		manager.setServerConfigManager(serverConfigManager);
-		manager.setBucketFactory(hdfsMessageBucketFactory);
-		return manager;
-	}
-
-	@Bean
-	public ReportBucketFactory reportBucketFactory(PathBuilder pathBuilder, ServerConfigManager serverConfigManager) {
-		return new ReportBucketFactory() {
-			@Override
-			public ReportBucket createReportBucket(String name, java.util.Date timestamp, int index)
-			      throws java.io.IOException {
-				LocalReportBucket bucket = new LocalReportBucket();
-
-				bucket.setPathBuilder(pathBuilder);
-				bucket.setConfigManager(serverConfigManager);
-				bucket.initialize(name, timestamp, index);
-				return bucket;
-			}
-		};
-	}
-
-	@Bean(initMethod = "initialize")
-	public ReportBucketManager reportBucketManager(ServerConfigManager serverConfigManager,
-			ReportBucketFactory reportBucketFactory) {
-		DefaultReportBucketManager manager = new DefaultReportBucketManager();
-
-		manager.setConfigManager(serverConfigManager);
-		manager.setBucketFactory(reportBucketFactory);
-		return manager;
 	}
 
 	@Bean
