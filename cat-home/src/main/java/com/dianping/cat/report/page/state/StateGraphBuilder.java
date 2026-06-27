@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
@@ -34,11 +36,14 @@ import com.dianping.cat.report.graph.PieChart;
 import com.dianping.cat.report.graph.PieChart.Item;
 import com.dianping.cat.report.page.state.service.StateReportService;
 
+@Component("stateGraphBuilder")
 public class StateGraphBuilder {
 
-	private StateReportService m_reportService;
+	@Resource
+	private StateReportService stateReportService;
 
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	public Pair<LineChart, PieChart> buildGraph(Payload payload, String key) {
 		String domain = payload.getDomain();
@@ -68,7 +73,7 @@ public class StateGraphBuilder {
 			step = TimeHelper.ONE_DAY;
 		}
 		for (long date = start.getTime(); date < end.getTime(); date += step) {
-			StateReport report = m_reportService.queryReport(domain, new Date(date), new Date(date + step));
+			StateReport report = stateReportService.queryReport(domain, new Date(date), new Date(date + step));
 
 			report.accept(builder);
 			report.accept(visitor);
@@ -87,7 +92,7 @@ public class StateGraphBuilder {
 
 	private Pair<LineChart, PieChart> buildHourlyGraph(StateReport report, String domain, String key, String ip) {
 		LineChart linechart = new LineChart();
-		StateHourlyGraphVisitor builder = new StateHourlyGraphVisitor(ip, m_serverFilterConfigManager.getUnusedDomains(),	key,
+		StateHourlyGraphVisitor builder = new StateHourlyGraphVisitor(ip, serverFilterConfigManager.getUnusedDomains(),	key,
 								60);
 
 		builder.visitStateReport(report);
@@ -119,11 +124,4 @@ public class StateGraphBuilder {
 		return chart;
 	}
 
-	public void setReportService(StateReportService reportService) {
-		m_reportService = reportService;
-	}
-
-	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
-	}
 }

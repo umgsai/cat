@@ -23,7 +23,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
@@ -44,29 +48,43 @@ import com.dianping.cat.system.page.config.Model;
 import com.dianping.cat.system.page.config.Payload;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 
+@Component("globalConfigProcessor")
 public class GlobalConfigProcessor {
 
-	public ProjectService m_projectService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(GlobalConfigProcessor.class);
 
-	private RouterConfigManager m_routerConfigManager;
+	@Resource
+	private ProjectService projectService;
 
-	private DomainGroupConfigManager m_domainGroupConfigManger;
+	@Resource
+	private RouterConfigManager routerConfigManager;
 
-	private SenderConfigManager m_senderConfigManager;
+	@Resource
+	private DomainGroupConfigManager domainGroupConfigManager;
 
-	private StorageGroupConfigManager m_groupConfigManager;
+	@Resource
+	private SenderConfigManager senderConfigManager;
 
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	@Resource
+	private StorageGroupConfigManager storageGroupConfigManager;
 
-	private AllReportConfigManager m_transactionConfigManager;
+	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private ConfigHtmlParser m_configHtmlParser;
+	@Resource
+	private AllReportConfigManager allReportConfigManager;
 
-	private SampleConfigManager m_sampleConfigManager;
+	@Resource
+	private ConfigHtmlParser configHtmlParser;
 
-	private ServerConfigManager m_serverConfigManager;
+	@Resource
+	private SampleConfigManager sampleConfigManager;
 
-	private ReportReloadConfigManager m_reloadConfigManager;
+	@Resource
+	private ServerConfigManager serverConfigManager;
+
+	@Resource
+	private ReportReloadConfigManager reportReloadConfigManager;
 
 	private boolean deleteProject(Payload payload) {
 		Project proto = new Project();
@@ -74,7 +92,7 @@ public class GlobalConfigProcessor {
 
 		proto.setId(id);
 		proto.setKeyId(id);
-		return m_projectService.delete(proto);
+		return projectService.delete(proto);
 	}
 
 	public void process(Action action, Payload payload, Model model) {
@@ -86,7 +104,7 @@ public class GlobalConfigProcessor {
 				domain = Constants.CAT;
 			}
 			model.setProjects(queryAllProjects());
-			model.setProject(m_projectService.findByDomain(domain));
+			model.setProject(projectService.findByDomain(domain));
 			break;
 		case PROJECT_ADD:
 			break;
@@ -102,7 +120,7 @@ public class GlobalConfigProcessor {
 				}
 			}
 			model.setProjects(queryAllProjects());
-			model.setProject(m_projectService.findByDomain(domain));
+			model.setProject(projectService.findByDomain(domain));
 			break;
 		case PROJECT_DELETE:
 			model.setOpState(deleteProject(payload));
@@ -112,88 +130,88 @@ public class GlobalConfigProcessor {
 				domain = Constants.CAT;
 			}
 			model.setProjects(queryAllProjects());
-			model.setProject(m_projectService.findByDomain(domain));
+			model.setProject(projectService.findByDomain(domain));
 			break;
 		case DOMAIN_GROUP_CONFIGS:
-			model.setDomainGroup(m_domainGroupConfigManger.getDomainGroup());
+			model.setDomainGroup(domainGroupConfigManager.getDomainGroup());
 			break;
 		case DOMAIN_GROUP_CONFIG_UPDATE:
 			domain = payload.getDomain();
-			Domain groupDomain = m_domainGroupConfigManger.queryGroupDomain(domain);
+			Domain groupDomain = domainGroupConfigManager.queryGroupDomain(domain);
 
 			model.setGroupDomain(groupDomain);
 			break;
 		case DOMAIN_GROUP_CONFIG_DELETE:
-			m_domainGroupConfigManger.deleteGroup(payload.getDomain());
-			model.setDomainGroup(m_domainGroupConfigManger.getDomainGroup());
+			domainGroupConfigManager.deleteGroup(payload.getDomain());
+			model.setDomainGroup(domainGroupConfigManager.getDomainGroup());
 			break;
 		case DOMAIN_GROUP_CONFIG_SUBMIT:
-			m_domainGroupConfigManger.insertFromJson(payload.getContent());
-			model.setDomainGroup(m_domainGroupConfigManger.getDomainGroup());
+			domainGroupConfigManager.insertFromJson(payload.getContent());
+			model.setDomainGroup(domainGroupConfigManager.getDomainGroup());
 			break;
 		case ROUTER_CONFIG_UPDATE:
 			String routerConfig = payload.getContent();
 
 			if (!StringUtils.isEmpty(routerConfig)) {
-				model.setOpState(m_routerConfigManager.insert(routerConfig));
+				model.setOpState(routerConfigManager.insert(routerConfig));
 			}
-			model.setContent(m_configHtmlParser.parse(m_routerConfigManager.getRouterConfig().toString()));
+			model.setContent(configHtmlParser.parse(routerConfigManager.getRouterConfig().toString()));
 			break;
 		case ALERT_SENDER_CONFIG_UPDATE:
 			String senderConfig = payload.getContent();
 
 			if (!StringUtils.isEmpty(senderConfig)) {
-				model.setOpState(m_senderConfigManager.insert(senderConfig));
+				model.setOpState(senderConfigManager.insert(senderConfig));
 			}
-			model.setContent(m_configHtmlParser.parse(m_senderConfigManager.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(senderConfigManager.getConfig().toString()));
 			break;
 		case STORAGE_GROUP_CONFIG_UPDATE:
 			String storageGroup = payload.getContent();
 
 			if (!StringUtils.isEmpty(storageGroup)) {
-				model.setOpState(m_groupConfigManager.insert(storageGroup));
+				model.setOpState(storageGroupConfigManager.insert(storageGroup));
 			}
-			model.setContent(m_configHtmlParser.parse(m_groupConfigManager.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(storageGroupConfigManager.getConfig().toString()));
 			break;
 		case SERVER_FILTER_CONFIG_UPDATE:
 			String serverConfig = payload.getContent();
 
 			if (!StringUtils.isEmpty(serverConfig)) {
-				model.setOpState(m_serverFilterConfigManager.insert(serverConfig));
+				model.setOpState(serverFilterConfigManager.insert(serverConfig));
 			}
-			model.setContent(m_configHtmlParser.parse(m_serverFilterConfigManager.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(serverFilterConfigManager.getConfig().toString()));
 			break;
 		case ALL_REPORT_CONFIG:
 			String transactionConfig = payload.getContent();
 
 			if (!StringUtils.isEmpty(transactionConfig)) {
-				model.setOpState(m_transactionConfigManager.insert(transactionConfig));
+				model.setOpState(allReportConfigManager.insert(transactionConfig));
 			}
-			model.setContent(m_configHtmlParser.parse(m_transactionConfigManager.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(allReportConfigManager.getConfig().toString()));
 			break;
 		case SAMPLE_CONFIG_UPDATE:
 			String sampleConfig = payload.getContent();
 
 			if (!StringUtils.isEmpty(sampleConfig)) {
-				model.setOpState(m_sampleConfigManager.insert(sampleConfig));
+				model.setOpState(sampleConfigManager.insert(sampleConfig));
 			}
-			model.setContent(m_configHtmlParser.parse(m_sampleConfigManager.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(sampleConfigManager.getConfig().toString()));
 			break;
 		case SERVER_CONFIG_UPDATE:
 			serverConfig = payload.getContent();
 
 			if (!StringUtils.isEmpty(serverConfig)) {
-				model.setOpState(m_serverConfigManager.insert(serverConfig));
+				model.setOpState(serverConfigManager.insert(serverConfig));
 			}
-			model.setContent(m_configHtmlParser.parse(m_serverConfigManager.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(serverConfigManager.getConfig().toString()));
 			break;
 		case REPORT_RELOAD_CONFIG_UPDATE:
 			String reportReloadConfig = payload.getContent();
 
 			if (!StringUtils.isEmpty(reportReloadConfig)) {
-				model.setOpState(m_reloadConfigManager.insert(reportReloadConfig));
+				model.setOpState(reportReloadConfigManager.insert(reportReloadConfig));
 			}
-			model.setContent(m_configHtmlParser.parse(m_reloadConfigManager.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(reportReloadConfigManager.getConfig().toString()));
 			break;
 		default:
 			break;
@@ -204,8 +222,9 @@ public class GlobalConfigProcessor {
 		List<Project> projects = new ArrayList<Project>();
 
 		try {
-			projects = m_projectService.findAll();
+			projects = projectService.findAll();
 		} catch (Exception e) {
+			LOGGER.error("Unable to query all projects.", e);
 			Cat.logError(e);
 		}
 		Collections.sort(projects, new ProjectCompartor());
@@ -223,63 +242,19 @@ public class GlobalConfigProcessor {
 		return result;
 	}
 
-	public void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
-		m_configHtmlParser = configHtmlParser;
-	}
-
-	public void setDomainGroupConfigManger(DomainGroupConfigManager domainGroupConfigManger) {
-		m_domainGroupConfigManger = domainGroupConfigManger;
-	}
-
-	public void setGroupConfigManager(StorageGroupConfigManager groupConfigManager) {
-		m_groupConfigManager = groupConfigManager;
-	}
-
-	public void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
-	}
-
-	public void setReloadConfigManager(ReportReloadConfigManager reloadConfigManager) {
-		m_reloadConfigManager = reloadConfigManager;
-	}
-
-	public void setRouterConfigManager(RouterConfigManager routerConfigManager) {
-		m_routerConfigManager = routerConfigManager;
-	}
-
-	public void setSampleConfigManager(SampleConfigManager sampleConfigManager) {
-		m_sampleConfigManager = sampleConfigManager;
-	}
-
-	public void setSenderConfigManager(SenderConfigManager senderConfigManager) {
-		m_senderConfigManager = senderConfigManager;
-	}
-
-	public void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
-	}
-
-	public void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
-		m_serverFilterConfigManager = serverFilterConfigManager;
-	}
-
-	public void setTransactionConfigManager(AllReportConfigManager transactionConfigManager) {
-		m_transactionConfigManager = transactionConfigManager;
-	}
-
 	private boolean updateProject(Payload payload) {
 		Project project = payload.getProject();
 		String domain = project.getDomain();
 
 		if (StringUtils.isNotEmpty(domain)) {
 			long id = project.getId();
-			Project temp = m_projectService.findByDomain(domain);
+			Project temp = projectService.findByDomain(domain);
 
 			if (temp != null && id > 0) {
 				temp.setKeyId(id);
-				return m_projectService.update(project);
+				return projectService.update(project);
 			} else {
-				return m_projectService.insert(project);
+				return projectService.insert(project);
 			}
 		}
 		return false;

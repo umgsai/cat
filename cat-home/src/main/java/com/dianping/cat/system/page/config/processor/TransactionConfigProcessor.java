@@ -20,34 +20,39 @@ package com.dianping.cat.system.page.config.processor;
 
 import java.util.Map;
 
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.alarm.rule.entity.Rule;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
 import com.dianping.cat.system.page.config.Action;
 import com.dianping.cat.system.page.config.Model;
 import com.dianping.cat.system.page.config.Payload;
 
+@Component("transactionConfigProcessor")
 public class TransactionConfigProcessor extends BaseProcesser {
 
-	private TransactionRuleConfigManager m_configManager;
+	@Resource
+	private TransactionRuleConfigManager transactionRuleConfigManager;
 
 	public void process(Action action, Payload payload, Model model) {
 		switch (action) {
 		case TRANSACTION_RULE:
-			Map<String, Rule> ruleMap = m_configManager.getMonitorRules().getRules();
+			Map<String, Rule> ruleMap = transactionRuleConfigManager.getMonitorRules().getRules();
 			rulesAvailableBuild(ruleMap);
 			model.setRules(ruleMap.values());
 			break;
 		case TRANSACTION_RULE_ADD_OR_UPDATE:
-			generateRuleConfigContent(payload.getRuleId(), m_configManager, model);
+			generateRuleConfigContent(payload.getRuleId(), transactionRuleConfigManager, model);
 			break;
 		case TRANSACTION_RULE_ADD_OR_UPDATE_SUBMIT:
-			model.setOpState(addSubmitRule(m_configManager, payload.getRuleId(), "",
+			model.setOpState(addSubmitRule(transactionRuleConfigManager, payload.getRuleId(), "",
 					payload.getConfigs(), payload.getAvailable()));
-			model.setRules(m_configManager.getMonitorRules().getRules().values());
+			model.setRules(transactionRuleConfigManager.getMonitorRules().getRules().values());
 			break;
 		case TRANSACTION_RULE_DELETE:
-			model.setOpState(deleteRule(m_configManager, payload.getRuleId()));
-			model.setRules(m_configManager.getMonitorRules().getRules().values());
+			model.setOpState(deleteRule(transactionRuleConfigManager, payload.getRuleId()));
+			model.setRules(transactionRuleConfigManager.getMonitorRules().getRules().values());
 			break;
 		default:
 			throw new RuntimeException("Error action name " + action.getName());
@@ -66,7 +71,4 @@ public class TransactionConfigProcessor extends BaseProcesser {
 		}
 	}
 
-	public void setConfigManager(TransactionRuleConfigManager configManager) {
-		m_configManager = configManager;
-	}
 }

@@ -320,6 +320,83 @@ git diff --check 通过
 用户已确认应用可以正常编译并启动。
 ```
 
+## 25. 第十七批完成记录
+
+第十七批扩大范围迁移页面支撑类和 system config processor 链路。计划中部分辅助类（`DependencyItemBuilder`、`TopologyGraphBuilder`、`StorageAlertInfoBuilder`、`ExternalInfoBuilder`、`StorageMergeHelper`、`EventMergeHelper`、`TransactionMergeHelper`）此前已经完成组件化并在扫描白名单中，本批没有重复改动。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 12 个 Bean 已改为 `@Component("原Bean名")` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+heartbeatHistoryGraphs -> com.dianping.cat.report.page.heartbeat.HistoryGraphs
+stateGraphBuilder -> com.dianping.cat.report.page.state.StateGraphBuilder
+stateBuilder -> com.dianping.cat.report.page.state.StateBuilder
+configHtmlParser -> com.dianping.cat.system.page.config.ConfigHtmlParser
+globalConfigProcessor -> com.dianping.cat.system.page.config.processor.GlobalConfigProcessor
+dependencyConfigProcessor -> com.dianping.cat.system.page.config.processor.DependencyConfigProcessor
+exceptionConfigProcessor -> com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor
+heartbeatConfigProcessor -> com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor
+storageConfigProcessor -> com.dianping.cat.system.page.config.processor.StorageConfigProcessor
+transactionConfigProcessor -> com.dianping.cat.system.page.config.processor.TransactionConfigProcessor
+eventConfigProcessor -> com.dianping.cat.system.page.config.processor.EventConfigProcessor
+alertConfigProcessor -> com.dianping.cat.system.page.config.processor.AlertConfigProcessor
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 12 个 `@Bean` 工厂方法，继续保留 `RuleFTLDecorator`、`RouterConfigManager`、`TopologyGraphManager` 等带初始化或生命周期语义的 Bean。
+
+3. 本批所有迁移类都使用 `@Resource` 字段注入；其中有歧义风险的依赖使用显式名称，例如：
+
+```text
+StateBuilder: @Resource(name = "stateModelService")
+BaseProcesser: @Resource(name = "ruleFTLDecorator")
+```
+
+4. 触碰到的旧式字段命名已收口为 Java 驼峰命名，例如：
+
+```text
+m_reportService -> heartbeatReportService / stateReportService
+m_manager -> heartbeatDisplayPolicyManager
+m_routerManager -> routerConfigManager
+m_stateService -> stateModelService
+m_projectService -> projectService
+m_domainGroupConfigManger -> domainGroupConfigManager
+m_transactionConfigManager -> allReportConfigManager
+m_reloadConfigManager -> reportReloadConfigManager
+m_ruleDecorator -> ruleDecorator
+m_configManager -> transactionRuleConfigManager / eventRuleConfigManager
+```
+
+5. `BaseProcesser` 原先只调用 `Cat.logError` 或直接吞掉的规则新增、更新、删除异常路径，已补充 SLF4J 日志；`GlobalConfigProcessor.queryAllProjects()` 也补充了查询失败日志。
+
+6. 本批仍不迁移以下内容：
+
+```text
+带 initMethod 的 Manager
+ReportService / ModelService
+TaskBuilder
+ReportManager
+Repository / DataSource / TransactionTemplate
+后台线程和调度类
+Map/List 聚合 Bean
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
 ## 11. 第三批完成记录
 
 第三批选择工具/适配类 Bean，目标是迁移无后台线程、无 prototype、无复杂生命周期的通用组件。

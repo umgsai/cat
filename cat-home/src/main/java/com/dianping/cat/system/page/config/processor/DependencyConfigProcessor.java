@@ -18,7 +18,9 @@
  */
 package com.dianping.cat.system.page.config.processor;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Constants;
 import com.dianping.cat.home.dependency.config.entity.DomainConfig;
@@ -30,21 +32,26 @@ import com.dianping.cat.system.page.config.ConfigHtmlParser;
 import com.dianping.cat.system.page.config.Model;
 import com.dianping.cat.system.page.config.Payload;
 
+@Component("dependencyConfigProcessor")
 public class DependencyConfigProcessor {
 
-	private GlobalConfigProcessor m_globalConfigManager;
+	@Resource
+	private GlobalConfigProcessor globalConfigProcessor;
 
-	private TopologyGraphConfigManager m_topologyConfigManager;
+	@Resource
+	private TopologyGraphConfigManager topologyGraphConfigManager;
 
-	private TopoGraphFormatConfigManager m_formatConfigManager;
+	@Resource
+	private TopoGraphFormatConfigManager topoGraphFormatConfigManager;
 
-	private ConfigHtmlParser m_configHtmlParser;
+	@Resource
+	private ConfigHtmlParser configHtmlParser;
 
 	private void graphEdgeConfigAdd(Payload payload, Model model) {
 		String type = payload.getType();
 		String from = payload.getFrom();
 		String to = payload.getTo();
-		EdgeConfig config = m_topologyConfigManager.queryEdgeConfig(type, from, to);
+		EdgeConfig config = topologyGraphConfigManager.queryEdgeConfig(type, from, to);
 
 		model.setEdgeConfig(config);
 	}
@@ -55,14 +62,14 @@ public class DependencyConfigProcessor {
 		if (!StringUtils.isEmpty(config.getType())) {
 			model.setEdgeConfig(config);
 			payload.setType(config.getType());
-			return m_topologyConfigManager.insertEdgeConfig(config);
+			return topologyGraphConfigManager.insertEdgeConfig(config);
 		} else {
 			return false;
 		}
 	}
 
 	private boolean graphEdgeConfigDelete(Payload payload) {
-		return m_topologyConfigManager.deleteEdgeConfig(payload.getType(), payload.getFrom(), payload.getTo());
+		return topologyGraphConfigManager.deleteEdgeConfig(payload.getType(), payload.getFrom(), payload.getTo());
 	}
 
 	private void graphNodeConfigAddOrUpdate(Payload payload, Model model) {
@@ -70,7 +77,7 @@ public class DependencyConfigProcessor {
 		String type = payload.getType();
 
 		if (!StringUtils.isEmpty(domain)) {
-			model.setDomainConfig(m_topologyConfigManager.queryNodeConfig(type, domain));
+			model.setDomainConfig(topologyGraphConfigManager.queryNodeConfig(type, domain));
 		}
 	}
 
@@ -81,77 +88,61 @@ public class DependencyConfigProcessor {
 		model.setDomainConfig(config);
 
 		if (Constants.ALL.equalsIgnoreCase(domain)) {
-			return m_topologyConfigManager.insertDomainDefaultConfig(type, config);
+			return topologyGraphConfigManager.insertDomainDefaultConfig(type, config);
 		} else {
-			return m_topologyConfigManager.insertDomainConfig(type, config);
+			return topologyGraphConfigManager.insertDomainConfig(type, config);
 		}
 	}
 
 	private boolean graphNodeConfigDelete(Payload payload) {
-		return m_topologyConfigManager.deleteDomainConfig(payload.getType(), payload.getDomain());
+		return topologyGraphConfigManager.deleteDomainConfig(payload.getType(), payload.getDomain());
 	}
 
 	public void process(Action action, Payload payload, Model model) {
 		switch (action) {
 		case TOPOLOGY_GRAPH_NODE_CONFIG_LIST:
-			model.setGraphConfig(m_topologyConfigManager.getConfig());
+			model.setGraphConfig(topologyGraphConfigManager.getConfig());
 			break;
 		case TOPOLOGY_GRAPH_NODE_CONFIG_ADD_OR_UPDATE:
 			graphNodeConfigAddOrUpdate(payload, model);
-			model.setProjects(m_globalConfigManager.queryAllProjects());
+			model.setProjects(globalConfigProcessor.queryAllProjects());
 			break;
 		case TOPOLOGY_GRAPH_NODE_CONFIG_ADD_OR_UPDATE_SUBMIT:
 			model.setOpState(graphNodeConfigAddOrUpdateSubmit(payload, model));
-			model.setGraphConfig(m_topologyConfigManager.getConfig());
+			model.setGraphConfig(topologyGraphConfigManager.getConfig());
 			break;
 		case TOPOLOGY_GRAPH_NODE_CONFIG_DELETE:
 			model.setOpState(graphNodeConfigDelete(payload));
-			model.setConfig(m_topologyConfigManager.getConfig());
+			model.setConfig(topologyGraphConfigManager.getConfig());
 			break;
 		case TOPOLOGY_GRAPH_EDGE_CONFIG_LIST:
-			model.setGraphConfig(m_topologyConfigManager.getConfig());
+			model.setGraphConfig(topologyGraphConfigManager.getConfig());
 			model.buildEdgeInfo();
 			break;
 		case TOPOLOGY_GRAPH_EDGE_CONFIG_ADD_OR_UPDATE:
 			graphEdgeConfigAdd(payload, model);
-			model.setProjects(m_globalConfigManager.queryAllProjects());
+			model.setProjects(globalConfigProcessor.queryAllProjects());
 			break;
 		case TOPOLOGY_GRAPH_EDGE_CONFIG_ADD_OR_UPDATE_SUBMIT:
 			model.setOpState(graphEdgeConfigAddOrUpdateSubmit(payload, model));
-			model.setGraphConfig(m_topologyConfigManager.getConfig());
+			model.setGraphConfig(topologyGraphConfigManager.getConfig());
 			model.buildEdgeInfo();
 			break;
 		case TOPOLOGY_GRAPH_EDGE_CONFIG_DELETE:
-			model.setGraphConfig(m_topologyConfigManager.getConfig());
+			model.setGraphConfig(topologyGraphConfigManager.getConfig());
 			model.setOpState(graphEdgeConfigDelete(payload));
 			model.buildEdgeInfo();
 			break;
 		case TOPO_GRAPH_FORMAT_CONFIG_UPDATE:
 			String topoGraphFormat = payload.getContent();
 			if (!StringUtils.isEmpty(topoGraphFormat)) {
-				model.setOpState(m_formatConfigManager.insert(topoGraphFormat));
+				model.setOpState(topoGraphFormatConfigManager.insert(topoGraphFormat));
 			}
-			model.setContent(m_configHtmlParser.parse(m_formatConfigManager.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(topoGraphFormatConfigManager.getConfig().toString()));
 			break;
 		default:
 			throw new RuntimeException("Error action name " + action.getName());
 		}
-	}
-
-	public void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
-		m_configHtmlParser = configHtmlParser;
-	}
-
-	public void setFormatConfigManager(TopoGraphFormatConfigManager formatConfigManager) {
-		m_formatConfigManager = formatConfigManager;
-	}
-
-	public void setGlobalConfigManager(GlobalConfigProcessor globalConfigManager) {
-		m_globalConfigManager = globalConfigManager;
-	}
-
-	public void setTopologyConfigManager(TopologyGraphConfigManager topologyConfigManager) {
-		m_topologyConfigManager = topologyConfigManager;
 	}
 
 }

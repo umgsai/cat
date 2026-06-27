@@ -25,6 +25,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.model.entity.Machine;
@@ -35,13 +38,16 @@ import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 
+@Component("stateBuilder")
 public class StateBuilder {
 
 	public static final int COUNT = 500 * 10000;
 
-	private RouterConfigManager m_routerManager;
+	@Resource
+	private RouterConfigManager routerConfigManager;
 
-	private ModelService<StateReport> m_stateService;
+	@Resource(name = "stateModelService")
+	private ModelService<StateReport> stateModelService;
 
 	public static boolean checkTooMuchLoss(Machine machine) {
 		return machine.getTotalLoss() > COUNT;
@@ -78,8 +84,8 @@ public class StateBuilder {
 
 	private List<String> queryAllServers() {
 		List<String> ids = new ArrayList<String>();
-		String backUpServer = m_routerManager.getRouterConfig().getBackupServer();
-		Map<String, DefaultServer> servers = m_routerManager.getRouterConfig().getDefaultServers();
+		String backUpServer = routerConfigManager.getRouterConfig().getBackupServer();
+		Map<String, DefaultServer> servers = routerConfigManager.getRouterConfig().getDefaultServers();
 
 		for (Entry<String, DefaultServer> server : servers.entrySet()) {
 			ids.add(server.getValue().getId());
@@ -105,8 +111,8 @@ public class StateBuilder {
 		ModelRequest request = new ModelRequest(domain, date) //
 		      .setProperty("ip", ip);
 
-		if (m_stateService.isEligable(request)) {
-			ModelResponse<StateReport> response = m_stateService.invoke(request);
+		if (stateModelService.isEligable(request)) {
+			ModelResponse<StateReport> response = stateModelService.invoke(request);
 
 			return response.getModel();
 		} else {
@@ -114,11 +120,4 @@ public class StateBuilder {
 		}
 	}
 
-	public void setRouterManager(RouterConfigManager routerManager) {
-		m_routerManager = routerManager;
-	}
-
-	public void setStateService(ModelService<StateReport> stateService) {
-		m_stateService = stateService;
-	}
 }

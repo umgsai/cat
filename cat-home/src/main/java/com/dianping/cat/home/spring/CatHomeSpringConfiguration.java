@@ -463,6 +463,18 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		com.dianping.cat.system.page.config.Handler.class,
 		com.dianping.cat.system.page.router.Handler.class,
 		com.dianping.cat.system.page.business.Handler.class,
+		com.dianping.cat.report.page.heartbeat.HistoryGraphs.class,
+		com.dianping.cat.report.page.state.StateGraphBuilder.class,
+		com.dianping.cat.report.page.state.StateBuilder.class,
+		ConfigHtmlParser.class,
+		com.dianping.cat.system.page.config.processor.GlobalConfigProcessor.class,
+		com.dianping.cat.system.page.config.processor.DependencyConfigProcessor.class,
+		com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor.class,
+		com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor.class,
+		com.dianping.cat.system.page.config.processor.StorageConfigProcessor.class,
+		com.dianping.cat.system.page.config.processor.TransactionConfigProcessor.class,
+		com.dianping.cat.system.page.config.processor.EventConfigProcessor.class,
+		com.dianping.cat.system.page.config.processor.AlertConfigProcessor.class,
 		com.dianping.cat.system.page.permission.Handler.class},
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
@@ -535,6 +547,18 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					com.dianping.cat.system.page.config.Handler.class,
 					com.dianping.cat.system.page.router.Handler.class,
 					com.dianping.cat.system.page.business.Handler.class,
+					com.dianping.cat.report.page.heartbeat.HistoryGraphs.class,
+					com.dianping.cat.report.page.state.StateGraphBuilder.class,
+					com.dianping.cat.report.page.state.StateBuilder.class,
+					ConfigHtmlParser.class,
+					com.dianping.cat.system.page.config.processor.GlobalConfigProcessor.class,
+					com.dianping.cat.system.page.config.processor.DependencyConfigProcessor.class,
+					com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor.class,
+					com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor.class,
+					com.dianping.cat.system.page.config.processor.StorageConfigProcessor.class,
+					com.dianping.cat.system.page.config.processor.TransactionConfigProcessor.class,
+					com.dianping.cat.system.page.config.processor.EventConfigProcessor.class,
+					com.dianping.cat.system.page.config.processor.AlertConfigProcessor.class,
 					com.dianping.cat.system.page.permission.Handler.class}),
 		useDefaultFilters = false)
 @MapperScan(basePackages = {
@@ -1270,38 +1294,6 @@ public class CatHomeSpringConfiguration {
 				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
 				monthlyReportContentRepository);
 		return service;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.heartbeat.HistoryGraphs heartbeatHistoryGraphs(
-			HeartbeatReportService heartbeatReportService, HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager) {
-		com.dianping.cat.report.page.heartbeat.HistoryGraphs historyGraphs =
-		      new com.dianping.cat.report.page.heartbeat.HistoryGraphs();
-
-		historyGraphs.setReportService(heartbeatReportService);
-		historyGraphs.setManager(heartbeatDisplayPolicyManager);
-		return historyGraphs;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.state.StateGraphBuilder stateGraphBuilder(
-			StateReportService stateReportService, ServerFilterConfigManager serverFilterConfigManager) {
-		com.dianping.cat.report.page.state.StateGraphBuilder builder =
-		      new com.dianping.cat.report.page.state.StateGraphBuilder();
-
-		builder.setReportService(stateReportService);
-		builder.setServerFilterConfigManager(serverFilterConfigManager);
-		return builder;
-	}
-
-	@Bean
-	public com.dianping.cat.report.page.state.StateBuilder stateBuilder(RouterConfigManager routerConfigManager,
-			@Qualifier("stateModelService") ModelService<StateReport> stateModelService) {
-		com.dianping.cat.report.page.state.StateBuilder builder = new com.dianping.cat.report.page.state.StateBuilder();
-
-		builder.setRouterManager(routerConfigManager);
-		builder.setStateService(stateModelService);
-		return builder;
 	}
 
 	@Bean(initMethod = "initialize")
@@ -3032,128 +3024,9 @@ public class CatHomeSpringConfiguration {
 		return new DomainValidator();
 	}
 
-	@Bean
-	public ConfigHtmlParser configHtmlParser() {
-		return new ConfigHtmlParser();
-	}
-
 	@Bean(initMethod = "initialize")
 	public com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator ruleFTLDecorator() {
 		return new com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator();
-	}
-
-	@Bean
-	public com.dianping.cat.system.page.config.processor.GlobalConfigProcessor globalConfigProcessor(
-			ProjectService projectService, RouterConfigManager routerConfigManager,
-			DomainGroupConfigManager domainGroupConfigManager, SenderConfigManager senderConfigManager,
-			StorageGroupConfigManager storageGroupConfigManager, ServerFilterConfigManager serverFilterConfigManager,
-			AllReportConfigManager allReportConfigManager, ConfigHtmlParser configHtmlParser,
-			SampleConfigManager sampleConfigManager, ServerConfigManager serverConfigManager,
-			ReportReloadConfigManager reportReloadConfigManager) {
-		com.dianping.cat.system.page.config.processor.GlobalConfigProcessor processor =
-		      new com.dianping.cat.system.page.config.processor.GlobalConfigProcessor();
-
-		processor.setProjectService(projectService);
-		processor.setRouterConfigManager(routerConfigManager);
-		processor.setDomainGroupConfigManger(domainGroupConfigManager);
-		processor.setSenderConfigManager(senderConfigManager);
-		processor.setGroupConfigManager(storageGroupConfigManager);
-		processor.setServerFilterConfigManager(serverFilterConfigManager);
-		processor.setTransactionConfigManager(allReportConfigManager);
-		processor.setConfigHtmlParser(configHtmlParser);
-		processor.setSampleConfigManager(sampleConfigManager);
-		processor.setServerConfigManager(serverConfigManager);
-		processor.setReloadConfigManager(reportReloadConfigManager);
-		return processor;
-	}
-
-	@Bean
-	public com.dianping.cat.system.page.config.processor.DependencyConfigProcessor dependencyConfigProcessor(
-			com.dianping.cat.system.page.config.processor.GlobalConfigProcessor globalConfigProcessor,
-			TopologyGraphConfigManager topologyGraphConfigManager, TopoGraphFormatConfigManager topoGraphFormatConfigManager,
-			ConfigHtmlParser configHtmlParser) {
-		com.dianping.cat.system.page.config.processor.DependencyConfigProcessor processor =
-		      new com.dianping.cat.system.page.config.processor.DependencyConfigProcessor();
-
-		processor.setGlobalConfigManager(globalConfigProcessor);
-		processor.setTopologyConfigManager(topologyGraphConfigManager);
-		processor.setFormatConfigManager(topoGraphFormatConfigManager);
-		processor.setConfigHtmlParser(configHtmlParser);
-		return processor;
-	}
-
-	@Bean
-	public com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor exceptionConfigProcessor(
-			com.dianping.cat.system.page.config.processor.GlobalConfigProcessor globalConfigProcessor,
-			ExceptionRuleConfigManager exceptionRuleConfigManager) {
-		com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor processor =
-		      new com.dianping.cat.system.page.config.processor.ExceptionConfigProcessor();
-
-		processor.setGlobalConfigProcessor(globalConfigProcessor);
-		processor.setExceptionRuleConfigManager(exceptionRuleConfigManager);
-		return processor;
-	}
-
-	@Bean
-	public com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor heartbeatConfigProcessor(
-			HeartbeatRuleConfigManager heartbeatRuleConfigManager,
-			HeartbeatDisplayPolicyManager heartbeatDisplayPolicyManager, ConfigHtmlParser configHtmlParser,
-			com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator ruleFTLDecorator) {
-		com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor processor =
-		      new com.dianping.cat.system.page.config.processor.HeartbeatConfigProcessor();
-
-		processor.setHeartbeatRuleConfigManager(heartbeatRuleConfigManager);
-		processor.setDisplayPolicyManager(heartbeatDisplayPolicyManager);
-		processor.setConfigHtmlParser(configHtmlParser);
-		processor.setRuleDecorator(ruleFTLDecorator);
-		return processor;
-	}
-
-	@Bean
-	public com.dianping.cat.system.page.config.processor.StorageConfigProcessor storageConfigProcessor(
-			com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator ruleFTLDecorator) {
-		com.dianping.cat.system.page.config.processor.StorageConfigProcessor processor =
-		      new com.dianping.cat.system.page.config.processor.StorageConfigProcessor();
-
-		processor.setRuleDecorator(ruleFTLDecorator);
-		return processor;
-	}
-
-	@Bean
-	public com.dianping.cat.system.page.config.processor.TransactionConfigProcessor transactionConfigProcessor(
-			TransactionRuleConfigManager transactionRuleConfigManager,
-			com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator ruleFTLDecorator) {
-		com.dianping.cat.system.page.config.processor.TransactionConfigProcessor processor =
-		      new com.dianping.cat.system.page.config.processor.TransactionConfigProcessor();
-
-		processor.setConfigManager(transactionRuleConfigManager);
-		processor.setRuleDecorator(ruleFTLDecorator);
-		return processor;
-	}
-
-	@Bean
-	public com.dianping.cat.system.page.config.processor.EventConfigProcessor eventConfigProcessor(
-			EventRuleConfigManager eventRuleConfigManager,
-			com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator ruleFTLDecorator) {
-		com.dianping.cat.system.page.config.processor.EventConfigProcessor processor =
-		      new com.dianping.cat.system.page.config.processor.EventConfigProcessor();
-
-		processor.setConfigManager(eventRuleConfigManager);
-		processor.setRuleDecorator(ruleFTLDecorator);
-		return processor;
-	}
-
-	@Bean
-	public com.dianping.cat.system.page.config.processor.AlertConfigProcessor alertConfigProcessor(
-			AlertConfigManager alertConfigManager, AlertPolicyManager alertPolicyManager,
-			ConfigHtmlParser configHtmlParser) {
-		com.dianping.cat.system.page.config.processor.AlertConfigProcessor processor =
-		      new com.dianping.cat.system.page.config.processor.AlertConfigProcessor();
-
-		processor.setAlertConfigManager(alertConfigManager);
-		processor.setAlertPolicyManager(alertPolicyManager);
-		processor.setConfigHtmlParser(configHtmlParser);
-		return processor;
 	}
 
 	@Bean(initMethod = "initialize")
