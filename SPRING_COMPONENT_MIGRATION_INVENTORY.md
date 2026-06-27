@@ -314,6 +314,67 @@ BUILD SUCCESS
 git diff --check 通过
 ```
 
+## 29. 第二十一批完成记录
+
+第二十一批迁移告警编排层 Bean。前两批已经完成告警发送链路的叶子实现和 Manager 聚合层迁移，本批继续迁移 `com.dianping.cat.alarm.spi.AlertManager` 和 `com.dianping.cat.report.alert.AlarmManager`，但暂不迁移具体告警任务类 `BusinessAlert`、`EventAlert`、`ExceptionAlert`、`HeartbeatAlert`、`TransactionAlert`，避免同时改动告警扫描线程的业务依赖。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. `com.dianping.cat.alarm.spi.AlertManager` 已改为 `@Component("spiAlertManager")` 创建，并加入 `CatHomeSpringConfiguration` 的保守白名单扫描。
+2. 已删除 `CatHomeSpringConfiguration` 中的 `spiAlertManager(...)` `@Bean(initMethod = "initialize")` 方法。
+3. `AlertManager` 的依赖已改为 `@Resource` 字段注入：
+
+```text
+SpliterManager
+SenderManager
+AlertService
+AlertPolicyManager
+DecoratorManager
+ContactorManager
+ServerConfigManager
+```
+
+4. `AlertManager` 原 `initMethod = "initialize"` 生命周期已改为 `@PostConstruct`，保持发送线程和恢复通知线程启动行为。
+5. `AlertManager` 中旧式 `m_` 字段已改为 Java 驼峰命名：
+
+```text
+m_initialized       -> initialized
+m_splitterManager   -> spliterManager
+m_senderManager     -> senderManager
+m_alertService      -> alertService
+m_policyManager     -> alertPolicyManager
+m_decoratorManager  -> decoratorManager
+m_contactorManager  -> contactorManager
+m_configManager     -> serverConfigManager
+m_alerts            -> alerts
+m_unrecoveredAlerts -> unrecoveredAlerts
+m_sendedAlerts      -> sentAlerts
+m_alertMap          -> alertMap
+m_sdf               -> sdf
+```
+
+6. `com.dianping.cat.report.alert.AlarmManager` 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 的保守白名单扫描。
+7. 已删除 `CatHomeSpringConfiguration` 中的 `alarmManager(...)` `@Bean` 方法。
+8. `AlarmManager` 中的具体告警任务依赖已改为 `@Resource` 字段注入，字段命名同步改为驼峰格式。
+9. `AlertManager` 和 `AlarmManager` 的 setter 方法暂时保留，兼容测试或少量手工装配场景；主路径已由 Spring 注解注入。
+10. 本批未运行 `AlertTest`、`SuspendTest`、`SenderTest`、`SenderManagerTest`，因为它们会触发告警巡检、真实发送链路或长时间等待。
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
 ## 28. 第二十批完成记录
 
 第二十批承接第十九批的告警发送链路改造，迁移告警聚合层 Manager。第十九批已经将 sender、spliter、contactor、decorator 的叶子实现改为组件注册；本批进一步将负责聚合调用的 Manager 改为 `@Component` 注册。`alertSenders`、`alertSpliters`、`alertContactors`、`alertDecorators` 这 4 个 Map 聚合 Bean 暂时继续保留在 `CatHomeSpringConfiguration` 中，作为稳定的命名装配点。

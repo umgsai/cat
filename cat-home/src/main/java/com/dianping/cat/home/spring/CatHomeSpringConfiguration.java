@@ -414,6 +414,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		HeartbeatContactor.class, TransactionContactor.class, BusinessDecorator.class,
 		EventDecorator.class, ExceptionDecorator.class, HeartbeatDecorator.class, TransactionDecorator.class,
 		SenderManager.class, SpliterManager.class, ContactorManager.class, DecoratorManager.class,
+		com.dianping.cat.alarm.spi.AlertManager.class, AlarmManager.class,
 		com.dianping.cat.report.page.home.JspViewer.class,
 		com.dianping.cat.report.page.monitor.JspViewer.class,
 		com.dianping.cat.report.page.model.JspViewer.class,
@@ -503,6 +504,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					HeartbeatContactor.class, TransactionContactor.class, BusinessDecorator.class,
 					EventDecorator.class, ExceptionDecorator.class, HeartbeatDecorator.class, TransactionDecorator.class,
 					SenderManager.class, SpliterManager.class, ContactorManager.class, DecoratorManager.class,
+					com.dianping.cat.alarm.spi.AlertManager.class, AlarmManager.class,
 					com.dianping.cat.report.page.home.JspViewer.class,
 					com.dianping.cat.report.page.monitor.JspViewer.class,
 					com.dianping.cat.report.page.model.JspViewer.class,
@@ -2333,36 +2335,6 @@ public class CatHomeSpringConfiguration {
 	public UserDefineRuleRepository userDefineRuleRepository(SqlSessionTemplate sqlSessionTemplate,
 			TransactionTemplate transactionTemplate) {
 		return configureSpringBackedRepository(new UserDefineRuleRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean(initMethod = "initialize")
-	public com.dianping.cat.alarm.spi.AlertManager spiAlertManager(SpliterManager spliterManager,
-			SenderManager senderManager, AlertService alertService,
-			AlertPolicyManager alertPolicyManager, DecoratorManager decoratorManager, ContactorManager contactorManager,
-			ServerConfigManager serverConfigManager) {
-		com.dianping.cat.alarm.spi.AlertManager manager = new com.dianping.cat.alarm.spi.AlertManager();
-
-		manager.setSplitterManager(spliterManager);
-		manager.setSenderManager(senderManager);
-		manager.setAlertService(alertService);
-		manager.setPolicyManager(alertPolicyManager);
-		manager.setDecoratorManager(decoratorManager);
-		manager.setContactorManager(contactorManager);
-		manager.setConfigManager(serverConfigManager);
-		return manager;
-	}
-
-	@Bean
-	public AlarmManager alarmManager(BusinessAlert businessAlert, EventAlert eventAlert, ExceptionAlert exceptionAlert,
-			HeartbeatAlert heartbeatAlert, TransactionAlert transactionAlert) {
-		AlarmManager manager = new AlarmManager();
-
-		manager.setBusinessAlert(businessAlert);
-		manager.setEventAlert(eventAlert);
-		manager.setExceptionAlert(exceptionAlert);
-		manager.setHeartbeatAlert(heartbeatAlert);
-		manager.setTransactionAlert(transactionAlert);
-		return manager;
 	}
 
 	@Bean
