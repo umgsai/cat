@@ -2,24 +2,30 @@ package com.dianping.cat.mybatis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import jakarta.annotation.Resource;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.mybatis.mapper.WeeklyReportMapper;
 import com.dianping.cat.mybatis.data.WeeklyReportDO;
 
+@Component("weeklyReportRepository")
 public class WeeklyReportRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WeeklyReportRepository.class);
 
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 
-	private SqlSessionTemplate m_sqlSessionTemplate;
+	@Resource(name = "sqlSessionTemplate")
+	private SqlSessionTemplate sqlSessionTemplate;
 
-	private TransactionTemplate m_transactionTemplate;
+	@Resource(name = "transactionTemplate")
+	private TransactionTemplate transactionTemplate;
 
 	public WeeklyReport createLocal() {
 		return new WeeklyReport();
@@ -73,9 +79,9 @@ public class WeeklyReportRepository {
 	}
 
 	private WeeklyReportMapper springMapper() {
-		SqlSessionTemplate sqlSessionTemplate = m_sqlSessionTemplate;
+		SqlSessionTemplate template = sqlSessionTemplate;
 
-		if (sqlSessionTemplate == null) {
+		if (template == null) {
 			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for WeeklyreportMapper.");
 		}
 
@@ -83,22 +89,22 @@ public class WeeklyReportRepository {
 			LOGGER.info("WeeklyReportRepository is using Spring managed WeeklyreportMapper.");
 		}
 
-		return sqlSessionTemplate.getMapper(WeeklyReportMapper.class);
+		return template.getMapper(WeeklyReportMapper.class);
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		if (m_transactionTemplate == null) {
+		if (transactionTemplate == null) {
 			throw new IllegalStateException("Spring TransactionTemplate is not configured for WeeklyreportMapper.");
 		}
-		return m_transactionTemplate;
+		return transactionTemplate;
 	}
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		m_sqlSessionTemplate = sqlSessionTemplate;
+		this.sqlSessionTemplate = sqlSessionTemplate;
 	}
 
 	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-		m_transactionTemplate = transactionTemplate;
+		this.transactionTemplate = transactionTemplate;
 	}
 
 	private WeeklyReport requireFound(WeeklyReportDO record, String field, String value) {

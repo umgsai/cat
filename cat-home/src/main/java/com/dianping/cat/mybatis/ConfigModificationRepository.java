@@ -4,10 +4,12 @@ import com.dianping.cat.mybatis.data.ConfigModificationDO;
 import com.dianping.cat.mybatis.mapper.ConfigModificationMapper;
 import com.dianping.cat.home.dal.report.ConfigModification;
 import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+@Component("configModificationRepository")
 public class ConfigModificationRepository extends SpringBackedRepositorySupport<ConfigModificationMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConfigModificationRepository.class);
 

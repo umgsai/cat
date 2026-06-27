@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -12,6 +13,7 @@ import com.dianping.cat.core.config.BusinessConfig;
 import com.dianping.cat.mybatis.data.BusinessConfigDO;
 import com.dianping.cat.mybatis.SpringBackedRepositorySupport;
 
+@Component("businessConfigRepository")
 public class BusinessConfigRepository extends SpringBackedRepositorySupport<BusinessConfigMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessConfigRepository.class);
 

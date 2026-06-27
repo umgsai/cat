@@ -2715,3 +2715,74 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+
+## 48. 第四十批完成记录
+第四十批迁移 Repository 显式 Bean。目标是在保留原 Bean 名、Mapper 使用方式和事务模板语义的前提下，把 `CatHomeSpringConfiguration` 中剩余的大批 Repository 工厂方法迁移为组件注册。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+1. 以下普通 Repository 已改为 `@Component("原Bean名")` 创建，并使用明确 bean 名称的 `@Resource` 注入：
+```text
+configRepository
+projectRepository
+hostinfoRepository
+dailyReportRepository
+dailyReportContentRepository
+hourlyReportRepository
+hourlyReportContentRepository
+weeklyReportRepository
+weeklyReportContentRepository
+monthlyReportRepository
+monthlyReportContentRepository
+taskRepository
+```
+
+2. 普通 Repository 中原来的 `m_sqlSessionTemplate`、`m_transactionTemplate` 已改为 Java 驼峰命名：
+```text
+sqlSessionTemplate
+transactionTemplate
+```
+
+3. `SpringBackedRepositorySupport` 已统一改为 `@Resource(name = "sqlSessionTemplate")` 和 `@Resource(name = "transactionTemplate")` 注入，继承它的 Repository 不再需要配置类工厂方法手动注入。
+
+4. 以下继承 `SpringBackedRepositorySupport` 的 Repository 已改为 `@Component("原Bean名")` 创建：
+```text
+businessConfigRepository
+overloadRepository
+alertRepository
+alterationRepository
+baselineRepository
+topologyGraphRepository
+alertSummaryRepository
+configModificationRepository
+metricGraphRepository
+metricScreenRepository
+serverAlarmRuleRepository
+userDefineRuleRepository
+```
+
+5. `CatHomeSpringConfiguration` 已删除 24 个 Repository 显式 `@Bean` 方法，并删除不再使用的 `configureSpringBackedRepository`、`configureReportService` 辅助方法。
+
+6. 所有迁移后的 Repository 已加入 `CatHomeSpringConfiguration` 的保守白名单扫描，仍然不扩大包扫描范围。
+
+7. 本批仍不迁移以下数据库基础设施 Bean：
+```text
+catDataSource
+sqlSessionFactory
+sqlSessionTemplate
+transactionManager
+transactionTemplate
+```
+
+验证记录：
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

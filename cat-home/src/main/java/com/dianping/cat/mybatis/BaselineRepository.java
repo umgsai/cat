@@ -4,10 +4,12 @@ import com.dianping.cat.mybatis.data.BaselineDO;
 import com.dianping.cat.mybatis.mapper.BaselineMapper;
 import com.dianping.cat.home.dal.report.Baseline;
 import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+@Component("baselineRepository")
 public class BaselineRepository extends SpringBackedRepositorySupport<BaselineMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BaselineRepository.class);
 

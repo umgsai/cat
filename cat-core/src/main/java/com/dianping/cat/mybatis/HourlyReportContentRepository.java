@@ -4,24 +4,30 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import jakarta.annotation.Resource;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.mybatis.mapper.HourlyReportContentMapper;
 import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 
+@Component("hourlyReportContentRepository")
 public class HourlyReportContentRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HourlyReportContentRepository.class);
 
 	private static final AtomicBoolean SPRING_MAPPER_LOGGED = new AtomicBoolean();
 
-	private SqlSessionTemplate m_sqlSessionTemplate;
+	@Resource(name = "sqlSessionTemplate")
+	private SqlSessionTemplate sqlSessionTemplate;
 
-	private TransactionTemplate m_transactionTemplate;
+	@Resource(name = "transactionTemplate")
+	private TransactionTemplate transactionTemplate;
 
 	public HourlyReportContent createLocal() {
 		return new HourlyReportContent();
@@ -82,28 +88,28 @@ public class HourlyReportContentRepository {
 	}
 
 	private HourlyReportContentMapper springMapper() {
-		if (m_sqlSessionTemplate == null) {
+		if (sqlSessionTemplate == null) {
 			throw new IllegalStateException("Spring SqlSessionTemplate is not configured for HourlyReportContentMapper.");
 		}
 		if (SPRING_MAPPER_LOGGED.compareAndSet(false, true)) {
 			LOGGER.info("HourlyReportContentRepository is using Spring managed HourlyReportContentMapper.");
 		}
-		return m_sqlSessionTemplate.getMapper(HourlyReportContentMapper.class);
+		return sqlSessionTemplate.getMapper(HourlyReportContentMapper.class);
 	}
 
 	private TransactionTemplate springTransactionTemplate() {
-		if (m_transactionTemplate == null) {
+		if (transactionTemplate == null) {
 			throw new IllegalStateException("Spring TransactionTemplate is not configured for HourlyReportContentMapper.");
 		}
-		return m_transactionTemplate;
+		return transactionTemplate;
 	}
 
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-		m_sqlSessionTemplate = sqlSessionTemplate;
+		this.sqlSessionTemplate = sqlSessionTemplate;
 	}
 
 	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-		m_transactionTemplate = transactionTemplate;
+		this.transactionTemplate = transactionTemplate;
 	}
 
 	private HourlyReportContent requireFound(HourlyReportContentDO record, String field, String value) {

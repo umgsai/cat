@@ -7,10 +7,12 @@ import com.dianping.cat.mybatis.SpringBackedRepositorySupport;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+@Component("serverAlarmRuleRepository")
 public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<ServerAlarmRuleMapper> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServerAlarmRuleRepository.class);
 
