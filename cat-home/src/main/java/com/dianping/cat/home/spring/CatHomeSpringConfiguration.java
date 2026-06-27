@@ -319,7 +319,6 @@ import com.dianping.cat.report.task.DefaultTaskConsumer;
 import com.dianping.cat.report.task.DefaultRemoteServersUpdater;
 import com.dianping.cat.report.task.ReportFacade;
 import com.dianping.cat.report.service.AbstractReportService;
-import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.report.task.current.CurrentReportBuilder;
 import com.dianping.cat.report.task.cmdb.CmdbInfoReloadBuilder;
@@ -409,7 +408,11 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		CompositeBusinessService.class, CompositeEventService.class, CompositeTransactionService.class,
 		CompositeHeartbeatService.class, CompositeTopService.class, CompositeStateService.class,
 		CompositeStorageService.class, CompositeCrossService.class, CompositeMatrixService.class,
-		CompositeDependencyService.class, LocalMessageService.class, HistoricalMessageService.class,
+		CompositeDependencyService.class, LocalProblemService.class, LocalEventService.class,
+		LocalTransactionService.class, LocalHeartbeatService.class, LocalCrossService.class,
+		LocalMatrixService.class, LocalDependencyService.class, LocalTopService.class,
+		LocalStateService.class, LocalStorageService.class, LocalBusinessService.class,
+		LocalMessageService.class, HistoricalMessageService.class,
 		CompositeLogViewService.class,
 		BusinessBaselineReportBuilder.class, JarReportService.class, JarReportBuilder.class,
 		HeavyReportService.class, HeavyReportBuilder.class, ClientReportService.class, ClientReportBuilder.class,
@@ -548,7 +551,11 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					CompositeBusinessService.class, CompositeEventService.class, CompositeTransactionService.class,
 					CompositeHeartbeatService.class, CompositeTopService.class, CompositeStateService.class,
 					CompositeStorageService.class, CompositeCrossService.class, CompositeMatrixService.class,
-					CompositeDependencyService.class, LocalMessageService.class, HistoricalMessageService.class,
+					CompositeDependencyService.class, LocalProblemService.class, LocalEventService.class,
+					LocalTransactionService.class, LocalHeartbeatService.class, LocalCrossService.class,
+					LocalMatrixService.class, LocalDependencyService.class, LocalTopService.class,
+					LocalStateService.class, LocalStorageService.class, LocalBusinessService.class,
+					LocalMessageService.class, HistoricalMessageService.class,
 					CompositeLogViewService.class,
 					JarReportBuilder.class, HeavyReportService.class, HeavyReportBuilder.class,
 					ClientReportService.class, ClientReportBuilder.class, ServiceReportService.class,
@@ -1556,158 +1563,6 @@ public class CatHomeSpringConfiguration {
 	public UserDefineRuleRepository userDefineRuleRepository(SqlSessionTemplate sqlSessionTemplate,
 			TransactionTemplate transactionTemplate) {
 		return configureSpringBackedRepository(new UserDefineRuleRepository(), sqlSessionTemplate, transactionTemplate);
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalModelService<ProblemReport> localProblemService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
-		LocalProblemService service = new LocalProblemService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(reportBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalModelService<EventReport> localEventService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
-		LocalEventService service = new LocalEventService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(reportBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalModelService<TransactionReport> localTransactionService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
-		LocalTransactionService service = new LocalTransactionService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(reportBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalModelService<HeartbeatReport> localHeartbeatService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
-		LocalHeartbeatService service = new LocalHeartbeatService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(reportBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalModelService<CrossReport> localCrossService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
-		LocalCrossService service = new LocalCrossService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(reportBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalModelService<MatrixReport> localMatrixService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
-		LocalMatrixService service = new LocalMatrixService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(reportBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalModelService<DependencyReport> localDependencyService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
-		LocalDependencyService service = new LocalDependencyService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(reportBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalModelService<TopReport> localTopService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
-		LocalTopService service = new LocalTopService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(reportBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalModelService<StateReport> localStateService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
-		LocalStateService service = new LocalStateService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(reportBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalModelService<StorageReport> localStorageService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
-		LocalStorageService service = new LocalStorageService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(reportBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LocalModelService<BusinessReport> localBusinessService(ServerConfigManager serverConfigManager,
-			ReportBucketManager reportBucketManager, MessageConsumer messageConsumer) {
-		LocalBusinessService service = new LocalBusinessService();
-
-		service.setConfigManager(serverConfigManager);
-		service.setBucketManager(reportBucketManager);
-		service.setConsumer(messageConsumer);
-		return service;
-	}
-
-	@Bean
-	public Map<String, LocalModelService> localModelServices(
-			@Qualifier("localProblemService") LocalModelService<ProblemReport> localProblemService,
-			@Qualifier("localEventService") LocalModelService<EventReport> localEventService,
-			@Qualifier("localTransactionService") LocalModelService<TransactionReport> localTransactionService,
-			@Qualifier("localHeartbeatService") LocalModelService<HeartbeatReport> localHeartbeatService,
-			@Qualifier("localCrossService") LocalModelService<CrossReport> localCrossService,
-			@Qualifier("localMatrixService") LocalModelService<MatrixReport> localMatrixService,
-			@Qualifier("localDependencyService") LocalModelService<DependencyReport> localDependencyService,
-			@Qualifier("localTopService") LocalModelService<TopReport> localTopService,
-			@Qualifier("localStateService") LocalModelService<StateReport> localStateService,
-			@Qualifier("localStorageService") LocalModelService<StorageReport> localStorageService,
-			@Qualifier("localBusinessService") LocalModelService<BusinessReport> localBusinessService,
-			@Qualifier("localMessageService") LocalModelService<String> localMessageService) {
-		Map<String, LocalModelService> services = new LinkedHashMap<String, LocalModelService>();
-
-		services.put(LocalProblemService.ID, localProblemService);
-		services.put(LocalEventService.ID, localEventService);
-		services.put(LocalTransactionService.ID, localTransactionService);
-		services.put(LocalHeartbeatService.ID, localHeartbeatService);
-		services.put(LocalCrossService.ID, localCrossService);
-		services.put(LocalMatrixService.ID, localMatrixService);
-		services.put(LocalDependencyService.ID, localDependencyService);
-		services.put(LocalTopService.ID, localTopService);
-		services.put(LocalStateService.ID, localStateService);
-		services.put(LocalStorageService.ID, localStorageService);
-		services.put(LocalBusinessService.ID, localBusinessService);
-		services.put("logview", localMessageService);
-		return services;
 	}
 
 	@Bean

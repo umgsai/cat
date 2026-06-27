@@ -32,12 +32,16 @@ import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.service.LocalModelService;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.service.ModelRequest;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
+@Component("localStateService")
 public class LocalStateService extends LocalModelService<StateReport> {
 
 	public static final String ID = StateAnalyzer.ID;
 
-	private ReportBucketManager m_bucketManager;
+	@Resource(name = "reportBucketManager")
+	private ReportBucketManager reportBucketManager;
 
 	public LocalStateService() {
 		super(StateAnalyzer.ID);
@@ -107,11 +111,11 @@ public class LocalStateService extends LocalModelService<StateReport> {
 	}
 
 	private ReportBucketManager getBucketManager() {
-		return m_bucketManager;
+		return reportBucketManager;
 	}
 
 	public void setBucketManager(ReportBucketManager bucketManager) {
-		m_bucketManager = bucketManager;
+		reportBucketManager = bucketManager;
 	}
 
 	public static class StateReportFilter extends com.dianping.cat.consumer.state.model.transform.DefaultXmlBuilder {

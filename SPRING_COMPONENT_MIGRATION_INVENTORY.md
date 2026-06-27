@@ -2380,3 +2380,60 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+
+## 42. 第三十四批完成记录
+
+第三十四批继续收口 ModelService 链路，迁移本地报表 `LocalModelService` 子类，并删除 `localModelServices` 聚合 Bean。目标是在保持旧 Bean 名和本地磁盘兜底读取行为不变的前提下，进一步减少 `CatHomeSpringConfiguration` 中的显式注册。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下本地报表服务已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+localProblemService
+localEventService
+localTransactionService
+localHeartbeatService
+localCrossService
+localMatrixService
+localDependencyService
+localTopService
+localStateService
+localStorageService
+localBusinessService
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 11 个旧 `@Bean(initMethod = "initialize")` 方法；初始化语义由 `LocalModelService` 基类的 `@PostConstruct` 承接。
+3. 11 个本地服务中的 `ReportBucketManager` 依赖已改为 `@Resource(name = "reportBucketManager")` 字段注入，并保留原 setter 以兼容测试和少量手工构造场景。
+4. 11 个本地服务触碰到的旧式字段命名已收口：
+
+```text
+m_bucketManager -> reportBucketManager
+```
+
+5. 已删除 `localModelServices` 聚合 Bean；`model.Handler` 改为按明确 Bean 名注入本地服务，并在初始化时自行构建 report name 到 `LocalModelService` 的 Map。
+6. `model.Handler` 聚合构建补充关键日志：当本地服务为空、服务名为空或服务名重复时，使用 SLF4J 输出可排查的上下文。
+7. 本批仍不迁移以下内容：
+
+```text
+ReportManager / ReportDelegate
+reportReloaders / taskBuilders 等任务入口聚合 Map
+存储 bucket / HDFS / message dump 基础设施
+DataSource / SqlSessionFactory / TransactionTemplate
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

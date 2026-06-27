@@ -50,8 +50,43 @@ import com.dianping.cat.report.service.ModelRequest;
 public class Handler implements PageHandler<Context> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Handler.class);
 
-	@Resource(name = "localModelServices")
-	private Map<String, LocalModelService> localServices;
+	@Resource(name = "localProblemService")
+	private LocalModelService problemService;
+
+	@Resource(name = "localEventService")
+	private LocalModelService eventService;
+
+	@Resource(name = "localTransactionService")
+	private LocalModelService transactionService;
+
+	@Resource(name = "localHeartbeatService")
+	private LocalModelService heartbeatService;
+
+	@Resource(name = "localCrossService")
+	private LocalModelService crossService;
+
+	@Resource(name = "localMatrixService")
+	private LocalModelService matrixService;
+
+	@Resource(name = "localDependencyService")
+	private LocalModelService dependencyService;
+
+	@Resource(name = "localTopService")
+	private LocalModelService topService;
+
+	@Resource(name = "localStateService")
+	private LocalModelService stateService;
+
+	@Resource(name = "localStorageService")
+	private LocalModelService storageService;
+
+	@Resource(name = "localBusinessService")
+	private LocalModelService businessService;
+
+	@Resource(name = "localMessageService")
+	private LocalModelService messageService;
+
+	private Map<String, LocalModelService> localServices = Collections.emptyMap();
 
 	private volatile boolean initialized;
 
@@ -119,15 +154,49 @@ public class Handler implements PageHandler<Context> {
 
 	public synchronized void initialize() {
 		if (!initialized) {
-			if (localServices == null || localServices.isEmpty()) {
-				localServices = new HashMap<String, LocalModelService>();
-				LOGGER.warn("Model page handler has no local model services configured.");
-			} else {
-				localServices = new HashMap<String, LocalModelService>(localServices);
-				LOGGER.info("Initialized model page handler from Spring injection, localServiceCount={}.",
-				      localServices.size());
-			}
+			localServices = buildLocalServices();
+			LOGGER.info("Initialized model page handler from Spring injection, localServiceCount={}.",
+			      localServices.size());
 			initialized = true;
+		}
+	}
+
+	private Map<String, LocalModelService> buildLocalServices() {
+		Map<String, LocalModelService> result = new HashMap<String, LocalModelService>();
+
+		addLocalService(result, problemService);
+		addLocalService(result, eventService);
+		addLocalService(result, transactionService);
+		addLocalService(result, heartbeatService);
+		addLocalService(result, crossService);
+		addLocalService(result, matrixService);
+		addLocalService(result, dependencyService);
+		addLocalService(result, topService);
+		addLocalService(result, stateService);
+		addLocalService(result, storageService);
+		addLocalService(result, businessService);
+		addLocalService(result, messageService);
+		return result;
+	}
+
+	private void addLocalService(Map<String, LocalModelService> services, LocalModelService service) {
+		if (service == null) {
+			LOGGER.warn("Ignoring null local model service while building model service map.");
+			return;
+		}
+
+		String name = service.getName();
+
+		if (name == null || name.length() == 0) {
+			LOGGER.warn("Ignoring local model service with empty name, serviceClass={}.", service.getClass().getName());
+			return;
+		}
+
+		LocalModelService previous = services.put(name, service);
+
+		if (previous != null) {
+			LOGGER.warn("Duplicate local model service name detected, name={}, previousClass={}, currentClass={}.",
+			      name, previous.getClass().getName(), service.getClass().getName());
 		}
 	}
 
