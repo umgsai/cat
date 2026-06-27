@@ -25,21 +25,27 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.TreeMap;
 
+import jakarta.annotation.Resource;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.analysis.MessageConsumer;
 import com.dianping.cat.analysis.TcpSocketReceiver;
 import com.dianping.cat.report.ReportPage;
 
+@Component("homeHandler")
 public class Handler implements PageHandler<Context> {
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
-	private TcpSocketReceiver m_receiver;
+	@Resource
+	private TcpSocketReceiver tcpSocketReceiver;
 
-	private MessageConsumer m_realtimeConsumer;
+	@Resource
+	private MessageConsumer messageConsumer;
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -60,8 +66,8 @@ public class Handler implements PageHandler<Context> {
 		case VIEW:
 			break;
 		case CHECKPOINT:
-			m_receiver.destory();
-			m_realtimeConsumer.doCheckpoint();
+			tcpSocketReceiver.destory();
+			messageConsumer.doCheckpoint();
 			break;
 		default:
 			break;
@@ -71,7 +77,7 @@ public class Handler implements PageHandler<Context> {
 		model.setPage(ReportPage.HOME);
 		model.setDomain(payload.getDomain());
 		model.setDate(payload.getDate());
-		m_jspViewer.view(ctx, model);
+		jspViewer.view(ctx, model);
 	}
 
 	private void showThreadDump(Model model, Payload payload) {
@@ -109,15 +115,4 @@ public class Handler implements PageHandler<Context> {
 		model.setContent(sb.toString());
 	}
 
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
-
-	public void setRealtimeConsumer(MessageConsumer realtimeConsumer) {
-		m_realtimeConsumer = realtimeConsumer;
-	}
-
-	public void setReceiver(TcpSocketReceiver receiver) {
-		m_receiver = receiver;
-	}
 }

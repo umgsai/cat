@@ -28,33 +28,37 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.system.SystemPage;
 
+@Component("systemPluginHandler")
 public class Handler implements PageHandler<Context> {
-	private JspViewer m_jspViewer;
+	@Resource
+	private JspViewer jspViewer;
 
 	// TODO make it configurable in database
-	private Map<String, String> m_serverMapping = new LinkedHashMap<String, String>();
+	private Map<String, String> serverMapping = new LinkedHashMap<String, String>();
 
 	public Handler() {
 		// Production
-		m_serverMapping.put("10.1.6.37:8080", "cat.dianpingoa.com");
-		m_serverMapping.put("10.1.8.64:8080", "cat.dianpingoa.com");
-		m_serverMapping.put("10.1.6.102:8080", "cat.dianpingoa.com");
-		m_serverMapping.put("10.1.6.108:8080", "cat.dianpingoa.com");
-		m_serverMapping.put("10.1.6.126:8080", "cat.dianpingoa.com");
-		m_serverMapping.put("10.1.6.128:8080", "cat.dianpingoa.com");
-		m_serverMapping.put("10.1.6.145:8080", "cat.dianpingoa.com");
+		serverMapping.put("10.1.6.37:8080", "cat.dianpingoa.com");
+		serverMapping.put("10.1.8.64:8080", "cat.dianpingoa.com");
+		serverMapping.put("10.1.6.102:8080", "cat.dianpingoa.com");
+		serverMapping.put("10.1.6.108:8080", "cat.dianpingoa.com");
+		serverMapping.put("10.1.6.126:8080", "cat.dianpingoa.com");
+		serverMapping.put("10.1.6.128:8080", "cat.dianpingoa.com");
+		serverMapping.put("10.1.6.145:8080", "cat.dianpingoa.com");
 
 		// QATE
-		m_serverMapping.put("192.168.7.70:8080", "cat.qa.dianpingoa.com");
+		serverMapping.put("192.168.7.70:8080", "cat.qa.dianpingoa.com");
 	}
 
 	private void addResourceFiles(ZipOutputStream zos, String baseDir, String... paths) throws IOException {
@@ -80,7 +84,7 @@ public class Handler implements PageHandler<Context> {
 
 			sb.append('{');
 
-			for (Map.Entry<String, String> e : m_serverMapping.entrySet()) {
+			for (Map.Entry<String, String> e : serverMapping.entrySet()) {
 				if (first) {
 					first = false;
 				} else {
@@ -147,7 +151,7 @@ public class Handler implements PageHandler<Context> {
 			break;
 		}
 		if (!ctx.isProcessStopped()) {
-			m_jspViewer.view(ctx, model);
+			jspViewer.view(ctx, model);
 		}
 	}
 
@@ -170,7 +174,4 @@ public class Handler implements PageHandler<Context> {
 		ctx.stopProcess();
 	}
 
-	public void setJspViewer(JspViewer jspViewer) {
-		m_jspViewer = jspViewer;
-	}
 }

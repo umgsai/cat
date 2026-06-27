@@ -793,6 +793,182 @@ mvn -pl cat-home -am -DskipTests compile
 BUILD SUCCESS
 ```
 
+## 21. 第十三批完成记录
+
+第十三批选择 System 页面 Viewer 迁移，只处理无依赖的 `JspViewer`，继续暂缓 System Handler、配置 Processor 和 Manager 初始化链路。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+systemConfigJspViewer
+systemBusinessJspViewer
+systemPermissionJspViewer
+systemLoginJspViewer
+systemPluginJspViewer
+systemProjectJspViewer
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 6 个简单 `@Bean` 方法。
+3. 所有 System 页面 Viewer 类名同为 `JspViewer`，因此均使用显式组件名，例如 `@Component("systemConfigJspViewer")`，避免默认 Bean 名 `jspViewer` 冲突。
+4. 本批仅迁移 System 页面 Viewer，不迁移以下内容：
+
+```text
+System Handler
+Report Handler
+Processor
+ReportService/ModelService
+TaskBuilder
+ReportManager
+带 initMethod 的 Manager
+Map/List 聚合 Bean
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
+## 22. 第十四批完成记录
+
+第十四批选择低依赖 Handler 迁移，验证 Handler 从配置类 setter 注入迁移到 `@Component` + `@Resource` 字段注入的路径。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+monitorHandler -> com.dianping.cat.report.page.monitor.Handler
+overloadHandler -> com.dianping.cat.report.page.overload.Handler
+systemLoginHandler -> com.dianping.cat.system.page.login.Handler
+systemPluginHandler -> com.dianping.cat.system.page.plugin.Handler
+systemProjectHandler -> com.dianping.cat.system.page.project.Handler
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 5 个 `@Bean` 方法。
+3. 所有 `Handler` 类名相同，因此均使用显式组件名，例如 `@Component("systemLoginHandler")`，避免默认 Bean 名 `handler` 冲突。
+4. 以下依赖已改为 `@Resource` 字段注入：
+
+```text
+systemPluginHandler: JspViewer
+systemLoginHandler: JspViewer, SigninService
+systemProjectHandler: JspViewer, ProjectService
+overloadHandler: JspViewer, TableCapacityService
+```
+
+5. 本批触碰到的旧式字段命名已改为 Java 驼峰命名：
+
+```text
+m_jspViewer            -> jspViewer
+m_signinService        -> signinService
+m_projectService       -> projectService
+m_tableCapacityService -> tableCapacityService
+m_serverMapping        -> serverMapping
+```
+
+6. 本批不迁移以下内容：
+
+```text
+依赖 ModelService/ReportService 的 Handler
+依赖 Map/List 聚合 Bean 的 Handler
+systemConfigHandler/systemBusinessHandler
+top/storage/dependency 等复杂 Handler
+TaskBuilder
+ReportManager
+带 initMethod 的 Manager
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
+## 23. 第十五批完成记录
+
+第十五批继续选择中低依赖 Handler 迁移，覆盖仓储、告警发送、配置展示和首页控制类，仍然避开 ModelService/ReportService 相关 Handler。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+homeHandler -> com.dianping.cat.report.page.home.Handler
+alterationHandler -> com.dianping.cat.report.page.alteration.Handler
+alertHandler -> com.dianping.cat.report.page.alert.Handler
+systemPermissionHandler -> com.dianping.cat.system.page.permission.Handler
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 4 个 `@Bean` 方法。
+3. 所有 `Handler` 类名相同，因此均使用显式组件名，例如 `@Component("alterationHandler")`，避免默认 Bean 名 `handler` 冲突。
+4. 以下依赖已改为 `@Resource` 字段注入：
+
+```text
+homeHandler: JspViewer, TcpSocketReceiver, MessageConsumer
+alterationHandler: JspViewer, AlterationRepository
+alertHandler: JspViewer, SenderManager, AlertRepository
+systemPermissionHandler: JspViewer, UserConfigManager, ResourceConfigManager, ConfigHtmlParser
+```
+
+5. 本批触碰到的旧式字段命名已改为 Java 驼峰命名：
+
+```text
+m_jspViewer            -> jspViewer
+m_receiver             -> tcpSocketReceiver
+m_realtimeConsumer     -> messageConsumer
+m_alterationDao        -> alterationRepository
+m_sdf                  -> dateFormat
+m_senderManager        -> senderManager
+m_alertDao             -> alertRepository
+m_userConfigManager    -> userConfigManager
+m_resourceConfigManager -> resourceConfigManager
+m_configHtmlParser     -> configHtmlParser
+```
+
+6. 本批不迁移以下内容：
+
+```text
+依赖 ModelService/ReportService 的 Handler
+依赖 Map/List 聚合 Bean 的 Handler
+systemConfigHandler/systemBusinessHandler
+top/storage/dependency 等复杂 Handler
+TaskBuilder
+ReportManager
+带 initMethod 的 Manager
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
 ## 10. 第二批完成记录
 
 第二批选择 `BusinessGraphCreator` 一个 Bean，目标是验证依赖较多但不涉及后台线程、不涉及 prototype 的普通业务图表 Bean 迁移方式。
