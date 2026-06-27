@@ -407,7 +407,10 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		DatabaseParser.class, IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
 		StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class,
 		AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
-		AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class},
+		AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
+		DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
+		LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
+		AlertExceptionBuilder.class},
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
 					DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class, MatrixAnalyzer.class,
@@ -422,7 +425,10 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
 					StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class,
 					AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
-					AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class}),
+					AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
+					DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
+					LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
+					AlertExceptionBuilder.class}),
 		useDefaultFilters = false)
 @MapperScan(basePackages = {
 		"com.dianping.cat.mybatis.mapper",
@@ -1087,11 +1093,6 @@ public class CatHomeSpringConfiguration {
 				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
 				monthlyReportContentRepository);
 		return service;
-	}
-
-	@Bean
-	public EventMergeHelper eventMergeHelper() {
-		return new EventMergeHelper();
 	}
 
 	@Bean(name = EventReportBuilder.ID, initMethod = "initialize")
@@ -1889,11 +1890,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public TransactionMergeHelper transactionMergeHelper() {
-		return new TransactionMergeHelper();
-	}
-
-	@Bean
 	public ClientReportService clientReportService(HourlyReportRepository hourlyReportRepository,
 			HourlyReportContentRepository hourlyReportContentRepository, DailyReportRepository dailyReportRepository,
 			DailyReportContentRepository dailyReportContentRepository, WeeklyReportRepository weeklyReportRepository,
@@ -2016,13 +2012,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public ContentFetcher contentFetcher() {
-		LocalResourceContentFetcher fetcher = new LocalResourceContentFetcher();
-
-		return fetcher;
-	}
-
-	@Bean
 	public ConfigRepository configRepository(SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
 		ConfigRepository repository = new ConfigRepository();
 
@@ -2038,11 +2027,6 @@ public class CatHomeSpringConfiguration {
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
 		return manager;
-	}
-
-	@Bean
-	public PathBuilder pathBuilder() {
-		return new DefaultPathBuilder();
 	}
 
 	@Bean
@@ -2783,11 +2767,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public DataExtractor dataExtractor() {
-		return new DataExtractorImpl();
-	}
-
-	@Bean
 	public List<ProblemHandler> problemHandlers(@Qualifier(DefaultProblemHandler.ID) ProblemHandler defaultProblemHandler,
 			@Qualifier(LongExecutionProblemHandler.ID) ProblemHandler longExecutionProblemHandler) {
 		return Arrays.asList(defaultProblemHandler, longExecutionProblemHandler);
@@ -3371,11 +3350,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public ServerStatisticManager serverStatisticManager() {
-		return new ServerStatisticManager();
-	}
-
-	@Bean
 	public ConfigHtmlParser configHtmlParser() {
 		return new ConfigHtmlParser();
 	}
@@ -3616,14 +3590,6 @@ public class CatHomeSpringConfiguration {
 		manager.setConfigDao(configRepository);
 		manager.setFetcher(contentFetcher);
 		return manager;
-	}
-
-	@Bean
-	public AlertExceptionBuilder alertExceptionBuilder(ExceptionRuleConfigManager exceptionRuleConfigManager) {
-		AlertExceptionBuilder builder = new AlertExceptionBuilder();
-
-		builder.setExceptionConfigManager(exceptionRuleConfigManager);
-		return builder;
 	}
 
 	@Bean(initMethod = "initialize")

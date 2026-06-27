@@ -24,16 +24,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.alarm.spi.AlertLevel;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;
 import com.dianping.cat.report.page.dependency.TopMetric.Item;
 
+@Component
 public class AlertExceptionBuilder {
 
-	private ExceptionRuleConfigManager m_exceptionConfigManager;
+	@Resource
+	private ExceptionRuleConfigManager exceptionRuleConfigManager;
 
 	public Map<String, List<AlertException>> buildAlertExceptions(List<Item> items) {
 		Map<String, List<AlertException>> alertExceptions = new LinkedHashMap<String, List<AlertException>>();
@@ -86,7 +90,7 @@ public class AlertExceptionBuilder {
 	}
 
 	private Pair<Double, Double> queryDomainExceptionLimit(String domain, String exceptionName) {
-		ExceptionLimit exceptionLimit = m_exceptionConfigManager.queryExceptionLimit(domain, exceptionName);
+		ExceptionLimit exceptionLimit = exceptionRuleConfigManager.queryExceptionLimit(domain, exceptionName);
 		MutablePair<Double, Double> limits = new MutablePair<Double, Double>();
 		double warnLimit = -1;
 		double errorLimit = -1;
@@ -106,7 +110,7 @@ public class AlertExceptionBuilder {
 	}
 
 	private Pair<Double, Double> queryDomainTotalLimit(String domain) {
-		ExceptionLimit totalExceptionLimit = m_exceptionConfigManager.queryTotalLimitByDomain(domain);
+		ExceptionLimit totalExceptionLimit = exceptionRuleConfigManager.queryTotalLimitByDomain(domain);
 		MutablePair<Double, Double> limits = new MutablePair<Double, Double>();
 		double totalWarnLimit = -1;
 		double totalErrorLimit = -1;
@@ -123,10 +127,6 @@ public class AlertExceptionBuilder {
 		limits.setRight(totalErrorLimit);
 
 		return limits;
-	}
-
-	public void setExceptionConfigManager(ExceptionRuleConfigManager exceptionConfigManager) {
-		m_exceptionConfigManager = exceptionConfigManager;
 	}
 
 	public class AlertException {

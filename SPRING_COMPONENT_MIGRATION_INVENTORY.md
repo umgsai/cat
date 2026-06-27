@@ -625,6 +625,113 @@ mvn -pl cat-home -am -DskipTests compile
 BUILD SUCCESS
 ```
 
+## 18. 第十批完成记录
+
+第十批选择报表页面/图表无状态辅助类迁移，继续避开 ReportService、ModelService、TaskBuilder 和聚合 Bean。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+dataExtractor -> com.dianping.cat.report.graph.metric.impl.DataExtractorImpl
+eventMergeHelper -> com.dianping.cat.report.page.event.transform.EventMergeHelper
+transactionMergeHelper -> com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 3 个简单 `@Bean` 方法：
+
+```text
+dataExtractor()
+eventMergeHelper()
+transactionMergeHelper()
+```
+
+3. `DataExtractorImpl` 使用 `@Component("dataExtractor")`，保留原 Bean 名，避免默认名变成 `dataExtractorImpl`。
+4. `EventMergeHelper`、`TransactionMergeHelper` 为无依赖 helper，仅加 `@Component`。
+5. 本批触碰到的旧式字段命名已改为 Java 驼峰命名：
+
+```text
+m_step -> step
+```
+
+6. 以下 Bean 本批继续保留在配置类中，避免改变数据库读写、任务和聚合语义：
+
+```text
+ReportService/ModelService 相关 Bean
+TaskBuilder 相关 Bean
+StateBuilder/StateGraphBuilder
+RemoteServersManager/ServersUpdaterManager
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
+## 19. 第十一批完成记录
+
+第十一批选择无复杂生命周期的基础工具和告警展示辅助 Bean 迁移，继续避开 `initMethod`、后台线程、任务构建和聚合 Bean。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+contentFetcher -> com.dianping.cat.config.content.LocalResourceContentFetcher
+pathBuilder -> com.dianping.cat.message.DefaultPathBuilder
+serverStatisticManager -> com.dianping.cat.statistic.ServerStatisticManager
+alertExceptionBuilder -> com.dianping.cat.report.alert.exception.AlertExceptionBuilder
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 4 个简单 `@Bean` 方法：
+
+```text
+contentFetcher()
+pathBuilder()
+serverStatisticManager()
+alertExceptionBuilder(...)
+```
+
+3. `LocalResourceContentFetcher` 使用 `@Component("contentFetcher")`，保留原 Bean 名。
+4. `DefaultPathBuilder` 使用 `@Component("pathBuilder")`，保留原 Bean 名。
+5. `ServerStatisticManager` 为统计状态单例，原配置类中也是单例，本批仅迁移注册方式。
+6. `AlertExceptionBuilder` 中 `ExceptionRuleConfigManager` 已改为 `@Resource` 字段注入。
+7. 本批触碰到的旧式字段命名已改为 Java 驼峰命名：
+
+```text
+m_serverState        -> serverState
+m_currentStatistic   -> currentStatistic
+m_currentMinute      -> currentMinute
+m_exceptionConfigManager -> exceptionRuleConfigManager
+```
+
+8. `LocalResourceContentFetcher` 中原本 SLF4J warn 未打印异常对象，本批已补充异常堆栈，便于排查默认配置加载失败。
+9. `DefaultMessageFinderManager` 本批暂缓迁移，因为它位于 `cat-hadoop` 模块，该模块当前未引入 Spring 依赖。
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
 ## 10. 第二批完成记录
 
 第二批选择 `BusinessGraphCreator` 一个 Bean，目标是验证依赖较多但不涉及后台线程、不涉及 prototype 的普通业务图表 Bean 迁移方式。

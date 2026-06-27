@@ -18,15 +18,18 @@
  */
 package com.dianping.cat.statistic;
 
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.statistic.ServerStatistic.Statistic;
 
+@Component
 public class ServerStatisticManager {
 
-	public ServerStatistic m_serverState = new ServerStatistic();
+	public ServerStatistic serverState = new ServerStatistic();
 
-	private volatile Statistic m_currentStatistic = null;
+	private volatile Statistic currentStatistic = null;
 
-	private volatile long m_currentMinute = -1;
+	private volatile long currentMinute = -1;
 
 	public void addBlockLoss(long total) {
 		getCurrentStatistic().addBlockLoss(total);
@@ -81,7 +84,7 @@ public class ServerStatisticManager {
 	}
 
 	public Statistic findOrCreateState(long time) {
-		return m_serverState.findOrCreate(time);
+		return serverState.findOrCreate(time);
 	}
 
 	private Statistic getCurrentStatistic() {
@@ -89,18 +92,18 @@ public class ServerStatisticManager {
 
 		time = time - time % (60 * 1000);
 
-		if (time != m_currentMinute) {
+		if (time != currentMinute) {
 			synchronized (this) {
-				if (time != m_currentMinute) {
-					m_currentStatistic = m_serverState.findOrCreate(time);
-					m_currentMinute = time;
+				if (time != currentMinute) {
+					currentStatistic = serverState.findOrCreate(time);
+					currentMinute = time;
 				}
 			}
 		}
-		return m_currentStatistic;
+		return currentStatistic;
 	}
 
 	public void removeState(long time) {
-		m_serverState.remove(time);
+		serverState.remove(time);
 	}
 }

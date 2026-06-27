@@ -22,15 +22,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.report.graph.metric.DataExtractor;
 
+@Component("dataExtractor")
 public class DataExtractorImpl implements DataExtractor {
 
 	private static final int MIN_POINT_NUMBER = 60;
 
 	private static final int MAX_POINT_NUMBER = 180;
 
-	private int m_step;
+	private int step;
 
 	@Override
 	public int calculateInterval(int length) {
@@ -52,22 +55,22 @@ public class DataExtractorImpl implements DataExtractor {
 	@Override
 	public double[] extract(double[] values) {
 		int length = values.length;
-		m_step = calculateInterval(length);
-		int size = length / m_step;
+		step = calculateInterval(length);
+		int size = length / step;
 
-		if (size * m_step < length) {
+		if (size * step < length) {
 			size++;
 		}
 		double[] result = new double[size];
 
-		for (int i = 0; i < length; i = i + m_step) {
+		for (int i = 0; i < length; i = i + step) {
 			double sum = 0;
-			for (int j = 0; j < m_step; j++) {
+			for (int j = 0; j < step; j++) {
 				if (i + j <= length - 1) {
 					sum = sum + values[i + j];
 				}
 			}
-			result[i / m_step] = sum / m_step;
+			result[i / step] = sum / step;
 		}
 		return result;
 	}
@@ -84,7 +87,7 @@ public class DataExtractorImpl implements DataExtractor {
 
 	@Override
 	public int getStep() {
-		return m_step;
+		return step;
 	}
 
 }

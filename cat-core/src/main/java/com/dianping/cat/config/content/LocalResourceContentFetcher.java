@@ -22,9 +22,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 
+@Component("contentFetcher")
 public class LocalResourceContentFetcher implements ContentFetcher {
 	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(LocalResourceContentFetcher.class);
 
@@ -38,7 +40,7 @@ public class LocalResourceContentFetcher implements ContentFetcher {
 		try (InputStream in = getClass().getResourceAsStream(path)) {
 			content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 		} catch (Exception e) {
-			LOGGER.warn("can't find local default config {}", configName);
+			LOGGER.warn("can't find local default config {}", configName, e);
 			Cat.logError(configName + " can't find", e);
 		}
 		return content;

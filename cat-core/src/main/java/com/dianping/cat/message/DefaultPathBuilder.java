@@ -21,6 +21,9 @@ package com.dianping.cat.message;
 import java.text.MessageFormat;
 import java.util.Date;
 
+import org.springframework.stereotype.Component;
+
+@Component("pathBuilder")
 public class DefaultPathBuilder implements PathBuilder {
 
 	@Override

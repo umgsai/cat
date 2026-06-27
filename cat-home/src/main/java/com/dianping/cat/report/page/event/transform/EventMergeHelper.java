@@ -18,9 +18,12 @@
  */
 package com.dianping.cat.report.page.event.transform;
 
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.event.model.entity.EventReport;
 
+@Component
 public class EventMergeHelper {
 
 	public EventReport mergeAllIps(EventReport report, String ipAddress) {
