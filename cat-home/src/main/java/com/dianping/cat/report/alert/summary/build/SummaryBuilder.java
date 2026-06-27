@@ -24,6 +24,7 @@ import java.util.Map;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ import com.dianping.cat.Cat;
 public abstract class SummaryBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SummaryBuilder.class);
 
-	public Configuration m_configuration;
+	public Configuration configuration;
 
 	protected abstract Map<Object, Object> generateModel(String domain, Date date);
 
@@ -52,21 +53,22 @@ public abstract class SummaryBuilder {
 	}
 
 	private Configuration getConfiguration() {
-		if (m_configuration == null) {
+		if (configuration == null) {
 			initialize();
 		}
-		return m_configuration;
+		return configuration;
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_configuration != null) {
+		if (configuration != null) {
 			return;
 		}
-		m_configuration = new Configuration();
-		m_configuration.setDefaultEncoding("UTF-8");
+		configuration = new Configuration();
+		configuration.setDefaultEncoding("UTF-8");
 
 		try {
-			m_configuration.setClassForTemplateLoading(this.getClass(), "/freemaker");
+			configuration.setClassForTemplateLoading(this.getClass(), "/freemaker");
 		} catch (Exception e) {
 			LOGGER.error("Unable to initialize alert summary template loading, builder={}, template={}.", getID(),
 			      getTemplateAddress(), e);

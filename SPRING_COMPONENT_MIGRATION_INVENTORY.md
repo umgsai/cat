@@ -314,6 +314,72 @@ BUILD SUCCESS
 git diff --check 通过
 ```
 
+## 38. 第三十批完成记录
+
+第三十批迁移告警汇总、远端服务缓存更新和规则模板渲染相关 Bean，目标是在不触碰 `ModelService`、存储和数据源链路的前提下，继续减少 `CatHomeSpringConfiguration` 中的显式 `@Bean` 注册数量。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+RelatedSummaryBuilder
+FailureSummaryBuilder
+AlterationSummaryBuilder
+AlertSummaryExecutor
+RemoteServersManager
+DefaultRemoteServersUpdater
+ServersUpdaterManager
+RuleFTLDecorator
+```
+
+2. 原先带 `initMethod = "initialize"` 的类已改为 `@PostConstruct`，保留启动初始化语义：
+
+```text
+SummaryBuilder
+ServersUpdaterManager
+RuleFTLDecorator
+```
+
+3. 带旧 Bean 名语义的类已保留原名称：
+
+```text
+RelatedSummaryBuilder    -> AlertSummaryContentGenerator
+FailureSummaryBuilder    -> FailureDecorator
+AlterationSummaryBuilder -> AlterationSummaryContentGenerator
+DefaultRemoteServersUpdater -> remoteServersUpdater
+RuleFTLDecorator -> ruleFTLDecorator
+```
+
+4. 已删除 `CatHomeSpringConfiguration` 中对应旧 `@Bean` 方法，保留 `ReportManager`、`ModelService`、存储和数据源相关配置不动。
+5. 本批触碰字段已按 Java 驼峰命名收口，并使用 `@Resource` 字段注入；原 setter 保留给测试和少量手工构造场景使用。
+6. `DefaultRemoteServersUpdater` 继续使用 `@Resource(name = "localStateService")` 和 `@Resource(name = "stateModelService")` 精确注入，避免 `ModelService` 泛型擦除后的歧义。
+7. `AlertSummaryExecutor` 继续按旧 Builder 名称注入三类 `SummaryBuilder`，保持汇总内容生成顺序不变。
+8. 本批仍不迁移以下内容：
+
+```text
+ReportManager / ModelService / LocalModelService
+ServerConfigManager
+存储 bucket / HDFS / message dump 链路
+DataSource / SqlSessionFactory / TransactionTemplate
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
 ## 39. 第三十一批完成记录
 
 第三十一批迁移报表保存链路中的 `ReportDelegate` 及相邻的 `StorageReportUpdater`，目标是在不触碰 `ReportManager` 生命周期的前提下，继续减少 `CatHomeSpringConfiguration` 中的显式 `@Bean` 注册数量。

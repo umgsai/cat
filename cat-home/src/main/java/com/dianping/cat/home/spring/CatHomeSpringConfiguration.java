@@ -422,7 +422,8 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		RouterConfigAdjustor.class, RouterConfigBuilder.class, DatabaseParser.class, IpConvertManager.class,
 		StorageSQLBuilder.class, StorageCacheBuilder.class, StorageRPCBuilder.class,
 		DefaultProblemHandler.class, LongExecutionProblemHandler.class,
-		AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
+		AlertSummaryService.class, RelatedSummaryBuilder.class, FailureSummaryBuilder.class,
+		AlterationSummaryBuilder.class, AlertSummaryExecutor.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
 		AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 		DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 		LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
@@ -447,6 +448,8 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		HeartbeatContactor.class, TransactionContactor.class, BusinessDecorator.class,
 		EventDecorator.class, ExceptionDecorator.class, HeartbeatDecorator.class, TransactionDecorator.class,
 		SenderManager.class, SpliterManager.class, ContactorManager.class, DecoratorManager.class,
+		RemoteServersManager.class, DefaultRemoteServersUpdater.class, ServersUpdaterManager.class,
+		com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator.class,
 		com.dianping.cat.alarm.spi.AlertManager.class, AlarmManager.class,
 		com.dianping.cat.report.page.home.JspViewer.class,
 		com.dianping.cat.report.page.monitor.JspViewer.class,
@@ -548,7 +551,9 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					RouterConfigBuilder.class, DatabaseParser.class,
 					IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class, StorageRPCBuilder.class,
 					DefaultProblemHandler.class, LongExecutionProblemHandler.class,
-					AlertSummaryService.class, AlertService.class, DefaultDataChecker.class, BaseRuleHelper.class,
+					AlertSummaryService.class, RelatedSummaryBuilder.class, FailureSummaryBuilder.class,
+					AlterationSummaryBuilder.class, AlertSummaryExecutor.class, AlertService.class,
+					DefaultDataChecker.class, BaseRuleHelper.class,
 					AlertInfoBuilder.class, UserDefinedRuleManager.class, DefaultBaselineService.class,
 					DataExtractorImpl.class, EventMergeHelper.class, TransactionMergeHelper.class,
 					LocalResourceContentFetcher.class, DefaultPathBuilder.class, ServerStatisticManager.class,
@@ -575,6 +580,8 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					HeartbeatContactor.class, TransactionContactor.class, BusinessDecorator.class,
 					EventDecorator.class, ExceptionDecorator.class, HeartbeatDecorator.class, TransactionDecorator.class,
 					SenderManager.class, SpliterManager.class, ContactorManager.class, DecoratorManager.class,
+					RemoteServersManager.class, DefaultRemoteServersUpdater.class, ServersUpdaterManager.class,
+					com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator.class,
 					com.dianping.cat.alarm.spi.AlertManager.class, AlarmManager.class,
 					com.dianping.cat.report.page.home.JspViewer.class,
 					com.dianping.cat.report.page.monitor.JspViewer.class,
@@ -2009,75 +2016,6 @@ public class CatHomeSpringConfiguration {
 		services.put(LocalBusinessService.ID, localBusinessService);
 		services.put("logview", localMessageService);
 		return services;
-	}
-
-	@Bean(initMethod = "initialize", name = RelatedSummaryBuilder.ID)
-	public SummaryBuilder relatedSummaryBuilder(AlertInfoBuilder alertInfoBuilder,
-			AlertSummaryService alertSummaryService) {
-		RelatedSummaryBuilder builder = new RelatedSummaryBuilder();
-
-		builder.setAlertSummaryManager(alertInfoBuilder);
-		builder.setAlertSummaryService(alertSummaryService);
-		return builder;
-	}
-
-	@Bean(initMethod = "initialize", name = FailureSummaryBuilder.ID)
-	public SummaryBuilder failureSummaryBuilder(@Qualifier("problemModelService") ModelService<ProblemReport> problemModelService) {
-		FailureSummaryBuilder builder = new FailureSummaryBuilder();
-
-		builder.setService(problemModelService);
-		return builder;
-	}
-
-	@Bean(initMethod = "initialize", name = AlterationSummaryBuilder.ID)
-	public SummaryBuilder alterationSummaryBuilder(AlterationRepository alterationRepository) {
-		AlterationSummaryBuilder builder = new AlterationSummaryBuilder();
-
-		builder.setAlterationDao(alterationRepository);
-		return builder;
-	}
-
-	@Bean
-	public AlertSummaryExecutor alertSummaryExecutor(@Qualifier(RelatedSummaryBuilder.ID) SummaryBuilder relatedBuilder,
-			@Qualifier(FailureSummaryBuilder.ID) SummaryBuilder failureBuilder,
-			@Qualifier(AlterationSummaryBuilder.ID) SummaryBuilder alterationBuilder,
-			SenderManager senderManager) {
-		AlertSummaryExecutor executor = new AlertSummaryExecutor();
-
-		executor.setRelatedBuilder(relatedBuilder);
-		executor.setFailureBuilder(failureBuilder);
-		executor.setAlterationBuilder(alterationBuilder);
-		executor.setSendManager(senderManager);
-		return executor;
-	}
-
-	@Bean
-	public RemoteServersManager remoteServersManager() {
-		return new RemoteServersManager();
-	}
-
-	@Bean
-	public ServersUpdater remoteServersUpdater(
-			@Qualifier("localStateService") LocalModelService<StateReport> stateModelService) {
-		DefaultRemoteServersUpdater updater = new DefaultRemoteServersUpdater();
-
-		updater.setLocalService(stateModelService);
-		return updater;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ServersUpdaterManager serversUpdaterManager(ServersUpdater remoteServersUpdater,
-			RemoteServersManager remoteServersManager) {
-		ServersUpdaterManager manager = new ServersUpdaterManager();
-
-		manager.setRemoteServerUpdater(remoteServersUpdater);
-		manager.setRemoteServersManager(remoteServersManager);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator ruleFTLDecorator() {
-		return new com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator();
 	}
 
 	@Bean

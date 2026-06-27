@@ -23,8 +23,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
@@ -37,12 +40,14 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component(FailureSummaryBuilder.ID)
 public class FailureSummaryBuilder extends SummaryBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FailureSummaryBuilder.class);
 
 	public static final String ID = "FailureDecorator";
 
-	private ModelService<ProblemReport> m_service;
+	@Resource(name = "problemModelService")
+	private ModelService<ProblemReport> problemModelService;
 
 	private void addDistributeInfo(Map<Object, Object> resultMap, ProblemReport report) {
 		PieGraphChartVisitor pieChart = new PieGraphChartVisitor("error", null);
@@ -79,7 +84,7 @@ public class FailureSummaryBuilder extends SummaryBuilder {
 		ModelRequest request = new ModelRequest(domain, getCurrentHour()).setProperty("queryType", "view");
 		request.setProperty("type", "error");
 		ProblemReport report = null;
-		ModelService<ProblemReport> service = m_service;
+		ModelService<ProblemReport> service = problemModelService;
 
 		if (service == null) {
 			LOGGER.warn("Problem report service is not configured for alert failure summary, domain={}, date={}.", domain,
@@ -124,7 +129,7 @@ public class FailureSummaryBuilder extends SummaryBuilder {
 	}
 
 	public void setService(ModelService<ProblemReport> service) {
-		m_service = service;
+		problemModelService = service;
 	}
 
 }

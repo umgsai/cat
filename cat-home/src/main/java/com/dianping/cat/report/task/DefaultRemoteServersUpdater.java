@@ -24,6 +24,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import jakarta.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Constants;
 import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.model.entity.Machine;
@@ -39,11 +43,14 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 
+@Component("remoteServersUpdater")
 public class DefaultRemoteServersUpdater implements ServersUpdater {
 
-	private ModelService<StateReport> m_service;
+	@Resource(name = "stateModelService")
+	private ModelService<StateReport> stateModelService;
 
-	private LocalModelService<StateReport> m_localService;
+	@Resource(name = "localStateService")
+	private LocalModelService<StateReport> localStateService;
 
 	@Override
 	public Map<String, Set<String>> buildServers(Date hour) {
@@ -63,16 +70,16 @@ public class DefaultRemoteServersUpdater implements ServersUpdater {
 		if (period == ModelPeriod.CURRENT || period == ModelPeriod.LAST) {
 			ModelRequest request = new ModelRequest(domain, time);
 
-			if (m_localService != null && m_localService.isEligable(request)) {
+			if (localStateService != null && localStateService.isEligable(request)) {
 				try {
-					String xml = m_localService.getReport(request, period, domain, new ApiPayload());
+					String xml = localStateService.getReport(request, period, domain, new ApiPayload());
 
 					return DefaultSaxParser.parse(xml);
 				} catch (Exception e) {
 					throw new RuntimeException("Unable to build local state report for " + request + "!", e);
 				}
-			} else if (m_service != null && m_service.isEligable(request)) {
-				ModelResponse<StateReport> response = m_service.invoke(request);
+			} else if (stateModelService != null && stateModelService.isEligable(request)) {
+				ModelResponse<StateReport> response = stateModelService.invoke(request);
 				StateReport report = response.getModel();
 
 				return report;
@@ -85,26 +92,26 @@ public class DefaultRemoteServersUpdater implements ServersUpdater {
 	}
 
 	public void setService(ModelService<StateReport> service) {
-		m_service = service;
+		stateModelService = service;
 	}
 
 	public void setLocalService(LocalModelService<StateReport> localService) {
-		m_localService = localService;
+		localStateService = localService;
 	}
 
 	public static class StateReportVisitor extends BaseVisitor {
 
-		private Map<String, Set<String>> m_servers = new ConcurrentHashMap<String, Set<String>>();
+		private Map<String, Set<String>> servers = new ConcurrentHashMap<String, Set<String>>();
 
-		private String m_ip;
+		private String ip;
 
 		public Map<String, Set<String>> getServers() {
-			return m_servers;
+			return servers;
 		}
 
 		@Override
 		public void visitMachine(Machine machine) {
-			m_ip = machine.getIp();
+			ip = machine.getIp();
 			super.visitMachine(machine);
 		}
 
@@ -112,14 +119,14 @@ public class DefaultRemoteServersUpdater implements ServersUpdater {
 		public void visitProcessDomain(ProcessDomain processDomain) {
 			if (processDomain.getTotal() > 0) {
 				String domain = processDomain.getName();
-				Set<String> servers = m_servers.get(domain);
+				Set<String> currentServers = servers.get(domain);
 
-				if (servers == null) {
-					servers = new HashSet<String>();
+				if (currentServers == null) {
+					currentServers = new HashSet<String>();
 
-					m_servers.put(domain, servers);
+					servers.put(domain, currentServers);
 				}
-				servers.add(m_ip);
+				currentServers.add(ip);
 			}
 		}
 	}

@@ -24,15 +24,18 @@ import java.util.Map;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 
+@Component("ruleFTLDecorator")
 public class RuleFTLDecorator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RuleFTLDecorator.class);
 
-	public volatile Configuration m_configuration;
+	public volatile Configuration configuration;
 
 	public String generateConfigsHtml(String templateValue) {
 		Map<Object, Object> dataMap = new HashMap<Object, Object>();
@@ -50,14 +53,15 @@ public class RuleFTLDecorator {
 	}
 
 	private Configuration getConfiguration() {
-		if (m_configuration == null) {
+		if (configuration == null) {
 			initialize();
 		}
-		return m_configuration;
+		return configuration;
 	}
 
+	@PostConstruct
 	public void initialize() {
-		if (m_configuration != null) {
+		if (configuration != null) {
 			return;
 		}
 
@@ -66,7 +70,7 @@ public class RuleFTLDecorator {
 		configuration.setDefaultEncoding("UTF-8");
 		try {
 			configuration.setClassForTemplateLoading(this.getClass(), "/freemaker");
-			m_configuration = configuration;
+			this.configuration = configuration;
 		} catch (Exception e) {
 			LOGGER.error("Unable to initialize alert rule FTL decorator template loading.", e);
 			Cat.logError(e);

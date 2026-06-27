@@ -22,25 +22,33 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 
+@Component
 public class ServersUpdaterManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServersUpdaterManager.class);
 
-	private ServersUpdater m_remoteServerUpdater;
+	@Resource(name = "remoteServersUpdater")
+	private ServersUpdater remoteServerUpdater;
 
-	private RemoteServersManager m_remoteServersManager;
+	@Resource
+	private RemoteServersManager remoteServersManager;
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
@@ -55,28 +63,28 @@ public class ServersUpdaterManager {
 			public void handle() throws Exception {
 				try {
 					long currentHour = TimeHelper.getCurrentHour().getTime();
-					Map<String, Set<String>> currentServers = m_remoteServerUpdater.buildServers(new Date(currentHour));
+					Map<String, Set<String>> currentServers = remoteServerUpdater.buildServers(new Date(currentHour));
 
-					m_remoteServersManager.setCurrentServers(currentServers);
+					remoteServersManager.setCurrentServers(currentServers);
 
 					long lastHour = currentHour - TimeHelper.ONE_HOUR;
-					Map<String, Set<String>> lastServers = m_remoteServerUpdater.buildServers(new Date(lastHour));
+					Map<String, Set<String>> lastServers = remoteServerUpdater.buildServers(new Date(lastHour));
 
-					m_remoteServersManager.setLastServers(lastServers);
+					remoteServersManager.setLastServers(lastServers);
 				} catch (Exception e) {
 					LOGGER.error("Unable to update remote server cache.", e);
 					Cat.logError(e);
 				}
 			}
 		});
-		m_initialized = true;
+		initialized = true;
 	}
 
 	public void setRemoteServerUpdater(ServersUpdater remoteServerUpdater) {
-		m_remoteServerUpdater = remoteServerUpdater;
+		this.remoteServerUpdater = remoteServerUpdater;
 	}
 
 	public void setRemoteServersManager(RemoteServersManager remoteServersManager) {
-		m_remoteServersManager = remoteServersManager;
+		this.remoteServersManager = remoteServersManager;
 	}
 }

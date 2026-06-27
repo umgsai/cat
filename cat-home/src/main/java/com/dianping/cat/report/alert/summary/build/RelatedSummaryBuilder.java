@@ -24,21 +24,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.alert.summary.entity.AlertSummary;
 import com.dianping.cat.report.alert.summary.AlertSummaryService;
 
+@Component(RelatedSummaryBuilder.ID)
 public class RelatedSummaryBuilder extends SummaryBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RelatedSummaryBuilder.class);
 
 	public static final String ID = "AlertSummaryContentGenerator";
 
-	private AlertInfoBuilder m_alertSummaryManager;
+	@Resource
+	private AlertInfoBuilder alertInfoBuilder;
 
-	private AlertSummaryService m_alertSummaryService;
+	@Resource
+	private AlertSummaryService alertSummaryService;
 
 	@SuppressWarnings("unchecked")
 	private Map<Object, Object> gatherDomainsForDependBusiness(Map<Object, Object> map) {
@@ -72,7 +78,7 @@ public class RelatedSummaryBuilder extends SummaryBuilder {
 	@Override
 	public Map<Object, Object> generateModel(String domain, Date date) {
 		LOGGER.info("Generating related alert summary model, domain={}, date={}.", domain, date);
-		AlertSummary alertSummary = m_alertSummaryManager.generateAlertSummary(domain, date);
+		AlertSummary alertSummary = alertInfoBuilder.generateAlertSummary(domain, date);
 		AlertSummaryVisitor visitor = new AlertSummaryVisitor(alertSummary.getDomain());
 
 		visitor.visitAlertSummary(alertSummary);
@@ -91,11 +97,11 @@ public class RelatedSummaryBuilder extends SummaryBuilder {
 	}
 
 	public void setAlertSummaryManager(AlertInfoBuilder alertSummaryManager) {
-		m_alertSummaryManager = alertSummaryManager;
+		alertInfoBuilder = alertSummaryManager;
 	}
 
 	public void setAlertSummaryService(AlertSummaryService alertSummaryService) {
-		m_alertSummaryService = alertSummaryService;
+		this.alertSummaryService = alertSummaryService;
 	}
 
 }

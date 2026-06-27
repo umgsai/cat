@@ -23,27 +23,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.mybatis.AlterationRepository;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 
+@Component(AlterationSummaryBuilder.ID)
 public class AlterationSummaryBuilder extends SummaryBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlterationSummaryBuilder.class);
 
 	public static final String ID = "AlterationSummaryContentGenerator";
 
-	private AlterationRepository m_alterationDao;
+	@Resource
+	private AlterationRepository alterationRepository;
 
 	@Override
 	public Map<Object, Object> generateModel(String domain, Date date) {
 		Map<Object, Object> dataMap = new HashMap<Object, Object>();
 
 		try {
-			AlterationRepository alterationDao = m_alterationDao;
+			AlterationRepository alterationDao = alterationRepository;
 
 			if (alterationDao == null) {
 				LOGGER.warn("Alteration repository is not configured for alert alteration summary, domain={}, date={}.",
@@ -77,7 +82,7 @@ public class AlterationSummaryBuilder extends SummaryBuilder {
 	}
 
 	public void setAlterationDao(AlterationRepository alterationDao) {
-		m_alterationDao = alterationDao;
+		alterationRepository = alterationDao;
 	}
 
 }
