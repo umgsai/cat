@@ -314,6 +314,74 @@ BUILD SUCCESS
 git diff --check 通过
 ```
 
+## 28. 第二十批完成记录
+
+第二十批承接第十九批的告警发送链路改造，迁移告警聚合层 Manager。第十九批已经将 sender、spliter、contactor、decorator 的叶子实现改为组件注册；本批进一步将负责聚合调用的 Manager 改为 `@Component` 注册。`alertSenders`、`alertSpliters`、`alertContactors`、`alertDecorators` 这 4 个 Map 聚合 Bean 暂时继续保留在 `CatHomeSpringConfiguration` 中，作为稳定的命名装配点。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Manager 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 的保守白名单扫描：
+
+```text
+SenderManager
+SpliterManager
+ContactorManager
+DecoratorManager
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中上述 4 个 Manager 的 `@Bean(initMethod = "initialize")` 方法。
+3. 4 个 Manager 中的旧式 `m_` 字段已改为 Java 驼峰命名：
+
+```text
+SenderManager:
+m_configManager -> serverConfigManager
+m_senders       -> senders
+m_initialized   -> initialized
+
+SpliterManager:
+m_spliters      -> spliters
+m_initialized   -> initialized
+
+ContactorManager:
+m_contactors    -> contactors
+m_initialized   -> initialized
+
+DecoratorManager:
+m_decorators    -> decorators
+m_initialized   -> initialized
+```
+
+4. 4 个 Manager 的依赖已改为 `@Resource` 字段注入：
+
+```text
+SenderManager     -> @Resource ServerConfigManager
+SenderManager     -> @Resource(name = "alertSenders")
+SpliterManager    -> @Resource(name = "alertSpliters")
+ContactorManager  -> @Resource(name = "alertContactors")
+DecoratorManager  -> @Resource(name = "alertDecorators")
+```
+
+5. 原 `initMethod = "initialize"` 生命周期已改为 `@PostConstruct`，保持初始化日志和空配置告警行为。
+6. 旧 setter 方法暂时保留，兼容测试或少量手工装配场景；主路径已由 Spring 注解注入。
+7. 本批没有迁移 4 个 Map 聚合 Bean，避免同时改变聚合装配方式和 Manager 生命周期。
+8. `SenderManagerTest`、`SenderTest`、`AlertTest`、`SuspendTest` 存在真实发送、告警巡检或长时间等待等副作用，本批未作为自动化验证运行。
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```
+
 ## 27. 第十九批完成记录
 
 第十九批迁移告警发送链路中的叶子 Bean，范围控制在 sender、spliter、contactor、decorator 的具体实现类。`SenderManager`、`SpliterManager`、`ContactorManager`、`DecoratorManager` 以及 `alertSenders`、`alertSpliters`、`alertContactors`、`alertDecorators` 这些聚合 Bean 暂时保留在 `CatHomeSpringConfiguration` 中，避免一次性扩大聚合关系改造范围。

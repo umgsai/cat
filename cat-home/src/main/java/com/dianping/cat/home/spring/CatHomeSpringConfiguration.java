@@ -413,6 +413,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		BusinessContactor.class, EventContactor.class, ExceptionContactor.class,
 		HeartbeatContactor.class, TransactionContactor.class, BusinessDecorator.class,
 		EventDecorator.class, ExceptionDecorator.class, HeartbeatDecorator.class, TransactionDecorator.class,
+		SenderManager.class, SpliterManager.class, ContactorManager.class, DecoratorManager.class,
 		com.dianping.cat.report.page.home.JspViewer.class,
 		com.dianping.cat.report.page.monitor.JspViewer.class,
 		com.dianping.cat.report.page.model.JspViewer.class,
@@ -501,6 +502,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					BusinessContactor.class, EventContactor.class, ExceptionContactor.class,
 					HeartbeatContactor.class, TransactionContactor.class, BusinessDecorator.class,
 					EventDecorator.class, ExceptionDecorator.class, HeartbeatDecorator.class, TransactionDecorator.class,
+					SenderManager.class, SpliterManager.class, ContactorManager.class, DecoratorManager.class,
 					com.dianping.cat.report.page.home.JspViewer.class,
 					com.dianping.cat.report.page.monitor.JspViewer.class,
 					com.dianping.cat.report.page.model.JspViewer.class,
@@ -3207,16 +3209,6 @@ public class CatHomeSpringConfiguration {
 		return senders;
 	}
 
-	@Bean(initMethod = "initialize")
-	public SenderManager senderManager(ServerConfigManager serverConfigManager,
-			@Qualifier("alertSenders") Map<String, Sender> alertSenders) {
-		SenderManager manager = new SenderManager();
-
-		manager.setConfigManager(serverConfigManager);
-		manager.setSenders(alertSenders);
-		return manager;
-	}
-
 	@Bean
 	public Map<String, Spliter> alertSpliters(@Qualifier("mailSpliter") Spliter mailSpliter,
 			@Qualifier("smsSpliter") Spliter smsSpliter, @Qualifier("weixinSpliter") Spliter weixinSpliter,
@@ -3228,14 +3220,6 @@ public class CatHomeSpringConfiguration {
 		spliters.put(WeixinSpliter.ID, weixinSpliter);
 		spliters.put(DXSpliter.ID, dxSpliter);
 		return spliters;
-	}
-
-	@Bean(initMethod = "initialize")
-	public ContactorManager contactorManager(@Qualifier("alertContactors") Map<String, Contactor> alertContactors) {
-		ContactorManager manager = new ContactorManager();
-
-		manager.setContactors(alertContactors);
-		return manager;
 	}
 
 	@Bean
@@ -3252,22 +3236,6 @@ public class CatHomeSpringConfiguration {
 		contactors.put(BusinessContactor.ID, businessContactor);
 		contactors.put(ExceptionContactor.ID, exceptionContactor);
 		return contactors;
-	}
-
-	@Bean(initMethod = "initialize")
-	public SpliterManager spliterManager(@Qualifier("alertSpliters") Map<String, Spliter> alertSpliters) {
-		SpliterManager manager = new SpliterManager();
-
-		manager.setSpliters(alertSpliters);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public DecoratorManager decoratorManager(@Qualifier("alertDecorators") Map<String, Decorator> alertDecorators) {
-		DecoratorManager manager = new DecoratorManager();
-
-		manager.setDecorators(alertDecorators);
-		return manager;
 	}
 
 	@Bean
