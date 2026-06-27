@@ -21,10 +21,13 @@ package com.dianping.cat.consumer.storage.builder;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
+@Component("storageCacheBuilder")
 public class StorageCacheBuilder implements StorageBuilder {
 
 	public final static String ID = "Cache";

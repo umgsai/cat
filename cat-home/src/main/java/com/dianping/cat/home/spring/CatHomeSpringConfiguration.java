@@ -88,6 +88,7 @@ import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.config.transaction.TpValueStatisticConfigManager;
+import com.dianping.cat.consumer.DatabaseParser;
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.consumer.business.BusinessDelegate;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
@@ -400,7 +401,10 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
 		BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
 		BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class, JsonBuilder.class,
-		DefaultValueTranslater.class, DefaultGraphBuilder.class},
+		DefaultValueTranslater.class, DefaultGraphBuilder.class, DependencyItemBuilder.class,
+		TopologyGraphBuilder.class, StorageAlertInfoBuilder.class, ExternalInfoBuilder.class, StorageMergeHelper.class,
+		DatabaseParser.class, IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
+		StorageRPCBuilder.class},
 		includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
 				classes = {BusinessAnalyzer.class, TransactionAnalyzer.class, CrossAnalyzer.class, DumpAnalyzer.class,
 					DependencyAnalyzer.class, EventAnalyzer.class, HeartbeatAnalyzer.class, MatrixAnalyzer.class,
@@ -409,7 +413,11 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
 					BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
 					BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class,
-					JsonBuilder.class, DefaultValueTranslater.class, DefaultGraphBuilder.class}),
+					JsonBuilder.class, DefaultValueTranslater.class, DefaultGraphBuilder.class,
+					DependencyItemBuilder.class, TopologyGraphBuilder.class, StorageAlertInfoBuilder.class,
+					ExternalInfoBuilder.class, StorageMergeHelper.class, DatabaseParser.class,
+					IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
+					StorageRPCBuilder.class}),
 		useDefaultFilters = false)
 @MapperScan(basePackages = {
 		"com.dianping.cat.mybatis.mapper",
@@ -1152,22 +1160,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public DependencyItemBuilder dependencyItemBuilder(TopologyGraphConfigManager topologyGraphConfigManager) {
-		DependencyItemBuilder builder = new DependencyItemBuilder();
-
-		builder.setGraphConfigManager(topologyGraphConfigManager);
-		return builder;
-	}
-
-	@Bean
-	public TopologyGraphBuilder topologyGraphBuilder(DependencyItemBuilder dependencyItemBuilder) {
-		TopologyGraphBuilder builder = new TopologyGraphBuilder();
-
-		builder.setItemBuilder(dependencyItemBuilder);
-		return builder;
-	}
-
-	@Bean
 	public com.dianping.cat.report.page.home.JspViewer homeJspViewer() {
 		return new com.dianping.cat.report.page.home.JspViewer();
 	}
@@ -1494,14 +1486,6 @@ public class CatHomeSpringConfiguration {
 	}
 
 	@Bean
-	public StorageAlertInfoBuilder storageAlertInfoBuilder(com.dianping.cat.alarm.service.AlertService alertService) {
-		StorageAlertInfoBuilder builder = new StorageAlertInfoBuilder();
-
-		builder.setAlertService(alertService);
-		return builder;
-	}
-
-	@Bean
 	public com.dianping.cat.report.page.storage.Handler storageHandler(
 			com.dianping.cat.report.page.storage.JspViewer storageJspViewer, StorageReportService storageReportService,
 			PayloadNormalizer payloadNormalizer,
@@ -1547,18 +1531,6 @@ public class CatHomeSpringConfiguration {
 		handler.setNormalizePayload(payloadNormalizer);
 		handler.setFormatConfigManager(topoGraphFormatConfigManager);
 		return handler;
-	}
-
-	@Bean
-	public ExternalInfoBuilder externalInfoBuilder(ServerConfigManager serverConfigManager,
-			@Qualifier("problemModelService") ModelService<ProblemReport> problemModelService,
-			DependencyReportService dependencyReportService) {
-		ExternalInfoBuilder builder = new ExternalInfoBuilder();
-
-		builder.setServerConfigManager(serverConfigManager);
-		builder.setProblemService(problemModelService);
-		builder.setReportService(dependencyReportService);
-		return builder;
 	}
 
 	@Bean(initMethod = "initialize")
@@ -2887,39 +2859,6 @@ public class CatHomeSpringConfiguration {
 				dailyReportContentRepository, weeklyReportRepository, weeklyReportContentRepository, monthlyReportRepository,
 				monthlyReportContentRepository);
 		return service;
-	}
-
-	@Bean
-	public StorageMergeHelper storageMergeHelper() {
-		return new StorageMergeHelper();
-	}
-
-	@Bean
-	public com.dianping.cat.consumer.DatabaseParser databaseParser() {
-		return new com.dianping.cat.consumer.DatabaseParser();
-	}
-
-	@Bean
-	public IpConvertManager ipConvertManager() {
-		return new IpConvertManager();
-	}
-
-	@Bean
-	public StorageBuilder storageSQLBuilder(com.dianping.cat.consumer.DatabaseParser databaseParser) {
-		StorageSQLBuilder builder = new StorageSQLBuilder();
-
-		builder.setDatabaseParser(databaseParser);
-		return builder;
-	}
-
-	@Bean
-	public StorageBuilder storageCacheBuilder() {
-		return new StorageCacheBuilder();
-	}
-
-	@Bean
-	public StorageBuilder storageRPCBuilder() {
-		return new StorageRPCBuilder();
 	}
 
 	@Bean

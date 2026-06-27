@@ -23,14 +23,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Cat;
 
+@Component
 public class IpConvertManager {
 
-	private Map<String, String> m_hosts = new HashMap<String, String>();
+	private static final Logger LOGGER = LoggerFactory.getLogger(IpConvertManager.class);
+
+	private Map<String, String> hosts = new HashMap<String, String>();
 
 	public String convertHostNameToIP(String hostName) {
-		String result = m_hosts.get(hostName);
+		String result = hosts.get(hostName);
 
 		if (result == null) {
 			if (isIPAddress(hostName)) {
@@ -41,11 +48,12 @@ public class IpConvertManager {
 
 					result = address.getHostAddress();
 				} catch (Exception e) {
+					LOGGER.warn("Unable to resolve host name to ip, hostName={}", hostName, e);
 					Cat.logError(e);
 					result = "";
 				}
 			}
-			m_hosts.put(hostName, result);
+			hosts.put(hostName, result);
 		}
 		return result;
 	}

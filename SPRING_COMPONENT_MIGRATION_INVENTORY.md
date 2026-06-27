@@ -275,6 +275,170 @@ mvn -pl cat-home -am -DskipTests compile
 BUILD SUCCESS
 ```
 
+## 12. 第四批完成记录
+
+第四批选择 dependency 图构建辅助 Bean，继续避开有生命周期的 `TopologyGraphManager`。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+dependencyItemBuilder -> com.dianping.cat.report.page.dependency.graph.DependencyItemBuilder
+topologyGraphBuilder -> com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 2 个 `@Bean` 方法：
+
+```text
+dependencyItemBuilder(...)
+topologyGraphBuilder(...)
+```
+
+3. `DependencyItemBuilder` 中 `TopologyGraphConfigManager` 已改为 `@Resource` 字段注入。
+4. `TopologyGraphBuilder` 中 `DependencyItemBuilder` 已改为 `@Resource` 字段注入。
+5. 本批触碰到的旧式字段命名已改为 Java 驼峰命名：
+
+```text
+m_graphConfigManager -> topologyGraphConfigManager
+m_itemBuilder        -> dependencyItemBuilder
+m_domain             -> domain
+m_graphs             -> graphs
+m_minute             -> minute
+m_date               -> date
+m_pigeonServices     -> pigeonServiceTypes
+```
+
+6. `TopologyGraphBuilder#setItemBuilder(...)` 保留，用于兼容 `TopologyGraphManager` 中手动 `new TopologyGraphBuilder().setItemBuilder(...)` 的旧路径。
+7. `TopologyGraphManager` 仍暂缓迁移，因为它有 `initMethod = "initialize"` 且依赖较多。
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
+## 13. 第五批完成记录
+
+第五批选择页面展示辅助 Bean，继续迁移无后台线程、无 `initMethod`、无聚合注册语义的低风险组件。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+storageAlertInfoBuilder -> com.dianping.cat.report.page.storage.display.StorageAlertInfoBuilder
+externalInfoBuilder -> com.dianping.cat.report.page.dependency.ExternalInfoBuilder
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 2 个 `@Bean` 方法：
+
+```text
+storageAlertInfoBuilder(...)
+externalInfoBuilder(...)
+```
+
+3. `StorageAlertInfoBuilder` 中 `AlertService` 已改为 `@Resource` 字段注入。
+4. `ExternalInfoBuilder` 中依赖已改为 `@Resource` 字段注入，其中 `ModelService<ProblemReport>` 使用 `@Resource(name = "problemModelService")`，避免同类型 Bean 注入歧义。
+5. 本批触碰到的旧式字段命名已改为 Java 驼峰命名：
+
+```text
+m_alertService        -> alertService
+m_sdf                 -> dateFormat
+m_serverConfigManager -> serverConfigManager
+m_problemservice      -> problemModelService
+m_reportService       -> dependencyReportService
+m_dateFormat          -> dateFormat
+```
+
+6. `StorageAlertInfoBuilder` 中原本只调用 `Cat.logError` 的告警时间异常分支，已补充 SLF4J warn 日志，包含 alert、alertDate、start、end、type 上下文。
+7. `ExternalInfoBuilder` 中 problem model service 不可用的异常分支，已补充 SLF4J error 日志，包含 request 上下文。
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
+## 14. 第六批完成记录
+
+第六批选择 storage/cross 低风险辅助 Bean，继续避开聚合 Bean、`initMethod` Bean 和任务构建链路。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. 以下 Bean 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+
+```text
+storageMergeHelper -> com.dianping.cat.report.page.storage.transform.StorageMergeHelper
+databaseParser -> com.dianping.cat.consumer.DatabaseParser
+ipConvertManager -> com.dianping.cat.consumer.cross.IpConvertManager
+storageSQLBuilder -> com.dianping.cat.consumer.storage.builder.StorageSQLBuilder
+storageCacheBuilder -> com.dianping.cat.consumer.storage.builder.StorageCacheBuilder
+storageRPCBuilder -> com.dianping.cat.consumer.storage.builder.StorageRPCBuilder
+```
+
+2. 已删除 `CatHomeSpringConfiguration` 中对应 6 个简单 `@Bean` 方法：
+
+```text
+storageMergeHelper()
+databaseParser()
+ipConvertManager()
+storageSQLBuilder(...)
+storageCacheBuilder()
+storageRPCBuilder()
+```
+
+3. `StorageSQLBuilder` 中 `DatabaseParser` 已改为 `@Resource` 字段注入，并显式使用 `@Component("storageSQLBuilder")` 保持原 Bean 名称。
+4. `StorageCacheBuilder`、`StorageRPCBuilder` 分别显式使用 `@Component("storageCacheBuilder")`、`@Component("storageRPCBuilder")`，保持现有 `@Qualifier` 注入语义。
+5. 本批触碰到的旧式字段命名已改为 Java 驼峰命名：
+
+```text
+m_databaseParser  -> databaseParser
+m_errorConnections -> errorConnections
+m_connections     -> connections
+m_hosts           -> hosts
+```
+
+6. `DatabaseParser` 中解析 JDBC 连接异常的分支，已补充 SLF4J warn 日志，包含 connection 上下文。
+7. `IpConvertManager` 中 hostname 解析异常的分支，已补充 SLF4J warn 日志，包含 hostName 上下文。
+8. 以下 Bean 本批继续保留在配置类中，避免改变聚合和生命周期语义：
+
+```text
+storageBuilders(...)
+storageBuilderManager(...)
+storageReportBuilder(...)
+```
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+```
+
 ## 10. 第二批完成记录
 
 第二批选择 `BusinessGraphCreator` 一个 Bean，目标是验证依赖较多但不涉及后台线程、不涉及 prototype 的普通业务图表 Bean 迁移方式。
