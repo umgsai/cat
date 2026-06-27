@@ -2786,3 +2786,45 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+## 49. 第四十一批完成记录
+第四十一批拆分数据库基础设施配置。目标不是把数据库基础设施强行改成 `@Component`，而是把仍然需要工厂方法创建的 5 个基础设施 Bean 从 `CatHomeSpringConfiguration` 中拆到独立配置类，避免主配置类继续承担数据源、MyBatis 和事务配置职责。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+1. 新增 `CatHomeDatabaseConfiguration`，集中保留以下基础设施 Bean 的 `@Bean` 注册方式和原 Bean 名称：
+```text
+catDataSource
+sqlSessionFactory
+sqlSessionTemplate
+transactionManager
+transactionTemplate
+```
+
+2. `@MapperScan` 已从 `CatHomeSpringConfiguration` 移到 `CatHomeDatabaseConfiguration`，让 MyBatis mapper 扫描和 `SqlSessionFactory` 配置保持在同一个数据库配置边界内。
+
+3. `CatHomeSpringConfiguration` 通过 `@Import(CatHomeDatabaseConfiguration.class)` 引入数据库配置，主配置类自身不再包含显式 `@Bean` 方法。
+
+4. `CatHomeDatabaseConfiguration` 增加了关键创建节点日志，方便启动时观察数据库基础设施初始化进度：
+```text
+DataSource
+SqlSessionFactory
+SqlSessionTemplate
+TransactionManager
+TransactionTemplate
+MyBatis mapper resources
+```
+
+5. 本批没有把 `DataSource`、`SqlSessionFactory`、`SqlSessionTemplate`、`TransactionTemplate` 改成 `@Component`，因为这些对象本身不是业务组件，继续用独立 `@Configuration` 的工厂方法更清晰、更可控。
+
+验证记录：
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+```text
+BUILD SUCCESS
+git diff --check 通过（仅有 Windows 换行提示）
+```

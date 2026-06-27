@@ -1,20 +1,9 @@
 package com.dianping.cat.home.spring;
 
-import javax.sql.DataSource;
-
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.SqlSessionTemplate;
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.DefaultMessageAnalyzerManager;
@@ -300,7 +289,11 @@ import com.dianping.cat.system.page.router.service.RouterConfigService;
 import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 
 @Configuration
-@Import({SpringMvcMigrationConfiguration.class, SpringStorageComponentConfiguration.class})
+@Import({
+		CatHomeDatabaseConfiguration.class,
+		SpringMvcMigrationConfiguration.class,
+		SpringStorageComponentConfiguration.class
+})
 @ComponentScan(basePackageClasses = {BusinessAnalyzer.class, BusinessDelegate.class,
 		TransactionAnalyzer.class, TransactionDelegate.class, CrossAnalyzer.class, CrossDelegate.class,
 		DumpAnalyzer.class, DependencyAnalyzer.class, DependencyDelegate.class, EventAnalyzer.class, EventDelegate.class,
@@ -616,64 +609,5 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					com.dianping.cat.system.page.config.processor.AlertConfigProcessor.class,
 					com.dianping.cat.system.page.permission.Handler.class}),
 		useDefaultFilters = false)
-@MapperScan(basePackages = {
-		"com.dianping.cat.mybatis.mapper",
-		"com.dianping.cat.mybatis.alert.dao",
-		"com.dianping.cat.mybatis.server.alarm.rule.dao",
-		"com.dianping.cat.mybatis.user.define.rule.dao"
-})
 public class CatHomeSpringConfiguration {
-	@Bean
-	public DataSource catDataSource() {
-		return CatHomeSpringDataSourceFactory.createCatDataSource();
-	}
-
-	@Bean
-	public SqlSessionFactory sqlSessionFactory(DataSource catDataSource) throws Exception {
-		SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
-		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-
-		factory.setDataSource(catDataSource);
-		factory.setMapperLocations(
-				resolver.getResource("classpath:mybatis/mapper/ConfigMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/DailyReportMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/HostInfoMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/HourlyReportMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/WeeklyReportMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/MonthReportMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/ProjectMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/DailyReportContentMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/HourlyReportContentMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/WeeklyReportContentMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/MonthlyReportContentMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/BusinessConfigMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/TaskMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/AlertSummaryMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/ConfigModificationMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/BaselineMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/OverloadMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/TopologyGraphMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/MetricGraphMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/MetricScreenMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/AlterationMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/AlertMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/ServerAlarmRuleMapper.xml"),
-				resolver.getResource("classpath:mybatis/mapper/UserDefineRuleMapper.xml"));
-		return factory.getObject();
-	}
-
-	@Bean
-	public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
-		return new SqlSessionTemplate(sqlSessionFactory);
-	}
-
-	@Bean
-	public PlatformTransactionManager transactionManager(DataSource catDataSource) {
-		return new DataSourceTransactionManager(catDataSource);
-	}
-
-	@Bean
-	public TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
-		return new TransactionTemplate(transactionManager);
-	}
 }
