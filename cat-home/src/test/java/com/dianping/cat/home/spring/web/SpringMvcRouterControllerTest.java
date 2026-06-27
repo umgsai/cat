@@ -40,10 +40,10 @@ public class SpringMvcRouterControllerTest {
 	private SpringMvcRouterController controller() {
 		SpringMvcRouterController controller = new SpringMvcRouterController();
 
-		inject(controller, "m_cachedReportService", new CachedRouterConfigService());
-		inject(controller, "m_configManager", new RouterConfigManager());
-		inject(controller, "m_sampleConfigManager", new SampleConfigManager());
-		inject(controller, "m_filterManager", new ServerFilterConfigManager());
+		inject(controller, "cachedRouterConfigService", new CachedRouterConfigService());
+		inject(controller, "routerConfigManager", new RouterConfigManager());
+		inject(controller, "sampleConfigManager", new SampleConfigManager());
+		inject(controller, "serverFilterConfigManager", new ServerFilterConfigManager());
 		return controller;
 	}
 

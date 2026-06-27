@@ -51,39 +51,37 @@ import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class SpringMvcProblemController {
-	private final SimpleDateFormat m_dayFormat = new SimpleDateFormat("yyyyMMdd");
+	private final SimpleDateFormat dayFormat = new SimpleDateFormat("yyyyMMdd");
 
-	private final SimpleDateFormat m_hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
+	private final SimpleDateFormat hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
 
-	private final SimpleDateFormat m_subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-	@Resource
-	private DomainGroupConfigManager m_configManager;
+	private final SimpleDateFormat subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	@Resource
-	private HostinfoService m_hostinfoService;
+	private DomainGroupConfigManager domainGroupConfigManager;
 
 	@Resource
-	private ProjectService m_projectService;
+	private HostinfoService hostinfoService;
 
 	@Resource
-	private SampleConfigManager m_sampleConfigManager;
+	private ProjectService projectService;
 
 	@Resource
-	private ServerConfigManager m_serverConfigManager;
+	private SampleConfigManager sampleConfigManager;
 
 	@Resource
-	private ProblemReportService m_reportService;
+	private ServerConfigManager serverConfigManager;
 
 	@Resource
-	@Qualifier("problemModelService")
-	private ModelService<ProblemReport> m_problemService;
+	private ProblemReportService problemReportService;
+
+	@Resource(name = "problemModelService")
+	private ModelService<ProblemReport> problemModelService;
 
 	@GetMapping("/mvc/r/p")
 	public void problem(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -126,7 +124,7 @@ public class SpringMvcProblemController {
 				: date(request.getParameter("date"), intParameter(request, "step", 0));
 
 		if (StringUtils.isEmpty(group)) {
-			group = m_configManager.queryDefaultGroup(domain);
+			group = domainGroupConfigManager.queryDefaultGroup(domain);
 		}
 		reportType = historyMode ? historyDates.getReportType() : reportType;
 
@@ -171,16 +169,16 @@ public class SpringMvcProblemController {
 		model.put("reportType", reportType);
 		model.put("type", type);
 		model.put("status", status);
-		model.put("date", historyMode ? m_dayFormat.format(new Date(date)) : m_hourlyFormat.format(new Date(date)));
+		model.put("date", historyMode ? dayFormat.format(new Date(date)) : hourlyFormat.format(new Date(date)));
 		model.put("longDate", date);
 		model.put("report", report);
-		model.put("reportStart", m_subtitleFormat.format(historyMode ? historyDates.getStart() : report.getStartTime()));
-		model.put("reportEnd", m_subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
+		model.put("reportStart", subtitleFormat.format(historyMode ? historyDates.getStart() : report.getStartTime()));
+		model.put("reportEnd", subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
 		model.put("ips", ips);
 		model.put("ipToHostnameStr", new JsonBuilder().toJson(ipToHostname(ips)));
-		model.put("groups", m_configManager.queryDomainGroup(domain));
+		model.put("groups", domainGroupConfigManager.queryDomainGroup(domain));
 		model.put("group", group);
-		model.put("groupIps", m_configManager.queryIpByDomainAndGroup(domain, group));
+		model.put("groupIps", domainGroupConfigManager.queryIpByDomainAndGroup(domain, group));
 		model.put("domainGroups", domainGroups());
 		model.put("navs", UrlNav.values());
 		model.put("baseUri", contextPath + "/mvc/r/p");
@@ -272,7 +270,7 @@ public class SpringMvcProblemController {
 
 		if (value != null && value.length() > 0) {
 			try {
-				result = value.length() == 10 ? m_hourlyFormat.parse(value).getTime()
+				result = value.length() == 10 ? hourlyFormat.parse(value).getTime()
 						: new SimpleDateFormat("yyyyMMdd").parse(value).getTime();
 			} catch (ParseException e) {
 				result = currentHour;
@@ -285,7 +283,7 @@ public class SpringMvcProblemController {
 	private Date dateParameter(String value) {
 		if (value != null && value.length() > 0) {
 			try {
-				return value.length() == 10 ? m_hourlyFormat.parse(value) : m_dayFormat.parse(value);
+				return value.length() == 10 ? hourlyFormat.parse(value) : dayFormat.parse(value);
 			} catch (ParseException e) {
 				// ignore invalid date and fall back to the same default as old MVC.
 			}
@@ -294,7 +292,7 @@ public class SpringMvcProblemController {
 	}
 
 	private String defaultSqlThreshold(String domain) {
-		Map<String, Domain> domains = m_serverConfigManager.getLongConfigDomains();
+		Map<String, Domain> domains = serverConfigManager.getLongConfigDomains();
 		Domain config = domains.get(domain);
 
 		if (config != null) {
@@ -310,11 +308,11 @@ public class SpringMvcProblemController {
 	}
 
 	private String defaultUrlThreshold(String domain) {
-		Map<String, Domain> domains = m_serverConfigManager.getLongConfigDomains();
+		Map<String, Domain> domains = serverConfigManager.getLongConfigDomains();
 		Domain config = domains.get(domain);
 
 		if (config != null) {
-			int threshold = config.getUrlThreshold() == null ? m_serverConfigManager.getLongUrlDefaultThreshold()
+			int threshold = config.getUrlThreshold() == null ? serverConfigManager.getLongUrlDefaultThreshold()
 					: config.getUrlThreshold();
 
 			if (threshold != 500 && threshold != 1000 && threshold != 2000 && threshold != 3000 && threshold != 4000
@@ -328,9 +326,9 @@ public class SpringMvcProblemController {
 	}
 
 	private Map<String, Department> domainGroups() {
-		Collection<String> domains = m_projectService.findAllDomains();
+		Collection<String> domains = projectService.findAllDomains();
 
-		return m_projectService.findDepartments(domains);
+		return projectService.findDepartments(domains);
 	}
 
 	private String emptyToNull(String value) {
@@ -338,7 +336,7 @@ public class SpringMvcProblemController {
 	}
 
 	private ProblemReport filterReportByGroup(ProblemReport report, String domain, String group) {
-		List<String> ips = m_configManager.queryIpByDomainAndGroup(domain, group);
+		List<String> ips = domainGroupConfigManager.queryIpByDomainAndGroup(domain, group);
 		List<String> removes = new ArrayList<String>();
 
 		for (Machine machine : report.getMachines().values()) {
@@ -516,7 +514,7 @@ public class SpringMvcProblemController {
 		Map<String, String> result = new LinkedHashMap<String, String>();
 
 		for (String ip : ips) {
-			String hostname = m_hostinfoService.queryHostnameByIp(ip);
+			String hostname = hostinfoService.queryHostnameByIp(ip);
 
 			if (hostname != null && !"null".equalsIgnoreCase(hostname)) {
 				result.put(ip, hostname);
@@ -538,9 +536,9 @@ public class SpringMvcProblemController {
 		if (value != null && value.length() > 0) {
 			try {
 				if (value.length() == 10) {
-					return m_hourlyFormat.parse(value);
+					return hourlyFormat.parse(value);
 				} else if (value.length() == 8) {
-					return m_dayFormat.parse(value);
+					return dayFormat.parse(value);
 				}
 			} catch (ParseException e) {
 				// ignore invalid custom date.
@@ -579,8 +577,8 @@ public class SpringMvcProblemController {
 		if (!StringUtils.isEmpty(status)) {
 			request.setProperty("name", status);
 		}
-		if (m_problemService.isEligable(request)) {
-			ModelResponse<ProblemReport> response = m_problemService.invoke(request);
+		if (problemModelService.isEligable(request)) {
+			ModelResponse<ProblemReport> response = problemModelService.invoke(request);
 
 			return response.getModel();
 		}
@@ -588,7 +586,7 @@ public class SpringMvcProblemController {
 	}
 
 	private ProblemReport queryHistoryReport(String domain, HistoryDates dates) {
-		return m_reportService.queryReport(domain, dates.getStart(), dates.getEnd());
+		return problemReportService.queryReport(domain, dates.getStart(), dates.getEnd());
 	}
 
 	private String queryString(int urlThreshold, int sqlThreshold, int serviceThreshold, int cacheThreshold,
@@ -598,7 +596,7 @@ public class SpringMvcProblemController {
 	}
 
 	private double sample(String domain) {
-		SampleConfig config = m_sampleConfigManager.getConfig();
+		SampleConfig config = sampleConfigManager.getConfig();
 		com.dianping.cat.sample.entity.Domain sampleDomain = config.findDomain(domain);
 
 		return sampleDomain == null ? 1.0 : sampleDomain.getSample();
@@ -629,7 +627,7 @@ public class SpringMvcProblemController {
 		}
 
 		private String getCustomDate() {
-			return "&startDate=" + m_dayFormat.format(m_start) + "&endDate=" + m_dayFormat.format(m_end);
+			return "&startDate=" + dayFormat.format(m_start) + "&endDate=" + dayFormat.format(m_end);
 		}
 
 		private long getDate() {

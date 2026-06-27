@@ -35,33 +35,31 @@ import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class SpringMvcStateController {
-	private final SimpleDateFormat m_dayFormat = new SimpleDateFormat("yyyyMMdd");
+	private final SimpleDateFormat dayFormat = new SimpleDateFormat("yyyyMMdd");
 
-	private final SimpleDateFormat m_hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
+	private final SimpleDateFormat hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
 
-	private final SimpleDateFormat m_subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-	@Resource
-	private ServerFilterConfigManager m_serverFilterConfigManager;
+	private final SimpleDateFormat subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	@Resource
-	private StateBuilder m_stateBuilder;
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	@Resource
-	private StateGraphBuilder m_stateGraphBuilder;
+	private StateBuilder stateBuilder;
 
 	@Resource
-	private StateReportService m_reportService;
+	private StateGraphBuilder stateGraphBuilder;
 
 	@Resource
-	@Qualifier("stateModelService")
-	private ModelService<StateReport> m_stateService;
+	private StateReportService stateReportService;
+
+	@Resource(name = "stateModelService")
+	private ModelService<StateReport> stateModelService;
 
 	@GetMapping("/mvc/r/state")
 	public void state(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -103,13 +101,13 @@ public class SpringMvcStateController {
 		} else if (isHistoryGraphAction(action)) {
 			buildHistoryGraph(model, ipAddress, historyDates, request.getParameter("key"));
 		} else {
-			StateDisplay display = new StateDisplay(ipAddress, m_serverFilterConfigManager.getUnusedDomains());
+			StateDisplay display = new StateDisplay(ipAddress, serverFilterConfigManager.getUnusedDomains());
 
 			display.setSortType(sort);
 			display.visitStateReport(report);
 			model.put("state", display);
 			if (!historyMode) {
-				model.put("message", m_stateBuilder.buildStateMessage(date, ipAddress));
+				model.put("message", stateBuilder.buildStateMessage(date, ipAddress));
 			}
 		}
 
@@ -122,11 +120,11 @@ public class SpringMvcStateController {
 		model.put("displayDomain", domain);
 		model.put("ipAddress", ipAddress);
 		model.put("reportType", reportType);
-		model.put("date", historyMode ? m_dayFormat.format(new Date(date)) : m_hourlyFormat.format(new Date(date)));
+		model.put("date", historyMode ? dayFormat.format(new Date(date)) : hourlyFormat.format(new Date(date)));
 		model.put("longDate", date);
 		model.put("report", report);
-		model.put("reportStart", m_subtitleFormat.format(historyMode ? historyDates.getStart() : report.getStartTime()));
-		model.put("reportEnd", m_subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
+		model.put("reportStart", subtitleFormat.format(historyMode ? historyDates.getStart() : report.getStartTime()));
+		model.put("reportEnd", subtitleFormat.format(historyMode ? historyDates.getDisplayEnd() : report.getEndTime()));
 		model.put("ips", ips);
 		model.put("navs", UrlNav.values());
 		model.put("navPrefix", "domain=" + domain + "&ip=" + ipAddress + "&show=" + show);
@@ -144,10 +142,10 @@ public class SpringMvcStateController {
 		Payload payload = new Payload();
 
 		payload.setIpAddress(ipAddress);
-		payload.setDate(m_hourlyFormat.format(new Date(date)));
+		payload.setDate(hourlyFormat.format(new Date(date)));
 		payload.setKey(key);
 
-		Pair<LineChart, PieChart> pair = m_stateGraphBuilder.buildGraph(payload, key, report);
+		Pair<LineChart, PieChart> pair = stateGraphBuilder.buildGraph(payload, key, report);
 
 		model.put("key", key);
 		model.put("graph", new JsonBuilder().toJson(pair.getKey()));
@@ -158,13 +156,13 @@ public class SpringMvcStateController {
 		Payload payload = new Payload();
 
 		payload.setIpAddress(ipAddress);
-		payload.setDate(m_dayFormat.format(dates.getStart()));
+		payload.setDate(dayFormat.format(dates.getStart()));
 		payload.setReportType(dates.getReportType());
-		payload.setCustomStart(m_dayFormat.format(dates.getStart()));
-		payload.setCustomEnd(m_dayFormat.format(dates.getEnd()));
+		payload.setCustomStart(dayFormat.format(dates.getStart()));
+		payload.setCustomEnd(dayFormat.format(dates.getEnd()));
 		payload.setKey(key);
 
-		Pair<LineChart, PieChart> pair = m_stateGraphBuilder.buildGraph(payload, key);
+		Pair<LineChart, PieChart> pair = stateGraphBuilder.buildGraph(payload, key);
 
 		model.put("key", key);
 		model.put("graph", new JsonBuilder().toJson(pair.getKey()));
@@ -189,7 +187,7 @@ public class SpringMvcStateController {
 
 		if (value != null && value.length() > 0) {
 			try {
-				result = value.length() == 10 ? m_hourlyFormat.parse(value).getTime()
+				result = value.length() == 10 ? hourlyFormat.parse(value).getTime()
 						: new SimpleDateFormat("yyyyMMdd").parse(value).getTime();
 			} catch (ParseException e) {
 				result = currentHour;
@@ -206,7 +204,7 @@ public class SpringMvcStateController {
 	private Date dateParameter(String value) {
 		if (value != null && value.length() > 0) {
 			try {
-				return value.length() == 10 ? m_hourlyFormat.parse(value) : m_dayFormat.parse(value);
+				return value.length() == 10 ? hourlyFormat.parse(value) : dayFormat.parse(value);
 			} catch (ParseException e) {
 				// ignore invalid date and fall back to the same default as old MVC.
 			}
@@ -363,9 +361,9 @@ public class SpringMvcStateController {
 		if (value != null && value.length() > 0) {
 			try {
 				if (value.length() == 10) {
-					return m_hourlyFormat.parse(value);
+					return hourlyFormat.parse(value);
 				} else if (value.length() == 8) {
-					return m_dayFormat.parse(value);
+					return dayFormat.parse(value);
 				}
 			} catch (ParseException e) {
 				// ignore invalid custom date.
@@ -377,8 +375,8 @@ public class SpringMvcStateController {
 	private StateReport queryHourlyReport(String ipAddress, long date) {
 		ModelRequest request = new ModelRequest(Constants.CAT, date).setProperty("ip", ipAddress);
 
-		if (m_stateService.isEligable(request)) {
-			ModelResponse<StateReport> response = m_stateService.invoke(request);
+		if (stateModelService.isEligable(request)) {
+			ModelResponse<StateReport> response = stateModelService.invoke(request);
 
 			return response.getModel();
 		}
@@ -386,7 +384,7 @@ public class SpringMvcStateController {
 	}
 
 	private StateReport queryHistoryReport(HistoryDates dates) {
-		return m_reportService.queryReport(Constants.CAT, dates.getStart(), dates.getEnd());
+		return stateReportService.queryReport(Constants.CAT, dates.getStart(), dates.getEnd());
 	}
 
 	private class HistoryDates {
@@ -409,7 +407,7 @@ public class SpringMvcStateController {
 		}
 
 		private String getCustomDate() {
-			return "&startDate=" + m_dayFormat.format(m_start) + "&endDate=" + m_dayFormat.format(m_end);
+			return "&startDate=" + dayFormat.format(m_start) + "&endDate=" + dayFormat.format(m_end);
 		}
 
 		private long getDate() {

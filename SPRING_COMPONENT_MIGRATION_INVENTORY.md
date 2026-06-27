@@ -1187,3 +1187,50 @@ mvn -pl cat-home -am -DskipTests compile
 ```text
 BUILD SUCCESS
 ```
+
+## 26. 第十八批完成记录
+
+第十八批聚焦 Spring MVC 迁移路径中的 Controller 和页面服务适配类。实际核对后发现，Spring MVC Controller 已经由 `SpringMvcMigrationConfiguration` 的 `@ComponentScan(basePackages = "com.dianping.cat.home.spring.web")` 扫描注册；`JsonBuilder`、`PayloadNormalizer`、`ReportModelDependencies`、`DefaultGraphBuilder`、`DefaultValueTranslater` 也已经是组件扫描白名单内的组件。本批因此只迁移仍由配置方法创建的低风险支撑 Bean，并对触碰到的 Spring MVC Controller 注入字段做命名规范化。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+
+1. `DomainValidator` 已改为 `@Component` 创建，并加入 `CatHomeSpringConfiguration` 的保守白名单扫描。
+2. 已删除 `CatHomeSpringConfiguration` 中的 `domainValidator()` `@Bean` 方法。
+3. Spring MVC Controller 中触碰到的注入字段已从 `m_` 风格改为 Java 驼峰命名，覆盖：
+
+```text
+SpringMvcLoginController
+SpringMvcProjectController
+SpringMvcBusinessController
+SpringMvcConfigController
+SpringMvcRouterController
+SpringMvcBusinessReportController
+SpringMvcLogviewController
+SpringMvcTransactionController
+SpringMvcEventController
+SpringMvcProblemController
+SpringMvcHeartbeatController
+SpringMvcCrossController
+SpringMvcStateController
+SpringMvcTopController
+```
+
+4. 多个 `ModelService` 注入点已从 `@Resource` + `@Qualifier` 调整为 `@Resource(name = "...")`，避免同类型 Bean 注入歧义。
+5. `SpringMvcConfigController` 中原先直接吞掉异常并返回 `false` 的配置写入路径已补充 SLF4J 日志，便于排查配置更新失败原因。
+6. 本批未迁移 `SpringMvcMigrationServlet`，因为它是路由适配入口，不属于普通 Spring Bean 注入字段改造范围；内部页面 DTO 的 `m_` 字段也暂不调整，避免影响 JSP/JSON 暴露属性。
+
+验证记录：
+
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

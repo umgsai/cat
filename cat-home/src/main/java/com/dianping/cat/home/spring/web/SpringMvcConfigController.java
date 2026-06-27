@@ -44,63 +44,67 @@ import com.dianping.cat.system.page.login.service.SigninService;
 import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 public class SpringMvcConfigController {
-	@Resource
-	private ProjectService m_projectService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(SpringMvcConfigController.class);
 
 	@Resource
-	private DomainGroupConfigManager m_domainGroupConfigManager;
+	private ProjectService projectService;
 
 	@Resource
-	private HeartbeatDisplayPolicyManager m_displayPolicyManager;
+	private DomainGroupConfigManager domainGroupConfigManager;
 
 	@Resource
-	private HeartbeatRuleConfigManager m_heartbeatRuleConfigManager;
+	private HeartbeatDisplayPolicyManager displayPolicyManager;
 
 	@Resource
-	private AlertPolicyManager m_alertPolicyManager;
+	private HeartbeatRuleConfigManager heartbeatRuleConfigManager;
 
 	@Resource
-	private AlertConfigManager m_alertConfigManager;
+	private AlertPolicyManager alertPolicyManager;
 
 	@Resource
-	private SenderConfigManager m_senderConfigManager;
+	private AlertConfigManager alertConfigManager;
 
 	@Resource
-	private ConfigHtmlParser m_configHtmlParser;
+	private SenderConfigManager senderConfigManager;
 
 	@Resource
-	private ServerConfigManager m_serverConfigManager;
+	private ConfigHtmlParser configHtmlParser;
 
 	@Resource
-	private SampleConfigManager m_sampleConfigManager;
+	private ServerConfigManager serverConfigManager;
 
 	@Resource
-	private RouterConfigManager m_routerConfigManager;
+	private SampleConfigManager sampleConfigManager;
 
 	@Resource
-	private TransactionRuleConfigManager m_transactionRuleConfigManager;
+	private RouterConfigManager routerConfigManager;
 
 	@Resource
-	private EventRuleConfigManager m_eventRuleConfigManager;
+	private TransactionRuleConfigManager transactionRuleConfigManager;
 
 	@Resource
-	private ExceptionRuleConfigManager m_exceptionRuleConfigManager;
+	private EventRuleConfigManager eventRuleConfigManager;
 
 	@Resource
-	private RuleFTLDecorator m_ruleDecorator;
+	private ExceptionRuleConfigManager exceptionRuleConfigManager;
 
 	@Resource
-	private SigninService m_signinService;
+	private RuleFTLDecorator ruleDecorator;
+
+	@Resource
+	private SigninService signinService;
 
 	@RequestMapping(value = "/s/config", method = { RequestMethod.GET, RequestMethod.POST })
 	public void config(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Session session = m_signinService.validate(new SigninContext(request, response));
+		Session session = signinService.validate(new SigninContext(request, response));
 
 		if (session == null) {
 			forwardLogin(request, response);
@@ -211,7 +215,7 @@ public class SpringMvcConfigController {
 		Project selected = null;
 
 		if (!projectAdd) {
-			selected = m_projectService.findByDomain(domain);
+			selected = projectService.findByDomain(domain);
 
 			if (selected == null) {
 				selected = findProject(projects, domain);
@@ -232,67 +236,67 @@ public class SpringMvcConfigController {
 	}
 
 	void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	void setDomainGroupConfigManager(DomainGroupConfigManager domainGroupConfigManager) {
-		m_domainGroupConfigManager = domainGroupConfigManager;
+		this.domainGroupConfigManager = domainGroupConfigManager;
 	}
 
 	void setDisplayPolicyManager(HeartbeatDisplayPolicyManager displayPolicyManager) {
-		m_displayPolicyManager = displayPolicyManager;
+		this.displayPolicyManager = displayPolicyManager;
 	}
 
 	void setHeartbeatRuleConfigManager(HeartbeatRuleConfigManager heartbeatRuleConfigManager) {
-		m_heartbeatRuleConfigManager = heartbeatRuleConfigManager;
+		this.heartbeatRuleConfigManager = heartbeatRuleConfigManager;
 	}
 
 	void setAlertPolicyManager(AlertPolicyManager alertPolicyManager) {
-		m_alertPolicyManager = alertPolicyManager;
+		this.alertPolicyManager = alertPolicyManager;
 	}
 
 	void setAlertConfigManager(AlertConfigManager alertConfigManager) {
-		m_alertConfigManager = alertConfigManager;
+		this.alertConfigManager = alertConfigManager;
 	}
 
 	void setSenderConfigManager(SenderConfigManager senderConfigManager) {
-		m_senderConfigManager = senderConfigManager;
+		this.senderConfigManager = senderConfigManager;
 	}
 
 	void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
-		m_configHtmlParser = configHtmlParser;
+		this.configHtmlParser = configHtmlParser;
 	}
 
 	void setServerConfigManager(ServerConfigManager serverConfigManager) {
-		m_serverConfigManager = serverConfigManager;
+		this.serverConfigManager = serverConfigManager;
 	}
 
 	void setSampleConfigManager(SampleConfigManager sampleConfigManager) {
-		m_sampleConfigManager = sampleConfigManager;
+		this.sampleConfigManager = sampleConfigManager;
 	}
 
 	void setRouterConfigManager(RouterConfigManager routerConfigManager) {
-		m_routerConfigManager = routerConfigManager;
+		this.routerConfigManager = routerConfigManager;
 	}
 
 	void setTransactionRuleConfigManager(TransactionRuleConfigManager transactionRuleConfigManager) {
-		m_transactionRuleConfigManager = transactionRuleConfigManager;
+		this.transactionRuleConfigManager = transactionRuleConfigManager;
 	}
 
 	void setEventRuleConfigManager(EventRuleConfigManager eventRuleConfigManager) {
-		m_eventRuleConfigManager = eventRuleConfigManager;
+		this.eventRuleConfigManager = eventRuleConfigManager;
 	}
 
 	void setExceptionRuleConfigManager(ExceptionRuleConfigManager exceptionRuleConfigManager) {
-		m_exceptionRuleConfigManager = exceptionRuleConfigManager;
+		this.exceptionRuleConfigManager = exceptionRuleConfigManager;
 	}
 
 	void setRuleDecorator(RuleFTLDecorator ruleDecorator) {
-		m_ruleDecorator = ruleDecorator;
+		this.ruleDecorator = ruleDecorator;
 	}
 
 	void setSigninService(SigninService signinService) {
-		m_signinService = signinService;
+		this.signinService = signinService;
 	}
 
 	private boolean deleteProject(long id) {
@@ -304,7 +308,7 @@ public class SpringMvcConfigController {
 
 		project.setId(id);
 		project.setKeyId(id);
-		return m_projectService.delete(project);
+		return projectService.delete(project);
 	}
 
 	private boolean isSupported(String action) {
@@ -323,12 +327,12 @@ public class SpringMvcConfigController {
 		Boolean opState = null;
 
 		if ("domainGroupConfigDelete".equals(action)) {
-			opState = m_domainGroupConfigManager.deleteGroup(domain);
+			opState = domainGroupConfigManager.deleteGroup(domain);
 		} else if ("domainGroupConfigSubmit".equals(action)) {
-			opState = m_domainGroupConfigManager.insertFromJson(parameter(request, "content", ""));
+			opState = domainGroupConfigManager.insertFromJson(parameter(request, "content", ""));
 		}
 
-		DomainGroup domainGroup = m_domainGroupConfigManager.getDomainGroup();
+		DomainGroup domainGroup = domainGroupConfigManager.getDomainGroup();
 		Domain groupDomain = groupDomain(action, request.getParameter("domain"));
 
 		model.put("domainGroup", domainGroup);
@@ -343,11 +347,11 @@ public class SpringMvcConfigController {
 		Boolean opState = null;
 
 		if (content != null && content.length() > 0) {
-			opState = m_displayPolicyManager.insert(content);
+			opState = displayPolicyManager.insert(content);
 		} else if (request.getParameter("submit") != null) {
 			opState = true;
 		}
-		model.put("content", m_configHtmlParser.parse(m_displayPolicyManager.getHeartbeatDisplayPolicy().toString()));
+		model.put("content", configHtmlParser.parse(displayPolicyManager.getHeartbeatDisplayPolicy().toString()));
 		model.put("opState", opState);
 	}
 
@@ -356,11 +360,11 @@ public class SpringMvcConfigController {
 		Boolean opState = null;
 
 		if (content != null && content.length() > 0) {
-			opState = m_alertPolicyManager.insert(content);
+			opState = alertPolicyManager.insert(content);
 		} else if (request.getParameter("submit") != null) {
 			opState = true;
 		}
-		model.put("content", m_configHtmlParser.parse(m_alertPolicyManager.getAlertPolicy().toString()));
+		model.put("content", configHtmlParser.parse(alertPolicyManager.getAlertPolicy().toString()));
 		model.put("opState", opState);
 	}
 
@@ -370,13 +374,13 @@ public class SpringMvcConfigController {
 		Boolean opState = null;
 
 		if (content != null && content.length() > 0) {
-			String xml = m_alertConfigManager.buildReceiverContentByOnOff(content, allOnOrOff);
+			String xml = alertConfigManager.buildReceiverContentByOnOff(content, allOnOrOff);
 
-			opState = xml != null && m_alertConfigManager.insert(xml);
+			opState = xml != null && alertConfigManager.insert(xml);
 		} else if (request.getParameter("submit") != null) {
 			opState = true;
 		}
-		model.put("content", m_configHtmlParser.parse(m_alertConfigManager.getAlertConfig().toString()));
+		model.put("content", configHtmlParser.parse(alertConfigManager.getAlertConfig().toString()));
 		model.put("opState", opState);
 	}
 
@@ -385,11 +389,11 @@ public class SpringMvcConfigController {
 		Boolean opState = null;
 
 		if (content != null && content.length() > 0) {
-			opState = m_senderConfigManager.insert(content);
+			opState = senderConfigManager.insert(content);
 		} else if (request.getParameter("submit") != null) {
 			opState = true;
 		}
-		model.put("content", m_configHtmlParser.parse(m_senderConfigManager.getConfig().toString()));
+		model.put("content", configHtmlParser.parse(senderConfigManager.getConfig().toString()));
 		model.put("opState", opState);
 	}
 
@@ -398,11 +402,11 @@ public class SpringMvcConfigController {
 		Boolean opState = null;
 
 		if (content != null && content.length() > 0) {
-			opState = m_serverConfigManager.insert(content);
+			opState = serverConfigManager.insert(content);
 		} else if (request.getParameter("submit") != null) {
 			opState = true;
 		}
-		model.put("content", m_configHtmlParser.parse(m_serverConfigManager.getConfig().toString()));
+		model.put("content", configHtmlParser.parse(serverConfigManager.getConfig().toString()));
 		model.put("opState", opState);
 	}
 
@@ -411,11 +415,11 @@ public class SpringMvcConfigController {
 		Boolean opState = null;
 
 		if (content != null && content.length() > 0) {
-			opState = m_sampleConfigManager.insert(content);
+			opState = sampleConfigManager.insert(content);
 		} else if (request.getParameter("submit") != null) {
 			opState = true;
 		}
-		model.put("content", m_configHtmlParser.parse(m_sampleConfigManager.getConfig().toString()));
+		model.put("content", configHtmlParser.parse(sampleConfigManager.getConfig().toString()));
 		model.put("opState", opState);
 	}
 
@@ -424,11 +428,11 @@ public class SpringMvcConfigController {
 		Boolean opState = null;
 
 		if (content != null && content.length() > 0) {
-			opState = m_routerConfigManager.insert(content);
+			opState = routerConfigManager.insert(content);
 		} else if (request.getParameter("submit") != null) {
 			opState = true;
 		}
-		model.put("content", m_configHtmlParser.parse(m_routerConfigManager.getRouterConfig().toString()));
+		model.put("content", configHtmlParser.parse(routerConfigManager.getRouterConfig().toString()));
 		model.put("opState", opState);
 	}
 
@@ -511,7 +515,7 @@ public class SpringMvcConfigController {
 	}
 
 	private void configTransactionRuleListModel(Map<String, Object> model) {
-		Map<String, Rule> rules = m_transactionRuleConfigManager.getMonitorRules().getRules();
+		Map<String, Rule> rules = transactionRuleConfigManager.getMonitorRules().getRules();
 
 		for (Rule rule : rules.values()) {
 			if (rule.getAvailable() == null) {
@@ -528,7 +532,7 @@ public class SpringMvcConfigController {
 		Rule rule = null;
 
 		if (ruleId.length() > 0) {
-			rule = m_transactionRuleConfigManager.queryRule(ruleId);
+			rule = transactionRuleConfigManager.queryRule(ruleId);
 		}
 		if (rule != null) {
 			configs = new DefaultJsonBuilder(true).buildArray(rule.getConfigs());
@@ -538,11 +542,11 @@ public class SpringMvcConfigController {
 		}
 		model.put("ruleId", ruleId);
 		model.put("available", available);
-		model.put("content", m_ruleDecorator.generateConfigsHtml(configs));
+		model.put("content", ruleDecorator.generateConfigsHtml(configs));
 	}
 
 	private void configEventRuleListModel(Map<String, Object> model) {
-		Map<String, Rule> rules = m_eventRuleConfigManager.getMonitorRules().getRules();
+		Map<String, Rule> rules = eventRuleConfigManager.getMonitorRules().getRules();
 
 		for (Rule rule : rules.values()) {
 			if (rule.getAvailable() == null) {
@@ -559,7 +563,7 @@ public class SpringMvcConfigController {
 		Rule rule = null;
 
 		if (ruleId.length() > 0) {
-			rule = m_eventRuleConfigManager.queryRule(ruleId);
+			rule = eventRuleConfigManager.queryRule(ruleId);
 		}
 		if (rule != null) {
 			configs = new DefaultJsonBuilder(true).buildArray(rule.getConfigs());
@@ -569,11 +573,11 @@ public class SpringMvcConfigController {
 		}
 		model.put("ruleId", ruleId);
 		model.put("available", available);
-		model.put("content", m_ruleDecorator.generateConfigsHtml(configs));
+		model.put("content", ruleDecorator.generateConfigsHtml(configs));
 	}
 
 	private void configHeartbeatRuleListModel(Map<String, Object> model) {
-		Map<String, Rule> rules = m_heartbeatRuleConfigManager.getMonitorRules().getRules();
+		Map<String, Rule> rules = heartbeatRuleConfigManager.getMonitorRules().getRules();
 		List<HeartbeatRuleItem> ruleItems = new ArrayList<HeartbeatRuleItem>();
 
 		for (Rule rule : rules.values()) {
@@ -600,7 +604,7 @@ public class SpringMvcConfigController {
 		Rule rule = null;
 
 		if (ruleId.length() > 0) {
-			rule = m_heartbeatRuleConfigManager.queryRule(ruleId);
+			rule = heartbeatRuleConfigManager.queryRule(ruleId);
 		}
 		if (rule != null) {
 			configs = new DefaultJsonBuilder(true).buildArray(rule.getConfigs());
@@ -611,14 +615,14 @@ public class SpringMvcConfigController {
 		}
 		model.put("ruleId", ruleId);
 		model.put("available", available);
-		model.put("content", m_ruleDecorator.generateConfigsHtml(configs));
+		model.put("content", ruleDecorator.generateConfigsHtml(configs));
 		model.put("configHeader", metrics);
-		model.put("heartbeatExtensionMetrics", m_displayPolicyManager.queryAlertMetrics());
+		model.put("heartbeatExtensionMetrics", displayPolicyManager.queryAlertMetrics());
 	}
 
 	private void configExceptionListModel(Map<String, Object> model) {
-		List<ExceptionLimit> exceptionLimits = m_exceptionRuleConfigManager.queryAllExceptionLimits();
-		List<ExceptionExclude> exceptionExcludes = m_exceptionRuleConfigManager.queryAllExceptionExcludes();
+		List<ExceptionLimit> exceptionLimits = exceptionRuleConfigManager.queryAllExceptionLimits();
+		List<ExceptionExclude> exceptionExcludes = exceptionRuleConfigManager.queryAllExceptionExcludes();
 
 		for (ExceptionLimit exceptionLimit : exceptionLimits) {
 			if (exceptionLimit.getAvailable() == null) {
@@ -635,7 +639,7 @@ public class SpringMvcConfigController {
 		ExceptionLimit exceptionLimit = null;
 
 		if ("exceptionThresholdUpdate".equals(action) && domain.length() > 0 && exception.length() > 0) {
-			exceptionLimit = m_exceptionRuleConfigManager.queryExceptionLimit(domain, exception);
+			exceptionLimit = exceptionRuleConfigManager.queryExceptionLimit(domain, exception);
 		}
 		if (exceptionLimit == null) {
 			exceptionLimit = new ExceptionLimit();
@@ -675,7 +679,7 @@ public class SpringMvcConfigController {
 				return new Domain();
 			}
 
-			Domain groupDomain = m_domainGroupConfigManager.queryGroupDomain(domain);
+			Domain groupDomain = domainGroupConfigManager.queryGroupDomain(domain);
 
 			return groupDomain == null ? new Domain() : groupDomain;
 		}
@@ -824,60 +828,66 @@ public class SpringMvcConfigController {
 
 	private boolean updateTransactionRule(String ruleId, String configs, Boolean available) {
 		try {
-			String xml = m_transactionRuleConfigManager.updateRule(ruleId, "", configs, available);
+			String xml = transactionRuleConfigManager.updateRule(ruleId, "", configs, available);
 
-			return m_transactionRuleConfigManager.insert(xml);
+			return transactionRuleConfigManager.insert(xml);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to update transaction rule, ruleId={}, available={}.", ruleId, available, e);
 			return false;
 		}
 	}
 
 	private boolean deleteTransactionRule(String ruleId) {
 		try {
-			String xml = m_transactionRuleConfigManager.deleteRule(ruleId);
+			String xml = transactionRuleConfigManager.deleteRule(ruleId);
 
-			return m_transactionRuleConfigManager.insert(xml);
+			return transactionRuleConfigManager.insert(xml);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to delete transaction rule, ruleId={}.", ruleId, e);
 			return false;
 		}
 	}
 
 	private boolean updateEventRule(String ruleId, String configs, Boolean available) {
 		try {
-			String xml = m_eventRuleConfigManager.updateRule(ruleId, "", configs, available);
+			String xml = eventRuleConfigManager.updateRule(ruleId, "", configs, available);
 
-			return m_eventRuleConfigManager.insert(xml);
+			return eventRuleConfigManager.insert(xml);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to update event rule, ruleId={}, available={}.", ruleId, available, e);
 			return false;
 		}
 	}
 
 	private boolean updateHeartbeatRule(String ruleId, String metrics, String configs, Boolean available) {
 		try {
-			String xml = m_heartbeatRuleConfigManager.updateRule(ruleId, metrics, configs, available);
+			String xml = heartbeatRuleConfigManager.updateRule(ruleId, metrics, configs, available);
 
-			return m_heartbeatRuleConfigManager.insert(xml);
+			return heartbeatRuleConfigManager.insert(xml);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to update heartbeat rule, ruleId={}, available={}.", ruleId, available, e);
 			return false;
 		}
 	}
 
 	private boolean deleteEventRule(String ruleId) {
 		try {
-			String xml = m_eventRuleConfigManager.deleteRule(ruleId);
+			String xml = eventRuleConfigManager.deleteRule(ruleId);
 
-			return m_eventRuleConfigManager.insert(xml);
+			return eventRuleConfigManager.insert(xml);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to delete event rule, ruleId={}.", ruleId, e);
 			return false;
 		}
 	}
 
 	private boolean deleteHeartbeatRule(String ruleId) {
 		try {
-			String xml = m_heartbeatRuleConfigManager.deleteRule(ruleId);
+			String xml = heartbeatRuleConfigManager.deleteRule(ruleId);
 
-			return m_heartbeatRuleConfigManager.insert(xml);
+			return heartbeatRuleConfigManager.insert(xml);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to delete heartbeat rule, ruleId={}.", ruleId, e);
 			return false;
 		}
 	}
@@ -894,8 +904,9 @@ public class SpringMvcConfigController {
 			exceptionLimit.setWarning(intParameter(request, "exceptionLimit.warning", 0));
 			exceptionLimit.setError(intParameter(request, "exceptionLimit.error", 0));
 			exceptionLimit.setAvailable(booleanParameter(request, "exceptionLimit.available", true));
-			return m_exceptionRuleConfigManager.insertExceptionLimit(exceptionLimit);
+			return exceptionRuleConfigManager.insertExceptionLimit(exceptionLimit);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to update exception threshold.", e);
 			return false;
 		}
 	}
@@ -909,24 +920,27 @@ public class SpringMvcConfigController {
 			exceptionExclude.setDomain(domain.trim());
 			exceptionExclude.setName(exception.trim());
 			exceptionExclude.setId(exceptionExclude.getDomain() + ":" + exceptionExclude.getName());
-			return m_exceptionRuleConfigManager.insertExceptionExclude(exceptionExclude);
+			return exceptionRuleConfigManager.insertExceptionExclude(exceptionExclude);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to update exception exclude.", e);
 			return false;
 		}
 	}
 
 	private boolean deleteExceptionLimit(String domain, String exception) {
 		try {
-			return m_exceptionRuleConfigManager.deleteExceptionLimit(domain, exception);
+			return exceptionRuleConfigManager.deleteExceptionLimit(domain, exception);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to delete exception threshold, domain={}, exception={}.", domain, exception, e);
 			return false;
 		}
 	}
 
 	private boolean deleteExceptionExclude(String domain, String exception) {
 		try {
-			return m_exceptionRuleConfigManager.deleteExceptionExclude(domain, exception);
+			return exceptionRuleConfigManager.deleteExceptionExclude(domain, exception);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to delete exception exclude, domain={}, exception={}.", domain, exception, e);
 			return false;
 		}
 	}
@@ -946,7 +960,7 @@ public class SpringMvcConfigController {
 	}
 
 	private List<Project> projects() {
-		List<Project> projects = new ArrayList<Project>(m_projectService.findAll());
+		List<Project> projects = new ArrayList<Project>(projectService.findAll());
 
 		Collections.sort(projects, new Comparator<Project>() {
 			@Override
@@ -1004,9 +1018,9 @@ public class SpringMvcConfigController {
 
 		if (project.getId() > 0) {
 			project.setKeyId(project.getId());
-			return m_projectService.update(project);
+			return projectService.update(project);
 		}
-		return m_projectService.insert(project);
+		return projectService.insert(project);
 	}
 
 	private int intParameter(HttpServletRequest request, String name, int defaultValue) {

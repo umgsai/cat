@@ -33,37 +33,35 @@ import com.dianping.cat.sample.entity.Domain;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class SpringMvcTopController {
-	private final SimpleDateFormat m_hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
+	private final SimpleDateFormat hourlyFormat = new SimpleDateFormat("yyyyMMddHH");
 
-	private final SimpleDateFormat m_subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-	@Resource
-	private ExceptionRuleConfigManager m_configManager;
+	private final SimpleDateFormat subtitleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	@Resource
-	private DomainGroupConfigManager m_domainGroupConfigManager;
+	private ExceptionRuleConfigManager exceptionRuleConfigManager;
 
 	@Resource
-	private ProjectService m_projectService;
+	private DomainGroupConfigManager domainGroupConfigManager;
 
 	@Resource
-	private SampleConfigManager m_sampleConfigManager;
+	private ProjectService projectService;
 
 	@Resource
-	private StateBuilder m_stateBuilder;
+	private SampleConfigManager sampleConfigManager;
 
 	@Resource
-	private TopReportService m_topReportService;
+	private StateBuilder stateBuilder;
 
 	@Resource
-	@Qualifier("topModelService")
-	private ModelService<TopReport> m_topService;
+	private TopReportService topReportService;
+
+	@Resource(name = "topModelService")
+	private ModelService<TopReport> topModelService;
 
 	@GetMapping("/mvc/r/top")
 	public void top(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -102,7 +100,7 @@ public class SpringMvcTopController {
 		TopReport report = queryTopReport(date);
 		Date end = new Date(date + TimeHelper.ONE_MINUTE * minute);
 		Date start = new Date(end.getTime() - TimeHelper.ONE_MINUTE * minuteCount);
-		TopMetric topMetric = new TopMetric(minuteCount, topCount, m_configManager, Arrays.asList(Constants.FRONT_END));
+		TopMetric topMetric = new TopMetric(minuteCount, topCount, exceptionRuleConfigManager, Arrays.asList(Constants.FRONT_END));
 
 		topMetric.setStart(start).setEnd(end);
 		if (minuteCount > minute) {
@@ -115,7 +113,7 @@ public class SpringMvcTopController {
 		model.put("webapp", contextPath);
 		model.put("domain", domain);
 		model.put("ipAddress", ipAddress);
-		model.put("date", m_hourlyFormat.format(new Date(date)));
+		model.put("date", hourlyFormat.format(new Date(date)));
 		model.put("longDate", date);
 		model.put("minute", minute);
 		model.put("maxMinute", maxMinute);
@@ -125,15 +123,15 @@ public class SpringMvcTopController {
 		model.put("fullScreen", booleanParameter(request, "fullScreen"));
 		model.put("refresh", booleanParameter(request, "refresh"));
 		model.put("frequency", intParameter(request, "frequency", 10));
-		model.put("reportStart", m_subtitleFormat.format(new Date(date)));
-		model.put("reportEnd", m_subtitleFormat.format(new Date(date + TimeHelper.ONE_HOUR - 1)));
-		model.put("message", m_stateBuilder.buildStateMessage(date, ipAddress));
+		model.put("reportStart", subtitleFormat.format(new Date(date)));
+		model.put("reportEnd", subtitleFormat.format(new Date(date + TimeHelper.ONE_HOUR - 1)));
+		model.put("message", stateBuilder.buildStateMessage(date, ipAddress));
 		model.put("topReport", report);
 		model.put("topMetric", topMetric);
 		model.put("topResult", topMetric.getError().getResult());
 		model.put("topResultView", topResultView(topMetric.getError().getResult()));
 		model.put("domainGroups", domainGroups());
-		model.put("groups", m_domainGroupConfigManager.queryDomainGroup(domain));
+		model.put("groups", domainGroupConfigManager.queryDomainGroup(domain));
 		model.put("navs", UrlNav.values());
 		model.put("baseUri", contextPath + "/mvc/r/top");
 		model.put("sample", sample(domain));
@@ -149,7 +147,7 @@ public class SpringMvcTopController {
 	private long date(String value) {
 		if (value != null && value.length() > 0) {
 			try {
-				Date date = value.length() == 10 ? m_hourlyFormat.parse(value) : new SimpleDateFormat("yyyyMMdd").parse(value);
+				Date date = value.length() == 10 ? hourlyFormat.parse(value) : new SimpleDateFormat("yyyyMMdd").parse(value);
 
 				return date.getTime();
 			} catch (ParseException e) {
@@ -209,7 +207,7 @@ public class SpringMvcTopController {
 	}
 
 	private Map<String, Department> domainGroups() {
-		return m_projectService.findDepartments(m_projectService.findAllDomains());
+		return projectService.findDepartments(projectService.findAllDomains());
 	}
 
 	private String parameter(HttpServletRequest request, String name, String defaultValue) {
@@ -236,7 +234,7 @@ public class SpringMvcTopController {
 	}
 
 	private double sample(String domain) {
-		Domain sampleDomain = m_sampleConfigManager.getConfig().findDomain(domain);
+		Domain sampleDomain = sampleConfigManager.getConfig().findDomain(domain);
 
 		return sampleDomain == null ? 1.0 : sampleDomain.getSample();
 	}
@@ -295,19 +293,19 @@ public class SpringMvcTopController {
 	private TopReport queryTopReport(long date) {
 		ModelRequest request = new ModelRequest(Constants.CAT, date).setProperty("date", String.valueOf(date));
 
-		if (m_topService.isEligable(request)) {
-			ModelResponse<TopReport> response = m_topService.invoke(request);
+		if (topModelService.isEligable(request)) {
+			ModelResponse<TopReport> response = topModelService.invoke(request);
 			TopReport report = response.getModel();
 
 			if (report == null || report.getDomains().size() == 0) {
-				report = m_topReportService.queryReport(Constants.CAT, new Date(date), new Date(date + TimeHelper.ONE_HOUR));
+				report = topReportService.queryReport(Constants.CAT, new Date(date), new Date(date + TimeHelper.ONE_HOUR));
 			}
 			if (report == null) {
 				report = new TopReport();
 				report.setStartTime(new Date(date));
 				report.setEndTime(new Date(date + TimeHelper.ONE_HOUR));
 			}
-			report.accept(new TopExceptionExclude(m_configManager));
+			report.accept(new TopExceptionExclude(exceptionRuleConfigManager));
 			return report;
 		}
 		return new TopReport().setStartTime(new Date(date)).setEndTime(new Date(date + TimeHelper.ONE_HOUR));

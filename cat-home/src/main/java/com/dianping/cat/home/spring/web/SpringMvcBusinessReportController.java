@@ -29,16 +29,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class SpringMvcBusinessReportController {
-	private final SimpleDateFormat m_minuteFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	private final SimpleDateFormat minuteFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 	@Resource
-	private BusinessGraphCreator m_graphCreator;
+	private BusinessGraphCreator businessGraphCreator;
 
 	@Resource
-	private ProjectService m_projectService;
+	private ProjectService projectService;
 
 	@Resource
-	private BusinessTagConfigManager m_tagConfigManager;
+	private BusinessTagConfigManager businessTagConfigManager;
 
 	@GetMapping("/mvc/r/business")
 	public void business(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -63,8 +63,8 @@ public class SpringMvcBusinessReportController {
 		Type type = Type.getType(typeValue, Type.Domain);
 		Date endTime = endDate(request.getParameter("endDate"), step);
 		Date startTime = startDate(request.getParameter("startDate"), endTime, timeRange, step);
-		Map<String, LineChart> charts = Type.Tag == type ? m_graphCreator.buildGraphByTag(startTime, endTime, name)
-				: m_graphCreator.buildGraphByDomain(startTime, endTime, name);
+		Map<String, LineChart> charts = Type.Tag == type ? businessGraphCreator.buildGraphByTag(startTime, endTime, name)
+				: businessGraphCreator.buildGraphByDomain(startTime, endTime, name);
 
 		model.put("contextPath", contextPath);
 		model.put("name", name);
@@ -72,11 +72,11 @@ public class SpringMvcBusinessReportController {
 		model.put("displayDomain", Type.Domain == type ? name : Constants.CAT);
 		model.put("type", type.getName());
 		model.put("timeRange", timeRange);
-		model.put("startTime", m_minuteFormat.format(startTime));
-		model.put("endTime", m_minuteFormat.format(endTime));
+		model.put("startTime", minuteFormat.format(startTime));
+		model.put("endTime", minuteFormat.format(endTime));
 		model.put("lineCharts", new ArrayList<LineChart>(charts.values()));
-		model.put("domains", m_projectService.findAllDomains());
-		model.put("tags", m_tagConfigManager.findAllTags());
+		model.put("domains", projectService.findAllDomains());
+		model.put("tags", businessTagConfigManager.findAllTags());
 		model.put("ranges", Arrays.asList(new RangeOption("1小时", 1), new RangeOption("2小时", 2),
 				new RangeOption("4小时", 4), new RangeOption("6小时", 6), new RangeOption("8小时", 8),
 				new RangeOption("12小时", 12), new RangeOption("24小时", 24), new RangeOption("48小时", 48)));
@@ -90,7 +90,7 @@ public class SpringMvcBusinessReportController {
 
 		if (value != null && value.length() > 0) {
 			try {
-				end = m_minuteFormat.parse(value);
+				end = minuteFormat.parse(value);
 			} catch (ParseException e) {
 				end = null;
 			}
@@ -106,7 +106,7 @@ public class SpringMvcBusinessReportController {
 
 		if (value != null && value.length() > 0) {
 			try {
-				start = m_minuteFormat.parse(value);
+				start = minuteFormat.parse(value);
 			} catch (ParseException e) {
 				start = null;
 			}

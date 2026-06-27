@@ -401,7 +401,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
 		BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
 		BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class, JsonBuilder.class,
-		DefaultValueTranslater.class, DefaultGraphBuilder.class, DependencyItemBuilder.class,
+		DomainValidator.class, DefaultValueTranslater.class, DefaultGraphBuilder.class, DependencyItemBuilder.class,
 		TopologyGraphBuilder.class, StorageAlertInfoBuilder.class, ExternalInfoBuilder.class, StorageMergeHelper.class,
 		DatabaseParser.class, IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
 		StorageRPCBuilder.class, DefaultProblemHandler.class, LongExecutionProblemHandler.class,
@@ -484,7 +484,7 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
 					BusinessPointParser.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
 					BusinessGraphCreator.class, PayloadNormalizer.class, ReportModelDependencies.class,
-					JsonBuilder.class, DefaultValueTranslater.class, DefaultGraphBuilder.class,
+					JsonBuilder.class, DomainValidator.class, DefaultValueTranslater.class, DefaultGraphBuilder.class,
 					DependencyItemBuilder.class, TopologyGraphBuilder.class, StorageAlertInfoBuilder.class,
 					ExternalInfoBuilder.class, StorageMergeHelper.class, DatabaseParser.class,
 					IpConvertManager.class, StorageSQLBuilder.class, StorageCacheBuilder.class,
@@ -3017,11 +3017,6 @@ public class CatHomeSpringConfiguration {
 		manager.setRemoteServerUpdater(remoteServersUpdater);
 		manager.setRemoteServersManager(remoteServersManager);
 		return manager;
-	}
-
-	@Bean
-	public DomainValidator domainValidator() {
-		return new DomainValidator();
 	}
 
 	@Bean(initMethod = "initialize")

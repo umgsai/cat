@@ -38,16 +38,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class SpringMvcBusinessController {
 	@Resource
-	private ProjectService m_projectService;
+	private ProjectService projectService;
 
 	@Resource
-	private BusinessConfigManager m_configManager;
+	private BusinessConfigManager businessConfigManager;
 
 	@Resource
-	private BusinessTagConfigManager m_tagConfigManager;
+	private BusinessTagConfigManager businessTagConfigManager;
 
 	@Resource
-	private ConfigHtmlParser m_configHtmlParser;
+	private ConfigHtmlParser configHtmlParser;
 
 	@RequestMapping(value = "/s/business", method = { RequestMethod.GET, RequestMethod.POST })
 	public void business(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -111,22 +111,22 @@ public class SpringMvcBusinessController {
 		Payload payload = context.getPayload();
 		Model model = new Model(context);
 		String domain = payload.getDomain();
-		BusinessReportConfig config = m_configManager.queryConfigByDomain(domain);
+		BusinessReportConfig config = businessConfigManager.queryConfigByDomain(domain);
 
 		model.setPage(SystemPage.BUSINESS);
 		model.setAction(payload.getAction());
-		model.setDomains(m_projectService.findAllDomains());
+		model.setDomains(projectService.findAllDomains());
 		if (Action.TagConfig.equals(payload.getAction())) {
 			String tagConfig = payload.getContent();
 
 			if (tagConfig != null && tagConfig.length() > 0) {
-				model.setOpState(m_tagConfigManager.store(tagConfig));
+				model.setOpState(businessTagConfigManager.store(tagConfig));
 			}
-			model.setContent(m_configHtmlParser.parse(m_tagConfigManager.getConfig().toString()));
+			model.setContent(configHtmlParser.parse(businessTagConfigManager.getConfig().toString()));
 		} else {
 			model.setConfigs(businessItemConfigs(config));
 			model.setCustomConfigs(customConfigs(config));
-			model.setTags(m_tagConfigManager.findTagByDomain(domain));
+			model.setTags(businessTagConfigManager.findTagByDomain(domain));
 		}
 		return model;
 	}
@@ -156,19 +156,19 @@ public class SpringMvcBusinessController {
 	}
 
 	void setConfigManager(BusinessConfigManager configManager) {
-		m_configManager = configManager;
+		this.businessConfigManager = configManager;
 	}
 
 	void setProjectService(ProjectService projectService) {
-		m_projectService = projectService;
+		this.projectService = projectService;
 	}
 
 	void setTagConfigManager(BusinessTagConfigManager tagConfigManager) {
-		m_tagConfigManager = tagConfigManager;
+		this.businessTagConfigManager = tagConfigManager;
 	}
 
 	void setConfigHtmlParser(ConfigHtmlParser configHtmlParser) {
-		m_configHtmlParser = configHtmlParser;
+		this.configHtmlParser = configHtmlParser;
 	}
 
 	private String domain(HttpServletRequest request) {

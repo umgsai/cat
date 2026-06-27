@@ -31,16 +31,16 @@ public class SpringMvcRouterController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpringMvcRouterController.class);
 
 	@Resource
-	private CachedRouterConfigService m_cachedReportService;
+	private CachedRouterConfigService cachedRouterConfigService;
 
 	@Resource
-	private RouterConfigManager m_configManager;
+	private RouterConfigManager routerConfigManager;
 
 	@Resource
-	private SampleConfigManager m_sampleConfigManager;
+	private SampleConfigManager sampleConfigManager;
 
 	@Resource
-	private ServerFilterConfigManager m_filterManager;
+	private ServerFilterConfigManager serverFilterConfigManager;
 
 	@GetMapping("/s/router")
 	public void router(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -53,7 +53,7 @@ public class SpringMvcRouterController {
 			return;
 		}
 
-		RouterConfig report = m_cachedReportService.queryLastRouterConfig();
+		RouterConfig report = cachedRouterConfigService.queryLastRouterConfig();
 		String domain = request.getParameter("domain");
 		String ip = request.getParameter("ip");
 
@@ -80,18 +80,18 @@ public class SpringMvcRouterController {
 	Map<String, String> buildKvs(RouterConfig report, String domain, String ip) {
 		Map<String, String> kvs = new HashMap<String, String>();
 
-		kvs.put("block", String.valueOf(m_configManager.shouldBlock(ip)));
+		kvs.put("block", String.valueOf(routerConfigManager.shouldBlock(ip)));
 		kvs.put("routers", buildRouterInfo(ip, domain, report));
 		kvs.put("sample", String.valueOf(buildSampleInfo(domain)));
-		kvs.put("startTransactionTypes", m_filterManager.getAtomicStartTypes());
-		kvs.put("matchTransactionTypes", m_filterManager.getAtomicMatchTypes());
+		kvs.put("startTransactionTypes", serverFilterConfigManager.getAtomicStartTypes());
+		kvs.put("matchTransactionTypes", serverFilterConfigManager.getAtomicMatchTypes());
 
 		return kvs;
 	}
 
 	double buildSampleInfo(String domain) {
 		double defaultValue = 1.0;
-		com.dianping.cat.sample.entity.Domain domainConfig = m_sampleConfigManager.getConfig().findDomain(domain);
+		com.dianping.cat.sample.entity.Domain domainConfig = sampleConfigManager.getConfig().findDomain(domain);
 
 		if (domainConfig != null) {
 			defaultValue = domainConfig.getSample();
@@ -109,8 +109,8 @@ public class SpringMvcRouterController {
 	}
 
 	private String buildRouterInfo(String ip, String domain, RouterConfig config) {
-		String group = m_configManager.queryServerGroupByIp(ip);
-		Domain domainConfig = m_configManager.getRouterConfig().findDomain(domain);
+		String group = routerConfigManager.queryServerGroupByIp(ip);
+		Domain domainConfig = routerConfigManager.getRouterConfig().findDomain(domain);
 		List<Server> servers = new ArrayList<Server>();
 
 		if (domainConfigNotExist(group, domainConfig)) {
@@ -128,7 +128,7 @@ public class SpringMvcRouterController {
 			}
 
 			if (servers.isEmpty()) {
-				servers = m_configManager.queryServersByDomain(group, domain);
+				servers = routerConfigManager.queryServersByDomain(group, domain);
 			}
 		} else {
 			servers = domainConfig.findGroup(group).getServers();

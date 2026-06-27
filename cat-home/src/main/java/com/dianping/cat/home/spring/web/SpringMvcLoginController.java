@@ -25,14 +25,14 @@ public class SpringMvcLoginController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpringMvcLoginController.class);
 
 	@Resource
-	private SigninService m_signinService;
+	private SigninService signinService;
 
 	@GetMapping("/s/login")
 	public void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String op = request.getParameter("op");
 
 		if ("logout".equals(op)) {
-			m_signinService.signout(new SigninContext(request, response));
+			signinService.signout(new SigninContext(request, response));
 			response.sendRedirect(defaultReturnUrl(request));
 		} else {
 			forwardLogin(request, response, null);
@@ -45,7 +45,7 @@ public class SpringMvcLoginController {
 		String password = request.getParameter("password");
 
 		if (account != null && account.length() > 0 && password != null) {
-			Session session = m_signinService.signin(new SigninContext(request, response),
+			Session session = signinService.signin(new SigninContext(request, response),
 					new Credential(account, password));
 
 			if (session != null) {

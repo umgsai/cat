@@ -20,12 +20,15 @@ package com.dianping.cat.report;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class DomainValidator {
 
-	private ConcurrentHashMap<String, String> m_valids = new ConcurrentHashMap<String, String>();
+	private ConcurrentHashMap<String, String> valids = new ConcurrentHashMap<String, String>();
 
 	public boolean validate(String domain) {
-		if (!m_valids.containsKey(domain)) {
+		if (!valids.containsKey(domain)) {
 			int length = domain.length();
 			char c;
 
@@ -36,7 +39,7 @@ public class DomainValidator {
 					return false;
 				}
 			}
-			m_valids.put(domain, domain);
+			valids.put(domain, domain);
 		}
 		return true;
 	}
