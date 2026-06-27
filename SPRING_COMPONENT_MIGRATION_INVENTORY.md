@@ -2647,3 +2647,71 @@ git diff --check
 BUILD SUCCESS
 git diff --check 通过
 ```
+
+## 47. 第三十九批完成记录
+第三十九批迁移剩余非数据库运行时入口 Bean。目标是在不改变运行时启动顺序、旧 Bean 名称和底层模块依赖边界的前提下，把消息消费入口、TCP 接收入口、HDFS 清理入口和启动校验入口从 `CatHomeSpringConfiguration` 的显式 `@Bean` 注册迁移为 Spring 组件注册。
+
+状态：已完成，完成时间 2026-06-27。
+
+完成内容：
+1. 以下 `cat-core` 运行时入口 Bean 已改为 `@Component("原Bean名")` 创建，并加入 `CatHomeSpringConfiguration` 白名单扫描：
+```text
+messageAnalyzerManager -> DefaultMessageAnalyzerManager
+messageConsumer -> RealtimeConsumer
+messageHandler -> DefaultMessageHandler
+tcpSocketReceiver -> TcpSocketReceiver
+```
+
+2. 原 `initMethod = "initialize"` 语义已由 `@PostConstruct` 承接：
+```text
+DefaultMessageAnalyzerManager.initialize()
+RealtimeConsumer.initialize()
+```
+
+3. `TcpSocketReceiver` 没有改为自动 `@PostConstruct` 启动，仍由 `CatHomeRuntimeBootstrap.start()` 调用 `init()`，保持原来 runtime bootstrap 统一拉起 TCP 服务的顺序。
+
+4. 以下 `cat-hadoop` 底层类没有直接引入 Spring 依赖，而是在 `cat-home` 的 storage 适配包中新增 Spring 子类，并保留旧 Bean 名：
+```text
+hdfsSystemManager -> SpringHdfsSystemManager extends HdfsSystemManager
+hdfsUploader -> SpringHdfsUploader extends HdfsUploader
+logviewProcessor -> SpringLogviewProcessor extends LogviewProcessor
+```
+
+5. `CatHomeRuntimeBootstrap` 已改为 `@Component("catHomeRuntimeBootstrap")`，原 `initMethod = "start"` 和 `destroyMethod = "shutdown"` 分别改由 `@PostConstruct` 和 `@PreDestroy` 承接；shutdown hook 和 checkpoint 行为保持不变。
+
+6. `CatHomeSpringStartupVerifier` 已改为 `@Component("catHomeSpringStartupVerifier")`，原 `initMethod = "verify"` 改由 `@PostConstruct` 承接。
+
+7. 本批触碰类中的 `m_` 成员变量已改为 Java 驼峰命名，并改用明确 bean 名称的 `@Resource(name = "...")` 注入；原 setter 保留，兼容测试和少量手工构造场景。
+
+8. `DefaultMessageAnalyzerManager` 中销毁过期 analyzer 的异常路径补充 SLF4J 日志，保留原 `Cat.logError`，方便启动后定位 analyzer 清理失败的具体时间窗口。
+
+9. `CatHomeSpringConfiguration` 中已删除以下旧显式 Bean 方法：
+```text
+messageAnalyzerManager
+messageConsumer
+messageHandler
+tcpSocketReceiver
+hdfsSystemManager
+hdfsUploader
+logviewProcessor
+catHomeRuntimeBootstrap
+catHomeSpringStartupVerifier
+```
+
+10. 本批仍不迁移以下内容：
+```text
+DataSource / SqlSessionFactory / SqlSessionTemplate / TransactionTemplate
+各类 Repository 显式 Bean
+```
+
+验证记录：
+```powershell
+mvn -pl cat-home -am -DskipTests compile
+git diff --check
+```
+
+结果：
+```text
+BUILD SUCCESS
+git diff --check 通过
+```

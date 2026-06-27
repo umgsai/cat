@@ -25,26 +25,38 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 
+@Component("messageAnalyzerManager")
 public class DefaultMessageAnalyzerManager
 						implements MessageAnalyzerManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageAnalyzerManager.class);
+
 	private static final long MINUTE = 60 * 1000L;
 
-	private long m_duration = 60 * MINUTE;
+	private long duration = 60 * MINUTE;
 
-	private long m_extraTime = 3 * MINUTE;
+	private long extraTime = 3 * MINUTE;
 
-	private List<String> m_analyzerNames;
+	private List<String> analyzerNames;
 
-	private MessageAnalyzerFactory m_analyzerFactory;
+	@Resource(name = "containerMessageAnalyzerFactory")
+	private MessageAnalyzerFactory analyzerFactory;
 
-	private ServerConfigManager m_configManager;
+	@Resource(name = "serverConfigManager")
+	private ServerConfigManager serverConfigManager;
 
-	private final Map<Long, Map<String, List<MessageAnalyzer>>> m_analyzers = new HashMap<Long, Map<String, List<MessageAnalyzer>>>();
+	private final Map<Long, Map<String, List<MessageAnalyzer>>> analyzerBuckets = new HashMap<Long, Map<String, List<MessageAnalyzer>>>();
 
-	private volatile boolean m_initialized;
+	private volatile boolean initialized;
 
 	@Override
 	public List<MessageAnalyzer> getAnalyzer(String name, long startTime) {
@@ -52,7 +64,7 @@ public class DefaultMessageAnalyzerManager
 
 		// remove last two hour analyzer
 		try {
-			Map<String, List<MessageAnalyzer>> temp = m_analyzers.remove(startTime - m_duration * 2);
+			Map<String, List<MessageAnalyzer>> temp = analyzerBuckets.remove(startTime - duration * 2);
 
 			if (temp != null) {
 				for (List<MessageAnalyzer> analyzers : temp.values()) {
@@ -63,17 +75,18 @@ public class DefaultMessageAnalyzerManager
 			}
 		} catch (Exception e) {
 			Cat.logError(e);
+			LOGGER.warn("Unable to destroy expired message analyzers, startTime={}.", startTime, e);
 		}
 
-		Map<String, List<MessageAnalyzer>> map = m_analyzers.get(startTime);
+		Map<String, List<MessageAnalyzer>> map = analyzerBuckets.get(startTime);
 
 		if (map == null) {
-			synchronized (m_analyzers) {
-				map = m_analyzers.get(startTime);
+			synchronized (analyzerBuckets) {
+				map = analyzerBuckets.get(startTime);
 
 				if (map == null) {
 					map = new HashMap<String, List<MessageAnalyzer>>();
-					m_analyzers.put(startTime, map);
+					analyzerBuckets.put(startTime, map);
 				}
 			}
 		}
@@ -90,7 +103,7 @@ public class DefaultMessageAnalyzerManager
 					MessageAnalyzer analyzer = createAnalyzer(name);
 
 					analyzer.setIndex(0);
-					analyzer.initialize(startTime, m_duration, m_extraTime);
+					analyzer.initialize(startTime, duration, extraTime);
 					analyzers.add(analyzer);
 
 					int count = analyzer.getAnanlyzerCount(name);
@@ -99,7 +112,7 @@ public class DefaultMessageAnalyzerManager
 						MessageAnalyzer tempAnalyzer = createAnalyzer(name);
 
 						tempAnalyzer.setIndex(i);
-						tempAnalyzer.initialize(startTime, m_duration, m_extraTime);
+						tempAnalyzer.initialize(startTime, duration, extraTime);
 						analyzers.add(tempAnalyzer);
 					}
 					map.put(name, analyzers);
@@ -114,11 +127,12 @@ public class DefaultMessageAnalyzerManager
 	public List<String> getAnalyzerNames() {
 		initialize();
 
-		return m_analyzerNames;
+		return analyzerNames;
 	}
 
+	@PostConstruct
 	public synchronized void initialize() {
-		if (m_initialized) {
+		if (initialized) {
 			return;
 		}
 
@@ -128,9 +142,9 @@ public class DefaultMessageAnalyzerManager
 			analyzer.destroy();
 		}
 
-		m_analyzerNames = new ArrayList<String>(map.keySet());
+		analyzerNames = new ArrayList<String>(map.keySet());
 
-		Collections.sort(m_analyzerNames, new Comparator<String>() {
+		Collections.sort(analyzerNames, new Comparator<String>() {
 			@Override
 			public int compare(String str1, String str2) {
 				String state = "state";
@@ -153,44 +167,44 @@ public class DefaultMessageAnalyzerManager
 		ServerConfigManager manager = getConfigManager();
 		List<String> disables = new ArrayList<String>();
 
-		for (String name : m_analyzerNames) {
+		for (String name : analyzerNames) {
 
 			if (!manager.getEnableOfRealtimeAnalyzer(name)) {
 				disables.add(name);
 			}
 		}
 		for (String name : disables) {
-			m_analyzerNames.remove(name);
+			analyzerNames.remove(name);
 		}
-		m_initialized = true;
+		initialized = true;
 	}
 
 	private MessageAnalyzer createAnalyzer(String name) {
-		if (m_analyzerFactory != null) {
-			return m_analyzerFactory.createAnalyzer(name);
+		if (analyzerFactory != null) {
+			return analyzerFactory.createAnalyzer(name);
 		}
 		throw new IllegalStateException("MessageAnalyzerFactory is required for DefaultMessageAnalyzerManager.");
 	}
 
 	private ServerConfigManager getConfigManager() {
-		if (m_configManager != null) {
-			return m_configManager;
+		if (serverConfigManager != null) {
+			return serverConfigManager;
 		}
 		throw new IllegalStateException("ServerConfigManager is required for DefaultMessageAnalyzerManager.");
 	}
 
 	private Map<String, MessageAnalyzer> getAnalyzerMap() {
-		if (m_analyzerFactory != null) {
-			return m_analyzerFactory.getAnalyzerMap();
+		if (analyzerFactory != null) {
+			return analyzerFactory.getAnalyzerMap();
 		}
 		throw new IllegalStateException("MessageAnalyzerFactory is required for DefaultMessageAnalyzerManager.");
 	}
 
 	public void setAnalyzerFactory(MessageAnalyzerFactory analyzerFactory) {
-		m_analyzerFactory = analyzerFactory;
+		this.analyzerFactory = analyzerFactory;
 	}
 
 	public void setConfigManager(ServerConfigManager configManager) {
-		m_configManager = configManager;
+		serverConfigManager = configManager;
 	}
 }

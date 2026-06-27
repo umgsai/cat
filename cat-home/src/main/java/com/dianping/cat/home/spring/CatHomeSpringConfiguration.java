@@ -8,9 +8,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
-import org.unidal.cat.message.storage.hdfs.HdfsSystemManager;
-import org.unidal.cat.message.storage.clean.HdfsUploader;
-import org.unidal.cat.message.storage.clean.LogviewProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -25,10 +22,6 @@ import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.analysis.DefaultMessageAnalyzerManager;
 import com.dianping.cat.analysis.DefaultMessageHandler;
 import com.dianping.cat.analysis.MessageAnalyzer;
-import com.dianping.cat.analysis.MessageAnalyzerFactory;
-import com.dianping.cat.analysis.MessageAnalyzerManager;
-import com.dianping.cat.analysis.MessageConsumer;
-import com.dianping.cat.analysis.MessageHandler;
 import com.dianping.cat.analysis.RealtimeConsumer;
 import com.dianping.cat.analysis.TcpSocketReceiver;
 import com.dianping.cat.config.AtomicMessageConfigManager;
@@ -319,7 +312,9 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		HeartbeatAnalyzer.class, HeartbeatDelegate.class, MatrixAnalyzer.class, MatrixDelegate.class,
 		ProblemAnalyzer.class, ProblemDelegate.class, StorageAnalyzer.class, StorageDelegate.class,
 		StorageReportUpdater.class, StorageBuilderManager.class, TopAnalyzer.class, TopDelegate.class, StateAnalyzer.class, StateDelegate.class,
-		ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
+		ContainerMessageAnalyzerFactory.class, DefaultMessageAnalyzerManager.class, RealtimeConsumer.class,
+		DefaultMessageHandler.class, TcpSocketReceiver.class, CatHomeRuntimeBootstrap.class,
+		CatHomeSpringStartupVerifier.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
 		CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
 		BusinessPointParser.class, DomainGroupConfigManager.class, StorageGroupConfigManager.class,
 		HeartbeatDisplayPolicyManager.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
@@ -464,7 +459,10 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 					StorageAnalyzer.class, StorageDelegate.class, StorageReportUpdater.class,
 					StorageBuilderManager.class,
 					TopAnalyzer.class, TopDelegate.class, StateAnalyzer.class, StateDelegate.class,
-					ContainerMessageAnalyzerFactory.class, BusinessKeyHelper.class, BusinessDataFetcher.class,
+					ContainerMessageAnalyzerFactory.class, DefaultMessageAnalyzerManager.class,
+					RealtimeConsumer.class, DefaultMessageHandler.class, TcpSocketReceiver.class,
+					CatHomeRuntimeBootstrap.class, CatHomeSpringStartupVerifier.class,
+					BusinessKeyHelper.class, BusinessDataFetcher.class,
 					CachedBusinessReportService.class, BusinessReportGroupService.class, CustomDataCalculator.class,
 					BusinessPointParser.class, DomainGroupConfigManager.class, StorageGroupConfigManager.class,
 					HeartbeatDisplayPolicyManager.class, BaselineConfigManager.class, DefaultBaselineCreator.class,
@@ -613,89 +611,6 @@ import com.dianping.cat.system.page.router.task.RouterConfigBuilder;
 		"com.dianping.cat.mybatis.user.define.rule.dao"
 })
 public class CatHomeSpringConfiguration {
-	@Bean(initMethod = "initialize")
-	public MessageAnalyzerManager messageAnalyzerManager(MessageAnalyzerFactory messageAnalyzerFactory,
-			ServerConfigManager serverConfigManager) {
-		DefaultMessageAnalyzerManager manager = new DefaultMessageAnalyzerManager();
-
-		manager.setAnalyzerFactory(messageAnalyzerFactory);
-		manager.setConfigManager(serverConfigManager);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public MessageConsumer messageConsumer(MessageAnalyzerManager messageAnalyzerManager,
-			ServerStatisticManager serverStatisticManager) {
-		RealtimeConsumer consumer = new RealtimeConsumer();
-
-		consumer.setAnalyzerManager(messageAnalyzerManager);
-		consumer.setServerStateManager(serverStatisticManager);
-		return consumer;
-	}
-
-	@Bean
-	public MessageHandler messageHandler(MessageConsumer messageConsumer) {
-		DefaultMessageHandler handler = new DefaultMessageHandler();
-
-		handler.setConsumer(messageConsumer);
-		return handler;
-	}
-
-	@Bean
-	public TcpSocketReceiver tcpSocketReceiver(ServerConfigManager serverConfigManager, MessageHandler messageHandler,
-			ServerStatisticManager serverStatisticManager) {
-		TcpSocketReceiver receiver = new TcpSocketReceiver();
-
-		receiver.setServerConfigManager(serverConfigManager);
-		receiver.setHandler(messageHandler);
-		receiver.setServerStateManager(serverStatisticManager);
-		return receiver;
-	}
-
-	@Bean(initMethod = "initialize")
-	public HdfsSystemManager hdfsSystemManager(ServerConfigManager serverConfigManager) {
-		HdfsSystemManager manager = new HdfsSystemManager();
-
-		manager.setConfigManager(serverConfigManager);
-		return manager;
-	}
-
-	@Bean(initMethod = "initialize")
-	public HdfsUploader hdfsUploader(HdfsSystemManager hdfsSystemManager, ServerConfigManager serverConfigManager) {
-		HdfsUploader uploader = new HdfsUploader();
-
-		uploader.setFileSystemManager(hdfsSystemManager);
-		uploader.setServerConfigManager(serverConfigManager);
-		return uploader;
-	}
-
-	@Bean(initMethod = "initialize")
-	public LogviewProcessor logviewProcessor(HdfsUploader hdfsUploader, ServerConfigManager serverConfigManager) {
-		LogviewProcessor processor = new LogviewProcessor();
-
-		processor.setHdfsUploader(hdfsUploader);
-		processor.setConfigManager(serverConfigManager);
-		return processor;
-	}
-
-	@Bean(initMethod = "start", destroyMethod = "shutdown")
-	public CatHomeRuntimeBootstrap catHomeRuntimeBootstrap(AlarmManager alarmManager,
-			DefaultTaskConsumer defaultTaskConsumer, LogviewProcessor logviewProcessor, MessageConsumer messageConsumer,
-			ReportReloadTask reportReloadTask, ServerConfigManager serverConfigManager,
-			ServersUpdaterManager serversUpdaterManager, TcpSocketReceiver tcpSocketReceiver) {
-		CatHomeRuntimeBootstrap bootstrap = new CatHomeRuntimeBootstrap();
-
-		bootstrap.setAlarmManager(alarmManager);
-		bootstrap.setTaskConsumer(defaultTaskConsumer);
-		bootstrap.setLogviewProcessor(logviewProcessor);
-		bootstrap.setMessageConsumer(messageConsumer);
-		bootstrap.setReportReloadTask(reportReloadTask);
-		bootstrap.setServerConfigManager(serverConfigManager);
-		bootstrap.setServersUpdaterManager(serversUpdaterManager);
-		bootstrap.setTcpSocketReceiver(tcpSocketReceiver);
-		return bootstrap;
-	}
-
 	@Bean
 	public ConfigRepository configRepository(SqlSessionTemplate sqlSessionTemplate, TransactionTemplate transactionTemplate) {
 		ConfigRepository repository = new ConfigRepository();
@@ -954,11 +869,6 @@ public class CatHomeSpringConfiguration {
 	@Bean
 	public SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
 		return new SqlSessionTemplate(sqlSessionFactory);
-	}
-
-	@Bean(initMethod = "verify")
-	public CatHomeSpringStartupVerifier catHomeSpringStartupVerifier(SqlSessionTemplate sqlSessionTemplate) {
-		return new CatHomeSpringStartupVerifier(sqlSessionTemplate);
 	}
 
 	@Bean

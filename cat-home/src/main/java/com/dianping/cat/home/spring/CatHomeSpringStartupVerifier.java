@@ -2,9 +2,13 @@ package com.dianping.cat.home.spring;
 
 import java.util.List;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.mybatis.mapper.ConfigMapper;
 import com.dianping.cat.mybatis.alert.dao.AlertMapper;
@@ -31,6 +35,7 @@ import com.dianping.cat.mybatis.mapper.WeeklyReportContentMapper;
 import com.dianping.cat.mybatis.mapper.WeeklyReportMapper;
 import com.dianping.cat.mybatis.mapper.DailyReportMapper;
 
+@Component("catHomeSpringStartupVerifier")
 public class CatHomeSpringStartupVerifier {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CatHomeSpringStartupVerifier.class);
 
@@ -42,15 +47,13 @@ public class CatHomeSpringStartupVerifier {
 			OverloadMapper.class, TopologyGraphMapper.class, MetricGraphMapper.class, MetricScreenMapper.class,
 			AlterationMapper.class, AlertMapper.class, ServerAlarmRuleMapper.class, UserDefineRuleMapper.class);
 
-	private final SqlSessionTemplate m_sqlSessionTemplate;
+	@Resource(name = "sqlSessionTemplate")
+	private SqlSessionTemplate sqlSessionTemplate;
 
-	public CatHomeSpringStartupVerifier(SqlSessionTemplate sqlSessionTemplate) {
-		m_sqlSessionTemplate = sqlSessionTemplate;
-	}
-
+	@PostConstruct
 	public void verify() {
 		for (Class<?> mapperClass : REQUIRED_MAPPERS) {
-			m_sqlSessionTemplate.getMapper(mapperClass);
+			sqlSessionTemplate.getMapper(mapperClass);
 		}
 
 		LOGGER.info("Verified {} Spring managed MyBatis mappers.", REQUIRED_MAPPERS.size());
