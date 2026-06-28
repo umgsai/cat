@@ -86,7 +86,6 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 /r/alteration
 /r/monitor
 /r/alert
-/r/storage
 ```
 
 这些页面必须先完成 Spring 化，否则无法删除旧 Unidal MVC runtime。
@@ -274,6 +273,52 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 新: http://localhost:8080/cat/mvc/r/statistics?domain=cat&op=summary
 ```
 
+#### `/r/storage`
+
+状态：已完成 `/mvc/r/storage` 新链路。
+
+路由状态：
+
+```text
+旧页面: /cat/r/storage?id={id}&domain={domain}&ip=All&type=SQL&date={yyyyMMddHH}&op=view
+目标新链路: /cat/mvc/r/storage?id={id}&domain={domain}&ip=All&type=SQL&date={yyyyMMddHH}&op=view
+当前状态: SpringMvcMigrationServlet 已注册 /r/storage，SpringMvcStorageController 已覆盖
+```
+
+旧实现入口：
+
+```text
+模块注册: cat-home/src/main/java/com/dianping/cat/report/ReportModule.java
+旧 Handler: cat-home/src/main/java/com/dianping/cat/report/page/storage/Handler.java
+旧 Payload: cat-home/src/main/java/com/dianping/cat/report/page/storage/Payload.java
+旧 Action: cat-home/src/main/java/com/dianping/cat/report/page/storage/Action.java
+旧小时 JSP: cat-home/src/main/webapp/jsp/report/storage/storage.jsp
+旧历史 JSP: cat-home/src/main/webapp/jsp/report/storage/historyStorage.jsp
+旧小时图 JSP: cat-home/src/main/webapp/jsp/report/storage/hourlyGraphs.jsp
+旧监控大盘 JSP: cat-home/src/main/webapp/jsp/report/storage/dashboard.jsp
+```
+
+迁移结果：
+
+1. 已覆盖 `op=view/history/hourlyGraph/dashboard`。
+2. `op=view` 和 `op=hourlyGraph` 走小时报表链路，依赖 `storageModelService` 查询 `StorageReport`。
+3. `op=history` 走汇总链路，依赖 `StorageReportService#queryReport(id + "-" + type, start, end)`。
+4. `op=dashboard` 复用 `AlertService`、`StorageAlertInfoBuilder`、`StorageGroupConfigManager` 和 `AlterationRepository`。
+5. 已保留 `id`、`domain`、`ip`、`type`、`operations`、`sort`、`project`、`minute`、`count` 等参数。
+6. 已新建 `jsp/spring/report/storage/*`，不再使用 `/WEB-INF/app.tld`、`web-core`、`webres`。
+7. 页面内链接和异步小时图请求已统一改成 `${contextPath}/mvc/...`。
+
+验收 URL 示例：
+
+```text
+旧: http://localhost:8080/cat/r/storage?id=cat&domain=cat&ip=All&type=SQL&date=2026062720&op=view
+新: http://localhost:8080/cat/mvc/r/storage?id=cat&domain=cat&ip=All&type=SQL&date=2026062720&op=view
+旧: http://localhost:8080/cat/r/storage?id=cat&domain=cat&ip=All&type=SQL&date=2026062700&reportType=day&op=history
+新: http://localhost:8080/cat/mvc/r/storage?id=cat&domain=cat&ip=All&type=SQL&date=2026062700&reportType=day&op=history
+旧: http://localhost:8080/cat/r/storage?domain=cat&type=SQL&date=2026062720&op=dashboard
+新: http://localhost:8080/cat/mvc/r/storage?domain=cat&type=SQL&date=2026062720&op=dashboard
+```
+
 ### 3.3 枚举存在但模块未注册页面
 
 以下页面在枚举中存在，但当前旧模块未注册 Handler。暂不作为主迁移缺口，但删除枚举和旧模块前必须确认没有外部链接或隐藏入口：
@@ -329,6 +374,7 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
    - `/r/cache`
    - `/r/statistics`
    - `/r/storage`
+   - 状态：以上页面均已完成 `/mvc` 新链路。
 
 4. 配置或写操作页面：
    - `/r/alteration`
