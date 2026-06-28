@@ -25,6 +25,12 @@ import com.dianping.cat.configuration.reload.entity.ReportReloadConfig;
 import com.dianping.cat.configuration.server.filter.entity.ServerFilterConfig;
 import com.dianping.cat.consumer.all.config.entity.AllConfig;
 import com.dianping.cat.consumer.config.AllReportConfigManager;
+import com.dianping.cat.home.dependency.config.entity.DomainConfig;
+import com.dianping.cat.home.dependency.config.entity.EdgeConfig;
+import com.dianping.cat.home.dependency.config.entity.NodeConfig;
+import com.dianping.cat.home.dependency.config.entity.TopologyGraphConfig;
+import com.dianping.cat.home.dependency.format.entity.ProductLine;
+import com.dianping.cat.home.dependency.format.entity.TopoGraphFormatConfig;
 import com.dianping.cat.home.exception.entity.ExceptionExclude;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;
 import com.dianping.cat.home.heartbeat.entity.Group;
@@ -34,6 +40,8 @@ import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
+import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager;
+import com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
 import com.dianping.cat.core.dal.Project;
@@ -375,6 +383,95 @@ public class SpringMvcConfigControllerTest {
 		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
 	}
 
+	@Test
+	public void shouldBuildAndSubmitTopologyGraphFormatModel() {
+		SpringMvcConfigController controller = new SpringMvcConfigController();
+		StubTopoGraphFormatConfigManager manager = new StubTopoGraphFormatConfigManager();
+		Map<String, Object> model;
+
+		controller.setConfigHtmlParser(new ConfigHtmlParser());
+		controller.setTopoGraphFormatConfigManager(manager);
+		model = controller.configModel(request("/cat", "op", "topoGraphFormatUpdate", "content",
+				"<topoGraph-format-config/>", "submit", "提交"), "topoGraphFormatUpdate");
+
+		Assert.assertEquals("<topoGraph-format-config/>", manager.getInserted());
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+		Assert.assertTrue(model.get("content").toString().contains("&lt;topoGraph-format-config"));
+	}
+
+	@Test
+	public void shouldBuildAndSubmitTopologyGraphNodeModels() {
+		SpringMvcConfigController controller = new SpringMvcConfigController();
+		StubTopologyGraphConfigManager manager = new StubTopologyGraphConfigManager();
+		Map<String, Object> model;
+
+		controller.setProjectService(new StubProjectService());
+		controller.setTopologyGraphConfigManager(manager);
+		model = controller.configModel(request("/cat", "op", "topologyGraphNodeConfigList", "type", "URL"),
+				"topologyGraphNodeConfigList");
+
+		Assert.assertSame(manager.getConfig(), model.get("config"));
+		Assert.assertTrue(((TopologyGraphConfig) model.get("config")).getNodeConfigs().containsKey("URL"));
+
+		model = controller.configModel(request("/cat", "op", "topologyGraphNodeConfigAdd", "type", "URL", "domain",
+				"cat"), "topologyGraphNodeConfigAdd");
+
+		Assert.assertEquals("cat", ((DomainConfig) model.get("domainConfig")).getId());
+		Assert.assertEquals(1, ((Collection<?>) model.get("projects")).size());
+
+		model = controller.configModel(request("/cat", "op", "topologyGraphNodeConfigAddSumbit", "type", "URL",
+				"domainConfig.id", "cat", "domainConfig.minCountThreshold", "200", "domainConfig.warningThreshold",
+				"3", "domainConfig.errorThreshold", "5", "domainConfig.warningResponseTime", "10.5",
+				"domainConfig.errorResponseTime", "20.5"), "topologyGraphNodeConfigAddSumbit");
+
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+		Assert.assertEquals("URL", manager.getInsertedDomainType());
+		Assert.assertEquals("cat", manager.queryNodeConfig("URL", "cat").getId());
+		Assert.assertEquals(200, manager.queryNodeConfig("URL", "cat").getMinCountThreshold());
+
+		model = controller.configModel(request("/cat", "op", "topologyGraphNodeConfigDelete", "type", "URL",
+				"domain", "cat"), "topologyGraphNodeConfigDelete");
+
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+		Assert.assertNull(manager.getConfig().findNodeConfig("URL").findDomainConfig("cat"));
+	}
+
+	@Test
+	public void shouldBuildAndSubmitTopologyGraphEdgeModels() {
+		SpringMvcConfigController controller = new SpringMvcConfigController();
+		StubTopologyGraphConfigManager manager = new StubTopologyGraphConfigManager();
+		Map<String, Object> model;
+
+		controller.setProjectService(new StubProjectService());
+		controller.setTopologyGraphConfigManager(manager);
+		model = controller.configModel(request("/cat", "op", "topologyGraphEdgeConfigList", "type", "PigeonCall"),
+				"topologyGraphEdgeConfigList");
+
+		Assert.assertEquals(1, ((Map<?, ?>) model.get("edgeGroups")).size());
+
+		model = controller.configModel(request("/cat", "op", "topologyGraphEdgeConfigAdd", "type", "PigeonCall",
+				"from", "cat", "to", "service"), "topologyGraphEdgeConfigAdd");
+
+		Assert.assertEquals("cat", ((EdgeConfig) model.get("edgeConfig")).getFrom());
+		Assert.assertEquals(1, ((Collection<?>) model.get("projects")).size());
+
+		model = controller.configModel(request("/cat", "op", "topologyGraphEdgeConfigAddSumbit",
+				"edgeConfig.type", "Database", "edgeConfig.from", "cat", "edgeConfig.to", "db",
+				"edgeConfig.minCountThreshold", "300", "edgeConfig.warningThreshold", "4",
+				"edgeConfig.errorThreshold", "8", "edgeConfig.warningResponseTime", "30.5",
+				"edgeConfig.errorResponseTime", "60.5"), "topologyGraphEdgeConfigAddSumbit");
+
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+		Assert.assertEquals("Database", manager.getInsertedEdge().getType());
+		Assert.assertNotNull(manager.getConfig().findEdgeConfig("Database:cat:db"));
+
+		model = controller.configModel(request("/cat", "op", "topologyGraphEdgeConfigDelete", "type", "Database",
+				"from", "cat", "to", "db"), "topologyGraphEdgeConfigDelete");
+
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+		Assert.assertNull(manager.getConfig().findEdgeConfig("Database:cat:db"));
+	}
+
 	private HttpServletRequest request(String contextPath, String... parameters) {
 		Map<String, String> values = new HashMap<String, String>();
 
@@ -499,6 +596,141 @@ public class SpringMvcConfigControllerTest {
 
 		String getInserted() {
 			return m_inserted;
+		}
+	}
+
+	private static class StubTopoGraphFormatConfigManager extends TopoGraphFormatConfigManager {
+		private String m_inserted;
+
+		@Override
+		public TopoGraphFormatConfig getConfig() {
+			return new TopoGraphFormatConfig().addProductLine(new ProductLine().setId("Cat").setColInside(1));
+		}
+
+		@Override
+		public boolean insert(String xml) {
+			m_inserted = xml;
+			return true;
+		}
+
+		String getInserted() {
+			return m_inserted;
+		}
+	}
+
+	private static class StubTopologyGraphConfigManager extends TopologyGraphConfigManager {
+		private final TopologyGraphConfig m_config = new TopologyGraphConfig();
+
+		private String m_insertedDomainType;
+
+		private EdgeConfig m_insertedEdge;
+
+		StubTopologyGraphConfigManager() {
+			m_config.addNodeConfig(new NodeConfig("URL").setDefaultMinCountThreshold(100)
+					.setDefaultWarningThreshold(1).setDefaultErrorThreshold(2).setDefaultWarningResponseTime(100.0)
+					.setDefaultErrorResponseTime(200.0));
+			m_config.addNodeConfig(new NodeConfig("PigeonCall").setDefaultMinCountThreshold(100)
+					.setDefaultWarningThreshold(1).setDefaultErrorThreshold(2).setDefaultWarningResponseTime(100.0)
+					.setDefaultErrorResponseTime(200.0));
+			m_config.addNodeConfig(new NodeConfig("Database").setDefaultMinCountThreshold(100)
+					.setDefaultWarningThreshold(1).setDefaultErrorThreshold(2).setDefaultWarningResponseTime(100.0)
+					.setDefaultErrorResponseTime(200.0));
+			m_config.addEdgeConfig(new EdgeConfig().setKey("PigeonCall:cat:service").setType("PigeonCall")
+					.setFrom("cat").setTo("service").setMinCountThreshold(100).setWarningThreshold(1)
+					.setErrorThreshold(2).setWarningResponseTime(100.0).setErrorResponseTime(200.0));
+		}
+
+		@Override
+		public boolean deleteDomainConfig(String type, String domain) {
+			m_config.findOrCreateNodeConfig(type).removeDomainConfig(domain);
+			return true;
+		}
+
+		@Override
+		public boolean deleteEdgeConfig(String type, String from, String to) {
+			m_config.removeEdgeConfig(type + ":" + from + ":" + to);
+			return true;
+		}
+
+		@Override
+		public synchronized TopologyGraphConfig getConfig() {
+			return m_config;
+		}
+
+		@Override
+		public boolean insertDomainConfig(String type, DomainConfig domainConfig) {
+			m_insertedDomainType = type;
+			m_config.findOrCreateNodeConfig(type).addDomainConfig(domainConfig);
+			return true;
+		}
+
+		@Override
+		public boolean insertDomainDefaultConfig(String type, DomainConfig domainConfig) {
+			NodeConfig node = m_config.findOrCreateNodeConfig(type);
+
+			m_insertedDomainType = type;
+			node.setDefaultMinCountThreshold(domainConfig.getMinCountThreshold());
+			node.setDefaultWarningThreshold(domainConfig.getWarningThreshold());
+			node.setDefaultErrorThreshold(domainConfig.getErrorThreshold());
+			node.setDefaultWarningResponseTime(domainConfig.getWarningResponseTime());
+			node.setDefaultErrorResponseTime(domainConfig.getErrorResponseTime());
+			return true;
+		}
+
+		@Override
+		public boolean insertEdgeConfig(EdgeConfig edgeConfig) {
+			m_insertedEdge = edgeConfig;
+			edgeConfig.setKey(edgeConfig.getType() + ":" + edgeConfig.getFrom() + ":" + edgeConfig.getTo());
+			m_config.addEdgeConfig(edgeConfig);
+			return true;
+		}
+
+		@Override
+		public EdgeConfig queryEdgeConfig(String type, String from, String to) {
+			EdgeConfig edgeConfig = m_config.findEdgeConfig(type + ":" + from + ":" + to);
+
+			if (edgeConfig != null) {
+				return edgeConfig;
+			}
+			DomainConfig domainConfig = queryNodeConfig(type, to);
+
+			if (domainConfig == null) {
+				return null;
+			}
+			return new EdgeConfig().setType(type).setFrom(from).setTo(to)
+					.setMinCountThreshold(domainConfig.getMinCountThreshold())
+					.setWarningThreshold(domainConfig.getWarningThreshold())
+					.setErrorThreshold(domainConfig.getErrorThreshold())
+					.setWarningResponseTime(domainConfig.getWarningResponseTime())
+					.setErrorResponseTime(domainConfig.getErrorResponseTime());
+		}
+
+		@Override
+		public DomainConfig queryNodeConfig(String type, String domain) {
+			NodeConfig node = m_config.findNodeConfig(type);
+
+			if (node == null) {
+				return null;
+			}
+
+			DomainConfig config = node.findDomainConfig(domain);
+
+			if (config != null) {
+				return config;
+			}
+			return new DomainConfig(domain).setMinCountThreshold(node.getDefaultMinCountThreshold())
+					.setWarningThreshold(node.getDefaultWarningThreshold())
+					.setErrorThreshold(node.getDefaultErrorThreshold())
+					.setWarningResponseTime(node.getDefaultWarningResponseTime())
+					.setErrorResponseTime(node.getDefaultErrorResponseTime());
+		}
+
+		EdgeConfig getInsertedEdge() {
+			return m_insertedEdge;
+		}
+
+		String getInsertedDomainType() {
+			return m_insertedDomainType;
 		}
 	}
 

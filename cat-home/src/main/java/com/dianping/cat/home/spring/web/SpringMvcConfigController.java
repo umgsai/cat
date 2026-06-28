@@ -26,6 +26,10 @@ import com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator;
 import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
+import com.dianping.cat.home.dependency.config.entity.DomainConfig;
+import com.dianping.cat.home.dependency.config.entity.EdgeConfig;
+import com.dianping.cat.home.dependency.config.entity.NodeConfig;
+import com.dianping.cat.home.dependency.config.entity.TopologyGraphConfig;
 import com.dianping.cat.home.exception.entity.ExceptionExclude;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;
 import com.dianping.cat.consumer.config.AllReportConfigManager;
@@ -36,6 +40,8 @@ import com.dianping.cat.home.group.entity.Group;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
+import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManager;
+import com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
@@ -102,6 +108,12 @@ public class SpringMvcConfigController {
 
 	@Resource
 	private ReportReloadConfigManager reportReloadConfigManager;
+
+	@Resource
+	private TopologyGraphConfigManager topologyGraphConfigManager;
+
+	@Resource
+	private TopoGraphFormatConfigManager topoGraphFormatConfigManager;
 
 	@Resource
 	private TransactionRuleConfigManager transactionRuleConfigManager;
@@ -202,6 +214,14 @@ public class SpringMvcConfigController {
 		}
 		if ("reportReloadConfigUpdate".equals(action)) {
 			configReportReloadConfigModel(request, model);
+			return model;
+		}
+		if ("topoGraphFormatUpdate".equals(action)) {
+			configTopoGraphFormatModel(request, model);
+			return model;
+		}
+		if (isTopologyGraphAction(action)) {
+			configTopologyGraphModel(request, action, model);
 			return model;
 		}
 		if ("sampleConfigUpdate".equals(action)) {
@@ -331,6 +351,14 @@ public class SpringMvcConfigController {
 		this.reportReloadConfigManager = reportReloadConfigManager;
 	}
 
+	void setTopologyGraphConfigManager(TopologyGraphConfigManager topologyGraphConfigManager) {
+		this.topologyGraphConfigManager = topologyGraphConfigManager;
+	}
+
+	void setTopoGraphFormatConfigManager(TopoGraphFormatConfigManager topoGraphFormatConfigManager) {
+		this.topoGraphFormatConfigManager = topoGraphFormatConfigManager;
+	}
+
 	void setTransactionRuleConfigManager(TransactionRuleConfigManager transactionRuleConfigManager) {
 		this.transactionRuleConfigManager = transactionRuleConfigManager;
 	}
@@ -370,10 +398,10 @@ public class SpringMvcConfigController {
 				|| "serverConfigUpdate".equals(action) || "sampleConfigUpdate".equals(action)
 				|| "routerConfigUpdate".equals(action) || "storageGroupConfigUpdate".equals(action)
 				|| "serverFilterConfigUpdate".equals(action) || "reportReloadConfigUpdate".equals(action)
-				|| "allReportConfig".equals(action)
+				|| "allReportConfig".equals(action) || "topoGraphFormatUpdate".equals(action)
 		|| isDomainGroupAction(action) || isExceptionAction(action) || isEventRuleAction(action)
 				|| isHeartbeatRuleAction(action) || isTransactionRuleAction(action)
-				|| isStorageRuleAction(action);
+				|| isStorageRuleAction(action) || isTopologyGraphAction(action);
 	}
 
 	private void configDomainGroupModel(HttpServletRequest request, String action, Map<String, Object> model,
@@ -513,6 +541,72 @@ public class SpringMvcConfigController {
 			opState = true;
 		}
 		model.put("content", configHtmlParser.parse(reportReloadConfigManager.getConfig().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configTopoGraphFormatModel(HttpServletRequest request, Map<String, Object> model) {
+		String content = request.getParameter("content");
+		Boolean opState = null;
+
+		if (content != null && content.length() > 0) {
+			opState = topoGraphFormatConfigManager.insert(content);
+		} else if (request.getParameter("submit") != null) {
+			opState = true;
+		}
+		model.put("content", configHtmlParser.parse(topoGraphFormatConfigManager.getConfig().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configTopologyGraphModel(HttpServletRequest request, String action, Map<String, Object> model) {
+		String type = parameter(request, "type", "");
+		String domain = parameter(request, "domain", "");
+		String from = parameter(request, "from", "");
+		String to = parameter(request, "to", "");
+		Boolean opState = null;
+
+		model.put("type", type);
+		model.put("domain", domain);
+		model.put("from", from);
+		model.put("to", to);
+
+		if ("topologyGraphNodeConfigAdd".equals(action)) {
+			if (domain.length() > 0) {
+				model.put("domainConfig", topologyGraphConfigManager.queryNodeConfig(type, domain));
+			}
+			model.put("projects", projects());
+			return;
+		}
+		if ("topologyGraphNodeConfigAddSumbit".equals(action)) {
+			DomainConfig domainConfig = domainConfig(request);
+
+			model.put("domainConfig", domainConfig);
+			if (Constants.ALL.equalsIgnoreCase(domainConfig.getId())) {
+				opState = topologyGraphConfigManager.insertDomainDefaultConfig(type, domainConfig);
+			} else {
+				opState = topologyGraphConfigManager.insertDomainConfig(type, domainConfig);
+			}
+		} else if ("topologyGraphNodeConfigDelete".equals(action)) {
+			opState = topologyGraphConfigManager.deleteDomainConfig(type, domain);
+		} else if ("topologyGraphEdgeConfigAdd".equals(action)) {
+			model.put("edgeConfig", nullToEmpty(topologyGraphConfigManager.queryEdgeConfig(type, from, to)));
+			model.put("projects", projects());
+			return;
+		} else if ("topologyGraphEdgeConfigAddSumbit".equals(action)) {
+			EdgeConfig edgeConfig = edgeConfig(request);
+
+			model.put("edgeConfig", edgeConfig);
+			type = edgeConfig.getType();
+			model.put("type", type);
+			opState = type != null && type.length() > 0 && topologyGraphConfigManager.insertEdgeConfig(edgeConfig);
+		} else if ("topologyGraphEdgeConfigDelete".equals(action)) {
+			opState = topologyGraphConfigManager.deleteEdgeConfig(type, from, to);
+		}
+
+		TopologyGraphConfig graphConfig = topologyGraphConfigManager.getConfig();
+
+		model.put("config", graphConfig);
+		model.put("graphConfig", graphConfig);
+		model.put("edgeGroups", edgeGroups(graphConfig));
 		model.put("opState", opState);
 	}
 
@@ -852,6 +946,14 @@ public class SpringMvcConfigController {
 				|| "storageRuleSubmit".equals(action) || "storageRuleDelete".equals(action);
 	}
 
+	private boolean isTopologyGraphAction(String action) {
+		return "topologyGraphNodeConfigList".equals(action) || "topologyGraphNodeConfigAdd".equals(action)
+				|| "topologyGraphNodeConfigAddSumbit".equals(action)
+				|| "topologyGraphNodeConfigDelete".equals(action) || "topologyGraphEdgeConfigList".equals(action)
+				|| "topologyGraphEdgeConfigAdd".equals(action) || "topologyGraphEdgeConfigAddSumbit".equals(action)
+				|| "topologyGraphEdgeConfigDelete".equals(action);
+	}
+
 	private boolean isEventRuleAction(String action) {
 		return "eventRule".equals(action) || "eventRuleUpdate".equals(action) || "eventRuleSubmit".equals(action)
 				|| "eventRuleDelete".equals(action);
@@ -897,6 +999,23 @@ public class SpringMvcConfigController {
 		}
 		if ("reportReloadConfigUpdate".equals(action)) {
 			return "/jsp/spring/report/config/reportReloadConfigUpdate.jsp";
+		}
+		if ("topoGraphFormatUpdate".equals(action)) {
+			return "/jsp/spring/report/config/topoGraphFormatUpdate.jsp";
+		}
+		if ("topologyGraphNodeConfigAdd".equals(action)) {
+			return "/jsp/spring/report/config/topologyGraphNodeConfigAdd.jsp";
+		}
+		if ("topologyGraphNodeConfigList".equals(action) || "topologyGraphNodeConfigAddSumbit".equals(action)
+				|| "topologyGraphNodeConfigDelete".equals(action)) {
+			return "/jsp/spring/report/config/topologyGraphNodeConfigs.jsp";
+		}
+		if ("topologyGraphEdgeConfigAdd".equals(action)) {
+			return "/jsp/spring/report/config/topologyGraphEdgeConfigAdd.jsp";
+		}
+		if ("topologyGraphEdgeConfigList".equals(action) || "topologyGraphEdgeConfigAddSumbit".equals(action)
+				|| "topologyGraphEdgeConfigDelete".equals(action)) {
+			return "/jsp/spring/report/config/topologyGraphEdgeConfigs.jsp";
 		}
 		if ("sampleConfigUpdate".equals(action)) {
 			return "/jsp/spring/report/config/sampleConfigUpdate.jsp";
@@ -968,6 +1087,32 @@ public class SpringMvcConfigController {
 		project.setEmail(parameter(request, "project.email", ""));
 		project.setPhone(parameter(request, "project.phone", ""));
 		return project;
+	}
+
+	private DomainConfig domainConfig(HttpServletRequest request) {
+		DomainConfig config = new DomainConfig();
+
+		config.setId(parameter(request, "domainConfig.id", ""));
+		config.setMinCountThreshold(intParameter(request, "domainConfig.minCountThreshold", 100));
+		config.setWarningThreshold(intParameter(request, "domainConfig.warningThreshold", 0));
+		config.setErrorThreshold(intParameter(request, "domainConfig.errorThreshold", 0));
+		config.setWarningResponseTime(doubleParameter(request, "domainConfig.warningResponseTime", 0));
+		config.setErrorResponseTime(doubleParameter(request, "domainConfig.errorResponseTime", 0));
+		return config;
+	}
+
+	private EdgeConfig edgeConfig(HttpServletRequest request) {
+		EdgeConfig config = new EdgeConfig();
+
+		config.setType(parameter(request, "edgeConfig.type", ""));
+		config.setFrom(parameter(request, "edgeConfig.from", ""));
+		config.setTo(parameter(request, "edgeConfig.to", ""));
+		config.setMinCountThreshold(intParameter(request, "edgeConfig.minCountThreshold", 100));
+		config.setWarningThreshold(intParameter(request, "edgeConfig.warningThreshold", 0));
+		config.setErrorThreshold(intParameter(request, "edgeConfig.errorThreshold", 0));
+		config.setWarningResponseTime(doubleParameter(request, "edgeConfig.warningResponseTime", 0));
+		config.setErrorResponseTime(doubleParameter(request, "edgeConfig.errorResponseTime", 0));
+		return config;
 	}
 
 	private long projectId(HttpServletRequest request) {
@@ -1130,6 +1275,28 @@ public class SpringMvcConfigController {
 		return projects;
 	}
 
+	private Map<String, EdgeGroup> edgeGroups(TopologyGraphConfig graphConfig) {
+		Map<String, EdgeGroup> groups = new LinkedHashMap<String, EdgeGroup>();
+
+		if (graphConfig != null) {
+			for (EdgeConfig edge : graphConfig.getEdgeConfigs().values()) {
+				String type = edge.getType();
+				EdgeGroup group = groups.get(type);
+
+				if (group == null) {
+					group = new EdgeGroup(graphConfig.findNodeConfig(type));
+					groups.put(type, group);
+				}
+				group.getEdgeConfigs().add(edge);
+			}
+		}
+		return groups;
+	}
+
+	private EdgeConfig nullToEmpty(EdgeConfig edgeConfig) {
+		return edgeConfig == null ? new EdgeConfig() : edgeConfig;
+	}
+
 	private String requestUrl(HttpServletRequest request) {
 		StringBuilder url = new StringBuilder();
 
@@ -1174,6 +1341,14 @@ public class SpringMvcConfigController {
 	private int intParameter(HttpServletRequest request, String name, int defaultValue) {
 		try {
 			return Integer.parseInt(parameter(request, name, String.valueOf(defaultValue)));
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
+	}
+
+	private double doubleParameter(HttpServletRequest request, String name, double defaultValue) {
+		try {
+			return Double.parseDouble(parameter(request, name, String.valueOf(defaultValue)));
 		} catch (NumberFormatException e) {
 			return defaultValue;
 		}
@@ -1231,6 +1406,24 @@ public class SpringMvcConfigController {
 
 		public String getIps() {
 			return m_ips;
+		}
+	}
+
+	public static class EdgeGroup {
+		private final List<EdgeConfig> m_edgeConfigs = new ArrayList<EdgeConfig>();
+
+		private final NodeConfig m_nodeConfig;
+
+		public EdgeGroup(NodeConfig nodeConfig) {
+			m_nodeConfig = nodeConfig == null ? new NodeConfig() : nodeConfig;
+		}
+
+		public List<EdgeConfig> getEdgeConfigs() {
+			return m_edgeConfigs;
+		}
+
+		public NodeConfig getNodeConfig() {
+			return m_nodeConfig;
 		}
 	}
 

@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set var="contextPath" value="${empty contextPath ? pageContext.request.contextPath : contextPath}" />
 <c:set var="projectConfigActive" value="${activeConfigMenu eq 'projects' || activeConfigMenu eq 'domainGroupConfigs'}" />
-<c:set var="applicationConfigActive" value="${activeConfigMenu eq 'businessConfig' || activeConfigMenu eq 'businessTag' || activeConfigMenu eq 'displayPolicy' || activeConfigMenu eq 'storageGroupConfigUpdate' || activeConfigMenu eq 'allReportConfig'}" />
+<c:set var="applicationConfigActive" value="${activeConfigMenu eq 'businessConfig' || activeConfigMenu eq 'businessTag' || activeConfigMenu eq 'displayPolicy' || activeConfigMenu eq 'storageGroupConfigUpdate' || activeConfigMenu eq 'allReportConfig' || activeConfigMenu eq 'topoGraphFormatUpdate' || activeConfigMenu eq 'topologyGraphNodeConfigList' || activeConfigMenu eq 'topologyGraphEdgeConfigList'}" />
 <c:set var="alertConfigActive" value="${activeConfigMenu eq 'transactionRule' || activeConfigMenu eq 'eventRule' || activeConfigMenu eq 'heartbeatRule' || activeConfigMenu eq 'storageRule'}" />
 <c:set var="overallConfigActive" value="${activeConfigMenu eq 'alertPolicy' || activeConfigMenu eq 'alertDefaultReceivers' || activeConfigMenu eq 'alertSenderConfig' || activeConfigMenu eq 'serverConfigUpdate' || activeConfigMenu eq 'serverFilterConfigUpdate' || activeConfigMenu eq 'sampleConfigUpdate' || activeConfigMenu eq 'routerConfigUpdate' || activeConfigMenu eq 'reportReloadConfigUpdate' || activeConfigMenu eq 'resourceUpdate' || activeConfigMenu eq 'userUpdate'}" />
 <div id="sidebar" class="sidebar responsive">
