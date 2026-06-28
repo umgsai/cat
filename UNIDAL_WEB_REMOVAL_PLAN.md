@@ -83,7 +83,6 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 
 ```text
 /r/dependency
-/r/alteration
 /r/alert
 ```
 
@@ -356,6 +355,47 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 新: http://localhost:8080/cat/mvc/r/monitor?op=batch&batch=test
 ```
 
+#### `/r/alteration`
+
+状态：已完成 `/mvc/r/alteration` 新链路。
+
+路由状态：
+
+```text
+旧页面/API: /cat/r/alteration?op=view&domain={domain}&startTime={yyyy-MM-dd HH:mm}&endTime={yyyy-MM-dd HH:mm}
+目标新链路: /cat/mvc/r/alteration?op=view&domain={domain}&startTime={yyyy-MM-dd HH:mm}&endTime={yyyy-MM-dd HH:mm}
+当前状态: SpringMvcMigrationServlet 已注册 /r/alteration GET/POST，SpringMvcAlterationController 已覆盖
+```
+
+旧实现入口：
+
+```text
+模块注册: cat-home/src/main/java/com/dianping/cat/report/ReportModule.java
+旧 Handler: cat-home/src/main/java/com/dianping/cat/report/page/alteration/Handler.java
+旧 Payload: cat-home/src/main/java/com/dianping/cat/report/page/alteration/Payload.java
+旧 Action: cat-home/src/main/java/com/dianping/cat/report/page/alteration/Action.java
+旧查询 JSP: cat-home/src/main/webapp/jsp/report/alteration/alter_view.jsp
+旧插入结果 JSP: cat-home/src/main/webapp/jsp/report/alteration/alter_insertResult.jsp
+```
+
+迁移结果：
+
+1. 已覆盖 `op=view/insert`。
+2. `op=view` 复用 `AlterationRepository#findByDtdh/findByDtdhTypes`，按分钟、项目、变更类型聚合展示。
+3. `op=insert` 复用 `AlterationRepository#insert`，保留旧 JSON 文本响应：`{"status":200}`、`{"status":500}`、`{"status":500, "errorMessage":"lack args"}`。
+4. 已保留 SQL 类型插入参数兼容逻辑：`domain/hostname/ip` 至少一个存在，缺失字段按旧逻辑补 `N/A`。
+5. 已新建 `jsp/spring/report/alteration/*`，不再使用 `/WEB-INF/app.tld`、`web-core`、`webres`。
+6. 页面查询链接已统一改成 `${contextPath}/mvc/r/alteration`。
+
+验收 URL 示例：
+
+```text
+旧: http://localhost:8080/cat/r/alteration?op=view&domain=cat
+新: http://localhost:8080/cat/mvc/r/alteration?op=view&domain=cat
+旧: http://localhost:8080/cat/r/alteration?op=insert&type=workflow&title=deploy&domain=cat&hostname=host-a&alterationDate=2026-06-27%2020:00:01&user=codex&content=done&url=http%253A%252F%252Fexample.com
+新: http://localhost:8080/cat/mvc/r/alteration?op=insert&type=workflow&title=deploy&domain=cat&hostname=host-a&alterationDate=2026-06-27%2020:00:01&user=codex&content=done&url=http%253A%252F%252Fexample.com
+```
+
 ### 3.3 枚举存在但模块未注册页面
 
 以下页面在枚举中存在，但当前旧模块未注册 Handler。暂不作为主迁移缺口，但删除枚举和旧模块前必须确认没有外部链接或隐藏入口：
@@ -414,10 +454,9 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
    - 状态：以上页面均已完成 `/mvc` 新链路。
 
 4. 配置或写操作页面：
-   - `/r/alteration`
    - `/r/alert`
    - `/r/dependency`
-   - 状态：`/r/monitor` 已完成 `/mvc` 新链路。
+   - 状态：`/r/monitor`、`/r/alteration` 已完成 `/mvc` 新链路。
 
 执行要求：
 
