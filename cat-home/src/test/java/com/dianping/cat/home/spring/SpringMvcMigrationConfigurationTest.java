@@ -1,10 +1,13 @@
 package com.dianping.cat.home.spring;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 
-import com.dianping.cat.config.business.BusinessConfigManager;
 import com.dianping.cat.home.spring.web.SpringMvcHealthController;
 import com.dianping.cat.home.spring.web.SpringMvcBusinessController;
 import com.dianping.cat.home.spring.web.SpringMvcHomeController;
@@ -12,27 +15,21 @@ import com.dianping.cat.home.spring.web.SpringMvcLoginController;
 import com.dianping.cat.home.spring.web.SpringMvcPluginController;
 import com.dianping.cat.home.spring.web.SpringMvcProjectController;
 import com.dianping.cat.home.spring.web.SpringMvcRouterController;
-import com.dianping.cat.service.ProjectService;
-import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
-import com.dianping.cat.system.page.login.service.SigninService;
-import com.dianping.cat.system.page.router.config.RouterConfigManager;
-import com.dianping.cat.system.page.router.service.CachedRouterConfigService;
-import com.dianping.cat.config.sample.SampleConfigManager;
-import com.dianping.cat.config.server.ServerFilterConfigManager;
 
 public class SpringMvcMigrationConfigurationTest {
 	@Test
-	public void shouldRegisterSpringMvcMigrationController() {
-		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				TestConfiguration.class, SpringMvcMigrationConfiguration.class)) {
-			Assert.assertNotNull(context.getBean(SpringMvcBusinessController.class));
-			Assert.assertNotNull(context.getBean(SpringMvcHealthController.class));
-			Assert.assertNotNull(context.getBean(SpringMvcHomeController.class));
-			Assert.assertNotNull(context.getBean(SpringMvcLoginController.class));
-			Assert.assertNotNull(context.getBean(SpringMvcPluginController.class));
-			Assert.assertNotNull(context.getBean(SpringMvcProjectController.class));
-			Assert.assertNotNull(context.getBean(SpringMvcRouterController.class));
-		}
+	public void shouldFindSpringMvcMigrationControllerByDefaultComponentScan() {
+		ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(true);
+		Set<String> beanClassNames = scanner.findCandidateComponents("com.dianping.cat.home.spring.web").stream()
+				.map(BeanDefinition::getBeanClassName).collect(Collectors.toSet());
+
+		Assert.assertTrue(beanClassNames.contains(SpringMvcBusinessController.class.getName()));
+		Assert.assertTrue(beanClassNames.contains(SpringMvcHealthController.class.getName()));
+		Assert.assertTrue(beanClassNames.contains(SpringMvcHomeController.class.getName()));
+		Assert.assertTrue(beanClassNames.contains(SpringMvcLoginController.class.getName()));
+		Assert.assertTrue(beanClassNames.contains(SpringMvcPluginController.class.getName()));
+		Assert.assertTrue(beanClassNames.contains(SpringMvcProjectController.class.getName()));
+		Assert.assertTrue(beanClassNames.contains(SpringMvcRouterController.class.getName()));
 	}
 
 	@Test
@@ -41,47 +38,5 @@ public class SpringMvcMigrationConfigurationTest {
 
 		Assert.assertEquals("UP", controller.health().get("status"));
 		Assert.assertEquals("spring-mvc-migration", controller.health().get("runtime"));
-	}
-
-	static class TestConfiguration {
-		@org.springframework.context.annotation.Bean
-		public SigninService signinService() {
-			return new SigninService();
-		}
-
-		@org.springframework.context.annotation.Bean
-		public CachedRouterConfigService cachedRouterConfigService() {
-			return new CachedRouterConfigService();
-		}
-
-		@org.springframework.context.annotation.Bean
-		public RouterConfigManager routerConfigManager() {
-			return new RouterConfigManager();
-		}
-
-		@org.springframework.context.annotation.Bean
-		public SampleConfigManager sampleConfigManager() {
-			return new SampleConfigManager();
-		}
-
-		@org.springframework.context.annotation.Bean
-		public ServerFilterConfigManager serverFilterConfigManager() {
-			return new ServerFilterConfigManager();
-		}
-
-		@org.springframework.context.annotation.Bean
-		public ProjectService projectService() {
-			return new ProjectService();
-		}
-
-		@org.springframework.context.annotation.Bean
-		public BusinessConfigManager businessConfigManager() {
-			return new BusinessConfigManager();
-		}
-
-		@org.springframework.context.annotation.Bean
-		public BusinessTagConfigManager businessTagConfigManager() {
-			return new BusinessTagConfigManager();
-		}
 	}
 }
