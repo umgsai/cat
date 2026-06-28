@@ -67,13 +67,6 @@
 			</a>
 			<b class="arrow"></b>
 		</li>
-		<li id="Overload_report" class="${activeReport eq 'Overload' ? 'active open' : ''}">
-			<a href="${contextPath}/mvc/r/overload?op=view">
-				<i class="menu-icon fa fa-database"></i>
-				<span class="menu-text">Overload</span>
-			</a>
-			<b class="arrow"></b>
-		</li>
 	</ul>
 	<div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
 		<i class="ace-icon fa fa-angle-double-left" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i>
