@@ -10,6 +10,7 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 
 import com.dianping.cat.home.spring.web.SpringMvcHealthController;
 import com.dianping.cat.home.spring.web.SpringMvcBusinessController;
+import com.dianping.cat.home.spring.web.SpringMvcCacheController;
 import com.dianping.cat.home.spring.web.SpringMvcHomeController;
 import com.dianping.cat.home.spring.web.SpringMvcLoginController;
 import com.dianping.cat.home.spring.web.SpringMvcMatrixController;
@@ -26,6 +27,7 @@ public class SpringMvcMigrationConfigurationTest {
 				.map(BeanDefinition::getBeanClassName).collect(Collectors.toSet());
 
 		Assert.assertTrue(beanClassNames.contains(SpringMvcBusinessController.class.getName()));
+		Assert.assertTrue(beanClassNames.contains(SpringMvcCacheController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcHealthController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcHomeController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcLoginController.class.getName()));

@@ -65,6 +65,7 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 /r/overload
 /r/matrix
 /r/model
+/r/cache
 /r/business
 /s/login
 /s/config
@@ -81,7 +82,6 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 
 ```text
 /r/dependency
-/r/cache
 /r/statistics
 /r/alteration
 /r/monitor
@@ -174,6 +174,47 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 新: http://localhost:8080/cat/mvc/r/matrix?domain=cat&ip=All&date=2026062720&reportType=day&op=view
 旧: http://localhost:8080/cat/r/matrix?domain=cat&ip=All&date=2026062700&reportType=day&op=history
 新: http://localhost:8080/cat/mvc/r/matrix?domain=cat&ip=All&date=2026062700&reportType=day&op=history
+```
+
+#### `/r/cache`
+
+状态：已完成 `/mvc/r/cache` 新链路。
+
+路由状态：
+
+```text
+旧页面: /cat/r/cache?domain={domain}&ip=All&date={yyyyMMddHH}&reportType=day&op=view
+目标新链路: /cat/mvc/r/cache?domain={domain}&ip=All&date={yyyyMMddHH}&reportType=day&op=view
+当前状态: SpringMvcMigrationServlet 已注册 /r/cache，SpringMvcCacheController 已覆盖
+```
+
+旧实现入口：
+
+```text
+模块注册: cat-home/src/main/java/com/dianping/cat/report/ReportModule.java
+旧 Handler: cat-home/src/main/java/com/dianping/cat/report/page/cache/Handler.java
+旧 Payload: cat-home/src/main/java/com/dianping/cat/report/page/cache/Payload.java
+旧 Action: cat-home/src/main/java/com/dianping/cat/report/page/cache/Action.java
+旧小时 JSP: cat-home/src/main/webapp/jsp/report/cache/cache.jsp
+旧历史 JSP: cat-home/src/main/webapp/jsp/report/cache/cacheHistory.jsp
+```
+
+迁移结果：
+
+1. 已覆盖 `op=view` 和 `op=history`。
+2. `op=view` 走小时报表链路，依赖 `transactionModelService` 和 `eventModelService`。
+3. `op=history` 走汇总链路，依赖 `TransactionReportService#queryReport` 和 `EventReportService#queryReport`。
+4. 已保留 `ip`、`type`、`queryname`、`sort` 参数，继续通过 `TransactionReportVistor` 构造 `CacheReport`。
+5. 已新建 `jsp/spring/report/cache/*`，不再使用 `/WEB-INF/app.tld`、`web-core`、`webres`。
+6. 页面内链接、导航和资源引用已统一改成 `${contextPath}/mvc/...` 和普通静态资源引用。
+
+验收 URL 示例：
+
+```text
+旧: http://localhost:8080/cat/r/cache?domain=cat&ip=All&date=2026062720&reportType=day&op=view
+新: http://localhost:8080/cat/mvc/r/cache?domain=cat&ip=All&date=2026062720&reportType=day&op=view
+旧: http://localhost:8080/cat/r/cache?domain=cat&ip=All&date=2026062700&reportType=day&op=history
+新: http://localhost:8080/cat/mvc/r/cache?domain=cat&ip=All&date=2026062700&reportType=day&op=history
 ```
 
 ### 3.3 枚举存在但模块未注册页面
