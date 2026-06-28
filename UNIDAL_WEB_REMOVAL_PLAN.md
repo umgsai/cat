@@ -84,7 +84,6 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 ```text
 /r/dependency
 /r/alteration
-/r/monitor
 /r/alert
 ```
 
@@ -319,6 +318,44 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 新: http://localhost:8080/cat/mvc/r/storage?domain=cat&type=SQL&date=2026062720&op=dashboard
 ```
 
+#### `/r/monitor`
+
+状态：已完成 `/mvc/r/monitor` 新链路。
+
+路由状态：
+
+```text
+旧接口: /cat/r/monitor?op=count&timestamp={timestamp}&group={group}&domain={domain}&key={key}&value={value}
+目标新链路: /cat/mvc/r/monitor?op=count&timestamp={timestamp}&group={group}&domain={domain}&key={key}&value={value}
+当前状态: SpringMvcMigrationServlet 已注册 /r/monitor GET/POST，SpringMvcMonitorController 已覆盖
+```
+
+旧实现入口：
+
+```text
+模块注册: cat-home/src/main/java/com/dianping/cat/report/ReportModule.java
+旧 Handler: cat-home/src/main/java/com/dianping/cat/report/page/monitor/Handler.java
+旧 Payload: cat-home/src/main/java/com/dianping/cat/report/page/monitor/Payload.java
+旧 Action: cat-home/src/main/java/com/dianping/cat/report/page/monitor/Action.java
+旧 JSP: cat-home/src/main/webapp/jsp/report/monitor.jsp
+```
+
+迁移结果：
+
+1. 已覆盖 `op=count/avg/sum/batch`。
+2. 旧 Handler 当前没有业务写入逻辑，旧 JSP 只输出 `model.status`，实际响应为 `200 text/html;charset=UTF-8` 空 body。
+3. 新 controller 保留旧行为，直接返回 `text/html;charset=UTF-8` 空响应，不再依赖 Unidal `Payload/Model/Action/JspViewer`。
+4. 已同时注册 GET/POST，保留外部调用兼容性。
+
+验收 URL 示例：
+
+```text
+旧: http://localhost:8080/cat/r/monitor?op=count&timestamp=2026062720&group=test&domain=cat&key=myKey&value=1
+新: http://localhost:8080/cat/mvc/r/monitor?op=count&timestamp=2026062720&group=test&domain=cat&key=myKey&value=1
+旧: http://localhost:8080/cat/r/monitor?op=batch&batch=test
+新: http://localhost:8080/cat/mvc/r/monitor?op=batch&batch=test
+```
+
 ### 3.3 枚举存在但模块未注册页面
 
 以下页面在枚举中存在，但当前旧模块未注册 Handler。暂不作为主迁移缺口，但删除枚举和旧模块前必须确认没有外部链接或隐藏入口：
@@ -378,9 +415,9 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 
 4. 配置或写操作页面：
    - `/r/alteration`
-   - `/r/monitor`
    - `/r/alert`
    - `/r/dependency`
+   - 状态：`/r/monitor` 已完成 `/mvc` 新链路。
 
 执行要求：
 
