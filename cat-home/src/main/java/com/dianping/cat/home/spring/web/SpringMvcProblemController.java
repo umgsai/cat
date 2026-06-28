@@ -428,7 +428,7 @@ public class SpringMvcProblemController {
 	}
 
 	private String historyGraphErrorTitle(String reportType) {
-		return "day".equals(reportType) ? "閿欒閲?(count/min)" : "閿欒閲?(count/day)";
+		return "day".equals(reportType) ? "错误量 (count/min)" : "错误量 (count/day)";
 	}
 
 	private long historyGraphStep(String reportType) {

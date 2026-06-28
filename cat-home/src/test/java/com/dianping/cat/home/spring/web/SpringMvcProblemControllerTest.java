@@ -51,6 +51,16 @@ public class SpringMvcProblemControllerTest {
 		Assert.assertEquals("detail", modelService.getLastQueryType());
 	}
 
+	@Test
+	public void shouldUseReadableHistoryGraphTitle() {
+		SpringMvcProblemController controller = controller(new RecordingProblemModelService());
+		Map<String, Object> model = controller.problemModel(request("historyGraph"));
+		String errorsTrend = (String) model.get("errorsTrend");
+
+		Assert.assertTrue(errorsTrend.contains("错误量 (count/min)"));
+		Assert.assertFalse(errorsTrend.contains("閿"));
+	}
+
 	private SpringMvcProblemController controller(RecordingProblemModelService modelService) {
 		SpringMvcProblemController controller = new SpringMvcProblemController();
 		ProjectService projectService = new ProjectService() {
@@ -77,7 +87,15 @@ public class SpringMvcProblemControllerTest {
 			}
 		};
 		controller.setProblemModelService(modelService);
-		controller.setProblemReportService(new ProblemReportService());
+		controller.setProblemReportService(new ProblemReportService() {
+			@Override
+			public ProblemReport queryReport(String domain, Date start, Date end) {
+				ProblemReport report = report(domain, start.getTime());
+
+				report.setEndTime(end);
+				return report;
+			}
+		});
 		controller.setDomainGroupConfigManager(new DomainGroupConfigManager() {
 			@Override
 			public String queryDefaultGroup(String domain) {
