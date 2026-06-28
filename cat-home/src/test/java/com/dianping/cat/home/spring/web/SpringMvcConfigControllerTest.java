@@ -344,6 +344,37 @@ public class SpringMvcConfigControllerTest {
 		Assert.assertTrue(model.get("content").toString().contains("&lt;report-reload-config"));
 	}
 
+	@Test
+	public void shouldBuildStorageRuleModelsLikeLegacyEmptyProcessor() {
+		SpringMvcConfigController controller = new SpringMvcConfigController();
+		Map<String, Object> model;
+
+		controller.setRuleDecorator(new StubRuleDecorator());
+		model = controller.configModel(request("/cat", "op", "storageRule", "type", "SQL"), "storageRule");
+
+		Assert.assertEquals("SQL", model.get("type"));
+		Assert.assertTrue(((Collection<?>) model.get("rules")).isEmpty());
+		Assert.assertNull(model.get("opState"));
+
+		model = controller.configModel(request("/cat", "op", "storageRuleUpdate", "type", "Cache", "ruleId",
+				"cache;*;get;avg;true"), "storageRuleUpdate");
+
+		Assert.assertEquals("Cache", model.get("type"));
+		Assert.assertEquals("cache;*;get;avg;true", model.get("ruleId"));
+		Assert.assertEquals("", model.get("content"));
+
+		model = controller.configModel(request("/cat", "op", "storageRuleSubmit", "type", "RPC", "ruleId",
+				"service;*;call;error;false", "configs", "[]"), "storageRuleSubmit");
+
+		Assert.assertEquals("RPC", model.get("type"));
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+
+		model = controller.configModel(request("/cat", "op", "storageRuleDelete", "type", "SQL", "ruleId",
+				"db;*;select;errorPercent;true"), "storageRuleDelete");
+
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+	}
+
 	private HttpServletRequest request(String contextPath, String... parameters) {
 		Map<String, String> values = new HashMap<String, String>();
 

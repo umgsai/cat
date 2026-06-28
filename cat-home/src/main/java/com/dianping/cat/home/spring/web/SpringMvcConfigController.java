@@ -228,6 +228,10 @@ public class SpringMvcConfigController {
 			configTransactionRuleModel(request, action, model);
 			return model;
 		}
+		if (isStorageRuleAction(action)) {
+			configStorageRuleModel(request, action, model);
+			return model;
+		}
 
 		boolean projectAdd = "projectAdd".equals(action);
 		Boolean opState = null;
@@ -367,9 +371,9 @@ public class SpringMvcConfigController {
 				|| "routerConfigUpdate".equals(action) || "storageGroupConfigUpdate".equals(action)
 				|| "serverFilterConfigUpdate".equals(action) || "reportReloadConfigUpdate".equals(action)
 				|| "allReportConfig".equals(action)
-				|| isDomainGroupAction(action) || isExceptionAction(action) || isEventRuleAction(action)
-				|| isHeartbeatRuleAction(action)
-				|| isTransactionRuleAction(action);
+		|| isDomainGroupAction(action) || isExceptionAction(action) || isEventRuleAction(action)
+				|| isHeartbeatRuleAction(action) || isTransactionRuleAction(action)
+				|| isStorageRuleAction(action);
 	}
 
 	private void configDomainGroupModel(HttpServletRequest request, String action, Map<String, Object> model,
@@ -577,6 +581,25 @@ public class SpringMvcConfigController {
 			configTransactionRuleListModel(model);
 		}
 		model.put("opState", opState);
+	}
+
+	private void configStorageRuleModel(HttpServletRequest request, String action, Map<String, Object> model) {
+		String type = parameter(request, "type", "SQL");
+		String ruleId = parameter(request, "ruleId", "");
+		Boolean opState = null;
+
+		if ("storageRuleSubmit".equals(action) || "storageRuleDelete".equals(action)) {
+			opState = true;
+		}
+
+		model.put("type", type);
+		model.put("ruleId", ruleId);
+		model.put("rules", Collections.emptyList());
+		model.put("opState", opState);
+
+		if ("storageRuleUpdate".equals(action)) {
+			model.put("content", "");
+		}
 	}
 
 	private void configEventRuleModel(HttpServletRequest request, String action, Map<String, Object> model) {
@@ -824,6 +847,11 @@ public class SpringMvcConfigController {
 				|| "transactionRuleSubmit".equals(action) || "transactionRuleDelete".equals(action);
 	}
 
+	private boolean isStorageRuleAction(String action) {
+		return "storageRule".equals(action) || "storageRuleUpdate".equals(action)
+				|| "storageRuleSubmit".equals(action) || "storageRuleDelete".equals(action);
+	}
+
 	private boolean isEventRuleAction(String action) {
 		return "eventRule".equals(action) || "eventRuleUpdate".equals(action) || "eventRuleSubmit".equals(action)
 				|| "eventRuleDelete".equals(action);
@@ -902,6 +930,12 @@ public class SpringMvcConfigController {
 		}
 		if (isTransactionRuleAction(action)) {
 			return "/jsp/spring/report/config/transactionRule.jsp";
+		}
+		if ("storageRuleUpdate".equals(action)) {
+			return "/jsp/spring/report/config/storageRuleUpdate.jsp";
+		}
+		if (isStorageRuleAction(action)) {
+			return "/jsp/spring/report/config/storageRule.jsp";
 		}
 		if ("domainGroupConfigUpdate".equals(action)) {
 			return "/jsp/spring/report/config/domainGroupConfigUpdate.jsp";
