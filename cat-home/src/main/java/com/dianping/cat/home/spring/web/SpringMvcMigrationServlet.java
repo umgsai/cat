@@ -24,6 +24,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcAlterationController m_alterationController;
 
+	private SpringMvcAlertController m_alertController;
+
 	private SpringMvcHeartbeatController m_heartbeatController;
 
 	private SpringMvcBusinessController m_businessController;
@@ -85,6 +87,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 			throw new ServletException("CAT home Spring context is not initialized.");
 		}
 		m_alterationController = context.getBean(SpringMvcAlterationController.class);
+		m_alertController = context.getBean(SpringMvcAlertController.class);
 		m_businessController = context.getBean(SpringMvcBusinessController.class);
 		m_businessReportController = context.getBean(SpringMvcBusinessReportController.class);
 		m_cacheController = context.getBean(SpringMvcCacheController.class);
@@ -138,6 +141,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/s/project", m_projectController::project);
 		register(routes, "GET", "/s/router", m_routerController::router);
 		register(routes, "GET", "/r/alteration", m_alterationController::alteration);
+		register(routes, "GET", "/r/alert", m_alertController::alert);
 		register(routes, "GET", "/r/business", m_businessReportController::business);
 		register(routes, "GET", "/r/cache", m_cacheController::cache);
 		register(routes, "GET", "/r/cross", m_crossController::cross);
@@ -161,6 +165,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "POST", "/s/login", m_loginController::submit);
 		register(routes, "POST", "/s/permission", m_permissionController::permission);
 		register(routes, "POST", "/r/alteration", m_alterationController::alteration);
+		register(routes, "POST", "/r/alert", m_alertController::alert);
 		register(routes, "POST", "/r/statistics", m_statisticsController::submit);
 
 		return Collections.unmodifiableMap(routes);

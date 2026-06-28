@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 
+import com.dianping.cat.home.spring.web.SpringMvcAlertController;
 import com.dianping.cat.home.spring.web.SpringMvcAlterationController;
 import com.dianping.cat.home.spring.web.SpringMvcHealthController;
 import com.dianping.cat.home.spring.web.SpringMvcBusinessController;
@@ -31,6 +32,7 @@ public class SpringMvcMigrationConfigurationTest {
 				.map(BeanDefinition::getBeanClassName).collect(Collectors.toSet());
 
 		Assert.assertTrue(beanClassNames.contains(SpringMvcAlterationController.class.getName()));
+		Assert.assertTrue(beanClassNames.contains(SpringMvcAlertController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcBusinessController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcCacheController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcHealthController.class.getName()));

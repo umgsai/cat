@@ -67,6 +67,7 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 /r/model
 /r/cache
 /r/statistics
+/r/alert
 /r/business
 /s/login
 /s/config
@@ -83,15 +84,13 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 
 ```text
 /r/dependency
-/r/alert
 ```
 
 这些页面必须先完成 Spring 化，否则无法删除旧 Unidal MVC runtime。
 
-### 3.2.1 下一批待迁移页面详情
+### 3.2.1 路由迁移详情
 
-以下页面是下一批建议优先迁移的缺口。它们都已经在 `ReportModule` 中注册，但当前
-`SpringMvcMigrationServlet` 没有 `/mvc` 路由，访问旧路径仍会进入 Unidal MVC runtime。
+以下页面来自已注册旧路由清单。已完成项用于记录验收范围；未完成项仍应优先迁移。
 
 #### `/r/model`
 
@@ -396,6 +395,47 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 新: http://localhost:8080/cat/mvc/r/alteration?op=insert&type=workflow&title=deploy&domain=cat&hostname=host-a&alterationDate=2026-06-27%2020:00:01&user=codex&content=done&url=http%253A%252F%252Fexample.com
 ```
 
+#### `/r/alert`
+
+状态：已完成 `/mvc/r/alert` 新链路。
+
+路由状态：
+
+```text
+旧页面/API: /cat/r/alert?op=view&domain={domain}&startTime={yyyy-MM-dd HH:mm}&endTime={yyyy-MM-dd HH:mm}
+目标新链路: /cat/mvc/r/alert?op=view&domain={domain}&startTime={yyyy-MM-dd HH:mm}&endTime={yyyy-MM-dd HH:mm}
+当前状态: SpringMvcMigrationServlet 已注册 /r/alert GET/POST，SpringMvcAlertController 已覆盖
+```
+
+旧实现入口：
+
+```text
+模块注册: cat-home/src/main/java/com/dianping/cat/report/ReportModule.java
+旧 Handler: cat-home/src/main/java/com/dianping/cat/report/page/alert/Handler.java
+旧 Payload: cat-home/src/main/java/com/dianping/cat/report/page/alert/Payload.java
+旧 Action: cat-home/src/main/java/com/dianping/cat/report/page/alert/Action.java
+旧查询 JSP: cat-home/src/main/webapp/jsp/report/alert/alertView.jsp
+旧结果 JSP: cat-home/src/main/webapp/jsp/report/alert/alertResult.jsp
+```
+
+迁移结果：
+
+1. 已覆盖 `op=view`、`op=alert`、`op=insert`。
+2. `op=view` 保留 `startTime/endTime/domain/count/alertType/fullScreen` 参数，继续按分钟、项目、告警类型分组。
+3. `op=alert` 保留人工发送告警接口，继续调用 `SenderManager#sendAlert`。
+4. `op=insert` 保留人工写入告警接口，继续调用 `AlertRepository#insert`。
+5. 已保留旧接口 JSON 文本返回，包括缺少 receivers、无效 channel、缺少 domain、写入失败等错误文案。
+6. 已新建 `jsp/spring/report/alert/*`，不再使用 `/WEB-INF/app.tld`、`web-core`、`webres`。
+
+验收 URL 示例：
+
+```text
+旧: http://localhost:8080/cat/r/alert?op=view&domain=cat
+新: http://localhost:8080/cat/mvc/r/alert?op=view&domain=cat
+旧: http://localhost:8080/cat/r/alert?op=insert&domain=cat&alertTime=2026-06-27%2020:00&metric=cpu&content=high
+新: http://localhost:8080/cat/mvc/r/alert?op=insert&domain=cat&alertTime=2026-06-27%2020:00&metric=cpu&content=high
+```
+
 ### 3.3 枚举存在但模块未注册页面
 
 以下页面在枚举中存在，但当前旧模块未注册 Handler。暂不作为主迁移缺口，但删除枚举和旧模块前必须确认没有外部链接或隐藏入口：
@@ -454,9 +494,8 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
    - 状态：以上页面均已完成 `/mvc` 新链路。
 
 4. 配置或写操作页面：
-   - `/r/alert`
    - `/r/dependency`
-   - 状态：`/r/monitor`、`/r/alteration` 已完成 `/mvc` 新链路。
+   - 状态：`/r/monitor`、`/r/alteration`、`/r/alert` 已完成 `/mvc` 新链路。
 
 执行要求：
 
