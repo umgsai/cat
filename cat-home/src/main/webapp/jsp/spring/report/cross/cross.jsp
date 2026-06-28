@@ -29,7 +29,8 @@
 		<c:set var="switchHref" value="${contextPath}/mvc/r/cross?op=history&domain=${domain}&ip=${ipAddress}" />
 	</c:otherwise>
 </c:choose>
-<c:set var="projectView" value="${action eq 'view' || action eq 'history' || action eq 'query'}" />
+<c:set var="projectView" value="${action eq 'view' || action eq 'history'}" />
+<c:set var="queryView" value="${action eq 'query'}" />
 <c:set var="hostView" value="${action eq 'host' || action eq 'historyHost'}" />
 <c:set var="methodView" value="${action eq 'method' || action eq 'historyMethod'}" />
 <!doctype html>
@@ -166,6 +167,36 @@
 						$(document).ready(function() { appendHostname(${empty ipToHostnameStr ? "{}" : ipToHostnameStr}); });
 					</script>
 					<c:choose>
+						<c:when test="${queryView}">
+							<table id="contents" class="table table-striped table-condensed">
+								<thead>
+									<tr>
+										<th>类型</th>
+										<th>项目</th>
+										<th>IP</th>
+										<th>方法名</th>
+										<th class="right">Total</th>
+										<th class="right">Failure</th>
+										<th class="right">Failure%</th>
+										<th class="right">Avg(ms)</th>
+									</tr>
+								</thead>
+								<tbody>
+									<c:forEach var="item" items="${queryInfo.items}">
+										<tr class="right">
+											<td class="left"><c:out value="${item.type}" /></td>
+											<td class="left"><c:out value="${item.domain}" /></td>
+											<td class="left"><c:out value="${item.ip}" /></td>
+											<td class="left"><c:out value="${item.method}" /></td>
+											<td><fmt:formatNumber value="${item.totalCount}" pattern="#,###,###,###,##0" /></td>
+											<td><fmt:formatNumber value="${item.failureCount}" pattern="#,###,###,###,##0" /></td>
+											<td><fmt:formatNumber value="${item.failurePercent}" pattern="0.0000%" /></td>
+											<td><fmt:formatNumber value="${item.avg}" pattern="0.00" /></td>
+										</tr>
+									</c:forEach>
+								</tbody>
+							</table>
+						</c:when>
 						<c:when test="${hostView}">
 							<table class="table table-striped table-condensed">
 								<c:if test="${not empty hostInfo.callProjectsInfo}">

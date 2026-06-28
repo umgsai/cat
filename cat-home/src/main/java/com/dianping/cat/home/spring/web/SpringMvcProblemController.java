@@ -34,11 +34,17 @@ import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.mvc.HistoryNav;
+import com.dianping.cat.mvc.ReportModelDependencies;
 import com.dianping.cat.mvc.UrlNav;
 import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
+import com.dianping.cat.report.page.problem.Context;
+import com.dianping.cat.report.page.problem.GroupLevelInfo;
 import com.dianping.cat.report.page.problem.LongConfig;
+import com.dianping.cat.report.page.problem.Model;
+import com.dianping.cat.report.page.problem.ThreadLevelInfo;
 import com.dianping.cat.report.page.problem.service.ProblemReportService;
+import com.dianping.cat.report.page.problem.transform.DetailStatistics;
 import com.dianping.cat.report.page.problem.transform.HourlyLineChartVisitor;
 import com.dianping.cat.report.page.problem.transform.PieGraphChartVisitor;
 import com.dianping.cat.report.page.problem.transform.ProblemStatistics;
@@ -83,14 +89,14 @@ public class SpringMvcProblemController {
 	@Resource(name = "problemModelService")
 	private ModelService<ProblemReport> problemModelService;
 
+	@Resource
+	private ReportModelDependencies reportModelDependencies;
+
 	@GetMapping("/mvc/r/p")
 	public void problem(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Map<String, Object> model = problemModel(request);
 		String action = (String) model.get("action");
-		String view = isHistoryGraphAction(action) ? "/jsp/spring/report/problem/problemHistoryGraphs.jsp"
-				: isHourlyGraphAction(action) ? "/jsp/spring/report/problem/problemHourlyGraphs.jsp"
-						: isHistoryAction(action) ? "/jsp/spring/report/problem/problemHistory.jsp"
-								: "/jsp/spring/report/problem/problemStatics.jsp";
+		String view = view(action);
 
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
 			request.setAttribute(entry.getKey(), entry.getValue());
@@ -129,7 +135,8 @@ public class SpringMvcProblemController {
 		reportType = historyMode ? historyDates.getReportType() : reportType;
 
 		ProblemReport report = historyMode ? queryHistoryReport(domain, historyDates)
-				: queryHourlyReport(domain, ipAddress, type, status, date, isHourlyGraphAction(action) ? "detail" : "view");
+				: queryHourlyReport(domain, ipAddress, type, status, date,
+						isHourlyDetailAction(action) ? "detail" : "view");
 
 		if (report != null && isGroupAction(action)) {
 			report = filterReportByGroup(report, domain, group);
@@ -143,7 +150,13 @@ public class SpringMvcProblemController {
 
 		List<String> ips = report.getIps() == null ? new ArrayList<String>() : SortHelper.sortIpAddress(report.getIps());
 
-		if (isHourlyGraphAction(action)) {
+		if (isGroupDetailAction(action)) {
+			String detailGroup = "thread".equals(action) ? parameter(request, "groupName", parameter(request, "group", ""))
+					: emptyToNull(request.getParameter("group"));
+
+			buildGroupDetail(model, action, report, ipAddress, date, intParameter(request, "minute", 0),
+					emptyToNull(detailGroup), emptyToNull(request.getParameter("thread")));
+		} else if (isHourlyGraphAction(action)) {
 			buildHourlyGraphs(model, report, isGroupAction(action) ? Constants.ALL : ipAddress, type, status);
 		} else if (isHistoryGraphAction(action)) {
 			buildHistoryGraphs(model, report, ipAddress, type, status, historyDates);
@@ -196,6 +209,34 @@ public class SpringMvcProblemController {
 		model.put("currentNav", HistoryNav.getByName(reportType));
 		model.put("customDate", historyMode ? historyDates.getCustomDate() : "");
 		return model;
+	}
+
+	private void buildGroupDetail(Map<String, Object> model, String action, ProblemReport report, String ipAddress,
+			long date, int minute, String groupName, String threadId) {
+		Model legacyModel = legacyModel(model, report, action, ipAddress, date);
+
+		if ("group".equals(action)) {
+			GroupLevelInfo groupLevelInfo = new GroupLevelInfo(legacyModel).display(report);
+
+			model.put("groupLevelInfo", groupLevelInfo);
+		} else if ("thread".equals(action)) {
+			legacyModel.setGroupName(groupName);
+			ThreadLevelInfo threadLevelInfo = new ThreadLevelInfo(legacyModel, groupName).display(report);
+
+			model.put("groupName", groupName);
+			model.put("threadLevelInfo", threadLevelInfo);
+		} else if ("detail".equals(action)) {
+			DetailStatistics detailStatistics = new DetailStatistics().setIp(ipAddress).setMinute(minute)
+					.setGroupName(groupName).setThreadId(threadId);
+
+			detailStatistics.visitProblemReport(report);
+			model.put("currentMinute", minute);
+			model.put("minuteLast", minute <= 0 ? 0 : minute - 1);
+			model.put("minuteNext", minute >= 59 ? 59 : minute + 1);
+			model.put("groupName", groupName);
+			model.put("threadId", threadId);
+			model.put("detailStatistics", detailStatistics);
+		}
 	}
 
 	private LineChart buildHistoryLineChart(Date start, Date end, String title, long step, double[] values) {
@@ -431,6 +472,10 @@ public class SpringMvcProblemController {
 				|| "historyGroupGraph".equals(action);
 	}
 
+	private boolean isGroupDetailAction(String action) {
+		return "group".equals(action) || "thread".equals(action) || "detail".equals(action);
+	}
+
 	private boolean isHistoryAction(String action) {
 		return action != null && action.startsWith("history");
 	}
@@ -441,6 +486,28 @@ public class SpringMvcProblemController {
 
 	private boolean isHourlyGraphAction(String action) {
 		return "hourlyGraph".equals(action) || "groupGraphs".equals(action);
+	}
+
+	private boolean isHourlyDetailAction(String action) {
+		return isHourlyGraphAction(action) || isGroupDetailAction(action);
+	}
+
+	private Model legacyModel(Map<String, Object> model, ProblemReport report, String action, String ipAddress,
+			long date) {
+		Context context = new Context();
+
+		context.setReportModelDependencies(reportModelDependencies);
+
+		Model legacyModel = new Model(context);
+		legacyModel.setAction(com.dianping.cat.report.page.problem.Action.getByName(action,
+				com.dianping.cat.report.page.problem.Action.HOULY_REPORT));
+		legacyModel.setDate(date);
+		legacyModel.setDisplayDomain((String) model.get("displayDomain"));
+		legacyModel.setIpAddress(ipAddress);
+		legacyModel.setLastMinute(lastMinute(date));
+		legacyModel.setReport(report);
+		legacyModel.setReportType("");
+		return legacyModel;
 	}
 
 	private boolean matches(Entity entity, String type, String status) {
@@ -532,6 +599,15 @@ public class SpringMvcProblemController {
 		return value;
 	}
 
+	private int lastMinute(long date) {
+		long currentHour = System.currentTimeMillis() - System.currentTimeMillis() % TimeHelper.ONE_HOUR;
+
+		if (date == currentHour) {
+			return Calendar.getInstance().get(Calendar.MINUTE);
+		}
+		return 59;
+	}
+
 	private Date parseCustomDate(String value) {
 		if (value != null && value.length() > 0) {
 			try {
@@ -587,6 +663,55 @@ public class SpringMvcProblemController {
 
 	private ProblemReport queryHistoryReport(String domain, HistoryDates dates) {
 		return problemReportService.queryReport(domain, dates.getStart(), dates.getEnd());
+	}
+
+	void setDomainGroupConfigManager(DomainGroupConfigManager domainGroupConfigManager) {
+		this.domainGroupConfigManager = domainGroupConfigManager;
+	}
+
+	void setHostinfoService(HostinfoService hostinfoService) {
+		this.hostinfoService = hostinfoService;
+	}
+
+	void setProblemModelService(ModelService<ProblemReport> problemModelService) {
+		this.problemModelService = problemModelService;
+	}
+
+	void setProblemReportService(ProblemReportService problemReportService) {
+		this.problemReportService = problemReportService;
+	}
+
+	void setProjectService(ProjectService projectService) {
+		this.projectService = projectService;
+	}
+
+	void setReportModelDependencies(ReportModelDependencies reportModelDependencies) {
+		this.reportModelDependencies = reportModelDependencies;
+	}
+
+	void setSampleConfigManager(SampleConfigManager sampleConfigManager) {
+		this.sampleConfigManager = sampleConfigManager;
+	}
+
+	void setServerConfigManager(ServerConfigManager serverConfigManager) {
+		this.serverConfigManager = serverConfigManager;
+	}
+
+	private String view(String action) {
+		if ("group".equals(action)) {
+			return "/jsp/spring/report/problem/problemGroup.jsp";
+		} else if ("thread".equals(action)) {
+			return "/jsp/spring/report/problem/problemThread.jsp";
+		} else if ("detail".equals(action)) {
+			return "/jsp/spring/report/problem/problemDetail.jsp";
+		} else if (isHistoryGraphAction(action)) {
+			return "/jsp/spring/report/problem/problemHistoryGraphs.jsp";
+		} else if (isHourlyGraphAction(action)) {
+			return "/jsp/spring/report/problem/problemHourlyGraphs.jsp";
+		} else if (isHistoryAction(action)) {
+			return "/jsp/spring/report/problem/problemHistory.jsp";
+		}
+		return "/jsp/spring/report/problem/problemStatics.jsp";
 	}
 
 	private String queryString(int urlThreshold, int sqlThreshold, int serviceThreshold, int cacheThreshold,

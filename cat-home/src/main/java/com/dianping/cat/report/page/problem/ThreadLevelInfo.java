@@ -141,7 +141,7 @@ public class ThreadLevelInfo {
 
 	private String getShowDetailByMinte(int minute) {
 		Map<String, String> params = new LinkedHashMap<String, String>();
-		String baseUrl = "/cat/r/p?op=detail";
+		String baseUrl = "/cat/mvc/r/p?op=detail";
 		params.put("domain", m_model.getDomain());
 		params.put("ip", m_model.getIpAddress());
 		params.put("date", m_model.getDate());

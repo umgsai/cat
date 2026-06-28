@@ -26,8 +26,10 @@ import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.mvc.HistoryNav;
 import com.dianping.cat.mvc.UrlNav;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
+import com.dianping.cat.report.page.cross.CrossMethodVisitor;
 import com.dianping.cat.report.page.cross.display.HostInfo;
 import com.dianping.cat.report.page.cross.display.MethodInfo;
+import com.dianping.cat.report.page.cross.display.MethodQueryInfo;
 import com.dianping.cat.report.page.cross.display.ProjectInfo;
 import com.dianping.cat.report.page.cross.service.CrossReportService;
 import com.dianping.cat.report.service.ModelRequest;
@@ -93,7 +95,8 @@ public class SpringMvcCrossController {
 		String project = parameter(request, "project", "All");
 		String remoteIp = parameter(request, "remote", "");
 		String queryName = parameter(request, "queryName", "");
-		boolean historyMode = isHistoryAction(action);
+		boolean queryAction = isQueryAction(action);
+		boolean historyMode = isHistoryAction(action) || isQueryHistory(request.getParameter("date"));
 		HistoryDates historyDates = historyMode ? historyDates(request, reportType) : null;
 		long date = historyMode ? historyDates.getDate() : date(request.getParameter("date"), intParameter(request, "step", 0));
 
@@ -112,8 +115,14 @@ public class SpringMvcCrossController {
 		ProjectInfo projectInfo = null;
 		HostInfo hostInfo = null;
 		MethodInfo methodInfo = null;
+		MethodQueryInfo queryInfo = null;
 
-		if (isHostAction(action)) {
+		if (queryAction) {
+			CrossMethodVisitor visitor = new CrossMethodVisitor(method);
+
+			visitor.visitCrossReport(report);
+			queryInfo = visitor.getInfo();
+		} else if (isHostAction(action)) {
 			hostInfo = new HostInfo(duration);
 			hostInfo.setHostinfoService(hostinfoService);
 			hostInfo.setClientIp(ipAddress).setCallSortBy(callSort).setServiceSortBy(serviceSort);
@@ -147,6 +156,7 @@ public class SpringMvcCrossController {
 		model.put("projectInfo", projectInfo);
 		model.put("hostInfo", hostInfo);
 		model.put("methodInfo", methodInfo);
+		model.put("queryInfo", queryInfo);
 		model.put("callSort", callSort);
 		model.put("serviceSort", serviceSort);
 		model.put("method", method);
@@ -267,6 +277,14 @@ public class SpringMvcCrossController {
 
 	private boolean isMethodAction(String action) {
 		return "method".equals(action) || "historyMethod".equals(action);
+	}
+
+	private boolean isQueryAction(String action) {
+		return "query".equals(action);
+	}
+
+	private boolean isQueryHistory(String date) {
+		return date != null && date.length() == 8;
 	}
 
 	private int intParameter(HttpServletRequest request, String name, int defaultValue) {
@@ -408,6 +426,30 @@ public class SpringMvcCrossController {
 
 	private CrossReport queryHistoryReport(String domain, HistoryDates dates) {
 		return crossReportService.queryReport(domain, dates.getStart(), dates.getEnd());
+	}
+
+	void setCrossModelService(ModelService<CrossReport> crossModelService) {
+		this.crossModelService = crossModelService;
+	}
+
+	void setCrossReportService(CrossReportService crossReportService) {
+		this.crossReportService = crossReportService;
+	}
+
+	void setDomainGroupConfigManager(DomainGroupConfigManager domainGroupConfigManager) {
+		this.domainGroupConfigManager = domainGroupConfigManager;
+	}
+
+	void setHostinfoService(HostinfoService hostinfoService) {
+		this.hostinfoService = hostinfoService;
+	}
+
+	void setProjectService(ProjectService projectService) {
+		this.projectService = projectService;
+	}
+
+	void setSampleConfigManager(SampleConfigManager sampleConfigManager) {
+		this.sampleConfigManager = sampleConfigManager;
 	}
 
 	private double sample(String domain) {
