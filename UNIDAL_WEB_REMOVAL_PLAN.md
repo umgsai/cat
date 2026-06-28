@@ -66,6 +66,7 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 /r/matrix
 /r/model
 /r/cache
+/r/statistics
 /r/business
 /s/login
 /s/config
@@ -82,7 +83,6 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 
 ```text
 /r/dependency
-/r/statistics
 /r/alteration
 /r/monitor
 /r/alert
@@ -215,6 +215,63 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 新: http://localhost:8080/cat/mvc/r/cache?domain=cat&ip=All&date=2026062720&reportType=day&op=view
 旧: http://localhost:8080/cat/r/cache?domain=cat&ip=All&date=2026062700&reportType=day&op=history
 新: http://localhost:8080/cat/mvc/r/cache?domain=cat&ip=All&date=2026062700&reportType=day&op=history
+```
+
+#### `/r/statistics`
+
+状态：已完成 `/mvc/r/statistics` 新链路。
+
+路由状态：
+
+```text
+旧页面: /cat/r/statistics?domain={domain}&op=service
+目标新链路: /cat/mvc/r/statistics?domain={domain}&op=service
+当前状态: SpringMvcMigrationServlet 已注册 /r/statistics GET/POST，SpringMvcStatisticsController 已覆盖
+```
+
+旧实现入口：
+
+```text
+模块注册: cat-home/src/main/java/com/dianping/cat/report/ReportModule.java
+旧 Handler: cat-home/src/main/java/com/dianping/cat/report/page/statistics/Handler.java
+旧 Payload: cat-home/src/main/java/com/dianping/cat/report/page/statistics/Payload.java
+旧 Action: cat-home/src/main/java/com/dianping/cat/report/page/statistics/Action.java
+旧 JSP: cat-home/src/main/webapp/jsp/report/service/service.jsp
+旧 JSP: cat-home/src/main/webapp/jsp/report/service/serviceHistory.jsp
+旧 JSP: cat-home/src/main/webapp/jsp/report/heavy/heavy.jsp
+旧 JSP: cat-home/src/main/webapp/jsp/report/heavy/heavyHistory.jsp
+旧 JSP: cat-home/src/main/webapp/jsp/report/utilization/utilization.jsp
+旧 JSP: cat-home/src/main/webapp/jsp/report/utilization/utilizationHistory.jsp
+旧 JSP: cat-home/src/main/webapp/jsp/report/jar/jar.jsp
+旧 JSP: cat-home/src/main/webapp/jsp/report/statistics/clientReport.jsp
+旧 JSP: cat-home/src/main/webapp/jsp/report/summary/summary.jsp
+```
+
+迁移结果：
+
+1. 已覆盖 `op=service/historyService/client/utilization/historyUtilization/jar/heavy/historyHeavy/summary`。
+2. 新 controller 不再复用旧 `Payload`、`Model`、`Action`，避免新链路继续绑定 Unidal MVC 类型。
+3. 已复用旧统计报表服务：`ServiceReportService`、`ClientReportService`、`UtilizationReportService`、`JarReportService`、`HeavyReportService`、`AlertSummaryExecutor`。
+4. 已新建 `jsp/spring/report/statistics/*`，不再使用 `/WEB-INF/app.tld`、`web-core`、`webres`。
+5. 页面内导航和表格链接已统一改成 `${contextPath}/mvc/...`。
+
+验收 URL 示例：
+
+```text
+旧: http://localhost:8080/cat/r/statistics?domain=cat&op=service
+新: http://localhost:8080/cat/mvc/r/statistics?domain=cat&op=service
+旧: http://localhost:8080/cat/r/statistics?domain=cat&op=historyService&reportType=day
+新: http://localhost:8080/cat/mvc/r/statistics?domain=cat&op=historyService&reportType=day
+旧: http://localhost:8080/cat/r/statistics?domain=cat&op=client
+新: http://localhost:8080/cat/mvc/r/statistics?domain=cat&op=client
+旧: http://localhost:8080/cat/r/statistics?domain=cat&op=utilization
+新: http://localhost:8080/cat/mvc/r/statistics?domain=cat&op=utilization
+旧: http://localhost:8080/cat/r/statistics?domain=cat&op=jar
+新: http://localhost:8080/cat/mvc/r/statistics?domain=cat&op=jar
+旧: http://localhost:8080/cat/r/statistics?domain=cat&op=heavy
+新: http://localhost:8080/cat/mvc/r/statistics?domain=cat&op=heavy
+旧: http://localhost:8080/cat/r/statistics?domain=cat&op=summary
+新: http://localhost:8080/cat/mvc/r/statistics?domain=cat&op=summary
 ```
 
 ### 3.3 枚举存在但模块未注册页面

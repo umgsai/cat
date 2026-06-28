@@ -18,6 +18,7 @@ import com.dianping.cat.home.spring.web.SpringMvcModelController;
 import com.dianping.cat.home.spring.web.SpringMvcPluginController;
 import com.dianping.cat.home.spring.web.SpringMvcProjectController;
 import com.dianping.cat.home.spring.web.SpringMvcRouterController;
+import com.dianping.cat.home.spring.web.SpringMvcStatisticsController;
 
 public class SpringMvcMigrationConfigurationTest {
 	@Test
@@ -36,6 +37,7 @@ public class SpringMvcMigrationConfigurationTest {
 		Assert.assertTrue(beanClassNames.contains(SpringMvcPluginController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcProjectController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcRouterController.class.getName()));
+		Assert.assertTrue(beanClassNames.contains(SpringMvcStatisticsController.class.getName()));
 	}
 
 	@Test

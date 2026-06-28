@@ -60,6 +60,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcStateController m_stateController;
 
+	private SpringMvcStatisticsController m_statisticsController;
+
 	private SpringMvcTopController m_topController;
 
 	private SpringMvcTransactionController m_transactionController;
@@ -96,6 +98,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		m_problemController = context.getBean(SpringMvcProblemController.class);
 		m_routerController = context.getBean(SpringMvcRouterController.class);
 		m_stateController = context.getBean(SpringMvcStateController.class);
+		m_statisticsController = context.getBean(SpringMvcStatisticsController.class);
 		m_topController = context.getBean(SpringMvcTopController.class);
 		m_transactionController = context.getBean(SpringMvcTransactionController.class);
 		m_routes = buildRoutes();
@@ -139,10 +142,12 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/r/h", m_heartbeatController::heartbeat);
 		register(routes, "GET", "/r/p", m_problemController::problem);
 		register(routes, "GET", "/r/state", m_stateController::state);
+		register(routes, "GET", "/r/statistics", m_statisticsController::statistics);
 		register(routes, "POST", "/s/business", m_businessController::business);
 		register(routes, "POST", "/s/config", m_configController::config);
 		register(routes, "POST", "/s/login", m_loginController::submit);
 		register(routes, "POST", "/s/permission", m_permissionController::permission);
+		register(routes, "POST", "/r/statistics", m_statisticsController::submit);
 
 		return Collections.unmodifiableMap(routes);
 	}
