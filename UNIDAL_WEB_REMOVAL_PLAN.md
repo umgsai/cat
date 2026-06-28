@@ -63,6 +63,7 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 /r/state
 /r/top
 /r/overload
+/r/matrix
 /r/business
 /s/login
 /s/config
@@ -79,7 +80,6 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 
 ```text
 /r/model
-/r/matrix
 /r/dependency
 /r/cache
 /r/statistics
@@ -90,6 +90,88 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 ```
 
 这些页面必须先完成 Spring 化，否则无法删除旧 Unidal MVC runtime。
+
+### 3.2.1 下一批待迁移页面详情
+
+以下页面是下一批建议优先迁移的缺口。它们都已经在 `ReportModule` 中注册，但当前
+`SpringMvcMigrationServlet` 没有 `/mvc` 路由，访问旧路径仍会进入 Unidal MVC runtime。
+
+#### `/r/model`
+
+路由状态：
+
+```text
+旧页面/API: /cat/r/model/{report}/{domain}/{period}?op=xml
+目标新链路: /cat/mvc/r/model/{report}/{domain}/{period}?op=xml
+当前缺口: SpringMvcMigrationServlet 未注册 /r/model/*，也没有 SpringMvcModelController
+```
+
+旧实现入口：
+
+```text
+模块注册: cat-home/src/main/java/com/dianping/cat/report/ReportModule.java
+旧 Handler: cat-home/src/main/java/com/dianping/cat/report/page/model/Handler.java
+旧 Payload: cat-home/src/main/java/com/dianping/cat/report/page/model/Payload.java
+旧 Action: cat-home/src/main/java/com/dianping/cat/report/page/model/Action.java
+旧 JSP: cat-home/src/main/webapp/jsp/report/model.jsp
+```
+
+迁移注意点：
+
+1. 该入口本质是 XML/GZIP 接口，不是普通 HTML 页面。
+2. 只定义了 `op=xml`，默认也是 `xml`。
+3. 路径参数来自 `Payload#setPath`，语义为 `{report}/{domain}/{period}`。
+4. `report=logview` 时使用 `messageId` 推导时间，其他 report 使用 `period.getStartTime()`。
+5. 需要复用 `LocalModelService` 服务表，覆盖 `problem/event/transaction/heartbeat/cross/matrix/dependency/top/state/storage/business/logview`。
+6. 新 controller 需要直接写 `application/xml;charset=utf-8`，并保留 `Content-Encoding: gzip` 行为。
+
+验收 URL 示例：
+
+```text
+旧: http://localhost:8080/cat/r/model/transaction/cat/current?op=xml
+新: http://localhost:8080/cat/mvc/r/model/transaction/cat/current?op=xml
+```
+
+#### `/r/matrix`
+
+状态：已完成 `/mvc/r/matrix` 新链路。
+
+路由状态：
+
+```text
+旧页面: /cat/r/matrix?domain={domain}&ip=All&date={yyyyMMddHH}&reportType=day&op=view
+目标新链路: /cat/mvc/r/matrix?domain={domain}&ip=All&date={yyyyMMddHH}&reportType=day&op=view
+当前状态: SpringMvcMigrationServlet 已注册 /r/matrix，SpringMvcMatrixController 已覆盖
+```
+
+旧实现入口：
+
+```text
+模块注册: cat-home/src/main/java/com/dianping/cat/report/ReportModule.java
+旧 Handler: cat-home/src/main/java/com/dianping/cat/report/page/matrix/Handler.java
+旧 Payload: cat-home/src/main/java/com/dianping/cat/report/page/matrix/Payload.java
+旧 Action: cat-home/src/main/java/com/dianping/cat/report/page/matrix/Action.java
+旧 JSP: cat-home/src/main/webapp/jsp/report/matrix/matrix.jsp
+旧历史 JSP: cat-home/src/main/webapp/jsp/report/matrix/matrixHistoryReport.jsp
+```
+
+迁移结果：
+
+1. 已覆盖 `op=view` 和 `op=history`。
+2. `op=view` 走小时报表链路，依赖 `matrixModelService` 查询 `MatrixReport`。
+3. `op=history` 走汇总链路，依赖 `MatrixReportService#queryReport(domain, start, end)`。
+4. 已迁移 `sort` 参数，并继续通过 `new DisplayMatrix(report).setSortBy(sort)` 构造展示模型。
+5. 已新建 `jsp/spring/report/matrix/*`，不再使用 `/WEB-INF/app.tld`、`web-core`、`webres`。
+6. 页面内链接、导航和资源引用已统一改成 `${contextPath}/mvc/...` 和普通静态资源引用。
+
+验收 URL 示例：
+
+```text
+旧: http://localhost:8080/cat/r/matrix?domain=cat&ip=All&date=2026062720&reportType=day&op=view
+新: http://localhost:8080/cat/mvc/r/matrix?domain=cat&ip=All&date=2026062720&reportType=day&op=view
+旧: http://localhost:8080/cat/r/matrix?domain=cat&ip=All&date=2026062700&reportType=day&op=history
+新: http://localhost:8080/cat/mvc/r/matrix?domain=cat&ip=All&date=2026062700&reportType=day&op=history
+```
 
 ### 3.3 枚举存在但模块未注册页面
 
