@@ -88,7 +88,29 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 
 已注册旧页面目前均已具备 `/mvc` 新链路。后续可以进入主路径切换和旧 Unidal MVC runtime 清理阶段。
 
-### 3.2.1 路由迁移详情
+### 3.2.1 2026-06-28 复扫基线
+
+本次复扫基于当前工作区状态，结论如下：
+
+1. 已注册旧页面均已有 `/mvc` 替代入口，当前没有新的“缺少 `/mvc` 对应路由”的注册页面。
+2. 生产代码中仍有 147 个文件命中 Web 相关 Unidal 引用。
+3. 其中旧 `report/page/*` 和 `system/page/*` 的页面层文件命中 135 个，主要是 `Action/Handler/Model/Payload/JspViewer`。
+4. 旧 JSP 总数 308 个，其中 193 个仍引用 Unidal taglib 或 WebRes。
+5. 新 Spring 链路中仍有少量过渡性 Unidal 引用，需要在切换主路径前先解耦：
+   - `cat-home/src/main/java/com/dianping/cat/home/spring/web/SpringMvcBusinessController.java`
+   - `cat-home/src/main/java/com/dianping/cat/home/spring/web/SpringMvcWebResourceInitializer.java`
+6. `SpringMvcLogviewController` 已不直接 import Unidal Web，保留旧 logview HTML 内容替换逻辑，不作为 Web MVC 依赖阻塞项。
+7. `cat-home/pom.xml` 仍直接依赖 `org.unidal.framework:web-framework` 和 `org.unidal.webres:WebResServer`，根 `pom.xml` 仍保留对应 dependency management。
+
+当前核心阻塞不再是页面缺口，而是：
+
+```text
+/r/*、/s/* -> SpringMvcServlet -> SpringMvcRuntime -> org.unidal.web.mvc
+```
+
+以及旧 JSP/taglib/WebRes 文件仍在工程中。
+
+### 3.2.2 路由迁移详情
 
 以下页面来自已注册旧路由清单。已完成项用于记录验收范围；未完成项仍应优先迁移。
 
@@ -499,6 +521,8 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 
 ### 阶段 0：建立迁移基线
 
+状态：已完成。
+
 目标：把当前事实固化，防止后续迁移时漏页面。
 
 任务：
@@ -515,6 +539,8 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 3. 新增迁移页面时测试会强制更新清单。
 
 ### 阶段 1：补齐 `/mvc` 页面和接口
+
+状态：已完成。
 
 目标：所有旧注册页面都有 Spring 新链路。
 
@@ -702,8 +728,26 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 
 ## 7. 当前下一步
 
-建议下一次实际改代码从阶段 0 开始：
+下一次实际改代码建议按以下顺序推进：
 
-1. 增加路由覆盖测试。
-2. 固化当前 11 个缺失路由。
-3. 然后优先迁移 `/s/permission`。
+1. 解耦 `SpringMvcBusinessController`。
+   - 目标：移除对 `com.dianping.cat.system.page.business.Action/Context/Model/Payload` 以及 `org.unidal.web.*` 的依赖。
+   - 做法：改成普通 `Map<String, Object>` request attribute 模型，Spring JSP 直接读取新字段。
+   - 验证：`SpringMvcBusinessControllerTest`、`mvn -pl cat-home -Dtest=SpringMvcBusinessControllerTest test`。
+
+2. 删除 `SpringMvcWebResourceInitializer` 的新链路调用。
+   - 当前只由 `SpringMvcBusinessController` 调用。
+   - `/mvc` 新 JSP 不应再依赖 WebRes runtime，移除调用后该类可进入删除候选。
+
+3. 切换主路径 `/r/*`、`/s/*`。
+   - 优先改造 `SpringMvcMigrationServlet` 同时处理 `/mvc/*`、`/r/*`、`/s/*`。
+   - 从 `web.xml` 移除 `SpringMvcServlet` 对 `/r/*`、`/s/*` 的映射。
+   - 保留 `/mvc/*` 作为兼容入口。
+
+4. 跑一次主路径 smoke test。
+   - `/cat/r/t?...op=view`
+   - `/cat/s/config?op=projects`
+   - `/cat/s/business?op=list`
+   - `/cat/s/permission?op=error`
+
+5. 主路径切换稳定后，进入旧 Unidal MVC 代码删除批次。

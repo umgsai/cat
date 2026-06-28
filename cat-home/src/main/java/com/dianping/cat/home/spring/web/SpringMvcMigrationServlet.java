@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson2.JSON;
+import jakarta.annotation.Resource;
 import org.springframework.context.ApplicationContext;
 
 import com.dianping.cat.home.spring.CatHomeSpringContextListener;
@@ -20,63 +21,91 @@ import com.dianping.cat.home.spring.CatHomeSpringContextListener;
 public class SpringMvcMigrationServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	private SpringMvcHealthController m_healthController;
+	@Resource
+	private SpringMvcHealthController springMvcHealthController;
 
-	private SpringMvcAlterationController m_alterationController;
+	@Resource
+	private SpringMvcAlterationController springMvcAlterationController;
 
-	private SpringMvcAlertController m_alertController;
+	@Resource
+	private SpringMvcAlertController springMvcAlertController;
 
-	private SpringMvcHeartbeatController m_heartbeatController;
+	@Resource
+	private SpringMvcHeartbeatController springMvcHeartbeatController;
 
-	private SpringMvcBusinessController m_businessController;
+	@Resource
+	private SpringMvcBusinessController springMvcBusinessController;
 
-	private SpringMvcBusinessReportController m_businessReportController;
+	@Resource
+	private SpringMvcBusinessReportController springMvcBusinessReportController;
 
-	private SpringMvcCacheController m_cacheController;
+	@Resource
+	private SpringMvcCacheController springMvcCacheController;
 
-	private SpringMvcConfigController m_configController;
+	@Resource
+	private SpringMvcConfigController springMvcConfigController;
 
-	private SpringMvcCrossController m_crossController;
+	@Resource
+	private SpringMvcCrossController springMvcCrossController;
 
-	private SpringMvcDependencyController m_dependencyController;
+	@Resource
+	private SpringMvcDependencyController springMvcDependencyController;
 
-	private SpringMvcEventController m_eventController;
+	@Resource
+	private SpringMvcEventController springMvcEventController;
 
-	private SpringMvcHomeController m_homeController;
+	@Resource
+	private SpringMvcHomeController springMvcHomeController;
 
-	private SpringMvcLoginController m_loginController;
+	@Resource
+	private SpringMvcLoginController springMvcLoginController;
 
-	private SpringMvcLogviewController m_logviewController;
+	@Resource
+	private SpringMvcLogviewController springMvcLogviewController;
 
-	private SpringMvcMatrixController m_matrixController;
+	@Resource
+	private SpringMvcMatrixController springMvcMatrixController;
 
-	private SpringMvcModelController m_modelController;
+	@Resource
+	private SpringMvcModelController springMvcModelController;
 
-	private SpringMvcMonitorController m_monitorController;
+	@Resource
+	private SpringMvcMonitorController springMvcMonitorController;
 
-	private SpringMvcOverloadController m_overloadController;
+	@Resource
+	private SpringMvcOverloadController springMvcOverloadController;
 
-	private SpringMvcPermissionController m_permissionController;
+	@Resource
+	private SpringMvcPermissionController springMvcPermissionController;
 
-	private SpringMvcPluginController m_pluginController;
+	@Resource
+	private SpringMvcPluginController springMvcPluginController;
 
-	private SpringMvcProjectController m_projectController;
+	@Resource
+	private SpringMvcProjectController springMvcProjectController;
 
-	private SpringMvcProblemController m_problemController;
+	@Resource
+	private SpringMvcProblemController springMvcProblemController;
 
-	private SpringMvcRouterController m_routerController;
+	@Resource
+	private SpringMvcRouterController springMvcRouterController;
 
-	private SpringMvcStateController m_stateController;
+	@Resource
+	private SpringMvcStateController springMvcStateController;
 
-	private SpringMvcStatisticsController m_statisticsController;
+	@Resource
+	private SpringMvcStatisticsController springMvcStatisticsController;
 
-	private SpringMvcStorageController m_storageController;
+	@Resource
+	private SpringMvcStorageController springMvcStorageController;
 
-	private SpringMvcTopController m_topController;
+	@Resource
+	private SpringMvcTopController springMvcTopController;
 
-	private SpringMvcTransactionController m_transactionController;
+	@Resource
+	private SpringMvcTransactionController springMvcTransactionController;
 
-	private Map<RouteKey, RouteHandler> m_routes = Collections.emptyMap();
+	private Map<RouteKey, RouteHandler> routes = Collections.emptyMap();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -88,35 +117,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		if (context == null) {
 			throw new ServletException("CAT home Spring context is not initialized.");
 		}
-		m_alterationController = context.getBean(SpringMvcAlterationController.class);
-		m_alertController = context.getBean(SpringMvcAlertController.class);
-		m_businessController = context.getBean(SpringMvcBusinessController.class);
-		m_businessReportController = context.getBean(SpringMvcBusinessReportController.class);
-		m_cacheController = context.getBean(SpringMvcCacheController.class);
-		m_configController = context.getBean(SpringMvcConfigController.class);
-		m_crossController = context.getBean(SpringMvcCrossController.class);
-		m_dependencyController = context.getBean(SpringMvcDependencyController.class);
-		m_eventController = context.getBean(SpringMvcEventController.class);
-		m_healthController = context.getBean(SpringMvcHealthController.class);
-		m_heartbeatController = context.getBean(SpringMvcHeartbeatController.class);
-		m_homeController = context.getBean(SpringMvcHomeController.class);
-		m_loginController = context.getBean(SpringMvcLoginController.class);
-		m_logviewController = context.getBean(SpringMvcLogviewController.class);
-		m_matrixController = context.getBean(SpringMvcMatrixController.class);
-		m_modelController = context.getBean(SpringMvcModelController.class);
-		m_monitorController = context.getBean(SpringMvcMonitorController.class);
-		m_overloadController = context.getBean(SpringMvcOverloadController.class);
-		m_permissionController = context.getBean(SpringMvcPermissionController.class);
-		m_pluginController = context.getBean(SpringMvcPluginController.class);
-		m_projectController = context.getBean(SpringMvcProjectController.class);
-		m_problemController = context.getBean(SpringMvcProblemController.class);
-		m_routerController = context.getBean(SpringMvcRouterController.class);
-		m_stateController = context.getBean(SpringMvcStateController.class);
-		m_statisticsController = context.getBean(SpringMvcStatisticsController.class);
-		m_storageController = context.getBean(SpringMvcStorageController.class);
-		m_topController = context.getBean(SpringMvcTopController.class);
-		m_transactionController = context.getBean(SpringMvcTransactionController.class);
-		m_routes = buildRoutes();
+		context.getAutowireCapableBeanFactory().autowireBean(this);
+		routes = buildRoutes();
 	}
 
 	@Override
@@ -132,45 +134,46 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 	private Map<RouteKey, RouteHandler> buildRoutes() {
 		Map<RouteKey, RouteHandler> routes = new LinkedHashMap<RouteKey, RouteHandler>();
 
-		register(routes, "GET", "/", (request, response) -> writeJson(response, m_healthController.health()));
-		register(routes, "GET", "/health", (request, response) -> writeJson(response, m_healthController.health()));
-		register(routes, "GET", "/r/home", m_homeController::home);
-		register(routes, "GET", "/s/login", m_loginController::login);
-		register(routes, "GET", "/s/business", m_businessController::business);
-		register(routes, "GET", "/s/config", m_configController::config);
-		register(routes, "GET", "/s/permission", m_permissionController::permission);
-		register(routes, "GET", "/s/plugin", m_pluginController::plugin);
-		register(routes, "GET", "/s/plugin/chrome", m_pluginController::chrome);
-		register(routes, "GET", "/s/project", m_projectController::project);
-		register(routes, "GET", "/s/router", m_routerController::router);
-		register(routes, "GET", "/r/alteration", m_alterationController::alteration);
-		register(routes, "GET", "/r/alert", m_alertController::alert);
-		register(routes, "GET", "/r/business", m_businessReportController::business);
-		register(routes, "GET", "/r/cache", m_cacheController::cache);
-		register(routes, "GET", "/r/cross", m_crossController::cross);
-		register(routes, "GET", "/r/dependency", m_dependencyController::dependency);
-		register(routes, "GET", "/r/m/*", m_logviewController::logview);
-		register(routes, "GET", "/r/matrix", m_matrixController::matrix);
-		register(routes, "GET", "/r/model", m_modelController::model);
-		register(routes, "GET", "/r/model/*", m_modelController::model);
-		register(routes, "GET", "/r/monitor", m_monitorController::monitor);
-		register(routes, "POST", "/r/monitor", m_monitorController::monitor);
-		register(routes, "GET", "/r/overload", m_overloadController::overload);
-		register(routes, "GET", "/r/top", m_topController::top);
-		register(routes, "GET", "/r/t", m_transactionController::transaction);
-		register(routes, "GET", "/r/e", m_eventController::event);
-		register(routes, "GET", "/r/h", m_heartbeatController::heartbeat);
-		register(routes, "GET", "/r/p", m_problemController::problem);
-		register(routes, "GET", "/r/state", m_stateController::state);
-		register(routes, "GET", "/r/statistics", m_statisticsController::statistics);
-		register(routes, "GET", "/r/storage", m_storageController::storage);
-		register(routes, "POST", "/s/business", m_businessController::business);
-		register(routes, "POST", "/s/config", m_configController::config);
-		register(routes, "POST", "/s/login", m_loginController::submit);
-		register(routes, "POST", "/s/permission", m_permissionController::permission);
-		register(routes, "POST", "/r/alteration", m_alterationController::alteration);
-		register(routes, "POST", "/r/alert", m_alertController::alert);
-		register(routes, "POST", "/r/statistics", m_statisticsController::submit);
+		register(routes, "GET", "/", (request, response) -> writeJson(response, springMvcHealthController.health()));
+		register(routes, "GET", "/health",
+				(request, response) -> writeJson(response, springMvcHealthController.health()));
+		register(routes, "GET", "/r/home", springMvcHomeController::home);
+		register(routes, "GET", "/s/login", springMvcLoginController::login);
+		register(routes, "GET", "/s/business", springMvcBusinessController::business);
+		register(routes, "GET", "/s/config", springMvcConfigController::config);
+		register(routes, "GET", "/s/permission", springMvcPermissionController::permission);
+		register(routes, "GET", "/s/plugin", springMvcPluginController::plugin);
+		register(routes, "GET", "/s/plugin/chrome", springMvcPluginController::chrome);
+		register(routes, "GET", "/s/project", springMvcProjectController::project);
+		register(routes, "GET", "/s/router", springMvcRouterController::router);
+		register(routes, "GET", "/r/alteration", springMvcAlterationController::alteration);
+		register(routes, "GET", "/r/alert", springMvcAlertController::alert);
+		register(routes, "GET", "/r/business", springMvcBusinessReportController::business);
+		register(routes, "GET", "/r/cache", springMvcCacheController::cache);
+		register(routes, "GET", "/r/cross", springMvcCrossController::cross);
+		register(routes, "GET", "/r/dependency", springMvcDependencyController::dependency);
+		register(routes, "GET", "/r/m/*", springMvcLogviewController::logview);
+		register(routes, "GET", "/r/matrix", springMvcMatrixController::matrix);
+		register(routes, "GET", "/r/model", springMvcModelController::model);
+		register(routes, "GET", "/r/model/*", springMvcModelController::model);
+		register(routes, "GET", "/r/monitor", springMvcMonitorController::monitor);
+		register(routes, "POST", "/r/monitor", springMvcMonitorController::monitor);
+		register(routes, "GET", "/r/overload", springMvcOverloadController::overload);
+		register(routes, "GET", "/r/top", springMvcTopController::top);
+		register(routes, "GET", "/r/t", springMvcTransactionController::transaction);
+		register(routes, "GET", "/r/e", springMvcEventController::event);
+		register(routes, "GET", "/r/h", springMvcHeartbeatController::heartbeat);
+		register(routes, "GET", "/r/p", springMvcProblemController::problem);
+		register(routes, "GET", "/r/state", springMvcStateController::state);
+		register(routes, "GET", "/r/statistics", springMvcStatisticsController::statistics);
+		register(routes, "GET", "/r/storage", springMvcStorageController::storage);
+		register(routes, "POST", "/s/business", springMvcBusinessController::business);
+		register(routes, "POST", "/s/config", springMvcConfigController::config);
+		register(routes, "POST", "/s/login", springMvcLoginController::submit);
+		register(routes, "POST", "/s/permission", springMvcPermissionController::permission);
+		register(routes, "POST", "/r/alteration", springMvcAlterationController::alteration);
+		register(routes, "POST", "/r/alert", springMvcAlertController::alert);
+		register(routes, "POST", "/r/statistics", springMvcStatisticsController::submit);
 
 		return Collections.unmodifiableMap(routes);
 	}
@@ -178,7 +181,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 	private void handle(String method, HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String path = normalizePath(request.getPathInfo());
-		RouteHandler handler = m_routes.get(new RouteKey(method, path));
+		RouteHandler handler = routes.get(new RouteKey(method, path));
 
 		if (handler == null) {
 			handler = wildcardRoute(method, path);
@@ -203,11 +206,11 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 	}
 
 	private RouteHandler wildcardRoute(String method, String path) {
-		for (Map.Entry<RouteKey, RouteHandler> entry : m_routes.entrySet()) {
+		for (Map.Entry<RouteKey, RouteHandler> entry : routes.entrySet()) {
 			RouteKey key = entry.getKey();
-			String routePath = key.m_path;
+			String routePath = key.path;
 
-			if (key.m_method.equals(method) && routePath.endsWith("/*")
+			if (key.method.equals(method) && routePath.endsWith("/*")
 					&& path.startsWith(routePath.substring(0, routePath.length() - 1))) {
 				return entry.getValue();
 			}
@@ -229,13 +232,13 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 	}
 
 	static class RouteKey {
-		private final String m_method;
+		private final String method;
 
-		private final String m_path;
+		private final String path;
 
 		RouteKey(String method, String path) {
-			m_method = method;
-			m_path = path;
+			this.method = method;
+			this.path = path;
 		}
 
 		@Override
@@ -249,12 +252,12 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 			RouteKey other = (RouteKey) obj;
 
-			return m_method.equals(other.m_method) && m_path.equals(other.m_path);
+			return method.equals(other.method) && path.equals(other.path);
 		}
 
 		@Override
 		public int hashCode() {
-			return m_method.hashCode() * 31 + m_path.hashCode();
+			return method.hashCode() * 31 + path.hashCode();
 		}
 	}
 }
