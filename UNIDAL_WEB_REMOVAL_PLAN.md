@@ -64,6 +64,7 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 /r/top
 /r/overload
 /r/matrix
+/r/model
 /r/business
 /s/login
 /s/config
@@ -79,7 +80,6 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 以下页面在 `ReportModule` 或 `SystemModule` 中注册，但 `SpringMvcMigrationServlet` 尚未覆盖：
 
 ```text
-/r/model
 /r/dependency
 /r/cache
 /r/statistics
@@ -98,12 +98,14 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 
 #### `/r/model`
 
+状态：已完成 `/mvc/r/model/*` 新链路。
+
 路由状态：
 
 ```text
 旧页面/API: /cat/r/model/{report}/{domain}/{period}?op=xml
 目标新链路: /cat/mvc/r/model/{report}/{domain}/{period}?op=xml
-当前缺口: SpringMvcMigrationServlet 未注册 /r/model/*，也没有 SpringMvcModelController
+当前状态: SpringMvcMigrationServlet 已注册 /r/model 和 /r/model/*，SpringMvcModelController 已覆盖
 ```
 
 旧实现入口：
@@ -116,14 +118,15 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 旧 JSP: cat-home/src/main/webapp/jsp/report/model.jsp
 ```
 
-迁移注意点：
+迁移结果：
 
 1. 该入口本质是 XML/GZIP 接口，不是普通 HTML 页面。
 2. 只定义了 `op=xml`，默认也是 `xml`。
-3. 路径参数来自 `Payload#setPath`，语义为 `{report}/{domain}/{period}`。
+3. 路径参数来自新 controller 解析，语义保持为 `{report}/{domain}/{period}`。
 4. `report=logview` 时使用 `messageId` 推导时间，其他 report 使用 `period.getStartTime()`。
-5. 需要复用 `LocalModelService` 服务表，覆盖 `problem/event/transaction/heartbeat/cross/matrix/dependency/top/state/storage/business/logview`。
-6. 新 controller 需要直接写 `application/xml;charset=utf-8`，并保留 `Content-Encoding: gzip` 行为。
+5. 已复用 `LocalModelService` 服务表，覆盖 `problem/event/transaction/heartbeat/cross/matrix/dependency/top/state/storage/business/logview`。
+6. 新 controller 直接写 `application/xml;charset=utf-8`，并保留 `Content-Encoding: gzip` 行为。
+7. 已增加 controller 单测，覆盖 service 调用、响应头和 gzip 解压后的 XML 内容。
 
 验收 URL 示例：
 
@@ -223,8 +226,8 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
    - 已覆盖 `op=view`，复用 `TableCapacityService`，Spring JSP 不再使用 Unidal taglib/WebRes。
 
 3. 报表只读页面：
-   - `/r/model`
    - `/r/matrix`
+   - `/r/model`
    - `/r/cache`
    - `/r/statistics`
    - `/r/storage`

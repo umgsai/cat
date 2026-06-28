@@ -42,6 +42,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcMatrixController m_matrixController;
 
+	private SpringMvcModelController m_modelController;
+
 	private SpringMvcOverloadController m_overloadController;
 
 	private SpringMvcPermissionController m_permissionController;
@@ -83,6 +85,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		m_loginController = context.getBean(SpringMvcLoginController.class);
 		m_logviewController = context.getBean(SpringMvcLogviewController.class);
 		m_matrixController = context.getBean(SpringMvcMatrixController.class);
+		m_modelController = context.getBean(SpringMvcModelController.class);
 		m_overloadController = context.getBean(SpringMvcOverloadController.class);
 		m_permissionController = context.getBean(SpringMvcPermissionController.class);
 		m_pluginController = context.getBean(SpringMvcPluginController.class);
@@ -123,6 +126,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/r/cross", m_crossController::cross);
 		register(routes, "GET", "/r/m/*", m_logviewController::logview);
 		register(routes, "GET", "/r/matrix", m_matrixController::matrix);
+		register(routes, "GET", "/r/model", m_modelController::model);
+		register(routes, "GET", "/r/model/*", m_modelController::model);
 		register(routes, "GET", "/r/overload", m_overloadController::overload);
 		register(routes, "GET", "/r/top", m_topController::top);
 		register(routes, "GET", "/r/t", m_transactionController::transaction);
