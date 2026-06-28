@@ -21,14 +21,13 @@ import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
+import com.dianping.cat.home.spring.view.state.StateGraphBuilder;
 import com.dianping.cat.mvc.HistoryNav;
 import com.dianping.cat.mvc.UrlNav;
 import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.graph.PieChart;
-import com.dianping.cat.report.page.state.Payload;
 import com.dianping.cat.report.page.state.StateBuilder;
 import com.dianping.cat.report.page.state.StateDisplay;
-import com.dianping.cat.report.page.state.StateGraphBuilder;
 import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
@@ -52,7 +51,7 @@ public class SpringMvcStateController {
 	@Resource
 	private StateBuilder stateBuilder;
 
-	@Resource
+	@Resource(name = "springStateGraphBuilder")
 	private StateGraphBuilder stateGraphBuilder;
 
 	@Resource
@@ -139,13 +138,7 @@ public class SpringMvcStateController {
 	}
 
 	private void buildGraph(Map<String, Object> model, StateReport report, String ipAddress, long date, String key) {
-		Payload payload = new Payload();
-
-		payload.setIpAddress(ipAddress);
-		payload.setDate(hourlyFormat.format(new Date(date)));
-		payload.setKey(key);
-
-		Pair<LineChart, PieChart> pair = stateGraphBuilder.buildGraph(payload, key, report);
+		Pair<LineChart, PieChart> pair = stateGraphBuilder.buildGraph(Constants.CAT, ipAddress, key, report);
 
 		model.put("key", key);
 		model.put("graph", new JsonBuilder().toJson(pair.getKey()));
@@ -153,16 +146,8 @@ public class SpringMvcStateController {
 	}
 
 	private void buildHistoryGraph(Map<String, Object> model, String ipAddress, HistoryDates dates, String key) {
-		Payload payload = new Payload();
-
-		payload.setIpAddress(ipAddress);
-		payload.setDate(dayFormat.format(dates.getStart()));
-		payload.setReportType(dates.getReportType());
-		payload.setCustomStart(dayFormat.format(dates.getStart()));
-		payload.setCustomEnd(dayFormat.format(dates.getEnd()));
-		payload.setKey(key);
-
-		Pair<LineChart, PieChart> pair = stateGraphBuilder.buildGraph(payload, key);
+		Pair<LineChart, PieChart> pair = stateGraphBuilder.buildGraph(Constants.CAT, dates.getStart(), dates.getEnd(),
+				ipAddress, key);
 
 		model.put("key", key);
 		model.put("graph", new JsonBuilder().toJson(pair.getKey()));

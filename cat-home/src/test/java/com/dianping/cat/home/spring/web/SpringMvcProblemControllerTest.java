@@ -19,10 +19,9 @@ import com.dianping.cat.consumer.problem.model.entity.Entity;
 import com.dianping.cat.consumer.problem.model.entity.JavaThread;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.problem.model.entity.Segment;
-import com.dianping.cat.mvc.ReportModelDependencies;
+import com.dianping.cat.home.spring.view.problem.GroupLevelInfo;
+import com.dianping.cat.home.spring.view.problem.ThreadLevelInfo;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
-import com.dianping.cat.report.page.problem.GroupLevelInfo;
-import com.dianping.cat.report.page.problem.ThreadLevelInfo;
 import com.dianping.cat.report.page.problem.service.ProblemReportService;
 import com.dianping.cat.report.page.problem.transform.DetailStatistics;
 import com.dianping.cat.report.service.ModelRequest;
@@ -77,12 +76,6 @@ public class SpringMvcProblemControllerTest {
 				return new SampleConfig();
 			}
 		};
-		ReportModelDependencies dependencies = new ReportModelDependencies();
-
-		setField(dependencies, "projectService", projectService);
-		setField(dependencies, "hostinfoService", hostinfoService);
-		setField(dependencies, "sampleConfigManager", sampleConfigManager);
-
 		controller.setProblemModelService(modelService);
 		controller.setProblemReportService(new ProblemReportService());
 		controller.setDomainGroupConfigManager(new DomainGroupConfigManager() {
@@ -104,7 +97,6 @@ public class SpringMvcProblemControllerTest {
 		controller.setHostinfoService(hostinfoService);
 		controller.setProjectService(projectService);
 		controller.setSampleConfigManager(sampleConfigManager);
-		controller.setReportModelDependencies(dependencies);
 		controller.setServerConfigManager(new ServerConfigManager());
 		return controller;
 	}

@@ -33,16 +33,13 @@ import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
+import com.dianping.cat.home.spring.view.problem.GroupLevelInfo;
+import com.dianping.cat.home.spring.view.problem.ThreadLevelInfo;
 import com.dianping.cat.mvc.HistoryNav;
-import com.dianping.cat.mvc.ReportModelDependencies;
 import com.dianping.cat.mvc.UrlNav;
 import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
-import com.dianping.cat.report.page.problem.Context;
-import com.dianping.cat.report.page.problem.GroupLevelInfo;
 import com.dianping.cat.report.page.problem.LongConfig;
-import com.dianping.cat.report.page.problem.Model;
-import com.dianping.cat.report.page.problem.ThreadLevelInfo;
 import com.dianping.cat.report.page.problem.service.ProblemReportService;
 import com.dianping.cat.report.page.problem.transform.DetailStatistics;
 import com.dianping.cat.report.page.problem.transform.HourlyLineChartVisitor;
@@ -88,9 +85,6 @@ public class SpringMvcProblemController {
 
 	@Resource(name = "problemModelService")
 	private ModelService<ProblemReport> problemModelService;
-
-	@Resource
-	private ReportModelDependencies reportModelDependencies;
 
 	@GetMapping("/mvc/r/p")
 	public void problem(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -213,15 +207,18 @@ public class SpringMvcProblemController {
 
 	private void buildGroupDetail(Map<String, Object> model, String action, ProblemReport report, String ipAddress,
 			long date, int minute, String groupName, String threadId) {
-		Model legacyModel = legacyModel(model, report, action, ipAddress, date);
+		String reportDate = hourlyFormat.format(new Date(date));
+		String domain = report.getDomain();
+		int lastMinute = lastMinute(date);
 
 		if ("group".equals(action)) {
-			GroupLevelInfo groupLevelInfo = new GroupLevelInfo(legacyModel).display(report);
+			GroupLevelInfo groupLevelInfo = new GroupLevelInfo(domain, ipAddress, reportDate, date, lastMinute)
+					.display(report);
 
 			model.put("groupLevelInfo", groupLevelInfo);
 		} else if ("thread".equals(action)) {
-			legacyModel.setGroupName(groupName);
-			ThreadLevelInfo threadLevelInfo = new ThreadLevelInfo(legacyModel, groupName).display(report);
+			ThreadLevelInfo threadLevelInfo = new ThreadLevelInfo(domain, ipAddress, reportDate, date, lastMinute,
+					groupName).display(report);
 
 			model.put("groupName", groupName);
 			model.put("threadLevelInfo", threadLevelInfo);
@@ -492,24 +489,6 @@ public class SpringMvcProblemController {
 		return isHourlyGraphAction(action) || isGroupDetailAction(action);
 	}
 
-	private Model legacyModel(Map<String, Object> model, ProblemReport report, String action, String ipAddress,
-			long date) {
-		Context context = new Context();
-
-		context.setReportModelDependencies(reportModelDependencies);
-
-		Model legacyModel = new Model(context);
-		legacyModel.setAction(com.dianping.cat.report.page.problem.Action.getByName(action,
-				com.dianping.cat.report.page.problem.Action.HOULY_REPORT));
-		legacyModel.setDate(date);
-		legacyModel.setDisplayDomain((String) model.get("displayDomain"));
-		legacyModel.setIpAddress(ipAddress);
-		legacyModel.setLastMinute(lastMinute(date));
-		legacyModel.setReport(report);
-		legacyModel.setReportType("");
-		return legacyModel;
-	}
-
 	private boolean matches(Entity entity, String type, String status) {
 		if (!type.equalsIgnoreCase(entity.getType())) {
 			return false;
@@ -683,10 +662,6 @@ public class SpringMvcProblemController {
 
 	void setProjectService(ProjectService projectService) {
 		this.projectService = projectService;
-	}
-
-	void setReportModelDependencies(ReportModelDependencies reportModelDependencies) {
-		this.reportModelDependencies = reportModelDependencies;
 	}
 
 	void setSampleConfigManager(SampleConfigManager sampleConfigManager) {

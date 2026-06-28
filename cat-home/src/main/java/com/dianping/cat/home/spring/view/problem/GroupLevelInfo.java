@@ -1,0 +1,164 @@
+package com.dianping.cat.home.spring.view.problem;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+
+import com.dianping.cat.consumer.problem.model.entity.Entity;
+import com.dianping.cat.consumer.problem.model.entity.JavaThread;
+import com.dianping.cat.consumer.problem.model.entity.Machine;
+import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
+import com.dianping.cat.consumer.problem.model.entity.Segment;
+import com.dianping.cat.helper.SortHelper;
+import com.dianping.cat.report.view.ProblemReportHelper;
+
+public class GroupLevelInfo {
+	private List<String> m_datas = new ArrayList<String>();
+
+	private String m_date;
+
+	private String m_domain;
+
+	private Map<String, GroupStatistics> m_groupStatistics = new LinkedHashMap<String, GroupStatistics>();
+
+	private String m_ipAddress;
+
+	private int m_minutes;
+
+	private long m_longDate;
+
+	public GroupLevelInfo(String domain, String ipAddress, String date, long longDate, int lastMinute) {
+		m_date = date;
+		m_domain = domain;
+		m_ipAddress = ipAddress;
+		m_minutes = lastMinute;
+		m_longDate = longDate;
+	}
+
+	public GroupLevelInfo display(ProblemReport report) {
+		Machine machine = report.getMachines().get(m_ipAddress);
+		if (machine == null) {
+			return null;
+		}
+		Collection<Entity> entities = machine.getEntities().values();
+
+		for (Entity entity : entities) {
+			Map<String, JavaThread> threads = entity.getThreads();
+
+			for (java.util.Map.Entry<String, JavaThread> entry : threads.entrySet()) {
+				JavaThread thread = entry.getValue();
+
+				String groupName = thread.getGroupName();
+				GroupStatistics statistics = findOrCreatGroupStatistics(groupName, m_minutes);
+				statistics.add(thread.getSegments(), entity.getType());
+			}
+		}
+		long currentTimeMillis = System.currentTimeMillis();
+		long currentHours = currentTimeMillis - currentTimeMillis % (60 * 60 * 1000);
+
+		if (currentHours == m_longDate) {
+			for (int i = m_minutes; i >= 0; i--) {
+				m_datas.add(getShowDetailByMinte(i));
+			}
+		} else {
+			for (int i = 0; i <= m_minutes; i++) {
+				m_datas.add(getShowDetailByMinte(i));
+			}
+		}
+		return this;
+	}
+
+	public GroupStatistics findOrCreatGroupStatistics(String groupName, int lastMinute) {
+		m_minutes = lastMinute;
+
+		GroupStatistics value = m_groupStatistics.get(groupName);
+		if (value == null) {
+			GroupStatistics result = new GroupStatistics(lastMinute);
+
+			m_groupStatistics.put(groupName, result);
+			return result;
+		} else {
+			return value;
+		}
+	}
+
+	public List<String> getDatas() {
+		return m_datas;
+	}
+
+	public List<String> getGroups() {
+		return SortHelper.sortDomain(m_groupStatistics.keySet());
+	}
+
+	private String getDisplayHour() {
+		return m_date.substring(8, 10);
+	}
+
+	private String getShowDetailByMinte(int minute) {
+		Map<String, String> params = new LinkedHashMap<String, String>();
+		String baseUrl = "/cat/mvc/r/p?op=detail";
+		params.put("domain", m_domain);
+		params.put("ip", m_ipAddress);
+		params.put("date", m_date);
+		params.put("minute", Integer.toString(minute));
+
+		StringBuilder sb = new StringBuilder().append("<td>");
+		String minuteStr = getDisplayHour() + ":";
+		if (minute < 10) {
+			minuteStr = minuteStr + "0" + Integer.toString(minute);
+		} else {
+			minuteStr = minuteStr + Integer.toString(minute);
+		}
+
+		sb.append(ProblemReportHelper.creatLinkString(baseUrl, "minute", params, minuteStr));
+		sb.append("</td>");
+
+		for (String group : getGroups()) {
+			sb.append("<td>");
+			params.put("group", group);
+			GroupStatistics value = m_groupStatistics.get(group);
+			for (String temp : value.getStatistics().get(minute)) {
+				String url = ProblemReportHelper.creatLinkString(baseUrl, temp, params, "");
+				sb.append(url);
+			}
+			sb.append("</td>");
+		}
+		return sb.toString();
+	}
+
+	public static class GroupStatistics {
+		private Map<Integer, TreeSet<String>> m_statistics = new LinkedHashMap<Integer, TreeSet<String>>();
+
+		public GroupStatistics(int lastMinute) {
+			for (int i = 0; i <= lastMinute; i++) {
+				m_statistics.put(i, new TreeSet<String>());
+			}
+		}
+
+		public void add(Map<Integer, Segment> segments, String type) {
+			for (java.util.Map.Entry<Integer, Segment> entry : segments.entrySet()) {
+				findOrCreat(entry.getKey()).add(type);
+			}
+		}
+
+		public TreeSet<String> findOrCreat(Integer key) {
+			TreeSet<String> result = m_statistics.get(key);
+			if (result == null) {
+				result = new TreeSet<String>();
+				m_statistics.put(key, result);
+			}
+			return result;
+		}
+
+		public Map<Integer, TreeSet<String>> getStatistics() {
+			return m_statistics;
+		}
+
+		public TreeSet<String> getTag(int minutes) {
+			return m_statistics.get(minutes);
+		}
+	}
+}
