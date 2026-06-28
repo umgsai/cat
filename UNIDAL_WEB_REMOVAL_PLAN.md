@@ -83,10 +83,10 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 以下页面在 `ReportModule` 或 `SystemModule` 中注册，但 `SpringMvcMigrationServlet` 尚未覆盖：
 
 ```text
-/r/dependency
+无
 ```
 
-这些页面必须先完成 Spring 化，否则无法删除旧 Unidal MVC runtime。
+已注册旧页面目前均已具备 `/mvc` 新链路。后续可以进入主路径切换和旧 Unidal MVC runtime 清理阶段。
 
 ### 3.2.1 路由迁移详情
 
@@ -436,6 +436,49 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
 新: http://localhost:8080/cat/mvc/r/alert?op=insert&domain=cat&alertTime=2026-06-27%2020:00&metric=cpu&content=high
 ```
 
+#### `/r/dependency`
+
+状态：已完成 `/mvc/r/dependency` 新链路。
+
+路由状态：
+
+```text
+旧页面: /cat/r/dependency?op=lineChart&domain={domain}&date={yyyyMMddHH}&minute={0-59}
+目标新链路: /cat/mvc/r/dependency?op=lineChart&domain={domain}&date={yyyyMMddHH}&minute={0-59}
+当前状态: SpringMvcMigrationServlet 已注册 /r/dependency，SpringMvcDependencyController 已覆盖
+```
+
+旧实现入口：
+
+```text
+模块注册: cat-home/src/main/java/com/dianping/cat/report/ReportModule.java
+旧 Handler: cat-home/src/main/java/com/dianping/cat/report/page/dependency/Handler.java
+旧 Payload: cat-home/src/main/java/com/dianping/cat/report/page/dependency/Payload.java
+旧 Action: cat-home/src/main/java/com/dianping/cat/report/page/dependency/Action.java
+旧趋势 JSP: cat-home/src/main/webapp/jsp/report/dependency/dependency.jsp
+旧拓扑 JSP: cat-home/src/main/webapp/jsp/report/dependency/dependencyTopologyGraph.jsp
+旧 dashboard JSP: cat-home/src/main/webapp/jsp/report/dependency/dependencyDashboard.jsp
+```
+
+迁移结果：
+
+1. 已覆盖 `op=lineChart`、`op=dependencyGraph`、`op=dashboard`。
+2. `op=lineChart` 继续查询 `dependencyModelService`，并复用 `LineGraphBuilder` 构造趋势图数据。
+3. `op=dependencyGraph` 继续复用 `TopologyGraphManager#buildTopologyGraph`。
+4. `op=dashboard` 继续复用 `TopologyGraphManager#buildDependencyDashboard` 和 `TopoGraphFormatConfigManager#buildFormatJson`。
+5. 已新建 `jsp/spring/report/dependency/*`，不再使用 `/WEB-INF/app.tld`、`web-core`、`webres`。
+
+验收 URL 示例：
+
+```text
+旧: http://localhost:8080/cat/r/dependency?op=lineChart&domain=cat
+新: http://localhost:8080/cat/mvc/r/dependency?op=lineChart&domain=cat
+旧: http://localhost:8080/cat/r/dependency?op=dependencyGraph&domain=cat
+新: http://localhost:8080/cat/mvc/r/dependency?op=dependencyGraph&domain=cat
+旧: http://localhost:8080/cat/r/dependency?op=dashboard&domain=cat
+新: http://localhost:8080/cat/mvc/r/dependency?op=dashboard&domain=cat
+```
+
 ### 3.3 枚举存在但模块未注册页面
 
 以下页面在枚举中存在，但当前旧模块未注册 Handler。暂不作为主迁移缺口，但删除枚举和旧模块前必须确认没有外部链接或隐藏入口：
@@ -494,8 +537,7 @@ web.xml /mvc/* -> SpringMvcMigrationServlet -> SpringMvcTransactionController ->
    - 状态：以上页面均已完成 `/mvc` 新链路。
 
 4. 配置或写操作页面：
-   - `/r/dependency`
-   - 状态：`/r/monitor`、`/r/alteration`、`/r/alert` 已完成 `/mvc` 新链路。
+   - 状态：`/r/monitor`、`/r/alteration`、`/r/alert`、`/r/dependency` 已完成 `/mvc` 新链路。
 
 执行要求：
 

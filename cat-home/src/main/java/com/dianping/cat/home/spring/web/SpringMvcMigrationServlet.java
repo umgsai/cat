@@ -38,6 +38,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 
 	private SpringMvcCrossController m_crossController;
 
+	private SpringMvcDependencyController m_dependencyController;
+
 	private SpringMvcEventController m_eventController;
 
 	private SpringMvcHomeController m_homeController;
@@ -93,6 +95,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		m_cacheController = context.getBean(SpringMvcCacheController.class);
 		m_configController = context.getBean(SpringMvcConfigController.class);
 		m_crossController = context.getBean(SpringMvcCrossController.class);
+		m_dependencyController = context.getBean(SpringMvcDependencyController.class);
 		m_eventController = context.getBean(SpringMvcEventController.class);
 		m_healthController = context.getBean(SpringMvcHealthController.class);
 		m_heartbeatController = context.getBean(SpringMvcHeartbeatController.class);
@@ -145,6 +148,7 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/r/business", m_businessReportController::business);
 		register(routes, "GET", "/r/cache", m_cacheController::cache);
 		register(routes, "GET", "/r/cross", m_crossController::cross);
+		register(routes, "GET", "/r/dependency", m_dependencyController::dependency);
 		register(routes, "GET", "/r/m/*", m_logviewController::logview);
 		register(routes, "GET", "/r/matrix", m_matrixController::matrix);
 		register(routes, "GET", "/r/model", m_modelController::model);

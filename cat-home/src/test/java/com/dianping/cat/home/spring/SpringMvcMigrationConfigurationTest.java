@@ -13,6 +13,7 @@ import com.dianping.cat.home.spring.web.SpringMvcAlterationController;
 import com.dianping.cat.home.spring.web.SpringMvcHealthController;
 import com.dianping.cat.home.spring.web.SpringMvcBusinessController;
 import com.dianping.cat.home.spring.web.SpringMvcCacheController;
+import com.dianping.cat.home.spring.web.SpringMvcDependencyController;
 import com.dianping.cat.home.spring.web.SpringMvcHomeController;
 import com.dianping.cat.home.spring.web.SpringMvcLoginController;
 import com.dianping.cat.home.spring.web.SpringMvcMatrixController;
@@ -35,6 +36,7 @@ public class SpringMvcMigrationConfigurationTest {
 		Assert.assertTrue(beanClassNames.contains(SpringMvcAlertController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcBusinessController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcCacheController.class.getName()));
+		Assert.assertTrue(beanClassNames.contains(SpringMvcDependencyController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcHealthController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcHomeController.class.getName()));
 		Assert.assertTrue(beanClassNames.contains(SpringMvcLoginController.class.getName()));
