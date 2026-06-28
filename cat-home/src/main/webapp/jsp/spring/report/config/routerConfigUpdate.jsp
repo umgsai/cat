@@ -56,7 +56,7 @@
 							<td style="text-align:center">
 								<input class="btn btn-primary" type="submit" name="submit" id="submit" value="提交" />
 								&nbsp; &nbsp;&nbsp;&nbsp;
-								<a href="${contextPath}/s/router?op=build" class="btn btn-primary" id="routerRebuild" target="_blank">重算路由</a>
+								<a href="${contextPath}/mvc/s/router?op=build" class="btn btn-primary" id="routerRebuild" target="_blank">重算路由</a>
 							</td>
 						</tr>
 					</table>

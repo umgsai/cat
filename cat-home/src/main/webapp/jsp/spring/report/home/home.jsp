@@ -92,6 +92,11 @@
 						</c:otherwise>
 					</c:choose>
 				</div>
+				<c:if test="${not empty content}">
+					<div class="thread-dump-content">
+						${content}
+					</div>
+				</c:if>
 				<br>
 				<br>
 				<a href="${contextPath}/mvc/r/home?op=checkpoint&domain=${domain}&date=${date}" style="color:#FFF">Do checkpoint here</a>

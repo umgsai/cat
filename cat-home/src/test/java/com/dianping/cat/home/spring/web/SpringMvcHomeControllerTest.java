@@ -31,6 +31,31 @@ public class SpringMvcHomeControllerTest {
 		Assert.assertEquals("plugin", model.get("docName"));
 	}
 
+	@Test
+	public void shouldRunCheckpointAction() {
+		StubHomeController controller = new StubHomeController();
+		Map<String, String> parameters = new java.util.HashMap<String, String>();
+
+		parameters.put("op", "checkpoint");
+		Map<String, Object> model = controller.homeModel(request(parameters));
+
+		Assert.assertTrue(controller.isCheckpointCalled());
+		Assert.assertEquals("checkpoint", model.get("actionName"));
+	}
+
+	@Test
+	public void shouldBuildThreadDumpContent() {
+		SpringMvcHomeController controller = new SpringMvcHomeController();
+		Map<String, String> parameters = new java.util.HashMap<String, String>();
+
+		parameters.put("op", "threadDump");
+
+		Map<String, Object> model = controller.homeModel(request(parameters));
+
+		Assert.assertEquals("threadDump", model.get("actionName"));
+		Assert.assertTrue(model.get("content").toString().contains("Threads:"));
+	}
+
 	private HttpServletRequest request(Map<String, String> parameters) {
 		return (HttpServletRequest) Proxy.newProxyInstance(getClass().getClassLoader(),
 				new Class<?>[] { HttpServletRequest.class }, new InvocationHandler() {
@@ -48,5 +73,18 @@ public class SpringMvcHomeControllerTest {
 						return null;
 					}
 				});
+	}
+
+	private static class StubHomeController extends SpringMvcHomeController {
+		private boolean m_checkpointCalled;
+
+		@Override
+		void checkpoint() {
+			m_checkpointCalled = true;
+		}
+
+		boolean isCheckpointCalled() {
+			return m_checkpointCalled;
+		}
 	}
 }

@@ -17,12 +17,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.home.router.entity.Domain;
 import com.dianping.cat.home.router.entity.RouterConfig;
 import com.dianping.cat.home.router.entity.Server;
+import com.dianping.cat.system.page.router.config.RouterConfigHandler;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
 import com.dianping.cat.system.page.router.service.CachedRouterConfigService;
 
@@ -42,6 +44,9 @@ public class SpringMvcRouterController {
 	@Resource
 	private ServerFilterConfigManager serverFilterConfigManager;
 
+	@Resource
+	private RouterConfigHandler routerConfigHandler;
+
 	@GetMapping("/s/router")
 	public void router(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String action = action(request);
@@ -49,7 +54,7 @@ public class SpringMvcRouterController {
 		response.setCharacterEncoding("utf-8");
 
 		if ("build".equals(action)) {
-			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+			writeText(response, buildRouterConfig());
 			return;
 		}
 
@@ -108,6 +113,10 @@ public class SpringMvcRouterController {
 		return sb.toString();
 	}
 
+	String buildRouterConfig() {
+		return String.valueOf(routerConfigHandler.updateRouterConfig(TimeHelper.getCurrentDay(-1)));
+	}
+
 	private String buildRouterInfo(String ip, String domain, RouterConfig config) {
 		String group = routerConfigManager.queryServerGroupByIp(ip);
 		Domain domainConfig = routerConfigManager.getRouterConfig().findDomain(domain);
@@ -139,6 +148,10 @@ public class SpringMvcRouterController {
 	private boolean domainConfigNotExist(String group, Domain domainConfig) {
 		return domainConfig == null || domainConfig.findGroup(group) == null
 				|| domainConfig.findGroup(group).getServers().isEmpty();
+	}
+
+	void setRouterConfigHandler(RouterConfigHandler routerConfigHandler) {
+		this.routerConfigHandler = routerConfigHandler;
 	}
 
 	private void writeText(HttpServletResponse response, String content) throws IOException {
