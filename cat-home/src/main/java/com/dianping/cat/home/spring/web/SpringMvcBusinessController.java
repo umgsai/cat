@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,19 +19,9 @@ import com.dianping.cat.configuration.business.entity.BusinessItemConfig;
 import com.dianping.cat.configuration.business.entity.BusinessReportConfig;
 import com.dianping.cat.configuration.business.entity.CustomConfig;
 import com.dianping.cat.service.ProjectService;
-import com.dianping.cat.system.SystemPage;
-import com.dianping.cat.system.page.business.Action;
-import com.dianping.cat.system.page.business.Context;
-import com.dianping.cat.system.page.business.Model;
-import com.dianping.cat.system.page.business.Payload;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
 import jakarta.annotation.Resource;
-import org.unidal.web.lifecycle.ActionResolver;
-import org.unidal.web.lifecycle.DefaultUrlMapping;
-import org.unidal.web.lifecycle.UrlMapping;
-import org.unidal.web.mvc.lifecycle.RequestContext;
-import org.unidal.web.mvc.payload.ParameterProvider;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -58,13 +49,11 @@ public class SpringMvcBusinessController {
 			return;
 		}
 
-		Context context = businessContext(request, response);
-		Model model = businessModel(context);
+		Map<String, Object> model = businessModel(request, action);
 
-		SpringMvcWebResourceInitializer.initialize(request);
-		request.setAttribute("ctx", context);
-		request.setAttribute("payload", context.getPayload());
-		request.setAttribute("model", model);
+		for (Map.Entry<String, Object> entry : model.entrySet()) {
+			request.setAttribute(entry.getKey(), entry.getValue());
+		}
 
 		RequestDispatcher dispatcher = request.getRequestDispatcher(jsp(action));
 
@@ -80,53 +69,27 @@ public class SpringMvcBusinessController {
 		return action;
 	}
 
-	Context businessContext(HttpServletRequest request, HttpServletResponse response) {
-		Context context = new Context();
-		Payload payload = new Payload();
-		RequestContext requestContext = new RequestContext();
-		DefaultUrlMapping urlMapping = new DefaultUrlMapping();
-
-		urlMapping.setContextPath(request.getContextPath());
-		urlMapping.setServletPath("/mvc/s");
-		urlMapping.setModule("s");
-		urlMapping.setAction("business");
-		urlMapping.setPathInfo("/business");
-		urlMapping.setQueryString(request.getQueryString());
-		requestContext.setActionResolver(new SpringMvcActionResolver());
-		requestContext.setUrlMapping(urlMapping);
-		context.initialize(request, response);
-		context.setRequestContext(requestContext);
-		context.setInboundPage("business");
-		context.setOutboundPage("business");
-		context.setServletContext(request.getSession().getServletContext());
-		payload.setPage(SystemPage.BUSINESS.getName());
-		payload.setAction(action(request));
-		payload.setDomain(domain(request));
-		payload.setContent(request.getParameter("content"));
-		context.setPayload(payload);
-		return context;
-	}
-
-	Model businessModel(Context context) {
-		Payload payload = context.getPayload();
-		Model model = new Model(context);
-		String domain = payload.getDomain();
+	Map<String, Object> businessModel(HttpServletRequest request, String action) {
+		Map<String, Object> model = new LinkedHashMap<String, Object>();
+		String domain = domain(request);
 		BusinessReportConfig config = businessConfigManager.queryConfigByDomain(domain);
 
-		model.setPage(SystemPage.BUSINESS);
-		model.setAction(payload.getAction());
-		model.setDomains(projectService.findAllDomains());
-		if (Action.TagConfig.equals(payload.getAction())) {
-			String tagConfig = payload.getContent();
+		model.put("contextPath", request.getContextPath());
+		model.put("actionName", action);
+		model.put("domain", domain);
+		model.put("businessUrl", request.getContextPath() + "/mvc/s/business");
+		model.put("domains", projectService.findAllDomains());
+		if ("tagConfig".equals(action)) {
+			String tagConfig = request.getParameter("content");
 
 			if (tagConfig != null && tagConfig.length() > 0) {
-				model.setOpState(businessTagConfigManager.store(tagConfig));
+				model.put("opState", businessTagConfigManager.store(tagConfig) ? "Success" : "Failure");
 			}
-			model.setContent(configHtmlParser.parse(businessTagConfigManager.getConfig().toString()));
+			model.put("content", configHtmlParser.parse(businessTagConfigManager.getConfig().toString()));
 		} else {
-			model.setConfigs(businessItemConfigs(config));
-			model.setCustomConfigs(customConfigs(config));
-			model.setTags(businessTagConfigManager.findTagByDomain(domain));
+			model.put("configs", businessItemConfigs(config));
+			model.put("customConfigs", customConfigs(config));
+			model.put("tags", businessTagConfigManager.findTagByDomain(domain));
 		}
 		return model;
 	}
@@ -185,21 +148,5 @@ public class SpringMvcBusinessController {
 			return "/jsp/spring/report/config/businessTag.jsp";
 		}
 		return "/jsp/spring/report/config/businessList.jsp";
-	}
-
-	private static class SpringMvcActionResolver implements ActionResolver {
-		@Override
-		public String buildUrl(ParameterProvider provider, UrlMapping mapping) {
-			String contextPath = mapping.getContextPath();
-			String servletPath = mapping.getServletPath();
-			String action = mapping.getAction();
-
-			return contextPath + servletPath + "/" + action;
-		}
-
-		@Override
-		public UrlMapping parseUrl(ParameterProvider provider) {
-			throw new UnsupportedOperationException();
-		}
 	}
 }

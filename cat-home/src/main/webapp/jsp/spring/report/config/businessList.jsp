@@ -57,7 +57,7 @@
 								<div class="input-group" style="float:left;">
 									<span class="input-group-addon">Domain</span>
 									<span class="input-icon" style="width:250px;">
-										<input type="text" class="search-input search-input form-control ui-autocomplete-input" id="domain" autocomplete="on" value="${fn:escapeXml(payload.domain)}" />
+										<input type="text" class="search-input search-input form-control ui-autocomplete-input" id="domain" autocomplete="on" value="${fn:escapeXml(domain)}" />
 										<i class="ace-icon fa fa-search nav-search-icon"></i>
 									</span>
 								</div>
@@ -80,11 +80,11 @@
 						<th width="9%"><h5 class="text-center">次数</h5></th>
 						<th width="9%"><h5 class="text-center">平均值</h5></th>
 						<th width="9%"><h5 class="text-center">总和</h5></th>
-						<th width="13%"><h5 class="text-center">操作&nbsp;&nbsp;<a class="btn update btn-primary btn-xs" href="${contextPath}/mvc/s/business?op=customAdd&domain=${payload.domain}">新增</a></h5></th>
+						<th width="13%"><h5 class="text-center">操作&nbsp;&nbsp;<a class="btn update btn-primary btn-xs" href="${contextPath}/mvc/s/business?op=customAdd&domain=${fn:escapeXml(domain)}">新增</a></h5></th>
 					</tr>
-					<c:forEach var="config" items="${model.configs}">
+					<c:forEach var="config" items="${configs}">
 						<tr>
-							<td><c:out value="${payload.domain}" /></td>
+							<td><c:out value="${domain}" /></td>
 							<td><c:out value="${config.viewOrder}" /></td>
 							<td>
 								<c:choose>
@@ -101,31 +101,31 @@
 							<td style="word-wrap:break-word;word-break:break-all;"><c:out value="${config.id}" /></td>
 							<td style="word-wrap:break-word;word-break:break-all;"><c:out value="${config.title}" /></td>
 							<td>
-								<c:forEach var="tag" items="${model.tags[config.id]}">
+								<c:forEach var="tag" items="${tags[config.id]}">
 									<span class="label label-info"><c:out value="${tag}" /></span>&nbsp;
 								</c:forEach>
 							</td>
 							<td align="right">
 								<c:if test="${config.showCount}"><span class="dashboard">&nbsp;&nbsp;&nbsp;&nbsp;</span></c:if>&nbsp;&nbsp;&nbsp;&nbsp;
-								<a href="${contextPath}/mvc/s/business?op=alertRuleAdd&key=${config.id}&domain=${payload.domain}&attributes=COUNT" class="btn btn-primary btn-xs">告警</a>
+								<a href="${contextPath}/mvc/s/business?op=alertRuleAdd&key=${config.id}&domain=${fn:escapeXml(domain)}&attributes=COUNT" class="btn btn-primary btn-xs">告警</a>
 							</td>
 							<td align="right">
 								<c:if test="${config.showAvg}"><span class="dashboard">&nbsp;&nbsp;&nbsp;&nbsp;</span></c:if>&nbsp;&nbsp;&nbsp;&nbsp;
-								<a href="${contextPath}/mvc/s/business?op=alertRuleAdd&key=${config.id}&domain=${payload.domain}&attributes=AVG" class="btn btn-primary btn-xs">告警</a>
+								<a href="${contextPath}/mvc/s/business?op=alertRuleAdd&key=${config.id}&domain=${fn:escapeXml(domain)}&attributes=AVG" class="btn btn-primary btn-xs">告警</a>
 							</td>
 							<td align="right">
 								<c:if test="${config.showSum}"><span class="dashboard">&nbsp;&nbsp;&nbsp;&nbsp;</span></c:if>&nbsp;&nbsp;&nbsp;&nbsp;
-								<a href="${contextPath}/mvc/s/business?op=alertRuleAdd&key=${config.id}&domain=${payload.domain}&attributes=SUM" class="btn btn-primary btn-xs">告警</a>
+								<a href="${contextPath}/mvc/s/business?op=alertRuleAdd&key=${config.id}&domain=${fn:escapeXml(domain)}&attributes=SUM" class="btn btn-primary btn-xs">告警</a>
 							</td>
 							<td style="text-align:center;white-space:nowrap">
-								<a href="${contextPath}/mvc/s/business?op=add&key=${config.id}&domain=${payload.domain}" class="btn btn-primary btn-xs"><i class="ace-icon fa fa-pencil-square-o bigger-120"></i></a>
-								<a href="${contextPath}/mvc/s/business?op=delete&key=${config.id}&domain=${payload.domain}" class="btn btn-danger btn-xs delete"><i class="ace-icon fa fa-trash-o bigger-120"></i></a>
+								<a href="${contextPath}/mvc/s/business?op=add&key=${config.id}&domain=${fn:escapeXml(domain)}" class="btn btn-primary btn-xs"><i class="ace-icon fa fa-pencil-square-o bigger-120"></i></a>
+								<a href="${contextPath}/mvc/s/business?op=delete&key=${config.id}&domain=${fn:escapeXml(domain)}" class="btn btn-danger btn-xs delete"><i class="ace-icon fa fa-trash-o bigger-120"></i></a>
 							</td>
 						</tr>
 					</c:forEach>
-					<c:forEach var="config" items="${model.customConfigs}">
+					<c:forEach var="config" items="${customConfigs}">
 						<tr>
-							<td><c:out value="${payload.domain}" /></td>
+							<td><c:out value="${domain}" /></td>
 							<td><c:out value="${config.viewOrder}" /></td>
 							<td>
 								<c:choose>
@@ -142,19 +142,19 @@
 							<td style="word-wrap:break-word;word-break:break-all;"><c:out value="${config.id}" /></td>
 							<td style="word-wrap:break-word;word-break:break-all;"><c:out value="${config.title}" /></td>
 							<td>
-								<c:forEach var="tag" items="${model.tags[config.id]}">
+								<c:forEach var="tag" items="${tags[config.id]}">
 									<span class="label label-info"><c:out value="${tag}" /></span>&nbsp;
 								</c:forEach>
 							</td>
 							<td align="center"></td>
 							<td align="center">
 								<span class="dashboard">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-								<a href="${contextPath}/mvc/s/business?op=alertRuleAdd&key=${config.id}&domain=${payload.domain}&attributes=AVG" class="btn btn-primary btn-xs">告警</a>
+								<a href="${contextPath}/mvc/s/business?op=alertRuleAdd&key=${config.id}&domain=${fn:escapeXml(domain)}&attributes=AVG" class="btn btn-primary btn-xs">告警</a>
 							</td>
 							<td align="center"></td>
 							<td style="text-align:center;white-space:nowrap">
-								<a href="${contextPath}/mvc/s/business?op=customAdd&key=${config.id}&domain=${payload.domain}" class="btn btn-primary btn-xs"><i class="ace-icon fa fa-pencil-square-o bigger-120"></i></a>
-								<a href="${contextPath}/mvc/s/business?op=customDelete&key=${config.id}&domain=${payload.domain}" class="btn btn-danger btn-xs delete"><i class="ace-icon fa fa-trash-o bigger-120"></i></a>
+								<a href="${contextPath}/mvc/s/business?op=customAdd&key=${config.id}&domain=${fn:escapeXml(domain)}" class="btn btn-primary btn-xs"><i class="ace-icon fa fa-pencil-square-o bigger-120"></i></a>
+								<a href="${contextPath}/mvc/s/business?op=customDelete&key=${config.id}&domain=${fn:escapeXml(domain)}" class="btn btn-danger btn-xs delete"><i class="ace-icon fa fa-trash-o bigger-120"></i></a>
 							</td>
 						</tr>
 					</c:forEach>
@@ -165,7 +165,7 @@
 	<script type="text/javascript">
 		$(document).ready(function() {
 			var data = [];
-			<c:forEach var="item" items="${model.domains}">
+			<c:forEach var="item" items="${domains}">
 				data.push({ label: '${fn:escapeXml(item)}' });
 			</c:forEach>
 			$('#domain').autocomplete({ delay: 0, source: data });

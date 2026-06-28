@@ -5,14 +5,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.ServletContext;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,10 +20,10 @@ import com.dianping.cat.config.business.BusinessConfigManager;
 import com.dianping.cat.configuration.business.entity.BusinessItemConfig;
 import com.dianping.cat.configuration.business.entity.BusinessReportConfig;
 import com.dianping.cat.configuration.business.entity.CustomConfig;
+import com.dianping.cat.home.business.entity.BusinessTagConfig;
 import com.dianping.cat.service.ProjectService;
-import com.dianping.cat.system.page.business.Context;
-import com.dianping.cat.system.page.business.Model;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
+import com.dianping.cat.system.page.config.ConfigHtmlParser;
 
 public class SpringMvcBusinessControllerTest {
 	@Test
@@ -48,18 +47,47 @@ public class SpringMvcBusinessControllerTest {
 		controller.setConfigManager(new StubBusinessConfigManager(config));
 		controller.setTagConfigManager(new StubBusinessTagConfigManager());
 
-		Context context = controller.businessContext(request("list", "cat", "/cat"), response());
-		Model model = controller.businessModel(context);
+		Map<String, Object> model = controller.businessModel(request("list", "cat", "/cat"), "list");
+		List<BusinessItemConfig> configs = (List<BusinessItemConfig>) model.get("configs");
+		List<CustomConfig> customConfigs = (List<CustomConfig>) model.get("customConfigs");
 
-		Assert.assertEquals("cat", context.getPayload().getDomain());
-		Assert.assertEquals("list", context.getPayload().getAction().getName());
-		Assert.assertEquals("/cat/mvc/s/business", model.getPageUri());
-		Assert.assertEquals("fast", model.getConfigs().get(0).getId());
-		Assert.assertEquals("custom", model.getCustomConfigs().get(0).getId());
-		Assert.assertTrue(model.getDomains().contains("mobile-api"));
+		Assert.assertEquals("cat", model.get("domain"));
+		Assert.assertEquals("list", model.get("actionName"));
+		Assert.assertEquals("/cat/mvc/s/business", model.get("businessUrl"));
+		Assert.assertEquals("fast", configs.get(0).getId());
+		Assert.assertEquals("custom", customConfigs.get(0).getId());
+		Assert.assertTrue(((Set<String>) model.get("domains")).contains("mobile-api"));
+	}
+
+	@Test
+	public void shouldBuildAndSubmitBusinessTagConfigModel() {
+		SpringMvcBusinessController controller = new SpringMvcBusinessController();
+		StubBusinessTagConfigManager tagConfigManager = new StubBusinessTagConfigManager();
+		Map<String, Object> model;
+
+		controller.setProjectService(new StubProjectService("cat"));
+		controller.setConfigManager(new StubBusinessConfigManager(new BusinessReportConfig()));
+		controller.setTagConfigManager(tagConfigManager);
+		controller.setConfigHtmlParser(new ConfigHtmlParser());
+		model = controller.businessModel(request("tagConfig", null, "/cat", "content", "<business-tag-config/>"),
+				"tagConfig");
+
+		Assert.assertEquals("tagConfig", model.get("actionName"));
+		Assert.assertEquals("<business-tag-config/>", tagConfigManager.getStored());
+		Assert.assertEquals("Success", model.get("opState"));
+		Assert.assertTrue(model.get("content").toString().contains("&lt;business-tag-config"));
 	}
 
 	private HttpServletRequest request(String action, String domain, String contextPath) {
+		return request(action, domain, contextPath, new String[0]);
+	}
+
+	private HttpServletRequest request(String action, String domain, String contextPath, String... parameters) {
+		Map<String, String> values = new HashMap<String, String>();
+
+		for (int i = 0; i < parameters.length; i += 2) {
+			values.put(parameters[i], parameters[i + 1]);
+		}
 		return (HttpServletRequest) Proxy.newProxyInstance(getClass().getClassLoader(),
 				new Class<?>[] { HttpServletRequest.class }, new InvocationHandler() {
 					@Override
@@ -71,6 +99,7 @@ public class SpringMvcBusinessControllerTest {
 							if ("domain".equals(args[0])) {
 								return domain;
 							}
+							return values.get(args[0]);
 						}
 						if ("getContextPath".equals(method.getName())) {
 							return contextPath;
@@ -78,56 +107,8 @@ public class SpringMvcBusinessControllerTest {
 						if ("getQueryString".equals(method.getName())) {
 							return "op=list&domain=" + domain;
 						}
-						if ("getSession".equals(method.getName())) {
-							return session();
-						}
 						if ("toString".equals(method.getName())) {
 							return "SpringMvcBusinessControllerTestRequest";
-						}
-						return null;
-					}
-				});
-	}
-
-	private HttpServletResponse response() {
-		return (HttpServletResponse) Proxy.newProxyInstance(getClass().getClassLoader(),
-				new Class<?>[] { HttpServletResponse.class }, new InvocationHandler() {
-					@Override
-					public Object invoke(Object proxy, Method method, Object[] args) {
-						if ("toString".equals(method.getName())) {
-							return "SpringMvcBusinessControllerTestResponse";
-						}
-						return null;
-					}
-				});
-	}
-
-	private HttpSession session() {
-		return (HttpSession) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { HttpSession.class },
-				new InvocationHandler() {
-					@Override
-					public Object invoke(Object proxy, Method method, Object[] args) {
-						if ("getServletContext".equals(method.getName())) {
-							return servletContext();
-						}
-						if ("toString".equals(method.getName())) {
-							return "SpringMvcBusinessControllerTestSession";
-						}
-						return null;
-					}
-				});
-	}
-
-	private ServletContext servletContext() {
-		return (ServletContext) Proxy.newProxyInstance(getClass().getClassLoader(),
-				new Class<?>[] { ServletContext.class }, new InvocationHandler() {
-					@Override
-					public Object invoke(Object proxy, Method method, Object[] args) {
-						if ("getRealPath".equals(method.getName())) {
-							return "D:/workspace/cat/cat-home/src/main/webapp";
-						}
-						if ("toString".equals(method.getName())) {
-							return "SpringMvcBusinessControllerTestServletContext";
 						}
 						return null;
 					}
@@ -161,9 +142,26 @@ public class SpringMvcBusinessControllerTest {
 	}
 
 	private static class StubBusinessTagConfigManager extends BusinessTagConfigManager {
+		private String m_stored;
+
 		@Override
 		public Map<String, Set<String>> findTagByDomain(String domain) {
 			return Collections.emptyMap();
+		}
+
+		@Override
+		public BusinessTagConfig getConfig() {
+			return new BusinessTagConfig();
+		}
+
+		@Override
+		public boolean store(String xml) {
+			m_stored = xml;
+			return true;
+		}
+
+		String getStored() {
+			return m_stored;
 		}
 	}
 }

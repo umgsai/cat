@@ -52,7 +52,7 @@
 						<tr>
 							<td>
 								<input id="content" name="content" value="" type="hidden" />
-								<div id="editor" class="editor">${model.content}</div>
+								<div id="editor" class="editor">${content}</div>
 							</td>
 						</tr>
 						<tr>
@@ -63,7 +63,7 @@
 					</table>
 				</form>
 				<c:choose>
-					<c:when test="${param.submit ne null && model.opState eq 'Success'}">
+					<c:when test="${param.submit ne null && opState eq 'Success'}">
 						<h4 class="text-center text-danger" id="state">操作成功</h4>
 					</c:when>
 					<c:when test="${param.submit ne null}">
