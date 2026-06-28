@@ -19,15 +19,23 @@ import com.dianping.cat.alarm.rule.entity.MonitorRules;
 import com.dianping.cat.alarm.rule.entity.Rule;
 import com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator;
 import com.dianping.cat.alarm.rule.entity.MetricItem;
+import com.dianping.cat.config.ReportReloadConfigManager;
+import com.dianping.cat.config.server.ServerFilterConfigManager;
+import com.dianping.cat.configuration.reload.entity.ReportReloadConfig;
+import com.dianping.cat.configuration.server.filter.entity.ServerFilterConfig;
+import com.dianping.cat.consumer.all.config.entity.AllConfig;
+import com.dianping.cat.consumer.config.AllReportConfigManager;
 import com.dianping.cat.home.exception.entity.ExceptionExclude;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;
 import com.dianping.cat.home.heartbeat.entity.Group;
 import com.dianping.cat.home.heartbeat.entity.HeartbeatDisplayPolicy;
+import com.dianping.cat.home.storage.entity.StorageGroupConfig;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
 import com.dianping.cat.report.alert.exception.ExceptionRuleConfigManager;
 import com.dianping.cat.report.alert.event.EventRuleConfigManager;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
+import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
 import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
@@ -296,6 +304,46 @@ public class SpringMvcConfigControllerTest {
 		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
 	}
 
+	@Test
+	public void shouldBuildAndSubmitGlobalXmlConfigModels() {
+		SpringMvcConfigController controller = new SpringMvcConfigController();
+		StubStorageGroupConfigManager storageGroupManager = new StubStorageGroupConfigManager();
+		StubServerFilterConfigManager serverFilterManager = new StubServerFilterConfigManager();
+		StubAllReportConfigManager allReportManager = new StubAllReportConfigManager();
+		StubReportReloadConfigManager reportReloadManager = new StubReportReloadConfigManager();
+		Map<String, Object> model;
+
+		controller.setConfigHtmlParser(new ConfigHtmlParser());
+		controller.setStorageGroupConfigManager(storageGroupManager);
+		controller.setServerFilterConfigManager(serverFilterManager);
+		controller.setAllReportConfigManager(allReportManager);
+		controller.setReportReloadConfigManager(reportReloadManager);
+
+		model = controller.configModel(request("/cat", "op", "storageGroupConfigUpdate", "content",
+				"<storage-group-config/>", "submit", "提交"), "storageGroupConfigUpdate");
+		Assert.assertEquals("<storage-group-config/>", storageGroupManager.getInserted());
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+		Assert.assertTrue(model.get("content").toString().contains("&lt;storage-group-config"));
+
+		model = controller.configModel(request("/cat", "op", "serverFilterConfigUpdate", "content",
+				"<server-filter-config/>", "submit", "提交"), "serverFilterConfigUpdate");
+		Assert.assertEquals("<server-filter-config/>", serverFilterManager.getInserted());
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+		Assert.assertTrue(model.get("content").toString().contains("&lt;server-filter-config"));
+
+		model = controller.configModel(request("/cat", "op", "allReportConfig", "content", "<all-config/>",
+				"submit", "提交"), "allReportConfig");
+		Assert.assertEquals("<all-config/>", allReportManager.getInserted());
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+		Assert.assertTrue(model.get("content").toString().contains("&lt;all-config"));
+
+		model = controller.configModel(request("/cat", "op", "reportReloadConfigUpdate", "content",
+				"<report-reload-config/>", "submit", "提交"), "reportReloadConfigUpdate");
+		Assert.assertEquals("<report-reload-config/>", reportReloadManager.getInserted());
+		Assert.assertEquals(Boolean.TRUE, model.get("opState"));
+		Assert.assertTrue(model.get("content").toString().contains("&lt;report-reload-config"));
+	}
+
 	private HttpServletRequest request(String contextPath, String... parameters) {
 		Map<String, String> values = new HashMap<String, String>();
 
@@ -340,6 +388,82 @@ public class SpringMvcConfigControllerTest {
 
 			metrics.add("System:Heap");
 			return metrics;
+		}
+
+		String getInserted() {
+			return m_inserted;
+		}
+	}
+
+	private static class StubStorageGroupConfigManager extends StorageGroupConfigManager {
+		private String m_inserted;
+
+		@Override
+		public StorageGroupConfig getConfig() {
+			return new StorageGroupConfig();
+		}
+
+		@Override
+		public boolean insert(String xml) {
+			m_inserted = xml;
+			return true;
+		}
+
+		String getInserted() {
+			return m_inserted;
+		}
+	}
+
+	private static class StubServerFilterConfigManager extends ServerFilterConfigManager {
+		private String m_inserted;
+
+		@Override
+		public ServerFilterConfig getConfig() {
+			return new ServerFilterConfig();
+		}
+
+		@Override
+		public boolean insert(String xml) {
+			m_inserted = xml;
+			return true;
+		}
+
+		String getInserted() {
+			return m_inserted;
+		}
+	}
+
+	private static class StubAllReportConfigManager extends AllReportConfigManager {
+		private String m_inserted;
+
+		@Override
+		public AllConfig getConfig() {
+			return new AllConfig();
+		}
+
+		@Override
+		public boolean insert(String xml) {
+			m_inserted = xml;
+			return true;
+		}
+
+		String getInserted() {
+			return m_inserted;
+		}
+	}
+
+	private static class StubReportReloadConfigManager extends ReportReloadConfigManager {
+		private String m_inserted;
+
+		@Override
+		public ReportReloadConfig getConfig() {
+			return new ReportReloadConfig();
+		}
+
+		@Override
+		public boolean insert(String xml) {
+			m_inserted = xml;
+			return true;
 		}
 
 		String getInserted() {

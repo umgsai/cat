@@ -23,9 +23,12 @@ import com.dianping.cat.alarm.spi.config.AlertConfigManager;
 import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
 import com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator;
+import com.dianping.cat.config.ReportReloadConfigManager;
 import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.home.exception.entity.ExceptionExclude;
 import com.dianping.cat.home.exception.entity.ExceptionLimit;
+import com.dianping.cat.consumer.config.AllReportConfigManager;
 import com.dianping.cat.report.alert.heartbeat.HeartbeatRuleConfigManager;
 import com.dianping.cat.home.group.entity.Domain;
 import com.dianping.cat.home.group.entity.DomainGroup;
@@ -35,6 +38,7 @@ import com.dianping.cat.report.alert.event.EventRuleConfigManager;
 import com.dianping.cat.report.alert.transaction.TransactionRuleConfigManager;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
+import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
 import com.dianping.cat.config.server.ServerConfigManager;
@@ -82,10 +86,22 @@ public class SpringMvcConfigController {
 	private ServerConfigManager serverConfigManager;
 
 	@Resource
+	private ServerFilterConfigManager serverFilterConfigManager;
+
+	@Resource
 	private SampleConfigManager sampleConfigManager;
 
 	@Resource
+	private StorageGroupConfigManager storageGroupConfigManager;
+
+	@Resource
 	private RouterConfigManager routerConfigManager;
+
+	@Resource
+	private AllReportConfigManager allReportConfigManager;
+
+	@Resource
+	private ReportReloadConfigManager reportReloadConfigManager;
 
 	@Resource
 	private TransactionRuleConfigManager transactionRuleConfigManager;
@@ -170,6 +186,22 @@ public class SpringMvcConfigController {
 		}
 		if ("serverConfigUpdate".equals(action)) {
 			configServerConfigModel(request, model);
+			return model;
+		}
+		if ("serverFilterConfigUpdate".equals(action)) {
+			configServerFilterConfigModel(request, model);
+			return model;
+		}
+		if ("storageGroupConfigUpdate".equals(action)) {
+			configStorageGroupConfigModel(request, model);
+			return model;
+		}
+		if ("allReportConfig".equals(action)) {
+			configAllReportConfigModel(request, model);
+			return model;
+		}
+		if ("reportReloadConfigUpdate".equals(action)) {
+			configReportReloadConfigModel(request, model);
 			return model;
 		}
 		if ("sampleConfigUpdate".equals(action)) {
@@ -259,6 +291,10 @@ public class SpringMvcConfigController {
 		this.alertConfigManager = alertConfigManager;
 	}
 
+	void setAllReportConfigManager(AllReportConfigManager allReportConfigManager) {
+		this.allReportConfigManager = allReportConfigManager;
+	}
+
 	void setSenderConfigManager(SenderConfigManager senderConfigManager) {
 		this.senderConfigManager = senderConfigManager;
 	}
@@ -271,12 +307,24 @@ public class SpringMvcConfigController {
 		this.serverConfigManager = serverConfigManager;
 	}
 
+	void setServerFilterConfigManager(ServerFilterConfigManager serverFilterConfigManager) {
+		this.serverFilterConfigManager = serverFilterConfigManager;
+	}
+
 	void setSampleConfigManager(SampleConfigManager sampleConfigManager) {
 		this.sampleConfigManager = sampleConfigManager;
 	}
 
+	void setStorageGroupConfigManager(StorageGroupConfigManager storageGroupConfigManager) {
+		this.storageGroupConfigManager = storageGroupConfigManager;
+	}
+
 	void setRouterConfigManager(RouterConfigManager routerConfigManager) {
 		this.routerConfigManager = routerConfigManager;
+	}
+
+	void setReportReloadConfigManager(ReportReloadConfigManager reportReloadConfigManager) {
+		this.reportReloadConfigManager = reportReloadConfigManager;
 	}
 
 	void setTransactionRuleConfigManager(TransactionRuleConfigManager transactionRuleConfigManager) {
@@ -316,7 +364,9 @@ public class SpringMvcConfigController {
 				|| "projectDelete".equals(action) || "displayPolicy".equals(action) || "alertPolicy".equals(action)
 				|| "alertDefaultReceivers".equals(action) || "alertSenderConfigUpdate".equals(action)
 				|| "serverConfigUpdate".equals(action) || "sampleConfigUpdate".equals(action)
-				|| "routerConfigUpdate".equals(action)
+				|| "routerConfigUpdate".equals(action) || "storageGroupConfigUpdate".equals(action)
+				|| "serverFilterConfigUpdate".equals(action) || "reportReloadConfigUpdate".equals(action)
+				|| "allReportConfig".equals(action)
 				|| isDomainGroupAction(action) || isExceptionAction(action) || isEventRuleAction(action)
 				|| isHeartbeatRuleAction(action)
 				|| isTransactionRuleAction(action);
@@ -407,6 +457,58 @@ public class SpringMvcConfigController {
 			opState = true;
 		}
 		model.put("content", configHtmlParser.parse(serverConfigManager.getConfig().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configServerFilterConfigModel(HttpServletRequest request, Map<String, Object> model) {
+		String content = request.getParameter("content");
+		Boolean opState = null;
+
+		if (content != null && content.length() > 0) {
+			opState = serverFilterConfigManager.insert(content);
+		} else if (request.getParameter("submit") != null) {
+			opState = true;
+		}
+		model.put("content", configHtmlParser.parse(serverFilterConfigManager.getConfig().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configStorageGroupConfigModel(HttpServletRequest request, Map<String, Object> model) {
+		String content = request.getParameter("content");
+		Boolean opState = null;
+
+		if (content != null && content.length() > 0) {
+			opState = storageGroupConfigManager.insert(content);
+		} else if (request.getParameter("submit") != null) {
+			opState = true;
+		}
+		model.put("content", configHtmlParser.parse(storageGroupConfigManager.getConfig().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configAllReportConfigModel(HttpServletRequest request, Map<String, Object> model) {
+		String content = request.getParameter("content");
+		Boolean opState = null;
+
+		if (content != null && content.length() > 0) {
+			opState = allReportConfigManager.insert(content);
+		} else if (request.getParameter("submit") != null) {
+			opState = true;
+		}
+		model.put("content", configHtmlParser.parse(allReportConfigManager.getConfig().toString()));
+		model.put("opState", opState);
+	}
+
+	private void configReportReloadConfigModel(HttpServletRequest request, Map<String, Object> model) {
+		String content = request.getParameter("content");
+		Boolean opState = null;
+
+		if (content != null && content.length() > 0) {
+			opState = reportReloadConfigManager.insert(content);
+		} else if (request.getParameter("submit") != null) {
+			opState = true;
+		}
+		model.put("content", configHtmlParser.parse(reportReloadConfigManager.getConfig().toString()));
 		model.put("opState", opState);
 	}
 
@@ -755,6 +857,18 @@ public class SpringMvcConfigController {
 		}
 		if ("serverConfigUpdate".equals(action)) {
 			return "/jsp/spring/report/config/serverConfigUpdate.jsp";
+		}
+		if ("serverFilterConfigUpdate".equals(action)) {
+			return "/jsp/spring/report/config/serverFilterConfigUpdate.jsp";
+		}
+		if ("storageGroupConfigUpdate".equals(action)) {
+			return "/jsp/spring/report/config/storageGroupConfigUpdate.jsp";
+		}
+		if ("allReportConfig".equals(action)) {
+			return "/jsp/spring/report/config/allReportConfig.jsp";
+		}
+		if ("reportReloadConfigUpdate".equals(action)) {
+			return "/jsp/spring/report/config/reportReloadConfigUpdate.jsp";
 		}
 		if ("sampleConfigUpdate".equals(action)) {
 			return "/jsp/spring/report/config/sampleConfigUpdate.jsp";
