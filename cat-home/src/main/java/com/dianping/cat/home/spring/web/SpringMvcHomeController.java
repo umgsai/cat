@@ -27,6 +27,11 @@ public class SpringMvcHomeController {
 	@Resource
 	private MessageConsumer messageConsumer;
 
+	@GetMapping({ "/mvc", "/mvc/" })
+	public void index(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		response.sendRedirect(request.getContextPath() + "/mvc/r/top?op=view&domain=cat");
+	}
+
 	@GetMapping("/mvc/r/home")
 	public void home(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Map<String, Object> model = homeModel(request);

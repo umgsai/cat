@@ -7,11 +7,22 @@ import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 public class SpringMvcHomeControllerTest {
+	@Test
+	public void shouldRedirectMvcRootToTopPage() throws Exception {
+		SpringMvcHomeController controller = new SpringMvcHomeController();
+		Redirect redirect = new Redirect();
+
+		controller.index(request(Collections.<String, String>emptyMap()), response(redirect));
+
+		Assert.assertEquals("/cat/mvc/r/top?op=view&domain=cat", redirect.location);
+	}
+
 	@Test
 	public void shouldBuildDefaultHomeModel() {
 		SpringMvcHomeController controller = new SpringMvcHomeController();
@@ -73,6 +84,27 @@ public class SpringMvcHomeControllerTest {
 						return null;
 					}
 				});
+	}
+
+	private HttpServletResponse response(Redirect redirect) {
+		return (HttpServletResponse) Proxy.newProxyInstance(getClass().getClassLoader(),
+				new Class<?>[] { HttpServletResponse.class }, new InvocationHandler() {
+					@Override
+					public Object invoke(Object proxy, Method method, Object[] args) {
+						if ("sendRedirect".equals(method.getName())) {
+							redirect.location = (String) args[0];
+							return null;
+						}
+						if ("toString".equals(method.getName())) {
+							return "SpringMvcHomeControllerTestResponse";
+						}
+						return null;
+					}
+				});
+	}
+
+	private static class Redirect {
+		private String location;
 	}
 
 	private static class StubHomeController extends SpringMvcHomeController {

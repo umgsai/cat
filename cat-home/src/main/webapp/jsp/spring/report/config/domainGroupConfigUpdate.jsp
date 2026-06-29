@@ -26,10 +26,11 @@
 	<script src="${contextPath}/assets/js/jquery.ui.touch-punch.min.js"></script>
 	<script src="${contextPath}/assets/js/ace-elements.min.js"></script>
 	<script src="${contextPath}/assets/js/ace.min.js"></script>
+	<script src="${contextPath}/assets/js/bootstrap-tag.min.js"></script>
 	<style>
 		.domain-group-editor { padding: 5px; }
 		.domain-group-editor .group-name { width: 220px; }
-		.domain-group-editor .group-ips { width: 95%; }
+		.domain-group-editor .tags { width: 95%; }
 	</style>
 </head>
 <body class="no-skin">
@@ -68,7 +69,7 @@
 									<input type="text" class="group group-name" id="group_${status.index}" value="${fn:escapeXml(item.id)}" readonly />
 								</td>
 								<td>
-									<input type="text" name="pars" class="group-ips" id="tag_${status.index}" value="${fn:escapeXml(item.ips)}" placeholder="Enter ip ..." />
+									<input type="text" name="pars" class="tag group-ips" id="tag_${status.index}" data-ips="${fn:escapeXml(item.ips)}" placeholder="Enter ip ..." />
 								</td>
 								<td width="5%">
 									<a href="javascript:removeRow(${status.index});" class="btn btn-danger btn-sm">
@@ -92,10 +93,30 @@
 			var n = $('.group').length + 1;
 			var html = '<tr id="row_' + n + '">'
 				+ '<td width="10%"><input type="text" class="group group-name" id="group_' + n + '" placeholder="Enter group ..." /></td>'
-				+ '<td><input type="text" name="pars" class="group-ips" id="tag_' + n + '" placeholder="Enter ip ..." /></td>'
+				+ '<td><input type="text" name="pars" class="tag group-ips" id="tag_' + n + '" placeholder="Enter ip ..." /></td>'
 				+ '<td width="5%"><a href="javascript:removeRow(' + n + ');" class="btn btn-danger btn-sm"><i class="ace-icon fa fa-trash-o bigger-120"></i></a></td>'
 				+ '</tr>';
 			$('#content').append(html);
+			initTagInput($('#tag_' + n), '');
+		}
+
+		function initTagInput(tagInput, ips) {
+			try {
+				tagInput.tag({
+					placeholder: tagInput.attr('placeholder')
+				});
+
+				var tagObject = tagInput.data('tag');
+
+				$.each((ips || '').split(','), function(_, ip) {
+					ip = $.trim(ip);
+					if (ip.length > 0) {
+						tagObject.add(ip);
+					}
+				});
+			} catch (e) {
+				tagInput.after('<textarea id="' + tagInput.attr('id') + '" name="' + tagInput.attr('name') + '" rows="3">' + tagInput.val() + '</textarea>').remove();
+			}
 		}
 
 		function submitDomainGroup() {
@@ -128,6 +149,9 @@
 		}
 
 		$(document).ready(function() {
+			$('.group-ips').each(function() {
+				initTagInput($(this), $(this).attr('data-ips'));
+			});
 			$('#nav_application').click(function() {
 				window.location.href = '${contextPath}/mvc/r/t';
 			});

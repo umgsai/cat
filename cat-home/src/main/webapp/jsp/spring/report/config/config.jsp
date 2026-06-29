@@ -115,25 +115,20 @@
 						</div>
 					</c:when>
 					<c:otherwise>
-						<div class="navbar-header pull-left position project-search">
-							<form id="wrap_search" style="margin-bottom:0px;">
-								<div class="input-group">
-									<span class="input-icon" style="width:300px;">
-										<input type="text" placeholder="input domain for search" value="${fn:escapeXml(currentDomain)}" class="search-input search-input form-control ui-autocomplete-input" id="search" list="projectDomains" autocomplete="off" />
-										<i class="ace-icon fa fa-search nav-search-icon"></i>
-									</span>
-									<span class="input-group-btn" style="width:50px">
-										<button class="btn btn-sm btn-primary" type="submit" id="search_go">Go</button>
-									</span>
-									<span class="input-group-addon">请输入你的项目，默认是cat。找不到你的项目？请点<a href="${contextPath}/mvc/s/config?op=projectAdd"><strong>添加</strong></a></span>
-								</div>
-								<datalist id="projectDomains">
-									<c:forEach var="item" items="${projects}">
-										<option value="${fn:escapeXml(item.domain)}" label="${fn:escapeXml(item.bu)} - ${fn:escapeXml(item.cmdbProductline)}"></option>
-									</c:forEach>
-								</datalist>
-							</form>
-						</div>
+							<div class="navbar-header pull-left position project-search">
+								<form id="wrap_search" style="margin-bottom:0px;">
+									<div class="input-group">
+										<span class="input-icon" style="width:300px;">
+											<input type="text" placeholder="input domain for search" value="${fn:escapeXml(currentDomain)}" class="search-input search-input form-control ui-autocomplete-input" id="search" autocomplete="off" />
+											<i class="ace-icon fa fa-search nav-search-icon"></i>
+										</span>
+										<span class="input-group-btn" style="width:50px">
+											<button class="btn btn-sm btn-primary" type="submit" id="search_go">Go</button>
+										</span>
+										<span class="input-group-addon">请输入你的项目，默认是cat。找不到你的项目？请点<a href="${contextPath}/mvc/s/config?op=projectAdd"><strong>添加</strong></a></span>
+									</div>
+								</form>
+							</div>
 						<br />
 						<br />
 						<br />
@@ -209,6 +204,29 @@
 	</div>
 	<script type="text/javascript">
 		$(document).ready(function() {
+			$.widget("custom.catcomplete", $.ui.autocomplete, {
+				_renderMenu: function(ul, items) {
+					var that = this;
+					var currentCategory = "";
+
+					$.each(items, function(index, item) {
+						if (item.category != currentCategory) {
+							ul.append("<li class='ui-autocomplete-category'>" + item.category + "</li>");
+							currentCategory = item.category;
+						}
+						that._renderItemData(ul, item);
+					});
+				}
+			});
+
+			var data = [];
+			<c:forEach var="item" items="${projects}">
+			data.push({ label: '<c:out value="${item.domain}" />', category: '<c:out value="${item.bu}" /> - <c:out value="${item.cmdbProductline}" />' });
+			</c:forEach>
+			$('#search').catcomplete({
+				delay: 0,
+				source: data
+			});
 			$('#wrap_search').submit(function() {
 				window.location.href = '${contextPath}/mvc/s/config?op=projects&domain=' + encodeURIComponent($('#search').val());
 				return false;

@@ -69,6 +69,11 @@
 		<dispatcher>REQUEST</dispatcher>
 	</filter-mapping>
 	<filter-mapping>
+		<filter-name>domain-filter</filter-name>
+		<url-pattern>/mvc/r/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+	</filter-mapping>
+	<filter-mapping>
 		<filter-name>cat-filter</filter-name>
 		<url-pattern>/s/*</url-pattern>
 		<dispatcher>REQUEST</dispatcher>
