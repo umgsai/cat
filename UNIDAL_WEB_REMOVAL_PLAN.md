@@ -2,6 +2,240 @@
 
 本文档是后续移除 Unidal Web 相关依赖的执行计划。后续所有 Web 迁移、路由补齐、JSP 改造和依赖删除操作都应以本文档为主线推进。
 
+## 0. 移除条件清单
+
+更新时间：2026-06-29
+
+当前结论：暂不具备完全移除 Unidal Web 依赖的条件。`/mvc/*` 新链路已经覆盖已注册旧页面，但工程中仍保留旧 `/r/*`、`/s/*` 入口、旧 Unidal MVC runtime、旧页面层类、旧 JSP taglib 和 Maven 依赖。
+
+### 0.1 当前扫描基线
+
+本次基线扫描范围：
+
+```text
+pom.xml
+*/pom.xml
+cat-home/src/main/java
+cat-home/src/main/webapp
+cat-core/src/main/java
+```
+
+命中情况：
+
+```text
+Web MVC / lifecycle / PageHandler / BaseJspViewer Java 文件: 147
+Java WebRes / web.jsp 文件: 3
+JSP/tag 文件中 Unidal taglib 引用: 196
+Unidal TLD 文件: 3
+Web 相关 Unidal 总命中文件: 344
+非 Web 的 org.unidal.cat.message.storage 引用文件: 37
+```
+
+说明：`org.unidal.cat.message.storage.*` 属于消息存储链路，和本阶段要删除的 `web-framework`、`WebResServer` 不是同一类依赖，不能和 Unidal Web MVC/WebRes 引用混在一起判断。
+
+### 0.2 必须清零的阻塞项
+
+- [ ] Maven 直接依赖清零
+
+当前仍存在：
+
+```text
+cat-home/pom.xml -> org.unidal.webres:WebResServer
+cat-home/pom.xml -> org.unidal.framework:web-framework
+cat-core/pom.xml -> org.unidal.framework:web-framework
+pom.xml          -> dependencyManagement 中仍声明 web-framework、WebResServer
+```
+
+移除条件：
+
+```bash
+rg -n "<groupId>org\\.unidal\\.framework</groupId>|<groupId>org\\.unidal\\.webres</groupId>|web-framework|WebResServer" pom.xml */pom.xml
+```
+
+结果必须为空，或只剩文档说明。
+
+- [ ] 旧 `/r/*`、`/s/*` Unidal MVC 入口下线
+
+当前仍存在：
+
+```text
+cat-home/src/main/webapp/WEB-INF/web.xml
+  /r/* -> mvc-servlet -> com.dianping.cat.mvc.SpringMvcServlet
+  /s/* -> mvc-servlet -> com.dianping.cat.mvc.SpringMvcServlet
+```
+
+移除条件：
+
+1. `/r/*`、`/s/*` 已切到 Spring Controller，或明确跳转到 `/mvc/*`。
+2. `SpringMvcServlet` 不再作为生产入口使用。
+3. `SpringMvcRuntime` 不再参与任何请求链路。
+
+验证命令：
+
+```bash
+rg -n "SpringMvcServlet|SpringMvcRuntime|<url-pattern>/r/\\*|<url-pattern>/s/\\*" cat-home/src/main/java cat-home/src/main/webapp/WEB-INF/web.xml
+```
+
+- [ ] `SpringMvcRuntime` 桥接层删除
+
+当前阻塞文件：
+
+```text
+cat-home/src/main/java/com/dianping/cat/mvc/SpringMvcRuntime.java
+cat-home/src/main/java/com/dianping/cat/mvc/SpringMvcServlet.java
+```
+
+这些文件仍使用：
+
+```text
+org.unidal.web.lifecycle.*
+org.unidal.web.mvc.*
+org.unidal.web.mvc.annotation.*
+org.unidal.web.mvc.payload.*
+org.unidal.web.mvc.model.*
+```
+
+移除条件：
+
+```bash
+rg -n "org\\.unidal\\.web\\.lifecycle|org\\.unidal\\.web\\.mvc|SpringMvcRuntime|SpringMvcServlet" cat-home/src/main/java cat-core/src/main/java
+```
+
+结果必须为空，或只剩文档/测试中明确保留的非生产说明。
+
+- [ ] 旧 report/system 页面层类解耦或删除
+
+当前主要阻塞目录：
+
+```text
+cat-home/src/main/java/com/dianping/cat/report/**
+cat-home/src/main/java/com/dianping/cat/system/**
+cat-core/src/main/java/com/dianping/cat/mvc/**
+```
+
+重点类型：
+
+```text
+ReportModule / SystemModule
+ReportContext / SystemContext
+ReportPage / SystemPage
+Action / Payload / Model / Handler / JspViewer
+BaseJspViewer / ViewModel / PageHandler / ActionPayload / FieldMeta
+```
+
+移除条件：
+
+1. Spring Controller 不再复用旧 `Action/Payload/Model/Handler/JspViewer` 作为请求执行链路。
+2. 纯业务服务类可以保留，但包名在 `report.page`、`system.page` 下时，需要确认没有继续 import `org.unidal.web.mvc.*`。
+3. `cat-core/src/main/java/com/dianping/cat/mvc/AbstractReportPayload.java`、`AbstractReportModel.java`、`ApiPayload.java` 需要替换为不依赖 Unidal 注解/接口的 Spring DTO 或普通基类。
+
+验证命令：
+
+```bash
+rg -n "org\\.unidal\\.web\\.mvc|BaseJspViewer|PageHandler|ActionPayload|ViewModel|FieldMeta|PayloadMeta|ModelMeta" cat-home/src/main/java cat-core/src/main/java
+```
+
+- [ ] JSP / tag / TLD 中 WebRes 和 web-core 引用清零
+
+当前主要阻塞：
+
+```text
+cat-home/src/main/webapp/WEB-INF/webres.tld
+cat-home/src/main/webapp/WEB-INF/web-core.tld
+cat-home/src/main/webapp/WEB-INF/app.tld
+cat-home/src/main/webapp/WEB-INF/tags/*.tag
+cat-home/src/main/webapp/jsp/report/**
+cat-home/src/main/webapp/jsp/system/**
+```
+
+移除条件：
+
+1. `/mvc` 使用的 JSP 只使用 JSTL、Spring 允许的普通 taglib 和静态资源。
+2. 旧 JSP 如果不再被生产路由访问，可以删除或隔离出不参与打包的目录。
+3. `webres.tld`、`web-core.tld`、`app.tld` 不再被 JSP 引用后删除。
+
+验证命令：
+
+```bash
+rg -n "http://www\\.unidal\\.org/webres|http://www\\.unidal\\.org/web/core|org\\.unidal\\.webres|org\\.unidal\\.web\\.jsp|org\\.unidal\\.web\\.mvc\\.ViewModel" cat-home/src/main/webapp
+```
+
+- [ ] WebRes 初始化逻辑删除
+
+当前阻塞点：
+
+```text
+cat-home/src/main/java/com/dianping/cat/report/ReportContext.java
+```
+
+该类仍初始化：
+
+```text
+ResourceRuntime
+ResourceTagConfigurator
+ResourceTagLibConfigurator
+```
+
+移除条件：
+
+```bash
+rg -n "org\\.unidal\\.webres|ResourceRuntime|ResourceTagConfigurator|ResourceTagLibConfigurator" cat-home/src/main/java cat-home/src/main/webapp
+```
+
+### 0.3 可分阶段处理的非阻塞项
+
+- [ ] `org.unidal.cat.message.storage.*` 单独评估
+
+这些引用主要在消息存储、logview、dump 链路中，不是 `web-framework`/`WebResServer` 的直接阻塞项。本阶段只要求删除 Web MVC/WebRes 依赖；如果后续目标扩大为移除所有 `org.unidal.*` 包名，再单独制定存储链路替换计划。
+
+验证命令：
+
+```bash
+rg -n "org\\.unidal\\.cat\\.message\\.storage" cat-home/src/main/java cat-core/src/main/java cat-consumer/src/main/java cat-alarm/src/main/java
+```
+
+### 0.4 推荐执行顺序
+
+1. 主路径切换：决定 `/r/*`、`/s/*` 是直接由 Spring Controller 承接，还是 301/302 到 `/mvc/*`。
+2. 删除旧 runtime：移除 `SpringMvcServlet`、`SpringMvcRuntime`、`ReportModule`、`SystemModule` 的生产入口。
+3. 清理旧页面层：删除或解耦不再被 Spring Controller 使用的旧 `Action/Payload/Model/Handler/JspViewer`。
+4. 清理 JSP：删除旧 `jsp/report/**`、`jsp/system/**` 中不再访问的页面，或把仍需要的页面迁到 `jsp/spring/**` 并替换 taglib。
+5. 清理 TLD 和 WebRes 初始化：删除 `webres.tld`、`web-core.tld`、`app.tld` 中依赖 Unidal 的函数和 tag。
+6. 删除 Maven 依赖：从 `cat-home`、`cat-core` 和根 `pom.xml` 删除 `web-framework`、`WebResServer`。
+7. 全量验证：执行完整编译打包和核心 URL 回归。
+
+### 0.5 最终验收标准
+
+移除完成必须同时满足：
+
+```bash
+rg -n "org\\.unidal\\.web\\.mvc|org\\.unidal\\.web\\.lifecycle|org\\.unidal\\.webres|org\\.unidal\\.web\\.jsp|http://www\\.unidal\\.org/webres|http://www\\.unidal\\.org/web/core|BaseJspViewer|PageHandler|WebResServer|web-framework" pom.xml */pom.xml cat-home/src/main/java cat-home/src/main/webapp cat-core/src/main/java
+```
+
+结果为空，或只剩本文档中的历史说明。
+
+必须通过：
+
+```bash
+mvn clean package -DskipTests
+mvn -pl cat-home test
+```
+
+核心 URL 至少回归：
+
+```text
+/cat/mvc/r/top?op=view&domain=cat
+/cat/mvc/r/t?domain=cat&ip=All&reportType=day&op=view
+/cat/mvc/r/p?op=history&domain=cat&ip=All&reportType=day
+/cat/mvc/r/e?domain=cat&ip=All&reportType=day&op=view
+/cat/mvc/r/h?domain=cat&ip=All&reportType=day&op=view
+/cat/mvc/r/matrix?domain=cat
+/cat/mvc/r/storage?id=cat&domain=cat&ip=All&type=SQL&op=view
+/cat/mvc/s/config?op=projects&domain=cat
+/cat/mvc/s/business?op=list&domain=cat
+/cat/mvc/s/permission?op=error
+```
+
 ## 1. 当前结论
 
 当前系统已经存在两套 Web 入口：
