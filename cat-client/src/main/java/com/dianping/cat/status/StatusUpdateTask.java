@@ -39,9 +39,13 @@ import com.dianping.cat.message.internal.MilliSecondTimer;
 import com.dianping.cat.status.model.entity.Extension;
 import com.dianping.cat.status.model.entity.StatusInfo;
 import com.dianping.cat.support.Threads.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // Component
 public class StatusUpdateTask implements Task, Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(StatusUpdateTask.class);
+
 	// Inject
 	private MessageStatistics m_statistics;
 
@@ -156,7 +160,7 @@ public class StatusUpdateTask implements Task, Initializable {
 		try {
 			buildClasspath();
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.warn("Unable to build CAT client classpath status.", e);
 		}
 
 		Transaction reboot = Cat.newTransaction("System", "Reboot");

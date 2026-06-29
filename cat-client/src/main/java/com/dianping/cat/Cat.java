@@ -33,6 +33,8 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.context.MetricContextHelper;
 import com.dianping.cat.message.context.TraceContextHelper;
 import com.dianping.cat.message.internal.NullMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The main entry of CAT API.
@@ -57,6 +59,8 @@ import com.dianping.cat.message.internal.NullMessage;
  * @author Frankie Wu
  */
 public class Cat {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Cat.class);
+
 	private static Cat CAT = new Cat();
 
 	private static int m_errors;
@@ -78,7 +82,7 @@ public class Cat {
 
 	private static void errorHandler(Exception e) {
 		if (m_errors++ % 100 == 0 || m_errors <= 3) {
-			e.printStackTrace();
+			LOGGER.error("CAT client API call failed.", e);
 		}
 	}
 

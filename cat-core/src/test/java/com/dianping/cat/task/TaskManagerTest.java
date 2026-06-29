@@ -28,6 +28,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.dianping.cat.mybatis.TaskRepository;
 import com.dianping.cat.task.TaskManager.TaskProlicy;
 
 public class TaskManagerTest {
@@ -76,6 +77,10 @@ public class TaskManagerTest {
 		private Map<Integer, Set<String>> m_results = new HashMap<Integer, Set<String>>();
 
 		private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+		public MockTaskManager() {
+			setTaskDao(new TaskRepository());
+		}
 
 		@Override
 		protected void insertToDatabase(Date period, String ip, String domain, int reportType) {

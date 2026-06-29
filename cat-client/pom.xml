@@ -12,12 +12,28 @@
    <dependencies>
       <dependency>
          <groupId>io.netty</groupId>
-         <artifactId>netty-all</artifactId>
+         <artifactId>netty-buffer</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>io.netty</groupId>
+         <artifactId>netty-common</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>io.netty</groupId>
+         <artifactId>netty-transport</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>io.netty</groupId>
+         <artifactId>netty-transport-classes-epoll</artifactId>
       </dependency>
       <dependency>
          <groupId>javax.servlet</groupId>
          <artifactId>servlet-api</artifactId>
          <scope>provided</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-api</artifactId>
       </dependency>
       <dependency>
          <groupId>log4j</groupId>
@@ -28,6 +44,16 @@
       <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>javax.servlet</groupId>
+         <artifactId>javax.servlet-api</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>ch.qos.logback</groupId>
+         <artifactId>logback-classic</artifactId>
          <scope>test</scope>
       </dependency>
       <dependency>
@@ -55,6 +81,11 @@
                      <createSourcesJar>true</createSourcesJar>
                      <shadeSourcesContent>true</shadeSourcesContent>
                      <minimizeJar>true</minimizeJar>
+                     <artifactSet>
+                        <excludes>
+                           <exclude>org.slf4j:slf4j-api</exclude>
+                        </excludes>
+                     </artifactSet>
                      <relocations>
                         <relocation>
                            <pattern>io.netty</pattern>

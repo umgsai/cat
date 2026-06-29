@@ -30,6 +30,8 @@ import java.util.List;
 public enum NetworkInterfaceManager {
 	INSTANCE;
 
+	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(NetworkInterfaceManager.class);
+
 	private InetAddress m_local;
 
 	private NetworkInterfaceManager() {
@@ -96,8 +98,7 @@ public enum NetworkInterfaceManager {
 				m_local = InetAddress.getByName(ip);
 				return;
 			} catch (Exception e) {
-				System.err.println(e);
-				// ignore
+				LOGGER.warn("Invalid CAT host.ip({}), continue detecting local network interface.", ip, e);
 			}
 		}
 

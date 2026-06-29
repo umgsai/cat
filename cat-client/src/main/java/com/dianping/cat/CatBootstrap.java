@@ -176,7 +176,7 @@ public class CatBootstrap {
 
 				initialize(config);
 			} catch (Exception e) {
-				e.printStackTrace();
+				m_logger.error(e, "Unable to initialize CAT from config(%s).", clientXmlFile);
 			}
 		} else {
 			m_logger.warn("CAT config(%s) is not found! SKIPPED", clientXmlFile);

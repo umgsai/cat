@@ -33,6 +33,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
 public class Threads {
+	private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(Threads.class);
+
 	private static volatile Manager s_manager = new Manager();
 
 	public static void addListener(ThreadListener listener) {
@@ -250,7 +252,7 @@ public class Threads {
 				try {
 					listener.onThreadGroupCreated(group, name);
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOGGER.warn("Thread listener failed on thread group creation: {}.", name, e);
 				}
 			}
 		}
@@ -260,7 +262,7 @@ public class Threads {
 				try {
 					listener.onThreadPoolCreated(service, name);
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOGGER.warn("Thread listener failed on thread pool creation: {}.", name, e);
 				}
 			}
 		}
@@ -270,7 +272,7 @@ public class Threads {
 				try {
 					listener.onThreadStarting(thread, name);
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOGGER.warn("Thread listener failed on thread start: {}.", name, e);
 				}
 			}
 		}
@@ -280,7 +282,7 @@ public class Threads {
 				try {
 					listener.onThreadStopping(thread, name);
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOGGER.warn("Thread listener failed on thread stop: {}.", name, e);
 				}
 			}
 		}
@@ -374,7 +376,7 @@ public class Threads {
 			if (m_target instanceof Task) {
 				((Task) m_target).shutdown();
 			} else {
-				System.out.println(String.format("Thread(%s) is shutdown! ", getName()));
+				LOGGER.warn("Thread({}) is shutdown by interruption.", getName());
 				interrupt();
 			}
 		}

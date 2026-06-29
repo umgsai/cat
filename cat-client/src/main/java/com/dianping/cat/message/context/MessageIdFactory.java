@@ -38,9 +38,13 @@ import com.dianping.cat.component.lifecycle.Initializable;
 import com.dianping.cat.configuration.ConfigureManager;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.support.Splitters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // Component
 public class MessageIdFactory implements Initializable {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MessageIdFactory.class);
+
 	public static final long HOUR = 3600 * 1000L;
 
 	private File m_baseDir;
@@ -114,7 +118,7 @@ public class MessageIdFactory implements Initializable {
 
 				m_ipAddress = sb.toString();
 			} else {
-				System.out.println("[ERROR] Unrecognized IP: " + ip + "!");
+				LOGGER.error("Unrecognized IP: {}. Use loopback IP for CAT message id.", ip);
 
 				m_ipAddress = "7f000001";
 			}
@@ -243,7 +247,7 @@ public class MessageIdFactory implements Initializable {
 				} catch (InterruptedException e) {
 					// ignore it
 				} catch (Throwable e) {
-					e.printStackTrace();
+					LOGGER.error("Unable to update CAT message id mark file for domain({}).", m_domain, e);
 				} finally {
 					if (lock != null) {
 						try {
@@ -267,7 +271,7 @@ public class MessageIdFactory implements Initializable {
 				} catch (ClosedChannelException e) {
 					return null;
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOGGER.warn("Unable to lock CAT message id mark file for domain({}).", m_domain, e);
 					return null;
 				}
 

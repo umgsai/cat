@@ -1,9 +1,7 @@
 package com.dianping.cat.component.lifecycle;
 
-import java.text.MessageFormat;
-import java.util.Date;
-
 import com.dianping.cat.apiguardian.api.API;
+import org.slf4j.LoggerFactory;
 
 @API(status = API.Status.INTERNAL, since = "3.1")
 public class DefaultLogger implements Logger {
@@ -115,25 +113,21 @@ public class DefaultLogger implements Logger {
 	}
 
 	public static class ConsoleOutput implements Output {
-		private MessageFormat m_format = new MessageFormat("[{0,date,yyyy-MM-dd HH:mm:ss.SSS}] [{1}] {2}");
+		private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger("com.dianping.cat.client");
 
 		@Override
 		public void write(Level level, String message, Throwable cause) {
 			try {
-				String timedMessage = m_format.format(new Object[] { new Date(), level, message });
-
 				if (level == Level.ERROR) {
-					System.err.println(timedMessage);
-
-					if (cause != null) {
-						cause.printStackTrace(System.err);
-					}
+					LOGGER.error(message, cause);
+				} else if (level == Level.WARN) {
+					LOGGER.warn(message, cause);
+				} else if (cause != null) {
+					LOGGER.warn(message, cause);
+				} else if (level == Level.INFO) {
+					LOGGER.info(message);
 				} else {
-					System.out.println(timedMessage);
-
-					if (cause != null) {
-						cause.printStackTrace(System.out);
-					}
+					LOGGER.debug(message);
 				}
 			} catch (Throwable e) {
 				// ignore it

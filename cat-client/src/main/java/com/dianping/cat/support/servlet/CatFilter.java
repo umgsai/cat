@@ -42,8 +42,12 @@ import com.dianping.cat.message.MessageTree;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.context.TraceContextHelper;
 import com.dianping.cat.message.internal.DefaultTransaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CatFilter implements Filter {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CatFilter.class);
+
 	private static Map<MessageFormat, String> s_patterns = new LinkedHashMap<MessageFormat, String>();
 
 	private List<Handler> m_handlers = new ArrayList<Handler>();
@@ -78,7 +82,7 @@ public class CatFilter implements Filter {
 					s_patterns.put(new MessageFormat(temps[0].trim()), temps[1].trim());
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.warn("Unable to initialize CAT filter pattern({}).", pattern, e);
 			}
 		}
 
