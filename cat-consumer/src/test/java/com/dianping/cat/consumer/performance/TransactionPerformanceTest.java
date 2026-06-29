@@ -158,7 +158,7 @@ public class TransactionPerformanceTest {
 		}
 
 		@Override
-		public void destory() {
+		public void destroy() {
 		}
 	}
 

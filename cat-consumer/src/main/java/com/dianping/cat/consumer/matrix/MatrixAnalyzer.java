@@ -72,7 +72,7 @@ public class MatrixAnalyzer extends AbstractMessageAnalyzer<MatrixReport> {
 	}
 
 	@Override
-	public boolean isEligable(MessageTree tree) {
+	public boolean isEligible(MessageTree tree) {
 		if (tree.getTransactions().size() > 0) {
 			return true;
 		} else {

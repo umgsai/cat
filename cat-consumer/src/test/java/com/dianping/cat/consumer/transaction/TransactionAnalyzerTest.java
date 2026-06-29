@@ -191,7 +191,7 @@ public class TransactionAnalyzerTest {
 		}
 
 		@Override
-		public void destory() {
+		public void destroy() {
 		}
 	}
 }

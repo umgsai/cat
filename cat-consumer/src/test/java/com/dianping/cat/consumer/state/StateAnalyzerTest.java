@@ -108,7 +108,7 @@ public class StateAnalyzerTest {
 		}
 
 		@Override
-		public void destory() {
+		public void destroy() {
 		}
 	}
 }

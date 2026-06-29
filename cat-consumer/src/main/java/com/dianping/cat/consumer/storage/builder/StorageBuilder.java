@@ -30,6 +30,11 @@ public interface StorageBuilder {
 
 	public String getType();
 
-	public boolean isEligable(Transaction t);
+	public boolean isEligible(Transaction t);
+
+	@Deprecated
+	public default boolean isEligable(Transaction t) {
+		return isEligible(t);
+	}
 
 }

@@ -72,7 +72,7 @@ public class BusinessAnalyzer extends AbstractMessageAnalyzer<BusinessReport> {
 	}
 
 	@Override
-	public boolean isEligable(MessageTree tree) {
+	public boolean isEligible(MessageTree tree) {
 		return tree.getMetrics().size() > 0;
 	}
 

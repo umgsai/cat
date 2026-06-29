@@ -165,7 +165,7 @@ public class EventAnalyzerTest {
 		}
 
 		@Override
-		public void destory() {
+		public void destroy() {
 		}
 	}
 

@@ -75,7 +75,7 @@ public class TopAnalyzer extends AbstractMessageAnalyzer<TopReport> {
 	}
 
 	@Override
-	public boolean isEligable(MessageTree tree) {
+	public boolean isEligible(MessageTree tree) {
 		if (tree.getEvents().size() > 0) {
 			return true;
 		} else {

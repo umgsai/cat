@@ -144,7 +144,7 @@ public class TopAnalyzerTest {
 		}
 
 		@Override
-		public void destory() {
+		public void destroy() {
 		}
 	}
 

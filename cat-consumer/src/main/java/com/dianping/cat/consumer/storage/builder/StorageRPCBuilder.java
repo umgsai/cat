@@ -75,7 +75,7 @@ public class StorageRPCBuilder implements StorageBuilder {
 	}
 
 	@Override
-	public boolean isEligable(Transaction t) {
+	public boolean isEligible(Transaction t) {
 		String type = t.getType();
 
 		return "PigeonCall".equals(type) || "Call".equals(type);

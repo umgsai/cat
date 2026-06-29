@@ -136,7 +136,7 @@ public class MatrixAnalyzerTest {
 		}
 
 		@Override
-		public void destory() {
+		public void destroy() {
 		}
 	}
 

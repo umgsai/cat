@@ -135,7 +135,7 @@ public class ProblemPerformanceTest {
 		}
 
 		@Override
-		public void destory() {
+		public void destroy() {
 		}
 	}
 

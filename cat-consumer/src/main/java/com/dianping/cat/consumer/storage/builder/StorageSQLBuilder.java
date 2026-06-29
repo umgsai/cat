@@ -80,7 +80,7 @@ public class StorageSQLBuilder implements StorageBuilder {
 	}
 
 	@Override
-	public boolean isEligable(Transaction t) {
+	public boolean isEligible(Transaction t) {
 		return "SQL".equals(t.getType());
 	}
 

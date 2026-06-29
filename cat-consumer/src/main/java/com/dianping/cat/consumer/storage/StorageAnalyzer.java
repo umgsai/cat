@@ -162,7 +162,7 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 	}
 
 	@Override
-	public boolean isEligable(MessageTree tree) {
+	public boolean isEligible(MessageTree tree) {
 		if (tree.getTransactions().size() > 0) {
 			return true;
 		} else {
@@ -186,7 +186,7 @@ public class StorageAnalyzer extends AbstractMessageAnalyzer<StorageReport> {
 			Collection<StorageBuilder> builders = storageBuilders.values();
 
 			for (StorageBuilder builder : builders) {
-				if (builder.isEligable(t)) {
+				if (builder.isEligible(t)) {
 					StorageItem item = builder.build(t);
 					String id = item.getId();
 

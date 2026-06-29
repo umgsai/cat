@@ -77,7 +77,7 @@ public class StorageCacheBuilder implements StorageBuilder {
 	}
 
 	@Override
-	public boolean isEligable(Transaction t) {
+	public boolean isEligible(Transaction t) {
 		String type = t.getType();
 
 		return type != null && (type.startsWith("Cache.") || type.startsWith("Squirrel."));

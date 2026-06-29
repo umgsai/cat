@@ -169,7 +169,7 @@ public class CrossAnalyzerTest {
 		}
 
 		@Override
-		public void destory() {
+		public void destroy() {
 		}
 	}
 

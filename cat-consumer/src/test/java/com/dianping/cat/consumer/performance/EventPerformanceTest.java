@@ -132,7 +132,7 @@ public class EventPerformanceTest {
 		}
 
 		@Override
-		public void destory() {
+		public void destroy() {
 		}
 	}
 
