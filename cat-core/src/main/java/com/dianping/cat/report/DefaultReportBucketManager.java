@@ -77,6 +77,7 @@ public class DefaultReportBucketManager implements ReportBucketManager {
 			removeEmptyDir(m_reportBaseDir);
 			t.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
+			LOGGER.error("Unable to clear old report buckets, baseDir={}.", m_reportBaseDir, e);
 			Cat.logError(e);
 			t.setStatus(e);
 		} finally {
@@ -155,6 +156,7 @@ public class DefaultReportBucketManager implements ReportBucketManager {
 			      .map(path -> relativePath(baseFile, path))
 			      .forEach(paths::add);
 		} catch (IOException e) {
+			LOGGER.warn("Unable to list report directories, baseDir={}.", baseFile, e);
 			Cat.logError(e);
 		}
 		return paths;
@@ -172,6 +174,7 @@ public class DefaultReportBucketManager implements ReportBucketManager {
 			      .map(path -> relativePath(baseFile, path))
 			      .forEach(paths::add);
 		} catch (IOException e) {
+			LOGGER.warn("Unable to list report files, baseDir={}.", baseFile, e);
 			Cat.logError(e);
 		}
 		return paths;
@@ -188,8 +191,11 @@ public class DefaultReportBucketManager implements ReportBucketManager {
 				try {
 					File file = new File(baseFile, path);
 
-					file.delete();
+					if (!file.delete()) {
+						LOGGER.debug("Report directory is not empty, path={}.", file.getAbsolutePath());
+					}
 				} catch (Exception e) {
+					LOGGER.warn("Unable to remove empty report directory, baseDir={}, path={}.", baseFile, path, e);
 				}
 			}
 		}

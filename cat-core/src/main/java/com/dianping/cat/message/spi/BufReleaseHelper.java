@@ -22,8 +22,11 @@ import com.dianping.cat.Cat;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.ReferenceCountUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BufReleaseHelper {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BufReleaseHelper.class);
 
 	public static void release(ByteBuf buf) {
 		try {
@@ -31,6 +34,7 @@ public class BufReleaseHelper {
 				ReferenceCountUtil.release(buf);
 			}
 		} catch (Exception e) {
+			LOGGER.warn("Unable to release byte buffer, buf={}.", buf, e);
 			Cat.logError(e);
 		}
 	}

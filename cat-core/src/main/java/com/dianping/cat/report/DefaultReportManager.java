@@ -311,7 +311,8 @@ public class DefaultReportManager<T> implements ReportManager<T> {
 					hourlyReports.remove(domain);
 				}
 				if (!errorDomains.isEmpty()) {
-					LOGGER.info("error domain:{}", errorDomains);
+					LOGGER.warn("Skipped invalid report domains, reportName={}, startTime={}, domains={}.", name,
+					      new Date(startTime), errorDomains);
 				}
 
 				reportDelegate.beforeSave(hourlyReports);

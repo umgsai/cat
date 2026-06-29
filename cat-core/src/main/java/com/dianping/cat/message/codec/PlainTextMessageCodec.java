@@ -31,6 +31,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Heartbeat;
@@ -51,6 +54,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 
 public class PlainTextMessageCodec implements MessageCodec {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PlainTextMessageCodec.class);
+
 	public static final String ID = "plain-text";
 
 	private static final String VERSION = "PT1"; // plain text version 1
@@ -76,6 +81,8 @@ public class PlainTextMessageCodec implements MessageCodec {
 			buf.readInt(); // get rid of length
 			result = buf.toString(Charset.forName("utf-8"));
 		} catch (Exception ex) {
+			LOGGER.warn("Unable to encode message tree, domain={}, messageId={}.",
+			      tree == null ? null : tree.getDomain(), tree == null ? null : tree.getMessageId(), ex);
 			Cat.logError(ex);
 		} finally {
 			BufReleaseHelper.release(buf);

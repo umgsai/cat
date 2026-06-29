@@ -21,6 +21,9 @@ package com.dianping.cat.analysis;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.support.Threads.Task;
 
@@ -28,6 +31,8 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
 public class PeriodManager implements Task {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PeriodManager.class);
+
 	public static long EXTRATIME = 3 * 60 * 1000L;
 
 	private PeriodStrategy m_strategy;
@@ -96,6 +101,7 @@ public class PeriodManager implements Task {
 					Threads.forGroup("cat").start(new EndTaskThread(-value));
 				}
 			} catch (Throwable e) {
+				LOGGER.error("Realtime period manager failed.", e);
 				Cat.logError(e);
 			}
 

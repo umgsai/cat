@@ -128,6 +128,8 @@ public class Period {
 				}
 			}
 		} catch (Throwable e) {
+			LOGGER.error("Failed to finish period tasks, taskCount={}, startTime={}, endTime={}.", m_tasks.size(),
+			      df.format(startDate), df.format(endDate), e);
 			Cat.logError(e);
 		} finally {
 			LOGGER.info("Finished {} tasks in period [{}, {}]", m_tasks.size(), df.format(startDate), df.format(endDate));

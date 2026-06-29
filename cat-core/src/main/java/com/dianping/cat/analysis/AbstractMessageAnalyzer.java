@@ -20,12 +20,17 @@ package com.dianping.cat.analysis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.ReportManager;
 
 public abstract class AbstractMessageAnalyzer<R> implements MessageAnalyzer {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMessageAnalyzer.class);
+
 	public static final long MINUTE = 60 * 1000L;
 
 	public static final long ONE_HOUR = 60 * 60 * 1000L;
@@ -58,6 +63,8 @@ public abstract class AbstractMessageAnalyzer<R> implements MessageAnalyzer {
 					m_errors++;
 
 					if (m_errors == 1 || m_errors % 10000 == 0) {
+						LOGGER.error("Failed to process message tree, analyzer={}, domain={}, messageId={}, errors={}.",
+						      getClass().getSimpleName(), tree.getDomain(), tree.getMessageId(), m_errors, e);
 						Cat.logError(e);
 					}
 				}
@@ -74,6 +81,8 @@ public abstract class AbstractMessageAnalyzer<R> implements MessageAnalyzer {
 					m_errors++;
 
 					if (m_errors == 1 || m_errors % 10000 == 0) {
+						LOGGER.error("Failed to process remaining message tree, analyzer={}, domain={}, messageId={}, errors={}.",
+						      getClass().getSimpleName(), tree.getDomain(), tree.getMessageId(), m_errors, e);
 						Cat.logError(e);
 					}
 				}

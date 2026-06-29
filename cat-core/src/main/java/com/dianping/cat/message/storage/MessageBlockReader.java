@@ -26,11 +26,15 @@ import java.io.RandomAccessFile;
 import java.util.zip.GZIPInputStream;
 
 import com.dianping.cat.helper.FileNameHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xerial.snappy.SnappyInputStream;
 
 import com.dianping.cat.Cat;
 
 public class MessageBlockReader {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MessageBlockReader.class);
+
 	private RandomAccessFile m_indexFile;
 
 	private RandomAccessFile m_dataFile;
@@ -59,6 +63,7 @@ public class MessageBlockReader {
 			try {
 				in = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(buf)));
 			} catch (IOException ioe) {
+				LOGGER.warn("Unable to decompress message block, size={}.", buf == null ? 0 : buf.length, ioe);
 				Cat.logError(ioe);
 			}
 		}

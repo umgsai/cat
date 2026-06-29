@@ -23,6 +23,8 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.report.server.RemoteServersManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -37,6 +39,7 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 public abstract class BaseRemoteModelService<T> extends ModelServiceWithCalSupport implements ModelService<T> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BaseRemoteModelService.class);
 
 	private RemoteServersManager m_remoteServersManager;
 
@@ -65,6 +68,8 @@ public abstract class BaseRemoteModelService<T> extends ModelServiceWithCalSuppo
 					sb.append('&');
 					sb.append(e.getKey()).append('=').append(URLEncoder.encode(e.getValue(), "utf-8"));
 				} catch (Exception ex) {
+					LOGGER.warn("Failed to encode remote model request parameter, request={}, key={}, value={}.",
+					      request, e.getKey(), e.getValue(), ex);
 					Cat.logError(ex);
 				}
 			}

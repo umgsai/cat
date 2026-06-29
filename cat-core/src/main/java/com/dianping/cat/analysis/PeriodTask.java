@@ -77,6 +77,8 @@ public class PeriodTask implements Task {
 			m_analyzer.doCheckpoint(true);
 			m_analyzer.destroy();
 		} catch (Exception e) {
+			LOGGER.error("Failed to finish period task, analyzer={}, startTime={}, index={}.",
+			      m_analyzer.getClass().getSimpleName(), m_startTime, m_index, e);
 			Cat.logError(e);
 		}
 	}
@@ -98,6 +100,8 @@ public class PeriodTask implements Task {
 		try {
 			m_analyzer.analyze(m_queue);
 		} catch (Exception e) {
+			LOGGER.error("Period task failed, analyzer={}, startTime={}, index={}.",
+			      m_analyzer.getClass().getSimpleName(), m_startTime, m_index, e);
 			Cat.logError(e);
 		}
 	}

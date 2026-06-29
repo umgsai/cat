@@ -20,17 +20,23 @@ package com.dianping.cat.message;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.internal.DefaultTransaction;
 import com.dianping.cat.message.spi.MessageTree;
 
 public class MessageTreeFormat {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MessageTreeFormat.class);
 
 	public static void format(MessageTree tree) {
 		try {
 			formatTruncateMessage(tree);
 			formatTransaction(tree);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to format message tree, domain={}, messageId={}.",
+			      tree == null ? null : tree.getDomain(), tree == null ? null : tree.getMessageId(), e);
 			Cat.logError(e);
 		}
 	}

@@ -22,6 +22,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Heartbeat;
@@ -34,6 +37,7 @@ import com.dianping.cat.message.tree.MessageId;
 import io.netty.buffer.ByteBuf;
 
 public class DefaultMessageTree implements MessageTree {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageTree.class);
 
 	private ByteBuf m_buf;
 
@@ -137,6 +141,7 @@ public class DefaultMessageTree implements MessageTree {
 
 			return codec.decode(buf);
 		} catch (Exception ex) {
+			LOGGER.warn("Unable to copy message tree for test, domain={}, messageId={}.", m_domain, m_messageId, ex);
 			Cat.logError(ex);
 		} finally {
 			BufReleaseHelper.release(buf);
@@ -353,6 +358,7 @@ public class DefaultMessageTree implements MessageTree {
 			buf.readInt(); // get rid of length
 			result = buf.toString(Charset.forName("utf-8"));
 		} catch (Exception ex) {
+			LOGGER.warn("Unable to serialize message tree, domain={}, messageId={}.", m_domain, m_messageId, ex);
 			Cat.logError(ex);
 		} finally {
 			if (buf != null) {
