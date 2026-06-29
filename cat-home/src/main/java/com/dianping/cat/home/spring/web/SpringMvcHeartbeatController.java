@@ -445,7 +445,7 @@ public class SpringMvcHeartbeatController {
 	private HeartbeatReport queryHourlyReport(String domain, String ipAddress, long date) {
 		ModelRequest request = new ModelRequest(domain, date).setProperty("ip", ipAddress);
 
-		if (heartbeatModelService.isEligable(request)) {
+		if (heartbeatModelService.isEligible(request)) {
 			ModelResponse<HeartbeatReport> response = heartbeatModelService.invoke(request);
 
 			return response.getModel();

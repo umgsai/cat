@@ -416,7 +416,7 @@ public class SpringMvcCrossController {
 	private CrossReport queryHourlyReport(String domain, String ipAddress, long date) {
 		ModelRequest request = new ModelRequest(domain, date).setProperty("ip", ipAddress);
 
-		if (crossModelService.isEligable(request)) {
+		if (crossModelService.isEligible(request)) {
 			ModelResponse<CrossReport> response = crossModelService.invoke(request);
 
 			return response.getModel();

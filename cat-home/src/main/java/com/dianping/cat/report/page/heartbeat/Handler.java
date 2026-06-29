@@ -130,7 +130,7 @@ public class Handler implements PageHandler<Context> {
 		ModelRequest request = new ModelRequest(domain, date) //
 								.setProperty("ip", ipAddress);
 
-		if (heartbeatModelService.isEligable(request)) {
+		if (heartbeatModelService.isEligible(request)) {
 			ModelResponse<HeartbeatReport> response = heartbeatModelService.invoke(request);
 			HeartbeatReport report = response.getModel();
 

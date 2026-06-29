@@ -431,7 +431,7 @@ public class SpringMvcTopController {
 	private TopReport queryTopReport(long date) {
 		ModelRequest request = new ModelRequest(Constants.CAT, date).setProperty("date", String.valueOf(date));
 
-		if (topModelService.isEligable(request)) {
+		if (topModelService.isEligible(request)) {
 			ModelResponse<TopReport> response = topModelService.invoke(request);
 			TopReport report = response.getModel();
 
@@ -455,7 +455,7 @@ public class SpringMvcTopController {
 		if (!Constants.ALL.equals(ipAddress)) {
 			request.setProperty("ip", ipAddress);
 		}
-		if (problemModelService.isEligable(request)) {
+		if (problemModelService.isEligible(request)) {
 			ModelResponse<ProblemReport> response = problemModelService.invoke(request);
 			ProblemReport report = response.getModel();
 
@@ -474,7 +474,7 @@ public class SpringMvcTopController {
 		ModelRequest request = new ModelRequest(domain, date).setProperty("type", type).setProperty("name", Constants.ALL)
 				.setProperty("ip", ip);
 
-		if (transactionModelService.isEligable(request)) {
+		if (transactionModelService.isEligible(request)) {
 			ModelResponse<TransactionReport> response = transactionModelService.invoke(request);
 			TransactionReport report = response.getModel();
 

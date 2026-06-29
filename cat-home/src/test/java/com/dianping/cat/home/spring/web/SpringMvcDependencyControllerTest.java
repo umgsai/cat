@@ -76,7 +76,7 @@ public class SpringMvcDependencyControllerTest {
 			}
 
 			@Override
-			public boolean isEligable(ModelRequest request) {
+			public boolean isEligible(ModelRequest request) {
 				return true;
 			}
 		});

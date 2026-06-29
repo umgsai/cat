@@ -24,10 +24,10 @@ public interface ModelService<M> {
 
 	public ModelResponse<M> invoke(ModelRequest request);
 
-	public default boolean isEligible(ModelRequest request) {
-		return isEligable(request);
-	}
+	public boolean isEligible(ModelRequest request);
 
 	@Deprecated
-	public boolean isEligable(ModelRequest request);
+	public default boolean isEligable(ModelRequest request) {
+		return isEligible(request);
+	}
 }

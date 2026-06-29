@@ -107,7 +107,7 @@ public class SpringMvcLogviewController {
 		ModelRequest request = new ModelRequest(id.getDomain(), timestamp).setProperty("messageId", messageId)
 				.setProperty("waterfall", String.valueOf(waterfall)).setProperty("timestamp", String.valueOf(timestamp));
 
-		if (logviewModelService.isEligable(request)) {
+		if (logviewModelService.isEligible(request)) {
 			ModelResponse<String> response = logviewModelService.invoke(request);
 
 			return response == null ? null : response.getModel();

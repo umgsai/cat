@@ -255,7 +255,7 @@ public class LocalMessageService extends LocalModelService<String> implements Mo
 	}
 
 	@Override
-	public boolean isEligable(ModelRequest request) {
+	public boolean isEligible(ModelRequest request) {
 		if (serverConfigManager.isHdfsOn()) {
 			return request.getPeriod().isCurrent();
 		} else {

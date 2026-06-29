@@ -34,7 +34,7 @@ import com.dianping.cat.consumer.state.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportBucketManager;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
-import com.dianping.cat.task.TaskManager.TaskProlicy;
+import com.dianping.cat.task.TaskManager.TaskPolicy;
 
 @Component("stateDelegate")
 public class StateDelegate implements ReportDelegate<StateReport> {
@@ -68,25 +68,25 @@ public class StateDelegate implements ReportDelegate<StateReport> {
 		Date startTime = report.getStartTime();
 		String domain = report.getDomain();
 
-		taskManager.createTask(startTime, domain, StateAnalyzer.ID, TaskProlicy.ALL);
-		taskManager.createTask(startTime, domain, Constants.REPORT_ROUTER, TaskProlicy.HOULY);
-		taskManager.createTask(startTime, domain, Constants.APP_DATABASE_PRUNER, TaskProlicy.DAILY);
-		taskManager.createTask(startTime, domain, Constants.METRIC_GRAPH_PRUNER, TaskProlicy.DAILY);
-		taskManager.createTask(startTime, domain, Constants.WEB_DATABASE_PRUNER, TaskProlicy.DAILY);
-		// taskManager.createTask(startTime, domain, Constants.CMDB, TaskProlicy.HOULY);
-		taskManager.createTask(startTime, domain, Constants.REPORT_DATABASE_CAPACITY, TaskProlicy.ALL);
-		taskManager.createTask(startTime, domain, Constants.REPORT_JAR, TaskProlicy.HOULY);
-		taskManager.createTask(startTime, domain, Constants.REPORT_HEAVY, TaskProlicy.ALL);
-		taskManager.createTask(startTime, domain, Constants.REPORT_UTILIZATION, TaskProlicy.ALL);
-		taskManager.createTask(startTime, domain, Constants.REPORT_SERVICE, TaskProlicy.ALL);
+		taskManager.createTask(startTime, domain, StateAnalyzer.ID, TaskPolicy.ALL);
+		taskManager.createTask(startTime, domain, Constants.REPORT_ROUTER, TaskPolicy.HOURLY);
+		taskManager.createTask(startTime, domain, Constants.APP_DATABASE_PRUNER, TaskPolicy.DAILY);
+		taskManager.createTask(startTime, domain, Constants.METRIC_GRAPH_PRUNER, TaskPolicy.DAILY);
+		taskManager.createTask(startTime, domain, Constants.WEB_DATABASE_PRUNER, TaskPolicy.DAILY);
+		// taskManager.createTask(startTime, domain, Constants.CMDB, TaskPolicy.HOURLY);
+		taskManager.createTask(startTime, domain, Constants.REPORT_DATABASE_CAPACITY, TaskPolicy.ALL);
+		taskManager.createTask(startTime, domain, Constants.REPORT_JAR, TaskPolicy.HOURLY);
+		taskManager.createTask(startTime, domain, Constants.REPORT_HEAVY, TaskPolicy.ALL);
+		taskManager.createTask(startTime, domain, Constants.REPORT_UTILIZATION, TaskPolicy.ALL);
+		taskManager.createTask(startTime, domain, Constants.REPORT_SERVICE, TaskPolicy.ALL);
 
 		Calendar cal = Calendar.getInstance();
 		int hour = cal.get(Calendar.HOUR_OF_DAY);
 
 		// for daily report aggreation done
 		if (hour >= 4) {
-			taskManager.createTask(startTime, domain, Constants.CURRENT_REPORT, TaskProlicy.DAILY);
-			taskManager.createTask(startTime, domain, Constants.REPORT_CLIENT, TaskProlicy.DAILY);
+			taskManager.createTask(startTime, domain, Constants.CURRENT_REPORT, TaskPolicy.DAILY);
+			taskManager.createTask(startTime, domain, Constants.REPORT_CLIENT, TaskPolicy.DAILY);
 		}
 		// clear local report
 		reportBucketManager.clearOldReports();

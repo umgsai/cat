@@ -111,7 +111,7 @@ public class StateBuilder {
 		ModelRequest request = new ModelRequest(domain, date) //
 		      .setProperty("ip", ip);
 
-		if (stateModelService.isEligable(request)) {
+		if (stateModelService.isEligible(request)) {
 			ModelResponse<StateReport> response = stateModelService.invoke(request);
 
 			return response.getModel();

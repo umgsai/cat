@@ -138,12 +138,6 @@ public abstract class BaseRemoteModelService<T> extends ModelServiceWithCalSuppo
 		}
 	}
 
-	@Override
-	@Deprecated
-	public boolean isEligable(ModelRequest request) {
-		return isEligible(request);
-	}
-
 	public abstract boolean isServersFixed();
 
 	private String readUrl(URL url) throws IOException {

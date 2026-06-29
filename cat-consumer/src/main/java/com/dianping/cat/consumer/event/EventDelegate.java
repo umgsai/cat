@@ -39,7 +39,7 @@ import com.dianping.cat.consumer.event.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.event.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
-import com.dianping.cat.task.TaskManager.TaskProlicy;
+import com.dianping.cat.task.TaskManager.TaskPolicy;
 
 @Component("eventDelegate")
 public class EventDelegate implements ReportDelegate<EventReport> {
@@ -122,7 +122,7 @@ public class EventDelegate implements ReportDelegate<EventReport> {
 		String domain = report.getDomain();
 
 		if (domain.equals(Constants.ALL) || serverFilterConfigManager.validateDomain(domain)) {
-			return taskManager.createTask(report.getStartTime(), domain, EventAnalyzer.ID, TaskProlicy.ALL_EXCLUED_HOURLY);
+			return taskManager.createTask(report.getStartTime(), domain, EventAnalyzer.ID, TaskPolicy.ALL_EXCLUDE_HOURLY);
 		} else {
 			return true;
 		}

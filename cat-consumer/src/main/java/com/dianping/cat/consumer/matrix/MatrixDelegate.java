@@ -32,7 +32,7 @@ import com.dianping.cat.consumer.matrix.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.matrix.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
-import com.dianping.cat.task.TaskManager.TaskProlicy;
+import com.dianping.cat.task.TaskManager.TaskPolicy;
 
 @Component("matrixDelegate")
 public class MatrixDelegate implements ReportDelegate<MatrixReport> {
@@ -66,7 +66,7 @@ public class MatrixDelegate implements ReportDelegate<MatrixReport> {
 		String domain = report.getDomain();
 
 		if (serverFilterConfigManager.validateDomain(domain)) {
-			return taskManager.createTask(report.getStartTime(), domain, MatrixAnalyzer.ID,	TaskProlicy.ALL_EXCLUED_HOURLY);
+			return taskManager.createTask(report.getStartTime(), domain, MatrixAnalyzer.ID,	TaskPolicy.ALL_EXCLUDE_HOURLY);
 		} else {
 			return true;
 		}

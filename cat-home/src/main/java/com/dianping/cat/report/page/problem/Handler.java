@@ -160,7 +160,7 @@ public class Handler implements PageHandler<Context> {
 		if (!StringUtils.isEmpty(payload.getStatus())) {
 			request.setProperty("name", payload.getStatus());
 		}
-		if (problemModelService.isEligable(request)) {
+		if (problemModelService.isEligible(request)) {
 			ModelResponse<ProblemReport> response = problemModelService.invoke(request);
 			ProblemReport report = response.getModel();
 

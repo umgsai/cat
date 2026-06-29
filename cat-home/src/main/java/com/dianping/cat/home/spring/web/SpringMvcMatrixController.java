@@ -318,7 +318,7 @@ public class SpringMvcMatrixController {
 	private MatrixReport queryHourlyReport(String domain, String ipAddress, long date) {
 		ModelRequest request = new ModelRequest(domain, date).setProperty("ip", ipAddress);
 
-		if (matrixModelService.isEligable(request)) {
+		if (matrixModelService.isEligible(request)) {
 			ModelResponse<MatrixReport> response = matrixModelService.invoke(request);
 
 			return response.getModel();

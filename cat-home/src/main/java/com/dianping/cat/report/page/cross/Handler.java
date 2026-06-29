@@ -66,7 +66,7 @@ public class Handler implements PageHandler<Context> {
 		ModelRequest request = new ModelRequest(domain, payload.getDate()) //
 								.setProperty("ip", ipAddress);
 
-		if (crossModelService.isEligable(request)) {
+		if (crossModelService.isEligible(request)) {
 			ModelResponse<CrossReport> response = crossModelService.invoke(request);
 			CrossReport report = response.getModel();
 

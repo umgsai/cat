@@ -79,12 +79,6 @@ public class DefaultReportManager<T> implements ReportManager<T> {
 	}
 
 	@Override
-	@Deprecated
-	public void destory() {
-		destroy();
-	}
-
-	@Override
 	public Set<String> getDomains(long startTime) {
 		Map<String, T> hourlyReports = reports.get(startTime);
 

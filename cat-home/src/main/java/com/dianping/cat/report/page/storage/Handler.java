@@ -371,7 +371,7 @@ public class Handler implements PageHandler<Context> {
 		ModelRequest request = new ModelRequest(buildReportId(payload), payload.getDate())
 								.setProperty("ip",	payload.getIpAddress());
 
-		if (storageModelService.isEligable(request)) {
+		if (storageModelService.isEligible(request)) {
 			ModelResponse<StorageReport> response = storageModelService.invoke(request);
 			StorageReport report = response.getModel();
 

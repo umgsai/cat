@@ -71,7 +71,7 @@ public class SpringMvcHomeController {
 	}
 
 	void checkpoint() {
-		tcpSocketReceiver.destory();
+		tcpSocketReceiver.destroy();
 		messageConsumer.doCheckpoint();
 	}
 

@@ -91,7 +91,7 @@ public class FailureSummaryBuilder extends SummaryBuilder {
 			      endTime);
 			return result;
 		}
-		if (service.isEligable(request)) {
+		if (service.isEligible(request)) {
 			ModelResponse<ProblemReport> response = service.invoke(request);
 			report = response == null ? null : response.getModel();
 		} else {

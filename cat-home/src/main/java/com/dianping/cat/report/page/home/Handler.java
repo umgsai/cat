@@ -66,7 +66,7 @@ public class Handler implements PageHandler<Context> {
 		case VIEW:
 			break;
 		case CHECKPOINT:
-			tcpSocketReceiver.destory();
+			tcpSocketReceiver.destroy();
 			messageConsumer.doCheckpoint();
 			break;
 		default:

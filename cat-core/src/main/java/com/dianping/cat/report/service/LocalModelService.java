@@ -148,11 +148,6 @@ public abstract class LocalModelService<T> {
 		return !period.isHistorical();
 	}
 
-	@Deprecated
-	public boolean isEligable(ModelRequest request) {
-		return isEligible(request);
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(64);

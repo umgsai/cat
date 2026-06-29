@@ -116,7 +116,7 @@ public class ExceptionAlert implements Task {
 		String date = String.valueOf(start.getTime());
 		ModelRequest request = new ModelRequest(domain, start.getTime()).setProperty("date", date);
 
-		if (topModelService.isEligable(request)) {
+		if (topModelService.isEligible(request)) {
 			ModelResponse<TopReport> response = topModelService.invoke(request);
 			TopReport report = response.getModel();
 

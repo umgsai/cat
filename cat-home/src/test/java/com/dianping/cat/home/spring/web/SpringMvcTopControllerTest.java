@@ -173,7 +173,7 @@ public class SpringMvcTopControllerTest {
 		}
 
 		@Override
-		public boolean isEligable(ModelRequest request) {
+		public boolean isEligible(ModelRequest request) {
 			return true;
 		}
 

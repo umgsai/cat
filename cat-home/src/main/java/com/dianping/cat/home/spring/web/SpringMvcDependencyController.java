@@ -325,7 +325,7 @@ public class SpringMvcDependencyController {
 		long date = ((Long) model.get("longDate")).longValue();
 		ModelRequest request = new ModelRequest(domain, date);
 
-		if (dependencyModelService.isEligable(request)) {
+		if (dependencyModelService.isEligible(request)) {
 			ModelResponse<DependencyReport> response = dependencyModelService.invoke(request);
 			DependencyReport report = response.getModel();
 

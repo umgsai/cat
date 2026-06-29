@@ -213,12 +213,6 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 		return false;
 	}
 
-	@Override
-	@Deprecated
-	public boolean isEligable(ModelRequest request) {
-		return isEligible(request);
-	}
-
 	protected abstract T merge(ModelRequest request, final List<ModelResponse<T>> responses);
 
 	@Override

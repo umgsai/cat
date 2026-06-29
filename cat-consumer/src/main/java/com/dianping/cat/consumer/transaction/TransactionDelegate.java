@@ -36,7 +36,7 @@ import com.dianping.cat.consumer.transaction.model.transform.DefaultNativeParser
 import com.dianping.cat.consumer.transaction.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
-import com.dianping.cat.task.TaskManager.TaskProlicy;
+import com.dianping.cat.task.TaskManager.TaskPolicy;
 
 @Component("transactionDelegate")
 public class TransactionDelegate implements ReportDelegate<TransactionReport> {
@@ -88,7 +88,7 @@ public class TransactionDelegate implements ReportDelegate<TransactionReport> {
 
 		if (domain.equals(Constants.ALL) || serverFilterConfigManager.validateDomain(domain)) {
 			return taskManager.createTask(report.getStartTime(), domain, TransactionAnalyzer.ID,
-			      TaskProlicy.ALL_EXCLUED_HOURLY);
+			      TaskPolicy.ALL_EXCLUDE_HOURLY);
 		} else {
 			return true;
 		}

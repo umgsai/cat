@@ -29,7 +29,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.dianping.cat.mybatis.TaskRepository;
-import com.dianping.cat.task.TaskManager.TaskProlicy;
+import com.dianping.cat.task.TaskManager.TaskPolicy;
 
 public class TaskManagerTest {
 	private static final long HOUR = 60 * 60 * 1000L;
@@ -44,7 +44,7 @@ public class TaskManagerTest {
 		for (; dateLong < end.getTime(); dateLong = dateLong + HOUR) {
 			Date date = new Date(dateLong);
 
-			analyzer.createTask(date, "cat", "trasnaction", TaskProlicy.ALL);
+			analyzer.createTask(date, "cat", "trasnaction", TaskPolicy.ALL);
 		}
 		Map<Integer, Set<String>> result = analyzer.getResults();
 
@@ -64,7 +64,7 @@ public class TaskManagerTest {
 		for (; dateLong < end.getTime(); dateLong = dateLong + HOUR) {
 			Date date = new Date(dateLong);
 
-			analyzer.createTask(date, "cat", "trasnaction", TaskProlicy.ALL_EXCLUED_HOURLY);
+			analyzer.createTask(date, "cat", "trasnaction", TaskPolicy.ALL_EXCLUDE_HOURLY);
 		}
 		Map<Integer, Set<String>> result = analyzer.getResults();
 		Assert.assertEquals(2, result.get(TaskManager.REPORT_MONTH).size());

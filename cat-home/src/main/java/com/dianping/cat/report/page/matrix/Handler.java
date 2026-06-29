@@ -59,7 +59,7 @@ public class Handler implements PageHandler<Context> {
 		ModelRequest request = new ModelRequest(domain, payload.getDate()) //
 								.setProperty("ip", ipAddress);
 
-		if (matrixModelService.isEligable(request)) {
+		if (matrixModelService.isEligible(request)) {
 			ModelResponse<MatrixReport> response = matrixModelService.invoke(request);
 			MatrixReport report = response.getModel();
 

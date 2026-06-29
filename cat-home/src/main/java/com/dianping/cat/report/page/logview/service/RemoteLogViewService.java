@@ -105,7 +105,7 @@ public class RemoteLogViewService extends BaseRemoteModelService<String> {
 	}
 
 	@Override
-	public boolean isEligable(ModelRequest request) {
+	public boolean isEligible(ModelRequest request) {
 		if (m_manager.isHdfsOn()) {
 			ModelPeriod period = request.getPeriod();
 

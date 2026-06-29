@@ -88,11 +88,6 @@ public final class TcpSocketReceiver {
 		}
 	}
 
-	@Deprecated
-	public synchronized void destory() {
-		destroy();
-	}
-
 	protected boolean getOSMatches(String osNamePrefix) {
 		String os = System.getProperty("os.name");
 

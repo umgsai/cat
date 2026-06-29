@@ -598,7 +598,7 @@ public class SpringMvcEventController {
 	private EventReport queryHourlyReport(String domain, String ipAddress, String type, long date) {
 		ModelRequest request = new ModelRequest(domain, date).setProperty("type", type).setProperty("ip", ipAddress);
 
-		if (eventModelService.isEligable(request)) {
+		if (eventModelService.isEligible(request)) {
 			ModelResponse<EventReport> response = eventModelService.invoke(request);
 
 			return response.getModel();

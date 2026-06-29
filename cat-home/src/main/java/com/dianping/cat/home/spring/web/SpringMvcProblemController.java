@@ -632,7 +632,7 @@ public class SpringMvcProblemController {
 		if (!StringUtils.isEmpty(status)) {
 			request.setProperty("name", status);
 		}
-		if (problemModelService.isEligable(request)) {
+		if (problemModelService.isEligible(request)) {
 			ModelResponse<ProblemReport> response = problemModelService.invoke(request);
 
 			return response.getModel();

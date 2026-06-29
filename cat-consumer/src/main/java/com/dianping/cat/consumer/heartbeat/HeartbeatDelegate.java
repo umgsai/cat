@@ -32,7 +32,7 @@ import com.dianping.cat.consumer.heartbeat.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.heartbeat.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
-import com.dianping.cat.task.TaskManager.TaskProlicy;
+import com.dianping.cat.task.TaskManager.TaskPolicy;
 
 @Component("heartbeatDelegate")
 public class HeartbeatDelegate implements ReportDelegate<HeartbeatReport> {
@@ -66,7 +66,7 @@ public class HeartbeatDelegate implements ReportDelegate<HeartbeatReport> {
 		String domain = report.getDomain();
 
 		if (serverFilterConfigManager.validateDomain(domain)) {
-			return taskManager.createTask(report.getStartTime(), domain, HeartbeatAnalyzer.ID, TaskProlicy.DAILY);
+			return taskManager.createTask(report.getStartTime(), domain, HeartbeatAnalyzer.ID, TaskPolicy.DAILY);
 		} else {
 			return true;
 		}

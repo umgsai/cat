@@ -116,7 +116,7 @@ public class TaskManager {
 		taskRepository = taskDao;
 	}
 
-	public enum TaskProlicy implements TaskCreationPolicy {
+	public enum TaskPolicy implements TaskCreationPolicy {
 
 		ALL {
 			@Override
@@ -140,7 +140,7 @@ public class TaskManager {
 			}
 		},
 
-		HOULY {
+		HOURLY {
 			@Override
 			public boolean shouldCreateDailyTask() {
 				return false;
@@ -162,7 +162,7 @@ public class TaskManager {
 			}
 		},
 
-		ALL_EXCLUED_HOURLY {
+		ALL_EXCLUDE_HOURLY {
 			@Override
 			public boolean shouldCreateDailyTask() {
 				return true;
@@ -226,6 +226,46 @@ public class TaskManager {
 			public boolean shouldCreateWeeklyTask() {
 				return false;
 			}
+		}
+	}
+
+	@Deprecated
+	public enum TaskProlicy implements TaskCreationPolicy {
+
+		ALL(TaskPolicy.ALL),
+
+		HOULY(TaskPolicy.HOURLY),
+
+		ALL_EXCLUED_HOURLY(TaskPolicy.ALL_EXCLUDE_HOURLY),
+
+		DAILY(TaskPolicy.DAILY),
+
+		HOURLY_AND_DAILY(TaskPolicy.HOURLY_AND_DAILY);
+
+		private final TaskPolicy policy;
+
+		TaskProlicy(TaskPolicy policy) {
+			this.policy = policy;
+		}
+
+		@Override
+		public boolean shouldCreateDailyTask() {
+			return policy.shouldCreateDailyTask();
+		}
+
+		@Override
+		public boolean shouldCreateHourlyTask() {
+			return policy.shouldCreateHourlyTask();
+		}
+
+		@Override
+		public boolean shouldCreateMonthTask() {
+			return policy.shouldCreateMonthTask();
+		}
+
+		@Override
+		public boolean shouldCreateWeeklyTask() {
+			return policy.shouldCreateWeeklyTask();
 		}
 	}
 

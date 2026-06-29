@@ -260,7 +260,7 @@ public class TopologyGraphManager {
 			if (serverFilterConfigManager.validateDomain(domain)) {
 				ModelRequest request = new ModelRequest(domain, ModelPeriod.CURRENT.getStartTime());
 
-				if (dependencyModelService.isEligable(request)) {
+				if (dependencyModelService.isEligible(request)) {
 					ModelResponse<DependencyReport> response = dependencyModelService.invoke(request);
 					DependencyReport report = response.getModel();
 

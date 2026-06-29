@@ -65,7 +65,7 @@ public class CatHomeRuntimeBootstrap {
 		} catch (RuntimeException e) {
 			LOGGER.warn("Unable to checkpoint message consumer during shutdown.", e);
 		}
-		tcpSocketReceiver.destory();
+		tcpSocketReceiver.destroy();
 		removeShutdownHook();
 		LOGGER.info("CAT home runtime bootstrap stopped.");
 	}

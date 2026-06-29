@@ -32,7 +32,7 @@ import com.dianping.cat.consumer.dependency.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.dependency.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
-import com.dianping.cat.task.TaskManager.TaskProlicy;
+import com.dianping.cat.task.TaskManager.TaskPolicy;
 
 @Component("dependencyDelegate")
 public class DependencyDelegate implements ReportDelegate<DependencyReport> {
@@ -60,7 +60,7 @@ public class DependencyDelegate implements ReportDelegate<DependencyReport> {
 
 	@Override
 	public boolean createHourlyTask(DependencyReport report) {
-		return taskManager.createTask(report.getStartTime(), Constants.CAT, DependencyAnalyzer.ID, TaskProlicy.HOULY);
+		return taskManager.createTask(report.getStartTime(), Constants.CAT, DependencyAnalyzer.ID, TaskPolicy.HOURLY);
 	}
 
 	@Override

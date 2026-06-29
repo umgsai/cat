@@ -23,12 +23,12 @@ import com.dianping.cat.report.ReportManager;
 
 public interface MessageAnalyzer {
 
-	public default boolean isEligible(MessageTree tree) {
-		return isEligable(tree);
-	}
+	public boolean isEligible(MessageTree tree);
 
 	@Deprecated
-	public boolean isEligable(MessageTree tree);
+	public default boolean isEligable(MessageTree tree) {
+		return isEligible(tree);
+	}
 
 	public void analyze(MessageQueue queue);
 
@@ -40,12 +40,12 @@ public interface MessageAnalyzer {
 
 	public void initialize(long startTime, long duration, long extraTime);
 
-	public default int getAnalyzerCount(String name) {
-		return getAnanlyzerCount(name);
-	}
+	public int getAnalyzerCount(String name);
 
 	@Deprecated
-	public int getAnanlyzerCount(String name);
+	public default int getAnanlyzerCount(String name) {
+		return getAnalyzerCount(name);
+	}
 
 	public void setIndex(int index);
 

@@ -34,7 +34,7 @@ import com.dianping.cat.consumer.storage.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.storage.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
-import com.dianping.cat.task.TaskManager.TaskProlicy;
+import com.dianping.cat.task.TaskManager.TaskPolicy;
 
 @Component("storageDelegate")
 public class StorageDelegate implements ReportDelegate<StorageReport> {
@@ -76,7 +76,7 @@ public class StorageDelegate implements ReportDelegate<StorageReport> {
 		String id = report.getId();
 
 		if (serverFilterConfigManager.validateDomain(id)) {
-			return taskManager.createTask(report.getStartTime(), id, StorageAnalyzer.ID, TaskProlicy.ALL_EXCLUED_HOURLY);
+			return taskManager.createTask(report.getStartTime(), id, StorageAnalyzer.ID, TaskPolicy.ALL_EXCLUDE_HOURLY);
 		} else {
 			return true;
 		}

@@ -31,7 +31,7 @@ import com.dianping.cat.consumer.business.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.business.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
-import com.dianping.cat.task.TaskManager.TaskProlicy;
+import com.dianping.cat.task.TaskManager.TaskPolicy;
 
 @Component("businessDelegate")
 public class BusinessDelegate implements ReportDelegate<BusinessReport> {
@@ -92,7 +92,7 @@ public class BusinessDelegate implements ReportDelegate<BusinessReport> {
 
 	@Override
 	public boolean createHourlyTask(BusinessReport report) {
-		return taskManager.createTask(report.getStartTime(), report.getDomain(), BusinessAnalyzer.ID, TaskProlicy.DAILY);
+		return taskManager.createTask(report.getStartTime(), report.getDomain(), BusinessAnalyzer.ID, TaskPolicy.DAILY);
 	}
 
 	public void setTaskManager(TaskManager taskManager) {

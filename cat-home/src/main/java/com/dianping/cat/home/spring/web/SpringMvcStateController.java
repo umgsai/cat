@@ -360,7 +360,7 @@ public class SpringMvcStateController {
 	private StateReport queryHourlyReport(String ipAddress, long date) {
 		ModelRequest request = new ModelRequest(Constants.CAT, date).setProperty("ip", ipAddress);
 
-		if (stateModelService.isEligable(request)) {
+		if (stateModelService.isEligible(request)) {
 			ModelResponse<StateReport> response = stateModelService.invoke(request);
 
 			return response.getModel();

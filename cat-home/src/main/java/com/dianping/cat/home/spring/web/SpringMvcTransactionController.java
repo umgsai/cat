@@ -601,7 +601,7 @@ public class SpringMvcTransactionController {
 	private TransactionReport queryHourlyReport(String domain, String ipAddress, String type, long date) {
 		ModelRequest request = new ModelRequest(domain, date).setProperty("type", type).setProperty("ip", ipAddress);
 
-		if (transactionModelService.isEligable(request)) {
+		if (transactionModelService.isEligible(request)) {
 			ModelResponse<TransactionReport> response = transactionModelService.invoke(request);
 
 			return response.getModel();

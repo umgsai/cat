@@ -97,12 +97,6 @@ public abstract class BaseHistoricalModelService<T> extends ModelServiceWithCalS
 		return request.getPeriod().isHistorical();
 	}
 
-	@Override
-	@Deprecated
-	public boolean isEligable(ModelRequest request) {
-		return isEligible(request);
-	}
-
 	protected boolean isLocalMode() {
 		return localMode;
 	}

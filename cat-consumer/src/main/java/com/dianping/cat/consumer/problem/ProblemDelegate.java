@@ -36,7 +36,7 @@ import com.dianping.cat.consumer.problem.model.transform.DefaultNativeParser;
 import com.dianping.cat.consumer.problem.model.transform.DefaultSaxParser;
 import com.dianping.cat.report.ReportDelegate;
 import com.dianping.cat.task.TaskManager;
-import com.dianping.cat.task.TaskManager.TaskProlicy;
+import com.dianping.cat.task.TaskManager.TaskPolicy;
 
 @Component("problemDelegate")
 public class ProblemDelegate implements ReportDelegate<ProblemReport> {
@@ -84,7 +84,7 @@ public class ProblemDelegate implements ReportDelegate<ProblemReport> {
 		String domain = report.getDomain();
 
 		if (serverFilterConfigManager.validateDomain(domain)) {
-			return taskManager.createTask(report.getStartTime(), domain, ProblemAnalyzer.ID,	TaskProlicy.ALL_EXCLUED_HOURLY);
+			return taskManager.createTask(report.getStartTime(), domain, ProblemAnalyzer.ID,	TaskPolicy.ALL_EXCLUDE_HOURLY);
 		} else {
 			return true;
 		}

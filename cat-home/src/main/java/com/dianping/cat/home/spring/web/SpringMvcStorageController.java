@@ -659,7 +659,7 @@ public class SpringMvcStorageController {
 	private StorageReport queryHourlyReport(String id, String type, long date, String ipAddress) {
 		ModelRequest request = new ModelRequest(id + "-" + type, date).setProperty("ip", ipAddress);
 
-		if (storageModelService.isEligable(request)) {
+		if (storageModelService.isEligible(request)) {
 			ModelResponse<StorageReport> response = storageModelService.invoke(request);
 
 			return response.getModel();

@@ -70,7 +70,7 @@ public class DefaultRemoteServersUpdater implements ServersUpdater {
 		if (period == ModelPeriod.CURRENT || period == ModelPeriod.LAST) {
 			ModelRequest request = new ModelRequest(domain, time);
 
-			if (localStateService != null && localStateService.isEligable(request)) {
+			if (localStateService != null && localStateService.isEligible(request)) {
 				try {
 					String xml = localStateService.getReport(request, period, domain, new ApiPayload());
 
@@ -78,7 +78,7 @@ public class DefaultRemoteServersUpdater implements ServersUpdater {
 				} catch (Exception e) {
 					throw new RuntimeException("Unable to build local state report for " + request + "!", e);
 				}
-			} else if (stateModelService != null && stateModelService.isEligable(request)) {
+			} else if (stateModelService != null && stateModelService.isEligible(request)) {
 				ModelResponse<StateReport> response = stateModelService.invoke(request);
 				StateReport report = response.getModel();
 
