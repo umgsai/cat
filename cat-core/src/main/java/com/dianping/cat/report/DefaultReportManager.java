@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
@@ -46,7 +47,7 @@ import static com.dianping.cat.Constants.HOUR;
 	* for a couple of hours.
 	*/
 public class DefaultReportManager<T> implements ReportManager<T> {
-	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DefaultReportManager.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultReportManager.class);
 
 	private ReportDelegate<T> reportDelegate;
 

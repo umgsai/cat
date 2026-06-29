@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import jakarta.annotation.Resource;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,7 @@ import com.dianping.cat.helper.TimeHelper;
 
 @Component
 public class HostinfoService {
-	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(HostinfoService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HostinfoService.class);
 
 	public static final String UNKNOWN_PROJECT = "UnknownProject";
 
@@ -85,9 +86,9 @@ public class HostinfoService {
 					return null;
 				}
 			} catch (EmptyResultDataAccessException e) {
-				SLF4J_LOGGER.warn("Hostinfo is missing by ip={}.", ip, e);
+				LOGGER.warn("Hostinfo is missing by ip={}.", ip, e);
 			} catch (Exception e) {
-				SLF4J_LOGGER.error("Unable to find hostinfo by ip={}.", ip, e);
+				LOGGER.error("Unable to find hostinfo by ip={}.", ip, e);
 				Cat.logError(e);
 			}
 			return null;
@@ -114,7 +115,7 @@ public class HostinfoService {
 
 		Threads.forGroup("Cat").start(new RefreshHost());
 		initialized = true;
-		SLF4J_LOGGER.info("HostinfoService started refresh task.");
+		LOGGER.info("HostinfoService started refresh task.");
 	}
 
 	private boolean insert(Hostinfo hostinfo) {
@@ -139,12 +140,12 @@ public class HostinfoService {
 			boolean inserted = insert(info);
 
 			if (inserted) {
-				SLF4J_LOGGER.info("Inserted hostinfo, domain={}, ip={}.", domain, ip);
+				LOGGER.info("Inserted hostinfo, domain={}, ip={}.", domain, ip);
 				return true;
 			}
-			SLF4J_LOGGER.warn("Hostinfo insert affected no rows, domain={}, ip={}.", domain, ip);
+			LOGGER.warn("Hostinfo insert affected no rows, domain={}, ip={}.", domain, ip);
 		} catch (RuntimeException e) {
-			SLF4J_LOGGER.error("Unable to insert hostinfo, domain={}, ip={}.", domain, ip, e);
+			LOGGER.error("Unable to insert hostinfo, domain={}, ip={}.", domain, ip, e);
 			Cat.logError(e);
 		}
 		return false;
@@ -187,7 +188,7 @@ public class HostinfoService {
 				return null;
 			}
 		} catch (Exception e) {
-			SLF4J_LOGGER.error("Unable to query hostname by ip={}.", ip, e);
+			LOGGER.error("Unable to query hostname by ip={}.", ip, e);
 			Cat.logError(e);
 		}
 
@@ -227,9 +228,9 @@ public class HostinfoService {
 			}
 			this.hostinfos = tmpHostInfos;
 			ipDomains = tmpIpDomains;
-			SLF4J_LOGGER.info("Refreshed hostinfo cache, hostCount={}.", hostinfos.size());
+			LOGGER.info("Refreshed hostinfo cache, hostCount={}.", hostinfos.size());
 		} catch (RuntimeException e) {
-			SLF4J_LOGGER.error("Unable to refresh hostinfo cache.", e);
+			LOGGER.error("Unable to refresh hostinfo cache.", e);
 			Cat.logError("initialize HostService error", e);
 		}
 	}
@@ -255,11 +256,11 @@ public class HostinfoService {
 
 		try {
 			hostInfoRepository.updateByPK(hostinfo);
-			SLF4J_LOGGER.info("Updated hostinfo, id={}, domain={}, ip={}.", hostinfo.getId(), hostinfo.getDomain(),
+			LOGGER.info("Updated hostinfo, id={}, domain={}, ip={}.", hostinfo.getId(), hostinfo.getDomain(),
 					hostinfo.getIp());
 			return true;
 		} catch (RuntimeException e) {
-			SLF4J_LOGGER.error("Unable to update hostinfo, id={}, domain={}, ip={}.", hostinfo.getId(),
+			LOGGER.error("Unable to update hostinfo, id={}, domain={}, ip={}.", hostinfo.getId(),
 					hostinfo.getDomain(), hostinfo.getIp(), e);
 			Cat.logError(e);
 			return false;
@@ -298,7 +299,7 @@ public class HostinfoService {
 				try {
 					Thread.sleep(TimeHelper.ONE_MINUTE);
 				} catch (InterruptedException e) {
-					SLF4J_LOGGER.warn("Hostinfo refresh task interrupted.", e);
+					LOGGER.warn("Hostinfo refresh task interrupted.", e);
 					Cat.logError(e);
 				}
 			}

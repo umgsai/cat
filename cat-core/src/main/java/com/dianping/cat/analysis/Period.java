@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.dianping.cat.support.Threads;
 
@@ -34,7 +35,7 @@ import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
 public class Period {
-	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Period.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Period.class);
 
 	private static final int QUEUE_SIZE = 30000;
 

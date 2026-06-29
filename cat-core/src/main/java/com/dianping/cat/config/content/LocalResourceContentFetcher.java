@@ -21,6 +21,7 @@ package com.dianping.cat.config.content;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,7 @@ import com.dianping.cat.Cat;
 
 @Component("contentFetcher")
 public class LocalResourceContentFetcher implements ContentFetcher {
-	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(LocalResourceContentFetcher.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LocalResourceContentFetcher.class);
 
 	private final String PATH = "/config/";
 

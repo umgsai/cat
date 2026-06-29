@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
@@ -40,7 +41,7 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.PathBuilder;
 
 public class LocalReportBucket implements ReportBucket {
-	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(LocalReportBucket.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LocalReportBucket.class);
 
 	private PathBuilder m_pathBuilder;
 
@@ -100,7 +101,7 @@ public class LocalReportBucket implements ReportBucket {
 
 				return new String(bytes, "utf-8");
 			} catch (Exception e) {
-				SLF4J_LOGGER.error("Error when reading report bucket file, file={}.", m_readDataFile, e);
+				LOGGER.error("Error when reading report bucket file, file={}.", m_readDataFile, e);
 			} finally {
 				m_readLock.unlock();
 			}

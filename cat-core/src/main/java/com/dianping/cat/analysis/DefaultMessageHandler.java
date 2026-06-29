@@ -20,6 +20,7 @@ package com.dianping.cat.analysis;
 
 import jakarta.annotation.Resource;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,7 @@ import com.dianping.cat.message.spi.MessageTree;
 
 @Component("messageHandler")
 public class DefaultMessageHandler implements MessageHandler {
-	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(DefaultMessageHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMessageHandler.class);
 
 	@Resource(name = "messageConsumer")
 	private MessageConsumer messageConsumer;
@@ -35,14 +36,14 @@ public class DefaultMessageHandler implements MessageHandler {
 	@Override
 	public void handle(MessageTree tree) {
 		if (messageConsumer == null) {
-			SLF4J_LOGGER.warn("Message consumer is not configured, drop message tree={}.", tree);
+			LOGGER.warn("Message consumer is not configured, drop message tree={}.", tree);
 			return;
 		}
 
 		try {
 			messageConsumer.consume(tree);
 		} catch (Throwable e) {
-			SLF4J_LOGGER.error("Error when consuming message, consumer={}, tree={}.", messageConsumer, tree, e);
+			LOGGER.error("Error when consuming message, consumer={}, tree={}.", messageConsumer, tree, e);
 		}
 	}
 

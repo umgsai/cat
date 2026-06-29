@@ -22,6 +22,7 @@ import java.util.List;
 
 import jakarta.annotation.Resource;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +51,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 
 @Component("tcpSocketReceiver")
 public final class TcpSocketReceiver {
-	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(TcpSocketReceiver.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TcpSocketReceiver.class);
 
 	@Resource(name = "serverConfigManager")
 	protected ServerConfigManager serverConfigManager;
@@ -155,15 +156,15 @@ public final class TcpSocketReceiver {
 	}
 
 	private void error(String message, Throwable cause) {
-		SLF4J_LOGGER.error(message, cause);
+		LOGGER.error(message, cause);
 	}
 
 	private void info(String message) {
-		SLF4J_LOGGER.info(message);
+		LOGGER.info(message);
 	}
 
 	private void warn(String message, Throwable cause) {
-		SLF4J_LOGGER.warn(message, cause);
+		LOGGER.warn(message, cause);
 	}
 
 	private class MessageDecoder extends ByteToMessageDecoder {

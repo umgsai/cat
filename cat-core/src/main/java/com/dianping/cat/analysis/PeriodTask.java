@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.dianping.cat.support.Threads.Task;
 
@@ -30,7 +31,7 @@ import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.spi.MessageTree;
 
 public class PeriodTask implements Task {
-	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PeriodTask.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PeriodTask.class);
 
 	private MessageAnalyzer m_analyzer;
 

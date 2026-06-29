@@ -23,6 +23,7 @@ import java.util.List;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +37,7 @@ import com.dianping.cat.statistic.ServerStatisticManager;
 
 @Component("messageConsumer")
 public class RealtimeConsumer implements MessageConsumer {
-	private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(RealtimeConsumer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RealtimeConsumer.class);
 
 	public static final long MINUTE = 60 * 1000L;
 
@@ -62,7 +63,7 @@ public class RealtimeConsumer implements MessageConsumer {
 		if (period != null) {
 			period.distribute(tree);
 		} else {
-			SLF4J_LOGGER.warn("No realtime period found for message tree, timestamp={}, tree={}.", timestamp, tree);
+			LOGGER.warn("No realtime period found for message tree, timestamp={}, tree={}.", timestamp, tree);
 			serverStatisticManager.addNetworkTimeError(1);
 		}
 	}
@@ -78,14 +79,14 @@ public class RealtimeConsumer implements MessageConsumer {
 			Period period = periodManager.findPeriod(currentStartTime);
 
 			if (period == null) {
-				SLF4J_LOGGER.warn("No current realtime period found when doing checkpoint, startTime={}.", currentStartTime);
+				LOGGER.warn("No current realtime period found when doing checkpoint, startTime={}.", currentStartTime);
 			} else {
 				for (MessageAnalyzer analyzer : period.getAnalyzers()) {
 					try {
 						analyzer.doCheckpoint(false);
 					} catch (Exception e) {
 						Cat.logError(e);
-						SLF4J_LOGGER.error("Failed to checkpoint realtime analyzer, analyzer={}.", analyzer, e);
+						LOGGER.error("Failed to checkpoint realtime analyzer, analyzer={}.", analyzer, e);
 					}
 				}
 			}
@@ -99,7 +100,7 @@ public class RealtimeConsumer implements MessageConsumer {
 			t.setStatus(Message.SUCCESS);
 		} catch (RuntimeException e) {
 			Cat.logError(e);
-			SLF4J_LOGGER.error("Failed to do realtime checkpoint.", e);
+			LOGGER.error("Failed to do realtime checkpoint.", e);
 			t.setStatus(e);
 		} finally {
 			t.complete();
@@ -167,11 +168,11 @@ public class RealtimeConsumer implements MessageConsumer {
 
 		Threads.forGroup("Cat").start(periodManager);
 		initialized = true;
-		SLF4J_LOGGER.info("Initialized realtime consumer.");
+		LOGGER.info("Initialized realtime consumer.");
 	}
 
 	private void info(String message) {
-		SLF4J_LOGGER.info(message);
+		LOGGER.info(message);
 	}
 
 	public void setAnalyzerManager(MessageAnalyzerManager analyzerManager) {
