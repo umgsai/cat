@@ -121,7 +121,7 @@ public abstract class BaseRemoteModelService<T> extends ModelServiceWithCalSuppo
 	}
 
 	@Override
-	public boolean isEligable(ModelRequest request) {
+	public boolean isEligible(ModelRequest request) {
 		ModelPeriod period = request.getPeriod();
 
 		if (m_serverConfigManager.isRemoteServersFixed() && isServersFixed()) {
@@ -136,6 +136,12 @@ public abstract class BaseRemoteModelService<T> extends ModelServiceWithCalSuppo
 		} else {
 			return !period.isHistorical();
 		}
+	}
+
+	@Override
+	@Deprecated
+	public boolean isEligable(ModelRequest request) {
+		return isEligible(request);
 	}
 
 	public abstract boolean isServersFixed();

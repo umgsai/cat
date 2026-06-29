@@ -75,7 +75,13 @@ public class DefaultReportManager<T> implements ReportManager<T> {
 		}
 	}
 
+	public void destroy() {
+	}
+
+	@Override
+	@Deprecated
 	public void destory() {
+		destroy();
 	}
 
 	@Override

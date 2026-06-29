@@ -54,7 +54,7 @@ public class PeriodTask implements Task {
 	}
 
 	public boolean enqueue(MessageTree tree) {
-		if (m_analyzer.isEligable(tree)) {
+		if (m_analyzer.isEligible(tree)) {
 			boolean result = m_queue.offer(tree);
 
 			if (!result) { // trace queue overflow

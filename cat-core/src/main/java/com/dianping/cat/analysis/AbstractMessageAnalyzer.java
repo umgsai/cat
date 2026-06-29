@@ -97,7 +97,7 @@ public abstract class AbstractMessageAnalyzer<R> implements MessageAnalyzer {
 		ReportManager<?> manager = this.getReportManager();
 
 		if (manager != null) {
-			manager.destory();
+			manager.destroy();
 		}
 	}
 
@@ -105,8 +105,14 @@ public abstract class AbstractMessageAnalyzer<R> implements MessageAnalyzer {
 	public abstract void doCheckpoint(boolean atEnd);
 
 	@Override
-	public int getAnanlyzerCount(String name) {
+	public int getAnalyzerCount(String name) {
 		return m_serverConfigManager.getThreadsOfRealtimeAnalyzer(name);
+	}
+
+	@Override
+	@Deprecated
+	public int getAnanlyzerCount(String name) {
+		return getAnalyzerCount(name);
 	}
 
 	protected long getExtraTime() {
@@ -134,8 +140,14 @@ public abstract class AbstractMessageAnalyzer<R> implements MessageAnalyzer {
 	}
 
 	@Override
-	public boolean isEligable(MessageTree tree) {
+	public boolean isEligible(MessageTree tree) {
 		return true;
+	}
+
+	@Override
+	@Deprecated
+	public boolean isEligable(MessageTree tree) {
+		return isEligible(tree);
 	}
 
 	protected boolean isLocalMode() {

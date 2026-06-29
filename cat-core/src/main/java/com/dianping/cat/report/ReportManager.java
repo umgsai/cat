@@ -25,6 +25,11 @@ import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
 
 public interface ReportManager<T> {
 
+	public default void destroy() {
+		destory();
+	}
+
+	@Deprecated
 	public void destory();
 
 	public void initialize();

@@ -142,7 +142,7 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 		t.addData("thread", Thread.currentThread());
 
 		for (final ModelService<T> service : allServices) {
-			if (!service.isEligable(request)) {
+			if (!service.isEligible(request)) {
 				continue;
 			}
 
@@ -201,16 +201,22 @@ public abstract class BaseCompositeModelService<T> extends ModelServiceWithCalSu
 	}
 
 	@Override
-	public boolean isEligable(ModelRequest request) {
+	public boolean isEligible(ModelRequest request) {
 		ensureInitialized();
 
 		for (ModelService<T> service : allServices) {
-			if (service.isEligable(request)) {
+			if (service.isEligible(request)) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	@Override
+	@Deprecated
+	public boolean isEligable(ModelRequest request) {
+		return isEligible(request);
 	}
 
 	protected abstract T merge(ModelRequest request, final List<ModelResponse<T>> responses);

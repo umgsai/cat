@@ -106,7 +106,7 @@ public class DefaultMessageAnalyzerManager
 					analyzer.initialize(startTime, duration, extraTime);
 					analyzers.add(analyzer);
 
-					int count = analyzer.getAnanlyzerCount(name);
+					int count = analyzer.getAnalyzerCount(name);
 
 					for (int i = 1; i < count; i++) {
 						MessageAnalyzer tempAnalyzer = createAnalyzer(name);

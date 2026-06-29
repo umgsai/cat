@@ -70,7 +70,7 @@ public final class TcpSocketReceiver {
 
 	private final int port = Integer.getInteger("cat.tcp.port", 2280); // default port number from phone, C:2, A:2, T:8
 
-	public synchronized void destory() {
+	public synchronized void destroy() {
 		try {
 			info("start shutdown socket, port " + port);
 			if (future != null) {
@@ -86,6 +86,11 @@ public final class TcpSocketReceiver {
 		} catch (Exception e) {
 			warn(e.getMessage(), e);
 		}
+	}
+
+	@Deprecated
+	public synchronized void destory() {
+		destroy();
 	}
 
 	protected boolean getOSMatches(String osNamePrefix) {

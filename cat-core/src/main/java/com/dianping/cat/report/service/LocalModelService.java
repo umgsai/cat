@@ -142,10 +142,15 @@ public abstract class LocalModelService<T> {
 		messageConsumer = consumer;
 	}
 
-	public boolean isEligable(ModelRequest request) {
+	public boolean isEligible(ModelRequest request) {
 		ModelPeriod period = request.getPeriod();
 
 		return !period.isHistorical();
+	}
+
+	@Deprecated
+	public boolean isEligable(ModelRequest request) {
+		return isEligible(request);
 	}
 
 	@Override
