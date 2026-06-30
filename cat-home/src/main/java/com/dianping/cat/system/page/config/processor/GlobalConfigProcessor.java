@@ -37,7 +37,7 @@ import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.config.AllReportConfigManager;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.home.group.entity.Domain;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
@@ -87,11 +87,10 @@ public class GlobalConfigProcessor {
 	private ReportReloadConfigManager reportReloadConfigManager;
 
 	private boolean deleteProject(Payload payload) {
-		Project proto = new Project();
+		ProjectDO proto = new ProjectDO();
 		int id = payload.getProjectId();
 
-		proto.setId(id);
-		proto.setKeyId(id);
+		proto.setId((long) id);
 		return projectService.delete(proto);
 	}
 
@@ -218,8 +217,8 @@ public class GlobalConfigProcessor {
 		}
 	}
 
-	public List<Project> queryAllProjects() {
-		List<Project> projects = new ArrayList<Project>();
+	public List<ProjectDO> queryAllProjects() {
+		List<ProjectDO> projects = new ArrayList<ProjectDO>();
 
 		try {
 			projects = projectService.findAll();
@@ -233,25 +232,24 @@ public class GlobalConfigProcessor {
 
 	public List<String> queryDoaminList() {
 		List<String> result = new ArrayList<String>();
-		List<Project> projects = queryAllProjects();
+		List<ProjectDO> projects = queryAllProjects();
 
 		result.add("Default");
-		for (Project p : projects) {
+		for (ProjectDO p : projects) {
 			result.add(p.getDomain());
 		}
 		return result;
 	}
 
 	private boolean updateProject(Payload payload) {
-		Project project = payload.getProject();
+		ProjectDO project = payload.getProject();
 		String domain = project.getDomain();
 
 		if (StringUtils.isNotEmpty(domain)) {
-			long id = project.getId();
-			Project temp = projectService.findByDomain(domain);
+			Long id = project.getId();
+			ProjectDO temp = projectService.findByDomain(domain);
 
-			if (temp != null && id > 0) {
-				temp.setKeyId(id);
+			if (temp != null && id != null && id > 0) {
 				return projectService.update(project);
 			} else {
 				return projectService.insert(project);
@@ -260,10 +258,10 @@ public class GlobalConfigProcessor {
 		return false;
 	}
 
-	public static class ProjectCompartor implements Comparator<Project> {
+	public static class ProjectCompartor implements Comparator<ProjectDO> {
 
 		@Override
-		public int compare(Project o1, Project o2) {
+		public int compare(ProjectDO o1, ProjectDO o2) {
 			String department1 = String.valueOf(o1.getBu());
 			String department2 = String.valueOf(o2.getBu());
 			String productLine1 = String.valueOf(o1.getCmdbProductline());

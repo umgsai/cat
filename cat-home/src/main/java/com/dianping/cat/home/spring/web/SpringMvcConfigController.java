@@ -24,7 +24,7 @@ import com.dianping.cat.alarm.spi.config.AlertPolicyManager;
 import com.dianping.cat.alarm.spi.config.SenderConfigManager;
 import com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator;
 import com.dianping.cat.config.ReportReloadConfigManager;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.home.dependency.config.entity.DomainConfig;
 import com.dianping.cat.home.dependency.config.entity.EdgeConfig;
@@ -257,7 +257,7 @@ public class SpringMvcConfigController {
 		Boolean opState = null;
 
 		if ("updateSubmit".equals(action)) {
-			Project submitted = project(request);
+			ProjectDO submitted = project(request);
 
 			opState = updateProject(submitted);
 			if (submitted.getDomain() != null && submitted.getDomain().length() > 0) {
@@ -267,8 +267,8 @@ public class SpringMvcConfigController {
 			opState = deleteProject(projectId(request));
 		}
 
-		List<Project> projects = projects();
-		Project selected = null;
+		List<ProjectDO> projects = projects();
+		ProjectDO selected = null;
 
 		if (!projectAdd) {
 			selected = projectService.findByDomain(domain);
@@ -384,10 +384,9 @@ public class SpringMvcConfigController {
 			return false;
 		}
 
-		Project project = new Project();
+		ProjectDO project = new ProjectDO();
 
 		project.setId(id);
-		project.setKeyId(id);
 		return projectService.delete(project);
 	}
 
@@ -875,8 +874,8 @@ public class SpringMvcConfigController {
 		model.put("domainList", queryDomainList());
 	}
 
-	private Project findProject(List<Project> projects, String domain) {
-		for (Project project : projects) {
+	private ProjectDO findProject(List<ProjectDO> projects, String domain) {
+		for (ProjectDO project : projects) {
 			if (string(project.getDomain()).equals(domain)) {
 				return project;
 			}
@@ -1074,8 +1073,8 @@ public class SpringMvcConfigController {
 		return value;
 	}
 
-	private Project project(HttpServletRequest request) {
-		Project project = new Project();
+	private ProjectDO project(HttpServletRequest request) {
+		ProjectDO project = new ProjectDO();
 
 		project.setId(longParameter(request, "project.id", 0));
 		project.setDomain(parameter(request, "project.domain", ""));
@@ -1242,7 +1241,7 @@ public class SpringMvcConfigController {
 		List<String> domains = new ArrayList<String>();
 
 		domains.add("Default");
-		for (Project project : projects()) {
+		for (ProjectDO project : projects()) {
 			domains.add(project.getDomain());
 		}
 		return domains;
@@ -1252,12 +1251,12 @@ public class SpringMvcConfigController {
 		return new ArrayList<String>();
 	}
 
-	private List<Project> projects() {
-		List<Project> projects = new ArrayList<Project>(projectService.findAll());
+	private List<ProjectDO> projects() {
+		List<ProjectDO> projects = new ArrayList<ProjectDO>(projectService.findAll());
 
-		Collections.sort(projects, new Comparator<Project>() {
+		Collections.sort(projects, new Comparator<ProjectDO>() {
 			@Override
-			public int compare(Project left, Project right) {
+			public int compare(ProjectDO left, ProjectDO right) {
 				int bu = string(left.getBu()).compareToIgnoreCase(string(right.getBu()));
 
 				if (bu != 0) {
@@ -1324,15 +1323,16 @@ public class SpringMvcConfigController {
 		return value == null ? "" : value;
 	}
 
-	private boolean updateProject(Project project) {
+	private boolean updateProject(ProjectDO project) {
 		String domain = project.getDomain();
 
 		if (domain == null || domain.length() == 0) {
 			return false;
 		}
 
-		if (project.getId() > 0) {
-			project.setKeyId(project.getId());
+		Long id = project.getId();
+
+		if (id != null && id > 0) {
 			return projectService.update(project);
 		}
 		return projectService.insert(project);

@@ -44,7 +44,7 @@ import com.dianping.cat.configuration.business.entity.BusinessReportConfig;
 import com.dianping.cat.configuration.business.entity.CustomConfig;
 import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.helper.Chinese;
 import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.helper.TimeHelper;
@@ -147,7 +147,7 @@ public class BusinessGraphCreator extends AbstractGraphCreator {
 
 	protected String buildContactInfo(String domainName) {
 		try {
-			Project project = projectService.findByDomain(domainName);
+			ProjectDO project = projectService.findByDomain(domainName);
 
 			if (project != null) {
 				String owners = project.getOwner();

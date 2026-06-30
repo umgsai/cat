@@ -44,7 +44,7 @@ import com.dianping.cat.report.page.dependency.config.TopoGraphFormatConfigManag
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphConfigManager;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
 
@@ -918,10 +918,12 @@ public class SpringMvcConfigControllerTest {
 
 	private static class StubProjectService extends ProjectService {
 		@Override
-		public List<Project> findAll() {
-			List<Project> projects = new ArrayList<Project>();
+		public List<ProjectDO> findAll() {
+			List<ProjectDO> projects = new ArrayList<ProjectDO>();
+			ProjectDO project = new ProjectDO();
 
-			projects.add(new Project().setDomain("cat"));
+			project.setDomain("cat");
+			projects.add(project);
 			return projects;
 		}
 	}

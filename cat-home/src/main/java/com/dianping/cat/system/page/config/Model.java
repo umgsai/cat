@@ -29,7 +29,7 @@ import org.unidal.web.mvc.ViewModel;
 import org.unidal.web.mvc.view.annotation.ModelMeta;
 
 import com.dianping.cat.alarm.rule.entity.Rule;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.home.dependency.config.entity.DomainConfig;
 import com.dianping.cat.home.dependency.config.entity.EdgeConfig;
 import com.dianping.cat.home.dependency.config.entity.NodeConfig;
@@ -47,9 +47,9 @@ public class Model extends ViewModel<SystemPage, Action, Context> {
 
 	public static final String FAIL = "Fail";
 
-	private Project m_project;
+	private ProjectDO m_project;
 
-	private List<Project> m_projects;
+	private List<ProjectDO> m_projects;
 
 	private ExceptionLimit m_exceptionLimit;
 
@@ -314,19 +314,19 @@ public class Model extends ViewModel<SystemPage, Action, Context> {
 		}
 	}
 
-	public Project getProject() {
+	public ProjectDO getProject() {
 		return m_project;
 	}
 
-	public void setProject(Project project) {
+	public void setProject(ProjectDO project) {
 		m_project = project;
 	}
 
-	public List<Project> getProjects() {
+	public List<ProjectDO> getProjects() {
 		return m_projects;
 	}
 
-	public void setProjects(List<Project> projects) {
+	public void setProjects(List<ProjectDO> projects) {
 		m_projects = projects;
 	}
 

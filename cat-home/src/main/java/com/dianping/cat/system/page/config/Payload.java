@@ -24,7 +24,7 @@ import org.unidal.web.mvc.payload.annotation.FieldMeta;
 import org.unidal.web.mvc.payload.annotation.ObjectMeta;
 
 import com.dianping.cat.Constants;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.home.dependency.config.entity.DomainConfig;
 import com.dianping.cat.home.dependency.config.entity.EdgeConfig;
 import com.dianping.cat.home.exception.entity.ExceptionExclude;
@@ -38,7 +38,7 @@ public class Payload implements ActionPayload<SystemPage, Action> {
 	private SystemPage m_page;
 
 	@ObjectMeta("project")
-	private Project m_project = new Project();
+	private ProjectDO m_project = new ProjectDO();
 
 	@ObjectMeta("domainConfig")
 	private DomainConfig m_domainConfig = new DomainConfig();
@@ -324,11 +324,11 @@ public class Payload implements ActionPayload<SystemPage, Action> {
 		m_productLineName = productLineName;
 	}
 
-	public Project getProject() {
+	public ProjectDO getProject() {
 		return m_project;
 	}
 
-	public void setProject(Project project) {
+	public void setProject(ProjectDO project) {
 		m_project = project;
 	}
 

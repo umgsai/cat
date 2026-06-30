@@ -20,7 +20,7 @@ package com.dianping.cat.service;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.mybatis.ProjectRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -47,9 +47,9 @@ public class ProjectService {
 
 	private ConcurrentHashMap<String, String> domains = new ConcurrentHashMap<String, String>();
 
-	private ConcurrentHashMap<String, Project> domainToProjects = new ConcurrentHashMap<String, Project>();
+	private ConcurrentHashMap<String, ProjectDO> domainToProjects = new ConcurrentHashMap<String, ProjectDO>();
 
-	private ConcurrentHashMap<String, Project> cmdbToProjects = new ConcurrentHashMap<String, Project>();
+	private ConcurrentHashMap<String, ProjectDO> cmdbToProjects = new ConcurrentHashMap<String, ProjectDO>();
 
 	private volatile boolean initialized;
 
@@ -59,20 +59,25 @@ public class ProjectService {
 		return domains.containsKey(domain);
 	}
 
-	public Project create() {
+	public ProjectDO create() {
 		return projectRepository.createLocal();
 	}
 
-	public boolean delete(Project project) {
+	public boolean delete(ProjectDO project) {
 		ensureInitialized();
 
-		long id = project.getId();
+		Long id = project.getId();
 		String domainName = null;
 
-		for (Entry<String, Project> entry : domainToProjects.entrySet()) {
-			Project pro = entry.getValue();
+		if (id == null) {
+			LOGGER.warn("Unable to delete project without id, domain={}.", project.getDomain());
+			return false;
+		}
 
-			if (pro.getId() == id) {
+		for (Entry<String, ProjectDO> entry : domainToProjects.entrySet()) {
+			ProjectDO pro = entry.getValue();
+
+			if (id.equals(pro.getId())) {
 				domainName = pro.getDomain();
 				break;
 			}
@@ -100,10 +105,10 @@ public class ProjectService {
 		}
 	}
 
-	public List<Project> findAll() {
+	public List<ProjectDO> findAll() {
 		ensureInitialized();
 
-		return new ArrayList<Project>(domainToProjects.values());
+		return new ArrayList<ProjectDO>(domainToProjects.values());
 	}
 
 	public Set<String> findAllDomains() {
@@ -112,22 +117,22 @@ public class ProjectService {
 		return domains.keySet();
 	}
 
-	public Project findByDomain(String domainName) {
+	public ProjectDO findByDomain(String domainName) {
 		ensureInitialized();
 
-		Project project = domainToProjects.get(domainName);
+		ProjectDO project = domainToProjects.get(domainName);
 
 		if (project != null) {
 			return project;
 		} else {
-			try {
-				Project pro = projectRepository.findByDomain(domainName);
+				try {
+					ProjectDO pro = projectRepository.findByDomain(domainName);
 
-				domainToProjects.put(pro.getDomain(), pro);
-				return project;
-			} catch (EmptyResultDataAccessException e) {
-				LOGGER.warn("Project is missing or unavailable by domain={}.", domainName, e);
-			} catch (Exception e) {
+					domainToProjects.put(pro.getDomain(), pro);
+					return pro;
+				} catch (EmptyResultDataAccessException e) {
+					LOGGER.warn("Project is missing or unavailable by domain={}.", domainName, e);
+				} catch (Exception e) {
 				LOGGER.error("Unable to find project by domain={}.", domainName, e);
 				Cat.logError(e);
 			}
@@ -141,7 +146,7 @@ public class ProjectService {
 		Map<String, Department> departments = new TreeMap<String, Department>();
 
 		for (String domain : domains) {
-			Project project = findProject(domain);
+			ProjectDO project = findProject(domain);
 			String department = DEFAULT;
 			String projectLine = DEFAULT;
 
@@ -164,10 +169,10 @@ public class ProjectService {
 		return departments;
 	}
 
-	public Project findProject(String domain) {
+	public ProjectDO findProject(String domain) {
 		ensureInitialized();
 
-		Project project = domainToProjects.get(domain);
+		ProjectDO project = domainToProjects.get(domain);
 
 		if (project == null) {
 			project = cmdbToProjects.get(domain);
@@ -204,7 +209,7 @@ public class ProjectService {
 		serverConfigManager = manager;
 	}
 
-	public boolean insert(Project project) {
+	public boolean insert(ProjectDO project) {
 		ensureInitialized();
 
 		domainToProjects.put(project.getDomain(), project);
@@ -230,7 +235,7 @@ public class ProjectService {
 	public boolean insert(String domain) {
 		ensureInitialized();
 
-		Project project = create();
+		ProjectDO project = create();
 
 		project.setDomain(domain);
 		project.setCmdbProductline(DEFAULT);
@@ -250,12 +255,12 @@ public class ProjectService {
 
 	protected void refresh() {
 		try {
-			List<Project> projects = projectRepository.findAll();
-			ConcurrentHashMap<String, Project> tmpDomainProjects = new ConcurrentHashMap<String, Project>();
-			ConcurrentHashMap<String, Project> tmpCmdbProjects = new ConcurrentHashMap<String, Project>();
+			List<ProjectDO> projects = projectRepository.findAll();
+			ConcurrentHashMap<String, ProjectDO> tmpDomainProjects = new ConcurrentHashMap<String, ProjectDO>();
+			ConcurrentHashMap<String, ProjectDO> tmpCmdbProjects = new ConcurrentHashMap<String, ProjectDO>();
 			ConcurrentHashMap<String, String> tmpDomains = new ConcurrentHashMap<String, String>();
 
-			for (Project project : projects) {
+			for (ProjectDO project : projects) {
 				String domain = project.getDomain();
 
 				tmpDomains.put(domain, domain);
@@ -278,7 +283,7 @@ public class ProjectService {
 		}
 	}
 
-	public boolean update(Project project) {
+	public boolean update(ProjectDO project) {
 		ensureInitialized();
 
 		domainToProjects.put(project.getDomain(), project);

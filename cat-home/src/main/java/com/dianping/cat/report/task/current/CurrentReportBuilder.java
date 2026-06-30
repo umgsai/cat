@@ -32,7 +32,7 @@ import com.dianping.cat.support.Threads;
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.service.ProjectService;
 
@@ -55,10 +55,10 @@ public class CurrentReportBuilder implements TaskBuilder {
 		CurrentWeeklyMonthlyReportTask reportTask = CurrentWeeklyMonthlyReportTask.getInstance();
 
 		try {
-			List<Project> projects = projectService.findAll();
+			List<ProjectDO> projects = projectService.findAll();
 			List<String> domains = new ArrayList<String>();
 
-			for (Project project : projects) {
+			for (ProjectDO project : projects) {
 				if (serverFilterConfigManager.validateDomain(project.getDomain())) {
 					domains.add(project.getDomain());
 				}

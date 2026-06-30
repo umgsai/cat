@@ -23,7 +23,7 @@ import org.unidal.web.mvc.ActionPayload;
 import org.unidal.web.mvc.payload.annotation.FieldMeta;
 import org.unidal.web.mvc.payload.annotation.ObjectMeta;
 
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.system.SystemPage;
 
 public class Payload implements ActionPayload<SystemPage, Action> {
@@ -33,7 +33,7 @@ public class Payload implements ActionPayload<SystemPage, Action> {
 	private Action m_action;
 
 	@ObjectMeta("project")
-	private Project m_project = new Project();
+	private ProjectDO m_project = new ProjectDO();
 
 	@Override
 	public Action getAction() {
@@ -54,11 +54,11 @@ public class Payload implements ActionPayload<SystemPage, Action> {
 		m_page = SystemPage.getByName(page, SystemPage.PROJECT);
 	}
 
-	public Project getProject() {
+	public ProjectDO getProject() {
 		return m_project;
 	}
 
-	public void setProject(Project project) {
+	public void setProject(ProjectDO project) {
 		m_project = project;
 	}
 

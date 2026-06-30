@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.service.ProjectService;
 
 import jakarta.annotation.Resource;
@@ -45,7 +45,7 @@ public abstract class ProjectDecorator extends Decorator {
 	public String buildContactInfo(String domainName) {
 		try {
 			ProjectService projectService = getProjectService();
-			Project project = projectService == null ? null : projectService.findByDomain(domainName);
+			ProjectDO project = projectService == null ? null : projectService.findByDomain(domainName);
 
 			if (project != null) {
 				String owners = project.getOwner();

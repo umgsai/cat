@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.page.project.UpdateStatus;
@@ -57,8 +57,8 @@ public class SpringMvcProjectController {
 		return builder.toJson(jsons);
 	}
 
-	Project project(HttpServletRequest request) {
-		Project project = new Project();
+	ProjectDO project(HttpServletRequest request) {
+		ProjectDO project = new ProjectDO();
 
 		project.setDomain(parameter(request, "project.domain", null));
 		project.setCmdbDomain(parameter(request, "project.cmdbDomain", null));
@@ -72,14 +72,14 @@ public class SpringMvcProjectController {
 	}
 
 	String updateProject(HttpServletRequest request) {
-		Project project = project(request);
+		ProjectDO project = project(request);
 
 		try {
 			if (project.getDomain() == null) {
 				project.setDomain(Constants.CAT);
 			}
 
-			Project existing = projectService.findByDomain(project.getDomain());
+			ProjectDO existing = projectService.findByDomain(project.getDomain());
 
 			if (existing == null) {
 				projectService.insert(project);

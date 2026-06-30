@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.SystemPage;
@@ -75,13 +75,13 @@ public class Handler implements PageHandler<Context> {
 			break;
 		case PROJECT_UPDATE:
 			try {
-				Project project = payload.getProject();
+				ProjectDO project = payload.getProject();
 
 				if (project.getDomain() == null) {
 					project.setDomain(Constants.CAT);
 				}
 
-				Project temp = projectService.findByDomain(project.getDomain());
+				ProjectDO temp = projectService.findByDomain(project.getDomain());
 
 				if (temp == null) {
 					projectService.insert(project);

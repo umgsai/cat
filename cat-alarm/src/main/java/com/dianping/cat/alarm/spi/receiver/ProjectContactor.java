@@ -25,7 +25,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.dianping.cat.alarm.receiver.entity.Receiver;
 import com.dianping.cat.alarm.spi.config.AlertConfigManager;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.service.ProjectService;
 
 import jakarta.annotation.Resource;
@@ -59,7 +59,7 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 
 			if (StringUtils.isNotEmpty(id)) {
 				ProjectService projectService = getProjectService();
-				Project project = projectService == null ? null : projectService.findByDomain(id);
+				ProjectDO project = projectService == null ? null : projectService.findByDomain(id);
 
 				if (project != null) {
 					mailReceivers.addAll(split(project.getEmail()));
@@ -82,7 +82,7 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 
 			if (StringUtils.isNotEmpty(id)) {
 				ProjectService projectService = getProjectService();
-				Project project = projectService == null ? null : projectService.findByDomain(id);
+				ProjectDO project = projectService == null ? null : projectService.findByDomain(id);
 
 				if (project != null) {
 					smsReceivers.addAll(split(project.getPhone()));
@@ -105,7 +105,7 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 
 			if (StringUtils.isNotEmpty(id)) {
 				ProjectService projectService = getProjectService();
-				Project project = projectService == null ? null : projectService.findByDomain(id);
+				ProjectDO project = projectService == null ? null : projectService.findByDomain(id);
 
 				if (project != null) {
 					weixinReceivers.addAll(split(project.getEmail()));
@@ -128,7 +128,7 @@ public abstract class ProjectContactor extends DefaultContactor implements Conta
 
 			if (StringUtils.isNotEmpty(id)) {
 				ProjectService projectService = getProjectService();
-				Project project = projectService == null ? null : projectService.findByDomain(id);
+				ProjectDO project = projectService == null ? null : projectService.findByDomain(id);
 
 				if (project != null) {
 					receivers.addAll(split(project.getEmail()));

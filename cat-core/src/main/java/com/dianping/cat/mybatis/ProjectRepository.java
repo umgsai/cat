@@ -3,7 +3,6 @@ package com.dianping.cat.mybatis;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import jakarta.annotation.Resource;
 
@@ -14,7 +13,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.dianping.cat.core.dal.Project;
 import com.dianping.cat.mybatis.mapper.ProjectMapper;
 import com.dianping.cat.mybatis.data.ProjectDO;
 
@@ -30,35 +28,35 @@ public class ProjectRepository {
 	@Resource(name = "transactionTemplate")
 	private TransactionTemplate transactionTemplate;
 
-	public Project createLocal() {
-		return new Project();
+	public ProjectDO createLocal() {
+		return new ProjectDO();
 	}
 
-	public int deleteByPK(Project proto) {
+	public int deleteByPK(ProjectDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
+		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getId()));
 	}
 
-	public List<Project> findAll() {
+	public List<ProjectDO> findAll() {
 		ProjectMapper mapper = springMapper();
 
 		ProjectDO record = new ProjectDO();
 
-		return mapper.findAll(record).stream().map(this::toModel).collect(Collectors.toList());
+		return mapper.findAll(record);
 	}
 
-	public Project findByPK(int keyId) {
+	public ProjectDO findByPK(int keyId) {
 		return findByPK((long) keyId);
 	}
 
-	public Project findByPK(long keyId) {
+	public ProjectDO findByPK(long keyId) {
 		ProjectMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public Project findByDomain(String domain) {
+	public ProjectDO findByDomain(String domain) {
 		ProjectDO record = new ProjectDO();
 		ProjectMapper mapper = springMapper();
 
@@ -68,7 +66,7 @@ public class ProjectRepository {
 		return requireFound(result, "findByDomain", record.toString());
 	}
 
-	public Project findByCmdbDomain(String domain) {
+	public ProjectDO findByCmdbDomain(String domain) {
 		ProjectDO record = new ProjectDO();
 		ProjectMapper mapper = springMapper();
 
@@ -78,21 +76,20 @@ public class ProjectRepository {
 		return requireFound(result, "findByCmdbDomain", record.toString());
 	}
 
-	public int insert(Project proto) {
+	public int insert(ProjectDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		ProjectDO record = toRecord(proto);
-		int count = transactionTemplate.execute(status -> springMapper().insert(record));
+		normalize(proto);
+		int count = transactionTemplate.execute(status -> springMapper().insert(proto));
 
-		proto.setId(record.getId());
-		proto.setKeyId(record.getId());
 		return count;
 	}
 
-	public int updateByPK(Project proto) {
+	public int updateByPK(ProjectDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
+		normalize(proto);
+		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(proto));
 	}
 
 	private ProjectMapper springMapper() {
@@ -124,70 +121,17 @@ public class ProjectRepository {
 		this.transactionTemplate = transactionTemplate;
 	}
 
-	private Project requireFound(ProjectDO record, String field, String value) {
+	private ProjectDO requireFound(ProjectDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No Project found by " + field + "(" + value + ").", 1);
 		}
 
-		return toModel(record);
-	}
-
-	private Project toModel(ProjectDO record) {
-		Project model = new Project();
-
-		if (record.getId() != null) {
-			model.setId(record.getId());
-		}
-		if (record.getDomain() != null) {
-			model.setDomain(record.getDomain());
-		}
-		if (record.getCmdbDomain() != null) {
-			model.setCmdbDomain(record.getCmdbDomain());
-		}
-		if (record.getLevel() != null) {
-			model.setLevel(record.getLevel());
-		}
-		if (record.getBu() != null) {
-			model.setBu(record.getBu());
-		}
-		if (record.getCmdbProductline() != null) {
-			model.setCmdbProductline(record.getCmdbProductline());
-		}
-		if (record.getOwner() != null) {
-			model.setOwner(record.getOwner());
-		}
-		if (record.getEmail() != null) {
-			model.setEmail(record.getEmail());
-		}
-		if (record.getPhone() != null) {
-			model.setPhone(record.getPhone());
-		}
-		if (record.getCreateTime() != null) {
-			model.setCreateTime(record.getCreateTime());
-		}
-		if (record.getUpdateTime() != null) {
-			model.setUpdateTime(record.getUpdateTime());
-		}
-		model.afterLoad();
-		return model;
-	}
-
-	private ProjectDO toRecord(Project model) {
-		ProjectDO record = new ProjectDO();
-
-		record.setId(model.getId());
-		record.setDomain(model.getDomain());
-		record.setCmdbDomain(model.getCmdbDomain());
-		record.setLevel(model.getLevel());
-		record.setBu(model.getBu());
-		record.setCmdbProductline(model.getCmdbProductline());
-		record.setOwner(model.getOwner());
-		record.setEmail(Optional.ofNullable(model.getEmail()).orElse(""));
-		record.setPhone(Optional.ofNullable(model.getPhone()).orElse( ""));
-		record.setCreateTime(model.getCreateTime());
-		record.setUpdateTime(model.getUpdateTime());
-		record.setKeyId(model.getKeyId());
 		return record;
+	}
+
+	private void normalize(ProjectDO record) {
+		record.setEmail(Optional.ofNullable(record.getEmail()).orElse(""));
+		record.setPhone(Optional.ofNullable(record.getPhone()).orElse(""));
 	}
 
 }

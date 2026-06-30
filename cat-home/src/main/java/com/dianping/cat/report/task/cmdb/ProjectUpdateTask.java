@@ -44,7 +44,7 @@ import com.dianping.cat.support.Threads.Task;
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.mybatis.data.HostInfoDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
@@ -77,10 +77,14 @@ public class ProjectUpdateTask implements Task {
 	private TransactionReportService transactionReportService;
 
 	private boolean checkIfNullOrEqual(String source, int target) {
+		return checkIfNullOrEqual(source, Integer.valueOf(target));
+	}
+
+	private boolean checkIfNullOrEqual(String source, Integer target) {
 		if (source == null || source.equals("null")) {
 			return true;
 		} else {
-			return Integer.parseInt(source) == target;
+			return target != null && Integer.parseInt(source) == target;
 		}
 	}
 
@@ -101,13 +105,13 @@ public class ProjectUpdateTask implements Task {
 
 	public void deleteUnusedDomainInfo() {
 		try {
-			List<Project> all = projectService.findAll();
+			List<ProjectDO> all = projectService.findAll();
 			Date start = TimeHelper.getCurrentDay(-30);
 			Date end = TimeHelper.getCurrentDay();
 			Set<String> domainNames = transactionReportService.queryAllDomainNames(start, end, TransactionAnalyzer.ID);
-			List<Project> toRemoves = new ArrayList<Project>();
+			List<ProjectDO> toRemoves = new ArrayList<ProjectDO>();
 
-			for (Project project : all) {
+			for (ProjectDO project : all) {
 				String name = project.getDomain();
 
 				if (!domainNames.contains(name)) {
@@ -115,7 +119,7 @@ public class ProjectUpdateTask implements Task {
 				}
 			}
 
-			for (Project project : toRemoves) {
+			for (ProjectDO project : toRemoves) {
 				projectService.delete(project);
 				Cat.logEvent("DeleteDomainInfo", project.getDomain(), Event.SUCCESS, project.toString());
 			}
@@ -393,7 +397,7 @@ public class ProjectUpdateTask implements Task {
 		}
 	}
 
-	private boolean updateProject(Project pro) {
+	private boolean updateProject(ProjectDO pro) {
 		String cmdbDomain = pro.getCmdbDomain();
 		Map<String, String> infosMap = queryProjectInfoFromCMDB(cmdbDomain);
 		String cmdbOwner = infosMap.get("owner");
@@ -403,7 +407,7 @@ public class ProjectUpdateTask implements Task {
 		String dbOwner = pro.getOwner();
 		String dbEmail = pro.getEmail();
 		String dbPhone = pro.getPhone();
-		int dbLevel = pro.getLevel();
+			Integer dbLevel = pro.getLevel();
 		boolean isProjChanged = false;
 
 		if (!checkIfNullOrEqual(cmdbOwner, dbOwner)) {
@@ -445,9 +449,9 @@ public class ProjectUpdateTask implements Task {
 
 	private void updateProjectInfo() {
 		try {
-			List<Project> projects = projectService.findAll();
+			List<ProjectDO> projects = projectService.findAll();
 
-			for (Project pro : projects) {
+			for (ProjectDO pro : projects) {
 				try {
 					String cmdbDomain = pro.getCmdbDomain();
 

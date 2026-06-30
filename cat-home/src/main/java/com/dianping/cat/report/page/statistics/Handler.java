@@ -38,7 +38,7 @@ import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import com.dianping.cat.Constants;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.heavy.entity.HeavyCache;
 import com.dianping.cat.home.heavy.entity.HeavyCall;
@@ -269,7 +269,7 @@ public class Handler implements PageHandler<Context> {
 
 		for (com.dianping.cat.home.utilization.entity.Domain d : domains) {
 			String domain = d.getId();
-			Project project = projectService.findByDomain(domain);
+			ProjectDO project = projectService.findByDomain(domain);
 
 			if (project != null) {
 				d.setCmdbId(project.getCmdbDomain());

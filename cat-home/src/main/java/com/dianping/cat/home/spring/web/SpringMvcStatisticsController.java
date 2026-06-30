@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.dianping.cat.Constants;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.heavy.entity.HeavyCache;
 import com.dianping.cat.home.heavy.entity.HeavyCall;
@@ -270,7 +270,7 @@ public class SpringMvcStatisticsController {
 		List<com.dianping.cat.home.utilization.entity.Domain> serviceList = new LinkedList<com.dianping.cat.home.utilization.entity.Domain>();
 
 		for (com.dianping.cat.home.utilization.entity.Domain domain : domains) {
-			Project project = projectService.findByDomain(domain.getId());
+			ProjectDO project = projectService.findByDomain(domain.getId());
 
 			if (project != null) {
 				domain.setCmdbId(project.getCmdbDomain());

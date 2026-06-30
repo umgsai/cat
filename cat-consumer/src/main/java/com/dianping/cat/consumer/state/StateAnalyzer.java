@@ -26,7 +26,7 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.state.model.entity.*;
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.message.Heartbeat;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.report.DefaultReportManager.StoragePolicy;
@@ -260,7 +260,7 @@ public class StateAnalyzer extends AbstractMessageAnalyzer<StateReport> {
 
 			machine.findOrCreateProcessDomain(domain).addIp(ip);
 
-			Project project = projectService.findProject(domain);
+			ProjectDO project = projectService.findProject(domain);
 
 			if (project == null) {
 				projectService.insert(domain);

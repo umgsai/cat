@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.ProjectDO;
 import com.dianping.cat.service.ProjectService;
 
 public class SpringMvcProjectControllerTest {
@@ -51,7 +51,7 @@ public class SpringMvcProjectControllerTest {
 		Assert.assertEquals("{\"status\":200, \"info\":\"success\"}", result);
 		Assert.assertEquals("cat", service.getInserted().getDomain());
 		Assert.assertEquals("cmdb-cat", service.getInserted().getCmdbDomain());
-		Assert.assertEquals(1, service.getInserted().getLevel());
+		Assert.assertEquals(Integer.valueOf(1), service.getInserted().getLevel());
 		Assert.assertEquals("platform", service.getInserted().getBu());
 		Assert.assertEquals("arch", service.getInserted().getCmdbProductline());
 		Assert.assertEquals("owner", service.getInserted().getOwner());
@@ -73,7 +73,7 @@ public class SpringMvcProjectControllerTest {
 		Assert.assertNull(service.getInserted());
 		Assert.assertEquals("cat", service.getUpdated().getDomain());
 		Assert.assertEquals("cmdb-cat", service.getUpdated().getCmdbDomain());
-		Assert.assertEquals(2, service.getUpdated().getLevel());
+		Assert.assertEquals(Integer.valueOf(2), service.getUpdated().getLevel());
 	}
 
 	@Test
@@ -118,9 +118,9 @@ public class SpringMvcProjectControllerTest {
 
 		private boolean m_failInsert;
 
-		private Project m_inserted;
+		private ProjectDO m_inserted;
 
-		private Project m_updated;
+		private ProjectDO m_updated;
 
 		StubProjectService(String... domains) {
 			for (String domain : Arrays.asList(domains)) {
@@ -128,11 +128,11 @@ public class SpringMvcProjectControllerTest {
 			}
 		}
 
-		Project getInserted() {
+		ProjectDO getInserted() {
 			return m_inserted;
 		}
 
-		Project getUpdated() {
+		ProjectDO getUpdated() {
 			return m_updated;
 		}
 
@@ -142,12 +142,19 @@ public class SpringMvcProjectControllerTest {
 		}
 
 		@Override
-		public Project findByDomain(String domainName) {
-			return m_domains.containsKey(domainName) ? new Project().setDomain(domainName) : null;
+		public ProjectDO findByDomain(String domainName) {
+			if (!m_domains.containsKey(domainName)) {
+				return null;
+			}
+
+			ProjectDO project = new ProjectDO();
+
+			project.setDomain(domainName);
+			return project;
 		}
 
 		@Override
-		public boolean insert(Project project) {
+		public boolean insert(ProjectDO project) {
 			if (m_failInsert) {
 				throw new RuntimeException("insert failed");
 			}
@@ -161,7 +168,7 @@ public class SpringMvcProjectControllerTest {
 		}
 
 		@Override
-		public boolean update(Project project) {
+		public boolean update(ProjectDO project) {
 			m_updated = project;
 			return true;
 		}
