@@ -20,8 +20,8 @@ package com.dianping.cat.task;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
-import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.mybatis.TaskRepository;
+import com.dianping.cat.mybatis.data.TaskDO;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,9 +94,9 @@ public class TaskManager {
 
 	protected void insertToDatabase(Date period, String domain, String name, int reportType) {
 		ensureTaskDao();
-		Task task = taskRepository.createLocal();
+		TaskDO task = taskRepository.createLocal();
 
-		task.setCreationDate(new Date());
+		task.setCreateTime(new Date());
 		task.setProducer(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		task.setReportDomain(domain);
 		task.setReportName(name);

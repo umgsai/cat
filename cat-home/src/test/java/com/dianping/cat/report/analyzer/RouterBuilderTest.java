@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.Constants;
-import com.dianping.cat.core.dal.Task;
+import com.dianping.cat.mybatis.data.TaskDO;
 import com.dianping.cat.home.router.entity.RouterConfig;
 import com.dianping.cat.report.task.ReportFacade;
 import com.dianping.cat.system.page.router.service.RouterConfigService;
@@ -44,7 +44,7 @@ public class RouterBuilderTest extends SpringCatHomeTestSupport {
 	@Test
 	public void test() throws Exception {
 		ReportFacade reportFacade = (ReportFacade) lookup(ReportFacade.class);
-		Task task = new Task();
+		TaskDO task = new TaskDO();
 		Date reportPeriod = new SimpleDateFormat("yyyy-MM-dd").parse(day3);
 
 		task.setReportName(Constants.REPORT_ROUTER);

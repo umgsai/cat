@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
-import com.dianping.cat.core.dal.Task;
+import com.dianping.cat.mybatis.data.TaskDO;
 import com.dianping.cat.support.Threads;
 
 public abstract class TaskConsumer implements Threads.Task {
@@ -58,9 +58,9 @@ public abstract class TaskConsumer implements Threads.Task {
 		}
 	}
 
-	protected abstract Task findDoingTask(String consumerIp);
+	protected abstract TaskDO findDoingTask(String consumerIp);
 
-	protected abstract Task findTodoTask();
+	protected abstract TaskDO findTodoTask();
 
 	protected String getLoaclIp() {
 		return NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
@@ -74,7 +74,7 @@ public abstract class TaskConsumer implements Threads.Task {
 		return m_stopped;
 	}
 
-	protected abstract boolean processTask(Task doing);
+	protected abstract boolean processTask(TaskDO doing);
 
 	@Override
 	public void run() {
@@ -83,7 +83,7 @@ public abstract class TaskConsumer implements Threads.Task {
 		while (m_running) {
 			try {
 				if (checkTime()) {
-					Task task = findDoingTask(localIp);
+					TaskDO task = findDoingTask(localIp);
 					if (task == null) {
 						task = findTodoTask();
 					}
@@ -150,9 +150,9 @@ public abstract class TaskConsumer implements Threads.Task {
 
 	protected abstract void taskRetryDuration();
 
-	protected abstract boolean updateDoingToDone(Task doing);
+	protected abstract boolean updateDoingToDone(TaskDO doing);
 
-	protected abstract boolean updateDoingToFailure(Task todo);
+	protected abstract boolean updateDoingToFailure(TaskDO todo);
 
-	protected abstract boolean updateTodoToDoing(Task todo);
+	protected abstract boolean updateTodoToDoing(TaskDO todo);
 }

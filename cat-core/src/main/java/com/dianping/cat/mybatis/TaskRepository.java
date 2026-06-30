@@ -11,9 +11,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.dianping.cat.core.dal.Task;
-import com.dianping.cat.mybatis.mapper.TaskMapper;
 import com.dianping.cat.mybatis.data.TaskDO;
+import com.dianping.cat.mybatis.mapper.TaskMapper;
 
 @Component("taskRepository")
 public class TaskRepository {
@@ -27,27 +26,27 @@ public class TaskRepository {
 	@Resource(name = "transactionTemplate")
 	private TransactionTemplate transactionTemplate;
 
-	public Task createLocal() {
-		return new Task();
+	public TaskDO createLocal() {
+		return new TaskDO();
 	}
 
-	public int deleteByPK(Task proto) {
+	public int deleteByPK(TaskDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
+		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getId()));
 	}
 
-	public Task findByPK(int keyId) {
+	public TaskDO findByPK(int keyId) {
 		return findByPK((long) keyId);
 	}
 
-	public Task findByPK(long keyId) {
+	public TaskDO findByPK(long keyId) {
 		TaskMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public Task findByStatusConsumer(int status, String consumer) {
+	public TaskDO findByStatusConsumer(int status, String consumer) {
 		TaskMapper mapper = springMapper();
 		TaskDO record = new TaskDO();
 
@@ -55,54 +54,51 @@ public class TaskRepository {
 		record.setConsumer(consumer);
 		TaskDO result = mapper.findByStatusConsumer(record).stream().findFirst().orElse(null);
 
-		return result == null ? null : toModel(result);
+		return result;
 	}
 
-	public int insert(Task proto) {
+	public int insert(TaskDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		TaskDO record = toRecord(proto);
-		int count = transactionTemplate.execute(status -> springMapper().insert(record));
+		int count = transactionTemplate.execute(status -> springMapper().insert(proto));
 
-		proto.setId(record.getId());
-		proto.setKeyId(record.getId());
 		return count;
 	}
 
-	public int updateByPK(Task proto) {
+	public int updateByPK(TaskDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
+		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(proto));
 	}
 
-	public int updateTodoToDoing(Task proto) {
+	public int updateTodoToDoing(TaskDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateTodoToDoing(toRecord(proto)));
+		return transactionTemplate.execute(status -> springMapper().updateTodoToDoing(proto));
 	}
 
-	public int updateDoingToDone(Task proto) {
+	public int updateDoingToDone(TaskDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateDoingToDone(toRecord(proto)));
+		return transactionTemplate.execute(status -> springMapper().updateDoingToDone(proto));
 	}
 
-	public int updateFailureToDone(Task proto) {
+	public int updateFailureToDone(TaskDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateFailureToDone(toRecord(proto)));
+		return transactionTemplate.execute(status -> springMapper().updateFailureToDone(proto));
 	}
 
-	public int updateStatusToTodo(Task proto) {
+	public int updateStatusToTodo(TaskDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateStatusToTodo(toRecord(proto)));
+		return transactionTemplate.execute(status -> springMapper().updateStatusToTodo(proto));
 	}
 
-	public int updateDoingToFail(Task proto) {
+	public int updateDoingToFail(TaskDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateDoingToFail(toRecord(proto)));
+		return transactionTemplate.execute(status -> springMapper().updateDoingToFail(proto));
 	}
 
 	private TaskMapper springMapper() {
@@ -130,82 +126,11 @@ public class TaskRepository {
 		this.transactionTemplate = transactionTemplate;
 	}
 
-	private Task requireFound(TaskDO record, String field, String value) {
+	private TaskDO requireFound(TaskDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No Task found by " + field + "(" + value + ").", 1);
 		}
 
-		return toModel(record);
-	}
-
-	private Task toModel(TaskDO record) {
-		Task model = new Task();
-
-		if (record.getId() != null) {
-			model.setId(record.getId());
-		}
-		if (record.getProducer() != null) {
-			model.setProducer(record.getProducer());
-		}
-		if (record.getConsumer() != null) {
-			model.setConsumer(record.getConsumer());
-		}
-		if (record.getFailureCount() != null) {
-			model.setFailureCount(record.getFailureCount());
-		}
-		if (record.getReportName() != null) {
-			model.setReportName(record.getReportName());
-		}
-		if (record.getReportDomain() != null) {
-			model.setReportDomain(record.getReportDomain());
-		}
-		if (record.getReportPeriod() != null) {
-			model.setReportPeriod(record.getReportPeriod());
-		}
-		if (record.getStatus() != null) {
-			model.setStatus(record.getStatus());
-		}
-		if (record.getTaskType() != null) {
-			model.setTaskType(record.getTaskType());
-		}
-		if (record.getCreateTime() != null) {
-			model.setCreateTime(record.getCreateTime());
-		}
-		if (record.getStartTime() != null) {
-			model.setStartTime(record.getStartTime());
-		}
-		if (record.getEndTime() != null) {
-			model.setEndTime(record.getEndTime());
-		}
-		if (record.getUpdateTime() != null) {
-			model.setUpdateTime(record.getUpdateTime());
-		}
-		if (record.getCount() != null) {
-			model.setCount(record.getCount());
-		}
-		model.afterLoad();
-		return model;
-	}
-
-	private TaskDO toRecord(Task model) {
-		TaskDO record = new TaskDO();
-
-		record.setId(model.getId());
-		record.setProducer(model.getProducer());
-		record.setConsumer(model.getConsumer());
-		record.setFailureCount(model.getFailureCount());
-		record.setReportName(model.getReportName());
-		record.setReportDomain(model.getReportDomain());
-		record.setReportPeriod(model.getReportPeriod());
-		record.setStatus(model.getStatus());
-		record.setTaskType(model.getTaskType());
-		record.setCreateTime(model.getCreateTime());
-		record.setStartTime(model.getStartTime());
-		record.setEndTime(model.getEndTime());
-		record.setUpdateTime(model.getUpdateTime());
-		record.setKeyId(model.getKeyId());
-		record.setStartLimit(model.getStartLimit());
-		record.setEndLimit(model.getEndLimit());
 		return record;
 	}
 }

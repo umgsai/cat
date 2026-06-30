@@ -27,10 +27,10 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
-import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
 import com.dianping.cat.home.service.client.entity.ClientReport;
 import com.dianping.cat.home.service.client.transform.DefaultNativeParser;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.report.service.AbstractReportService;
 
 @Component
@@ -52,8 +52,8 @@ public class ClientReportService extends AbstractReportService<ClientReport> {
 		String name = Constants.REPORT_CLIENT;
 
 		try {
-			DailyReport report = dailyReportRepository
-									.findByDomainNamePeriod(domain, name, new Date(startTime));
+			DailyReportDO report = dailyReportRepository
+									.findDOByDomainNamePeriod(domain, name, new Date(startTime));
 			return queryFromDailyBinary(report.getId(), domain);
 		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("Client daily report is missing, domain={}, period={}.", domain, new Date(startTime), e);

@@ -32,8 +32,8 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
-import com.dianping.cat.core.dal.Task;
 import com.dianping.cat.mybatis.TaskRepository;
+import com.dianping.cat.mybatis.data.TaskDO;
 import com.dianping.cat.message.Transaction;
 
 @Component
@@ -47,8 +47,8 @@ public class DefaultTaskConsumer extends TaskConsumer {
 	private TaskRepository taskRepository;
 
 	@Override
-	protected Task findDoingTask(String ip) {
-		Task task = null;
+	protected TaskDO findDoingTask(String ip) {
+		TaskDO task = null;
 		try {
 			task = taskRepository.findByStatusConsumer(STATUS_DOING, ip);
 		} catch (RuntimeException e) {
@@ -58,8 +58,8 @@ public class DefaultTaskConsumer extends TaskConsumer {
 	}
 
 	@Override
-	protected Task findTodoTask() {
-		Task task = null;
+	protected TaskDO findTodoTask() {
+		TaskDO task = null;
 		try {
 			task = taskRepository.findByStatusConsumer(STATUS_TODO, null);
 		} catch (RuntimeException e) {
@@ -74,7 +74,7 @@ public class DefaultTaskConsumer extends TaskConsumer {
 	}
 
 	@Override
-	protected boolean processTask(Task doing) {
+	protected boolean processTask(TaskDO doing) {
 		boolean result = false;
 		Transaction t = Cat.newTransaction("Task", doing.getReportName());
 
@@ -116,9 +116,9 @@ public class DefaultTaskConsumer extends TaskConsumer {
 	}
 
 	@Override
-	protected boolean updateDoingToDone(Task doing) {
+	protected boolean updateDoingToDone(TaskDO doing) {
 		doing.setStatus(STATUS_DONE);
-		doing.setEndDate(new Date());
+		doing.setEndTime(new Date());
 
 		try {
 			return taskRepository.updateDoingToDone(doing) == 1;
@@ -131,9 +131,9 @@ public class DefaultTaskConsumer extends TaskConsumer {
 	}
 
 	@Override
-	protected boolean updateDoingToFailure(Task doing) {
+	protected boolean updateDoingToFailure(TaskDO doing) {
 		doing.setStatus(STATUS_FAIL);
-		doing.setEndDate(new Date());
+		doing.setEndTime(new Date());
 
 		try {
 			return taskRepository.updateDoingToFail(doing) == 1;
@@ -146,10 +146,10 @@ public class DefaultTaskConsumer extends TaskConsumer {
 	}
 
 	@Override
-	protected boolean updateTodoToDoing(Task todo) {
+	protected boolean updateTodoToDoing(TaskDO todo) {
 		todo.setStatus(STATUS_DOING);
 		todo.setConsumer(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
-		todo.setStartDate(new Date());
+		todo.setStartTime(new Date());
 
 		try {
 			return taskRepository.updateTodoToDoing(todo) == 1;

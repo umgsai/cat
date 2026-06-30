@@ -25,7 +25,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.cat.core.dal.Task;
+import com.dianping.cat.mybatis.data.TaskDO;
 
 public class TaskConsumerTest {
 
@@ -36,10 +36,10 @@ public class TaskConsumerTest {
 		*/
 	@Test
 	public void testContinueDoingTaskSuccess() throws InterruptedException {
-		final Task t = new Task();
+		final TaskDO t = new TaskDO();
 		t.setStatus(TaskConsumer.STATUS_DOING);
 
-		final List<Task> taskList = new ArrayList<Task>();
+		final List<TaskDO> taskList = new ArrayList<TaskDO>();
 		taskList.add(t);
 
 		TaskConsumerWrap consumer = new TaskConsumerWrap() {
@@ -50,19 +50,19 @@ public class TaskConsumerTest {
 			}
 
 			@Override
-			protected Task findDoingTask(String ip) {
+			protected TaskDO findDoingTask(String ip) {
 				super.findDoingTask(ip);
 				return taskList.size() == 0 ? null : taskList.remove(0);
 			}
 
 			@Override
-			protected boolean processTask(Task doing) {
+			protected boolean processTask(TaskDO doing) {
 				super.processTask(doing);
 				return true;
 			}
 
 			@Override
-			protected boolean updateDoingToDone(Task doing) {
+			protected boolean updateDoingToDone(TaskDO doing) {
 				super.updateDoingToDone(doing);
 				doing.setStatus(STATUS_DONE);
 				return true;
@@ -79,7 +79,7 @@ public class TaskConsumerTest {
 
 		Assert.assertEquals("[1, 10, 3, 1, 8, 4]", expectValue);
 
-		Assert.assertEquals(TaskConsumer.STATUS_DONE, t.getStatus());
+		Assert.assertEquals(Integer.valueOf(TaskConsumer.STATUS_DONE), t.getStatus());
 
 	}
 
@@ -92,10 +92,10 @@ public class TaskConsumerTest {
 		*/
 	@Test
 	public void testContinueDoingTaskFail() throws InterruptedException {
-		final Task t = new Task();
+		final TaskDO t = new TaskDO();
 		t.setStatus(TaskConsumer.STATUS_DOING);
 
-		final List<Task> taskList = new ArrayList<Task>();
+		final List<TaskDO> taskList = new ArrayList<TaskDO>();
 		taskList.add(t);
 
 		TaskConsumerWrap consumer = new TaskConsumerWrap() {
@@ -106,7 +106,7 @@ public class TaskConsumerTest {
 			}
 
 			@Override
-			protected Task findDoingTask(String ip) {
+			protected TaskDO findDoingTask(String ip) {
 				super.findDoingTask(ip);
 				return taskList.size() == 0 ? null : taskList.remove(0);
 			}
@@ -119,7 +119,7 @@ public class TaskConsumerTest {
 		}
 
 		Assert.assertEquals("[1, 10, 5, 1, 8, 4]", Arrays.toString(consumer.replayer.toArray()));
-		Assert.assertEquals(TaskConsumer.STATUS_DOING, t.getStatus());
+		Assert.assertEquals(Integer.valueOf(TaskConsumer.STATUS_DOING), t.getStatus());
 	}
 
 	/**
@@ -129,10 +129,10 @@ public class TaskConsumerTest {
 		*/
 	@Test
 	public void testTodoTaskSuccess() throws InterruptedException {
-		final Task t = new Task();
+		final TaskDO t = new TaskDO();
 		t.setStatus(TaskConsumer.STATUS_TODO);
 
-		final List<Task> taskList = new ArrayList<Task>();
+		final List<TaskDO> taskList = new ArrayList<TaskDO>();
 		taskList.add(t);
 
 		final TaskConsumerWrap consumer = new TaskConsumerWrap() {
@@ -143,26 +143,26 @@ public class TaskConsumerTest {
 			}
 
 			@Override
-			protected boolean updateTodoToDoing(Task todo) {
+			protected boolean updateTodoToDoing(TaskDO todo) {
 				super.updateTodoToDoing(todo);
 				return true;
 			}
 
 			@Override
-			protected boolean processTask(Task doing) {
+			protected boolean processTask(TaskDO doing) {
 				super.processTask(doing);
 				return true;
 			}
 
 			@Override
-			protected boolean updateDoingToDone(Task doing) {
+			protected boolean updateDoingToDone(TaskDO doing) {
 				super.updateDoingToDone(doing);
 				t.setStatus(TaskConsumer.STATUS_DONE);
 				return true;
 			}
 
 			@Override
-			protected Task findTodoTask() {
+			protected TaskDO findTodoTask() {
 				super.findTodoTask();
 				return taskList.size() == 0 ? null : taskList.remove(0);
 			}
@@ -175,7 +175,7 @@ public class TaskConsumerTest {
 		}
 
 		Assert.assertEquals("[1, 8, 7, 10, 3, 1, 8, 4]", Arrays.toString(consumer.replayer.toArray()));
-		Assert.assertEquals(TaskConsumer.STATUS_DONE, t.getStatus());
+		Assert.assertEquals(Integer.valueOf(TaskConsumer.STATUS_DONE), t.getStatus());
 	}
 
 	/**
@@ -185,10 +185,10 @@ public class TaskConsumerTest {
 		*/
 	@Test
 	public void testTodoTaskFail() throws InterruptedException {
-		final Task t = new Task();
+		final TaskDO t = new TaskDO();
 		t.setStatus(TaskConsumer.STATUS_TODO);
 
-		final List<Task> taskList = new ArrayList<Task>();
+		final List<TaskDO> taskList = new ArrayList<TaskDO>();
 		taskList.add(t);
 
 		final TaskConsumerWrap consumer = new TaskConsumerWrap() {
@@ -199,19 +199,19 @@ public class TaskConsumerTest {
 			}
 
 			@Override
-			protected boolean updateTodoToDoing(Task todo) {
+			protected boolean updateTodoToDoing(TaskDO todo) {
 				super.updateTodoToDoing(todo);
 				return true;
 			}
 
 			@Override
-			protected Task findTodoTask() {
+			protected TaskDO findTodoTask() {
 				super.findTodoTask();
 				return taskList.size() == 0 ? null : taskList.remove(0);
 			}
 
 			@Override
-			protected boolean updateDoingToFailure(Task todo) {
+			protected boolean updateDoingToFailure(TaskDO todo) {
 				super.updateDoingToFailure(todo);
 				todo.setStatus(STATUS_FAIL);
 				return true;
@@ -225,7 +225,7 @@ public class TaskConsumerTest {
 		}
 
 		Assert.assertEquals("[1, 8, 7, 10, 5, 1, 8, 4]", Arrays.toString(consumer.replayer.toArray()));
-		Assert.assertEquals(TaskConsumer.STATUS_FAIL, t.getStatus());
+		Assert.assertEquals(Integer.valueOf(TaskConsumer.STATUS_FAIL), t.getStatus());
 	}
 
 	public boolean possibleResult(String actual) {
@@ -247,13 +247,13 @@ public class TaskConsumerTest {
 		}
 
 		@Override
-		protected Task findDoingTask(String ip) {
+		protected TaskDO findDoingTask(String ip) {
 			replayer.add(1);
 			return null;
 		}
 
 		@Override
-		protected boolean updateDoingToDone(Task doing) {
+		protected boolean updateDoingToDone(TaskDO doing) {
 			replayer.add(3);
 			return false;
 		}
@@ -270,19 +270,19 @@ public class TaskConsumerTest {
 		}
 
 		@Override
-		protected boolean updateTodoToDoing(Task todo) {
+		protected boolean updateTodoToDoing(TaskDO todo) {
 			replayer.add(7);
 			return false;
 		}
 
 		@Override
-		protected Task findTodoTask() {
+		protected TaskDO findTodoTask() {
 			replayer.add(8);
 			return null;
 		}
 
 		@Override
-		protected boolean processTask(Task doing) {
+		protected boolean processTask(TaskDO doing) {
 			replayer.add(10);
 			return false;
 		}
@@ -293,7 +293,7 @@ public class TaskConsumerTest {
 		}
 
 		@Override
-		protected boolean updateDoingToFailure(Task todo) {
+		protected boolean updateDoingToFailure(TaskDO todo) {
 			replayer.add(5);
 			return false;
 		}

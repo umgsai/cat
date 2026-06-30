@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.core.dal.Task;
+import com.dianping.cat.mybatis.data.TaskDO;
 import com.dianping.cat.report.page.business.task.BusinessBaselineReportBuilder;
 import com.dianping.cat.report.page.cross.task.CrossReportBuilder;
 import com.dianping.cat.report.page.dependency.task.DependencyReportBuilder;
@@ -117,7 +117,7 @@ public class ReportFacade {
 
 	private Map<String, TaskBuilder> taskBuilders = new LinkedHashMap<String, TaskBuilder>();
 
-	public boolean builderReport(Task task) {
+	public boolean builderReport(TaskDO task) {
 		try {
 			if (task == null) {
 				SLF4J_LOGGER.warn("Report build skipped because task is null.");

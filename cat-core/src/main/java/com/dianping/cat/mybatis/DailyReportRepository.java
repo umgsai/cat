@@ -53,10 +53,23 @@ public class DailyReportRepository {
 				domain + "/" + name + "/" + period);
 	}
 
+	public DailyReportDO findDOByDomainNamePeriod(String domain, String name, java.util.Date period) {
+		DailyReportMapper mapper = springMapper();
+
+		return requireFoundDO(mapper.findByDomainNamePeriod(domain, name, period), "domain/name/period",
+				domain + "/" + name + "/" + period);
+	}
+
 	public DailyReport findByPK(long keyId) {
 		DailyReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findById(keyId), "id", String.valueOf(keyId));
+	}
+
+	public DailyReportDO findDOByPK(long keyId) {
+		DailyReportMapper mapper = springMapper();
+
+		return requireFoundDO(mapper.findById(keyId), "id", String.valueOf(keyId));
 	}
 
 	public int insert(DailyReportDO report) {
@@ -73,6 +86,12 @@ public class DailyReportRepository {
 		return mapper.queryLatestReportsByDomainName(domain, name, limits).stream()
 				.map(this::toDailyReport)
 				.collect(Collectors.toList());
+	}
+
+	public List<DailyReportDO> queryLatestDOReportsByDomainName(String domain, String name, int limits) {
+		DailyReportMapper mapper = springMapper();
+
+		return mapper.queryLatestReportsByDomainName(domain, name, limits);
 	}
 
 	public int updateByPK(DailyReport proto) {
@@ -116,6 +135,14 @@ public class DailyReportRepository {
 		}
 
 		return toDailyReport(report);
+	}
+
+	private DailyReportDO requireFoundDO(DailyReportDO report, String field, String value) {
+		if (report == null) {
+			throw new EmptyResultDataAccessException(String.format("No daily report found by %s(%s).", field, value), 1);
+		}
+
+		return report;
 	}
 
 	private DailyReport toDailyReport(DailyReportDO reportDO) {
