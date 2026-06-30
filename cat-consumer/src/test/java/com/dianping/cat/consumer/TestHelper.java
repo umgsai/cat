@@ -5,12 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.MethodUtils;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.slf4j.Logger;
@@ -120,7 +117,7 @@ public class TestHelper {
 	// return false;
 	// }
 	//
-	// if(!CollectionUtils.isEqualCollection(expected.getIps(), input.getIps())){
+	// if(!expected.getIps().equals(input.getIps())){
 	// return false;
 	// }
 	//
@@ -138,29 +135,27 @@ public class TestHelper {
 	public static boolean isEquals(Object expected, Object input) throws SAXException, IOException {
 		// return XmlHelper.isXmlEquals(expected.toString(), input.toString());
 		try {
-			String domain1 = BeanUtils.getProperty(expected, "domain");
-			String domain2 = BeanUtils.getProperty(input, "domain");
+			String domain1 = getStringProperty(expected, "domain");
+			String domain2 = getStringProperty(input, "domain");
 			if (domain1 == null || !domain1.equals(domain2)) {
 				return false;
 			}
 
-			Object startTime1 = MethodUtils.invokeExactMethod(expected, "getStartTime", ArrayUtils.EMPTY_OBJECT_ARRAY);
-			Object startTime2 = MethodUtils.invokeExactMethod(input, "getStartTime", ArrayUtils.EMPTY_OBJECT_ARRAY);
+			Object startTime1 = invokeExactMethod(expected, "getStartTime");
+			Object startTime2 = invokeExactMethod(input, "getStartTime");
 			if (startTime1 == null || startTime2 == null || !startTime1.toString().equals(startTime2.toString())) {
 				return false;
 			}
 
-			Object endTime1 = MethodUtils.invokeExactMethod(expected, "getEndTime", ArrayUtils.EMPTY_OBJECT_ARRAY);
-			Object endTime2 = MethodUtils.invokeExactMethod(input, "getEndTime", ArrayUtils.EMPTY_OBJECT_ARRAY);
+			Object endTime1 = invokeExactMethod(expected, "getEndTime");
+			Object endTime2 = invokeExactMethod(input, "getEndTime");
 			if (endTime1 == null || endTime2 == null || !endTime1.toString().equals(endTime2.toString())) {
 				return false;
 			}
 
-			// Collection<String> ips1 = (Collection<String>)MethodUtils.invokeExactMethod(expected, "getIps",
-			// ArrayUtils.EMPTY_OBJECT_ARRAY);
-			// Collection<String> ips2 = (Collection<String>) MethodUtils.invokeExactMethod(input, "getIps",
-			// ArrayUtils.EMPTY_OBJECT_ARRAY);
-			// if(!CollectionUtils.isEqualCollection(ips1, ips2)){
+			// Collection<String> ips1 = invokeExactMethod(expected, "getIps");
+			// Collection<String> ips2 = invokeExactMethod(input, "getIps");
+			// if(!ips1.equals(ips2)){
 			// return false;
 			// }
 			String childKey = "Machine";
@@ -174,14 +169,14 @@ public class TestHelper {
 			if (machines.size() != machines2.size()) {
 				return false;
 			}
-			if (!CollectionUtils.isEqualCollection(machines.keySet(), machines2.keySet())) {
+			if (!machines.keySet().equals(machines2.keySet())) {
 				return false;
 			}
 			String findKey = "find" + childKey;
 
 			for (Map.Entry<String, Object> entry : machines.entrySet()) {
 				String key = entry.getKey();
-				Object m2 = MethodUtils.invokeExactMethod(input, findKey, new String[] { key });
+				Object m2 = invokeExactMethod(input, findKey, key);
 				if (m2 == null) {
 					return false;
 				}
@@ -239,7 +234,7 @@ public class TestHelper {
 		Map<String, Ratio> ratios1 = a.getRatios();
 
 		Map<String, Ratio> ratios2 = b.getRatios();
-		if (!CollectionUtils.isEqualCollection(ratios1.keySet(), ratios2.keySet())) {
+		if (!ratios1.keySet().equals(ratios2.keySet())) {
 			return false;
 		}
 		for (Map.Entry<String, Ratio> entry : ratios1.entrySet()) {
@@ -267,9 +262,6 @@ public class TestHelper {
 
 		Map<String, Entity> ratios1 = a.getEntities();
 		Map<String, Entity> ratios2 = b.getEntities();
-		if (false && !CollectionUtils.isEqualCollection(ratios1.keySet(), ratios2.keySet())) {
-			return false;
-		}
 		for (Map.Entry<String, Entity> entry : ratios1.entrySet()) {
 			String key = entry.getKey();
 			Entity m2 = ratios2.get(key);
@@ -294,7 +286,7 @@ public class TestHelper {
 
 		Map<String, TransactionType> ratios1 = a.getTypes();
 		Map<String, TransactionType> ratios2 = b.getTypes();
-		if (!CollectionUtils.isEqualCollection(ratios1.keySet(), ratios2.keySet())) {
+		if (!ratios1.keySet().equals(ratios2.keySet())) {
 			return false;
 		}
 		for (Map.Entry<String, TransactionType> entry : ratios1.entrySet()) {
@@ -307,7 +299,7 @@ public class TestHelper {
 
 			Map<String, TransactionName> names1 = m1.getNames();
 			Map<String, TransactionName> names2 = m2.getNames();
-			if (!CollectionUtils.isEqualCollection(names1.keySet(), names2.keySet())) {
+			if (!names1.keySet().equals(names2.keySet())) {
 				return false;
 			}
 			for (Map.Entry<String, TransactionName> entry1 : names1.entrySet()) {
@@ -355,6 +347,27 @@ public class TestHelper {
 	@SuppressWarnings("unchecked")
 	public static <T> T invokeExactMethod(Object object, String methodName) throws NoSuchMethodException,
 	      IllegalAccessException, InvocationTargetException {
-		return (T) MethodUtils.invokeExactMethod(object, methodName, ArrayUtils.EMPTY_OBJECT_ARRAY);
+		return (T) invokeExactMethod(object, methodName, new Object[0]);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T invokeExactMethod(Object object, String methodName, Object... args) throws NoSuchMethodException,
+	      IllegalAccessException, InvocationTargetException {
+		Class<?>[] parameterTypes = new Class<?>[args.length];
+
+		for (int i = 0; i < args.length; i++) {
+			parameterTypes[i] = args[i].getClass();
+		}
+		Method method = object.getClass().getMethod(methodName, parameterTypes);
+
+		return (T) method.invoke(object, args);
+	}
+
+	private static String getStringProperty(Object object, String propertyName) throws NoSuchMethodException,
+	      IllegalAccessException, InvocationTargetException {
+		String methodName = "get" + Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
+		Object value = invokeExactMethod(object, methodName);
+
+		return value == null ? null : value.toString();
 	}
 }
