@@ -64,7 +64,8 @@ public class DefaultBlockDumperManager implements BlockDumperManager {
 					dumper = createDumper(hour);
 
 					m_map.put(hour, dumper);
-					LOGGER.info("Create block dumper " + sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
+						LOGGER.info("Created block dumper, hour={}, startTime={}.", hour,
+								sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
 				}
 			}
 		}

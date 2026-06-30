@@ -94,7 +94,7 @@ public class DefaultBlockDumper implements BlockDumper {
 
 			if ((++m_failCount % 100) == 0) {
 				Cat.logError(new BlockQueueFullException("Error when adding block to queue, fails: " + m_failCount));
-				LOGGER.info("block dump queue is full " + m_failCount + " index:" + index);
+					LOGGER.info("Block dump queue is full, failCount={}, index={}.", m_failCount, index);
 			}
 		} else {
 			m_statisticManager.addBlockTotal(1);

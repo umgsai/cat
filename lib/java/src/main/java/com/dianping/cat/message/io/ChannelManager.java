@@ -132,7 +132,7 @@ public class ChannelManager implements Threads.Task {
             if (channel.isActive() && channel.isOpen()) {
                 isActive = true;
             } else {
-                LOGGER.error("channel buf is not active ,current channel " + future.channel().remoteAddress());
+                LOGGER.error("Channel buffer is not active, currentChannel={}.", future.channel().remoteAddress());
             }
         }
 
@@ -143,7 +143,7 @@ public class ChannelManager implements Threads.Task {
         Pair<Boolean, String> pair = routerConfigChanged();
 
         if (pair.getKey()) {
-            LOGGER.info("router config changed :" + pair.getValue());
+            LOGGER.info("Router config changed: {}.", pair.getValue());
             String servers = pair.getValue();
             List<InetSocketAddress> serverAddresses = parseSocketAddress(servers);
             ChannelHolder newHolder = initChannel(serverAddresses, servers);
@@ -154,7 +154,7 @@ public class ChannelManager implements Threads.Task {
 
                     activeChannelHolder = newHolder;
                     closeChannelHolder(last);
-                    LOGGER.info("switch active channel to " + activeChannelHolder);
+                    LOGGER.info("Switch active channel to {}.", activeChannelHolder);
                 } else {
                     activeChannelHolder = newHolder;
                 }
@@ -178,7 +178,7 @@ public class ChannelManager implements Threads.Task {
                 int count = attempts.incrementAndGet();
 
                 if (count % 1000 == 0 || count == 1) {
-                    LOGGER.error("channel buf is is close when send msg! Attempts: " + count);
+                    LOGGER.error("Channel buffer is closed when sending message, attempts={}.", count);
                 }
             }
         }
@@ -192,7 +192,7 @@ public class ChannelManager implements Threads.Task {
                 SocketAddress address = channel.channel().remoteAddress();
 
                 if (address != null) {
-                    LOGGER.info("close channel " + address);
+                    LOGGER.info("Close channel {}.", address);
                 }
                 channel.channel().close();
             }
@@ -212,7 +212,7 @@ public class ChannelManager implements Threads.Task {
     }
 
     private ChannelFuture createChannel(InetSocketAddress address) {
-        LOGGER.info("start connect server" + address.toString());
+        LOGGER.info("Start connecting to CAT server {}.", address);
         ChannelFuture future = null;
 
         try {
@@ -220,14 +220,14 @@ public class ChannelManager implements Threads.Task {
             future.awaitUninterruptibly(configService.getClientConnectTimeout(), TimeUnit.MILLISECONDS); // 100 ms
 
             if (!future.isSuccess()) {
-                LOGGER.error("Error when try connecting to " + address);
+                LOGGER.error("Unable to connect to CAT server {}.", address);
                 closeChannel(future);
             } else {
-                LOGGER.info("Connected to CAT server at " + address);
+                LOGGER.info("Connected to CAT server at {}.", address);
                 return future;
             }
         } catch (Throwable e) {
-            LOGGER.error("Error when connect server " + address.getAddress(), e);
+            LOGGER.error("Unable to connect to CAT server {}.", address, e);
 
             if (future != null) {
                 closeChannel(future);
@@ -243,7 +243,7 @@ public class ChannelManager implements Threads.Task {
                 channelHolder.setActiveIndex(-1);
             }
         } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
+            LOGGER.error("Unable to check active CAT server channel.", e);
         }
     }
 
@@ -276,12 +276,12 @@ public class ChannelManager implements Threads.Task {
                     holder.setActiveIndex(i).setIp(hostAddress);
                     holder.setActiveServerConfig(serverConfig).setServerAddresses(addresses);
 
-                    LOGGER.info("success when init CAT server, new active holder" + holder.toString());
+                    LOGGER.info("Initialized CAT server channel, activeHolder={}.", holder);
                     return holder;
                 }
             }
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            LOGGER.error("Unable to initialize CAT server channel, serverConfig={}.", serverConfig, e);
         }
 
         try {
@@ -290,7 +290,7 @@ public class ChannelManager implements Threads.Task {
             for (InetSocketAddress address : addresses) {
                 sb.append(address.toString()).append(";");
             }
-            LOGGER.info("Error when init CAT server " + sb.toString());
+            LOGGER.info("Unable to initialize CAT server, addresses={}.", sb);
         } catch (Exception e) {
             // ignore
         }
@@ -323,7 +323,7 @@ public class ChannelManager implements Threads.Task {
             }
             return address;
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            LOGGER.error("Unable to parse CAT server addresses, content={}.", content, e);
         }
         return new ArrayList<InetSocketAddress>();
     }
@@ -346,7 +346,7 @@ public class ChannelManager implements Threads.Task {
                 }
             }
         } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
+            LOGGER.error("Unable to reconnect default CAT server, serverAddresses={}.", serverAddresses, e);
         }
     }
 

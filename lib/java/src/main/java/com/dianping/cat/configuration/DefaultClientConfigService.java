@@ -61,9 +61,9 @@ public class DefaultClientConfigService implements ClientConfigService {
         if (StringUtils.isNotEmpty(config)) {
             try {
                 this.config = com.dianping.cat.configuration.client.transform.DefaultSaxParser.parse(config);
-                LOGGER.info("setup cat with config:" + config);
+                LOGGER.info("Setup CAT with config: " + config);
             } catch (Exception e) {
-                LOGGER.error("error in client config " + config, e);
+                LOGGER.error("Invalid CAT client config: " + config, e);
             }
         }
 
@@ -73,7 +73,7 @@ public class DefaultClientConfigService implements ClientConfigService {
 
             defaultConfig.setDomain(appName);
             this.config = defaultConfig;
-            LOGGER.info("setup cat with default configuration:" + this.config);
+            LOGGER.info("Setup CAT with default configuration: " + this.config);
         }
     }
 
@@ -185,11 +185,11 @@ public class DefaultClientConfigService implements ClientConfigService {
             try {
                 refreshConfig(url);
                 refreshStatus = true;
-                LOGGER.info("retry: " + retry + " , success when connect cat server config url " + url);
+                LOGGER.info("Connected to CAT server config url, retry={}, url={}.", retry, url);
                 break;
             } catch (Exception e) {
                 retry++;
-                LOGGER.error("error when connect cat server config url " + url);
+                LOGGER.error("Unable to connect to CAT server config url, retry={}, url={}.", retry, url, e);
             }
         }
 
@@ -204,7 +204,7 @@ public class DefaultClientConfigService implements ClientConfigService {
 
                 refreshConfig(url);
             } catch (Exception e) {
-                LOGGER.error("error when connect cat server config url from remote config");
+                LOGGER.error("Unable to connect to CAT server config url from remote config.", e);
             }
         }
     }

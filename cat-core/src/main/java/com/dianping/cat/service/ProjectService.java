@@ -158,7 +158,7 @@ public class ProjectService {
 				temp = new Department();
 				departments.put(department, temp);
 			}
-			temp.findOrCreatProjectLine(projectLine).addDomain(domain);
+				temp.findOrCreateProjectLine(projectLine).addDomain(domain);
 		}
 
 		return departments;
@@ -298,7 +298,7 @@ public class ProjectService {
 
 		private Map<String, ProjectLine> m_projectLines = new TreeMap<String, ProjectLine>();
 
-		public ProjectLine findOrCreatProjectLine(String projectLine) {
+		public ProjectLine findOrCreateProjectLine(String projectLine) {
 			ProjectLine line = m_projectLines.get(String.valueOf(projectLine));
 
 			if (line == null) {

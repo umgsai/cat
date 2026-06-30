@@ -73,17 +73,17 @@ public class DefaultMessageDumper implements MessageDumper {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
 		String date = sdf.format(new Date(hour * TimeHelper.ONE_HOUR));
 
-		LOGGER.info("starting close message processor " + date);
-		closeMessageProcessor();
-		LOGGER.info("end close dumper processor " + date);
+			LOGGER.info("Starting to close message processor, hour={}, startTime={}.", hour, date);
+			closeMessageProcessor();
+			LOGGER.info("Finished closing message processor, hour={}, startTime={}.", hour, date);
 
-		LOGGER.info("starting close dumper manager " + date);
-		m_blockDumperManager.close(hour);
-		LOGGER.info("end close dumper manager " + date);
+			LOGGER.info("Starting to close dumper manager, hour={}, startTime={}.", hour, date);
+			m_blockDumperManager.close(hour);
+			LOGGER.info("Finished closing dumper manager, hour={}, startTime={}.", hour, date);
 
-		LOGGER.info("starting close bucket manager " + date);
-		m_bucketManager.closeBuckets(hour);
-		LOGGER.info("end close bucket manager " + date);
+			LOGGER.info("Starting to close bucket manager, hour={}, startTime={}.", hour, date);
+			m_bucketManager.closeBuckets(hour);
+			LOGGER.info("Finished closing bucket manager, hour={}, startTime={}.", hour, date);
 	}
 
 	private void closeMessageProcessor() throws InterruptedException {
@@ -145,7 +145,7 @@ public class DefaultMessageDumper implements MessageDumper {
 			if ((m_failCount.incrementAndGet() % 100) == 0) {
 				Cat.logError(new MessageQueueFullException("Error when adding message to queue, fails: " + m_failCount));
 
-				LOGGER.info("message tree queue is full " + m_failCount + " index " + index);
+					LOGGER.info("Message tree queue is full, failCount={}, index={}.", m_failCount, index);
 				// tree.getBuffer().release();
 			}
 		} else {

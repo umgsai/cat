@@ -194,7 +194,7 @@ public class TcpSocketSender implements Threads.Task, MessageSender {
                         break;
                     }
                 } catch (Exception e) {
-                    LOGGER.error(e.getMessage(), e);
+                    LOGGER.error("Unable to discard expired CAT message trees.", e);
                     break;
                 }
             }

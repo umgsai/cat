@@ -52,7 +52,7 @@ public class GroupLevelInfo {
 				JavaThread thread = entry.getValue();
 
 				String groupName = thread.getGroupName();
-				GroupStatistics statistics = findOrCreatGroupStatistics(groupName, m_minutes);
+				GroupStatistics statistics = findOrCreateGroupStatistics(groupName, m_minutes);
 				statistics.add(thread.getSegments(), entity.getType());
 			}
 		}
@@ -61,17 +61,17 @@ public class GroupLevelInfo {
 
 		if (currentHours == m_longDate) {
 			for (int i = m_minutes; i >= 0; i--) {
-				m_datas.add(getShowDetailByMinte(i));
+				m_datas.add(getShowDetailByMinute(i));
 			}
 		} else {
 			for (int i = 0; i <= m_minutes; i++) {
-				m_datas.add(getShowDetailByMinte(i));
+				m_datas.add(getShowDetailByMinute(i));
 			}
 		}
 		return this;
 	}
 
-	public GroupStatistics findOrCreatGroupStatistics(String groupName, int lastMinute) {
+	public GroupStatistics findOrCreateGroupStatistics(String groupName, int lastMinute) {
 		m_minutes = lastMinute;
 
 		GroupStatistics value = m_groupStatistics.get(groupName);
@@ -97,7 +97,7 @@ public class GroupLevelInfo {
 		return m_date.substring(8, 10);
 	}
 
-	private String getShowDetailByMinte(int minute) {
+	private String getShowDetailByMinute(int minute) {
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		String baseUrl = "/cat/mvc/r/p?op=detail";
 		params.put("domain", m_domain);
@@ -140,11 +140,11 @@ public class GroupLevelInfo {
 
 		public void add(Map<Integer, Segment> segments, String type) {
 			for (java.util.Map.Entry<Integer, Segment> entry : segments.entrySet()) {
-				findOrCreat(entry.getKey()).add(type);
+				findOrCreate(entry.getKey()).add(type);
 			}
 		}
 
-		public TreeSet<String> findOrCreat(Integer key) {
+		public TreeSet<String> findOrCreate(Integer key) {
 			TreeSet<String> result = m_statistics.get(key);
 			if (result == null) {
 				result = new TreeSet<String>();

@@ -69,7 +69,8 @@ public class DefaultMessageDumperManager implements MessageDumperManager {
 					dumper = createDumper(hour);
 
 					m_dumpers.put(hour, dumper);
-					LOGGER.info("create message dumper " + sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
+						LOGGER.info("Created message dumper, hour={}, startTime={}.", hour,
+								sdf.format(new Date(TimeUnit.HOURS.toMillis(hour))));
 				}
 			}
 		}

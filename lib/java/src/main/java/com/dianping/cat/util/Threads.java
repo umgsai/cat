@@ -322,14 +322,14 @@ public class Threads {
         private DefaultThreadFactory factory;
         private ThreadGroup threadGroup;
         private boolean active;
-        private boolean deamon;
+        private boolean daemon;
 
         public ThreadGroupManager(UncaughtExceptionHandler handler, String name) {
             threadGroup = new ThreadGroup(name);
             factory = new DefaultThreadFactory(threadGroup);
             factory.setUncaughtExceptionHandler(handler);
             active = true;
-            deamon = true;
+            daemon = true;
         }
 
         public void awaitTermination(long time, TimeUnit unit) {
@@ -370,7 +370,7 @@ public class Threads {
         }
 
         public ThreadGroupManager nonDaemon() {
-            deamon = false;
+            daemon = false;
             return this;
         }
 
@@ -393,15 +393,15 @@ public class Threads {
         }
 
         public Thread start(Runnable runnable) {
-            return start(runnable, deamon);
+            return start(runnable, daemon);
         }
 
-        public Thread start(Runnable runnable, boolean deamon) {
+        public Thread start(Runnable runnable, boolean daemon) {
             Thread thread = factory.newThread(runnable);
 
             logger.info("cat client start thread " + thread.getName());
 
-            thread.setDaemon(deamon);
+            thread.setDaemon(daemon);
             thread.start();
             return thread;
         }

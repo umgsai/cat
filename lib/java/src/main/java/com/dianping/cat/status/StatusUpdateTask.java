@@ -109,7 +109,7 @@ public class StatusUpdateTask implements Threads.Task {
                 }
                 t.setSuccessStatus();
             } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
+                LOGGER.error("Unable to collect CAT client status.", e);
                 t.setStatus(e);
             } finally {
                 t.complete();

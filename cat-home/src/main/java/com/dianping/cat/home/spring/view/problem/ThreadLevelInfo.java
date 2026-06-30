@@ -60,14 +60,14 @@ public class ThreadLevelInfo {
 				JavaThread thread = entry.getValue();
 				String groupName = thread.getGroupName();
 				String threadId = thread.getId();
-				GroupStatistics statistics = findOrCreatGroupStatistics(groupName, m_minutes);
+				GroupStatistics statistics = findOrCreateGroupStatistics(groupName, m_minutes);
 
 				if (groupName.equals(m_groupName)) {
 					statistics.add(threadId, thread.getSegments(), m_minutes, temp.getType());
-					findOrCreatThreadInfo(groupName, threadId);
+					findOrCreateThreadInfo(groupName, threadId);
 				} else {
 					statistics.add(groupName, thread.getSegments(), m_minutes, temp.getType());
-					findOrCreatThreadInfo(groupName, groupName);
+					findOrCreateThreadInfo(groupName, groupName);
 				}
 			}
 		}
@@ -75,17 +75,17 @@ public class ThreadLevelInfo {
 		long currentHours = currentTimeMillis - currentTimeMillis % (60 * 60 * 1000);
 		if (currentHours == m_longDate) {
 			for (int i = m_minutes; i >= 0; i--) {
-				m_datas.add(getShowDetailByMinte(i));
+				m_datas.add(getShowDetailByMinute(i));
 			}
 		} else {
 			for (int i = 0; i <= m_minutes; i++) {
-				m_datas.add(getShowDetailByMinte(i));
+				m_datas.add(getShowDetailByMinute(i));
 			}
 		}
 		return this;
 	}
 
-	public GroupStatistics findOrCreatGroupStatistics(String groupName, int lastMinute) {
+	public GroupStatistics findOrCreateGroupStatistics(String groupName, int lastMinute) {
 		m_minutes = lastMinute;
 
 		GroupStatistics value = m_groupStatistics.get(groupName);
@@ -128,7 +128,7 @@ public class ThreadLevelInfo {
 		return result;
 	}
 
-	private void findOrCreatThreadInfo(String groupName, String threadName) {
+	private void findOrCreateThreadInfo(String groupName, String threadName) {
 		TreeSet<String> sets = m_threadsInfo.get(groupName);
 
 		if (sets != null) {
@@ -145,7 +145,7 @@ public class ThreadLevelInfo {
 		return m_date.substring(8, 10);
 	}
 
-	private String getShowDetailByMinte(int minute) {
+	private String getShowDetailByMinute(int minute) {
 		Map<String, String> params = new LinkedHashMap<String, String>();
 		String baseUrl = "/cat/mvc/r/p?op=detail";
 		params.put("domain", m_domain);
@@ -167,11 +167,11 @@ public class ThreadLevelInfo {
 			String groupName = group.getName();
 			GroupStatistics value = m_groupStatistics.get(groupName);
 			Set<String> threads = getThreadsByGroup(groupName);
-			Map<String, TheadStatistics> temps = value.getStatistics();
+			Map<String, ThreadStatistics> temps = value.getStatistics();
 
 			for (String thread : threads) {
-				TheadStatistics theadStatistics = temps.get(thread);
-				TreeSet<String> errors = theadStatistics.getStatistics().get(minute);
+				ThreadStatistics threadStatistics = temps.get(thread);
+				TreeSet<String> errors = threadStatistics.getStatistics().get(minute);
 				sb.append("<td>");
 				for (String error : errors) {
 					params.put("group", groupName);
@@ -216,16 +216,16 @@ public class ThreadLevelInfo {
 	}
 
 	public static class GroupStatistics {
-		private Map<String, TheadStatistics> m_statistics = new LinkedHashMap<String, TheadStatistics>();
+		private Map<String, ThreadStatistics> m_statistics = new LinkedHashMap<String, ThreadStatistics>();
 
 		public void add(String threadId, Map<Integer, Segment> segments, int minute, String type) {
-			findOrCreatTheadStatistics(threadId, minute).add(segments, type);
+			findOrCreateThreadStatistics(threadId, minute).add(segments, type);
 		}
 
-		public TheadStatistics findOrCreatTheadStatistics(String threadName, int minute) {
-			TheadStatistics statistics = m_statistics.get(threadName);
+		public ThreadStatistics findOrCreateThreadStatistics(String threadName, int minute) {
+			ThreadStatistics statistics = m_statistics.get(threadName);
 			if (statistics == null) {
-				TheadStatistics result = new TheadStatistics(minute);
+				ThreadStatistics result = new ThreadStatistics(minute);
 
 				m_statistics.put(threadName, result);
 				return result;
@@ -234,19 +234,19 @@ public class ThreadLevelInfo {
 			}
 		}
 
-		public Map<String, TheadStatistics> getStatistics() {
+		public Map<String, ThreadStatistics> getStatistics() {
 			return m_statistics;
 		}
 
-		public void setStatistics(Map<String, TheadStatistics> statistics) {
+		public void setStatistics(Map<String, ThreadStatistics> statistics) {
 			m_statistics = statistics;
 		}
 	}
 
-	public static class TheadStatistics {
+	public static class ThreadStatistics {
 		private Map<Integer, TreeSet<String>> m_statistics = new LinkedHashMap<Integer, TreeSet<String>>();
 
-		public TheadStatistics(int lastMinute) {
+		public ThreadStatistics(int lastMinute) {
 			for (int i = 0; i <= lastMinute; i++) {
 				m_statistics.put(i, new TreeSet<String>());
 			}
@@ -254,11 +254,11 @@ public class ThreadLevelInfo {
 
 		public void add(Map<Integer, Segment> segments, String type) {
 			for (java.util.Map.Entry<Integer, Segment> entry : segments.entrySet()) {
-				findOrCreat(entry.getKey()).add(type);
+				findOrCreate(entry.getKey()).add(type);
 			}
 		}
 
-		public TreeSet<String> findOrCreat(Integer key) {
+		public TreeSet<String> findOrCreate(Integer key) {
 			TreeSet<String> result = m_statistics.get(key);
 			if (result == null) {
 				result = new TreeSet<String>();

@@ -364,7 +364,7 @@ final class SpringMvcRuntime {
 				throw re;
 			}
 		} else {
-			LOGGER.error(e.getMessage(), e);
+			LOGGER.error("Unable to handle Spring MVC migration request.", e);
 		}
 
 		if (!actionContext.isProcessStopped()) {
@@ -390,7 +390,7 @@ final class SpringMvcRuntime {
 		try {
 			handleRequest(request, response, requestContext);
 		} catch (Throwable e) {
-			String message = "Error occured when handling uri: " + request.getRequestURI();
+			String message = "Error occurred when handling uri: " + request.getRequestURI();
 
 			LOGGER.error(message, e);
 
@@ -435,7 +435,7 @@ final class SpringMvcRuntime {
 		try {
 			invokeMethod(inboundAction.getActionMethod(), inboundAction.getModuleInstance(), actionContext);
 		} catch (RuntimeException e) {
-			throw new ActionException("Error occured during handling inbound action(" + inboundAction.getActionName()
+			throw new ActionException("Error occurred during handling inbound action(" + inboundAction.getActionName()
 			      + ")!", e);
 		}
 	}
@@ -451,7 +451,7 @@ final class SpringMvcRuntime {
 		try {
 			invokeMethod(outboundAction.getMethod(), outboundAction.getModuleInstance(), actionContext);
 		} catch (RuntimeException e) {
-			throw new ActionException("Error occured during handling outbound action(" + outboundActionName + ")", e);
+			throw new ActionException("Error occurred during handling outbound action(" + outboundActionName + ")", e);
 		}
 	}
 
@@ -531,7 +531,7 @@ final class SpringMvcRuntime {
 		try {
 			invokeMethod(transition.getMethod(), transition.getModuleInstance(), actionContext);
 		} catch (RuntimeException e) {
-			throw new ActionException("Error occured during handling transition(" + transition.getTransitionName() + ")", e);
+			throw new ActionException("Error occurred during handling transition(" + transition.getTransitionName() + ")", e);
 		}
 	}
 
@@ -555,7 +555,7 @@ final class SpringMvcRuntime {
 			try {
 				validator.validate(ctx);
 			} catch (Exception e) {
-				throw new RuntimeException("Error occured during validating " + validatorClass.getName(), e);
+				throw new RuntimeException("Error occurred during validating " + validatorClass.getName(), e);
 			}
 		}
 	}
@@ -600,10 +600,10 @@ final class SpringMvcRuntime {
 			} else if (cause instanceof Error) {
 				throw (Error) cause;
 			}
-			throw new RuntimeException("Error occured during invoking method: " + method + " with parameters("
+			throw new RuntimeException("Error occurred during invoking method: " + method + " with parameters("
 			      + Arrays.toString(args) + ")", cause);
 		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException("Error occured during invoking method: " + method + " with parameters("
+			throw new RuntimeException("Error occurred during invoking method: " + method + " with parameters("
 			      + Arrays.toString(args) + ")", e);
 		}
 	}

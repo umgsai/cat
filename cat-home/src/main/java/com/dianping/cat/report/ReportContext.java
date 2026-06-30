@@ -23,6 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.unidal.web.mvc.Action;
 import org.unidal.web.mvc.ActionContext;
 import org.unidal.web.mvc.ActionPayload;
@@ -40,6 +42,8 @@ import com.dianping.cat.mvc.ReportModelDependencyProvider;
 
 public class ReportContext<T extends ActionPayload<? extends Page, ? extends Action>> extends ActionContext<T>
 		implements ReportModelDependencyProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReportContext.class);
+
 	private ReportModelDependencies m_reportModelDependencies;
 
 	@Override
@@ -58,8 +62,8 @@ public class ReportContext<T extends ActionPayload<? extends Page, ? extends Act
 				ServletContext servletContext = request.getSession().getServletContext();
 				File warRoot = new File(servletContext.getRealPath("/"));
 
-				System.out.println("[INFO] Working directory is " + System.getProperty("user.dir"));
-				System.out.println("[INFO] War root is " + warRoot);
+				LOGGER.info("Working directory is {}.", System.getProperty("user.dir"));
+				LOGGER.info("War root is {}.", warRoot);
 
 				ResourceRuntime.INSTANCE.removeConfig(contextPath);
 				ResourceInitializer.initialize(contextPath, warRoot);
