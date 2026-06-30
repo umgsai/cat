@@ -36,8 +36,8 @@ import com.dianping.cat.support.Threads.Task;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
-import com.dianping.cat.core.dal.Hostinfo;
 import com.dianping.cat.mybatis.HostInfoRepository;
+import com.dianping.cat.mybatis.data.HostInfoDO;
 import com.dianping.cat.helper.TimeHelper;
 
 @Component
@@ -54,24 +54,24 @@ public class HostinfoService {
 
 	private Map<String, String> ipDomains = new ConcurrentHashMap<String, String>();
 
-	private Map<String, Hostinfo> hostinfos = new ConcurrentHashMap<String, Hostinfo>();
+	private Map<String, HostInfoDO> hostinfos = new ConcurrentHashMap<String, HostInfoDO>();
 
 	private volatile boolean initialized;
 
-	public Hostinfo createLocal() {
+	public HostInfoDO createLocal() {
 		return hostInfoRepository.createLocal();
 	}
 
-	public List<Hostinfo> findAll() {
+	public List<HostInfoDO> findAll() {
 		ensureInitialized();
 
-		return new ArrayList<Hostinfo>(hostinfos.values());
+		return new ArrayList<HostInfoDO>(hostinfos.values());
 	}
 
-	public Hostinfo findByIp(String ip) {
+	public HostInfoDO findByIp(String ip) {
 		ensureInitialized();
 
-		Hostinfo hostinfo = hostinfos.get(ip);
+		HostInfoDO hostinfo = hostinfos.get(ip);
 
 		if (hostinfo != null) {
 			return hostinfo;
@@ -86,7 +86,7 @@ public class HostinfoService {
 					return null;
 				}
 			} catch (EmptyResultDataAccessException e) {
-				LOGGER.warn("Hostinfo is missing by ip={}.", ip, e);
+				LOGGER.warn("Host info is missing by ip={}.", ip, e);
 			} catch (Exception e) {
 				LOGGER.error("Unable to find hostinfo by ip={}.", ip, e);
 				Cat.logError(e);
@@ -118,7 +118,7 @@ public class HostinfoService {
 		LOGGER.info("HostinfoService started refresh task.");
 	}
 
-	private boolean insert(Hostinfo hostinfo) {
+	private boolean insert(HostInfoDO hostinfo) {
 		int result = hostInfoRepository.insert(hostinfo);
 
 		if (result == 1) {
@@ -133,7 +133,7 @@ public class HostinfoService {
 		ensureInitialized();
 
 		try {
-			Hostinfo info = createLocal();
+			HostInfoDO info = createLocal();
 
 			info.setDomain(domain);
 			info.setIp(ip);
@@ -143,7 +143,7 @@ public class HostinfoService {
 				LOGGER.info("Inserted hostinfo, domain={}, ip={}.", domain, ip);
 				return true;
 			}
-			LOGGER.warn("Hostinfo insert affected no rows, domain={}, ip={}.", domain, ip);
+			LOGGER.warn("Host info insert affected no rows, domain={}, ip={}.", domain, ip);
 		} catch (RuntimeException e) {
 			LOGGER.error("Unable to insert hostinfo, domain={}, ip={}.", domain, ip, e);
 			Cat.logError(e);
@@ -167,7 +167,7 @@ public class HostinfoService {
 
 		try {
 			if (validateIp(ip)) {
-				Hostinfo info = hostinfos.get(ip);
+				HostInfoDO info = hostinfos.get(ip);
 				String hostname = null;
 
 				if (info != null) {
@@ -203,7 +203,7 @@ public class HostinfoService {
 			return ips;
 		}
 
-		for (Hostinfo hostinfo : hostinfos.values()) {
+		for (HostInfoDO hostinfo : hostinfos.values()) {
 			if (domain.equals(hostinfo.getDomain())) {
 				String ip = hostinfo.getIp();
 
@@ -218,11 +218,11 @@ public class HostinfoService {
 
 	protected void refresh() {
 		try {
-			List<Hostinfo> hostinfos = hostInfoRepository.findAllIp();
-			Map<String, Hostinfo> tmpHostInfos = new ConcurrentHashMap<String, Hostinfo>();
+			List<HostInfoDO> hostinfos = hostInfoRepository.findAllIp();
+			Map<String, HostInfoDO> tmpHostInfos = new ConcurrentHashMap<String, HostInfoDO>();
 			Map<String, String> tmpIpDomains = new ConcurrentHashMap<String, String>();
 
-			for (Hostinfo hostinfo : hostinfos) {
+			for (HostInfoDO hostinfo : hostinfos) {
 				tmpHostInfos.put(hostinfo.getIp(), hostinfo);
 				tmpIpDomains.put(hostinfo.getIp(), hostinfo.getDomain());
 			}
@@ -238,18 +238,18 @@ public class HostinfoService {
 	public boolean update(long id, String domain, String ip) {
 		ensureInitialized();
 
-		Hostinfo info = createLocal();
+		HostInfoDO info = createLocal();
 
 		info.setId(id);
 		info.setDomain(domain);
 		info.setIp(ip);
-		info.setLastModifiedDate(new Date());
+		info.setUpdateTime(new Date());
 		updateHostinfo(info);
 		hostinfos.put(ip, info);
 		return true;
 	}
 
-	public boolean updateHostinfo(Hostinfo hostinfo) {
+	public boolean updateHostinfo(HostInfoDO hostinfo) {
 		ensureInitialized();
 
 		hostinfos.put(hostinfo.getIp(), hostinfo);
@@ -299,7 +299,7 @@ public class HostinfoService {
 				try {
 					Thread.sleep(TimeHelper.ONE_MINUTE);
 				} catch (InterruptedException e) {
-					LOGGER.warn("Hostinfo refresh task interrupted.", e);
+					LOGGER.warn("Host info refresh task interrupted.", e);
 					Cat.logError(e);
 				}
 			}

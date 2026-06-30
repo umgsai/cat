@@ -40,9 +40,9 @@ import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.consumer.state.model.transform.BaseVisitor;
 import com.dianping.cat.consumer.state.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.Hostinfo;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.WeeklyReport;
+import com.dianping.cat.mybatis.data.HostInfoDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.page.state.service.StateReportService;
 import com.dianping.cat.report.task.TaskBuilder;
@@ -215,7 +215,7 @@ public class StateReportBuilder implements TaskBuilder {
 				projectService.insert(domain);
 
 			}
-			Hostinfo info = hostinfoService.findByIp(ip);
+				HostInfoDO info = hostinfoService.findByIp(ip);
 
 			if (info == null) {
 				LOGGER.info("State report discovered new host, domain={}, ip={}.", domain, ip);

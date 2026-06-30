@@ -44,8 +44,8 @@ import com.dianping.cat.support.Threads.Task;
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
-import com.dianping.cat.core.dal.Hostinfo;
 import com.dianping.cat.core.dal.Project;
+import com.dianping.cat.mybatis.data.HostInfoDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
@@ -365,9 +365,9 @@ public class ProjectUpdateTask implements Task {
 
 	private void updateHostNameInfo() {
 		try {
-			List<Hostinfo> infos = hostInfoService.findAll();
+				List<HostInfoDO> infos = hostInfoService.findAll();
 
-			for (Hostinfo info : infos) {
+				for (HostInfoDO info : infos) {
 				try {
 					String hostname = info.getHostname();
 					String ip = info.getIp();
