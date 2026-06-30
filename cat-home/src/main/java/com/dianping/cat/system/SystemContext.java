@@ -34,10 +34,14 @@ import org.unidal.webres.resource.runtime.ResourceRuntimeContext;
 import org.unidal.webres.resource.spi.IResourceRegistry;
 import org.unidal.webres.tag.resource.ResourceTagConfigurator;
 import org.unidal.webres.taglib.basic.ResourceTagLibConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.system.page.login.service.LoginMember;
 
 public class SystemContext<T extends ActionPayload<? extends Page, ? extends Action>> extends ActionContext<T> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SystemContext.class);
 
 	private LoginMember m_signinMember;
 
@@ -60,8 +64,8 @@ public class SystemContext<T extends ActionPayload<? extends Page, ? extends Act
 				ServletContext servletContext = request.getSession().getServletContext();
 				File warRoot = new File(servletContext.getRealPath("/"));
 
-				System.out.println("[INFO] Working directory is " + System.getProperty("user.dir"));
-				System.out.println("[INFO] War root is " + warRoot);
+				LOGGER.info("Working directory is {}", System.getProperty("user.dir"));
+				LOGGER.info("War root is {}", warRoot);
 
 				ResourceRuntime.INSTANCE.removeConfig(contextPath);
 				ResourceInitializer.initialize(contextPath, warRoot);

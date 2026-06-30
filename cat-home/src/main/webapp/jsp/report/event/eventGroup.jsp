@@ -12,7 +12,7 @@
 <a:hourly_report
 	title="Event Report${empty payload.type ? '' : ' :: '}<a href='?op=groupReport&domain=${model.domain}&date=${model.date}&group=${payload.group}&type=${payload.encodedType}'>${payload.type}</a>"
 	navUrlPrefix="op=groupReport&op=groupReport&domain=${model.domain}${empty payload.type ? '' : '&type='}${payload.encodedType}"
-	timestamp="${w:format(model.creatTime,'yyyy-MM-dd HH:mm:ss')}">
+	timestamp="${w:format(model.createTime,'yyyy-MM-dd HH:mm:ss')}">
 
 	<jsp:attribute name="subtitle">${w:format(report.startTime,'yyyy-MM-dd HH:mm:ss')} to ${w:format(report.endTime,'yyyy-MM-dd HH:mm:ss')}</jsp:attribute>
 	<jsp:body>

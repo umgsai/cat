@@ -118,7 +118,7 @@ public class GroupLevelInfo {
 			minuteStr = minuteStr + Integer.toString(minute);
 		}
 
-		sb.append(ProblemReportHelper.creatLinkString(baseUrl, "minute", params, minuteStr));
+		sb.append(ProblemReportHelper.createLinkString(baseUrl, "minute", params, minuteStr));
 		sb.append("</td>");
 
 		for (String group : getGroups()) {
@@ -126,7 +126,7 @@ public class GroupLevelInfo {
 			params.put("group", group);
 			GroupStatistics value = m_groupStatistics.get(group);
 			for (String temp : value.getStatistics().get(minute)) {
-				String url = ProblemReportHelper.creatLinkString(baseUrl, temp, params, "");
+				String url = ProblemReportHelper.createLinkString(baseUrl, temp, params, "");
 				sb.append(url);
 			}
 			sb.append("</td>");

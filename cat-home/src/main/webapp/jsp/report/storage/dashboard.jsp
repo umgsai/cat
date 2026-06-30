@@ -11,7 +11,7 @@
 <jsp:useBean id="model"	type="com.dianping.cat.report.page.storage.Model" scope="request" />
 
 <a:hourly_report title="Storage Report"
-	navUrlPrefix="op=${payload.action.name}&domain=${model.domain}&type=${payload.type}" timestamp="${w:format(model.creatTime,'yyyy-MM-dd HH:mm:ss')}">
+	navUrlPrefix="op=${payload.action.name}&domain=${model.domain}&type=${payload.type}" timestamp="${w:format(model.createTime,'yyyy-MM-dd HH:mm:ss')}">
 
 	<jsp:attribute name="subtitle">${w:format(model.reportStart,'yyyy-MM-dd HH:mm:ss')} to ${w:format(model.reportEnd,'yyyy-MM-dd HH:mm:ss')}</jsp:attribute>
 

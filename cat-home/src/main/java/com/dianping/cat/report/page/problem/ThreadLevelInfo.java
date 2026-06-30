@@ -154,7 +154,7 @@ public class ThreadLevelInfo {
 		} else {
 			minuteStr = minuteStr + Integer.toString(minute);
 		}
-		sb.append(ProblemReportHelper.creatLinkString(baseUrl, "minute", params, minuteStr));
+		sb.append(ProblemReportHelper.createLinkString(baseUrl, "minute", params, minuteStr));
 		sb.append("</td>");
 
 		for (GroupDisplayInfo group : getGroups()) {
@@ -172,7 +172,7 @@ public class ThreadLevelInfo {
 					if (groupName.equals(m_groupName)) {
 						params.put("thread", thread);
 					}
-					String url = ProblemReportHelper.creatLinkString(baseUrl, error, params, "");
+					String url = ProblemReportHelper.createLinkString(baseUrl, error, params, "");
 					sb.append(url);
 				}
 				sb.append("</td>");

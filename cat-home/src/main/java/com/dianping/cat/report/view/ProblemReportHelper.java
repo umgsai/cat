@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class ProblemReportHelper {
 
-	public static String creatLinkString(String baseUrl, String classStyle, Map<String, String> params, String text) {
+	public static String createLinkString(String baseUrl, String classStyle, Map<String, String> params, String text) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<a ");
 		sb.append("href=\"").append(baseUrl);

@@ -11,7 +11,7 @@
 
 <a:storage_report title="Storage Report"
 	navUrlPrefix="op=${payload.action.name}&type=${payload.type}&domain=${model.domain}&id=${payload.id}&ip=${model.ipAddress}&operations=${payload.operations}"
-	timestamp="${w:format(model.creatTime,'yyyy-MM-dd HH:mm:ss')}">
+	timestamp="${w:format(model.createTime,'yyyy-MM-dd HH:mm:ss')}">
 
 	<jsp:attribute name="subtitle">${w:format(report.startTime,'yyyy-MM-dd HH:mm:ss')} to ${w:format(report.endTime,'yyyy-MM-dd HH:mm:ss')}</jsp:attribute>
 

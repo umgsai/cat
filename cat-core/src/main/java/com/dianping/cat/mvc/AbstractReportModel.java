@@ -41,7 +41,7 @@ import com.dianping.cat.service.ProjectService.Department;
 
 public abstract class AbstractReportModel<A extends Action, P extends Page, M extends ActionContext<?>>
 						extends	ViewModel<P, A, M> {
-	private transient Date m_creatTime;
+	private transient Date m_createTime;
 
 	private transient String m_customDate;
 
@@ -99,12 +99,12 @@ public abstract class AbstractReportModel<A extends Action, P extends Page, M ex
 		return buildPageUri(getPage().getPath(), null);
 	}
 
-	public Date getCreatTime() {
-		return m_creatTime;
+	public Date getCreateTime() {
+		return m_createTime;
 	}
 
-	public void setCreatTime(Date creatTime) {
-		m_creatTime = creatTime;
+	public void setCreateTime(Date createTime) {
+		m_createTime = createTime;
 	}
 
 	// required by current tag()

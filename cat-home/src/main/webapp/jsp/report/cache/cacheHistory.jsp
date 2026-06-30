@@ -17,7 +17,7 @@
 <a:historyReport
 	title="Cache Report${empty payload.type ? '' : ' :: '}<a href='?op=history&domain=${model.domain}&reportType=${payload.reportType}&date=${model.date}&type=${payload.type}${model.customDate}'>${payload.type}</a>"
 	navUrlPrefix="ip=${model.ipAddress}&queryname=${model.queryName}&domain=${model.domain}${empty payload.type ? '' : '&type='}${payload.type}"
-	timestamp="${w:format(model.creatTime,'yyyy-MM-dd HH:mm:ss')}">
+	timestamp="${w:format(model.createTime,'yyyy-MM-dd HH:mm:ss')}">
 	<jsp:attribute name="subtitle">${w:format(payload.historyStartDate,'yyyy-MM-dd HH:mm:ss')} to ${w:format(payload.historyDisplayEndDate,'yyyy-MM-dd HH:mm:ss')}</jsp:attribute>
 	<jsp:body>
 <table class="machines">
