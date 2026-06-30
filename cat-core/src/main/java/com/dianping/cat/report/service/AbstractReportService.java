@@ -38,6 +38,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
 import com.dianping.cat.mybatis.DailyReportContentRepository;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.mybatis.HourlyReportContentRepository;
@@ -126,7 +127,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	}
 
 	@Override
-	public boolean insertDailyReport(DailyReport report, byte[] content) {
+	public boolean insertDailyReport(DailyReportDO report, byte[] content) {
 		ensureReportRepositories();
 		try {
 			dailyReportRepository.insert(report);

@@ -32,7 +32,7 @@ import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.heartbeat.model.transform.DefaultNativeBuilder;
-import com.dianping.cat.core.dal.DailyReport;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.task.TaskBuilder;
@@ -52,9 +52,9 @@ public class HeartbeatReportBuilder implements TaskBuilder {
 		try {
 			Date end = TaskHelper.tomorrowZero(period);
 			HeartbeatReport heartbeatReport = queryDailyHeartbeatReport(name, domain, period, end);
-			DailyReport report = new DailyReport();
+			DailyReportDO report = new DailyReportDO();
 
-			report.setCreationDate(new Date());
+			report.setCreateTime(new Date());
 			report.setDomain(domain);
 			report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 			report.setName(name);

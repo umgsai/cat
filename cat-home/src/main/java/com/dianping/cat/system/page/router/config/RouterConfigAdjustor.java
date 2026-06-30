@@ -42,6 +42,7 @@ import com.dianping.cat.consumer.state.model.entity.ProcessDomain;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.mybatis.DailyReportRepository;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.router.entity.DefaultServer;
@@ -284,9 +285,9 @@ public class RouterConfigAdjustor {
 			List<DailyReport> reports = dailyReportRepository
 									.queryLatestReportsByDomainName(domain, name, 1);
 			DailyReport oldReport = reports.get(0);
-			DailyReport dailyReport = new DailyReport();
+			DailyReportDO dailyReport = new DailyReportDO();
 
-			dailyReport.setCreationDate(new Date());
+			dailyReport.setCreateTime(new Date());
 			dailyReport.setDomain(domain);
 			dailyReport.setIp(oldReport.getIp());
 			dailyReport.setName(name);

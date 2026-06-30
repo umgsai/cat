@@ -35,8 +35,8 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
-import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.mybatis.DailyReportRepository;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.router.entity.Domain;
 import com.dianping.cat.home.router.entity.Group;
@@ -264,9 +264,9 @@ public class RouterConfigHandler {
 			String name = RouterConfigBuilder.ID;
 			String domain = Constants.CAT;
 			RouterConfig routerConfig = buildRouterConfig(domain, period);
-			DailyReport dailyReport = new DailyReport();
+			DailyReportDO dailyReport = new DailyReportDO();
 
-			dailyReport.setCreationDate(new Date());
+			dailyReport.setCreateTime(new Date());
 			dailyReport.setDomain(domain);
 			dailyReport.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 			dailyReport.setName(name);

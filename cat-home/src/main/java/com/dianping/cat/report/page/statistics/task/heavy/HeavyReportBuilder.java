@@ -33,7 +33,7 @@ import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
-import com.dianping.cat.core.dal.DailyReport;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.WeeklyReport;
@@ -65,9 +65,9 @@ public class HeavyReportBuilder implements TaskBuilder {
 		LOGGER.info("Building heavy daily report, name={}, domain={}, period={}.", name, domain, period);
 
 		HeavyReport heavyReport = queryHourlyReportsByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
-		DailyReport report = new DailyReport();
+		DailyReportDO report = new DailyReportDO();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);

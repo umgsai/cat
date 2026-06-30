@@ -27,9 +27,9 @@ import org.springframework.stereotype.Component;
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
-import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.home.router.entity.RouterConfig;
 import com.dianping.cat.home.router.transform.DefaultNativeBuilder;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.report.task.TaskBuilder;
 import com.dianping.cat.system.page.router.config.RouterConfigAdjustor;
 import com.dianping.cat.system.page.router.config.RouterConfigHandler;
@@ -55,9 +55,9 @@ public class RouterConfigBuilder implements TaskBuilder {
 	@Override
 	public boolean buildDailyTask(String name, String domain, Date period) {
 		RouterConfig routerConfig = routerConfigHandler.buildRouterConfig(domain, period);
-		DailyReport dailyReport = new DailyReport();
+		DailyReportDO dailyReport = new DailyReportDO();
 
-		dailyReport.setCreationDate(new Date());
+		dailyReport.setCreateTime(new Date());
 		dailyReport.setDomain(domain);
 		dailyReport.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		dailyReport.setName(name);

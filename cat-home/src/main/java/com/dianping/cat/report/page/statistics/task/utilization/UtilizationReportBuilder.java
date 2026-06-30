@@ -36,7 +36,7 @@ import com.dianping.cat.consumer.cross.model.entity.CrossReport;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
-import com.dianping.cat.core.dal.DailyReport;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.WeeklyReport;
@@ -85,9 +85,9 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 		UtilizationReport utilizationReport = queryHourlyReportsByDuration(name, domain, period,
 								TaskHelper.tomorrowZero(period));
-		DailyReport report = new DailyReport();
+		DailyReportDO report = new DailyReportDO();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);

@@ -35,7 +35,7 @@ import com.dianping.cat.consumer.matrix.MatrixReportFilter;
 import com.dianping.cat.consumer.matrix.MatrixReportMerger;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.matrix.model.transform.DefaultNativeBuilder;
-import com.dianping.cat.core.dal.DailyReport;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.helper.TimeHelper;
@@ -58,9 +58,9 @@ public class MatrixReportBuilder implements TaskBuilder {
 	public boolean buildDailyTask(String name, String domain, Date period) {
 		LOGGER.info("Building matrix daily report, name={}, domain={}, period={}.", name, domain, period);
 		MatrixReport matrixReport = queryHourlyReportByDuration(name, domain, period, TaskHelper.tomorrowZero(period));
-		DailyReport report = new DailyReport();
+		DailyReportDO report = new DailyReportDO();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);

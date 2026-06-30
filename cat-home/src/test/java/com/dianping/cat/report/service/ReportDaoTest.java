@@ -23,10 +23,10 @@ import java.util.Date;
 import org.junit.Test;
 
 import com.dianping.cat.SpringCatHomeTestSupport;
-import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.WeeklyReport;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.HourlyReportRepository;
 import com.dianping.cat.mybatis.MonthlyReportRepository;
 import com.dianping.cat.mybatis.WeeklyReportRepository;
@@ -52,11 +52,10 @@ public class ReportDaoTest extends SpringCatHomeTestSupport {
 	@Test
 	public void testDaily() throws Exception {
 		DailyReportRepository dao = lookup(DailyReportRepository.class);
-		DailyReport proto = new DailyReport();
+		DailyReportDO proto = new DailyReportDO();
 
-		proto.setCreationDate(new Date());
+		proto.setCreateTime(new Date());
 		proto.setDomain("domain");
-		proto.setEndDate(new Date());
 		proto.setName("name");
 		proto.setIp("ip");
 		proto.setPeriod(new Date());

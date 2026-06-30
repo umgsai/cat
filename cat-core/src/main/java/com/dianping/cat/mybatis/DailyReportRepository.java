@@ -33,7 +33,7 @@ public class DailyReportRepository {
 		return new DailyReport();
 	}
 
-	public int deleteByDomainNamePeriod(DailyReport proto) {
+	public int deleteByDomainNamePeriod(DailyReportDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		return transactionTemplate.execute(status -> springMapper().deleteByDomainNamePeriod(proto.getDomain(),
@@ -59,14 +59,11 @@ public class DailyReportRepository {
 		return requireFound(mapper.findById(keyId), "id", String.valueOf(keyId));
 	}
 
-	public int insert(DailyReport proto) {
+	public int insert(DailyReportDO report) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		DailyReportDO report = toDailyReportDO(proto);
 		int count = transactionTemplate.execute(status -> springMapper().insert(report));
 
-		proto.setId(report.getId());
-		proto.setKeyId(report.getId());
 		return count;
 	}
 
