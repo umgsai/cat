@@ -56,7 +56,7 @@ public class DefaultMessageProducer implements MessageProducer {
         return INSTANCE;
     }
 
-    private String buildStackInfo(String message, Throwable cause) {
+    private String buildErrorData(String message, Throwable cause) {
         StringWriter writer = new StringWriter(2048);
 
         if (message != null) {
@@ -68,12 +68,16 @@ public class DefaultMessageProducer implements MessageProducer {
             // when build stack, cat will report the message tree.
             Cat.getManager().getThreadLocalMessageTree().setDiscardPrivate(false);
 
-            cause.printStackTrace(new PrintWriter(writer));
+            appendStackTrace(writer, cause);
         } else {
             writer.write("The exception with same name will print stack eighty times in one minute, discard exception stack to avoid abnormal performance bottleneck");
         }
 
         return writer.toString();
+    }
+
+    private void appendStackTrace(StringWriter writer, Throwable cause) {
+        cause.printStackTrace(new PrintWriter(writer));
     }
 
     @Override
@@ -88,8 +92,8 @@ public class DefaultMessageProducer implements MessageProducer {
 
     @Override
     public void logError(String message, Throwable cause) {
-        if (notExsitCause(cause)) {
-            String detailMessage = buildStackInfo(message, cause);
+        if (doesNotExistCause(cause)) {
+            String detailMessage = buildErrorData(message, cause);
             final String name = cause.getClass().getName();
 
             if (cause instanceof Error) {
@@ -109,8 +113,8 @@ public class DefaultMessageProducer implements MessageProducer {
 
     @Override
     public void logErrorWithCategory(String category, String message, Throwable cause) {
-        if (notExsitCause(cause)) {
-            String detailMessage = buildStackInfo(message, cause);
+        if (doesNotExistCause(cause)) {
+            String detailMessage = buildErrorData(message, cause);
 
             if (cause instanceof Error) {
                 logEvent("Error", category, ERROR, detailMessage);
@@ -221,7 +225,7 @@ public class DefaultMessageProducer implements MessageProducer {
         return transaction;
     }
 
-    private boolean notExsitCause(Throwable e) {
+    private boolean doesNotExistCause(Throwable e) {
         if (manager instanceof DefaultMessageManager) {
             return ((DefaultMessageManager) manager).notExsitCause(e);
         } else {

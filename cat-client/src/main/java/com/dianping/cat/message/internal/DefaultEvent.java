@@ -30,20 +30,15 @@ public class DefaultEvent extends AbstractMessage implements Event {
 
 		ctx.add(this);
 	}
-	
+
 	public DefaultEvent(TraceContext ctx, String message, Throwable e) {
 		super("Error", e.getClass().getName());
 
 		if (!ctx.hasException(e)) {
-			StringWriter writer = new StringWriter(2048);
-
-			if (message != null && message.length() > 0) {
-				writer.append(message).append(' ');
-			}
+			String eventData = buildEventData(message, e);
 
 			setStatus("ERROR");
-			e.printStackTrace(new PrintWriter(writer));
-			addData(writer.toString());
+			addData(eventData);
 			ctx.add(this);
 		}
 	}
@@ -61,5 +56,19 @@ public class DefaultEvent extends AbstractMessage implements Event {
 	public void complete(long startInMillis) {
 		setTimestamp(startInMillis);
 		super.setCompleted();
+	}
+
+	private String buildEventData(String message, Throwable cause) {
+		StringWriter writer = new StringWriter(2048);
+
+		if (message != null && message.length() > 0) {
+			writer.append(message).append(' ');
+		}
+		appendStackTrace(writer, cause);
+		return writer.toString();
+	}
+
+	private void appendStackTrace(StringWriter writer, Throwable cause) {
+		cause.printStackTrace(new PrintWriter(writer));
 	}
 }

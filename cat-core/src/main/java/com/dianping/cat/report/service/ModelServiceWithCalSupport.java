@@ -18,8 +18,7 @@
  */
 package com.dianping.cat.report.service;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
@@ -29,16 +28,14 @@ public abstract class ModelServiceWithCalSupport {
 	private Transaction m_current;
 
 	protected void logError(Throwable cause) {
-		StringWriter writer = new StringWriter(2048);
-
-		cause.printStackTrace(new PrintWriter(writer));
+		String stackTrace = ExceptionUtils.getStackTrace(cause);
 
 		if (cause instanceof Error) {
-			logEvent("Error", cause.getClass().getName(), "ERROR", writer.toString());
+			logEvent("Error", cause.getClass().getName(), "ERROR", stackTrace);
 		} else if (cause instanceof RuntimeException) {
-			logEvent("RuntimeException", cause.getClass().getName(), "ERROR", writer.toString());
+			logEvent("RuntimeException", cause.getClass().getName(), "ERROR", stackTrace);
 		} else {
-			logEvent("Exception", cause.getClass().getName(), "ERROR", writer.toString());
+			logEvent("Exception", cause.getClass().getName(), "ERROR", stackTrace);
 		}
 	}
 

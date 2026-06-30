@@ -23,6 +23,7 @@ import com.dianping.cat.util.Threads;
 
 import java.io.*;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -59,8 +60,43 @@ public class CatLogger {
         out("ERROR", message, throwable);
     }
 
+    public void error(String message, Object... arguments) {
+        out("ERROR", formatMessage(message, arguments), getThrowable(arguments));
+    }
+
     private String formatMessage(String level, String message) {
         return format.format(new Object[]{new Date(), level, message, getCallerClassName()});
+    }
+
+    private String formatMessage(String message, Object... arguments) {
+        if (arguments == null || arguments.length == 0) {
+            return message;
+        }
+
+        Object[] formattingArguments = getFormattingArguments(arguments);
+        StringBuilder builder = new StringBuilder();
+        int argIndex = 0;
+        int start = 0;
+
+        while (true) {
+            int index = message.indexOf("{}", start);
+
+            if (index < 0) {
+                builder.append(message.substring(start));
+                break;
+            }
+
+            builder.append(message, start, index);
+
+            if (argIndex < formattingArguments.length) {
+                builder.append(formattingArguments[argIndex++]);
+            } else {
+                builder.append("{}");
+            }
+            start = index + 2;
+        }
+
+        return builder.toString();
     }
 
     private String getCallerClassName() {
@@ -132,6 +168,32 @@ public class CatLogger {
 
     public void info(String message, Throwable throwable) {
         out("INFO", message, throwable);
+    }
+
+    public void info(String message, Object... arguments) {
+        out("INFO", formatMessage(message, arguments), getThrowable(arguments));
+    }
+
+    private Object[] getFormattingArguments(Object[] arguments) {
+        if (getThrowable(arguments) == null) {
+            return arguments;
+        }
+
+        return Arrays.copyOf(arguments, arguments.length - 1);
+    }
+
+    private Throwable getThrowable(Object[] arguments) {
+        if (arguments == null || arguments.length == 0) {
+            return null;
+        }
+
+        Object lastArgument = arguments[arguments.length - 1];
+
+        if (lastArgument instanceof Throwable) {
+            return (Throwable) lastArgument;
+        }
+
+        return null;
     }
 
     private void out(String severity, String message, Throwable throwable) {
