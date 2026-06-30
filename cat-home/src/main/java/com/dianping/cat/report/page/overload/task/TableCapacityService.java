@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.HourlyReport;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.mybatis.HourlyReportRepository;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.mybatis.MonthlyReportRepository;
@@ -65,11 +65,11 @@ public class TableCapacityService {
 
 		switch (reportType) {
 		case CapacityUpdater.HOURLY_TYPE:
-			overloadReport.setDomain(((HourlyReport) object).getDomain());
-			overloadReport.setIp(((HourlyReport) object).getIp());
-			overloadReport.setName(((HourlyReport) object).getName());
-			overloadReport.setPeriod(((HourlyReport) object).getPeriod());
-			overloadReport.setType(((HourlyReport) object).getType());
+			overloadReport.setDomain(((HourlyReportDO) object).getDomain());
+			overloadReport.setIp(((HourlyReportDO) object).getIp());
+			overloadReport.setName(((HourlyReportDO) object).getName());
+			overloadReport.setPeriod(((HourlyReportDO) object).getPeriod());
+			overloadReport.setType(((HourlyReportDO) object).getType());
 			break;
 		case CapacityUpdater.DAILY_TYPE:
 			overloadReport.setDomain(((DailyReport) object).getDomain());

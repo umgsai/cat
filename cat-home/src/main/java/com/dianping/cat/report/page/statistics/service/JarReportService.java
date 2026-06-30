@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
-import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportContent;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
+import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.jar.entity.JarReport;
 import com.dianping.cat.home.jar.transform.DefaultNativeParser;
@@ -49,7 +49,7 @@ public class JarReportService extends AbstractReportService<JarReport> {
 	}
 
 	private JarReport queryFromHourlyBinary(long id, Date period, String domain) {
-		HourlyReportContent content = hourlyReportContentRepository
+		HourlyReportContentDO content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {
@@ -66,7 +66,7 @@ public class JarReportService extends AbstractReportService<JarReport> {
 		String name = Constants.REPORT_JAR;
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
-			List<HourlyReport> reports = null;
+			List<HourlyReportDO> reports = null;
 			try {
 				reports = hourlyReportRepository.findAllByDomainNamePeriod(start, domain, name);
 			} catch (RuntimeException e) {
@@ -75,7 +75,7 @@ public class JarReportService extends AbstractReportService<JarReport> {
 				Cat.logError(e);
 			}
 			if (reports != null) {
-				for (HourlyReport report : reports) {
+				for (HourlyReportDO report : reports) {
 					try {
 						return queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 					} catch (RuntimeException e) {

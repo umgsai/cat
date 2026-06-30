@@ -33,10 +33,10 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
-import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.mybatis.HourlyReportContentRepository;
 import com.dianping.cat.mybatis.HourlyReportRepository;
+import com.dianping.cat.mybatis.data.HourlyReportContentDO;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 
@@ -249,25 +249,25 @@ public class DefaultReportManager<T> implements ReportManager<T> {
 		for (T report : reports.values()) {
 			try {
 				String domain = reportDelegate.getDomain(report);
-				HourlyReport r = reportDao.createLocal();
+				HourlyReportDO r = reportDao.createLocal();
 
 				r.setName(name);
 				r.setDomain(domain);
 				r.setPeriod(period);
 				r.setIp(ip);
 				r.setType(1);
-				r.setCreationDate(creationDate);
+				r.setCreateTime(creationDate);
 
 				reportDao.insert(r);
 
 				long id = r.getId();
 				byte[] binaryContent = reportDelegate.buildBinary(report);
-				HourlyReportContent content = reportContentDao.createLocal();
+				HourlyReportContentDO content = reportContentDao.createLocal();
 
 				content.setReportId(id);
 				content.setContent(binaryContent);
 				content.setPeriod(period);
-				content.setCreationDate(creationDate);
+				content.setCreateTime(creationDate);
 				reportContentDao.insert(content);
 				reportDelegate.createHourlyTask(report);
 			} catch (Throwable e) {

@@ -19,6 +19,4 @@ public class HourlyReportDO {
 	private Date period;
 
 	private Date createTime;
-
-	private Long keyId;
 }

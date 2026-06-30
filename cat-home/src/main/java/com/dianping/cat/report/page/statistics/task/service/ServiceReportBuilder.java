@@ -37,7 +37,7 @@ import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.consumer.cross.CrossAnalyzer;
 import com.dianping.cat.consumer.cross.model.entity.CrossReport;
 import com.dianping.cat.mybatis.data.DailyReportDO;
-import com.dianping.cat.core.dal.HourlyReport;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.helper.TimeHelper;
@@ -110,9 +110,9 @@ public class ServiceReportBuilder implements TaskBuilder {
 				}
 			}
 		}
-		HourlyReport report = new HourlyReport();
+		HourlyReportDO report = new HourlyReportDO();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);
@@ -128,7 +128,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 		ServiceReport serviceReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);
@@ -146,7 +146,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
 		WeeklyReport report = new WeeklyReport();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);

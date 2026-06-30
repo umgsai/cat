@@ -35,8 +35,8 @@ import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.consumer.storage.model.transform.DefaultNativeParser;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportContent;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
+import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
 import com.dianping.cat.core.dal.WeeklyReport;
@@ -122,7 +122,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	}
 
 	private StorageReport queryFromHourlyBinary(long id, Date period, String reportId) {
-		HourlyReportContent content = hourlyReportContentRepository
+		HourlyReportContentDO content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {
@@ -160,7 +160,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 		String name = StorageAnalyzer.ID;
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
-			List<HourlyReport> reports = null;
+			List<HourlyReportDO> reports = null;
 			try {
 				reports = hourlyReportRepository
 										.findAllByDomainNamePeriod(new Date(startTime), reportId, name);
@@ -170,7 +170,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 				Cat.logError(e);
 			}
 			if (reports != null) {
-				for (HourlyReport report : reports) {
+				for (HourlyReportDO report : reports) {
 					try {
 						StorageReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), reportId);
 						reportModel.accept(merger);

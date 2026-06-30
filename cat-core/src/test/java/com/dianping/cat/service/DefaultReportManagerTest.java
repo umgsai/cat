@@ -31,8 +31,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportContent;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
+import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.mybatis.HourlyReportContentRepository;
 import com.dianping.cat.mybatis.HourlyReportRepository;
 import com.dianping.cat.report.DefaultReportManager;
@@ -163,8 +163,8 @@ public class DefaultReportManagerTest {
 		public Date creationDate;
 
 		@Override
-		public int insert(HourlyReport proto) {
-			creationDate = proto.getCreationDate();
+		public int insert(HourlyReportDO proto) {
+			creationDate = proto.getCreateTime();
 			return count++;
 		}
 
@@ -177,8 +177,8 @@ public class DefaultReportManagerTest {
 		public Date creationDate;
 
 		@Override
-		public int insert(HourlyReportContent proto) {
-			creationDate = proto.getCreationDate();
+		public int insert(HourlyReportContentDO proto) {
+			creationDate = proto.getCreateTime();
 			return count++;
 		}
 

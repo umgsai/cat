@@ -34,7 +34,7 @@ import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.StateReportMerger;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.consumer.state.model.transform.DefaultNativeBuilder;
-import com.dianping.cat.core.dal.HourlyReport;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
@@ -95,9 +95,9 @@ public class StateReportReloader extends AbstractReportReloader {
 		List<StateReport> reports = buildMergedReports(mergedReports);
 
 		for (StateReport r : reports) {
-			HourlyReport report = new HourlyReport();
+			HourlyReportDO report = new HourlyReportDO();
 
-			report.setCreationDate(new Date());
+			report.setCreateTime(new Date());
 			report.setDomain(r.getDomain());
 			report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 			report.setName(getId());

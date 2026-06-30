@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.server.ServerConfigManager;
-import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportContent;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
+import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.mybatis.HourlyReportContentRepository;
 import com.dianping.cat.mybatis.HourlyReportRepository;
 
@@ -50,11 +50,11 @@ public abstract class AbstractReportReloader implements ReportReloader {
 
 	public boolean insertHourlyReport(ReportReloadEntity entity) {
 		try {
-			HourlyReport report = entity.getReport();
+			HourlyReportDO report = entity.getReport();
 			hourlyReportRepository.insert(report);
 
 			long id = report.getId();
-			HourlyReportContent proto = hourlyReportContentRepository.createLocal();
+			HourlyReportContentDO proto = hourlyReportContentRepository.createLocal();
 
 			proto.setReportId(id);
 			proto.setContent(entity.getReportContent());
@@ -62,7 +62,7 @@ public abstract class AbstractReportReloader implements ReportReloader {
 			hourlyReportContentRepository.insert(proto);
 			return true;
 		} catch (RuntimeException e) {
-			HourlyReport report = entity == null ? null : entity.getReport();
+			HourlyReportDO report = entity == null ? null : entity.getReport();
 			LOGGER.error("Unable to insert reloaded hourly report, reloader={}, reportName={}, domain={}, period={}.",
 					getId(), report == null ? null : report.getName(), report == null ? null : report.getDomain(),
 					report == null ? null : report.getPeriod(), e);

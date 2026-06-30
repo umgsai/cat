@@ -30,8 +30,8 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportContent;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
+import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
 import com.dianping.cat.core.dal.WeeklyReport;
@@ -95,7 +95,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 	}
 
 	private ServiceReport queryFromHourlyBinary(long id, Date period, String domain) {
-		HourlyReportContent content = hourlyReportContentRepository
+		HourlyReportContentDO content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {
@@ -133,7 +133,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 		String name = Constants.REPORT_SERVICE;
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
-			List<HourlyReport> reports = null;
+			List<HourlyReportDO> reports = null;
 			try {
 				reports = hourlyReportRepository
 										.findAllByDomainNamePeriod(new Date(startTime), domain, name);
@@ -143,7 +143,7 @@ public class ServiceReportService extends AbstractReportService<ServiceReport> {
 				Cat.logError(e);
 			}
 			if (reports != null) {
-				for (HourlyReport report : reports) {
+				for (HourlyReportDO report : reports) {
 					try {
 						ServiceReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 						reportModel.accept(merger);

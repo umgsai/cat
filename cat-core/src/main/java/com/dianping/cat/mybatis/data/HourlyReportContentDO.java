@@ -18,8 +18,6 @@ public class HourlyReportContentDO {
 
 	private Double contentLength;
 
-	private Long keyReportId;
-
 	private Long startId;
 
 	private Double capacity;

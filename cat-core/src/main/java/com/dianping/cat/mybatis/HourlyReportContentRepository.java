@@ -2,7 +2,6 @@ package com.dianping.cat.mybatis;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import jakarta.annotation.Resource;
 
@@ -13,9 +12,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.dianping.cat.core.dal.HourlyReportContent;
-import com.dianping.cat.mybatis.mapper.HourlyReportContentMapper;
 import com.dianping.cat.mybatis.data.HourlyReportContentDO;
+import com.dianping.cat.mybatis.mapper.HourlyReportContentMapper;
 
 @Component("hourlyReportContentRepository")
 public class HourlyReportContentRepository {
@@ -29,33 +27,33 @@ public class HourlyReportContentRepository {
 	@Resource(name = "transactionTemplate")
 	private TransactionTemplate transactionTemplate;
 
-	public HourlyReportContent createLocal() {
-		return new HourlyReportContent();
+	public HourlyReportContentDO createLocal() {
+		return new HourlyReportContentDO();
 	}
 
-	public int deleteByPK(HourlyReportContent proto) {
+	public int deleteByPK(HourlyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
+			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getReportId()));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing deleteByPK for HourlyReportContent.", e);
 		}
 	}
 
-	public List<HourlyReportContent> findOverloadReport(long startId) {
+	public List<HourlyReportContentDO> findOverloadReport(long startId) {
 		HourlyReportContentMapper mapper = springMapper();
 		HourlyReportContentDO record = new HourlyReportContentDO();
 
 		record.setStartId(startId);
 		try {
-			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
+			return mapper.findOverloadReport(record);
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing findOverloadReport for HourlyReportContent.", e);
 		}
 	}
 
-	public HourlyReportContent findByPK(long keyReportId, java.util.Date period) {
+	public HourlyReportContentDO findByPK(long keyReportId, java.util.Date period) {
 		HourlyReportContentMapper mapper = springMapper();
 
 		try {
@@ -67,21 +65,21 @@ public class HourlyReportContentRepository {
 		}
 	}
 
-	public int insert(HourlyReportContent proto) {
+	public int insert(HourlyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
+			return transactionTemplate.execute(status -> springMapper().insert(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing insert for HourlyReportContent.", e);
 		}
 	}
 
-	public int updateByPK(HourlyReportContent proto) {
+	public int updateByPK(HourlyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
+			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing updateByPK for HourlyReportContent.", e);
 		}
@@ -112,50 +110,11 @@ public class HourlyReportContentRepository {
 		this.transactionTemplate = transactionTemplate;
 	}
 
-	private HourlyReportContent requireFound(HourlyReportContentDO record, String field, String value) {
+	private HourlyReportContentDO requireFound(HourlyReportContentDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No HourlyReportContent found by " + field + "(" + value + ").", 1);
 		}
 
-		return toModel(record);
-	}
-
-	private HourlyReportContent toModel(HourlyReportContentDO record) {
-		HourlyReportContent model = new HourlyReportContent();
-
-		if (record.getReportId() != null) {
-			model.setReportId(record.getReportId());
-		}
-		if (record.getContent() != null) {
-			model.setContent(record.getContent());
-		}
-		if (record.getPeriod() != null) {
-			model.setPeriod(record.getPeriod());
-		}
-		if (record.getCreateTime() != null) {
-			model.setCreateTime(record.getCreateTime());
-		}
-		if (record.getUpdateTime() != null) {
-			model.setUpdateTime(record.getUpdateTime());
-		}
-		if (record.getContentLength() != null) {
-			model.setContentLength(record.getContentLength().longValue());
-		}
-		model.afterLoad();
-		return model;
-	}
-
-	private HourlyReportContentDO toRecord(HourlyReportContent model) {
-		HourlyReportContentDO record = new HourlyReportContentDO();
-
-		record.setReportId(model.getReportId());
-		record.setContent(model.getContent());
-		record.setPeriod(model.getPeriod());
-		record.setCreateTime(model.getCreateTime());
-		record.setUpdateTime(model.getUpdateTime());
-		record.setKeyReportId(model.getKeyReportId());
-		record.setStartId(model.getStartId());
-		record.setCapacity(model.getCapacity());
 		return record;
 	}
 }

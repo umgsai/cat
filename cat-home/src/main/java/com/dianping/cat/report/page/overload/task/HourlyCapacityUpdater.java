@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportContent;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
+import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.mybatis.HourlyReportContentRepository;
 import com.dianping.cat.mybatis.HourlyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
@@ -64,10 +64,10 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 		LOGGER.info("Starting hourly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
-			List<HourlyReportContent> reports = hourlyReportContentRepository
+			List<HourlyReportContentDO> reports = hourlyReportContentRepository
 									.findOverloadReport(maxId);
 
-			for (HourlyReportContent content : reports) {
+			for (HourlyReportContentDO content : reports) {
 				try {
 					long reportId = content.getReportId();
 					double contentLength = content.getContentLength();
@@ -79,7 +79,7 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 						overload.setReportSize(contentLength);
 						overload.setReportType(CapacityUpdater.HOURLY_TYPE);
 
-						HourlyReport hourlyReport;
+						HourlyReportDO hourlyReport;
 						try {
 							hourlyReport = hourlyReportRepository.findByPK(reportId);
 							overload.setPeriod(hourlyReport.getPeriod());

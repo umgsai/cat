@@ -39,7 +39,7 @@ import com.dianping.cat.consumer.heartbeat.HeartbeatAnalyzer;
 import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.heartbeat.model.entity.Machine;
 import com.dianping.cat.consumer.heartbeat.model.transform.BaseVisitor;
-import com.dianping.cat.core.dal.HourlyReport;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.jar.entity.Domain;
 import com.dianping.cat.home.jar.entity.Jar;
@@ -94,9 +94,9 @@ public class JarReportBuilder implements TaskBuilder {
 		jarReport.setStartTime(period);
 		jarReport.setEndTime(end);
 
-		HourlyReport report = new HourlyReport();
+		HourlyReportDO report = new HourlyReportDO();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);

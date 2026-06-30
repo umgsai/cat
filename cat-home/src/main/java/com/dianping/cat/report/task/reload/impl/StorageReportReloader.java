@@ -34,7 +34,7 @@ import com.dianping.cat.consumer.storage.StorageAnalyzer;
 import com.dianping.cat.consumer.storage.StorageReportMerger;
 import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.consumer.storage.model.transform.DefaultNativeBuilder;
-import com.dianping.cat.core.dal.HourlyReport;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
@@ -95,9 +95,9 @@ public class StorageReportReloader extends AbstractReportReloader {
 		List<StorageReport> reports = buildMergedReports(mergedReports);
 
 		for (StorageReport r : reports) {
-			HourlyReport report = new HourlyReport();
+			HourlyReportDO report = new HourlyReportDO();
 
-			report.setCreationDate(new Date());
+			report.setCreateTime(new Date());
 			report.setDomain(r.getId());
 			report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 			report.setName(getId());

@@ -18,24 +18,24 @@
  */
 package com.dianping.cat.report.task.reload;
 
-import com.dianping.cat.core.dal.HourlyReport;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
 
 public class ReportReloadEntity {
 
-	private HourlyReport m_report;
+	private HourlyReportDO m_report;
 
 	private byte[] m_reportContent;
 
-	public ReportReloadEntity(HourlyReport report, byte[] reportContent) {
+	public ReportReloadEntity(HourlyReportDO report, byte[] reportContent) {
 		m_report = report;
 		m_reportContent = reportContent;
 	}
 
-	public HourlyReport getReport() {
+	public HourlyReportDO getReport() {
 		return m_report;
 	}
 
-	public void setReport(HourlyReport report) {
+	public void setReport(HourlyReportDO report) {
 		m_report = report;
 	}
 

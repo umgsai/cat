@@ -30,8 +30,8 @@ import com.dianping.cat.consumer.business.BusinessAnalyzer;
 import com.dianping.cat.consumer.business.BusinessReportMerger;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.consumer.business.model.transform.DefaultNativeParser;
-import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportContent;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
+import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
@@ -61,7 +61,7 @@ public class BusinessReportService extends AbstractReportService<BusinessReport>
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
 			Date period = new Date(startTime);
-			List<HourlyReport> reports = null;
+			List<HourlyReportDO> reports = null;
 
 			try {
 				reports = hourlyReportRepository.findAllByDomainNamePeriod(period, domain, name);
@@ -69,7 +69,7 @@ public class BusinessReportService extends AbstractReportService<BusinessReport>
 				Cat.logError(e);
 			}
 			if (reports != null) {
-				for (HourlyReport report : reports) {
+				for (HourlyReportDO report : reports) {
 					try {
 						BusinessReport reportModel = queryFromHourlyBinary(report.getId(), period, domain);
 						reportModel.accept(merger);
@@ -90,7 +90,7 @@ public class BusinessReportService extends AbstractReportService<BusinessReport>
 	}
 
 	private BusinessReport queryFromHourlyBinary(long id, Date period, String domain) {
-		HourlyReportContent content = hourlyReportContentRepository
+		HourlyReportContentDO content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {

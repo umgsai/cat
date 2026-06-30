@@ -34,7 +34,7 @@ import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
 import com.dianping.cat.consumer.matrix.MatrixReportMerger;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.consumer.matrix.model.transform.DefaultNativeBuilder;
-import com.dianping.cat.core.dal.HourlyReport;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.report.task.reload.AbstractReportReloader;
 import com.dianping.cat.report.task.reload.ReportReloadEntity;
@@ -95,9 +95,9 @@ public class MatrixReportReloader extends AbstractReportReloader {
 		List<MatrixReport> reports = buildMergedReports(mergedReports);
 
 		for (MatrixReport r : reports) {
-			HourlyReport report = new HourlyReport();
+			HourlyReportDO report = new HourlyReportDO();
 
-			report.setCreationDate(new Date());
+			report.setCreateTime(new Date());
 			report.setDomain(r.getDomain());
 			report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 			report.setName(getId());

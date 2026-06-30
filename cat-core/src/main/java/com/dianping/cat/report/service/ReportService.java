@@ -21,15 +21,15 @@ package com.dianping.cat.report.service;
 import java.util.Date;
 import java.util.Set;
 
-import com.dianping.cat.core.dal.HourlyReport;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.mybatis.data.DailyReportDO;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
 
 public interface ReportService<T> {
 	public boolean insertDailyReport(DailyReportDO report, byte[] content);
 
-	public boolean insertHourlyReport(HourlyReport report, byte[] content);
+	public boolean insertHourlyReport(HourlyReportDO report, byte[] content);
 
 	public boolean insertMonthlyReport(MonthlyReport report, byte[] content);
 

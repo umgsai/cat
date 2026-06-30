@@ -37,7 +37,7 @@ import com.dianping.cat.consumer.heartbeat.model.entity.HeartbeatReport;
 import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.mybatis.data.DailyReportDO;
-import com.dianping.cat.core.dal.HourlyReport;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.WeeklyReport;
 import com.dianping.cat.helper.TimeHelper;
@@ -160,9 +160,9 @@ public class UtilizationReportBuilder implements TaskBuilder {
 		utilizationReport.setStartTime(start);
 		utilizationReport.setEndTime(end);
 
-		HourlyReport report = new HourlyReport();
+		HourlyReportDO report = new HourlyReportDO();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);
@@ -180,7 +180,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 		UtilizationReport utilizationReport = queryDailyReportsByDuration(domain, period,	TaskHelper.nextMonthStart(period));
 		MonthlyReport report = new MonthlyReport();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);
@@ -199,7 +199,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
 		WeeklyReport report = new WeeklyReport();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);

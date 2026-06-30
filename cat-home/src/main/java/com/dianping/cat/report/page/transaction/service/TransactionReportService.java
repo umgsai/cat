@@ -41,8 +41,8 @@ import com.dianping.cat.consumer.transaction.model.transform.BaseVisitor;
 import com.dianping.cat.consumer.transaction.model.transform.DefaultNativeParser;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportContent;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
+import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
 import com.dianping.cat.core.dal.WeeklyReport;
@@ -129,7 +129,7 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 	}
 
 	private TransactionReport queryFromHourlyBinary(long id, Date period, String domain) {
-		HourlyReportContent content = hourlyReportContentRepository
+		HourlyReportContentDO content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {
@@ -167,7 +167,7 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 		String name = TransactionAnalyzer.ID;
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
-			List<HourlyReport> reports = null;
+			List<HourlyReportDO> reports = null;
 			try {
 				reports = hourlyReportRepository
 										.findAllByDomainNamePeriod(new Date(startTime), domain, name);
@@ -177,7 +177,7 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 				Cat.logError(e);
 			}
 			if (reports != null) {
-				for (HourlyReport report : reports) {
+				for (HourlyReportDO report : reports) {
 					try {
 						TransactionReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 

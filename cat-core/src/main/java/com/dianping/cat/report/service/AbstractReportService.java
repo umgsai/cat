@@ -39,10 +39,10 @@ import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
 import com.dianping.cat.mybatis.DailyReportContentRepository;
 import com.dianping.cat.mybatis.data.DailyReportDO;
-import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportContent;
 import com.dianping.cat.mybatis.HourlyReportContentRepository;
 import com.dianping.cat.mybatis.HourlyReportRepository;
+import com.dianping.cat.mybatis.data.HourlyReportContentDO;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
 import com.dianping.cat.mybatis.MonthlyReportContentRepository;
@@ -148,13 +148,13 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	}
 
 	@Override
-	public boolean insertHourlyReport(HourlyReport report, byte[] content) {
+	public boolean insertHourlyReport(HourlyReportDO report, byte[] content) {
 		ensureReportRepositories();
 		try {
 			hourlyReportRepository.insert(report);
 
 			long id = report.getId();
-			HourlyReportContent proto = hourlyReportContentRepository.createLocal();
+			HourlyReportContentDO proto = hourlyReportContentRepository.createLocal();
 
 			proto.setReportId(id);
 			proto.setContent(content);
@@ -271,14 +271,14 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 		if (domains == null) {
 			domains = new HashSet<String>();
 			try {
-				List<HourlyReport> reports = hourlyReportRepository
-										.findAllByPeriodName(date, name);
+					List<HourlyReportDO> reports = hourlyReportRepository
+											.findAllByPeriodName(date, name);
 
-				if (reports != null) {
-					for (HourlyReport report : reports) {
-						domains.add(report.getDomain());
+					if (reports != null) {
+						for (HourlyReportDO report : reports) {
+							domains.add(report.getDomain());
+						}
 					}
-				}
 				Cat.logEvent("FindDomain", key, Event.SUCCESS, domains.toString());
 				domainCache.put(key, domains);
 			} catch (RuntimeException e) {

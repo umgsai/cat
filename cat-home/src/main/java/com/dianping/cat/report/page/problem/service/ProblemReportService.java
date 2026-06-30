@@ -34,8 +34,8 @@ import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.problem.model.transform.DefaultNativeParser;
 import com.dianping.cat.core.dal.DailyReport;
 import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.core.dal.HourlyReport;
-import com.dianping.cat.core.dal.HourlyReportContent;
+import com.dianping.cat.mybatis.data.HourlyReportDO;
+import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
 import com.dianping.cat.core.dal.WeeklyReport;
@@ -98,7 +98,7 @@ public class ProblemReportService extends AbstractReportService<ProblemReport> {
 	}
 
 	private ProblemReport queryFromHourlyBinary(long id, Date period, String domain) {
-		HourlyReportContent content = hourlyReportContentRepository
+		HourlyReportContentDO content = hourlyReportContentRepository
 								.findByPK(id, period);
 
 		if (content != null) {
@@ -136,7 +136,7 @@ public class ProblemReportService extends AbstractReportService<ProblemReport> {
 		String name = ProblemAnalyzer.ID;
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_HOUR) {
-			List<HourlyReport> reports = null;
+			List<HourlyReportDO> reports = null;
 			try {
 				reports = hourlyReportRepository
 										.findAllByDomainNamePeriod(new Date(startTime), domain, name);
@@ -146,7 +146,7 @@ public class ProblemReportService extends AbstractReportService<ProblemReport> {
 				Cat.logError(e);
 			}
 			if (reports != null) {
-				for (HourlyReport report : reports) {
+				for (HourlyReportDO report : reports) {
 					try {
 						ProblemReport reportModel = queryFromHourlyBinary(report.getId(), report.getPeriod(), domain);
 
