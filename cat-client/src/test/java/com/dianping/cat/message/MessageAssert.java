@@ -327,7 +327,7 @@ public class MessageAssert {
 		}
 
 		@Override
-		protected void handleMessagreTree(MessageHandlerContext ctx, MessageTree tree) {
+		protected void handleMessageTree(MessageHandlerContext ctx, MessageTree tree) {
 			MessageAssert.newTree(tree);
 		}
 	}

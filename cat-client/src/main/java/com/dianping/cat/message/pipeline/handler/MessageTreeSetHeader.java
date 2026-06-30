@@ -16,7 +16,7 @@ public class MessageTreeSetHeader extends MessageHandlerAdaptor {
 	}
 
 	@Override
-	protected void handleMessagreTree(MessageHandlerContext ctx, MessageTree tree) {
+	protected void handleMessageTree(MessageHandlerContext ctx, MessageTree tree) {
 		ConfigureManager manager = ctx.getConfigureManager();
 
 		if (tree.getDomain() == null) {

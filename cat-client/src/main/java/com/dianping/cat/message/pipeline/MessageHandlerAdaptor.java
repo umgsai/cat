@@ -23,7 +23,7 @@ public class MessageHandlerAdaptor implements MessageHandler {
 	@Override
 	public void handleMessage(MessageHandlerContext ctx, Object msg) {
 		if (msg instanceof MessageTree) {
-			handleMessagreTree(ctx, (MessageTree) msg);
+			handleMessageTree(ctx, (MessageTree) msg);
 		} else if (msg instanceof Log) {
 			handleLog(ctx, (Log) msg);
 		} else if (msg instanceof LogSegment) {
@@ -37,7 +37,7 @@ public class MessageHandlerAdaptor implements MessageHandler {
 		}
 	}
 
-	protected void handleMessagreTree(MessageHandlerContext ctx, MessageTree tree) {
+	protected void handleMessageTree(MessageHandlerContext ctx, MessageTree tree) {
 		ctx.fireMessage(tree);
 	}
 

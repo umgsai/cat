@@ -37,7 +37,7 @@ public class MessageSerializer extends MessageHandlerAdaptor {
 	}
 
 	@Override
-	protected void handleMessagreTree(MessageHandlerContext ctx, MessageTree tree) {
+	protected void handleMessageTree(MessageHandlerContext ctx, MessageTree tree) {
 		ByteBuf buf = PooledByteBufAllocator.DEFAULT.heapBuffer();
 		int writerIndex = buf.writerIndex();
 

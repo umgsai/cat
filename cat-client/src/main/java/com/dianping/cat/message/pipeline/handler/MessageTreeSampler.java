@@ -21,13 +21,13 @@ public class MessageTreeSampler extends MessageHandlerAdaptor implements Initial
 	}
 
 	@Override
-	protected void handleMessagreTree(MessageHandlerContext ctx, MessageTree tree) {
+	protected void handleMessageTree(MessageHandlerContext ctx, MessageTree tree) {
 		boolean blocked = m_configureManager.getBooleanProperty(ConfigureProperty.BLOCKED, false);
 
 		if (blocked) {
 			// stop here
 		} else {
-			super.handleMessagreTree(ctx, tree);
+			super.handleMessageTree(ctx, tree);
 		}
 	}
 
