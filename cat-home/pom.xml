@@ -32,10 +32,6 @@
       </dependency>
       <dependency>
          <groupId>io.netty</groupId>
-         <artifactId>netty-all</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>io.netty</groupId>
          <artifactId>netty-buffer</artifactId>
       </dependency>
       <dependency>
@@ -192,24 +188,9 @@
       </dependency>
       <dependency>
          <groupId>org.apache.commons</groupId>
-         <artifactId>commons-email</artifactId>
-         <version>1.1</version>
+         <artifactId>commons-jexl3</artifactId>
+         <version>3.0</version>
       </dependency>
-      <dependency>
-         <groupId>javax.mail</groupId>
-         <artifactId>mail</artifactId>
-         <version>1.4.4</version>
-      </dependency>
-      <dependency>
-         <groupId>com.google.code.javaparser</groupId>
-         <artifactId>javaparser</artifactId>
-         <version>1.0.8</version>
-      </dependency>
-     <dependency>
-    	<groupId>org.apache.commons</groupId>
-    	<artifactId>commons-jexl3</artifactId>
-    	<version>3.0</version>
-	</dependency>
       <dependency>
          <groupId>com.onelogin</groupId>
          <artifactId>java-saml</artifactId>
