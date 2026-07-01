@@ -2,7 +2,6 @@ package com.dianping.cat.mybatis;
 
 import com.dianping.cat.mybatis.data.MetricGraphDO;
 import com.dianping.cat.mybatis.mapper.MetricGraphMapper;
-import com.dianping.cat.home.dal.report.MetricGraph;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
@@ -20,39 +19,39 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 				"MetricGraphRepository is using Spring managed MetricGraphMapper.");
 	}
 
-	public MetricGraph createLocal() {
-		return new MetricGraph();
+	public MetricGraphDO createLocal() {
+		return new MetricGraphDO();
 	}
 
-	public int deleteByPK(MetricGraph proto) {
+	public int deleteByPK(MetricGraphDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
+			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getId()));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing deleteByPK for MetricGraph.", e);
 		}
 	}
 
-	public int deleteBeforeDate(MetricGraph proto) {
+	public int deleteBeforeDate(MetricGraphDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteBeforeDate(toRecord(proto)));
+			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteBeforeDate(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing deleteBeforeDate for MetricGraph.", e);
 		}
 	}
 
-	public MetricGraph findByPK(int keyId) {
-		return findByPK((long) keyId);
+	public MetricGraphDO findByPK(int id) {
+		return findByPK((long) id);
 	}
 
-	public MetricGraph findByPK(long keyId) {
+	public MetricGraphDO findByPK(long id) {
 		MetricGraphMapper mapper = springMapper(LOGGER);
 
 		try {
-			return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
+			return requireFound(mapper.findByPrimaryKey(id), "primary key", String.valueOf(id));
 		} catch (EmptyResultDataAccessException e) {
 			throw e;
 		} catch (Exception e) {
@@ -60,7 +59,7 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 		}
 	}
 
-	public MetricGraph findByGrapId(long graphId) {
+	public MetricGraphDO findByGrapId(long graphId) {
 		MetricGraphMapper mapper = springMapper(LOGGER);
 		MetricGraphDO record = new MetricGraphDO();
 
@@ -76,7 +75,7 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 		}
 	}
 
-	public MetricGraph findLast(int number) {
+	public MetricGraphDO findLast(int number) {
 		MetricGraphMapper mapper = springMapper(LOGGER);
 		MetricGraphDO record = new MetricGraphDO();
 
@@ -92,75 +91,31 @@ public class MetricGraphRepository extends SpringBackedRepositorySupport<MetricG
 		}
 	}
 
-	public int insert(MetricGraph proto) {
+	public int insert(MetricGraphDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			MetricGraphDO record = toRecord(proto);
-			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
-
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
-			return count;
+			return transactionTemplate.execute(status -> springMapper(LOGGER).insert(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing insert for MetricGraph.", e);
 		}
 	}
 
-	public int updateByPK(MetricGraph proto) {
+	public int updateByPK(MetricGraphDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
+			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing updateByPK for MetricGraph.", e);
 		}
 	}
 
-	private MetricGraph requireFound(MetricGraphDO record, String field, String value) {
+	private MetricGraphDO requireFound(MetricGraphDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No MetricGraph found by " + field + "(" + value + ").", 1);
 		}
 
-		return toModel(record);
-	}
-
-	private MetricGraph toModel(MetricGraphDO record) {
-		MetricGraph model = new MetricGraph();
-
-		if (record.getId() != null) {
-			model.setId(record.getId());
-		}
-		if (record.getGraphId() != null) {
-			model.setGraphId(record.getGraphId());
-		}
-		if (record.getContent() != null) {
-			model.setContent(record.getContent());
-		}
-		if (record.getName() != null) {
-			model.setName(record.getName());
-		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
-		}
-		if (record.getUpdatetime() != null) {
-			model.setUpdatetime(record.getUpdatetime());
-		}
-		model.afterLoad();
-		return model;
-	}
-
-	private MetricGraphDO toRecord(MetricGraph model) {
-		MetricGraphDO record = new MetricGraphDO();
-
-		record.setId(model.getId());
-		record.setGraphId(model.getGraphId());
-		record.setName(model.getName());
-		record.setContent(model.getContent());
-		record.setCreateTime(model.getCreateTime());
-		record.setUpdateTime(model.getUpdateTime());
-		record.setKeyId(model.getKeyId());
-		record.setNumber(model.getNumber());
 		return record;
 	}
 }
