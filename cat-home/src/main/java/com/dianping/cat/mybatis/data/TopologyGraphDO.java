@@ -19,6 +19,4 @@ public class TopologyGraphDO {
 	private Date createTime;
 
 	private Date updateTime;
-
-	private Long keyId;
 }

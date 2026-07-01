@@ -36,6 +36,7 @@ import com.dianping.cat.consumer.dependency.DependencyAnalyzer;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.mybatis.TopologyGraphRepository;
+import com.dianping.cat.mybatis.data.TopologyGraphDO;
 import com.dianping.cat.home.dependency.graph.entity.TopologyGraph;
 import com.dianping.cat.home.dependency.graph.transform.DefaultNativeBuilder;
 import com.dianping.cat.report.page.dependency.graph.TopologyGraphBuilder;
@@ -85,12 +86,12 @@ public class DependencyReportBuilder implements TaskBuilder {
 				Date date = new Date(entry.getKey());
 				TopologyGraph graph = entry.getValue();
 
-				com.dianping.cat.home.dal.report.TopologyGraph proto = topologyGraphRepository.createLocal();
+				TopologyGraphDO proto = topologyGraphRepository.createLocal();
 				String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 
 				proto.setType(3);
 				proto.setPeriod(date);
-				proto.setCreationDate(new Date());
+				proto.setCreateTime(new Date());
 				proto.setIp(ip);
 				proto.setContent(DefaultNativeBuilder.build(graph));
 

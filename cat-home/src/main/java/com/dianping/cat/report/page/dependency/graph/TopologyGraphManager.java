@@ -43,6 +43,7 @@ import com.dianping.cat.config.server.ServerFilterConfigManager;
 import com.dianping.cat.consumer.dependency.model.entity.DependencyReport;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.mybatis.TopologyGraphRepository;
+import com.dianping.cat.mybatis.data.TopologyGraphDO;
 import com.dianping.cat.home.dependency.format.entity.Domain;
 import com.dianping.cat.home.dependency.format.entity.ProductLine;
 import com.dianping.cat.home.dependency.graph.entity.TopologyEdge;
@@ -214,7 +215,7 @@ public class TopologyGraphManager {
 
 	public TopologyGraph queryGraphFromDB(long time) {
 		try {
-			com.dianping.cat.home.dal.report.TopologyGraph topologyGraph = topologyGraphRepository
+			TopologyGraphDO topologyGraph = topologyGraphRepository
 									.findByPeriod(new Date(time));
 
 			if (topologyGraph != null) {
