@@ -17,6 +17,4 @@ public class AlertSummaryDO {
 	private Date createTime;
 
 	private Date updateTime;
-
-	private Long keyId;
 }

@@ -25,8 +25,8 @@ import org.springframework.stereotype.Component;
 import jakarta.annotation.Resource;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.home.dal.report.AlertSummary;
 import com.dianping.cat.mybatis.AlertSummaryRepository;
+import com.dianping.cat.mybatis.data.AlertSummaryDO;
 
 @Component
 public class AlertSummaryService {
@@ -36,7 +36,7 @@ public class AlertSummaryService {
 	private AlertSummaryRepository alertSummaryRepository;
 
 	public void insert(com.dianping.cat.home.alert.summary.entity.AlertSummary alertSummary) {
-		AlertSummary summary = new AlertSummary();
+		AlertSummaryDO summary = new AlertSummaryDO();
 		String content = alertSummary.toString();
 
 		summary.setDomain(alertSummary.getDomain());
