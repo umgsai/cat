@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
-import com.dianping.cat.core.config.BusinessConfig;
+import com.dianping.cat.mybatis.data.BusinessConfigDO;
 import com.dianping.cat.mybatis.mapper.BusinessConfigRepository;
 import com.dianping.cat.home.business.entity.BusinessItem;
 import com.dianping.cat.home.business.entity.BusinessTagConfig;
@@ -116,10 +116,10 @@ public class BusinessTagConfigManager {
 		}
 
 		try {
-			List<BusinessConfig> result = businessConfigRepository.findByName(TAG_CONFIG);
+			List<BusinessConfigDO> result = businessConfigRepository.findByName(TAG_CONFIG);
 
 			if (result.size() > 0) {
-				BusinessConfig config = result.get(0);
+				BusinessConfigDO config = result.get(0);
 				configId = config.getId();
 				tagConfig = DefaultSaxParser.parse(config.getContent());
 				LOGGER.info("Loaded business tag config from repository, configId={}, tagCount={}.", configId,
@@ -127,12 +127,12 @@ public class BusinessTagConfigManager {
 			} else {
 				tagConfig = new BusinessTagConfig();
 
-				BusinessConfig config = businessConfigRepository.createLocal();
+				BusinessConfigDO config = businessConfigRepository.createLocal();
 
 				config.setName(TAG_CONFIG);
 				config.setDomain(Constants.CAT);
 				config.setContent(tagConfig.toString());
-				config.setUpdatetime(new Date());
+				config.setUpdateTime(new Date());
 
 				businessConfigRepository.insert(config);
 				configId = config.getId();
@@ -164,14 +164,13 @@ public class BusinessTagConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				BusinessConfig config = businessConfigRepository.createLocal();
+				BusinessConfigDO config = businessConfigRepository.createLocal();
 
 				config.setId(configId);
-				config.setKeyId(configId);
 				config.setName(TAG_CONFIG);
 				config.setDomain(Constants.CAT);
 				config.setContent(tagConfig.toString());
-				config.setUpdatetime(new Date());
+				config.setUpdateTime(new Date());
 				businessConfigRepository.updateByPK(config);
 				LOGGER.info("Stored business tag config, configId={}, tagCount={}.", configId,
 						tagConfig.getTags().size());

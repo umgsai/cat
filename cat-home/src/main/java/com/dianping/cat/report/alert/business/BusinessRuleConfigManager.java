@@ -38,7 +38,7 @@ import com.dianping.cat.alarm.rule.entity.SubCondition;
 import com.dianping.cat.alarm.rule.transform.DefaultJsonParser;
 import com.dianping.cat.alarm.rule.transform.DefaultSaxParser;
 import com.dianping.cat.configuration.business.entity.BusinessItemConfig;
-import com.dianping.cat.core.config.BusinessConfig;
+import com.dianping.cat.mybatis.data.BusinessConfigDO;
 import com.dianping.cat.mybatis.mapper.BusinessConfigRepository;
 import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.task.TimerSyncTask;
@@ -156,14 +156,14 @@ public class BusinessRuleConfigManager {
 
 	private void loadData() {
 		try {
-			List<BusinessConfig> configs = businessConfigRepository.findByName(ALERT_CONFIG);
+			List<BusinessConfigDO> configs = businessConfigRepository.findByName(ALERT_CONFIG);
 			Map<String, MonitorRules> rules = new ConcurrentHashMap<String, MonitorRules>();
 
-			for (BusinessConfig config : configs) {
+			for (BusinessConfigDO config : configs) {
 				try {
-					String doamin = config.getDomain();
+					String domainName = config.getDomain();
 					MonitorRules rule = DefaultSaxParser.parse(config.getContent());
-					rules.put(doamin, rule);
+					rules.put(domainName, rule);
 				} catch (Exception e) {
 					LOGGER.error("Unable to parse business alert rule config, domain={}, id={}.", config.getDomain(),
 					      config.getId(), e);
@@ -230,11 +230,11 @@ public class BusinessRuleConfigManager {
 
 			domainRule.getRules().put(rule.getId(), rule);
 
-			BusinessConfig proto = businessConfigRepository.createLocal();
+			BusinessConfigDO proto = businessConfigRepository.createLocal();
 			proto.setDomain(domain);
 			proto.setContent(domainRule.toString());
 			proto.setName(ALERT_CONFIG);
-			proto.setUpdatetime(new Date());
+			proto.setUpdateTime(new Date());
 
 			if (isExist) {
 				businessConfigRepository.updateBaseConfigByDomain(proto);

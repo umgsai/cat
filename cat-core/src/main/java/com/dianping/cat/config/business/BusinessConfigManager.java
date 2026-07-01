@@ -38,7 +38,7 @@ import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.configuration.business.entity.BusinessItemConfig;
 import com.dianping.cat.configuration.business.entity.BusinessReportConfig;
 import com.dianping.cat.configuration.business.transform.DefaultSaxParser;
-import com.dianping.cat.core.config.BusinessConfig;
+import com.dianping.cat.mybatis.data.BusinessConfigDO;
 import com.dianping.cat.mybatis.mapper.BusinessConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
@@ -79,12 +79,12 @@ public class BusinessConfigManager {
 		ensureInitialized();
 
 		try {
-			BusinessConfig config = businessConfigRepository.findByNameDomain(BASE_CONFIG, domain);
+			BusinessConfigDO config = businessConfigRepository.findByNameDomain(BASE_CONFIG, domain);
 			BusinessReportConfig businessReportConfig = DefaultSaxParser.parse(config.getContent());
 
 			businessReportConfig.removeBusinessItemConfig(key);
 			config.setContent(businessReportConfig.toString());
-			config.setUpdatetime(new Date());
+			config.setUpdateTime(new Date());
 			businessConfigRepository.updateByPK(config);
 
 			Set<String> itemIds = domains.get(domain);
@@ -103,12 +103,12 @@ public class BusinessConfigManager {
 		ensureInitialized();
 
 		try {
-			BusinessConfig config = businessConfigRepository.findByNameDomain(BASE_CONFIG, domain);
+			BusinessConfigDO config = businessConfigRepository.findByNameDomain(BASE_CONFIG, domain);
 			BusinessReportConfig businessReportConfig = DefaultSaxParser.parse(config.getContent());
 
 			businessReportConfig.removeCustomConfig(key);
 			config.setContent(businessReportConfig.toString());
-			config.setUpdatetime(new Date());
+			config.setUpdateTime(new Date());
 
 			businessConfigRepository.updateByPK(config);
 			cacheConfigs(businessReportConfig, domain);
@@ -170,10 +170,10 @@ public class BusinessConfigManager {
 
 	private void loadData() {
 		try {
-			List<BusinessConfig> configs = businessConfigRepository.findByName(BASE_CONFIG);
+			List<BusinessConfigDO> configs = businessConfigRepository.findByName(BASE_CONFIG);
 			Map<String, Set<String>> domains = new ConcurrentHashMap<String, Set<String>>();
 
-			for (BusinessConfig config : configs) {
+			for (BusinessConfigDO config : configs) {
 				try {
 					BusinessReportConfig businessReportConfig = DefaultSaxParser.parse(config.getContent());
 					String domain = businessReportConfig.getId();
@@ -214,11 +214,11 @@ public class BusinessConfigManager {
 				BusinessItemConfig businessItemConfig = buildBusinessItemConfig(key, item);
 				config.addBusinessItemConfig(businessItemConfig);
 
-				BusinessConfig businessConfig = businessConfigRepository.createLocal();
+				BusinessConfigDO businessConfig = businessConfigRepository.createLocal();
 				businessConfig.setName(BASE_CONFIG);
 				businessConfig.setDomain(domain);
 				businessConfig.setContent(config.toString());
-				businessConfig.setUpdatetime(new Date());
+				businessConfig.setUpdateTime(new Date());
 				businessConfigRepository.insert(businessConfig);
 
 				Set<String> itemIds = new HashSet<String>();
@@ -230,7 +230,7 @@ public class BusinessConfigManager {
 				Set<String> itemIds = domains.get(domain);
 
 				if (!itemIds.contains(key)) {
-					BusinessConfig businessConfig = businessConfigRepository
+					BusinessConfigDO businessConfig = businessConfigRepository
 											.findByNameDomain(BASE_CONFIG, domain);
 					BusinessReportConfig config = DefaultSaxParser.parse(businessConfig.getContent());
 					BusinessItemConfig businessItemConfig = buildBusinessItemConfig(key, item);
@@ -262,7 +262,7 @@ public class BusinessConfigManager {
 			if (alertMachine) {
 				businessReportConfig = configs.get(domain);
 			} else {
-				BusinessConfig config = businessConfigRepository.findByNameDomain(BASE_CONFIG, domain);
+				BusinessConfigDO config = businessConfigRepository.findByNameDomain(BASE_CONFIG, domain);
 
 				businessReportConfig = DefaultSaxParser.parse(config.getContent());
 			}
@@ -282,7 +282,7 @@ public class BusinessConfigManager {
 	public boolean updateConfigByDomain(BusinessReportConfig config) {
 		ensureInitialized();
 
-		BusinessConfig proto = businessConfigRepository.createLocal();
+		BusinessConfigDO proto = businessConfigRepository.createLocal();
 		String domain = config.getId();
 
 		proto.setDomain(domain);
@@ -305,13 +305,13 @@ public class BusinessConfigManager {
 	public boolean insertConfigByDomain(BusinessReportConfig config) {
 		ensureInitialized();
 
-		BusinessConfig proto = businessConfigRepository.createLocal();
+		BusinessConfigDO proto = businessConfigRepository.createLocal();
 		String domain = config.getId();
 
 		proto.setDomain(domain);
 		proto.setName(BASE_CONFIG);
 		proto.setContent(config.toString());
-		proto.setUpdatetime(new Date());
+		proto.setUpdateTime(new Date());
 
 		try {
 			businessConfigRepository.insert(proto);
