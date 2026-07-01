@@ -34,8 +34,6 @@ public class AlterationDO {
 
 	private Date updateTime;
 
-	private Long keyId;
-
 	private Date startTime;
 
 	private Date endTime;

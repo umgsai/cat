@@ -46,8 +46,8 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.storage.builder.StorageSQLBuilder;
-import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.mybatis.AlterationRepository;
+import com.dianping.cat.mybatis.data.AlterationDO;
 import com.dianping.cat.report.ReportPage;
 
 @Component("alterationHandler")
@@ -64,7 +64,7 @@ public class Handler implements PageHandler<Context> {
 
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-	private Alteration buildAlteration(Payload payload) {
+	private AlterationDO buildAlteration(Payload payload) {
 		String type = payload.getType();
 		String domain = payload.getDomain();
 		String hostname = payload.getHostname();
@@ -77,7 +77,7 @@ public class Handler implements PageHandler<Context> {
 		int status = payload.getStatus();
 
 		Date date = payload.getAlterationDate();
-		Alteration alt = new Alteration();
+		AlterationDO alt = new AlterationDO();
 
 		alt.setType(type);
 		alt.setDomain(domain);
@@ -87,7 +87,7 @@ public class Handler implements PageHandler<Context> {
 		alt.setAltGroup(group);
 		alt.setContent(content);
 		alt.setHostname(hostname);
-		alt.setDate(date);
+		alt.setChangeTime(date);
 		alt.setStatus(status);
 		try {
 			alt.setUrl(URLDecoder.decode(url, "UTF-8"));
@@ -100,12 +100,12 @@ public class Handler implements PageHandler<Context> {
 		return alt;
 	}
 
-	private Map<String, AlterationMinute> generateAlterationMinutes(List<Alteration> alts) {
+	private Map<String, AlterationMinute> generateAlterationMinutes(List<AlterationDO> alts) {
 		Map<String, AlterationMinute> alterationMinutes = new LinkedHashMap<String, AlterationMinute>();
 		DateFormat df = new SimpleDateFormat("MM-dd HH:mm");
 
-		for (Alteration alt : alts) {
-			Date date = alt.getDate();
+		for (AlterationDO alt : alts) {
+			Date date = alt.getChangeTime();
 			String dateStr = df.format(date);
 			AlterationMinute alterationMinute = alterationMinutes.get(dateStr);
 
@@ -141,7 +141,7 @@ public class Handler implements PageHandler<Context> {
 				      payload.getType(), payload.getDomain(), payload.getHostname(), payload.getTitle());
 				setInsertResult(model, 2);
 			} else {
-				Alteration alt = buildAlteration(payload);
+				AlterationDO alt = buildAlteration(payload);
 				try {
 					int count = alterationRepository.insert(alt);
 
@@ -162,7 +162,7 @@ public class Handler implements PageHandler<Context> {
 			}
 			break;
 		case VIEW:
-			List<Alteration> alts = new ArrayList<Alteration>();
+			List<AlterationDO> alts = new ArrayList<AlterationDO>();
 			Date startTime = payload.getStartTime();
 			Date endTime = payload.getEndTime();
 			String[] altTypes = payload.getAltTypeArray();
@@ -288,32 +288,32 @@ public class Handler implements PageHandler<Context> {
 
 		private String m_name;
 
-		private Map<String, List<Alteration>> m_alterationsByType = new HashMap<String, List<Alteration>>();
+		private Map<String, List<AlterationDO>> m_alterationsByType = new HashMap<String, List<AlterationDO>>();
 
 		public AlterationDomain(String domain) {
 			m_name = domain;
 		}
 
-		public void add(Alteration alt) {
+		public void add(AlterationDO alt) {
 			String type = alt.getType();
-			List<Alteration> alts = m_alterationsByType.get(type);
+			List<AlterationDO> alts = m_alterationsByType.get(type);
 
 			if (alts == null) {
-				alts = new ArrayList<Alteration>();
+				alts = new ArrayList<AlterationDO>();
 
 				m_alterationsByType.put(type, alts);
 			}
 			alts.add(alt);
 		}
 
-		public Map<String, List<Alteration>> getAlterationTypes() {
+		public Map<String, List<AlterationDO>> getAlterationTypes() {
 			return m_alterationsByType;
 		}
 
 		public int getCount() {
 			int count = 0;
 
-			for (List<Alteration> alts : m_alterationsByType.values()) {
+			for (List<AlterationDO> alts : m_alterationsByType.values()) {
 				count += alts.size();
 			}
 			return count;
@@ -335,7 +335,7 @@ public class Handler implements PageHandler<Context> {
 			m_date = dateStr;
 		}
 
-		public void add(Alteration alt) {
+		public void add(AlterationDO alt) {
 			String domain = alt.getDomain();
 			AlterationDomain alterationDomain = m_domains.get(domain);
 

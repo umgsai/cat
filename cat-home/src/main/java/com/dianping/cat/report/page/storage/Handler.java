@@ -53,8 +53,8 @@ import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
-import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.mybatis.AlterationRepository;
+import com.dianping.cat.mybatis.data.AlterationDO;
 import com.dianping.cat.home.storage.alert.entity.Storage;
 import com.dianping.cat.home.storage.alert.entity.StorageAlertInfo;
 import com.dianping.cat.mvc.PayloadNormalizer;
@@ -145,13 +145,13 @@ public class Handler implements PageHandler<Context> {
 		return links;
 	}
 
-	private List<Alteration> buildAlterations(Date start, Date end, String type) {
-		List<Alteration> results = new LinkedList<Alteration>();
+	private List<AlterationDO> buildAlterations(Date start, Date end, String type) {
+		List<AlterationDO> results = new LinkedList<AlterationDO>();
 
 		try {
-			List<Alteration> alterations = alterationRepository.findByTypeDruation(start, end, type);
+			List<AlterationDO> alterations = alterationRepository.findByTypeDruation(start, end, type);
 
-			for (Alteration alteration : alterations) {
+			for (AlterationDO alteration : alterations) {
 				results.add(alteration);
 			}
 		} catch (EmptyResultDataAccessException e) {

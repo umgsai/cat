@@ -23,8 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.dianping.cat.Cat;
 import com.dianping.cat.consumer.storage.builder.StorageSQLBuilder;
 import com.dianping.cat.helper.TimeHelper;
-import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.mybatis.AlterationRepository;
+import com.dianping.cat.mybatis.data.AlterationDO;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -75,7 +75,7 @@ public class SpringMvcAlterationController {
 		String hostname = emptyToNull(request.getParameter("hostname"));
 		String altType = request.getParameter("altType");
 		String[] altTypes = altTypeArray(altType);
-		List<Alteration> alterations = new ArrayList<Alteration>();
+		List<AlterationDO> alterations = new ArrayList<AlterationDO>();
 
 		try {
 			if (altTypes == null) {
@@ -125,8 +125,8 @@ public class SpringMvcAlterationController {
 		return altType.split(",");
 	}
 
-	private Alteration buildAlteration(AlterationPayload payload) {
-		Alteration alt = new Alteration();
+	private AlterationDO buildAlteration(AlterationPayload payload) {
+		AlterationDO alt = new AlterationDO();
 
 		alt.setType(payload.type);
 		alt.setDomain(payload.domain);
@@ -136,7 +136,7 @@ public class SpringMvcAlterationController {
 		alt.setAltGroup(payload.group);
 		alt.setContent(payload.content);
 		alt.setHostname(payload.hostname);
-		alt.setDate(payload.alterationDate);
+		alt.setChangeTime(payload.alterationDate);
 		alt.setStatus(payload.status);
 		try {
 			alt.setUrl(URLDecoder.decode(payload.url, "UTF-8"));
@@ -167,12 +167,12 @@ public class SpringMvcAlterationController {
 		}
 	}
 
-	private Map<String, AlterationMinute> generateAlterationMinutes(List<Alteration> alterations) {
+	private Map<String, AlterationMinute> generateAlterationMinutes(List<AlterationDO> alterations) {
 		Map<String, AlterationMinute> alterationMinutes = new LinkedHashMap<String, AlterationMinute>();
 		DateFormat format = new SimpleDateFormat("MM-dd HH:mm");
 
-		for (Alteration alteration : alterations) {
-			Date date = alteration.getDate();
+		for (AlterationDO alteration : alterations) {
+			Date date = alteration.getChangeTime();
 			String dateText = format.format(date);
 			AlterationMinute minute = alterationMinutes.get(dateText);
 
@@ -327,7 +327,7 @@ public class SpringMvcAlterationController {
 					payload.domain, payload.hostname, payload.title);
 			result = "{\"status\":500, \"errorMessage\":\"lack args\"}";
 		} else {
-			Alteration alteration = buildAlteration(payload);
+			AlterationDO alteration = buildAlteration(payload);
 
 			try {
 				int count = alterationRepository.insert(alteration);
@@ -352,7 +352,7 @@ public class SpringMvcAlterationController {
 	}
 
 	static class AlterationDomain {
-		private final Map<String, List<Alteration>> alterationsByType = new HashMap<String, List<Alteration>>();
+		private final Map<String, List<AlterationDO>> alterationsByType = new HashMap<String, List<AlterationDO>>();
 
 		private final String name;
 
@@ -360,25 +360,25 @@ public class SpringMvcAlterationController {
 			name = domain;
 		}
 
-		public void add(Alteration alteration) {
+		public void add(AlterationDO alteration) {
 			String type = alteration.getType();
-			List<Alteration> alterations = alterationsByType.get(type);
+			List<AlterationDO> alterations = alterationsByType.get(type);
 
 			if (alterations == null) {
-				alterations = new ArrayList<Alteration>();
+				alterations = new ArrayList<AlterationDO>();
 				alterationsByType.put(type, alterations);
 			}
 			alterations.add(alteration);
 		}
 
-		public Map<String, List<Alteration>> getAlterationTypes() {
+		public Map<String, List<AlterationDO>> getAlterationTypes() {
 			return alterationsByType;
 		}
 
 		public int getCount() {
 			int count = 0;
 
-			for (List<Alteration> alterations : alterationsByType.values()) {
+			for (List<AlterationDO> alterations : alterationsByType.values()) {
 				count += alterations.size();
 			}
 			return count;
@@ -398,7 +398,7 @@ public class SpringMvcAlterationController {
 			this.date = date;
 		}
 
-		public void add(Alteration alteration) {
+		public void add(AlterationDO alteration) {
 			String domain = alteration.getDomain();
 			AlterationDomain alterationDomain = domains.get(domain);
 

@@ -34,9 +34,9 @@ import com.dianping.cat.consumer.storage.StorageAnalyzer;
 import com.dianping.cat.consumer.storage.model.entity.Machine;
 import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.helper.SortHelper;
-import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.home.storage.alert.entity.StorageAlertInfo;
 import com.dianping.cat.mvc.AbstractReportModel;
+import com.dianping.cat.mybatis.data.AlterationDO;
 import com.dianping.cat.report.ReportPage;
 import com.dianping.cat.report.page.storage.config.StorageGroupConfigManager.Department;
 
@@ -74,7 +74,7 @@ public class Model extends AbstractReportModel<Action, ReportPage, Context> {
 
 	private Map<String, Map<String, List<String>>> m_links;
 
-	private List<Alteration> m_alterations;
+	private List<AlterationDO> m_alterations;
 
 	private String m_distributionChart;
 
@@ -90,11 +90,11 @@ public class Model extends AbstractReportModel<Action, ReportPage, Context> {
 		m_alertInfos = alertInfos;
 	}
 
-	public List<Alteration> getAlterations() {
+	public List<AlterationDO> getAlterations() {
 		return m_alterations;
 	}
 
-	public void setAlterations(List<Alteration> alterations) {
+	public void setAlterations(List<AlterationDO> alterations) {
 		m_alterations = alterations;
 	}
 

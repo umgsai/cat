@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.mybatis.AlterationRepository;
+import com.dianping.cat.mybatis.data.AlterationDO;
 import com.dianping.cat.report.alert.summary.AlertSummaryExecutor;
 
 @Component(AlterationSummaryBuilder.ID)
@@ -55,7 +55,7 @@ public class AlterationSummaryBuilder extends SummaryBuilder {
 				      domain, date);
 				return dataMap;
 			}
-			List<Alteration> alterations = alterationDao
+			List<AlterationDO> alterations = alterationDao
 									.findByDomainAndTime(getStartDate(date), date, domain);
 
 			dataMap.put("count", alterations.size());

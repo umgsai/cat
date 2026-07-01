@@ -146,7 +146,7 @@ public class SpringMvcStorageControllerTest {
 
 		controller.setAlterationRepository(new AlterationRepository() {
 			@Override
-			public java.util.List<com.dianping.cat.home.dal.report.Alteration> findByTypeDruation(Date startTime,
+			public java.util.List<com.dianping.cat.mybatis.data.AlterationDO> findByTypeDruation(Date startTime,
 					Date endTime, String type) {
 				return Collections.emptyList();
 			}

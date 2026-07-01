@@ -13,8 +13,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.dianping.cat.home.dal.report.Alteration;
 import com.dianping.cat.mybatis.AlterationRepository;
+import com.dianping.cat.mybatis.data.AlterationDO;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,7 +26,7 @@ public class SpringMvcAlterationControllerTest {
 
 		controller.setAlterationRepository(new AlterationRepository() {
 			@Override
-			public java.util.List<Alteration> findByDtdhTypes(Date startTime, Date endTime, String type, String domain,
+			public java.util.List<AlterationDO> findByDtdhTypes(Date startTime, Date endTime, String type, String domain,
 					String hostname, String[] types) {
 				Assert.assertEquals("2026-06-27 20:00", format.format(startTime));
 				Assert.assertEquals("2026-06-27 21:00", format.format(endTime));
@@ -53,7 +53,7 @@ public class SpringMvcAlterationControllerTest {
 
 		controller.setAlterationRepository(new AlterationRepository() {
 			@Override
-			public int insert(Alteration proto) {
+			public int insert(AlterationDO proto) {
 				Assert.assertEquals("workflow", proto.getType());
 				Assert.assertEquals("cat", proto.getDomain());
 				Assert.assertEquals("host-a", proto.getHostname());
@@ -85,7 +85,7 @@ public class SpringMvcAlterationControllerTest {
 
 		controller.setAlterationRepository(new AlterationRepository() {
 			@Override
-			public int insert(Alteration proto) {
+			public int insert(AlterationDO proto) {
 				Assert.assertEquals("SQL", proto.getType());
 				Assert.assertEquals("N/A", proto.getDomain());
 				Assert.assertEquals("host-a", proto.getHostname());
@@ -101,9 +101,16 @@ public class SpringMvcAlterationControllerTest {
 		Assert.assertEquals("{\"status\":200}", response.body.toString());
 	}
 
-	private Alteration alteration(String type, String domain, String hostname, Date date) {
-		return new Alteration().setType(type).setDomain(domain).setHostname(hostname).setTitle("deploy")
-				.setContent("done").setDate(date);
+	private AlterationDO alteration(String type, String domain, String hostname, Date date) {
+		AlterationDO alteration = new AlterationDO();
+
+		alteration.setType(type);
+		alteration.setDomain(domain);
+		alteration.setHostname(hostname);
+		alteration.setTitle("deploy");
+		alteration.setContent("done");
+		alteration.setChangeTime(date);
+		return alteration;
 	}
 
 	private SpringMvcAlterationController controller() {
@@ -111,7 +118,7 @@ public class SpringMvcAlterationControllerTest {
 
 		controller.setAlterationRepository(new AlterationRepository() {
 			@Override
-			public java.util.List<Alteration> findByDtdh(Date startTime, Date endTime, String type, String domain,
+			public java.util.List<AlterationDO> findByDtdh(Date startTime, Date endTime, String type, String domain,
 					String hostname) {
 				return Collections.emptyList();
 			}
