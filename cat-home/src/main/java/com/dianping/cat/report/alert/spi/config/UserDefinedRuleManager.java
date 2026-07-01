@@ -22,7 +22,7 @@ package com.dianping.cat.report.alert.spi.config;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
-import com.dianping.cat.alarm.UserDefineRule;
+import com.dianping.cat.mybatis.user.define.rule.dao.data.UserDefineRuleDO;
 import com.dianping.cat.mybatis.repository.user.define.rule.UserDefineRuleRepository;
 
 @Component
@@ -32,13 +32,13 @@ public class UserDefinedRuleManager {
 	private UserDefineRuleRepository userDefineRuleRepository;
 
 	public String addUserDefineText(String userDefinedText) {
-		UserDefineRule item = userDefineRuleRepository.findMaxId();
+		UserDefineRuleDO item = userDefineRuleRepository.findMaxId();
 		long id = 1;
 		if (item != null) {
 			id = item.getMaxId() + 1;
 		}
 
-		UserDefineRule userDefineRule = userDefineRuleRepository.createLocal();
+		UserDefineRuleDO userDefineRule = userDefineRuleRepository.createLocal();
 
 		userDefineRule.setContent(userDefinedText);
 		userDefineRule.setId(id);
@@ -49,12 +49,12 @@ public class UserDefinedRuleManager {
 	public String getUserDefineText(String idStr) {
 		long id = Long.parseLong(idStr);
 
-		UserDefineRule item = userDefineRuleRepository.findByPK(id);
+		UserDefineRuleDO item = userDefineRuleRepository.findByPK(id);
 		return item.getContent();
 	}
 
 	public void removeById(String id) {
-		UserDefineRule item = userDefineRuleRepository.createLocal();
+		UserDefineRuleDO item = userDefineRuleRepository.createLocal();
 
 		item.setId(Long.parseLong(id));
 		userDefineRuleRepository.deleteByPK(item);
