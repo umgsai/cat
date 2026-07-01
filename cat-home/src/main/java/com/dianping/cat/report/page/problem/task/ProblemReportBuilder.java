@@ -36,7 +36,7 @@ import com.dianping.cat.consumer.problem.ProblemReportMerger;
 import com.dianping.cat.consumer.problem.model.entity.ProblemReport;
 import com.dianping.cat.consumer.problem.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.mybatis.data.DailyReportDO;
-import com.dianping.cat.core.dal.MonthlyReport;
+import com.dianping.cat.mybatis.data.MonthReportDO;
 import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.page.problem.service.ProblemReportService;
@@ -89,9 +89,9 @@ public class ProblemReportBuilder implements TaskBuilder {
 
 		new ProblemReportFilter().visitProblemReport(problemReport);
 
-		MonthlyReport report = new MonthlyReport();
+		MonthReportDO report = new MonthReportDO();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);

@@ -42,8 +42,8 @@ import com.dianping.cat.mybatis.HourlyReportContentRepository;
 import com.dianping.cat.mybatis.HourlyReportRepository;
 import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
-import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.dal.MonthlyReportContent;
+import com.dianping.cat.mybatis.data.MonthReportDO;
+import com.dianping.cat.mybatis.data.MonthlyReportContentDO;
 import com.dianping.cat.mybatis.MonthlyReportContentRepository;
 import com.dianping.cat.mybatis.MonthlyReportRepository;
 import com.dianping.cat.mybatis.data.WeeklyReportDO;
@@ -169,16 +169,15 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	}
 
 	@Override
-	public boolean insertMonthlyReport(MonthlyReport report, byte[] content) {
+	public boolean insertMonthlyReport(MonthReportDO report, byte[] content) {
 		ensureReportRepositories();
 		try {
-			MonthlyReport monthReport = monthlyReportRepository
+			MonthReportDO monthReport = monthlyReportRepository
 									.findReportByDomainNamePeriod(report.getPeriod(),	report.getDomain(), report.getName());
 
 			if (monthReport != null) {
-				MonthlyReportContent reportContent = monthlyReportContentRepository.createLocal();
+				MonthlyReportContentDO reportContent = monthlyReportContentRepository.createLocal();
 
-				reportContent.setKeyReportId(monthReport.getId());
 				reportContent.setReportId(monthReport.getId());
 				monthlyReportRepository.deleteReportByDomainNamePeriod(report);
 				monthlyReportContentRepository.deleteByPK(reportContent);
@@ -194,7 +193,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 			monthlyReportRepository.insert(report);
 
 			long id = report.getId();
-			MonthlyReportContent proto = monthlyReportContentRepository.createLocal();
+			MonthlyReportContentDO proto = monthlyReportContentRepository.createLocal();
 
 			proto.setReportId(id);
 			proto.setContent(content);

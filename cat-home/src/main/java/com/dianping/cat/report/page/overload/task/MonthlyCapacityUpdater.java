@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.dal.MonthlyReportContent;
+import com.dianping.cat.mybatis.data.MonthReportDO;
+import com.dianping.cat.mybatis.data.MonthlyReportContentDO;
 import com.dianping.cat.mybatis.MonthlyReportContentRepository;
 import com.dianping.cat.mybatis.MonthlyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
@@ -64,10 +64,10 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 		LOGGER.info("Starting monthly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
-			List<MonthlyReportContent> reports = monthlyReportContentRepository
+			List<MonthlyReportContentDO> reports = monthlyReportContentRepository
 									.findOverloadReport(maxId);
 
-			for (MonthlyReportContent content : reports) {
+			for (MonthlyReportContentDO content : reports) {
 				try {
 					long reportId = content.getReportId();
 					double contentLength = content.getContentLength();
@@ -80,7 +80,7 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 						overload.setReportType(CapacityUpdater.MONTHLY_TYPE);
 
 						try {
-							MonthlyReport report = monthlyReportRepository.findByPK(reportId);
+							MonthReportDO report = monthlyReportRepository.findByPK(reportId);
 							overload.setPeriod(report.getPeriod());
 							overloadRepository.insert(overload);
 						} catch (EmptyResultDataAccessException e) {

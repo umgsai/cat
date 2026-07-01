@@ -32,8 +32,8 @@ import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.data.DailyReportContentDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportContentDO;
-import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.dal.MonthlyReportContent;
+import com.dianping.cat.mybatis.data.MonthReportDO;
+import com.dianping.cat.mybatis.data.MonthlyReportContentDO;
 import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.mybatis.data.WeeklyReportContentDO;
 import com.dianping.cat.helper.TimeHelper;
@@ -105,7 +105,7 @@ public class UtilizationReportService extends AbstractReportService<UtilizationR
 	}
 
 	private UtilizationReport queryFromMonthlyBinary(long id, String domain) {
-		MonthlyReportContent content = monthlyReportContentRepository.findByPK(id);
+		MonthlyReportContentDO content = monthlyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -168,7 +168,7 @@ public class UtilizationReportService extends AbstractReportService<UtilizationR
 	@Override
 	public UtilizationReport queryMonthlyReport(String domain, Date start) {
 		try {
-			MonthlyReport entity = monthlyReportRepository
+			MonthReportDO entity = monthlyReportRepository
 									.findReportByDomainNamePeriod(start, domain,	Constants.REPORT_UTILIZATION);
 			return queryFromMonthlyBinary(entity.getId(), domain);
 		} catch (EmptyResultDataAccessException e) {

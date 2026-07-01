@@ -11,7 +11,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.mybatis.mapper.MonthReportMapper;
 import com.dianping.cat.mybatis.data.MonthReportDO;
 
@@ -27,29 +26,29 @@ public class MonthlyReportRepository {
 	@Resource(name = "transactionTemplate")
 	private TransactionTemplate transactionTemplate;
 
-	public MonthlyReport createLocal() {
-		return new MonthlyReport();
+	public MonthReportDO createLocal() {
+		return new MonthReportDO();
 	}
 
-	public int deleteByPK(MonthlyReport proto) {
+	public int deleteByPK(MonthReportDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
+		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getId()));
 	}
 
-	public int deleteReportByDomainNamePeriod(MonthlyReport proto) {
+	public int deleteReportByDomainNamePeriod(MonthReportDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().deleteReportByDomainNamePeriod(toRecord(proto)));
+		return transactionTemplate.execute(status -> springMapper().deleteReportByDomainNamePeriod(proto));
 	}
 
-	public MonthlyReport findByPK(long keyId) {
+	public MonthReportDO findByPK(long keyId) {
 		MonthReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public MonthlyReport findReportByDomainNamePeriod(java.util.Date period, String domain, String name) {
+	public MonthReportDO findReportByDomainNamePeriod(java.util.Date period, String domain, String name) {
 		MonthReportDO record = new MonthReportDO();
 		MonthReportMapper mapper = springMapper();
 
@@ -61,21 +60,16 @@ public class MonthlyReportRepository {
 		return requireFound(result, "findReportByDomainNamePeriod", record.toString());
 	}
 
-	public int insert(MonthlyReport proto) {
+	public int insert(MonthReportDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		MonthReportDO record = toRecord(proto);
-		int count = transactionTemplate.execute(status -> springMapper().insert(record));
-
-		proto.setId(record.getId());
-		proto.setKeyId(record.getId());
-		return count;
+		return transactionTemplate.execute(status -> springMapper().insert(proto));
 	}
 
-	public int updateByPK(MonthlyReport proto) {
+	public int updateByPK(MonthReportDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
+		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(proto));
 	}
 
 	private MonthReportMapper springMapper() {
@@ -107,53 +101,11 @@ public class MonthlyReportRepository {
 		this.transactionTemplate = transactionTemplate;
 	}
 
-	private MonthlyReport requireFound(MonthReportDO record, String field, String value) {
+	private MonthReportDO requireFound(MonthReportDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No MonthlyReport found by " + field + "(" + value + ").", 1);
 		}
 
-		return toModel(record);
-	}
-
-	private MonthlyReport toModel(MonthReportDO record) {
-		MonthlyReport model = new MonthlyReport();
-
-		if (record.getId() != null) {
-			model.setId(record.getId());
-		}
-		if (record.getName() != null) {
-			model.setName(record.getName());
-		}
-		if (record.getIp() != null) {
-			model.setIp(record.getIp());
-		}
-		if (record.getDomain() != null) {
-			model.setDomain(record.getDomain());
-		}
-		if (record.getPeriod() != null) {
-			model.setPeriod(record.getPeriod());
-		}
-		if (record.getType() != null) {
-			model.setType(record.getType());
-		}
-		if (record.getCreateTime() != null) {
-			model.setCreateTime(record.getCreateTime());
-		}
-		model.afterLoad();
-		return model;
-	}
-
-	private MonthReportDO toRecord(MonthlyReport model) {
-		MonthReportDO record = new MonthReportDO();
-
-		record.setId(model.getId());
-		record.setName(model.getName());
-		record.setIp(model.getIp());
-		record.setDomain(model.getDomain());
-		record.setPeriod(model.getPeriod());
-		record.setType(model.getType());
-		record.setCreateTime(model.getCreateTime());
-		record.setKeyId(model.getKeyId());
 		return record;
 	}
 

@@ -35,7 +35,7 @@ import com.dianping.cat.consumer.matrix.MatrixAnalyzer;
 import com.dianping.cat.consumer.matrix.model.entity.MatrixReport;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
-import com.dianping.cat.core.dal.MonthlyReport;
+import com.dianping.cat.mybatis.data.MonthReportDO;
 import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.heavy.entity.HeavyReport;
@@ -113,7 +113,7 @@ public class HeavyReportBuilder implements TaskBuilder {
 		LOGGER.info("Building heavy monthly report, name={}, domain={}, period={}.", name, domain, period);
 
 		HeavyReport heavyReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
-		MonthlyReport report = new MonthlyReport();
+		MonthReportDO report = new MonthReportDO();
 
 		report.setCreateTime(new Date());
 		report.setDomain(domain);

@@ -2,7 +2,6 @@ package com.dianping.cat.mybatis;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import jakarta.annotation.Resource;
 
@@ -13,9 +12,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.dianping.cat.core.dal.MonthlyReportContent;
-import com.dianping.cat.mybatis.mapper.MonthlyReportContentMapper;
 import com.dianping.cat.mybatis.data.MonthlyReportContentDO;
+import com.dianping.cat.mybatis.mapper.MonthlyReportContentMapper;
 
 @Component("monthlyReportContentRepository")
 public class MonthlyReportContentRepository {
@@ -29,33 +27,33 @@ public class MonthlyReportContentRepository {
 	@Resource(name = "transactionTemplate")
 	private TransactionTemplate transactionTemplate;
 
-	public MonthlyReportContent createLocal() {
-		return new MonthlyReportContent();
+	public MonthlyReportContentDO createLocal() {
+		return new MonthlyReportContentDO();
 	}
 
-	public int deleteByPK(MonthlyReportContent proto) {
+	public int deleteByPK(MonthlyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
+			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getReportId()));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing deleteByPK for MonthlyReportContent.", e);
 		}
 	}
 
-	public List<MonthlyReportContent> findOverloadReport(long startId) {
+	public List<MonthlyReportContentDO> findOverloadReport(long startId) {
 		MonthlyReportContentMapper mapper = springMapper();
 		MonthlyReportContentDO record = new MonthlyReportContentDO();
 
 		record.setStartId(startId);
 		try {
-			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
+			return mapper.findOverloadReport(record);
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing findOverloadReport for MonthlyReportContent.", e);
 		}
 	}
 
-	public MonthlyReportContent findByPK(long keyReportId) {
+	public MonthlyReportContentDO findByPK(long keyReportId) {
 		MonthlyReportContentMapper mapper = springMapper();
 
 		try {
@@ -67,21 +65,21 @@ public class MonthlyReportContentRepository {
 		}
 	}
 
-	public int insert(MonthlyReportContent proto) {
+	public int insert(MonthlyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
+			return transactionTemplate.execute(status -> springMapper().insert(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing insert for MonthlyReportContent.", e);
 		}
 	}
 
-	public int updateByPK(MonthlyReportContent proto) {
+	public int updateByPK(MonthlyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
+			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing updateByPK for MonthlyReportContent.", e);
 		}
@@ -112,46 +110,11 @@ public class MonthlyReportContentRepository {
 		this.transactionTemplate = transactionTemplate;
 	}
 
-	private MonthlyReportContent requireFound(MonthlyReportContentDO record, String field, String value) {
+	private MonthlyReportContentDO requireFound(MonthlyReportContentDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No MonthlyReportContent found by " + field + "(" + value + ").", 1);
 		}
 
-		return toModel(record);
-	}
-
-	private MonthlyReportContent toModel(MonthlyReportContentDO record) {
-		MonthlyReportContent model = new MonthlyReportContent();
-
-		if (record.getReportId() != null) {
-			model.setReportId(record.getReportId());
-		}
-		if (record.getContent() != null) {
-			model.setContent(record.getContent());
-		}
-		if (record.getCreateTime() != null) {
-			model.setCreateTime(record.getCreateTime());
-		}
-		if (record.getUpdateTime() != null) {
-			model.setUpdateTime(record.getUpdateTime());
-		}
-		if (record.getContentLength() != null) {
-			model.setContentLength(record.getContentLength());
-		}
-		model.afterLoad();
-		return model;
-	}
-
-	private MonthlyReportContentDO toRecord(MonthlyReportContent model) {
-		MonthlyReportContentDO record = new MonthlyReportContentDO();
-
-		record.setReportId(model.getReportId());
-		record.setContent(model.getContent());
-		record.setCreateTime(model.getCreateTime());
-		record.setUpdateTime(model.getUpdateTime());
-		record.setKeyReportId(model.getKeyReportId());
-		record.setCapacity(model.getCapacity());
-		record.setStartId(model.getStartId());
 		return record;
 	}
 }

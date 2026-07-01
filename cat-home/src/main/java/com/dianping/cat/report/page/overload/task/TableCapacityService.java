@@ -33,7 +33,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.mybatis.HourlyReportRepository;
-import com.dianping.cat.core.dal.MonthlyReport;
+import com.dianping.cat.mybatis.data.MonthReportDO;
 import com.dianping.cat.mybatis.MonthlyReportRepository;
 import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.mybatis.WeeklyReportRepository;
@@ -86,11 +86,11 @@ public class TableCapacityService {
 			overloadReport.setType(((WeeklyReportDO) object).getType());
 			break;
 		case CapacityUpdater.MONTHLY_TYPE:
-			overloadReport.setDomain(((MonthlyReport) object).getDomain());
-			overloadReport.setIp(((MonthlyReport) object).getIp());
-			overloadReport.setName(((MonthlyReport) object).getName());
-			overloadReport.setPeriod(((MonthlyReport) object).getPeriod());
-			overloadReport.setType(((MonthlyReport) object).getType());
+			overloadReport.setDomain(((MonthReportDO) object).getDomain());
+			overloadReport.setIp(((MonthReportDO) object).getIp());
+			overloadReport.setName(((MonthReportDO) object).getName());
+			overloadReport.setPeriod(((MonthReportDO) object).getPeriod());
+			overloadReport.setType(((MonthReportDO) object).getType());
 			break;
 		}
 		overloadReport.setReportType(reportType);

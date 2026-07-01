@@ -38,7 +38,7 @@ import com.dianping.cat.consumer.transaction.TransactionAnalyzer;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
-import com.dianping.cat.core.dal.MonthlyReport;
+import com.dianping.cat.mybatis.data.MonthReportDO;
 import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.utilization.entity.ApplicationState;
@@ -178,7 +178,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 		LOGGER.info("Building utilization monthly report, name={}, domain={}, period={}.", name, domain, period);
 
 		UtilizationReport utilizationReport = queryDailyReportsByDuration(domain, period,	TaskHelper.nextMonthStart(period));
-		MonthlyReport report = new MonthlyReport();
+		MonthReportDO report = new MonthReportDO();
 
 		report.setCreateTime(new Date());
 		report.setDomain(domain);

@@ -19,6 +19,4 @@ public class MonthReportDO {
 	private Integer type;
 
 	private Date createTime;
-
-	private Long keyId;
 }

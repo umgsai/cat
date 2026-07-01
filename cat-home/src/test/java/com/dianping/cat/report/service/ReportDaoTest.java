@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import com.dianping.cat.SpringCatHomeTestSupport;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
-import com.dianping.cat.core.dal.MonthlyReport;
+import com.dianping.cat.mybatis.data.MonthReportDO;
 import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.HourlyReportRepository;
@@ -79,9 +79,9 @@ public class ReportDaoTest extends SpringCatHomeTestSupport {
 	@Test
 	public void testMonth() throws Exception {
 		MonthlyReportRepository dao = lookup(MonthlyReportRepository.class);
-		MonthlyReport proto = new MonthlyReport();
+		MonthReportDO proto = new MonthReportDO();
 
-		proto.setCreationDate(new Date());
+		proto.setCreateTime(new Date());
 		proto.setDomain("domain");
 		proto.setName("name");
 		proto.setIp("ip");

@@ -38,7 +38,7 @@ import com.dianping.cat.consumer.cross.CrossAnalyzer;
 import com.dianping.cat.consumer.cross.model.entity.CrossReport;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
-import com.dianping.cat.core.dal.MonthlyReport;
+import com.dianping.cat.mybatis.data.MonthReportDO;
 import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.service.entity.Domain;
@@ -126,7 +126,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 	public boolean buildMonthlyTask(String name, String domain, Date period) {
 		LOGGER.info("Building service monthly report, name={}, domain={}, period={}.", name, domain, period);
 		ServiceReport serviceReport = queryDailyReportsByDuration(domain, period, TaskHelper.nextMonthStart(period));
-		MonthlyReport report = new MonthlyReport();
+		MonthReportDO report = new MonthReportDO();
 
 		report.setCreateTime(new Date());
 		report.setDomain(domain);
