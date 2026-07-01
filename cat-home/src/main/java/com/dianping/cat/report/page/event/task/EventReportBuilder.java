@@ -38,7 +38,7 @@ import com.dianping.cat.consumer.event.model.entity.EventReport;
 import com.dianping.cat.consumer.event.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.dal.WeeklyReport;
+import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.page.event.service.EventReportService;
 import com.dianping.cat.report.task.TaskBuilder;
@@ -126,9 +126,9 @@ public class EventReportBuilder implements TaskBuilder {
 		}
 
 		EventReport eventReport = queryDailyReportsByDuration(domain, period, end);
-		WeeklyReport report = new WeeklyReport();
+		WeeklyReportDO report = new WeeklyReportDO();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);

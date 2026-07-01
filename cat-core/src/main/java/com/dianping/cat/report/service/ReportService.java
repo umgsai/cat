@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.Set;
 
 import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.dal.WeeklyReport;
+import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
 
@@ -33,7 +33,7 @@ public interface ReportService<T> {
 
 	public boolean insertMonthlyReport(MonthlyReport report, byte[] content);
 
-	public boolean insertWeeklyReport(WeeklyReport report, byte[] content);
+	public boolean insertWeeklyReport(WeeklyReportDO report, byte[] content);
 
 	public Set<String> queryAllDomainNames(Date start, Date end, String name);
 

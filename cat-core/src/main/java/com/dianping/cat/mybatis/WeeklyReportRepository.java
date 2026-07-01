@@ -11,9 +11,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.dianping.cat.core.dal.WeeklyReport;
-import com.dianping.cat.mybatis.mapper.WeeklyReportMapper;
 import com.dianping.cat.mybatis.data.WeeklyReportDO;
+import com.dianping.cat.mybatis.mapper.WeeklyReportMapper;
 
 @Component("weeklyReportRepository")
 public class WeeklyReportRepository {
@@ -27,29 +26,29 @@ public class WeeklyReportRepository {
 	@Resource(name = "transactionTemplate")
 	private TransactionTemplate transactionTemplate;
 
-	public WeeklyReport createLocal() {
-		return new WeeklyReport();
+	public WeeklyReportDO createLocal() {
+		return new WeeklyReportDO();
 	}
 
-	public int deleteByPK(WeeklyReport proto) {
+	public int deleteByPK(WeeklyReportDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyId()));
+		return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getId()));
 	}
 
-	public int deleteReportByDomainNamePeriod(WeeklyReport proto) {
+	public int deleteReportByDomainNamePeriod(WeeklyReportDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().deleteReportByDomainNamePeriod(toRecord(proto)));
+		return transactionTemplate.execute(status -> springMapper().deleteReportByDomainNamePeriod(proto));
 	}
 
-	public WeeklyReport findByPK(long keyId) {
+	public WeeklyReportDO findByPK(long keyId) {
 		WeeklyReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByPrimaryKey(keyId), "primary key", String.valueOf(keyId));
 	}
 
-	public WeeklyReport findReportByDomainNamePeriod(java.util.Date period, String domain, String name) {
+	public WeeklyReportDO findReportByDomainNamePeriod(java.util.Date period, String domain, String name) {
 		WeeklyReportDO record = new WeeklyReportDO();
 		WeeklyReportMapper mapper = springMapper();
 
@@ -61,21 +60,16 @@ public class WeeklyReportRepository {
 		return requireFound(result, "findReportByDomainNamePeriod", record.toString());
 	}
 
-	public int insert(WeeklyReport proto) {
+	public int insert(WeeklyReportDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		WeeklyReportDO record = toRecord(proto);
-		int count = transactionTemplate.execute(status -> springMapper().insert(record));
-
-		proto.setId(record.getId());
-		proto.setKeyId(record.getId());
-		return count;
+		return transactionTemplate.execute(status -> springMapper().insert(proto));
 	}
 
-	public int updateByPK(WeeklyReport proto) {
+	public int updateByPK(WeeklyReportDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
+		return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(proto));
 	}
 
 	private WeeklyReportMapper springMapper() {
@@ -107,53 +101,11 @@ public class WeeklyReportRepository {
 		this.transactionTemplate = transactionTemplate;
 	}
 
-	private WeeklyReport requireFound(WeeklyReportDO record, String field, String value) {
+	private WeeklyReportDO requireFound(WeeklyReportDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No WeeklyReport found by " + field + "(" + value + ").", 1);
 		}
 
-		return toModel(record);
-	}
-
-	private WeeklyReport toModel(WeeklyReportDO record) {
-		WeeklyReport model = new WeeklyReport();
-
-		if (record.getId() != null) {
-			model.setId(record.getId());
-		}
-		if (record.getName() != null) {
-			model.setName(record.getName());
-		}
-		if (record.getIp() != null) {
-			model.setIp(record.getIp());
-		}
-		if (record.getDomain() != null) {
-			model.setDomain(record.getDomain());
-		}
-		if (record.getPeriod() != null) {
-			model.setPeriod(record.getPeriod());
-		}
-		if (record.getType() != null) {
-			model.setType(record.getType());
-		}
-		if (record.getCreateTime() != null) {
-			model.setCreateTime(record.getCreateTime());
-		}
-		model.afterLoad();
-		return model;
-	}
-
-	private WeeklyReportDO toRecord(WeeklyReport model) {
-		WeeklyReportDO record = new WeeklyReportDO();
-
-		record.setId(model.getId());
-		record.setName(model.getName());
-		record.setIp(model.getIp());
-		record.setDomain(model.getDomain());
-		record.setPeriod(model.getPeriod());
-		record.setType(model.getType());
-		record.setCreateTime(model.getCreateTime());
-		record.setKeyId(model.getKeyId());
 		return record;
 	}
 

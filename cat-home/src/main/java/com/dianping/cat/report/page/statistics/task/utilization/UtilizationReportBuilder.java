@@ -39,7 +39,7 @@ import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.dal.WeeklyReport;
+import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.utilization.entity.ApplicationState;
 import com.dianping.cat.home.utilization.entity.Domain;
@@ -197,7 +197,7 @@ public class UtilizationReportBuilder implements TaskBuilder {
 
 		UtilizationReport utilizationReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
-		WeeklyReport report = new WeeklyReport();
+		WeeklyReportDO report = new WeeklyReportDO();
 
 		report.setCreateTime(new Date());
 		report.setDomain(domain);

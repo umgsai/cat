@@ -38,7 +38,7 @@ import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.consumer.storage.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.dal.WeeklyReport;
+import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.page.storage.transform.StorageMergeHelper;
 import com.dianping.cat.report.task.TaskBuilder;
@@ -123,9 +123,9 @@ public class StorageReportBuilder implements TaskBuilder {
 		}
 
 		StorageReport storageReport = queryDailyReportsByDuration(reportId, period, end);
-		WeeklyReport report = new WeeklyReport();
+		WeeklyReportDO report = new WeeklyReportDO();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(reportId);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);

@@ -41,7 +41,7 @@ import com.dianping.cat.consumer.state.model.transform.BaseVisitor;
 import com.dianping.cat.consumer.state.model.transform.DefaultNativeBuilder;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.dal.WeeklyReport;
+import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.mybatis.data.HostInfoDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.page.state.service.StateReportService;
@@ -127,9 +127,9 @@ public class StateReportBuilder implements TaskBuilder {
 		Date end = new Date(start.getTime() + TimeHelper.ONE_DAY * 7);
 
 		StateReport stateReport = queryDailyReportsByDuration(domain, start, end);
-		WeeklyReport report = new WeeklyReport();
+		WeeklyReportDO report = new WeeklyReportDO();
 
-		report.setCreationDate(new Date());
+		report.setCreateTime(new Date());
 		report.setDomain(domain);
 		report.setIp(NetworkInterfaceManager.INSTANCE.getLocalHostAddress());
 		report.setName(name);

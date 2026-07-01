@@ -39,7 +39,7 @@ import com.dianping.cat.consumer.cross.model.entity.CrossReport;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.core.dal.MonthlyReport;
-import com.dianping.cat.core.dal.WeeklyReport;
+import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.service.entity.Domain;
 import com.dianping.cat.home.service.entity.ServiceReport;
@@ -144,7 +144,7 @@ public class ServiceReportBuilder implements TaskBuilder {
 
 		ServiceReport serviceReport = queryDailyReportsByDuration(domain, period,
 								new Date(period.getTime()	+ TimeHelper.ONE_WEEK));
-		WeeklyReport report = new WeeklyReport();
+		WeeklyReportDO report = new WeeklyReportDO();
 
 		report.setCreateTime(new Date());
 		report.setDomain(domain);

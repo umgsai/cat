@@ -39,8 +39,8 @@ import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
-import com.dianping.cat.core.dal.WeeklyReport;
-import com.dianping.cat.core.dal.WeeklyReportContent;
+import com.dianping.cat.mybatis.data.WeeklyReportDO;
+import com.dianping.cat.mybatis.data.WeeklyReportContentDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.report.service.AbstractReportService;
 
@@ -143,7 +143,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	}
 
 	private StorageReport queryFromWeeklyBinary(long id, String reportId) {
-		WeeklyReportContent content = weeklyReportContentRepository.findByPK(id);
+		WeeklyReportContentDO content = weeklyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -214,7 +214,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	@Override
 	public StorageReport queryWeeklyReport(String reportId, Date start) {
 		try {
-			WeeklyReport entity = weeklyReportRepository
+			WeeklyReportDO entity = weeklyReportRepository
 									.findReportByDomainNamePeriod(start, reportId, StorageAnalyzer.ID);
 
 			return queryFromWeeklyBinary(entity.getId(), reportId);

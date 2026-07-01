@@ -2,7 +2,6 @@ package com.dianping.cat.mybatis;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import jakarta.annotation.Resource;
 
@@ -13,9 +12,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.dianping.cat.core.dal.WeeklyReportContent;
-import com.dianping.cat.mybatis.mapper.WeeklyReportContentMapper;
 import com.dianping.cat.mybatis.data.WeeklyReportContentDO;
+import com.dianping.cat.mybatis.mapper.WeeklyReportContentMapper;
 
 @Component("weeklyReportContentRepository")
 public class WeeklyReportContentRepository {
@@ -29,33 +27,33 @@ public class WeeklyReportContentRepository {
 	@Resource(name = "transactionTemplate")
 	private TransactionTemplate transactionTemplate;
 
-	public WeeklyReportContent createLocal() {
-		return new WeeklyReportContent();
+	public WeeklyReportContentDO createLocal() {
+		return new WeeklyReportContentDO();
 	}
 
-	public int deleteByPK(WeeklyReportContent proto) {
+	public int deleteByPK(WeeklyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
+			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getReportId()));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing deleteByPK for WeeklyReportContent.", e);
 		}
 	}
 
-	public List<WeeklyReportContent> findOverloadReport(long startId) {
+	public List<WeeklyReportContentDO> findOverloadReport(long startId) {
 		WeeklyReportContentMapper mapper = springMapper();
 		WeeklyReportContentDO record = new WeeklyReportContentDO();
 
 		record.setStartId(startId);
 		try {
-			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
+			return mapper.findOverloadReport(record);
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing findOverloadReport for WeeklyReportContent.", e);
 		}
 	}
 
-	public WeeklyReportContent findByPK(long keyReportId) {
+	public WeeklyReportContentDO findByPK(long keyReportId) {
 		WeeklyReportContentMapper mapper = springMapper();
 
 		try {
@@ -67,21 +65,21 @@ public class WeeklyReportContentRepository {
 		}
 	}
 
-	public int insert(WeeklyReportContent proto) {
+	public int insert(WeeklyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
+			return transactionTemplate.execute(status -> springMapper().insert(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing insert for WeeklyReportContent.", e);
 		}
 	}
 
-	public int updateByPK(WeeklyReportContent proto) {
+	public int updateByPK(WeeklyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
+			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing updateByPK for WeeklyReportContent.", e);
 		}
@@ -112,46 +110,11 @@ public class WeeklyReportContentRepository {
 		this.transactionTemplate = transactionTemplate;
 	}
 
-	private WeeklyReportContent requireFound(WeeklyReportContentDO record, String field, String value) {
+	private WeeklyReportContentDO requireFound(WeeklyReportContentDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No WeeklyReportContent found by " + field + "(" + value + ").", 1);
 		}
 
-		return toModel(record);
-	}
-
-	private WeeklyReportContent toModel(WeeklyReportContentDO record) {
-		WeeklyReportContent model = new WeeklyReportContent();
-
-		if (record.getReportId() != null) {
-			model.setReportId(record.getReportId());
-		}
-		if (record.getContent() != null) {
-			model.setContent(record.getContent());
-		}
-		if (record.getCreateTime() != null) {
-			model.setCreateTime(record.getCreateTime());
-		}
-		if (record.getUpdateTime() != null) {
-			model.setUpdateTime(record.getUpdateTime());
-		}
-		if (record.getContentLength() != null) {
-			model.setContentLength(record.getContentLength());
-		}
-		model.afterLoad();
-		return model;
-	}
-
-	private WeeklyReportContentDO toRecord(WeeklyReportContent model) {
-		WeeklyReportContentDO record = new WeeklyReportContentDO();
-
-		record.setReportId(model.getReportId());
-		record.setContent(model.getContent());
-		record.setCreateTime(model.getCreateTime());
-		record.setUpdateTime(model.getUpdateTime());
-		record.setKeyReportId(model.getKeyReportId());
-		record.setCapacity(model.getCapacity());
-		record.setStartId(model.getStartId());
 		return record;
 	}
 }

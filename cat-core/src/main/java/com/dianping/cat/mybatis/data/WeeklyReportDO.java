@@ -19,6 +19,4 @@ public class WeeklyReportDO {
 	private Integer type;
 
 	private Date createTime;
-
-	private Long keyId;
 }

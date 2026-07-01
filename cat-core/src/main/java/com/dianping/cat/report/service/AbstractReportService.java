@@ -46,8 +46,8 @@ import com.dianping.cat.core.dal.MonthlyReport;
 import com.dianping.cat.core.dal.MonthlyReportContent;
 import com.dianping.cat.mybatis.MonthlyReportContentRepository;
 import com.dianping.cat.mybatis.MonthlyReportRepository;
-import com.dianping.cat.core.dal.WeeklyReport;
-import com.dianping.cat.core.dal.WeeklyReportContent;
+import com.dianping.cat.mybatis.data.WeeklyReportDO;
+import com.dianping.cat.mybatis.data.WeeklyReportContentDO;
 import com.dianping.cat.mybatis.WeeklyReportContentRepository;
 import com.dianping.cat.mybatis.WeeklyReportRepository;
 import com.dianping.cat.mybatis.DailyReportRepository;
@@ -210,16 +210,15 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 	}
 
 	@Override
-	public boolean insertWeeklyReport(WeeklyReport report, byte[] content) {
+	public boolean insertWeeklyReport(WeeklyReportDO report, byte[] content) {
 		ensureReportRepositories();
 		try {
-			WeeklyReport weeklyReport = weeklyReportRepository
+			WeeklyReportDO weeklyReport = weeklyReportRepository
 									.findReportByDomainNamePeriod(report.getPeriod(),	report.getDomain(), report.getName());
 
 			if (weeklyReport != null) {
-				WeeklyReportContent reportContent = weeklyReportContentRepository.createLocal();
+				WeeklyReportContentDO reportContent = weeklyReportContentRepository.createLocal();
 
-				reportContent.setKeyReportId(weeklyReport.getId());
 				reportContent.setReportId(weeklyReport.getId());
 				weeklyReportContentRepository.deleteByPK(reportContent);
 				weeklyReportRepository.deleteReportByDomainNamePeriod(report);
@@ -235,7 +234,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 			weeklyReportRepository.insert(report);
 
 			long id = report.getId();
-			WeeklyReportContent proto = weeklyReportContentRepository.createLocal();
+			WeeklyReportContentDO proto = weeklyReportContentRepository.createLocal();
 
 			proto.setReportId(id);
 			proto.setContent(content);

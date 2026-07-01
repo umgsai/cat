@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.core.dal.WeeklyReport;
-import com.dianping.cat.core.dal.WeeklyReportContent;
+import com.dianping.cat.mybatis.data.WeeklyReportDO;
+import com.dianping.cat.mybatis.data.WeeklyReportContentDO;
 import com.dianping.cat.mybatis.WeeklyReportContentRepository;
 import com.dianping.cat.mybatis.WeeklyReportRepository;
 import com.dianping.cat.home.dal.report.Overload;
@@ -64,10 +64,10 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 		LOGGER.info("Starting weekly report capacity scan, startMaxId={}.", maxId);
 
 		while (true) {
-			List<WeeklyReportContent> reports = weeklyReportContentRepository
+			List<WeeklyReportContentDO> reports = weeklyReportContentRepository
 									.findOverloadReport(maxId);
 
-			for (WeeklyReportContent content : reports) {
+			for (WeeklyReportContentDO content : reports) {
 				try {
 					long reportId = content.getReportId();
 					double contentLength = content.getContentLength();
@@ -80,7 +80,7 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 						overload.setReportType(CapacityUpdater.WEEKLY_TYPE);
 
 						try {
-							WeeklyReport report = weeklyReportRepository.findByPK(reportId);
+							WeeklyReportDO report = weeklyReportRepository.findByPK(reportId);
 							overload.setPeriod(report.getPeriod());
 							overloadRepository.insert(overload);
 						} catch (EmptyResultDataAccessException e) {

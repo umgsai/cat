@@ -18,9 +18,5 @@ public class WeeklyReportContentDO {
 
 	private Double contentLength;
 
-	private Long keyReportId;
-
-	private Double capacity;
-
 	private Long startId;
 }
