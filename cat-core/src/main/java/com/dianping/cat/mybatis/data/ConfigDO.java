@@ -15,4 +15,12 @@ public class ConfigDO {
 	private Date createTime;
 
 	private Date updateTime;
+
+	public void setId(Integer id) {
+		this.id = id == null ? null : id.longValue();
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 }

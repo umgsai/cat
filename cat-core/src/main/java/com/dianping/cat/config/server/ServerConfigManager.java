@@ -57,7 +57,7 @@ import com.dianping.cat.configuration.server.entity.Server;
 import com.dianping.cat.configuration.server.entity.ServerConfig;
 import com.dianping.cat.configuration.server.entity.StorageConfig;
 import com.dianping.cat.configuration.server.transform.DefaultSaxParser;
-import com.dianping.cat.core.config.Config;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.support.Threads;
 import com.dianping.cat.task.TimerSyncTask;
@@ -411,11 +411,11 @@ public class ServerConfigManager {
 
 		try {
 			try {
-				Config dbConfig = configRepository.findByName(CONFIG_NAME);
+				ConfigDO dbConfig = configRepository.findByName(CONFIG_NAME);
 				String content = dbConfig.getContent();
 
 				configId = dbConfig.getId();
-				modifyTime = dbConfig.getModifyDate().getTime();
+				modifyTime = dbConfig.getUpdateTime().getTime();
 				serverConfig = DefaultSaxParser.parse(content);
 				LOGGER.info("Loaded server config from repository, configId={}, modifyTime={}.", configId,
 						modifyTime);
@@ -424,7 +424,7 @@ public class ServerConfigManager {
 
 				try {
 					String content = contentFetcher.getConfigContent(CONFIG_NAME);
-					Config dbConfig = configRepository.createLocal();
+					ConfigDO dbConfig = configRepository.createLocal();
 
 					dbConfig.setName(CONFIG_NAME);
 					dbConfig.setContent(content);
@@ -594,8 +594,8 @@ public class ServerConfigManager {
 	}
 
 	private void refreshConfig() throws Exception {
-		Config dbConfig = configRepository.findByName(CONFIG_NAME);
-		long remoteModifyTime = dbConfig.getModifyDate().getTime();
+		ConfigDO dbConfig = configRepository.findByName(CONFIG_NAME);
+		long remoteModifyTime = dbConfig.getUpdateTime().getTime();
 
 		synchronized (this) {
 			if (remoteModifyTime > modifyTime) {
@@ -634,10 +634,9 @@ public class ServerConfigManager {
 
 	public boolean storeConfig() {
 		try {
-			Config dbConfig = configRepository.createLocal();
+			ConfigDO dbConfig = configRepository.createLocal();
 
 			dbConfig.setId(configId);
-			dbConfig.setKeyId(configId);
 			dbConfig.setName(CONFIG_NAME);
 			dbConfig.setContent(serverConfig.toString());
 			configRepository.updateByPK(dbConfig);

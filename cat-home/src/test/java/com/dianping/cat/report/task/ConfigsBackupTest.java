@@ -25,7 +25,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.cat.core.config.Config;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.mybatis.ConfigRepository;
 
 public class ConfigsBackupTest extends SpringTaskTestSupport {
@@ -64,9 +64,9 @@ public class ConfigsBackupTest extends SpringTaskTestSupport {
 			boolean result = true;
 
 			try {
-				List<Config> configs = m_dao.findAllConfig();
+				List<ConfigDO> configs = m_dao.findAllConfig();
 
-				for (Config config : configs) {
+				for (ConfigDO config : configs) {
 					boolean tmpResult = backupConfig(config.getName(), config.getContent());
 
 					if (!tmpResult && result) {

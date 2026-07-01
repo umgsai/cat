@@ -3,7 +3,6 @@ package com.dianping.cat.mybatis;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import jakarta.annotation.Resource;
 
@@ -14,7 +13,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.dianping.cat.core.config.Config;
 import com.dianping.cat.mybatis.mapper.ConfigMapper;
 import com.dianping.cat.mybatis.data.ConfigDO;
 
@@ -30,62 +28,59 @@ public class ConfigRepository {
 	@Resource(name = "transactionTemplate")
 	private TransactionTemplate transactionTemplate;
 
-	public Config createLocal() {
-		return new Config();
+	public ConfigDO createLocal() {
+		return new ConfigDO();
 	}
 
-	public int deleteByPK(Config proto) {
+	public int deleteByPK(ConfigDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().deleteById(proto.getKeyId()));
+		return transactionTemplate.execute(status -> springMapper().deleteById(proto.getId()));
 	}
 
-	public List<Config> findAllConfig() {
+	public List<ConfigDO> findAllConfig() {
 		ConfigMapper mapper = springMapper();
 
-		return mapper.queryAll().stream().map(this::toConfig).collect(Collectors.toList());
+		return mapper.queryAll();
 	}
 
-	public Config findByName(String name) {
+	public ConfigDO findByName(String name) {
 		ConfigMapper mapper = springMapper();
 
 		return requireFound(mapper.findByName(name), "name", name);
 	}
 
-	public Config findByPK(int keyId) {
+	public ConfigDO findByPK(int keyId) {
 		return findByPK((long) keyId);
 	}
 
-	public Config findByPK(long keyId) {
+	public ConfigDO findByPK(long keyId) {
 		ConfigMapper mapper = springMapper();
 
 		return requireFound(mapper.findById(keyId), "id", String.valueOf(keyId));
 	}
 
-	public int insert(Config proto) {
+	public int insert(ConfigDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 		Date now = new Date();
 
-		if (proto.getCreationDate() == null) {
-			proto.setCreationDate(now);
+		if (proto.getCreateTime() == null) {
+			proto.setCreateTime(now);
 		}
-		if (proto.getModifyDate() == null) {
-			proto.setModifyDate(now);
+		if (proto.getUpdateTime() == null) {
+			proto.setUpdateTime(now);
 		}
 
-		ConfigDO config = toConfigDO(proto);
-		int count = transactionTemplate.execute(status -> springMapper().insert(config));
+		int count = transactionTemplate.execute(status -> springMapper().insert(proto));
 
-		proto.setId(config.getId());
-		proto.setKeyId(config.getId());
 		return count;
 	}
 
-	public int updateByPK(Config proto) {
+	public int updateByPK(ConfigDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		proto.setModifyDate(new Date());
-		return transactionTemplate.execute(status -> springMapper().updateById(toConfigDO(proto)));
+		proto.setUpdateTime(new Date());
+		return transactionTemplate.execute(status -> springMapper().updateById(proto));
 	}
 
 	private ConfigMapper springMapper() {
@@ -117,35 +112,11 @@ public class ConfigRepository {
 		this.transactionTemplate = transactionTemplate;
 	}
 
-	private Config requireFound(ConfigDO config, String field, String value) {
+	private ConfigDO requireFound(ConfigDO config, String field, String value) {
 		if (config == null) {
 			throw new EmptyResultDataAccessException(String.format("No config found by %s(%s).", field, value), 1);
 		}
 
-		return toConfig(config);
-	}
-
-	private Config toConfig(ConfigDO configDO) {
-		Config config = new Config();
-
-		config.setId(configDO.getId());
-		config.setName(configDO.getName());
-		config.setContent(configDO.getContent());
-		config.setCreateTime(configDO.getCreateTime());
-		config.setUpdateTime(configDO.getUpdateTime());
-		config.afterLoad();
 		return config;
 	}
-
-	private ConfigDO toConfigDO(Config config) {
-		ConfigDO configDO = new ConfigDO();
-
-		configDO.setId(config.getKeyId() > 0 ? config.getKeyId() : config.getId());
-		configDO.setName(config.getName());
-		configDO.setContent(config.getContent());
-		configDO.setCreateTime(config.getCreateTime());
-		configDO.setUpdateTime(config.getUpdateTime());
-		return configDO;
-	}
-
 }

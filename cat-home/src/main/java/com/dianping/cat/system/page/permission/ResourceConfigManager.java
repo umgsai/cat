@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
-import com.dianping.cat.core.config.Config;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.home.resource.entity.Resource;
 import com.dianping.cat.home.resource.entity.ResourceConfig;
@@ -102,11 +102,11 @@ public class ResourceConfigManager {
 	@PostConstruct
 	public void initialize() {
 		try {
-			Config config = configRepository.findByName(CONFIG_NAME);
+			ConfigDO config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
 			configId = config.getId();
-			modifyTime = config.getModifyDate().getTime();
+			modifyTime = config.getUpdateTime().getTime();
 			this.config = DefaultSaxParser.parse(content);
 			LOGGER.info("Loaded resource config from repository, configId={}, modifyTime={}.", configId,
 					modifyTime);
@@ -115,7 +115,7 @@ public class ResourceConfigManager {
 
 			try {
 				String content = contentFetcher.getConfigContent(CONFIG_NAME);
-				Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(content);
@@ -166,8 +166,8 @@ public class ResourceConfigManager {
 	}
 
 	private void refreshConfig() throws Exception {
-		Config config = configRepository.findByName(CONFIG_NAME);
-		long modifyTime = config.getModifyDate().getTime();
+		ConfigDO config = configRepository.findByName(CONFIG_NAME);
+		long modifyTime = config.getUpdateTime().getTime();
 
 		synchronized (this) {
 			if (modifyTime > this.modifyTime) {
@@ -216,10 +216,9 @@ public class ResourceConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 
 				config.setId(configId);
-				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(this.config.toString());
 				configRepository.updateByPK(config);

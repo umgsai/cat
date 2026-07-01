@@ -36,7 +36,7 @@ import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.configuration.server.filter.entity.AtomicTreeConfig;
 import com.dianping.cat.configuration.server.filter.entity.ServerFilterConfig;
 import com.dianping.cat.configuration.server.filter.transform.DefaultSaxParser;
-import com.dianping.cat.core.config.Config;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
@@ -124,11 +124,11 @@ public class ServerFilterConfigManager {
 		}
 
 		try {
-			Config config = configRepository.findByName(CONFIG_NAME);
+			ConfigDO config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
 			configId = config.getId();
-			modifyTime = config.getModifyDate().getTime();
+			modifyTime = config.getUpdateTime().getTime();
 			this.config = DefaultSaxParser.parse(content);
 			LOGGER.info("Loaded server filter config from repository, configId={}, modifyTime={}.", configId,
 					modifyTime);
@@ -137,7 +137,7 @@ public class ServerFilterConfigManager {
 
 			try {
 				String content = contentFetcher.getConfigContent(CONFIG_NAME);
-				Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(content);
@@ -196,8 +196,8 @@ public class ServerFilterConfigManager {
 	}
 
 	private void refreshConfig() throws SAXException, IOException {
-		Config config = configRepository.findByName(CONFIG_NAME);
-		long modifyTime = config.getModifyDate().getTime();
+		ConfigDO config = configRepository.findByName(CONFIG_NAME);
+		long modifyTime = config.getUpdateTime().getTime();
 
 		synchronized (this) {
 			if (modifyTime > this.modifyTime) {
@@ -216,10 +216,9 @@ public class ServerFilterConfigManager {
 		ensureInitialized();
 
 		try {
-			Config config = configRepository.createLocal();
+			ConfigDO config = configRepository.createLocal();
 
 			config.setId(configId);
-			config.setKeyId(configId);
 			config.setName(CONFIG_NAME);
 			config.setContent(this.config.toString());
 			configRepository.updateByPK(config);

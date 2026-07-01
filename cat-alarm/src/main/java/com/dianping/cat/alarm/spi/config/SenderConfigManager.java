@@ -31,7 +31,7 @@ import com.dianping.cat.alarm.sender.entity.Sender;
 import com.dianping.cat.alarm.sender.entity.SenderConfig;
 import com.dianping.cat.alarm.sender.transform.DefaultSaxParser;
 import com.dianping.cat.config.content.ContentFetcher;
-import com.dianping.cat.core.config.Config;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.mybatis.ConfigRepository;
 
 import jakarta.annotation.PostConstruct;
@@ -78,7 +78,7 @@ public class SenderConfigManager {
 				return;
 			}
 			try {
-				Config config = configRepository.findByName(CONFIG_NAME);
+				ConfigDO config = configRepository.findByName(CONFIG_NAME);
 				String content = config.getContent();
 
 				senderConfig = DefaultSaxParser.parse(content);
@@ -89,7 +89,7 @@ public class SenderConfigManager {
 
 				try {
 					String content = contentFetcher.getConfigContent(CONFIG_NAME);
-					Config config = configRepository.createLocal();
+					ConfigDO config = configRepository.createLocal();
 
 					config.setName(CONFIG_NAME);
 					config.setContent(content);
@@ -183,10 +183,9 @@ public class SenderConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 
 				config.setId(configId);
-				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(senderConfig.toString());
 				configRepository.updateByPK(config);

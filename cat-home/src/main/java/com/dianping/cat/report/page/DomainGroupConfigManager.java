@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
-import com.dianping.cat.core.config.Config;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.home.group.entity.Domain;
@@ -72,7 +72,7 @@ public class DomainGroupConfigManager {
 	@PostConstruct
 	public void initialize() {
 		try {
-			Config configDO = configRepository.findByName(CONFIG_NAME);
+			ConfigDO configDO = configRepository.findByName(CONFIG_NAME);
 			String content = configDO.getContent();
 
 			configId = configDO.getId();
@@ -83,7 +83,7 @@ public class DomainGroupConfigManager {
 
 			try {
 				String content = contentFetcher.getConfigContent(CONFIG_NAME);
-				Config configDO = configRepository.createLocal();
+				ConfigDO configDO = configRepository.createLocal();
 
 				configDO.setName(CONFIG_NAME);
 				configDO.setContent(content);
@@ -196,10 +196,9 @@ public class DomainGroupConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config configDO = configRepository.createLocal();
+				ConfigDO configDO = configRepository.createLocal();
 
 				configDO.setId(configId);
-				configDO.setKeyId(configId);
 				configDO.setName(CONFIG_NAME);
 				configDO.setContent(domainGroup.toString());
 				configRepository.updateByPK(configDO);

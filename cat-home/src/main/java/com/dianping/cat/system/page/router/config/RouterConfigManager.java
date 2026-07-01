@@ -24,7 +24,7 @@ import jakarta.annotation.Resource;
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.content.ContentFetcher;
-import com.dianping.cat.core.config.Config;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.mybatis.DailyReportContentRepository;
 import com.dianping.cat.mybatis.DailyReportRepository;
@@ -139,23 +139,23 @@ public class RouterConfigManager {
 
 		try {
 			SLF4J_LOGGER.info("Initializing router config manager, configName={}.", CONFIG_NAME);
-			Config config = configRepository.findByName(CONFIG_NAME);
+			ConfigDO config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
 			configId = config.getId();
 			routerConfig = DefaultSaxParser.parse(content);
-			modifyTime = config.getModifyDate().getTime();
+			modifyTime = config.getUpdateTime().getTime();
 		} catch (EmptyResultDataAccessException e) {
 			SLF4J_LOGGER.warn("Router config not found in repository, loading default content, configName={}.",
 			      CONFIG_NAME);
 			try {
 				String content = contentFetcher.getConfigContent(CONFIG_NAME);
-				Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 				Date now = new Date();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(content);
-				config.setModifyDate(now);
+				config.setUpdateTime(now);
 				configRepository.insert(config);
 
 				configId = config.getId();
@@ -347,8 +347,8 @@ public class RouterConfigManager {
 	}
 
 	private void refreshConfigInfo() throws SAXException, IOException {
-		Config config = configRepository.findByName(CONFIG_NAME);
-		long modifyTime = config.getModifyDate().getTime();
+		ConfigDO config = configRepository.findByName(CONFIG_NAME);
+		long modifyTime = config.getUpdateTime().getTime();
 
 		synchronized (this) {
 			if (modifyTime > this.modifyTime) {
@@ -432,10 +432,9 @@ public class RouterConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 
 				config.setId(configId);
-				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(routerConfig.toString());
 				configRepository.updateByPK(config);

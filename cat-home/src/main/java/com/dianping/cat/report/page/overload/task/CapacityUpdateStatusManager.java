@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.core.config.Config;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.mybatis.OverloadRepository;
 
@@ -96,7 +96,7 @@ public class CapacityUpdateStatusManager {
 	@PostConstruct
 	public void initialize() {
 		try {
-			Config config = configRepository.findByName(CONFIG_NAME);
+			ConfigDO config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
 			configId = config.getId();
 
@@ -113,7 +113,7 @@ public class CapacityUpdateStatusManager {
 				monthlyStatus = overloadRepository.findMaxIdByType(CapacityUpdater.MONTHLY_TYPE)
 										.getMaxId();
 
-				Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(buildConfigContent());
@@ -130,10 +130,9 @@ public class CapacityUpdateStatusManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 
 				config.setId(configId);
-				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(buildConfigContent());
 				configRepository.updateByPK(config);

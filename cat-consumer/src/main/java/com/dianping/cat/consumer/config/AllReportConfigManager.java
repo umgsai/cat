@@ -38,7 +38,7 @@ import com.dianping.cat.consumer.all.config.entity.Name;
 import com.dianping.cat.consumer.all.config.entity.Report;
 import com.dianping.cat.consumer.all.config.entity.Type;
 import com.dianping.cat.consumer.all.config.transform.DefaultSaxParser;
-import com.dianping.cat.core.config.Config;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.task.TimerSyncTask;
 import com.dianping.cat.task.TimerSyncTask.SyncHandler;
@@ -81,24 +81,24 @@ public class AllReportConfigManager {
 		}
 
 		try {
-			Config config = configRepository.findByName(CONFIG_NAME);
+			ConfigDO config = configRepository.findByName(CONFIG_NAME);
 			String content = config.getContent();
 
 			configId = config.getId();
 			this.config = DefaultSaxParser.parse(content);
-			modifyTime = config.getModifyDate().getTime();
+			modifyTime = config.getUpdateTime().getTime();
 			LOGGER.info("Loaded all report config from repository, configId={}, modifyTime={}.", configId, modifyTime);
 		} catch (EmptyResultDataAccessException e) {
 			LOGGER.warn("All report config is missing in repository, loading default content from fetcher.", e);
 
 			try {
 				String content = contentFetcher.getConfigContent(CONFIG_NAME);
-				Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 				Date now = new Date();
 
 				config.setName(CONFIG_NAME);
 				config.setContent(content);
-				config.setModifyDate(now);
+				config.setUpdateTime(now);
 				configRepository.insert(config);
 
 				configId = config.getId();
@@ -149,8 +149,8 @@ public class AllReportConfigManager {
 	}
 
 	private void refreshConfig() throws SAXException, IOException {
-		Config config = configRepository.findByName(CONFIG_NAME);
-		long modifyTime = config.getModifyDate().getTime();
+		ConfigDO config = configRepository.findByName(CONFIG_NAME);
+		long modifyTime = config.getUpdateTime().getTime();
 
 		synchronized (this) {
 			if (modifyTime > this.modifyTime) {
@@ -167,10 +167,9 @@ public class AllReportConfigManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 
 				config.setId(configId);
-				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(this.config.toString());
 				configRepository.updateByPK(config);

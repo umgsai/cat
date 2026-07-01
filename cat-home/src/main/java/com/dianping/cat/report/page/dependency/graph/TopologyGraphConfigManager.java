@@ -40,7 +40,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.consumer.dependency.model.entity.Dependency;
 import com.dianping.cat.consumer.dependency.model.entity.Index;
-import com.dianping.cat.core.config.Config;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.mybatis.ConfigRepository;
 import com.dianping.cat.helper.Chinese;
 import com.dianping.cat.home.dependency.config.entity.DomainConfig;
@@ -264,7 +264,7 @@ public class TopologyGraphConfigManager {
 			}
 		} else {
 			try {
-				Config configDO = configRepository.findByName(CONFIG_NAME);
+				ConfigDO configDO = configRepository.findByName(CONFIG_NAME);
 				String content = configDO.getContent();
 
 				configId = configDO.getId();
@@ -272,7 +272,7 @@ public class TopologyGraphConfigManager {
 			} catch (EmptyResultDataAccessException e) {
 				try {
 					String content = contentFetcher.getConfigContent(CONFIG_NAME);
-					Config configDO = configRepository.createLocal();
+					ConfigDO configDO = configRepository.createLocal();
 
 					configDO.setName(CONFIG_NAME);
 					configDO.setContent(content);
@@ -392,9 +392,8 @@ public class TopologyGraphConfigManager {
 			}
 		} else {
 			try {
-				Config configDO = configRepository.createLocal();
+				ConfigDO configDO = configRepository.createLocal();
 				configDO.setId(configId);
-				configDO.setKeyId(configId);
 				configDO.setName(CONFIG_NAME);
 				configDO.setContent(config.toString());
 				configRepository.updateByPK(configDO);

@@ -47,6 +47,7 @@ import com.dianping.cat.alarm.rule.transform.DefaultSaxParser;
 import com.dianping.cat.alarm.spi.rule.RuleType;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.mybatis.ConfigRepository;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.report.alert.config.BaseRuleHelper;
@@ -108,7 +109,7 @@ public abstract class BaseRuleConfigManager {
 
 			LOGGER.info("Initializing alert rule config manager, configName={}.", getConfigName());
 			try {
-				com.dianping.cat.core.config.Config config = configRepository.findByName(getConfigName());
+				ConfigDO config = configRepository.findByName(getConfigName());
 				String content = config.getContent();
 
 				configId = config.getId();
@@ -118,7 +119,7 @@ public abstract class BaseRuleConfigManager {
 				      getConfigName());
 				try {
 					String content = contentFetcher.getConfigContent(getConfigName());
-					com.dianping.cat.core.config.Config config = configRepository.createLocal();
+					ConfigDO config = configRepository.createLocal();
 
 					config.setName(getConfigName());
 					config.setContent(content);
@@ -168,9 +169,9 @@ public abstract class BaseRuleConfigManager {
 	}
 
 	private void refreshConfig() throws SAXException, IOException {
-		com.dianping.cat.core.config.Config config = configRepository.findByName(getConfigName());
+		ConfigDO config = configRepository.findByName(getConfigName());
 
-		long modifyTime = config.getModifyDate().getTime();
+		long modifyTime = config.getUpdateTime().getTime();
 
 		synchronized (this) {
 			if (modifyTime > this.modifyTime) {
@@ -424,10 +425,9 @@ public abstract class BaseRuleConfigManager {
 	protected boolean storeConfig() {
 		synchronized (this) {
 			try {
-				com.dianping.cat.core.config.Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 
 				config.setId(configId);
-				config.setKeyId(configId);
 				config.setName(getConfigName());
 				config.setContent(monitorRules.toString());
 				configRepository.updateByPK(config);

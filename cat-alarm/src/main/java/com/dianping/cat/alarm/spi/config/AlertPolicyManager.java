@@ -34,7 +34,7 @@ import com.dianping.cat.alarm.policy.entity.Type;
 import com.dianping.cat.alarm.policy.transform.DefaultSaxParser;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.config.content.ContentFetcher;
-import com.dianping.cat.core.config.Config;
+import com.dianping.cat.mybatis.data.ConfigDO;
 import com.dianping.cat.mybatis.ConfigRepository;
 
 import jakarta.annotation.PostConstruct;
@@ -85,7 +85,7 @@ public class AlertPolicyManager {
 				return;
 			}
 			try {
-				Config config = configRepository.findByName(CONFIG_NAME);
+				ConfigDO config = configRepository.findByName(CONFIG_NAME);
 				String content = config.getContent();
 
 				configId = config.getId();
@@ -96,7 +96,7 @@ public class AlertPolicyManager {
 
 				try {
 					String content = contentFetcher.getConfigContent(CONFIG_NAME);
-					Config config = configRepository.createLocal();
+					ConfigDO config = configRepository.createLocal();
 
 					config.setName(CONFIG_NAME);
 					config.setContent(content);
@@ -222,10 +222,9 @@ public class AlertPolicyManager {
 	private boolean storeConfig() {
 		synchronized (this) {
 			try {
-				Config config = configRepository.createLocal();
+				ConfigDO config = configRepository.createLocal();
 
 				config.setId(configId);
-				config.setKeyId(configId);
 				config.setName(CONFIG_NAME);
 				config.setContent(alertPolicy.toString());
 				configRepository.updateByPK(config);
