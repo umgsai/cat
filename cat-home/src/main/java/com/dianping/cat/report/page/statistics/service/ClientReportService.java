@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
-import com.dianping.cat.core.dal.DailyReportContent;
+import com.dianping.cat.mybatis.data.DailyReportContentDO;
 import com.dianping.cat.home.service.client.entity.ClientReport;
 import com.dianping.cat.home.service.client.transform.DefaultNativeParser;
 import com.dianping.cat.mybatis.data.DailyReportDO;
@@ -69,7 +69,7 @@ public class ClientReportService extends AbstractReportService<ClientReport> {
 	}
 
 	private ClientReport queryFromDailyBinary(long id, String domain) {
-		DailyReportContent content = dailyReportContentRepository.findByPK(id);
+		DailyReportContentDO content = dailyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());

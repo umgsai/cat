@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.core.dal.DailyReport;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.mybatis.HourlyReportRepository;
 import com.dianping.cat.core.dal.MonthlyReport;
@@ -72,11 +72,11 @@ public class TableCapacityService {
 			overloadReport.setType(((HourlyReportDO) object).getType());
 			break;
 		case CapacityUpdater.DAILY_TYPE:
-			overloadReport.setDomain(((DailyReport) object).getDomain());
-			overloadReport.setIp(((DailyReport) object).getIp());
-			overloadReport.setName(((DailyReport) object).getName());
-			overloadReport.setPeriod(((DailyReport) object).getPeriod());
-			overloadReport.setType(((DailyReport) object).getType());
+			overloadReport.setDomain(((DailyReportDO) object).getDomain());
+			overloadReport.setIp(((DailyReportDO) object).getIp());
+			overloadReport.setName(((DailyReportDO) object).getName());
+			overloadReport.setPeriod(((DailyReportDO) object).getPeriod());
+			overloadReport.setType(((DailyReportDO) object).getType());
 			break;
 		case CapacityUpdater.WEEKLY_TYPE:
 			overloadReport.setDomain(((WeeklyReport) object).getDomain());

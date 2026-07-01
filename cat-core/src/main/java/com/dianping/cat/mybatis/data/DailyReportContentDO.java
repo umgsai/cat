@@ -18,11 +18,5 @@ public class DailyReportContentDO {
 
 	private Double contentLength;
 
-	private Long keyReportId;
-
 	private Long startId;
-
-	private Long endId;
-
-	private Double capacity;
 }

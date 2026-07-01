@@ -18,9 +18,9 @@
  */
 package com.dianping.cat.report.page.overload.task;
 
-import com.dianping.cat.core.dal.DailyReport;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 
-public class OverloadReport extends DailyReport {
+public class OverloadReport extends DailyReportDO {
 
 	private int m_reportType;
 

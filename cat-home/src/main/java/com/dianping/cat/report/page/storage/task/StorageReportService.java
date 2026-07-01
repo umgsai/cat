@@ -33,8 +33,8 @@ import com.dianping.cat.consumer.storage.StorageAnalyzer;
 import com.dianping.cat.consumer.storage.StorageReportMerger;
 import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 import com.dianping.cat.consumer.storage.model.transform.DefaultNativeParser;
-import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.DailyReportContent;
+import com.dianping.cat.mybatis.data.DailyReportDO;
+import com.dianping.cat.mybatis.data.DailyReportContentDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.core.dal.MonthlyReport;
@@ -92,7 +92,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_DAY) {
 			try {
-				DailyReport report = dailyReportRepository
+				DailyReportDO report = dailyReportRepository
 										.findByDomainNamePeriod(id, name, new Date(startTime));
 				StorageReport reportModel = queryFromDailyBinary(report.getId(), id);
 
@@ -112,7 +112,7 @@ public class StorageReportService extends AbstractReportService<StorageReport> {
 	}
 
 	private StorageReport queryFromDailyBinary(long id, String domain) {
-		DailyReportContent content = dailyReportContentRepository.findByPK(id);
+		DailyReportContentDO content = dailyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());

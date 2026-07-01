@@ -2,7 +2,6 @@ package com.dianping.cat.mybatis;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import jakarta.annotation.Resource;
 
@@ -13,9 +12,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.mybatis.mapper.DailyReportMapper;
 import com.dianping.cat.mybatis.data.DailyReportDO;
+import com.dianping.cat.mybatis.mapper.DailyReportMapper;
 
 @Component("dailyReportRepository")
 public class DailyReportRepository {
@@ -29,8 +27,8 @@ public class DailyReportRepository {
 	@Resource(name = "transactionTemplate")
 	private TransactionTemplate transactionTemplate;
 
-	public DailyReport createLocal() {
-		return new DailyReport();
+	public DailyReportDO createLocal() {
+		return new DailyReportDO();
 	}
 
 	public int deleteByDomainNamePeriod(DailyReportDO proto) {
@@ -40,13 +38,13 @@ public class DailyReportRepository {
 				proto.getName(), proto.getPeriod()));
 	}
 
-	public int deleteByPK(DailyReport proto) {
+	public int deleteByPK(DailyReportDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().deleteById(proto.getKeyId()));
+		return transactionTemplate.execute(status -> springMapper().deleteById(proto.getId()));
 	}
 
-	public DailyReport findByDomainNamePeriod(String domain, String name, java.util.Date period) {
+	public DailyReportDO findByDomainNamePeriod(String domain, String name, java.util.Date period) {
 		DailyReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findByDomainNamePeriod(domain, name, period), "domain/name/period",
@@ -54,22 +52,17 @@ public class DailyReportRepository {
 	}
 
 	public DailyReportDO findDOByDomainNamePeriod(String domain, String name, java.util.Date period) {
-		DailyReportMapper mapper = springMapper();
-
-		return requireFoundDO(mapper.findByDomainNamePeriod(domain, name, period), "domain/name/period",
-				domain + "/" + name + "/" + period);
+		return findByDomainNamePeriod(domain, name, period);
 	}
 
-	public DailyReport findByPK(long keyId) {
+	public DailyReportDO findByPK(long keyId) {
 		DailyReportMapper mapper = springMapper();
 
 		return requireFound(mapper.findById(keyId), "id", String.valueOf(keyId));
 	}
 
 	public DailyReportDO findDOByPK(long keyId) {
-		DailyReportMapper mapper = springMapper();
-
-		return requireFoundDO(mapper.findById(keyId), "id", String.valueOf(keyId));
+		return findByPK(keyId);
 	}
 
 	public int insert(DailyReportDO report) {
@@ -80,24 +73,18 @@ public class DailyReportRepository {
 		return count;
 	}
 
-	public List<DailyReport> queryLatestReportsByDomainName(String domain, String name, int limits) {
-		DailyReportMapper mapper = springMapper();
-
-		return mapper.queryLatestReportsByDomainName(domain, name, limits).stream()
-				.map(this::toDailyReport)
-				.collect(Collectors.toList());
+	public List<DailyReportDO> queryLatestReportsByDomainName(String domain, String name, int limits) {
+		return springMapper().queryLatestReportsByDomainName(domain, name, limits);
 	}
 
 	public List<DailyReportDO> queryLatestDOReportsByDomainName(String domain, String name, int limits) {
-		DailyReportMapper mapper = springMapper();
-
-		return mapper.queryLatestReportsByDomainName(domain, name, limits);
+		return queryLatestReportsByDomainName(domain, name, limits);
 	}
 
-	public int updateByPK(DailyReport proto) {
+	public int updateByPK(DailyReportDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
-		return transactionTemplate.execute(status -> springMapper().updateById(toDailyReportDO(proto)));
+		return transactionTemplate.execute(status -> springMapper().updateById(proto));
 	}
 
 	private DailyReportMapper springMapper() {
@@ -129,47 +116,12 @@ public class DailyReportRepository {
 		this.transactionTemplate = transactionTemplate;
 	}
 
-	private DailyReport requireFound(DailyReportDO report, String field, String value) {
-		if (report == null) {
-			throw new EmptyResultDataAccessException(String.format("No daily report found by %s(%s).", field, value), 1);
-		}
-
-		return toDailyReport(report);
-	}
-
-	private DailyReportDO requireFoundDO(DailyReportDO report, String field, String value) {
+	private DailyReportDO requireFound(DailyReportDO report, String field, String value) {
 		if (report == null) {
 			throw new EmptyResultDataAccessException(String.format("No daily report found by %s(%s).", field, value), 1);
 		}
 
 		return report;
-	}
-
-	private DailyReport toDailyReport(DailyReportDO reportDO) {
-		DailyReport report = new DailyReport();
-
-		report.setId(reportDO.getId());
-		report.setName(reportDO.getName());
-		report.setIp(reportDO.getIp());
-		report.setDomain(reportDO.getDomain());
-		report.setPeriod(reportDO.getPeriod());
-		report.setType(reportDO.getType());
-		report.setCreateTime(reportDO.getCreateTime());
-		report.afterLoad();
-		return report;
-	}
-
-	private DailyReportDO toDailyReportDO(DailyReport report) {
-		DailyReportDO reportDO = new DailyReportDO();
-
-		reportDO.setId(report.getKeyId() > 0 ? report.getKeyId() : report.getId());
-		reportDO.setName(report.getName());
-		reportDO.setIp(report.getIp());
-		reportDO.setDomain(report.getDomain());
-		reportDO.setPeriod(report.getPeriod());
-		reportDO.setType(report.getType());
-		reportDO.setCreateTime(report.getCreateTime());
-		return reportDO;
 	}
 
 }

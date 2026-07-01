@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
-import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.DailyReportContent;
+import com.dianping.cat.mybatis.data.DailyReportDO;
+import com.dianping.cat.mybatis.data.DailyReportContentDO;
 import com.dianping.cat.home.router.entity.RouterConfig;
 import com.dianping.cat.home.router.transform.DefaultNativeParser;
 import com.dianping.cat.report.service.AbstractReportService;
@@ -61,10 +61,10 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 			String name = Constants.REPORT_ROUTER;
 
 			try {
-				DailyReport report = dailyReportRepository.findByDomainNamePeriod(domain, name, start);
+				DailyReportDO report = dailyReportRepository.findByDomainNamePeriod(domain, name, start);
 				RouterConfig config = queryFromDailyBinary(report.getId());
 
-				routerConfigs.put(time, Pair.of(config, report.getCreationDate().getTime()));
+				routerConfigs.put(time, Pair.of(config, report.getCreateTime().getTime()));
 				return config;
 			} catch (EmptyResultDataAccessException e) {
 				// ignore
@@ -80,7 +80,7 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 	}
 
 	private RouterConfig queryFromDailyBinary(long id) {
-		DailyReportContent content = dailyReportContentRepository.findByPK(id);
+		DailyReportContentDO content = dailyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
@@ -96,14 +96,14 @@ public class RouterConfigService extends AbstractReportService<RouterConfig> {
 
 	public RouterConfig queryLastReport(String domain) {
 		try {
-			List<DailyReport> reports = dailyReportRepository
+			List<DailyReportDO> reports = dailyReportRepository
 									.queryLatestReportsByDomainName(domain, Constants.REPORT_ROUTER, 1);
 
 			if (reports.size() == 0) {
 				return null;
 			}
 
-			DailyReport report = reports.get(0);
+			DailyReportDO report = reports.get(0);
 			RouterConfig config = queryFromDailyBinary(report.getId());
 
 			return config;

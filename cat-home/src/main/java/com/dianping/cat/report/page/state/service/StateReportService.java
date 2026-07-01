@@ -31,8 +31,8 @@ import com.dianping.cat.consumer.state.StateAnalyzer;
 import com.dianping.cat.consumer.state.StateReportMerger;
 import com.dianping.cat.consumer.state.model.entity.StateReport;
 import com.dianping.cat.consumer.state.model.transform.DefaultNativeParser;
-import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.DailyReportContent;
+import com.dianping.cat.mybatis.data.DailyReportDO;
+import com.dianping.cat.mybatis.data.DailyReportContentDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.core.dal.MonthlyReport;
@@ -64,7 +64,7 @@ public class StateReportService extends AbstractReportService<StateReport> {
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_DAY) {
 			try {
-				DailyReport report = dailyReportRepository
+				DailyReportDO report = dailyReportRepository
 										.findByDomainNamePeriod(domain, name, new Date(startTime));
 				StateReport reportModel = queryFromDailyBinary(report.getId(), domain);
 
@@ -85,7 +85,7 @@ public class StateReportService extends AbstractReportService<StateReport> {
 	}
 
 	private StateReport queryFromDailyBinary(long id, String domain) {
-		DailyReportContent content = dailyReportContentRepository.findByPK(id);
+		DailyReportContentDO content = dailyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());

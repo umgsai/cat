@@ -35,8 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.DailyReportContent;
+import com.dianping.cat.mybatis.data.DailyReportContentDO;
 import com.dianping.cat.mybatis.DailyReportContentRepository;
 import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.HourlyReportContentRepository;
@@ -133,7 +132,7 @@ public abstract class AbstractReportService<T> implements ReportService<T> {
 			dailyReportRepository.insert(report);
 
 			long id = report.getId();
-			DailyReportContent proto = dailyReportContentRepository.createLocal();
+			DailyReportContentDO proto = dailyReportContentRepository.createLocal();
 
 			proto.setReportId(id);
 			proto.setContent(content);

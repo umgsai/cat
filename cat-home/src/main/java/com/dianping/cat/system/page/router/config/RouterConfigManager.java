@@ -26,9 +26,10 @@ import com.dianping.cat.Constants;
 import com.dianping.cat.config.content.ContentFetcher;
 import com.dianping.cat.core.config.Config;
 import com.dianping.cat.mybatis.ConfigRepository;
-import com.dianping.cat.core.dal.*;
 import com.dianping.cat.mybatis.DailyReportContentRepository;
 import com.dianping.cat.mybatis.DailyReportRepository;
+import com.dianping.cat.mybatis.data.DailyReportContentDO;
+import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.home.router.entity.*;
 import com.dianping.cat.home.router.transform.DefaultNativeParser;
@@ -393,13 +394,14 @@ public class RouterConfigManager {
 		long time = period.getTime();
 
 		try {
-			DailyReport report = dailyReportRepository.findByDomainNamePeriod(Constants.CAT, RouterConfigBuilder.ID, period);
-			long modifyTime = report.getCreationDate().getTime();
+			DailyReportDO report = dailyReportRepository.findByDomainNamePeriod(Constants.CAT, RouterConfigBuilder.ID,
+			      period);
+			long modifyTime = report.getCreateTime().getTime();
 			Pair<RouterConfig, Long> pair = routerConfigs.get(time);
 
 			if (pair == null || modifyTime > pair.getValue()) {
 				try {
-					DailyReportContent reportContent = dailyReportContentRepository.findByPK(report.getId());
+					DailyReportContentDO reportContent = dailyReportContentRepository.findByPK(report.getId());
 					RouterConfig routerConfig = DefaultNativeParser.parse(reportContent.getContent());
 
 					routerConfigs.put(time, Pair.of(routerConfig, modifyTime));

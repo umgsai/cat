@@ -2,7 +2,6 @@ package com.dianping.cat.mybatis;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import jakarta.annotation.Resource;
 
@@ -13,9 +12,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.dianping.cat.core.dal.DailyReportContent;
-import com.dianping.cat.mybatis.mapper.DailyReportContentMapper;
 import com.dianping.cat.mybatis.data.DailyReportContentDO;
+import com.dianping.cat.mybatis.mapper.DailyReportContentMapper;
 
 @Component("dailyReportContentRepository")
 public class DailyReportContentRepository {
@@ -29,33 +27,33 @@ public class DailyReportContentRepository {
 	@Resource(name = "transactionTemplate")
 	private TransactionTemplate transactionTemplate;
 
-	public DailyReportContent createLocal() {
-		return new DailyReportContent();
+	public DailyReportContentDO createLocal() {
+		return new DailyReportContentDO();
 	}
 
-	public int deleteByPK(DailyReportContent proto) {
+	public int deleteByPK(DailyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getKeyReportId()));
+			return transactionTemplate.execute(status -> springMapper().deleteByPrimaryKey(proto.getReportId()));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing deleteByPK for DailyReportContent.", e);
 		}
 	}
 
-	public List<DailyReportContent> findOverloadReport(long startId) {
+	public List<DailyReportContentDO> findOverloadReport(long startId) {
 		DailyReportContentMapper mapper = springMapper();
 		DailyReportContentDO record = new DailyReportContentDO();
 
 		record.setStartId(startId);
 		try {
-			return mapper.findOverloadReport(record).stream().map(this::toModel).collect(Collectors.toList());
+			return mapper.findOverloadReport(record);
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing findOverloadReport for DailyReportContent.", e);
 		}
 	}
 
-	public DailyReportContent findByPK(long keyReportId) {
+	public DailyReportContentDO findByPK(long keyReportId) {
 		DailyReportContentMapper mapper = springMapper();
 
 		try {
@@ -67,21 +65,21 @@ public class DailyReportContentRepository {
 		}
 	}
 
-	public int insert(DailyReportContent proto) {
+	public int insert(DailyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().insert(toRecord(proto)));
+			return transactionTemplate.execute(status -> springMapper().insert(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing insert for DailyReportContent.", e);
 		}
 	}
 
-	public int updateByPK(DailyReportContent proto) {
+	public int updateByPK(DailyReportContentDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(toRecord(proto)));
+			return transactionTemplate.execute(status -> springMapper().updateByPrimaryKey(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing updateByPK for DailyReportContent.", e);
 		}
@@ -112,47 +110,11 @@ public class DailyReportContentRepository {
 		this.transactionTemplate = transactionTemplate;
 	}
 
-	private DailyReportContent requireFound(DailyReportContentDO record, String field, String value) {
+	private DailyReportContentDO requireFound(DailyReportContentDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No DailyReportContent found by " + field + "(" + value + ").", 1);
 		}
 
-		return toModel(record);
-	}
-
-	private DailyReportContent toModel(DailyReportContentDO record) {
-		DailyReportContent model = new DailyReportContent();
-
-		if (record.getReportId() != null) {
-			model.setReportId(record.getReportId());
-		}
-		if (record.getContent() != null) {
-			model.setContent(record.getContent());
-		}
-		if (record.getCreateTime() != null) {
-			model.setCreateTime(record.getCreateTime());
-		}
-		if (record.getUpdateTime() != null) {
-			model.setUpdateTime(record.getUpdateTime());
-		}
-		if (record.getContentLength() != null) {
-			model.setContentLength(record.getContentLength());
-		}
-		model.afterLoad();
-		return model;
-	}
-
-	private DailyReportContentDO toRecord(DailyReportContent model) {
-		DailyReportContentDO record = new DailyReportContentDO();
-
-		record.setReportId(model.getReportId());
-		record.setContent(model.getContent());
-		record.setCreateTime(model.getCreateTime());
-		record.setUpdateTime(model.getUpdateTime());
-		record.setKeyReportId(model.getKeyReportId());
-		record.setStartId(model.getStartId());
-		record.setEndId(model.getEndId());
-		record.setCapacity(model.getCapacity());
 		return record;
 	}
 }

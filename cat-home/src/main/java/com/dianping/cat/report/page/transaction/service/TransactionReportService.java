@@ -39,8 +39,8 @@ import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionType;
 import com.dianping.cat.consumer.transaction.model.transform.BaseVisitor;
 import com.dianping.cat.consumer.transaction.model.transform.DefaultNativeParser;
-import com.dianping.cat.core.dal.DailyReport;
-import com.dianping.cat.core.dal.DailyReportContent;
+import com.dianping.cat.mybatis.data.DailyReportDO;
+import com.dianping.cat.mybatis.data.DailyReportContentDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.core.dal.MonthlyReport;
@@ -98,7 +98,7 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 
 		for (; startTime < endTime; startTime = startTime + TimeHelper.ONE_DAY) {
 			try {
-				DailyReport report = dailyReportRepository
+				DailyReportDO report = dailyReportRepository
 										.findByDomainNamePeriod(domain, name, new Date(startTime));
 				TransactionReport reportModel = queryFromDailyBinary(report.getId(), domain);
 
@@ -119,7 +119,7 @@ public class TransactionReportService extends AbstractReportService<TransactionR
 	}
 
 	private TransactionReport queryFromDailyBinary(long id, String domain) {
-		DailyReportContent content = dailyReportContentRepository.findByPK(id);
+		DailyReportContentDO content = dailyReportContentRepository.findByPK(id);
 
 		if (content != null) {
 			return DefaultNativeParser.parse(content.getContent());
