@@ -20,11 +20,11 @@ package com.dianping.cat.report.page.metric.service;
 
 import java.util.Date;
 
-import com.dianping.cat.home.dal.report.Baseline;
+import com.dianping.cat.mybatis.data.BaselineDO;
 
 public interface BaselineService {
 
-	public void insertBaseline(Baseline baseline);
+	public void insertBaseline(BaselineDO baseline);
 
 	public double[] queryDailyBaseline(String reportName, String key, Date reportPeriod);
 

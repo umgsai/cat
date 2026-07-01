@@ -20,7 +20,5 @@ public class BaselineDO {
 
 	private Date updateTime;
 
-	private Long keyId;
-
 	private double[] dataInDoubleArray;
 }

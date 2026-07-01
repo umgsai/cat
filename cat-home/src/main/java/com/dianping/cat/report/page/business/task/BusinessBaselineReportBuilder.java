@@ -36,7 +36,7 @@ import com.dianping.cat.consumer.business.model.entity.BusinessItem;
 import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.helper.MetricType;
 import com.dianping.cat.helper.TimeHelper;
-import com.dianping.cat.home.dal.report.Baseline;
+import com.dianping.cat.mybatis.data.BaselineDO;
 import com.dianping.cat.report.page.business.service.BusinessReportService;
 import com.dianping.cat.report.page.metric.service.BaselineService;
 import com.dianping.cat.report.page.metric.task.BaselineConfig;
@@ -140,7 +140,7 @@ public class BusinessBaselineReportBuilder implements TaskBuilder {
 	}
 
 	private void storeBaseLine(String name, String key, Date targetDate, double[] result) {
-		Baseline baseline = new Baseline();
+		BaselineDO baseline = new BaselineDO();
 		baseline.setDataInDoubleArray(result);
 		baseline.setIndexKey(key);
 		baseline.setReportName(name);

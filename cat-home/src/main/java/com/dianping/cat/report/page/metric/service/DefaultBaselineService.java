@@ -37,8 +37,8 @@ import java.util.Map.Entry;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.TimeHelper;
-import com.dianping.cat.home.dal.report.Baseline;
 import com.dianping.cat.mybatis.BaselineRepository;
+import com.dianping.cat.mybatis.data.BaselineDO;
 import com.dianping.cat.report.service.ModelPeriod;
 import com.dianping.cat.report.task.TaskHelper;
 
@@ -50,12 +50,12 @@ public class DefaultBaselineService implements BaselineService {
 	@Resource
 	private BaselineRepository baselineRepository;
 
-	private Map<String, Baseline> baselines = new LinkedHashMap<String, Baseline>() {
+	private Map<String, BaselineDO> baselines = new LinkedHashMap<String, BaselineDO>() {
 
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		protected boolean removeEldestEntry(Entry<String, Baseline> eldest) {
+		protected boolean removeEldestEntry(Entry<String, BaselineDO> eldest) {
 			return size() > 50000;
 		}
 	};
@@ -103,7 +103,7 @@ public class DefaultBaselineService implements BaselineService {
 	@Override
 	public boolean hasDailyBaseline(String reportName, String key, Date reportPeriod) {
 		String baselineKey = reportName + ":" + key + ":" + reportPeriod;
-		Baseline baseline = baselines.get(baselineKey);
+		BaselineDO baseline = baselines.get(baselineKey);
 		boolean has = false;
 
 		if (baseline != null) {
@@ -123,7 +123,7 @@ public class DefaultBaselineService implements BaselineService {
 	}
 
 	@Override
-	public void insertBaseline(Baseline baseline) {
+	public void insertBaseline(BaselineDO baseline) {
 		try {
 			baseline.setData(encodeBaselines(baseline.getDataInDoubleArray()));
 			baselineRepository.insert(baseline);
@@ -199,7 +199,7 @@ public class DefaultBaselineService implements BaselineService {
 	@Override
 	public double[] queryDailyBaseline(String reportName, String key, Date reportPeriod) {
 		String baselineKey = reportName + ":" + key + ":" + reportPeriod;
-		Baseline baseline = baselines.get(baselineKey);
+		BaselineDO baseline = baselines.get(baselineKey);
 
 		if (baseline == null) {
 			try {
