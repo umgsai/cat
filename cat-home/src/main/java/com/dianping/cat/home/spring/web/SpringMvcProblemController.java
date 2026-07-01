@@ -45,6 +45,8 @@ import com.dianping.cat.report.page.problem.transform.DetailStatistics;
 import com.dianping.cat.report.page.problem.transform.HourlyLineChartVisitor;
 import com.dianping.cat.report.page.problem.transform.PieGraphChartVisitor;
 import com.dianping.cat.report.page.problem.transform.ProblemStatistics;
+import com.dianping.cat.report.page.problem.transform.ProblemStatistics.StatusStatistics;
+import com.dianping.cat.report.page.problem.transform.ProblemStatistics.TypeStatistics;
 import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
@@ -53,6 +55,7 @@ import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
 import jakarta.annotation.Resource;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,6 +75,9 @@ public class SpringMvcProblemController {
 	private HostinfoService hostinfoService;
 
 	@Resource
+	private JsonBuilder jsonBuilder;
+
+	@Resource
 	private ProjectService projectService;
 
 	@Resource
@@ -88,8 +94,14 @@ public class SpringMvcProblemController {
 
 	@GetMapping("/mvc/r/p")
 	public void problem(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String action = parameter(request, "op", "view");
+
+		if ("vueData".equals(action)) {
+			writeJson(response, jsonBuilder.toJson(vueProblemReport(request)));
+			return;
+		}
+
 		Map<String, Object> model = problemModel(request);
-		String action = (String) model.get("action");
 		String view = view(action);
 
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
@@ -105,6 +117,10 @@ public class SpringMvcProblemController {
 		Map<String, Object> model = new LinkedHashMap<String, Object>();
 		String contextPath = request.getContextPath();
 		String action = parameter(request, "op", "view");
+
+		if ("vueData".equals(action)) {
+			action = parameter(request, "vueAction", "view");
+		}
 		String domain = parameter(request, "domain", Constants.CAT);
 		String ipAddress = parameter(request, "ip", Constants.ALL);
 		String reportType = parameter(request, "reportType", "day");
@@ -203,6 +219,99 @@ public class SpringMvcProblemController {
 		model.put("currentNav", HistoryNav.getByName(reportType));
 		model.put("customDate", historyMode ? historyDates.getCustomDate() : "");
 		return model;
+	}
+
+	private VueProblemReport vueProblemReport(HttpServletRequest request) {
+		Map<String, Object> model = problemModel(request);
+		VueProblemReport report = new VueProblemReport();
+		@SuppressWarnings("unchecked")
+		List<String> ips = (List<String>) model.get("ips");
+		@SuppressWarnings("unchecked")
+		Map<String, Department> domainGroups = (Map<String, Department>) model.get("domainGroups");
+		@SuppressWarnings("unchecked")
+		List<String> groups = (List<String>) model.get("groups");
+		@SuppressWarnings("unchecked")
+		List<String> groupIps = (List<String>) model.get("groupIps");
+
+		report.setContextPath((String) model.get("contextPath"));
+		report.setDomain((String) model.get("domain"));
+		report.setDisplayDomain((String) model.get("displayDomain"));
+		report.setIpAddress((String) model.get("ipAddress"));
+		report.setReportType((String) model.get("reportType"));
+		report.setType((String) model.get("type"));
+		report.setStatus((String) model.get("status"));
+		report.setDate((String) model.get("date"));
+		report.setLongDate((Long) model.get("longDate"));
+		report.setReportStart((String) model.get("reportStart"));
+		report.setReportEnd((String) model.get("reportEnd"));
+		report.setIps(ips == null ? new ArrayList<String>() : ips);
+		report.setIpToHostname(ipToHostname(ips == null ? new ArrayList<String>() : ips));
+		report.setGroups(groups == null ? new ArrayList<String>() : groups);
+		report.setGroup((String) model.get("group"));
+		report.setGroupIps(groupIps == null ? new ArrayList<String>() : groupIps);
+		report.setDomainGroups(vueDomainGroups(domainGroups));
+		report.setHistoryMode((Boolean) model.get("historyMode"));
+		report.setSample((Double) model.get("sample"));
+		report.setUrlThreshold((Integer) model.get("urlThreshold"));
+		report.setSqlThreshold((Integer) model.get("sqlThreshold"));
+		report.setServiceThreshold((Integer) model.get("serviceThreshold"));
+		report.setCacheThreshold((Integer) model.get("cacheThreshold"));
+		report.setCallThreshold((Integer) model.get("callThreshold"));
+		report.setRows(vueProblemRows((ProblemStatistics) model.get("allStatistics")));
+		return report;
+	}
+
+	private List<VueDomainDepartment> vueDomainGroups(Map<String, Department> domainGroups) {
+		List<VueDomainDepartment> departments = new ArrayList<VueDomainDepartment>();
+
+		if (domainGroups == null) {
+			return departments;
+		}
+		for (Map.Entry<String, Department> departmentEntry : domainGroups.entrySet()) {
+			VueDomainDepartment department = new VueDomainDepartment();
+
+			department.setName(departmentEntry.getKey());
+			for (Map.Entry<String, ProjectService.ProjectLine> lineEntry : departmentEntry.getValue().getProjectLines()
+					.entrySet()) {
+				VueDomainLine line = new VueDomainLine();
+
+				line.setName(lineEntry.getKey());
+				line.setDomains(lineEntry.getValue().getLineDomains());
+				department.getLines().add(line);
+			}
+			departments.add(department);
+		}
+		return departments;
+	}
+
+	private List<VueProblemTypeRow> vueProblemRows(ProblemStatistics statistics) {
+		List<VueProblemTypeRow> rows = new ArrayList<VueProblemTypeRow>();
+		int index = 0;
+
+		if (statistics == null) {
+			return rows;
+		}
+		for (Map.Entry<String, TypeStatistics> entry : statistics.getStatus().entrySet()) {
+			TypeStatistics type = entry.getValue();
+			VueProblemTypeRow row = new VueProblemTypeRow();
+
+			row.setIndex(index);
+			row.setType(type.getType());
+			row.setCount(type.getCount());
+			for (Map.Entry<String, StatusStatistics> statusEntry : type.getStatus().entrySet()) {
+				StatusStatistics status = statusEntry.getValue();
+				VueProblemStatusRow item = new VueProblemStatusRow();
+
+				item.setStatus(status.getStatus());
+				item.setEncodedStatus(status.getEncodeStatus());
+				item.setCount(status.getCount());
+				item.setLinks(status.getLinks());
+				row.getStatuses().add(item);
+			}
+			rows.add(row);
+			index++;
+		}
+		return rows;
 	}
 
 	private void buildGroupDetail(Map<String, Object> model, String action, ProblemReport report, String ipAddress,
@@ -652,6 +761,10 @@ public class SpringMvcProblemController {
 		this.hostinfoService = hostinfoService;
 	}
 
+	void setJsonBuilder(JsonBuilder jsonBuilder) {
+		this.jsonBuilder = jsonBuilder;
+	}
+
 	void setProblemModelService(ModelService<ProblemReport> problemModelService) {
 		this.problemModelService = problemModelService;
 	}
@@ -705,6 +818,101 @@ public class SpringMvcProblemController {
 	@SuppressWarnings("unused")
 	private String encode(String value) {
 		return value == null ? "" : URLEncoder.encode(value, StandardCharsets.UTF_8);
+	}
+
+	private void writeJson(HttpServletResponse response, String body) throws IOException {
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/json;charset=utf-8");
+		response.getWriter().write(body == null ? "" : body);
+	}
+
+	@Data
+	public static class VueDomainDepartment {
+		private List<VueDomainLine> lines = new ArrayList<VueDomainLine>();
+
+		private String name;
+	}
+
+	@Data
+	public static class VueDomainLine {
+		private List<String> domains = new ArrayList<String>();
+
+		private String name;
+	}
+
+	@Data
+	public static class VueProblemReport {
+		private int cacheThreshold;
+
+		private int callThreshold;
+
+		private String contextPath;
+
+		private String date;
+
+		private String displayDomain;
+
+		private String domain;
+
+		private List<VueDomainDepartment> domainGroups = new ArrayList<VueDomainDepartment>();
+
+		private String group;
+
+		private List<String> groupIps = new ArrayList<String>();
+
+		private List<String> groups = new ArrayList<String>();
+
+		private boolean historyMode;
+
+		private String ipAddress;
+
+		private Map<String, String> ipToHostname = new LinkedHashMap<String, String>();
+
+		private List<String> ips = new ArrayList<String>();
+
+		private long longDate;
+
+		private String reportEnd;
+
+		private String reportStart;
+
+		private String reportType;
+
+		private List<VueProblemTypeRow> rows = new ArrayList<VueProblemTypeRow>();
+
+		private double sample;
+
+		private int serviceThreshold;
+
+		private int sqlThreshold;
+
+		private String status;
+
+		private String type;
+
+		private int urlThreshold;
+	}
+
+	@Data
+	public static class VueProblemStatusRow {
+		private int count;
+
+		private String encodedStatus;
+
+		private List<String> links = new ArrayList<String>();
+
+		private String status;
+	}
+
+	@Data
+	public static class VueProblemTypeRow {
+		private int count;
+
+		private int index;
+
+		private List<VueProblemStatusRow> statuses = new ArrayList<VueProblemStatusRow>();
+
+		private String type;
 	}
 
 	private class HistoryDates {

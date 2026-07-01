@@ -53,6 +53,7 @@ import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
 import jakarta.annotation.Resource;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -77,6 +78,9 @@ public class SpringMvcEventController {
 	private HostinfoService hostinfoService;
 
 	@Resource
+	private JsonBuilder jsonBuilder;
+
+	@Resource
 	private ProjectService projectService;
 
 	@Resource
@@ -93,8 +97,14 @@ public class SpringMvcEventController {
 
 	@GetMapping("/mvc/r/e")
 	public void event(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String action = parameter(request, "op", "view");
+
+		if ("vueData".equals(action)) {
+			writeJson(response, jsonBuilder.toJson(vueEventReport(request)));
+			return;
+		}
+
 		Map<String, Object> model = eventModel(request);
-		String action = (String) model.get("action");
 		String view = isHistoryGraphAction(action) ? "/jsp/spring/report/event/eventHistoryGraphs.jsp"
 				: "graphs".equals(action) ? "/jsp/spring/report/event/eventGraphs.jsp"
 						: "/jsp/spring/report/event/event.jsp";
@@ -114,6 +124,10 @@ public class SpringMvcEventController {
 		Map<String, Object> model = new LinkedHashMap<String, Object>();
 		String contextPath = request.getContextPath();
 		String action = parameter(request, "op", "view");
+
+		if ("vueData".equals(action)) {
+			action = parameter(request, "vueAction", "view");
+		}
 		String domain = parameter(request, "domain", Constants.CAT);
 		String ipAddress = parameter(request, "ip", Constants.ALL);
 		String reportType = parameter(request, "reportType", "day");
@@ -192,6 +206,137 @@ public class SpringMvcEventController {
 		model.put("sample", sample(report.getDomain()));
 		model.put("model", model);
 		return model;
+	}
+
+	private VueEventReport vueEventReport(HttpServletRequest request) {
+		Map<String, Object> model = eventModel(request);
+		VueEventReport report = new VueEventReport();
+		@SuppressWarnings("unchecked")
+		List<String> ips = (List<String>) model.get("ips");
+		@SuppressWarnings("unchecked")
+		Map<String, Department> domainGroups = (Map<String, Department>) model.get("domainGroups");
+		@SuppressWarnings("unchecked")
+		List<String> groups = (List<String>) model.get("groups");
+		@SuppressWarnings("unchecked")
+		List<String> groupIps = (List<String>) model.get("groupIps");
+
+		report.setContextPath((String) model.get("contextPath"));
+		report.setDomain((String) model.get("domain"));
+		report.setDisplayDomain((String) model.get("displayDomain"));
+		report.setIpAddress((String) model.get("ipAddress"));
+		report.setReportType((String) model.get("reportType"));
+		report.setType((String) model.get("type"));
+		report.setEncodedType((String) model.get("encodedType"));
+		report.setName((String) model.get("name"));
+		report.setSortBy((String) model.get("sortBy"));
+		report.setDate((String) model.get("date"));
+		report.setLongDate((Long) model.get("longDate"));
+		report.setReportStart((String) model.get("reportStart"));
+		report.setReportEnd((String) model.get("reportEnd"));
+		report.setIps(ips == null ? new ArrayList<String>() : ips);
+		report.setIpToHostname(ipToHostname(ips == null ? new ArrayList<String>() : ips));
+		report.setGroups(groups == null ? new ArrayList<String>() : groups);
+		report.setGroup((String) model.get("group"));
+		report.setGroupIps(groupIps == null ? new ArrayList<String>() : groupIps);
+		report.setDomainGroups(vueDomainGroups(domainGroups));
+		report.setHistoryMode((Boolean) model.get("historyMode"));
+		report.setSample((Double) model.get("sample"));
+		report.setRows(vueEventRows(model));
+		return report;
+	}
+
+	private List<VueDomainDepartment> vueDomainGroups(Map<String, Department> domainGroups) {
+		List<VueDomainDepartment> departments = new ArrayList<VueDomainDepartment>();
+
+		if (domainGroups == null) {
+			return departments;
+		}
+		for (Map.Entry<String, Department> departmentEntry : domainGroups.entrySet()) {
+			VueDomainDepartment department = new VueDomainDepartment();
+
+			department.setName(departmentEntry.getKey());
+			for (Map.Entry<String, ProjectService.ProjectLine> lineEntry : departmentEntry.getValue().getProjectLines()
+					.entrySet()) {
+				VueDomainLine line = new VueDomainLine();
+
+				line.setName(lineEntry.getKey());
+				line.setDomains(lineEntry.getValue().getLineDomains());
+				department.getLines().add(line);
+			}
+			departments.add(department);
+		}
+		return departments;
+	}
+
+	private List<VueEventRow> vueEventNameRows(DisplayNames names) {
+		List<VueEventRow> rows = new ArrayList<VueEventRow>();
+		int index = 0;
+
+		for (EventNameModel item : names.getResults()) {
+			EventName name = item.getDetail();
+			VueEventRow row = vueEventRow(name);
+
+			row.setIndex(index);
+			row.setTotalRow(index == 0);
+			row.setEncodedName(item.getName());
+			row.setEncodedType(encode(item.getType()));
+			row.setTotalPercent(name.getTotalPercent());
+			rows.add(row);
+			index++;
+		}
+		return rows;
+	}
+
+	private VueEventRow vueEventRow(EventName name) {
+		VueEventRow row = new VueEventRow();
+
+		row.setId(name.getId());
+		row.setTotalCount(name.getTotalCount());
+		row.setFailCount(name.getFailCount());
+		row.setFailPercent(name.getFailPercent() / 100.0);
+		row.setMessageUrl(StringUtils.isEmpty(name.getFailMessageUrl()) ? name.getSuccessMessageUrl()
+				: name.getFailMessageUrl());
+		row.setTps(name.getTps());
+		return row;
+	}
+
+	private VueEventRow vueEventRow(EventType type) {
+		VueEventRow row = new VueEventRow();
+
+		row.setId(type.getId());
+		row.setTotalCount(type.getTotalCount());
+		row.setFailCount(type.getFailCount());
+		row.setFailPercent(type.getFailPercent() / 100.0);
+		row.setMessageUrl(StringUtils.isEmpty(type.getFailMessageUrl()) ? type.getSuccessMessageUrl()
+				: type.getFailMessageUrl());
+		row.setTps(type.getTps());
+		return row;
+	}
+
+	private List<VueEventRow> vueEventRows(Map<String, Object> model) {
+		DisplayTypes types = (DisplayTypes) model.get("displayTypeReport");
+
+		if (types != null) {
+			List<VueEventRow> rows = new ArrayList<VueEventRow>();
+			int index = 0;
+
+			for (DisplayTypes.EventTypeModel item : types.getResults()) {
+				VueEventRow row = vueEventRow(item.getDetail());
+
+				row.setIndex(index);
+				row.setEncodedType(item.getType());
+				rows.add(row);
+				index++;
+			}
+			return rows;
+		}
+
+		DisplayNames names = (DisplayNames) model.get("displayNameReport");
+
+		if (names != null) {
+			return vueEventNameRows(names);
+		}
+		return new ArrayList<VueEventRow>();
 	}
 
 	private LineChart buildHistoryLineChart(Date start, Date end, String title, long step, double[] values) {
@@ -614,6 +759,102 @@ public class SpringMvcEventController {
 		Domain sampleDomain = sampleConfigManager.getConfig().findDomain(domain);
 
 		return sampleDomain == null ? 1.0 : sampleDomain.getSample();
+	}
+
+	void setJsonBuilder(JsonBuilder jsonBuilder) {
+		this.jsonBuilder = jsonBuilder;
+	}
+
+	private void writeJson(HttpServletResponse response, String body) throws IOException {
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/json;charset=utf-8");
+		response.getWriter().write(body == null ? "" : body);
+	}
+
+	@Data
+	public static class VueDomainDepartment {
+		private List<VueDomainLine> lines = new ArrayList<VueDomainLine>();
+
+		private String name;
+	}
+
+	@Data
+	public static class VueDomainLine {
+		private List<String> domains = new ArrayList<String>();
+
+		private String name;
+	}
+
+	@Data
+	public static class VueEventReport {
+		private String contextPath;
+
+		private String date;
+
+		private String displayDomain;
+
+		private String domain;
+
+		private List<VueDomainDepartment> domainGroups = new ArrayList<VueDomainDepartment>();
+
+		private String encodedType;
+
+		private String group;
+
+		private List<String> groupIps = new ArrayList<String>();
+
+		private List<String> groups = new ArrayList<String>();
+
+		private boolean historyMode;
+
+		private String ipAddress;
+
+		private Map<String, String> ipToHostname = new LinkedHashMap<String, String>();
+
+		private List<String> ips = new ArrayList<String>();
+
+		private long longDate;
+
+		private String name;
+
+		private String reportEnd;
+
+		private String reportStart;
+
+		private String reportType;
+
+		private List<VueEventRow> rows = new ArrayList<VueEventRow>();
+
+		private double sample;
+
+		private String sortBy;
+
+		private String type;
+	}
+
+	@Data
+	public static class VueEventRow {
+		private String encodedName;
+
+		private String encodedType;
+
+		private long failCount;
+
+		private double failPercent;
+
+		private String id;
+
+		private int index;
+
+		private String messageUrl;
+
+		private long totalCount;
+
+		private double totalPercent;
+
+		private boolean totalRow;
+
+		private double tps;
 	}
 
 	private class HistoryDates {

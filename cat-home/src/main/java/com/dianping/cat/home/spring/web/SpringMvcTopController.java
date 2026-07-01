@@ -45,6 +45,7 @@ import com.dianping.cat.sample.entity.Domain;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
 import jakarta.annotation.Resource;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -92,7 +93,7 @@ public class SpringMvcTopController {
 	public void top(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String action = parameter(request, "op", "view");
 
-		if ("api".equals(action) || "health".equals(action)) {
+		if ("api".equals(action) || "health".equals(action) || "vueData".equals(action)) {
 			writeJson(response, topResponse(request, action));
 			return;
 		}
@@ -155,6 +156,9 @@ public class SpringMvcTopController {
 		if ("health".equals(action)) {
 			return jsonBuilder.toJson(domainInfo(request));
 		}
+		if ("vueData".equals(action)) {
+			return jsonBuilder.toJson(vueTopDashboard(request));
+		}
 
 		long date = reportDate(request);
 		int minute = minute(request, date);
@@ -162,6 +166,38 @@ public class SpringMvcTopController {
 		int topCount = intParameter(request, "tops", 11);
 
 		return jsonBuilder.toJson(topMetric(date, minute, minuteCount, topCount));
+	}
+
+	private VueTopDashboard vueTopDashboard(HttpServletRequest request) {
+		Map<String, Object> model = topModel(request);
+		VueTopDashboard dashboard = new VueTopDashboard();
+		@SuppressWarnings("unchecked")
+		Map<String, List<TopItemView>> topResultView = (Map<String, List<TopItemView>>) model.get("topResultView");
+		@SuppressWarnings("unchecked")
+		Map<String, Department> domainGroups = (Map<String, Department>) model.get("domainGroups");
+
+		dashboard.setContextPath((String) model.get("webapp"));
+		dashboard.setDomain((String) model.get("domain"));
+		dashboard.setIpAddress((String) model.get("ipAddress"));
+		dashboard.setDate((String) model.get("date"));
+		dashboard.setMinute((Integer) model.get("minute"));
+		dashboard.setMaxMinute((Integer) model.get("maxMinute"));
+		@SuppressWarnings("unchecked")
+		List<Integer> minutes = (List<Integer>) model.get("minutes");
+
+		dashboard.setMinutes(minutes);
+		dashboard.setMinuteCount((Integer) model.get("minuteCount"));
+		dashboard.setTopCount((Integer) model.get("topCount"));
+		dashboard.setFullScreen((Boolean) model.get("fullScreen"));
+		dashboard.setRefresh((Boolean) model.get("refresh"));
+		dashboard.setFrequency((Integer) model.get("frequency"));
+		dashboard.setReportStart((String) model.get("reportStart"));
+		dashboard.setReportEnd((String) model.get("reportEnd"));
+		dashboard.setMessage((String) model.get("message"));
+		dashboard.setSample((Double) model.get("sample"));
+		dashboard.setTopResults(vueTopResults(topResultView));
+		dashboard.setDomainGroups(vueDomainGroups(domainGroups));
+		return dashboard;
 	}
 
 	private boolean booleanParameter(HttpServletRequest request, String name) {
@@ -288,6 +324,49 @@ public class SpringMvcTopController {
 			result.put(entry.getKey(), items);
 		}
 		return result;
+	}
+
+	private List<VueDomainDepartment> vueDomainGroups(Map<String, Department> domainGroups) {
+		List<VueDomainDepartment> departments = new ArrayList<VueDomainDepartment>();
+
+		for (Entry<String, Department> departmentEntry : domainGroups.entrySet()) {
+			VueDomainDepartment department = new VueDomainDepartment();
+
+			department.setName(departmentEntry.getKey());
+			for (Entry<String, ProjectService.ProjectLine> lineEntry : departmentEntry.getValue().getProjectLines()
+					.entrySet()) {
+				VueDomainLine line = new VueDomainLine();
+
+				line.setName(lineEntry.getKey());
+				line.setDomains(lineEntry.getValue().getLineDomains());
+				department.getLines().add(line);
+			}
+			departments.add(department);
+		}
+		return departments;
+	}
+
+	private List<VueTopResultGroup> vueTopResults(Map<String, List<TopItemView>> topResultView) {
+		List<VueTopResultGroup> groups = new ArrayList<VueTopResultGroup>();
+
+		for (Entry<String, List<TopItemView>> entry : topResultView.entrySet()) {
+			VueTopResultGroup group = new VueTopResultGroup();
+
+			group.setMinute(entry.getKey());
+			for (TopItemView view : entry.getValue()) {
+				VueTopResultItem item = new VueTopResultItem();
+
+				item.setDomain(view.getDomain());
+				item.setShortDomain(view.getShortDomain());
+				item.setValue(view.getValue());
+				item.setErrorInfo(view.getErrorInfo());
+				item.setStyle(view.getStyle());
+				item.setLinkStyle(view.getLinkStyle());
+				group.getItems().add(item);
+			}
+			groups.add(group);
+		}
+		return groups;
 	}
 
 	private double sample(String domain) {
@@ -426,6 +505,81 @@ public class SpringMvcTopController {
 		public double getValue() {
 			return m_item.getValue();
 		}
+	}
+
+	@Data
+	public static class VueDomainDepartment {
+		private String name;
+
+		private List<VueDomainLine> lines = new ArrayList<VueDomainLine>();
+	}
+
+	@Data
+	public static class VueDomainLine {
+		private List<String> domains = new ArrayList<String>();
+
+		private String name;
+	}
+
+	@Data
+	public static class VueTopDashboard {
+		private String contextPath;
+
+		private String date;
+
+		private String domain;
+
+		private List<VueDomainDepartment> domainGroups = new ArrayList<VueDomainDepartment>();
+
+		private int frequency;
+
+		private boolean fullScreen;
+
+		private String ipAddress;
+
+		private int maxMinute;
+
+		private String message;
+
+		private int minute;
+
+		private int minuteCount;
+
+		private List<Integer> minutes = new ArrayList<Integer>();
+
+		private boolean refresh;
+
+		private String reportEnd;
+
+		private String reportStart;
+
+		private double sample;
+
+		private int topCount;
+
+		private List<VueTopResultGroup> topResults = new ArrayList<VueTopResultGroup>();
+	}
+
+	@Data
+	public static class VueTopResultGroup {
+		private List<VueTopResultItem> items = new ArrayList<VueTopResultItem>();
+
+		private String minute;
+	}
+
+	@Data
+	public static class VueTopResultItem {
+		private String domain;
+
+		private String errorInfo;
+
+		private String linkStyle;
+
+		private String shortDomain;
+
+		private String style;
+
+		private double value;
 	}
 
 	private TopReport queryTopReport(long date) {

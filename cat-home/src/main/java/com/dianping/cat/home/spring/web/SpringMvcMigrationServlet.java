@@ -105,6 +105,9 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 	@Resource
 	private SpringMvcTransactionController springMvcTransactionController;
 
+	@Resource
+	private SpringMvcVueController springMvcVueController;
+
 	private Map<RouteKey, RouteHandler> routes = Collections.emptyMap();
 
 	@Override
@@ -146,6 +149,8 @@ public class SpringMvcMigrationServlet extends HttpServlet {
 		register(routes, "GET", "/s/plugin/chrome", springMvcPluginController::chrome);
 		register(routes, "GET", "/s/project", springMvcProjectController::project);
 		register(routes, "GET", "/s/router", springMvcRouterController::router);
+		register(routes, "GET", "/vue", springMvcVueController::vue);
+		register(routes, "GET", "/vue/*", springMvcVueController::vue);
 		register(routes, "GET", "/r/alteration", springMvcAlterationController::alteration);
 		register(routes, "GET", "/r/alert", springMvcAlertController::alert);
 		register(routes, "GET", "/r/business", springMvcBusinessReportController::business);
