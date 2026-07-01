@@ -36,8 +36,8 @@ import org.unidal.web.mvc.annotation.PreInboundActionMeta;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.helper.JsonBuilder;
-import com.dianping.cat.home.dal.report.ConfigModification;
 import com.dianping.cat.mybatis.ConfigModificationRepository;
+import com.dianping.cat.mybatis.data.ConfigModificationDO;
 import com.dianping.cat.system.SystemPage;
 import com.dianping.cat.system.page.config.processor.AlertConfigProcessor;
 import com.dianping.cat.system.page.config.processor.DependencyConfigProcessor;
@@ -183,12 +183,12 @@ public class Handler implements PageHandler<Context> {
 	}
 
 	public void store(String userName, String accountName, Payload payload) {
-		ConfigModification modification = configModificationRepository.createLocal();
+		ConfigModificationDO modification = configModificationRepository.createLocal();
 
 		modification.setUserName(userName);
 		modification.setAccountName(accountName);
 		modification.setActionName(payload.getAction().getName());
-		modification.setDate(new Date());
+		modification.setModifyTime(new Date());
 		modification.setArgument(new JsonBuilder().toJson(payload));
 
 		try {
