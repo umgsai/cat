@@ -22,18 +22,8 @@ public class OperationDO {
 
 	private Date updateTime;
 
-	private Long keyId;
-
-	public Date getCreationDate() {
-		return createTime;
-	}
-
 	public Date getTime() {
 		return operationTime;
-	}
-
-	public void setCreationDate(Date creationDate) {
-		createTime = creationDate;
 	}
 
 	public void setId(Integer id) {
