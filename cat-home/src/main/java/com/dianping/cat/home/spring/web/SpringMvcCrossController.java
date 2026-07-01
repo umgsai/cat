@@ -30,6 +30,8 @@ import com.dianping.cat.report.page.cross.CrossMethodVisitor;
 import com.dianping.cat.report.page.cross.display.HostInfo;
 import com.dianping.cat.report.page.cross.display.MethodInfo;
 import com.dianping.cat.report.page.cross.display.MethodQueryInfo;
+import com.dianping.cat.report.page.cross.display.MethodQueryInfo.Item;
+import com.dianping.cat.report.page.cross.display.TypeDetailInfo;
 import com.dianping.cat.report.page.cross.display.ProjectInfo;
 import com.dianping.cat.report.page.cross.service.CrossReportService;
 import com.dianping.cat.report.service.ModelRequest;
@@ -40,6 +42,7 @@ import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
 import jakarta.annotation.Resource;
+import lombok.Data;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -58,6 +61,9 @@ public class SpringMvcCrossController {
 	private HostinfoService hostinfoService;
 
 	@Resource
+	private JsonBuilder jsonBuilder;
+
+	@Resource
 	private ProjectService projectService;
 
 	@Resource
@@ -71,6 +77,13 @@ public class SpringMvcCrossController {
 
 	@GetMapping("/mvc/r/cross")
 	public void cross(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String action = parameter(request, "op", "view");
+
+		if ("vueData".equals(action)) {
+			writeJson(response, jsonBuilder.toJson(vueCrossReport(request)));
+			return;
+		}
+
 		Map<String, Object> model = crossModel(request);
 
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
@@ -86,6 +99,10 @@ public class SpringMvcCrossController {
 		Map<String, Object> model = new LinkedHashMap<String, Object>();
 		String contextPath = request.getContextPath();
 		String action = parameter(request, "op", "view");
+
+		if ("vueData".equals(action)) {
+			action = parameter(request, "vueAction", "view");
+		}
 		String domain = parameter(request, "domain", Constants.CAT);
 		String ipAddress = parameter(request, "ip", Constants.ALL);
 		String reportType = parameter(request, "reportType", "day");
@@ -178,6 +195,51 @@ public class SpringMvcCrossController {
 		return model;
 	}
 
+	private VueCrossReport vueCrossReport(HttpServletRequest request) {
+		Map<String, Object> model = crossModel(request);
+		VueCrossReport report = new VueCrossReport();
+		ProjectInfo projectInfo = (ProjectInfo) model.get("projectInfo");
+		MethodQueryInfo queryInfo = (MethodQueryInfo) model.get("queryInfo");
+		@SuppressWarnings("unchecked")
+		List<String> ips = (List<String>) model.get("ips");
+		@SuppressWarnings("unchecked")
+		Map<String, Department> domainGroups = (Map<String, Department>) model.get("domainGroups");
+
+		report.setAction((String) model.get("action"));
+		report.setCallSort((String) model.get("callSort"));
+		report.setContextPath((String) model.get("contextPath"));
+		report.setDate((String) model.get("date"));
+		report.setDisplayDomain((String) model.get("displayDomain"));
+		report.setDomain((String) model.get("domain"));
+		report.setDomainGroups(vueDomainGroups(domainGroups));
+		report.setHistoryMode((Boolean) model.get("historyMode"));
+		report.setIpAddress((String) model.get("ipAddress"));
+		report.setIpToHostname(ipToHostname(ips == null ? new ArrayList<String>() : ips));
+		report.setIps(ips == null ? new ArrayList<String>() : ips);
+		report.setLongDate((Long) model.get("longDate"));
+		report.setMethod((String) model.get("method"));
+		report.setProject((String) model.get("project"));
+		report.setQueryName((String) model.get("queryName"));
+		report.setRemoteIp((String) model.get("remoteIp"));
+		report.setReportEnd((String) model.get("reportEnd"));
+		report.setReportStart((String) model.get("reportStart"));
+		report.setReportType((String) model.get("reportType"));
+		report.setSample((Double) model.get("sample"));
+		report.setServiceSort((String) model.get("serviceSort"));
+
+		if (projectInfo != null) {
+			Map<String, TypeDetailInfo> callerInfo = projectInfo.getCallerProjectsInfo();
+
+			report.setCallProjects(vueTypeRows(projectInfo.getCallProjectsInfo()));
+			report.setServiceProjects(vueTypeRows(projectInfo.getServiceProjectsInfo()));
+			report.setCallerProjects(vueTypeMap(callerInfo));
+		}
+		if (queryInfo != null) {
+			report.setQueryItems(vueQueryRows(queryInfo.getItems()));
+		}
+		return report;
+	}
+
 	private long currentStartDay() {
 		Calendar cal = Calendar.getInstance();
 
@@ -221,6 +283,94 @@ public class SpringMvcCrossController {
 		Collection<String> domains = projectService.findAllDomains();
 
 		return projectService.findDepartments(domains);
+	}
+
+	private List<VueDomainDepartment> vueDomainGroups(Map<String, Department> domainGroups) {
+		List<VueDomainDepartment> departments = new ArrayList<VueDomainDepartment>();
+
+		if (domainGroups == null) {
+			return departments;
+		}
+		for (Map.Entry<String, Department> departmentEntry : domainGroups.entrySet()) {
+			VueDomainDepartment department = new VueDomainDepartment();
+
+			department.setName(departmentEntry.getKey());
+			for (Map.Entry<String, ProjectService.ProjectLine> lineEntry : departmentEntry.getValue().getProjectLines()
+					.entrySet()) {
+				VueDomainLine line = new VueDomainLine();
+
+				line.setName(lineEntry.getKey());
+				line.setDomains(lineEntry.getValue().getLineDomains());
+				department.getLines().add(line);
+			}
+			departments.add(department);
+		}
+		return departments;
+	}
+
+	private VueCrossQueryRow vueQueryRow(Item item) {
+		VueCrossQueryRow row = new VueCrossQueryRow();
+
+		row.setAvg(item.getAvg());
+		row.setDomain(item.getDomain());
+		row.setFailureCount(item.getFailureCount());
+		row.setFailurePercent(item.getFailurePercent());
+		row.setIp(item.getIp());
+		row.setMethod(item.getMethod());
+		row.setTotalCount(item.getTotalCount());
+		row.setTps(item.getTps());
+		row.setType(item.getType());
+		return row;
+	}
+
+	private List<VueCrossQueryRow> vueQueryRows(Collection<Item> items) {
+		List<VueCrossQueryRow> rows = new ArrayList<VueCrossQueryRow>();
+
+		if (items == null) {
+			return rows;
+		}
+		for (Item item : items) {
+			rows.add(vueQueryRow(item));
+		}
+		return rows;
+	}
+
+	private Map<String, VueCrossTypeRow> vueTypeMap(Map<String, TypeDetailInfo> infos) {
+		Map<String, VueCrossTypeRow> rows = new LinkedHashMap<String, VueCrossTypeRow>();
+
+		if (infos == null) {
+			return rows;
+		}
+		for (Map.Entry<String, TypeDetailInfo> entry : infos.entrySet()) {
+			rows.put(entry.getKey(), vueTypeRow(entry.getValue()));
+		}
+		return rows;
+	}
+
+	private VueCrossTypeRow vueTypeRow(TypeDetailInfo info) {
+		VueCrossTypeRow row = new VueCrossTypeRow();
+
+		row.setAvg(info.getAvg());
+		row.setFailureCount(info.getFailureCount());
+		row.setFailurePercent(info.getFailurePercent());
+		row.setIp(info.getIp());
+		row.setProjectName(info.getProjectName());
+		row.setTotalCount(info.getTotalCount());
+		row.setTps(info.getTps());
+		row.setType(info.getType());
+		return row;
+	}
+
+	private List<VueCrossTypeRow> vueTypeRows(Collection<TypeDetailInfo> infos) {
+		List<VueCrossTypeRow> rows = new ArrayList<VueCrossTypeRow>();
+
+		if (infos == null) {
+			return rows;
+		}
+		for (TypeDetailInfo info : infos) {
+			rows.add(vueTypeRow(info));
+		}
+		return rows;
 	}
 
 	private Date historyEndDate(long date, String reportType, String customEnd) {
@@ -444,6 +594,10 @@ public class SpringMvcCrossController {
 		this.hostinfoService = hostinfoService;
 	}
 
+	void setJsonBuilder(JsonBuilder jsonBuilder) {
+		this.jsonBuilder = jsonBuilder;
+	}
+
 	void setProjectService(ProjectService projectService) {
 		this.projectService = projectService;
 	}
@@ -456,6 +610,119 @@ public class SpringMvcCrossController {
 		Domain sampleDomain = sampleConfigManager.getConfig().findDomain(domain);
 
 		return sampleDomain == null ? 1.0 : sampleDomain.getSample();
+	}
+
+	private void writeJson(HttpServletResponse response, String body) throws IOException {
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/json;charset=utf-8");
+		response.getWriter().write(body == null ? "" : body);
+	}
+
+	@Data
+	public static class VueCrossQueryRow {
+		private double avg;
+
+		private String domain;
+
+		private long failureCount;
+
+		private double failurePercent;
+
+		private String ip;
+
+		private String method;
+
+		private long totalCount;
+
+		private double tps;
+
+		private String type;
+	}
+
+	@Data
+	public static class VueCrossReport {
+		private String action;
+
+		private String callSort;
+
+		private List<VueCrossTypeRow> callProjects = new ArrayList<VueCrossTypeRow>();
+
+		private Map<String, VueCrossTypeRow> callerProjects = new LinkedHashMap<String, VueCrossTypeRow>();
+
+		private String contextPath;
+
+		private String date;
+
+		private String displayDomain;
+
+		private String domain;
+
+		private List<VueDomainDepartment> domainGroups = new ArrayList<VueDomainDepartment>();
+
+		private boolean historyMode;
+
+		private String ipAddress;
+
+		private Map<String, String> ipToHostname = new LinkedHashMap<String, String>();
+
+		private List<String> ips = new ArrayList<String>();
+
+		private long longDate;
+
+		private String method;
+
+		private String project;
+
+		private List<VueCrossQueryRow> queryItems = new ArrayList<VueCrossQueryRow>();
+
+		private String queryName;
+
+		private String remoteIp;
+
+		private String reportEnd;
+
+		private String reportStart;
+
+		private String reportType;
+
+		private double sample;
+
+		private String serviceSort;
+
+		private List<VueCrossTypeRow> serviceProjects = new ArrayList<VueCrossTypeRow>();
+	}
+
+	@Data
+	public static class VueCrossTypeRow {
+		private double avg;
+
+		private long failureCount;
+
+		private double failurePercent;
+
+		private String ip;
+
+		private String projectName;
+
+		private long totalCount;
+
+		private double tps;
+
+		private String type;
+	}
+
+	@Data
+	public static class VueDomainDepartment {
+		private List<VueDomainLine> lines = new ArrayList<VueDomainLine>();
+
+		private String name;
+	}
+
+	@Data
+	public static class VueDomainLine {
+		private List<String> domains = new ArrayList<String>();
+
+		private String name;
 	}
 
 	private class HistoryDates {

@@ -752,6 +752,47 @@ input {
   background: #115e59;
 }
 
+.cross-query {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: #b42318;
+  font-weight: 700;
+}
+
+.cross-query input {
+  flex: 1 1 460px;
+  min-width: 240px;
+  height: 30px;
+  border: 1px solid #cfd8e3;
+  border-radius: 4px;
+  padding: 4px 8px;
+  background: #ffffff;
+  color: #172033;
+  font-weight: 500;
+}
+
+.cross-query button {
+  height: 30px;
+  border: 1px solid #0f766e;
+  border-radius: 4px;
+  padding: 0 12px;
+  background: #0f766e;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.cross-query button:hover {
+  background: #115e59;
+}
+
+.cross-table .section-title {
+  background: #f8fafc;
+  color: #172033;
+}
+
 .transaction-table-wrap {
   overflow-x: auto;
 }
@@ -907,6 +948,37 @@ input {
   color: #0f766e;
   font-size: 14px;
   font-weight: 700;
+}
+
+.heartbeat-graphs {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.heartbeat-group {
+  overflow: hidden;
+  border: 1px solid #d9e1ec;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.heartbeat-group h2 {
+  margin: 0;
+  border-bottom: 1px solid #e4e9f0;
+  padding: 9px 12px;
+  color: #b42318;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.heartbeat-svg-wrap {
+  overflow-x: auto;
+  padding: 10px 12px 14px;
+}
+
+.heartbeat-svg-wrap svg {
+  display: block;
 }
 
 @media (max-width: 900px) {

@@ -45,8 +45,8 @@ const reportMenus = [
   { name: 'Transaction', href: () => vueReportUrl('/mvc/vue/r/t'), icon: Clock3 },
   { name: 'Event', href: () => vueReportUrl('/mvc/vue/r/e'), icon: Flag },
   { name: 'Problem', href: () => vueReportUrl('/mvc/vue/r/p'), icon: Activity },
-  { name: 'Heartbeat', href: () => legacyReportUrl('/mvc/r/h'), icon: HeartPulse },
-  { name: 'Cross', href: () => legacyReportUrl('/mvc/r/cross'), icon: GitBranch },
+  { name: 'Heartbeat', href: () => vueReportUrl('/mvc/vue/r/h'), icon: HeartPulse },
+  { name: 'Cross', href: () => vueReportUrl('/mvc/vue/r/cross'), icon: GitBranch },
   { name: 'Business', href: () => businessUrl(), icon: ListTree },
   { name: 'State', href: () => legacyReportUrl('/mvc/r/state'), icon: RadioTower }
 ]

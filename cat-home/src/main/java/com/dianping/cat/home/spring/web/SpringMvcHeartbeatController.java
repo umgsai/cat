@@ -35,6 +35,7 @@ import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.graph.svg.GraphBuilder;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.heartbeat.HeartbeatSvgGraph;
+import com.dianping.cat.report.page.heartbeat.HeartbeatSvgGraph.ExtensionGroup;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.service.ModelRequest;
@@ -45,6 +46,7 @@ import com.dianping.cat.service.HostinfoService;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.service.ProjectService.Department;
 import jakarta.annotation.Resource;
+import lombok.Data;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -71,6 +73,9 @@ public class SpringMvcHeartbeatController {
 	private HostinfoService hostinfoService;
 
 	@Resource
+	private JsonBuilder jsonBuilder;
+
+	@Resource
 	private ProjectService projectService;
 
 	@Resource
@@ -84,8 +89,14 @@ public class SpringMvcHeartbeatController {
 
 	@GetMapping("/mvc/r/h")
 	public void heartbeat(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String action = parameter(request, "op", "view");
+
+		if ("vueData".equals(action)) {
+			writeJson(response, jsonBuilder.toJson(vueHeartbeatReport(request)));
+			return;
+		}
+
 		Map<String, Object> model = heartbeatModel(request);
-		String action = (String) model.get("action");
 		String view = "historyPart".equals(action) ? "/jsp/spring/report/heartbeat/heartbeatPartHistoryGraph.jsp"
 				: isHistoryAction(action) ? "/jsp/spring/report/heartbeat/heartbeatHistory.jsp"
 						: "/jsp/spring/report/heartbeat/heartbeat.jsp";
@@ -103,6 +114,10 @@ public class SpringMvcHeartbeatController {
 		Map<String, Object> model = new LinkedHashMap<String, Object>();
 		String contextPath = request.getContextPath();
 		String action = parameter(request, "op", "view");
+
+		if ("vueData".equals(action)) {
+			action = parameter(request, "vueAction", "view");
+		}
 		String domain = parameter(request, "domain", Constants.CAT);
 		String ipAddress = parameter(request, "ip", Constants.ALL);
 		String reportType = parameter(request, "reportType", "day");
@@ -166,6 +181,86 @@ public class SpringMvcHeartbeatController {
 		model.put("sample", sample(report.getDomain()));
 		model.put("model", model);
 		return model;
+	}
+
+	private VueHeartbeatReport vueHeartbeatReport(HttpServletRequest request) {
+		Map<String, Object> model = heartbeatModel(request);
+		VueHeartbeatReport report = new VueHeartbeatReport();
+		@SuppressWarnings("unchecked")
+		List<String> ips = (List<String>) model.get("ips");
+		@SuppressWarnings("unchecked")
+		Map<String, Department> domainGroups = (Map<String, Department>) model.get("domainGroups");
+		@SuppressWarnings("unchecked")
+		List<String> groups = (List<String>) model.get("groups");
+		@SuppressWarnings("unchecked")
+		Map<String, ExtensionGroup> extensionGraph = (Map<String, ExtensionGroup>) model.get("extensionGraph");
+
+		report.setContextPath((String) model.get("contextPath"));
+		report.setDomain((String) model.get("domain"));
+		report.setDisplayDomain((String) model.get("displayDomain"));
+		report.setIpAddress((String) model.get("ipAddress"));
+		report.setRealIp((String) model.get("realIp"));
+		report.setReportType((String) model.get("reportType"));
+		report.setType((String) model.get("type"));
+		report.setExtensionType((String) model.get("extensionType"));
+		report.setDate((String) model.get("date"));
+		report.setLongDate((Long) model.get("longDate"));
+		report.setReportStart((String) model.get("reportStart"));
+		report.setReportEnd((String) model.get("reportEnd"));
+		report.setIps(ips == null ? new ArrayList<String>() : ips);
+		report.setIpToHostname(ipToHostname(ips == null ? new ArrayList<String>() : ips));
+		report.setGroups(groups == null ? new ArrayList<String>() : groups);
+		report.setDomainGroups(vueDomainGroups(domainGroups));
+		report.setHistoryMode((Boolean) model.get("historyMode"));
+		report.setSample((Double) model.get("sample"));
+		report.setExtensionGroups(vueExtensionGroups(extensionGraph));
+		return report;
+	}
+
+	private List<VueDomainDepartment> vueDomainGroups(Map<String, Department> domainGroups) {
+		List<VueDomainDepartment> departments = new ArrayList<VueDomainDepartment>();
+
+		if (domainGroups == null) {
+			return departments;
+		}
+		for (Map.Entry<String, Department> departmentEntry : domainGroups.entrySet()) {
+			VueDomainDepartment department = new VueDomainDepartment();
+
+			department.setName(departmentEntry.getKey());
+			for (Map.Entry<String, ProjectService.ProjectLine> lineEntry : departmentEntry.getValue().getProjectLines()
+					.entrySet()) {
+				VueDomainLine line = new VueDomainLine();
+
+				line.setName(lineEntry.getKey());
+				line.setDomains(lineEntry.getValue().getLineDomains());
+				department.getLines().add(line);
+			}
+			departments.add(department);
+		}
+		return departments;
+	}
+
+	private List<VueHeartbeatExtensionGroup> vueExtensionGroups(Map<String, ExtensionGroup> extensionGraph) {
+		List<VueHeartbeatExtensionGroup> groups = new ArrayList<VueHeartbeatExtensionGroup>();
+
+		if (extensionGraph == null) {
+			return groups;
+		}
+		for (Map.Entry<String, ExtensionGroup> entry : extensionGraph.entrySet()) {
+			VueHeartbeatExtensionGroup group = new VueHeartbeatExtensionGroup();
+
+			group.setName(entry.getKey());
+			group.setHeight(entry.getValue().getHeight());
+			for (Map.Entry<String, String> svgEntry : entry.getValue().getSvgs().entrySet()) {
+				VueHeartbeatSvg svg = new VueHeartbeatSvg();
+
+				svg.setName(svgEntry.getKey());
+				svg.setContent(svgEntry.getValue());
+				group.getSvgs().add(svg);
+			}
+			groups.add(group);
+		}
+		return groups;
 	}
 
 	private void addMachineDataToMap(Map<String, double[]> datas, Machine machine, Set<String> extensionMetrics) {
@@ -473,6 +568,10 @@ public class SpringMvcHeartbeatController {
 		return sampleDomain == null ? 1.0 : sampleDomain.getSample();
 	}
 
+	void setJsonBuilder(JsonBuilder jsonBuilder) {
+		this.jsonBuilder = jsonBuilder;
+	}
+
 	private void updateMetricArray(Map<String, double[]> datas, int minute, String metricName, double value) {
 		double[] values = datas.get(metricName);
 
@@ -481,6 +580,83 @@ public class SpringMvcHeartbeatController {
 			datas.put(metricName, values);
 		}
 		values[minute] = value;
+	}
+
+	private void writeJson(HttpServletResponse response, String body) throws IOException {
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/json;charset=utf-8");
+		response.getWriter().write(body == null ? "" : body);
+	}
+
+	@Data
+	public static class VueDomainDepartment {
+		private List<VueDomainLine> lines = new ArrayList<VueDomainLine>();
+
+		private String name;
+	}
+
+	@Data
+	public static class VueDomainLine {
+		private List<String> domains = new ArrayList<String>();
+
+		private String name;
+	}
+
+	@Data
+	public static class VueHeartbeatExtensionGroup {
+		private int height;
+
+		private String name;
+
+		private List<VueHeartbeatSvg> svgs = new ArrayList<VueHeartbeatSvg>();
+	}
+
+	@Data
+	public static class VueHeartbeatReport {
+		private String contextPath;
+
+		private String date;
+
+		private String displayDomain;
+
+		private String domain;
+
+		private List<VueDomainDepartment> domainGroups = new ArrayList<VueDomainDepartment>();
+
+		private String extensionType;
+
+		private List<VueHeartbeatExtensionGroup> extensionGroups = new ArrayList<VueHeartbeatExtensionGroup>();
+
+		private List<String> groups = new ArrayList<String>();
+
+		private boolean historyMode;
+
+		private String ipAddress;
+
+		private Map<String, String> ipToHostname = new LinkedHashMap<String, String>();
+
+		private List<String> ips = new ArrayList<String>();
+
+		private long longDate;
+
+		private String realIp;
+
+		private String reportEnd;
+
+		private String reportStart;
+
+		private String reportType;
+
+		private double sample;
+
+		private String type;
+	}
+
+	@Data
+	public static class VueHeartbeatSvg {
+		private String content;
+
+		private String name;
 	}
 
 	private class HistoryDates {

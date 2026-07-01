@@ -1,5 +1,7 @@
 <template>
-  <ProblemView v-if="currentView === 'problem'" />
+  <CrossView v-if="currentView === 'cross'" />
+  <HeartbeatView v-else-if="currentView === 'heartbeat'" />
+  <ProblemView v-else-if="currentView === 'problem'" />
   <EventView v-else-if="currentView === 'event'" />
   <TransactionView v-else-if="currentView === 'transaction'" />
   <ReportHomeView v-else-if="currentView === 'report-home'" />
@@ -9,7 +11,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import CrossView from './views/CrossView.vue'
 import EventView from './views/EventView.vue'
+import HeartbeatView from './views/HeartbeatView.vue'
 import LoginView from './views/LoginView.vue'
 import ProblemView from './views/ProblemView.vue'
 import ReportHomeView from './views/ReportHomeView.vue'
@@ -18,6 +22,12 @@ import TransactionView from './views/TransactionView.vue'
 const currentView = computed(() => {
   const path = window.location.pathname
 
+  if (path.endsWith('/mvc/vue/r/cross') || path.endsWith('/mvc/vue/r/cross/')) {
+    return 'cross'
+  }
+  if (path.endsWith('/mvc/vue/r/h') || path.endsWith('/mvc/vue/r/h/')) {
+    return 'heartbeat'
+  }
   if (path.endsWith('/mvc/vue/r/p') || path.endsWith('/mvc/vue/r/p/')) {
     return 'problem'
   }
