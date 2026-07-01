@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Splitter;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.alarm.Alert;
+import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
 import com.dianping.cat.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
@@ -64,8 +64,8 @@ public class Handler implements PageHandler<Context> {
 	@Resource
 	private AlertRepository alertRepository;
 
-	private Alert buildAlertEntity(Payload payload) {
-		Alert alertEntity = new Alert();
+	private AlertDO buildAlertEntity(Payload payload) {
+		AlertDO alertEntity = new AlertDO();
 
 		alertEntity.setAlertTime(payload.getAlertTime());
 		alertEntity.setCategory(payload.getCategory());
@@ -76,11 +76,11 @@ public class Handler implements PageHandler<Context> {
 		return alertEntity;
 	}
 
-	private Map<String, AlertMinute> generateAlertMinutes(List<Alert> alerts) {
+	private Map<String, AlertMinute> generateAlertMinutes(List<AlertDO> alerts) {
 		DateFormat format = new SimpleDateFormat("MM-dd HH:mm");
 		Map<String, AlertMinute> alertMinutes = new LinkedHashMap<String, AlertMinute>();
 
-		for (Alert alert : alerts) {
+		for (AlertDO alert : alerts) {
 			String time = format.format(alert.getAlertTime());
 			AlertMinute alertMinute = alertMinutes.get(time);
 
@@ -140,7 +140,7 @@ public class Handler implements PageHandler<Context> {
 			if (StringUtils.isEmpty(payload.getDomain())) {
 				setAlertResult(model, 4);
 			} else {
-				Alert alertEntity = buildAlertEntity(payload);
+				AlertDO alertEntity = buildAlertEntity(payload);
 
 				try {
 					int count = alertRepository.insert(alertEntity);
@@ -165,7 +165,7 @@ public class Handler implements PageHandler<Context> {
 			Date endTime = payload.getEndTime();
 			String domain = payload.getDomain();
 			String alertTypeStr = payload.getAlertType();
-			List<Alert> alerts;
+			List<AlertDO> alerts;
 			try {
 				if (StringUtils.isEmpty(alertTypeStr)) {
 					alerts = alertRepository.queryAlertsByTimeDomain(startTime, endTime, domain);
@@ -174,7 +174,7 @@ public class Handler implements PageHandler<Context> {
 					      payload.getAlertTypeArray());
 				}
 			} catch (RuntimeException e) {
-				alerts = new ArrayList<Alert>();
+				alerts = new ArrayList<AlertDO>();
 				LOGGER.error("Unable to query alerts, startTime={}, endTime={}, domain={}, alertTypes={}.", startTime,
 				      endTime, domain, alertTypeStr, e);
 				Cat.logError(e);
@@ -218,32 +218,32 @@ public class Handler implements PageHandler<Context> {
 
 		private String m_name;
 
-		private Map<String, List<Alert>> m_alertsByCategory = new HashMap<String, List<Alert>>();
+		private Map<String, List<AlertDO>> m_alertsByCategory = new HashMap<String, List<AlertDO>>();
 
 		public AlertDomain(String name) {
 			m_name = name;
 		}
 
-		public void addAlert(Alert alert) {
+		public void addAlert(AlertDO alert) {
 			String category = alert.getCategory();
-			List<Alert> alerts = m_alertsByCategory.get(category);
+			List<AlertDO> alerts = m_alertsByCategory.get(category);
 
 			if (alerts == null) {
-				alerts = new ArrayList<Alert>();
+				alerts = new ArrayList<AlertDO>();
 
 				m_alertsByCategory.put(category, alerts);
 			}
 			alerts.add(alert);
 		}
 
-		public Map<String, List<Alert>> getAlertCategories() {
+		public Map<String, List<AlertDO>> getAlertCategories() {
 			return m_alertsByCategory;
 		}
 
 		public int getCount() {
 			int count = 0;
 
-			for (List<Alert> alerts : m_alertsByCategory.values()) {
+			for (List<AlertDO> alerts : m_alertsByCategory.values()) {
 				count += alerts.size();
 			}
 			return count;
@@ -265,7 +265,7 @@ public class Handler implements PageHandler<Context> {
 			m_time = time;
 		}
 
-		public void addAlert(Alert alert) {
+		public void addAlert(AlertDO alert) {
 			String domain = alert.getDomain();
 			AlertDomain alertDomain = m_domains.get(domain);
 

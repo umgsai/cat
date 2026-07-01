@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.alarm.Alert;
+import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
 import com.dianping.cat.alarm.service.AlertService;
 import com.dianping.cat.alarm.spi.AlertLevel;
 import com.dianping.cat.helper.TimeHelper;
@@ -59,10 +59,10 @@ public class StorageAlertInfoBuilder {
 	}
 
 	public Map<String, StorageAlertInfo> buildStorageAlertInfos(Date start, Date end, int minuteCounts, String type,
-							List<Alert> alerts) {
+							List<AlertDO> alerts) {
 		Map<String, StorageAlertInfo> results = prepareBlankAlert(start.getTime(), end.getTime(), minuteCounts, type);
 
-		for (Alert alert : alerts) {
+		for (AlertDO alert : alerts) {
 			long time = alert.getAlertTime().getTime();
 			long current = time - time % TimeHelper.ONE_MINUTE - TimeHelper.ONE_MINUTE;
 			Date date = new Date(current);
@@ -90,7 +90,7 @@ public class StorageAlertInfoBuilder {
 		return alertInfo;
 	}
 
-	public void parseAlertEntity(Alert alert, StorageAlertInfo alertInfo) {
+	public void parseAlertEntity(AlertDO alert, StorageAlertInfo alertInfo) {
 		String name = alert.getDomain();
 		List<String> fields = Splitter.on(';').splitToList(alert.getMetric());
 		String ip = fields.get(0);

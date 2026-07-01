@@ -24,11 +24,17 @@ public class AlertDO {
 
 	private Date updateTime;
 
-	private Long keyId;
-
 	private Date startTime;
 
 	private Date endTime;
 
 	private String[] categories;
+
+	public void setId(Integer id) {
+		this.id = id == null ? null : id.longValue();
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 }

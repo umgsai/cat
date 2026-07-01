@@ -13,7 +13,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.dianping.cat.alarm.Alert;
+import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
@@ -29,7 +29,7 @@ public class SpringMvcAlertControllerTest {
 
 		controller.setAlertRepository(new AlertRepository() {
 			@Override
-			public java.util.List<Alert> queryAlertsByTimeDomainCategories(Date startTime, Date endTime, String domain,
+			public java.util.List<AlertDO> queryAlertsByTimeDomainCategories(Date startTime, Date endTime, String domain,
 					String[] categories) {
 				Assert.assertEquals("2026-06-27 20:00", format.format(startTime));
 				Assert.assertEquals("2026-06-27 21:00", format.format(endTime));
@@ -54,7 +54,7 @@ public class SpringMvcAlertControllerTest {
 
 		controller.setAlertRepository(new AlertRepository() {
 			@Override
-			public int insert(Alert proto) {
+			public int insert(AlertDO proto) {
 				Assert.assertEquals("cat", proto.getDomain());
 				Assert.assertEquals("zabbix", proto.getCategory());
 				Assert.assertEquals("warning", proto.getType());
@@ -121,9 +121,16 @@ public class SpringMvcAlertControllerTest {
 				response.body.toString());
 	}
 
-	private Alert alert(String domain, String category, String type, Date alertTime) {
-		return new Alert().setDomain(domain).setCategory(category).setType(type).setMetric("cpu").setContent("high")
-				.setAlertTime(alertTime);
+	private AlertDO alert(String domain, String category, String type, Date alertTime) {
+		AlertDO alert = new AlertDO();
+
+		alert.setDomain(domain);
+		alert.setCategory(category);
+		alert.setType(type);
+		alert.setMetric("cpu");
+		alert.setContent("high");
+		alert.setAlertTime(alertTime);
+		return alert;
 	}
 
 	private SpringMvcAlertController controller() {
@@ -131,7 +138,7 @@ public class SpringMvcAlertControllerTest {
 
 		controller.setAlertRepository(new AlertRepository() {
 			@Override
-			public java.util.List<Alert> queryAlertsByTimeDomain(Date startTime, Date endTime, String domain) {
+			public java.util.List<AlertDO> queryAlertsByTimeDomain(Date startTime, Date endTime, String domain) {
 				return Collections.emptyList();
 			}
 		});

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.alarm.Alert;
+import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.mybatis.repository.alert.AlertRepository;
@@ -41,8 +41,8 @@ public class AlertService {
 	@Resource
 	private AlertRepository alertRepository;
 
-	private Alert buildAlert(AlertEntity alertEntity, SendMessageEntity message) {
-		Alert alert = new Alert();
+	private AlertDO buildAlert(AlertEntity alertEntity, SendMessageEntity message) {
+		AlertDO alert = new AlertDO();
 
 		alert.setDomain(alertEntity.getDomain());
 		alert.setAlertTime(alertEntity.getDate());
@@ -54,8 +54,8 @@ public class AlertService {
 		return alert;
 	}
 
-	public List<Alert> query(Date start, Date end, String type) {
-		List<Alert> alerts = new LinkedList<Alert>();
+	public List<AlertDO> query(Date start, Date end, String type) {
+		List<AlertDO> alerts = new LinkedList<AlertDO>();
 
 		try {
 			alerts = alertRepository.queryAlertsByTimeCategory(start, end, type);
@@ -70,7 +70,7 @@ public class AlertService {
 	}
 
 	public void insert(AlertEntity alertEntity, SendMessageEntity message) {
-		Alert alert = buildAlert(alertEntity, message);
+		AlertDO alert = buildAlert(alertEntity, message);
 
 		try {
 			int count = alertRepository.insert(alert);

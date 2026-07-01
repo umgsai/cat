@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
-import com.dianping.cat.alarm.Alert;
+import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
 import com.dianping.cat.alarm.service.AlertService;
 import com.dianping.cat.consumer.storage.builder.StorageBuilderManager;
 import com.dianping.cat.consumer.storage.builder.StorageSQLBuilder;
@@ -305,7 +305,7 @@ public class SpringMvcStorageController {
 		long end = time + minute * TimeHelper.ONE_MINUTE;
 		Date startDate = new Date(end - (minuteCounts - 1) * TimeHelper.ONE_MINUTE);
 		Date endDate = new Date(end);
-		List<Alert> alerts = alertService.query(new Date(startDate.getTime() + TimeHelper.ONE_MINUTE),
+		List<AlertDO> alerts = alertService.query(new Date(startDate.getTime() + TimeHelper.ONE_MINUTE),
 				new Date(endDate.getTime() + TimeHelper.ONE_MINUTE), type);
 		Map<String, StorageAlertInfo> alertInfos = storageAlertInfoBuilder.buildStorageAlertInfos(startDate, endDate,
 				minuteCounts, type, alerts);

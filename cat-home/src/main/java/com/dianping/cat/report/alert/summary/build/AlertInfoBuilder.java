@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 import jakarta.annotation.Resource;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.alarm.Alert;
+import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
 import com.dianping.cat.mybatis.repository.alert.AlertRepository;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.home.alert.summary.entity.AlertSummary;
@@ -86,10 +86,10 @@ public class AlertInfoBuilder {
 		return alerts.values();
 	}
 
-	private Collection<com.dianping.cat.home.alert.summary.entity.Alert> convertToAlerts(List<Alert> dbAlerts) {
+	private Collection<com.dianping.cat.home.alert.summary.entity.Alert> convertToAlerts(List<AlertDO> dbAlerts) {
 		Map<String, com.dianping.cat.home.alert.summary.entity.Alert> alerts = new LinkedHashMap<String, com.dianping.cat.home.alert.summary.entity.Alert>();
 
-		for (Alert dbAlert : dbAlerts) {
+		for (AlertDO dbAlert : dbAlerts) {
 			String domain = dbAlert.getDomain();
 			String metric = dbAlert.getMetric();
 			String key = domain + ":" + metric;
@@ -150,7 +150,7 @@ public class AlertInfoBuilder {
 				      cate, domain, startTime, date);
 				return category;
 			}
-			List<Alert> dbAlerts = alertDao
+			List<AlertDO> dbAlerts = alertDao
 									.queryAlertsByTimeCategoryDomain(startTime, date, dbCategoryName, domain);
 			LOGGER.info("Loaded alert summary category alerts, category={}, domain={}, start={}, end={}, alertCount={}.",
 					cate, domain, startTime, date, dbAlerts.size());
@@ -179,7 +179,7 @@ public class AlertInfoBuilder {
 					      cate, domain, startTime, date);
 					continue;
 				}
-				List<Alert> dbAlerts = alertDao
+				List<AlertDO> dbAlerts = alertDao
 										.queryAlertsByTimeCategoryDomain(startTime, date, dbCategoryName, domain);
 
 				LOGGER.info("Loaded dependency alert summary alerts, category={}, domain={}, start={}, end={}, alertCount={}.",
@@ -224,7 +224,7 @@ public class AlertInfoBuilder {
 		return domains;
 	}
 
-	private void setDBAlertsToCategory(Category category, List<Alert> dbAlerts) {
+	private void setDBAlertsToCategory(Category category, List<AlertDO> dbAlerts) {
 		Collection<com.dianping.cat.home.alert.summary.entity.Alert> alerts = convertToAlerts(dbAlerts);
 		Iterator<com.dianping.cat.home.alert.summary.entity.Alert> it = alerts.iterator();
 

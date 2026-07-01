@@ -121,7 +121,8 @@ public class SpringMvcStorageControllerTest {
 
 		controller.setAlertService(new AlertService() {
 			@Override
-			public java.util.List<com.dianping.cat.alarm.Alert> query(Date start, Date end, String type) {
+			public java.util.List<com.dianping.cat.mybatis.alert.dao.data.AlertDO> query(Date start, Date end,
+					String type) {
 				Assert.assertEquals("SQL", type);
 				return Collections.emptyList();
 			}
@@ -129,7 +130,7 @@ public class SpringMvcStorageControllerTest {
 		controller.setStorageAlertInfoBuilder(new StorageAlertInfoBuilder() {
 			@Override
 			public Map<String, StorageAlertInfo> buildStorageAlertInfos(Date start, Date end, int minuteCounts,
-					String type, java.util.List<com.dianping.cat.alarm.Alert> alerts) {
+					String type, java.util.List<com.dianping.cat.mybatis.alert.dao.data.AlertDO> alerts) {
 				return Collections.singletonMap("20:00", makeAlertInfo(type, start));
 			}
 		});

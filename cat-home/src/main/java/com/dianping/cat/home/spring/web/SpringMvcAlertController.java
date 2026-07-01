@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.alarm.Alert;
+import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
@@ -74,7 +74,7 @@ public class SpringMvcAlertController {
 		Date endTime = endTime(request.getParameter("endTime"));
 		String domain = emptyToNull(request.getParameter("domain"));
 		String alertType = defaultString(request.getParameter("alertType"));
-		List<Alert> alerts = new ArrayList<Alert>();
+		List<AlertDO> alerts = new ArrayList<AlertDO>();
 
 		try {
 			if (StringUtils.isEmpty(alertType)) {
@@ -139,8 +139,8 @@ public class SpringMvcAlertController {
 		}
 	}
 
-	private Alert buildAlert(HttpServletRequest request) {
-		Alert alert = new Alert();
+	private AlertDO buildAlert(HttpServletRequest request) {
+		AlertDO alert = new AlertDO();
 
 		alert.setAlertTime(alertTime(request.getParameter("alertTime")));
 		alert.setCategory(defaultValue(request.getParameter("category"), "zabbix"));
@@ -186,11 +186,11 @@ public class SpringMvcAlertController {
 		}
 	}
 
-	private Map<String, AlertMinute> generateAlertMinutes(List<Alert> alerts) {
+	private Map<String, AlertMinute> generateAlertMinutes(List<AlertDO> alerts) {
 		DateFormat format = new SimpleDateFormat("MM-dd HH:mm");
 		Map<String, AlertMinute> alertMinutes = new LinkedHashMap<String, AlertMinute>();
 
-		for (Alert alert : alerts) {
+		for (AlertDO alert : alerts) {
 			String time = format.format(alert.getAlertTime());
 			AlertMinute alertMinute = alertMinutes.get(time);
 
@@ -223,7 +223,7 @@ public class SpringMvcAlertController {
 			return "{\"status\":500, \"errorMessage\":\"lack domain\"}";
 		}
 
-		Alert alert = buildAlert(request);
+		AlertDO alert = buildAlert(request);
 
 		try {
 			int count = alertRepository.insert(alert);
@@ -323,31 +323,31 @@ public class SpringMvcAlertController {
 	public static class AlertDomain {
 		private final String name;
 
-		private final Map<String, List<Alert>> alertsByCategory = new HashMap<String, List<Alert>>();
+		private final Map<String, List<AlertDO>> alertsByCategory = new HashMap<String, List<AlertDO>>();
 
 		AlertDomain(String name) {
 			this.name = name;
 		}
 
-		void addAlert(Alert alert) {
+		void addAlert(AlertDO alert) {
 			String category = alert.getCategory();
-			List<Alert> alerts = alertsByCategory.get(category);
+			List<AlertDO> alerts = alertsByCategory.get(category);
 
 			if (alerts == null) {
-				alerts = new ArrayList<Alert>();
+				alerts = new ArrayList<AlertDO>();
 				alertsByCategory.put(category, alerts);
 			}
 			alerts.add(alert);
 		}
 
-		public Map<String, List<Alert>> getAlertCategories() {
+		public Map<String, List<AlertDO>> getAlertCategories() {
 			return alertsByCategory;
 		}
 
 		public int getCount() {
 			int count = 0;
 
-			for (List<Alert> alerts : alertsByCategory.values()) {
+			for (List<AlertDO> alerts : alertsByCategory.values()) {
 				count += alerts.size();
 			}
 			return count;
@@ -367,7 +367,7 @@ public class SpringMvcAlertController {
 			this.time = time;
 		}
 
-		void addAlert(Alert alert) {
+		void addAlert(AlertDO alert) {
 			String domain = alert.getDomain();
 			AlertDomain alertDomain = domains.get(domain);
 
