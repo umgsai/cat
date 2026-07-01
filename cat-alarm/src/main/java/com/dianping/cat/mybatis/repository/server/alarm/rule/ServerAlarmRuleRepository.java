@@ -1,11 +1,9 @@
 package com.dianping.cat.mybatis.repository.server.alarm.rule;
 
-import com.dianping.cat.alarm.ServerAlarmRule;
 import com.dianping.cat.mybatis.server.alarm.rule.dao.ServerAlarmRuleMapper;
 import com.dianping.cat.mybatis.server.alarm.rule.dao.data.ServerAlarmRuleDO;
 import com.dianping.cat.mybatis.SpringBackedRepositorySupport;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import org.slf4j.LoggerFactory;
@@ -23,36 +21,36 @@ public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<Ser
 				"ServerAlarmRuleRepository is using Spring managed ServerAlarmRuleMapper.");
 	}
 
-	public ServerAlarmRule createLocal() {
-		return new ServerAlarmRule();
+	public ServerAlarmRuleDO createLocal() {
+		return new ServerAlarmRuleDO();
 	}
 
-	public int deleteByPK(ServerAlarmRule proto) {
+	public int deleteByPK(ServerAlarmRuleDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getKeyId()));
+			return transactionTemplate.execute(status -> springMapper(LOGGER).deleteByPrimaryKey(proto.getId()));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing deleteByPK for ServerAlarmRule.", e);
 		}
 	}
 
-	public List<ServerAlarmRule> findAll() {
+	public List<ServerAlarmRuleDO> findAll() {
 		ServerAlarmRuleMapper mapper = springMapper(LOGGER);
 		ServerAlarmRuleDO record = new ServerAlarmRuleDO();
 
 		try {
-			return mapper.findAll(record).stream().map(this::toModel).collect(Collectors.toList());
+			return mapper.findAll(record);
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing findAll for ServerAlarmRule.", e);
 		}
 	}
 
-	public ServerAlarmRule findByPK(int keyId) {
+	public ServerAlarmRuleDO findByPK(int keyId) {
 		return findByPK((long) keyId);
 	}
 
-	public ServerAlarmRule findByPK(long keyId) {
+	public ServerAlarmRuleDO findByPK(long keyId) {
 		ServerAlarmRuleMapper mapper = springMapper(LOGGER);
 
 		try {
@@ -64,90 +62,33 @@ public class ServerAlarmRuleRepository extends SpringBackedRepositorySupport<Ser
 		}
 	}
 
-	public int insert(ServerAlarmRule proto) {
+	public int insert(ServerAlarmRuleDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			ServerAlarmRuleDO record = toRecord(proto);
-			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(record));
+			int count = transactionTemplate.execute(status -> springMapper(LOGGER).insert(proto));
 
-			proto.setId(record.getId());
-			proto.setKeyId(record.getId());
 			return count;
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing insert for ServerAlarmRule.", e);
 		}
 	}
 
-	public int updateByPK(ServerAlarmRule proto) {
+	public int updateByPK(ServerAlarmRuleDO proto) {
 		TransactionTemplate transactionTemplate = springTransactionTemplate();
 
 		try {
-			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(toRecord(proto)));
+			return transactionTemplate.execute(status -> springMapper(LOGGER).updateByPrimaryKey(proto));
 		} catch (Exception e) {
 			throw new IllegalStateException("Error when executing updateByPK for ServerAlarmRule.", e);
 		}
 	}
 
-	private ServerAlarmRule requireFound(ServerAlarmRuleDO record, String field, String value) {
+	private ServerAlarmRuleDO requireFound(ServerAlarmRuleDO record, String field, String value) {
 		if (record == null) {
 			throw new EmptyResultDataAccessException("No ServerAlarmRule found by " + field + "(" + value + ").", 1);
 		}
 
-		return toModel(record);
-	}
-
-	private ServerAlarmRule toModel(ServerAlarmRuleDO record) {
-		ServerAlarmRule model = new ServerAlarmRule();
-
-		if (record.getId() != null) {
-			model.setId(record.getId());
-		}
-		if (record.getCategory() != null) {
-			model.setCategory(record.getCategory());
-		}
-		if (record.getEndPoint() != null) {
-			model.setEndPoint(record.getEndPoint());
-		}
-		if (record.getMeasurement() != null) {
-			model.setMeasurement(record.getMeasurement());
-		}
-		if (record.getTags() != null) {
-			model.setTags(record.getTags());
-		}
-		if (record.getContent() != null) {
-			model.setContent(record.getContent());
-		}
-		if (record.getType() != null) {
-			model.setType(record.getType());
-		}
-		if (record.getCreator() != null) {
-			model.setCreator(record.getCreator());
-		}
-		if (record.getCreationDate() != null) {
-			model.setCreationDate(record.getCreationDate());
-		}
-		if (record.getUpdatetime() != null) {
-			model.setUpdatetime(record.getUpdatetime());
-		}
-		model.afterLoad();
-		return model;
-	}
-
-	private ServerAlarmRuleDO toRecord(ServerAlarmRule model) {
-		ServerAlarmRuleDO record = new ServerAlarmRuleDO();
-
-		record.setId(model.getId());
-		record.setCategory(model.getCategory());
-		record.setEndPoint(model.getEndPoint());
-		record.setMeasurement(model.getMeasurement());
-		record.setTags(model.getTags());
-		record.setContent(model.getContent());
-		record.setType(model.getType());
-		record.setCreator(model.getCreator());
-		record.setCreateTime(model.getCreateTime());
-		record.setUpdateTime(model.getUpdateTime());
-		record.setKeyId(model.getKeyId());
 		return record;
 	}
 }
