@@ -32,8 +32,8 @@ import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.mybatis.data.WeeklyReportContentDO;
 import com.dianping.cat.mybatis.WeeklyReportContentRepository;
 import com.dianping.cat.mybatis.WeeklyReportRepository;
-import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.mybatis.OverloadRepository;
+import com.dianping.cat.mybatis.data.OverloadDO;
 
 @Component(WeeklyCapacityUpdater.ID)
 public class WeeklyCapacityUpdater implements CapacityUpdater {
@@ -73,7 +73,7 @@ public class WeeklyCapacityUpdater implements CapacityUpdater {
 					double contentLength = content.getContentLength();
 
 					if (contentLength >= CapacityUpdater.CAPACITY) {
-						Overload overload = overloadRepository.createLocal();
+						OverloadDO overload = overloadRepository.createLocal();
 
 						overload.setReportId(reportId);
 						overload.setReportSize(contentLength);

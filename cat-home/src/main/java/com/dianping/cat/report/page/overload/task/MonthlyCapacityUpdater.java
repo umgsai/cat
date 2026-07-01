@@ -32,8 +32,8 @@ import com.dianping.cat.mybatis.data.MonthReportDO;
 import com.dianping.cat.mybatis.data.MonthlyReportContentDO;
 import com.dianping.cat.mybatis.MonthlyReportContentRepository;
 import com.dianping.cat.mybatis.MonthlyReportRepository;
-import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.mybatis.OverloadRepository;
+import com.dianping.cat.mybatis.data.OverloadDO;
 
 @Component(MonthlyCapacityUpdater.ID)
 public class MonthlyCapacityUpdater implements CapacityUpdater {
@@ -73,7 +73,7 @@ public class MonthlyCapacityUpdater implements CapacityUpdater {
 					double contentLength = content.getContentLength();
 
 					if (contentLength >= CapacityUpdater.CAPACITY) {
-						Overload overload = overloadRepository.createLocal();
+						OverloadDO overload = overloadRepository.createLocal();
 
 						overload.setReportId(reportId);
 						overload.setReportSize(contentLength);

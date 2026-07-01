@@ -24,17 +24,11 @@ public class OverloadDO {
 
 	private Long count;
 
-	private Long keyId;
-
 	private Date startTime;
 
 	private Date endTime;
 
 	private Integer type;
-
-	public Date getCreationDate() {
-		return createTime;
-	}
 
 	public void setCount(Integer count) {
 		this.count = count == null ? null : count.longValue();
@@ -44,24 +38,12 @@ public class OverloadDO {
 		this.count = count;
 	}
 
-	public void setCreationDate(Date creationDate) {
-		createTime = creationDate;
-	}
-
 	public void setId(Integer id) {
 		this.id = id == null ? null : id.longValue();
 	}
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public void setKeyId(Integer keyId) {
-		this.keyId = keyId == null ? null : keyId.longValue();
-	}
-
-	public void setKeyId(Long keyId) {
-		this.keyId = keyId;
 	}
 
 	public void setMaxId(Integer maxId) {

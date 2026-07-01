@@ -38,8 +38,8 @@ import com.dianping.cat.mybatis.MonthlyReportRepository;
 import com.dianping.cat.mybatis.data.WeeklyReportDO;
 import com.dianping.cat.mybatis.WeeklyReportRepository;
 import com.dianping.cat.mybatis.DailyReportRepository;
-import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.mybatis.OverloadRepository;
+import com.dianping.cat.mybatis.data.OverloadDO;
 
 @Component
 public class TableCapacityService {
@@ -103,10 +103,10 @@ public class TableCapacityService {
 		List<OverloadReport> reports = new ArrayList<OverloadReport>();
 
 		try {
-			List<Overload> overloads = overloadRepository
+			List<OverloadDO> overloads = overloadRepository
 									.findIdAndSizeByDuration(startTime, endTime);
 
-			for (Overload overload : overloads) {
+			for (OverloadDO overload : overloads) {
 				try {
 					long reportId = overload.getReportId();
 					int reportType = overload.getReportType();

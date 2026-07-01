@@ -32,8 +32,8 @@ import com.dianping.cat.mybatis.data.HourlyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportContentDO;
 import com.dianping.cat.mybatis.HourlyReportContentRepository;
 import com.dianping.cat.mybatis.HourlyReportRepository;
-import com.dianping.cat.home.dal.report.Overload;
 import com.dianping.cat.mybatis.OverloadRepository;
+import com.dianping.cat.mybatis.data.OverloadDO;
 
 @Component(HourlyCapacityUpdater.ID)
 public class HourlyCapacityUpdater implements CapacityUpdater {
@@ -73,7 +73,7 @@ public class HourlyCapacityUpdater implements CapacityUpdater {
 					double contentLength = content.getContentLength();
 
 					if (contentLength >= CapacityUpdater.CAPACITY) {
-						Overload overload = overloadRepository.createLocal();
+						OverloadDO overload = overloadRepository.createLocal();
 
 						overload.setReportId(reportId);
 						overload.setReportSize(contentLength);
