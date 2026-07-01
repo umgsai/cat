@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.mybatis.alert.dao.AlertMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.alert.dao.data.AlertDO">
+<mapper namespace="com.dianping.cat.mybatis.mapper.AlertMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.data.AlertDO">
         <result column="id" property="id"/>
         <result column="domain" property="domain"/>
         <result column="alert_time" property="alertTime"/>
@@ -40,7 +40,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.mybatis.alert.dao.data.AlertDO" keyProperty="id">
+            parameterType="com.dianping.cat.mybatis.data.AlertDO" keyProperty="id">
         INSERT INTO t_alert
         <include refid="setField"/>
     </insert>
@@ -61,7 +61,7 @@
         delete from t_alert where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.alert.dao.data.AlertDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.data.AlertDO">
         UPDATE t_alert
         <include refid="setField"/>
         WHERE id = #{id}

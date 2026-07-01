@@ -1,7 +1,7 @@
-package com.dianping.cat.mybatis.repository.server.alarm.rule;
+package com.dianping.cat.mybatis;
 
-import com.dianping.cat.mybatis.server.alarm.rule.dao.ServerAlarmRuleMapper;
-import com.dianping.cat.mybatis.server.alarm.rule.dao.data.ServerAlarmRuleDO;
+import com.dianping.cat.mybatis.mapper.ServerAlarmRuleMapper;
+import com.dianping.cat.mybatis.data.ServerAlarmRuleDO;
 import com.dianping.cat.mybatis.SpringBackedRepositorySupport;
 import java.util.List;
 import org.slf4j.Logger;

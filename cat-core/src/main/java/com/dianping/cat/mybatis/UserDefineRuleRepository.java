@@ -1,7 +1,7 @@
-package com.dianping.cat.mybatis.repository.user.define.rule;
+package com.dianping.cat.mybatis;
 
-import com.dianping.cat.mybatis.user.define.rule.dao.UserDefineRuleMapper;
-import com.dianping.cat.mybatis.user.define.rule.dao.data.UserDefineRuleDO;
+import com.dianping.cat.mybatis.mapper.UserDefineRuleMapper;
+import com.dianping.cat.mybatis.data.UserDefineRuleDO;
 import com.dianping.cat.mybatis.SpringBackedRepositorySupport;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;

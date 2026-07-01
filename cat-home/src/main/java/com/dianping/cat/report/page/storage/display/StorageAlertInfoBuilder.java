@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
+import com.dianping.cat.mybatis.data.AlertDO;
 import com.dianping.cat.alarm.service.AlertService;
 import com.dianping.cat.alarm.spi.AlertLevel;
 import com.dianping.cat.helper.TimeHelper;

@@ -20,12 +20,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
+import com.dianping.cat.mybatis.data.AlertDO;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
 import com.dianping.cat.helper.TimeHelper;
-import com.dianping.cat.mybatis.repository.alert.AlertRepository;
+import com.dianping.cat.mybatis.AlertRepository;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.dianping.cat.mybatis.server.alarm.rule.dao.data;
+package com.dianping.cat.mybatis.data;
 
 import java.util.Date;
 

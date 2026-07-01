@@ -1,4 +1,4 @@
-package com.dianping.cat.mybatis.mapper;
+package com.dianping.cat.mybatis;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.dianping.cat.mybatis.data.BusinessConfigDO;
-import com.dianping.cat.mybatis.SpringBackedRepositorySupport;
+import com.dianping.cat.mybatis.mapper.BusinessConfigMapper;
 
 @Component("businessConfigRepository")
 public class BusinessConfigRepository extends SpringBackedRepositorySupport<BusinessConfigMapper> {

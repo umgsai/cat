@@ -29,10 +29,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
+import com.dianping.cat.mybatis.data.AlertDO;
 import com.dianping.cat.alarm.spi.AlertEntity;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
-import com.dianping.cat.mybatis.repository.alert.AlertRepository;
+import com.dianping.cat.mybatis.AlertRepository;
 
 @Component
 public class AlertService {

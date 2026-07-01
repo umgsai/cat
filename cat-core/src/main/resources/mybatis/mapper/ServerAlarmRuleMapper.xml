@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dianping.cat.mybatis.server.alarm.rule.dao.ServerAlarmRuleMapper">
-    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.server.alarm.rule.dao.data.ServerAlarmRuleDO">
+<mapper namespace="com.dianping.cat.mybatis.mapper.ServerAlarmRuleMapper">
+    <resultMap id="BaseResultMap" type="com.dianping.cat.mybatis.data.ServerAlarmRuleDO">
         <result column="id" property="id"/>
         <result column="category" property="category"/>
         <result column="endpoint" property="endPoint"/>
@@ -43,7 +43,7 @@
     </sql>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id"
-            parameterType="com.dianping.cat.mybatis.server.alarm.rule.dao.data.ServerAlarmRuleDO" keyProperty="id">
+            parameterType="com.dianping.cat.mybatis.data.ServerAlarmRuleDO" keyProperty="id">
         INSERT INTO t_server_alarm_rule
         <include refid="setField"/>
     </insert>
@@ -64,7 +64,7 @@
         delete from t_server_alarm_rule where id = #{id}
     </delete>
 
-    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.server.alarm.rule.dao.data.ServerAlarmRuleDO">
+    <update id="updateByPrimaryKey" parameterType="com.dianping.cat.mybatis.data.ServerAlarmRuleDO">
         UPDATE t_server_alarm_rule
         <include refid="setField"/>
         WHERE id = #{id}

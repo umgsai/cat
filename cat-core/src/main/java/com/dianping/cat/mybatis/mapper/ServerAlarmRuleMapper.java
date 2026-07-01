@@ -1,10 +1,10 @@
-package com.dianping.cat.mybatis.server.alarm.rule.dao;
+package com.dianping.cat.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.mybatis.server.alarm.rule.dao.data.ServerAlarmRuleDO;
+import com.dianping.cat.mybatis.data.ServerAlarmRuleDO;
 
 public interface ServerAlarmRuleMapper {
 	int deleteByPrimaryKey(@Param("id") Long id);

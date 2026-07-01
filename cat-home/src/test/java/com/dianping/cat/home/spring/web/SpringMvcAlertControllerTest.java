@@ -13,11 +13,11 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
+import com.dianping.cat.mybatis.data.AlertDO;
 import com.dianping.cat.alarm.spi.AlertChannel;
 import com.dianping.cat.alarm.spi.sender.SendMessageEntity;
 import com.dianping.cat.alarm.spi.sender.SenderManager;
-import com.dianping.cat.mybatis.repository.alert.AlertRepository;
+import com.dianping.cat.mybatis.AlertRepository;
 import org.junit.Assert;
 import org.junit.Test;
 

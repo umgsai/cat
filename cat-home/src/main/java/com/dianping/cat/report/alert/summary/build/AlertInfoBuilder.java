@@ -33,8 +33,8 @@ import org.springframework.stereotype.Component;
 import jakarta.annotation.Resource;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
-import com.dianping.cat.mybatis.repository.alert.AlertRepository;
+import com.dianping.cat.mybatis.data.AlertDO;
+import com.dianping.cat.mybatis.AlertRepository;
 import com.dianping.cat.alarm.spi.AlertType;
 import com.dianping.cat.home.alert.summary.entity.AlertSummary;
 import com.dianping.cat.home.alert.summary.entity.Category;

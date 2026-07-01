@@ -1,10 +1,10 @@
-package com.dianping.cat.mybatis.alert.dao;
+package com.dianping.cat.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
+import com.dianping.cat.mybatis.data.AlertDO;
 
 public interface AlertMapper {
 	int deleteByPrimaryKey(@Param("id") Long id);

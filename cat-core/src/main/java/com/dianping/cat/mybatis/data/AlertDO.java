@@ -1,20 +1,34 @@
-package com.dianping.cat.mybatis.user.define.rule.dao.data;
+package com.dianping.cat.mybatis.data;
 
 import java.util.Date;
 
 import lombok.Data;
 
 @Data
-public class UserDefineRuleDO {
+public class AlertDO {
 	private Long id;
 
+	private String domain;
+
+	private Date alertTime;
+
+	private String category;
+
+	private String type;
+
 	private String content;
+
+	private String metric;
 
 	private Date createTime;
 
 	private Date updateTime;
 
-	private Long maxId;
+	private Date startTime;
+
+	private Date endTime;
+
+	private String[] categories;
 
 	public void setId(Integer id) {
 		this.id = id == null ? null : id.longValue();
@@ -22,13 +36,5 @@ public class UserDefineRuleDO {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public void setMaxId(Integer maxId) {
-		this.maxId = maxId == null ? null : maxId.longValue();
-	}
-
-	public void setMaxId(Long maxId) {
-		this.maxId = maxId;
 	}
 }

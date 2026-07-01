@@ -22,8 +22,8 @@ package com.dianping.cat.report.alert.spi.config;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
-import com.dianping.cat.mybatis.user.define.rule.dao.data.UserDefineRuleDO;
-import com.dianping.cat.mybatis.repository.user.define.rule.UserDefineRuleRepository;
+import com.dianping.cat.mybatis.data.UserDefineRuleDO;
+import com.dianping.cat.mybatis.UserDefineRuleRepository;
 
 @Component
 public class UserDefinedRuleManager {

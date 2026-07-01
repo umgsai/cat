@@ -1,10 +1,10 @@
-package com.dianping.cat.mybatis.user.define.rule.dao;
+package com.dianping.cat.mybatis.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.cat.mybatis.user.define.rule.dao.data.UserDefineRuleDO;
+import com.dianping.cat.mybatis.data.UserDefineRuleDO;
 
 public interface UserDefineRuleMapper {
 	int deleteByPrimaryKey(@Param("id") Long id);

@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.mybatis.data.BusinessConfigDO;
-import com.dianping.cat.mybatis.mapper.BusinessConfigRepository;
+import com.dianping.cat.mybatis.BusinessConfigRepository;
 import com.dianping.cat.home.business.entity.BusinessItem;
 import com.dianping.cat.home.business.entity.BusinessTagConfig;
 import com.dianping.cat.home.business.entity.Tag;

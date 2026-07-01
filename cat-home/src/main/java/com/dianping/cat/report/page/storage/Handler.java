@@ -46,7 +46,7 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
-import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
+import com.dianping.cat.mybatis.data.AlertDO;
 import com.dianping.cat.alarm.service.AlertService;
 import com.dianping.cat.consumer.storage.builder.StorageBuilderManager;
 import com.dianping.cat.consumer.storage.model.entity.StorageReport;

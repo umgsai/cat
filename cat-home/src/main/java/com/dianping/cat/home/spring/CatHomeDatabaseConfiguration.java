@@ -17,12 +17,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
-@MapperScan(basePackages = {
-		"com.dianping.cat.mybatis.mapper",
-		"com.dianping.cat.mybatis.alert.dao",
-		"com.dianping.cat.mybatis.server.alarm.rule.dao",
-		"com.dianping.cat.mybatis.user.define.rule.dao"
-})
+@MapperScan(basePackages = "com.dianping.cat.mybatis.mapper")
 public class CatHomeDatabaseConfiguration {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CatHomeDatabaseConfiguration.class);
 

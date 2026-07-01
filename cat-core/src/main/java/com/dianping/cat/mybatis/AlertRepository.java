@@ -1,7 +1,7 @@
-package com.dianping.cat.mybatis.repository.alert;
+package com.dianping.cat.mybatis;
 
-import com.dianping.cat.mybatis.alert.dao.AlertMapper;
-import com.dianping.cat.mybatis.alert.dao.data.AlertDO;
+import com.dianping.cat.mybatis.mapper.AlertMapper;
+import com.dianping.cat.mybatis.data.AlertDO;
 import com.dianping.cat.mybatis.SpringBackedRepositorySupport;
 import java.util.List;
 import org.slf4j.Logger;
