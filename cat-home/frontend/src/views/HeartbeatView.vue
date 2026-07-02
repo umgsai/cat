@@ -153,6 +153,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import HeartbeatBarChartPanel from '../components/HeartbeatBarChartPanel.vue'
 import ReportSidebar from '../components/ReportSidebar.vue'
+import { getFrequentDomains } from '../utils/domainCookies'
 
 interface DomainLine {
   name: string
@@ -243,13 +244,7 @@ const domainSuggestions = computed(() => {
 })
 
 const frequentDomains = computed(() => {
-  const cookie = readCookie('CAT_DOMAINS')
-  const values = cookie.split('|').map((item) => decodeURIComponent(item).trim()).filter(Boolean)
-
-  if (values.length) {
-    return values
-  }
-  return currentDomain.value ? [currentDomain.value] : []
+  return getFrequentDomains(currentDomain.value)
 })
 
 const shortcuts = computed(() => {
@@ -394,13 +389,6 @@ function legacyHeartbeatUrl(overrides: Record<string, string | undefined>) {
 
 function legacyUrl(path: string) {
   return `${contextPath.value}${path}`
-}
-
-function readCookie(name: string) {
-  const prefix = `${name}=`
-  const item = document.cookie.split('; ').find((entry) => entry.startsWith(prefix))
-
-  return item ? item.substring(prefix.length) : ''
 }
 
 function searchDomains(query: string, callback: (items: Array<{ label: string; value: string; category: string }>) => void) {

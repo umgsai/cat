@@ -54,47 +54,55 @@
           </div>
         </div>
 
-        <section class="transaction-card business-query">
-          <span>开始</span>
-          <el-date-picker
-            v-model="startTimeInput"
-            type="datetime"
-            format="YYYY-MM-DD HH:mm"
-            value-format="YYYY-MM-DD HH:mm"
-            :clearable="false"
-            :editable="true"
-          />
-          <span>结束</span>
-          <el-date-picker
-            v-model="endTimeInput"
-            type="datetime"
-            format="YYYY-MM-DD HH:mm"
-            value-format="YYYY-MM-DD HH:mm"
-            :clearable="false"
-            :editable="true"
-          />
-          <span class="business-query-label">查询条件</span>
-          <el-tooltip content="输入 domain 或者标签，标签以 TAG_ 开头" placement="top">
-            <span class="business-help">?</span>
-          </el-tooltip>
-          <el-autocomplete
-            v-model="queryInput"
-            class="business-search"
-            placeholder="input domain for search"
-            :fetch-suggestions="searchItems"
-            value-key="value"
-            clearable
-            @select="selectQuery"
-            @keyup.enter="queryBusiness"
-          >
-            <template #default="{ item }">
-              <div class="business-suggestion">
-                <span>{{ item.value }}</span>
-                <small>{{ item.category }}</small>
-              </div>
-            </template>
-          </el-autocomplete>
-          <button class="domain-go" type="button" @click="queryBusiness">Go</button>
+        <section class="business-query-panel">
+          <label class="business-field business-field-time">
+            <span class="business-field-label">开始</span>
+            <el-date-picker
+              v-model="startTimeInput"
+              type="datetime"
+              format="YYYY-MM-DD HH:mm"
+              value-format="YYYY-MM-DD HH:mm"
+              :clearable="false"
+              :editable="true"
+            />
+          </label>
+          <label class="business-field business-field-time">
+            <span class="business-field-label">结束</span>
+            <el-date-picker
+              v-model="endTimeInput"
+              type="datetime"
+              format="YYYY-MM-DD HH:mm"
+              value-format="YYYY-MM-DD HH:mm"
+              :clearable="false"
+              :editable="true"
+            />
+          </label>
+          <div class="business-field business-field-search">
+            <span class="business-field-label">
+              查询条件
+              <el-tooltip content="输入 domain 或者标签，标签以 TAG_ 开头" placement="top">
+                <span class="business-help">?</span>
+              </el-tooltip>
+            </span>
+            <el-autocomplete
+              v-model="queryInput"
+              class="business-search"
+              placeholder="input domain for search"
+              :fetch-suggestions="searchItems"
+              value-key="value"
+              clearable
+              @select="selectQuery"
+              @keyup.enter="queryBusiness"
+            >
+              <template #default="{ item }">
+                <div class="business-suggestion">
+                  <span>{{ item.value }}</span>
+                  <small>{{ item.category }}</small>
+                </div>
+              </template>
+            </el-autocomplete>
+          </div>
+          <button class="business-query-submit" type="button" @click="queryBusiness">Go</button>
         </section>
 
         <section v-if="loadError" class="empty-state">

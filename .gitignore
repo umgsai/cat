@@ -32,3 +32,5 @@ _book
 *.epub
 *.mobi
 *.pdf
+cat-home/src/main/webapp/assets/vue/assets/index-*.js
+cat-home/src/main/webapp/assets/vue/assets/index-*.css

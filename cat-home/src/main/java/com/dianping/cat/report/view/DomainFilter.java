@@ -85,18 +85,12 @@ public class DomainFilter implements Filter {
 					String newValue = buildNewCookie(domain, value);
 
 					if (newValue != null) {
-						Cookie c = new Cookie(DOMAIN, newValue);
-
-						c.setMaxAge(EXPIRY);
-						httpResponse.addCookie(c);
+						addDomainCookie(httpRequest, httpResponse, newValue);
 					}
 				}
 			}
 			if (!cookieExist) {
-				Cookie c = new Cookie(DOMAIN, domain);
-
-				c.setMaxAge(EXPIRY);
-				httpResponse.addCookie(c);
+				addDomainCookie(httpRequest, httpResponse, domain);
 			}
 		}
 
@@ -106,6 +100,15 @@ public class DomainFilter implements Filter {
 	}
 
 	public void init(FilterConfig filterConfig) throws ServletException {
+	}
+
+	private void addDomainCookie(HttpServletRequest request, HttpServletResponse response, String value) {
+		Cookie cookie = new Cookie(DOMAIN, value);
+		String contextPath = request.getContextPath();
+
+		cookie.setMaxAge(EXPIRY);
+		cookie.setPath(contextPath == null || contextPath.length() == 0 ? "/" : contextPath);
+		response.addCookie(cookie);
 	}
 
 	private void logClientIpInfo(HttpServletRequest httpRequest) {

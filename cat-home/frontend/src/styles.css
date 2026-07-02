@@ -339,7 +339,7 @@ input {
 
 .cat-content {
   min-width: 0;
-  padding: 14px 18px 28px;
+  padding: 5px 0px 0px 5px;
 }
 
 .query-bar {
@@ -798,11 +798,45 @@ input {
   gap: 6px;
 }
 
-.business-query {
+.business-query,
+.business-query-panel {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+
+.business-query-panel {
+  margin-top: 6px;
+  border: 1px solid #d9e1ec;
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: #ffffff;
+}
+
+.business-field {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.business-field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #172033;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.business-field-time .el-date-editor.el-input {
+  width: 218px;
+}
+
+.business-field-search {
+  flex: 1 1 360px;
 }
 
 .business-query-label {
@@ -825,6 +859,33 @@ input {
 
 .business-search {
   width: min(360px, 100%);
+}
+
+.business-field-search .business-search {
+  width: 100%;
+  min-width: 260px;
+}
+
+.business-query-panel .el-input__wrapper {
+  min-height: 32px;
+  border-radius: 4px;
+}
+
+.business-query-submit {
+  height: 32px;
+  min-width: 56px;
+  border: 1px solid #0f766e;
+  border-radius: 4px;
+  padding: 0 16px;
+  background: #0f766e;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.business-query-submit:hover {
+  background: #115e59;
 }
 
 .business-suggestion {
