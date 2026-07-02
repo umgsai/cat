@@ -33,6 +33,8 @@
           <p>使用 CAT 账号进入监控后台</p>
         </div>
 
+        <div v-if="loginError" class="login-error">登录失败，请检查账号和密码。</div>
+
         <el-form
           ref="formRef"
           :model="form"
@@ -76,9 +78,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import { ElMessage } from 'element-plus'
 import { Lock, User } from '@element-plus/icons-vue'
 
 interface LoginForm {
@@ -101,6 +102,32 @@ const rules: FormRules<LoginForm> = {
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 }
 
+const currentParams = computed(() => new URLSearchParams(window.location.search))
+const contextPath = computed(() => {
+  const path = window.location.pathname
+  const mvcIndex = path.indexOf('/mvc/')
+
+  if (mvcIndex > 0) {
+    return path.substring(0, mvcIndex)
+  }
+  return '/cat'
+})
+const loginError = computed(() => Boolean(currentParams.value.get('error')))
+const returnUrl = computed(() => {
+  const rtnUrl = currentParams.value.get('rtnUrl')
+
+  if (rtnUrl) {
+    return rtnUrl
+  }
+
+  const currentUrl = `${window.location.pathname}${window.location.search}`
+
+  if (!currentUrl.includes('/s/login')) {
+    return currentUrl
+  }
+  return `${contextPath.value}/mvc/vue/s/config?op=projects`
+})
+
 const submit = async () => {
   if (!formRef.value) {
     return
@@ -113,9 +140,27 @@ const submit = async () => {
   }
 
   loading.value = true
-  window.setTimeout(() => {
-    loading.value = false
-    ElMessage.success('登录表单已提交')
-  }, 500)
+  submitLoginForm()
+}
+
+function appendField(formElement: HTMLFormElement, name: string, value: string) {
+  const input = document.createElement('input')
+
+  input.type = 'hidden'
+  input.name = name
+  input.value = value
+  formElement.appendChild(input)
+}
+
+function submitLoginForm() {
+  const formElement = document.createElement('form')
+
+  formElement.method = 'post'
+  formElement.action = `${contextPath.value}/mvc/s/login`
+  appendField(formElement, 'account', form.username)
+  appendField(formElement, 'password', form.password)
+  appendField(formElement, 'rtnUrl', returnUrl.value)
+  document.body.appendChild(formElement)
+  formElement.submit()
 }
 </script>

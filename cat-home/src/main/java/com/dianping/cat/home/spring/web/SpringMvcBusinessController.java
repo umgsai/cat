@@ -1,18 +1,22 @@
 package com.dianping.cat.home.spring.web;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson2.JSON;
 import com.dianping.cat.alarm.rule.entity.Rule;
 import com.dianping.cat.alarm.rule.transform.DefaultJsonBuilder;
 import com.dianping.cat.alarm.spi.decorator.RuleFTLDecorator;
@@ -26,6 +30,9 @@ import com.dianping.cat.report.alert.business.BusinessRuleConfigManager;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 import com.dianping.cat.system.page.config.ConfigHtmlParser;
+import com.dianping.cat.system.page.login.service.Session;
+import com.dianping.cat.system.page.login.service.SigninContext;
+import com.dianping.cat.system.page.login.service.SigninService;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
@@ -52,9 +59,23 @@ public class SpringMvcBusinessController {
 	@Resource
 	private ConfigHtmlParser configHtmlParser;
 
+	@Resource
+	private SigninService signinService;
+
 	@RequestMapping(value = "/s/business", method = { RequestMethod.GET, RequestMethod.POST })
 	public void business(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String action = action(request);
+		Session session = signinService.validate(new SigninContext(request, response));
+
+		if (session == null && "vueData".equals(action)) {
+			writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, JSON.toJSONString(vueUnauthorized(request)));
+			return;
+		}
+
+		if ("vueData".equals(action)) {
+			writeJson(response, JSON.toJSONString(vueBusinessConfig(request)));
+			return;
+		}
 
 		if (!isSupported(action)) {
 			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -62,6 +83,12 @@ public class SpringMvcBusinessController {
 		}
 
 		Map<String, Object> model = businessModel(request, action);
+
+		if (isVueMutationRequest(request, action)) {
+			response.sendRedirect(vueBusinessConfigUrl(request, vueConfigAction(action), domain(request),
+					String.valueOf(model.get("opState"))));
+			return;
+		}
 
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
 			request.setAttribute(entry.getKey(), entry.getValue());
@@ -115,7 +142,7 @@ public class SpringMvcBusinessController {
 					parameter(request, "attributes", ""));
 			listModel(model, domain, businessConfigManager.queryConfigByDomain(domain));
 		} else if ("customAdd".equals(action)) {
-			CustomConfig customConfig = config.findCustomConfig(key(request));
+			CustomConfig customConfig = config == null ? null : config.findCustomConfig(key(request));
 
 			model.put("customConfig", customConfig == null ? new CustomConfig() : customConfig);
 		} else if ("customAddSubmit".equals(action)) {
@@ -128,6 +155,120 @@ public class SpringMvcBusinessController {
 			listModel(model, domain, config);
 		}
 		return model;
+	}
+
+	private Map<String, Object> vueBusinessConfig(HttpServletRequest request) {
+		String vueAction = parameter(request, "vueAction", "list");
+		Map<String, Object> model = businessModel(request, vueAction);
+		@SuppressWarnings("unchecked")
+		List<BusinessItemConfig> configs = (List<BusinessItemConfig>) model.get("configs");
+		@SuppressWarnings("unchecked")
+		List<CustomConfig> customConfigs = (List<CustomConfig>) model.get("customConfigs");
+		@SuppressWarnings("unchecked")
+		Map<String, Set<String>> tags = (Map<String, Set<String>>) model.get("tags");
+		Map<String, Object> json = new LinkedHashMap<String, Object>();
+
+		json.put("contextPath", request.getContextPath());
+		json.put("actionName", "businessList");
+		if ("customAdd".equals(vueAction)) {
+			json.put("actionName", "businessCustomAdd");
+			json.put("customConfig", customItem((CustomConfig) model.get("customConfig"), tags));
+		} else if ("tagConfig".equals(vueAction)) {
+			json.put("actionName", "businessTagConfig");
+			json.put("content", businessTagConfigManager.getConfig().toString());
+		}
+		json.put("businessActionName", vueAction);
+		json.put("domain", model.get("domain"));
+		json.put("domains", model.get("domains"));
+		json.put("configs", businessItems(configs, tags));
+		json.put("customConfigs", customItems(customConfigs, tags));
+		json.put("opState", model.get("opState") == null ? request.getParameter("opState") : model.get("opState"));
+		return json;
+	}
+
+	private Map<String, Object> vueUnauthorized(HttpServletRequest request) {
+		Map<String, Object> json = new LinkedHashMap<String, Object>();
+		String rtnUrl = requestUrl(request);
+		String loginUrl = request.getContextPath() + "/mvc/vue/s/login?rtnUrl="
+				+ URLEncoder.encode(rtnUrl, StandardCharsets.UTF_8);
+
+		json.put("loginUrl", loginUrl);
+		json.put("message", "请先登录后查看业务监控配置。");
+		return json;
+	}
+
+	private List<Map<String, Object>> businessItems(List<BusinessItemConfig> configs, Map<String, Set<String>> tags) {
+		List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
+
+		if (configs == null) {
+			return items;
+		}
+		for (BusinessItemConfig config : configs) {
+			Map<String, Object> item = businessItem(config, tags);
+
+			item.put("showCount", config.getShowCount());
+			item.put("showAvg", config.getShowAvg());
+			item.put("showSum", config.getShowSum());
+			item.put("custom", false);
+			items.add(item);
+		}
+		return items;
+	}
+
+	private List<Map<String, Object>> customItems(List<CustomConfig> configs, Map<String, Set<String>> tags) {
+		List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
+
+		if (configs == null) {
+			return items;
+		}
+		for (CustomConfig config : configs) {
+			Map<String, Object> item = customItem(config, tags);
+
+			item.put("showCount", false);
+			item.put("showAvg", true);
+			item.put("showSum", false);
+			item.put("custom", true);
+			item.put("tags", tagList(tags, config.getId()));
+			items.add(item);
+		}
+		return items;
+	}
+
+	private Map<String, Object> customItem(CustomConfig config, Map<String, Set<String>> tags) {
+		Map<String, Object> item = new LinkedHashMap<String, Object>();
+
+		if (config == null) {
+			config = new CustomConfig();
+		}
+		item.put("id", config.getId());
+		item.put("title", config.getTitle());
+		item.put("viewOrder", config.getViewOrder());
+		item.put("alarm", config.getAlarm());
+		item.put("privilege", config.getPrivilege());
+		item.put("pattern", config.getPattern());
+		item.put("tags", tagList(tags, config.getId()));
+		return item;
+	}
+
+	private Map<String, Object> businessItem(BusinessItemConfig config, Map<String, Set<String>> tags) {
+		Map<String, Object> item = new LinkedHashMap<String, Object>();
+
+		item.put("id", config.getId());
+		item.put("title", config.getTitle());
+		item.put("viewOrder", config.getViewOrder());
+		item.put("alarm", config.getAlarm());
+		item.put("privilege", config.getPrivilege());
+		item.put("tags", tagList(tags, config.getId()));
+		return item;
+	}
+
+	private List<String> tagList(Map<String, Set<String>> tags, String id) {
+		Set<String> values = tags == null ? null : tags.get(id);
+
+		if (values == null) {
+			return new ArrayList<String>();
+		}
+		return new ArrayList<String>(values);
 	}
 
 	private void alertRuleModel(Map<String, Object> model, HttpServletRequest request, String domain) {
@@ -148,6 +289,9 @@ public class SpringMvcBusinessController {
 	}
 
 	List<BusinessItemConfig> businessItemConfigs(BusinessReportConfig config) {
+		if (config == null) {
+			return new ArrayList<BusinessItemConfig>();
+		}
 		List<BusinessItemConfig> configs = new ArrayList<BusinessItemConfig>(config.getBusinessItemConfigs().values());
 
 		Collections.sort(configs, new Comparator<BusinessItemConfig>() {
@@ -160,6 +304,9 @@ public class SpringMvcBusinessController {
 	}
 
 	List<CustomConfig> customConfigs(BusinessReportConfig config) {
+		if (config == null) {
+			return new ArrayList<CustomConfig>();
+		}
 		List<CustomConfig> configs = new ArrayList<CustomConfig>(config.getCustomConfigs().values());
 
 		Collections.sort(configs, new Comparator<CustomConfig>() {
@@ -237,6 +384,10 @@ public class SpringMvcBusinessController {
 		this.configHtmlParser = configHtmlParser;
 	}
 
+	void setSigninService(SigninService signinService) {
+		this.signinService = signinService;
+	}
+
 	private String domain(HttpServletRequest request) {
 		String domain = request.getParameter("domain");
 
@@ -248,8 +399,17 @@ public class SpringMvcBusinessController {
 
 	private boolean isSupported(String action) {
 		return "list".equals(action) || "add".equals(action) || "addSubmit".equals(action) || "delete".equals(action)
-				|| "tagConfig".equals(action) || "alertRuleAdd".equals(action) || "alertRuleAddSubmit".equals(action)
-				|| "customAdd".equals(action) || "customAddSubmit".equals(action) || "customDelete".equals(action);
+				|| "vueData".equals(action) || "tagConfig".equals(action) || "alertRuleAdd".equals(action)
+				|| "alertRuleAddSubmit".equals(action) || "customAdd".equals(action)
+				|| "customAddSubmit".equals(action) || "customDelete".equals(action);
+	}
+
+	private boolean isVueMutationRequest(HttpServletRequest request, String action) {
+		if (!"true".equals(request.getParameter("vue"))) {
+			return false;
+		}
+		return "customAddSubmit".equals(action) || "customDelete".equals(action) || "delete".equals(action)
+				|| "addSubmit".equals(action) || ("tagConfig".equals(action) && request.getParameter("content") != null);
 	}
 
 	private String jsp(String action) {
@@ -276,6 +436,45 @@ public class SpringMvcBusinessController {
 		model.put("configs", businessItemConfigs(config));
 		model.put("customConfigs", customConfigs(config));
 		model.put("tags", businessTagConfigManager.findTagByDomain(domain));
+	}
+
+	private void writeJson(HttpServletResponse response, String body) throws IOException {
+		writeJson(response, HttpServletResponse.SC_OK, body);
+	}
+
+	private void writeJson(HttpServletResponse response, int status, String body) throws IOException {
+		response.setStatus(status);
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/json;charset=utf-8");
+		response.getWriter().write(body);
+	}
+
+	private String requestUrl(HttpServletRequest request) {
+		StringBuilder url = new StringBuilder();
+
+		url.append(request.getRequestURI());
+
+		if (request.getQueryString() != null && request.getQueryString().length() > 0) {
+			url.append('?').append(request.getQueryString());
+		}
+		return url.toString();
+	}
+
+	private String vueBusinessConfigUrl(HttpServletRequest request, String action, String domain, String opState) {
+		StringBuilder url = new StringBuilder(request.getContextPath()).append("/mvc/vue/s/config?op=").append(action);
+
+		url.append("&domain=").append(URLEncoder.encode(domain, StandardCharsets.UTF_8));
+		if (opState != null && opState.length() > 0 && !"null".equals(opState)) {
+			url.append("&opState=").append(URLEncoder.encode(opState, StandardCharsets.UTF_8));
+		}
+		return url.toString();
+	}
+
+	private String vueConfigAction(String action) {
+		if ("tagConfig".equals(action)) {
+			return "businessTagConfig";
+		}
+		return "businessList";
 	}
 
 	private String parameter(HttpServletRequest request, String name, String defaultValue) {
@@ -322,6 +521,9 @@ public class SpringMvcBusinessController {
 
 		if (StringUtils.isEmpty(itemConfig.getId())) {
 			return false;
+		}
+		if (config == null) {
+			config = new BusinessReportConfig();
 		}
 		if (config.getId() != null) {
 			config.addCustomConfig(itemConfig);

@@ -1,7 +1,10 @@
 package com.dianping.cat.home.spring.web;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -53,6 +56,7 @@ import com.dianping.cat.system.page.login.service.SigninContext;
 import com.dianping.cat.system.page.login.service.SigninService;
 import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.system.page.router.config.RouterConfigManager;
+import com.alibaba.fastjson2.JSON;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,14 +136,22 @@ public class SpringMvcConfigController {
 
 	@RequestMapping(value = "/s/config", method = { RequestMethod.GET, RequestMethod.POST })
 	public void config(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String action = action(request);
 		Session session = signinService.validate(new SigninContext(request, response));
 
 		if (session == null) {
+			if ("vueData".equals(action)) {
+				writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, JSON.toJSONString(vueUnauthorized(request)));
+				return;
+			}
 			forwardLogin(request, response);
 			return;
 		}
 
-		String action = action(request);
+		if ("vueData".equals(action)) {
+			writeJson(response, JSON.toJSONString(vueConfigProjects(request)));
+			return;
+		}
 
 		if (!isSupported(action)) {
 			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -147,6 +159,12 @@ public class SpringMvcConfigController {
 		}
 
 		Map<String, Object> model = configModel(request, action);
+
+		if (isVueMutationRequest(request, action)) {
+			response.sendRedirect(vueConfigUrl(request, vueConfigAction(action), parameter(request, "domain", Constants.CAT),
+					String.valueOf(model.get("opState"))));
+			return;
+		}
 
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
 			request.setAttribute(entry.getKey(), entry.getValue());
@@ -291,6 +309,169 @@ public class SpringMvcConfigController {
 		return model;
 	}
 
+	private Map<String, Object> vueConfigProjects(HttpServletRequest request) {
+		String vueAction = parameter(request, "vueAction", "projects");
+		Map<String, Object> model = configModel(request, vueAction);
+		Map<String, Object> json = new LinkedHashMap<String, Object>();
+		ProjectDO project = (ProjectDO) model.get("project");
+		@SuppressWarnings("unchecked")
+		List<ProjectDO> projects = (List<ProjectDO>) model.get("projects");
+		@SuppressWarnings("unchecked")
+		List<DomainGroupRow> domainGroupRows = (List<DomainGroupRow>) model.get("domainGroupRows");
+		@SuppressWarnings("unchecked")
+		List<GroupRow> groupRows = (List<GroupRow>) model.get("groupRows");
+		@SuppressWarnings("unchecked")
+		Collection<Rule> rules = (Collection<Rule>) model.get("rules");
+
+		json.put("contextPath", request.getContextPath());
+		json.put("actionName", vueAction);
+		json.put("domain", model.get("domain"));
+		json.put("project", project == null ? null : project(project));
+		json.put("projectAdd", model.get("projectAdd"));
+		json.put("projects", projectList(projects));
+		json.put("domainGroupRows", domainGroupRowList(domainGroupRows));
+		json.put("groupRows", groupRowList(groupRows));
+		json.put("transactionRules", transactionRuleRows(rules));
+		json.put("transactionRuleId", model.get("ruleId"));
+		json.put("transactionRuleAvailable", model.get("available"));
+		json.put("transactionRuleConfigs", model.get("configs"));
+		json.put("content", configContent(vueAction, model));
+		json.put("opState", model.get("opState") == null ? request.getParameter("opState") : model.get("opState"));
+		return json;
+	}
+
+	private String configContent(String action, Map<String, Object> model) {
+		if ("displayPolicy".equals(action)) {
+			return displayPolicyManager.getHeartbeatDisplayPolicy().toString();
+		}
+		Object content = model.get("content");
+
+		return content == null ? "" : content.toString();
+	}
+
+	private Map<String, Object> vueUnauthorized(HttpServletRequest request) {
+		Map<String, Object> json = new LinkedHashMap<String, Object>();
+		String rtnUrl = requestUrl(request);
+		String loginUrl = request.getContextPath() + "/mvc/vue/s/login?rtnUrl="
+				+ URLEncoder.encode(rtnUrl, StandardCharsets.UTF_8);
+
+		json.put("loginUrl", loginUrl);
+		json.put("message", "请先登录后查看项目配置。");
+		return json;
+	}
+
+	private List<Map<String, Object>> projectList(List<ProjectDO> projects) {
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+		if (projects == null) {
+			return list;
+		}
+		for (ProjectDO project : projects) {
+			list.add(project(project));
+		}
+		return list;
+	}
+
+	private List<Map<String, Object>> domainGroupRowList(List<DomainGroupRow> rows) {
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+		if (rows == null) {
+			return list;
+		}
+		for (DomainGroupRow row : rows) {
+			Map<String, Object> item = new LinkedHashMap<String, Object>();
+
+			item.put("domain", row.getDomain());
+			item.put("groups", split(row.getGroups()));
+			list.add(item);
+		}
+		return list;
+	}
+
+	private List<Map<String, Object>> groupRowList(List<GroupRow> rows) {
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+		if (rows == null) {
+			return list;
+		}
+		for (GroupRow row : rows) {
+			Map<String, Object> item = new LinkedHashMap<String, Object>();
+
+			item.put("id", row.getId());
+			item.put("ips", split(row.getIps()));
+			list.add(item);
+		}
+		return list;
+	}
+
+	private List<Map<String, Object>> transactionRuleRows(Collection<Rule> rules) {
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+		if (rules == null) {
+			return list;
+		}
+		for (Rule rule : rules) {
+			String id = rule.getId();
+			String[] conditions = id == null ? new String[0] : id.split(";", -1);
+			Map<String, Object> item = new LinkedHashMap<String, Object>();
+
+			item.put("id", id);
+			item.put("domain", condition(conditions, 0));
+			item.put("type", condition(conditions, 1));
+			item.put("name", condition(conditions, 2));
+			item.put("monitor", condition(conditions, 3));
+			item.put("available", rule.getAvailable() == null ? Boolean.TRUE : rule.getAvailable());
+			list.add(item);
+		}
+		return list;
+	}
+
+	private String condition(String[] conditions, int index) {
+		return index < conditions.length ? conditions[index] : "";
+	}
+
+	private Map<String, Object> project(ProjectDO project) {
+		Map<String, Object> item = new LinkedHashMap<String, Object>();
+
+		item.put("id", project.getId());
+		item.put("domain", project.getDomain());
+		item.put("cmdbDomain", project.getCmdbDomain());
+		item.put("level", project.getLevel());
+		item.put("bu", project.getBu());
+		item.put("cmdbProductline", project.getCmdbProductline());
+		item.put("owner", project.getOwner());
+		item.put("email", project.getEmail());
+		item.put("phone", project.getPhone());
+		return item;
+	}
+
+	private List<String> split(String value) {
+		List<String> result = new ArrayList<String>();
+
+		if (value == null || value.length() == 0) {
+			return result;
+		}
+		for (String item : value.split(",")) {
+			String trimmed = item.trim();
+
+			if (trimmed.length() > 0) {
+				result.add(trimmed);
+			}
+		}
+		return result;
+	}
+
+	private void writeJson(HttpServletResponse response, String body) throws IOException {
+		writeJson(response, HttpServletResponse.SC_OK, body);
+	}
+
+	private void writeJson(HttpServletResponse response, int status, String body) throws IOException {
+		response.setStatus(status);
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/json;charset=utf-8");
+		response.getWriter().write(body);
+	}
+
 	void setProjectService(ProjectService projectService) {
 		this.projectService = projectService;
 	}
@@ -391,7 +572,7 @@ public class SpringMvcConfigController {
 	}
 
 	private boolean isSupported(String action) {
-		return "projects".equals(action) || "projectAdd".equals(action) || "updateSubmit".equals(action)
+		return "projects".equals(action) || "vueData".equals(action) || "projectAdd".equals(action) || "updateSubmit".equals(action)
 				|| "projectDelete".equals(action) || "displayPolicy".equals(action) || "alertPolicy".equals(action)
 				|| "alertDefaultReceivers".equals(action) || "alertSenderConfigUpdate".equals(action)
 				|| "serverConfigUpdate".equals(action) || "sampleConfigUpdate".equals(action)
@@ -401,6 +582,14 @@ public class SpringMvcConfigController {
 		|| isDomainGroupAction(action) || isExceptionAction(action) || isEventRuleAction(action)
 				|| isHeartbeatRuleAction(action) || isTransactionRuleAction(action)
 				|| isStorageRuleAction(action) || isTopologyGraphAction(action);
+	}
+
+	private boolean isVueMutationRequest(HttpServletRequest request, String action) {
+		if (!"true".equals(request.getParameter("vue"))) {
+			return false;
+		}
+		return "transactionRuleDelete".equals(action) || "transactionRuleSubmit".equals(action)
+				|| ("displayPolicy".equals(action) && request.getParameter("content") != null);
 	}
 
 	private void configDomainGroupModel(HttpServletRequest request, String action, Map<String, Object> model,
@@ -760,6 +949,7 @@ public class SpringMvcConfigController {
 		}
 		model.put("ruleId", ruleId);
 		model.put("available", available);
+		model.put("configs", configs);
 		model.put("content", ruleDecorator.generateConfigsHtml(configs));
 	}
 
@@ -1305,6 +1495,24 @@ public class SpringMvcConfigController {
 			url.append('?').append(request.getQueryString());
 		}
 		return url.toString();
+	}
+
+	private String vueConfigUrl(HttpServletRequest request, String action, String domain, String opState) {
+		StringBuilder url = new StringBuilder(request.getContextPath()).append("/mvc/vue/s/config?op=")
+				.append(URLEncoder.encode(action, StandardCharsets.UTF_8));
+
+		url.append("&domain=").append(URLEncoder.encode(domain, StandardCharsets.UTF_8));
+		if (opState != null && opState.length() > 0 && !"null".equals(opState)) {
+			url.append("&opState=").append(URLEncoder.encode(opState, StandardCharsets.UTF_8));
+		}
+		return url.toString();
+	}
+
+	private String vueConfigAction(String action) {
+		if ("transactionRuleDelete".equals(action) || "transactionRuleSubmit".equals(action)) {
+			return "transactionRule";
+		}
+		return action;
 	}
 
 	private String join(List<String> values) {

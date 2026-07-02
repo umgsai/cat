@@ -7,8 +7,8 @@
       </div>
       <nav class="cat-sections" aria-label="主导航">
         <a class="is-active" :href="heartbeatUrl({})">Application</a>
-        <a :href="legacyUrl('/mvc/s/config?op=projects')">Configs</a>
-        <a :href="legacyUrl('/mvc/r/home?op=view&docName=index')">Documents</a>
+        <a :href="legacyUrl('/mvc/vue/s/config?op=projects')">Configs</a>
+        <a :href="legacyUrl('/mvc/vue/r/home?op=view&docName=index')">Documents</a>
       </nav>
       <div class="cat-actions">
         <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>

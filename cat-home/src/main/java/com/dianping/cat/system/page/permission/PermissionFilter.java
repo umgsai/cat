@@ -27,6 +27,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,8 +92,16 @@ public class PermissionFilter implements Filter {
 		SigninContext ctx = new SigninContext(httpRequest, httpResponse);
 		String requestURI = httpRequest.getRequestURI();
 
-		if (LOG_IN_URL.equals(requestURI)) {
+		if (isLoginRequest(httpRequest) || isVueDataRequest(httpRequest)) {
 			chain.doFilter(request, response);
+		} else if (isVueSystemPageRequest(httpRequest)) {
+			Token token = m_tokenManager.getToken(ctx, Token.TOKEN);
+
+			if (token == null) {
+				httpResponse.sendRedirect(loginUrl(httpRequest));
+			} else {
+				chain.doFilter(request, response);
+			}
 		} else {
 
 			String op = httpRequest.getParameter(OP);
@@ -100,7 +110,7 @@ public class PermissionFilter implements Filter {
 				op = DEFAULT_OP;
 			}
 
-			int resourceRole = m_resourceConfigManager.getRole(requestURI, op);
+			int resourceRole = resourceRole(httpRequest, requestURI, op);
 
 			if (resourceRole == ResourceConfigManager.DEFAULT_RESOURCE_ROLE) {
 				chain.doFilter(request, response);
@@ -108,18 +118,140 @@ public class PermissionFilter implements Filter {
 				Token token = m_tokenManager.getToken(ctx, Token.TOKEN);
 
 				if (token == null) {
-					request.getRequestDispatcher(m_loginPage).forward(request, response);
+					httpResponse.sendRedirect(loginUrl(httpRequest));
 				} else {
 					int userRole = m_userConfigManager.getRole(token.getUserName());
 
 					if (userRole >= resourceRole) {
 						chain.doFilter(request, response);
 					} else {
-						request.getRequestDispatcher(m_errorPage).forward(request, response);
+						if (isVueSourceRequest(httpRequest)) {
+							httpResponse.sendRedirect(vuePermissionErrorUrl(httpRequest));
+						} else {
+							request.getRequestDispatcher(m_errorPage).forward(request, response);
+						}
 					}
 				}
 			}
 		}
+	}
+
+	private String currentUrl(HttpServletRequest request) {
+		StringBuilder url = new StringBuilder(request.getRequestURI());
+		String queryString = request.getQueryString();
+
+		if (queryString != null && queryString.length() > 0) {
+			url.append('?').append(queryString);
+		}
+		return url.toString();
+	}
+
+	private boolean isLoginRequest(HttpServletRequest request) {
+		String requestURI = request.getRequestURI();
+		String contextPath = request.getContextPath();
+
+		return LOG_IN_URL.equals(requestURI) || (contextPath + "/s/login").equals(requestURI)
+				|| (contextPath + "/mvc/s/login").equals(requestURI)
+				|| (contextPath + "/mvc/vue/s/login").equals(requestURI);
+	}
+
+	private boolean isVueSystemPageRequest(HttpServletRequest request) {
+		String requestURI = request.getRequestURI();
+		String contextPath = request.getContextPath();
+
+		return "GET".equalsIgnoreCase(request.getMethod()) && requestURI.startsWith(contextPath + "/mvc/vue/s/");
+	}
+
+	private boolean isVueDataRequest(HttpServletRequest request) {
+		String requestURI = request.getRequestURI();
+		String contextPath = request.getContextPath();
+
+		if (!"GET".equalsIgnoreCase(request.getMethod()) || !"vueData".equals(request.getParameter(OP))) {
+			return false;
+		}
+		return (contextPath + "/mvc/s/config").equals(requestURI)
+				|| (contextPath + "/mvc/s/business").equals(requestURI);
+	}
+
+	private boolean isVueSourceRequest(HttpServletRequest request) {
+		String contextPath = request.getContextPath();
+		String referer = request.getHeader("Referer");
+
+		return "true".equals(request.getParameter("vue"))
+				|| (referer != null && referer.contains(contextPath + "/mvc/vue/"));
+	}
+
+	private String loginUrl(HttpServletRequest request) {
+		String rtnUrl = currentUrl(request);
+		StringBuilder url = new StringBuilder(request.getContextPath()).append(m_loginPage);
+
+		if (rtnUrl.length() > 0) {
+			url.append("?rtnUrl=").append(URLEncoder.encode(rtnUrl, StandardCharsets.UTF_8));
+		}
+		return url.toString();
+	}
+
+	private String vuePermissionErrorUrl(HttpServletRequest request) {
+		return request.getContextPath() + "/mvc/vue/s/permission?op=error";
+	}
+
+	private int resourceRole(HttpServletRequest request, String requestURI, String op) {
+		int role = configuredRole(requestURI, op);
+
+		if (role != ResourceConfigManager.DEFAULT_RESOURCE_ROLE) {
+			return role;
+		}
+
+		String contextPath = request.getContextPath();
+		String path = requestURI;
+
+		if (contextPath != null && contextPath.length() > 0 && path.startsWith(contextPath)) {
+			path = path.substring(contextPath.length());
+			role = configuredRole(path, op);
+
+			if (role != ResourceConfigManager.DEFAULT_RESOURCE_ROLE) {
+				return role;
+			}
+		}
+
+		String legacyPath = legacyPath(path);
+
+		if (!legacyPath.equals(path)) {
+			role = configuredRole(legacyPath, op);
+
+			if (role != ResourceConfigManager.DEFAULT_RESOURCE_ROLE) {
+				return role;
+			}
+			if (contextPath != null && contextPath.length() > 0) {
+				return configuredRole(contextPath + legacyPath, op);
+			}
+		}
+		return role;
+	}
+
+	private int configuredRole(String path, String op) {
+		int role = m_resourceConfigManager.getRole(path, op);
+
+		if (role == ResourceConfigManager.DEFAULT_RESOURCE_ROLE && !DEFAULT_OP.equals(op)) {
+			return m_resourceConfigManager.getRole(path, DEFAULT_OP);
+		}
+		return role;
+	}
+
+	private String legacyPath(String path) {
+		if (path.startsWith("/mvc/vue/s/")) {
+			return "/s/" + path.substring("/mvc/vue/s/".length());
+		}
+		if (path.startsWith("/mvc/vue/r/")) {
+			return "/r/" + path.substring("/mvc/vue/r/".length());
+		}
+		if (path.startsWith("/mvc/s/")) {
+			return "/s/" + path.substring("/mvc/s/".length());
+		}
+		if (path.startsWith("/mvc/r/")) {
+			return "/r/" + path.substring("/mvc/r/".length());
+		}
+		return path;
 	}
 
 	@Override
