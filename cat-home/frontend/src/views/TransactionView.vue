@@ -53,11 +53,11 @@
           </div>
           <div class="time-shortcuts">
             <span>
-              【<a class="mode-link" :href="historyModeUrl">切到历史模式</a>】
+              【<a class="mode-link" :href="modeSwitchUrl">{{ modeSwitchText }}</a>】
             </span>
             <span v-for="shortcut in shortcuts" :key="shortcut.label">
               [
-              <a :href="shortcut.href">{{ shortcut.label }}</a>
+              <a :class="{ current: shortcut.current }" :href="shortcut.href">{{ shortcut.label }}</a>
               ]
             </span>
           </div>
@@ -167,7 +167,9 @@
                 </tr>
                 <tr v-else>
                   <th class="left">
-                    <a :href="graphUrl()">[:: show ::]</a>
+                    <a :href="graphUrl()" @click="toggleGraph('type-total', graphUrl(), $event)">
+                      {{ graphLinkText('type-total') }}
+                    </a>
                     <a :href="sortUrl('type')">Name</a>
                   </th>
                   <th class="right"><a :href="sortUrl('total')">Total</a></th>
@@ -185,35 +187,67 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="row in report.rows" :key="`${row.index}-${row.id}`">
-                  <td class="left long-text" :class="{ center: row.totalRow }">
-                    <template v-if="!isNameView">
-                      <a :href="graphUrl(row)">[:: show ::]</a>
-                      <a :href="transactionUrl({ type: row.id, ip: currentIp })">{{ row.id }}</a>
-                    </template>
-                    <template v-else-if="row.totalRow">
-                      {{ truncate(row.id) }}
-                    </template>
-                    <template v-else>
-                      <a :href="graphUrl(row)">[:: show ::]</a>
-                      <span>{{ truncate(row.id) }}</span>
-                    </template>
+                <tr v-if="isNameView && activeGraphKey === 'type-total'">
+                  <td :colspan="isNameView ? 13 : 12">
+                    <TransactionGraphPanel
+                      :error="graphErrors['type-total']"
+                      :graph="graphCache['type-total']"
+                      :loading="graphLoadingKey === 'type-total'"
+                      :format-decimal="formatDecimal"
+                      :format-integer="formatInteger"
+                      :format-rate="formatRate"
+                    />
                   </td>
-                  <td class="right">{{ formatInteger(row.totalCount) }}</td>
-                  <td class="right">{{ formatInteger(row.failCount) }}</td>
-                  <td class="right">{{ formatRate(row.failPercent, 4) }}</td>
-                  <td class="right sample-link">
-                    <a v-if="row.messageUrl" :href="logViewUrl(row.messageUrl)">Log View</a>
-                  </td>
-                  <td class="right">{{ formatDecimal(row.min, 1) }}</td>
-                  <td class="right">{{ formatDecimal(row.max, 1) }}</td>
-                  <td class="right">{{ formatDecimal(row.avg, 1) }}</td>
-                  <td class="right">{{ isNameView && row.totalRow ? '-' : formatDecimal(row.line95Value, 1) }}</td>
-                  <td class="right">{{ isNameView && row.totalRow ? '-' : formatDecimal(row.line99Value, 1) }}</td>
-                  <td class="right">{{ formatDecimal(row.std, 1) }}</td>
-                  <td class="right">{{ formatDecimal(row.tps, 1) }}</td>
-                  <td v-if="isNameView" class="right">{{ formatRate(row.totalPercent, 2) }}</td>
                 </tr>
+                <template v-for="row in report.rows" :key="`${row.index}-${row.id}`">
+                  <tr>
+                    <td class="left long-text" :class="{ center: row.totalRow }">
+                      <template v-if="!isNameView">
+                        <a :href="graphUrl(row)" @click="toggleGraph(rowGraphKey(row), graphUrl(row), $event)">
+                          {{ graphLinkText(rowGraphKey(row)) }}
+                        </a>
+                        <a :href="transactionUrl({ type: row.id, ip: currentIp })">{{ row.id }}</a>
+                      </template>
+                      <template v-else-if="row.totalRow">
+                        {{ truncate(row.id) }}
+                      </template>
+                      <template v-else>
+                        <a :href="graphUrl(row)" @click="toggleGraph(rowGraphKey(row), graphUrl(row), $event)">
+                          {{ graphLinkText(rowGraphKey(row)) }}
+                        </a>
+                        <span>{{ truncate(row.id) }}</span>
+                      </template>
+                    </td>
+                    <td class="right">{{ formatInteger(row.totalCount) }}</td>
+                    <td class="right">{{ formatInteger(row.failCount) }}</td>
+                    <td class="right">{{ formatRate(row.failPercent, 4) }}</td>
+                    <td class="right sample-link">
+                      <a v-if="row.messageUrl" :href="logViewUrl(row.messageUrl)" target="_blank" rel="noreferrer">
+                        Log View
+                      </a>
+                    </td>
+                    <td class="right">{{ formatDecimal(row.min, 1) }}</td>
+                    <td class="right">{{ formatDecimal(row.max, 1) }}</td>
+                    <td class="right">{{ formatDecimal(row.avg, 1) }}</td>
+                    <td class="right">{{ isNameView && row.totalRow ? '-' : formatDecimal(row.line95Value, 1) }}</td>
+                    <td class="right">{{ isNameView && row.totalRow ? '-' : formatDecimal(row.line99Value, 1) }}</td>
+                    <td class="right">{{ formatDecimal(row.std, 1) }}</td>
+                    <td class="right">{{ formatDecimal(row.tps, 1) }}</td>
+                    <td v-if="isNameView" class="right">{{ formatRate(row.totalPercent, 2) }}</td>
+                  </tr>
+                  <tr v-if="activeGraphKey === rowGraphKey(row)">
+                    <td :colspan="isNameView ? 13 : 12">
+                      <TransactionGraphPanel
+                        :error="graphErrors[rowGraphKey(row)]"
+                        :graph="graphCache[rowGraphKey(row)]"
+                        :loading="graphLoadingKey === rowGraphKey(row)"
+                        :format-decimal="formatDecimal"
+                        :format-integer="formatInteger"
+                        :format-rate="formatRate"
+                      />
+                    </td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
@@ -227,6 +261,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import ReportSidebar from '../components/ReportSidebar.vue'
+import TransactionGraphPanel from '../components/TransactionGraphPanel.vue'
 
 interface DomainLine {
   name: string
@@ -285,6 +320,29 @@ interface TransactionReport {
   type: string
 }
 
+interface TransactionDistributionDetail {
+  avg: number
+  failCount: number
+  failPercent: number
+  ip: string
+  max: number
+  min: number
+  std: number
+  totalCount: number
+}
+
+interface TransactionGraph {
+  distributionDetails: TransactionDistributionDetail[]
+  errorTrend: string
+  graph1: string
+  graph2: string
+  graph3: string
+  graph4: string
+  hitTrend: string
+  historyMode: boolean
+  responseTrend: string
+}
+
 const report = ref<TransactionReport | null>(null)
 const loading = ref(false)
 const loadError = ref('')
@@ -292,6 +350,15 @@ const domainInput = ref('')
 const queryNameInput = ref('')
 const showDomainPanel = ref(false)
 const showFrequentPanel = ref(false)
+const activeGraphKey = ref('')
+const graphCache = ref<Record<string, TransactionGraph>>({})
+const graphErrors = ref<Record<string, string>>({})
+const graphLoadingKey = ref('')
+const historyNavs = [
+  { label: 'month', last: '-1m', next: '+1m' },
+  { label: 'week', last: '-1w', next: '+1w' },
+  { label: 'day', last: '-1d', next: '+1d' }
+]
 
 const contextPath = computed(() => {
   const path = window.location.pathname
@@ -312,6 +379,17 @@ const currentType = computed(() => report.value?.type || currentParams.value.get
 const currentQueryName = computed(() => report.value?.queryName || currentParams.value.get('queryname') || '')
 const domainGroups = computed(() => report.value?.domainGroups || [])
 const isNameView = computed(() => Boolean(currentType.value))
+const isHistoryMode = computed(() => Boolean(report.value?.historyMode))
+const currentHistoryNav = computed(() => historyNavs.find((item) => item.label === currentReportType.value) || historyNavs[2])
+const modeSwitchText = computed(() => isHistoryMode.value ? '切到小时模式' : '切到历史模式')
+const modeSwitchUrl = computed(() => {
+  const params = new URLSearchParams()
+
+  params.set('op', isHistoryMode.value ? 'view' : 'history')
+  params.set('domain', currentDomain.value)
+  params.set('ip', currentIp.value)
+  return `${contextPath.value}/mvc/vue/r/t?${params.toString()}`
+})
 
 const domainSuggestions = computed(() => {
   const suggestions: Array<{ label: string; value: string; category: string }> = []
@@ -341,18 +419,42 @@ const shortcuts = computed(() => {
   const ip = currentIp.value
   const domain = currentDomain.value
 
+  if (isHistoryMode.value) {
+    const currentNav = currentHistoryNav.value
+
+    return [
+      ...historyNavs.map((nav) => ({
+        current: nav.label === currentReportType.value,
+        href: historyUrl({ date, domain, ip, reportType: nav.label }),
+        label: nav.label
+      })),
+      {
+        current: false,
+        href: historyUrl({ date, domain, ip, queryname: currentQueryName.value, reportType: currentReportType.value, step: '-1', type: currentType.value }),
+        label: currentNav.last
+      },
+      {
+        current: false,
+        href: historyUrl({ date, domain, ip, queryname: currentQueryName.value, reportType: currentReportType.value, step: '1', type: currentType.value }),
+        label: currentNav.next
+      },
+      {
+        current: false,
+        href: historyUrl({ domain, ip, queryname: currentQueryName.value, reportType: currentReportType.value, type: currentType.value }),
+        label: 'now'
+      }
+    ]
+  }
   return [
-    { label: '-7d', href: transactionUrl({ date, ip, step: '-168', domain }) },
-    { label: '-1d', href: transactionUrl({ date, ip, step: '-24', domain }) },
-    { label: '-1h', href: transactionUrl({ date, ip, step: '-1', domain }) },
-    { label: '+1h', href: transactionUrl({ date, ip, step: '1', domain }) },
-    { label: '+1d', href: transactionUrl({ date, ip, step: '24', domain }) },
-    { label: '+7d', href: transactionUrl({ date, ip, step: '168', domain }) },
-    { label: 'now', href: transactionUrl({ domain, ip }) }
+    { current: false, label: '-7d', href: transactionUrl({ date, ip, step: '-168', domain }) },
+    { current: false, label: '-1d', href: transactionUrl({ date, ip, step: '-24', domain }) },
+    { current: false, label: '-1h', href: transactionUrl({ date, ip, step: '-1', domain }) },
+    { current: false, label: '+1h', href: transactionUrl({ date, ip, step: '1', domain }) },
+    { current: false, label: '+1d', href: transactionUrl({ date, ip, step: '24', domain }) },
+    { current: false, label: '+7d', href: transactionUrl({ date, ip, step: '168', domain }) },
+    { current: false, label: 'now', href: hourlyNowUrl() }
   ]
 })
-
-const historyModeUrl = computed(() => transactionUrl({ op: 'history', domain: currentDomain.value, ip: currentIp.value }))
 
 onMounted(() => {
   loadReport()
@@ -415,7 +517,7 @@ function domainUrl(domain: string) {
 function graphUrl(row?: TransactionRow) {
   const params = baseTransactionParams()
 
-  params.set('op', 'graphs')
+  params.set('op', report.value?.historyMode ? 'historyGraph' : 'graphs')
   if (currentType.value) {
     params.set('type', currentType.value)
   } else if (row?.id) {
@@ -425,6 +527,58 @@ function graphUrl(row?: TransactionRow) {
     params.set('name', row.id)
   }
   return `${contextPath.value}/mvc/r/t?${params.toString()}`
+}
+
+function graphDataUrl(link: string) {
+  const url = new URL(link, window.location.origin)
+  const action = url.searchParams.get('op') || 'graphs'
+
+  url.searchParams.set('op', 'vueGraphData')
+  url.searchParams.set('vueAction', action)
+  return `${url.pathname}?${url.searchParams.toString()}`
+}
+
+function graphLinkText(key: string) {
+  return activeGraphKey.value === key ? '[:: hide ::]' : '[:: show ::]'
+}
+
+function historyUrl(overrides: Record<string, string | undefined>) {
+  const params = new URLSearchParams()
+
+  params.set('op', 'history')
+  params.set('domain', overrides.domain || currentDomain.value)
+  params.set('ip', overrides.ip || currentIp.value)
+  if (overrides.date) {
+    params.set('date', overrides.date)
+  }
+  if (overrides.reportType) {
+    params.set('reportType', overrides.reportType)
+  }
+  if (overrides.step) {
+    params.set('step', overrides.step)
+  }
+  if (overrides.type) {
+    params.set('type', overrides.type)
+  }
+  if (overrides.queryname) {
+    params.set('queryname', overrides.queryname)
+  }
+  return `${contextPath.value}/mvc/vue/r/t?${params.toString()}`
+}
+
+function hourlyNowUrl() {
+  const params = new URLSearchParams()
+
+  params.set('op', 'view')
+  params.set('domain', currentDomain.value)
+  params.set('ip', currentIp.value)
+  if (currentQueryName.value) {
+    params.set('queryname', currentQueryName.value)
+  }
+  if (currentType.value) {
+    params.set('type', currentType.value)
+  }
+  return `${contextPath.value}/mvc/vue/r/t?${params.toString()}`
 }
 
 function hostLabel(ip: string) {
@@ -438,7 +592,7 @@ function legacyUrl(path: string) {
 }
 
 function logViewUrl(messageUrl: string) {
-  return `${contextPath.value}/mvc/r/m/${messageUrl}?domain=${encodeURIComponent(currentDomain.value)}`
+  return `${contextPath.value}/mvc/vue/r/m/${messageUrl}?domain=${encodeURIComponent(currentDomain.value)}`
 }
 
 function readCookie(name: string) {
@@ -461,6 +615,10 @@ function searchDomains(query: string, callback: (items: Array<{ label: string; v
 function selectDomain(item: { value: string }) {
   domainInput.value = item.value
   goDomain()
+}
+
+function rowGraphKey(row: TransactionRow) {
+  return isNameView.value ? `name-${row.index}-${row.id}` : `type-${row.index}-${row.id}`
 }
 
 function sortUrl(sort: string) {
@@ -500,6 +658,43 @@ function transactionUrl(overrides: Record<string, string | undefined>) {
     params.set('queryname', overrides.queryname)
   }
   return `${contextPath.value}/mvc/vue/r/t?${params.toString()}`
+}
+
+async function toggleGraph(key: string, link: string, event: MouseEvent) {
+  if (event.ctrlKey || event.metaKey) {
+    return
+  }
+  event.preventDefault()
+
+  if (activeGraphKey.value === key) {
+    activeGraphKey.value = ''
+    return
+  }
+  activeGraphKey.value = key
+  if (graphCache.value[key]) {
+    return
+  }
+
+  graphLoadingKey.value = key
+  graphErrors.value = { ...graphErrors.value, [key]: '' }
+
+  try {
+    const response = await fetch(graphDataUrl(link), { headers: { Accept: 'application/json' } })
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+    const graph = await response.json() as TransactionGraph
+
+    graphCache.value = { ...graphCache.value, [key]: graph }
+  } catch (error) {
+    graphErrors.value = {
+      ...graphErrors.value,
+      [key]: `图表数据加载失败: ${error instanceof Error ? error.message : String(error)}`
+    }
+  } finally {
+    graphLoadingKey.value = ''
+  }
 }
 
 function baseTransactionParams() {

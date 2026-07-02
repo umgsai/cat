@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.tree.MessageId;
@@ -17,6 +18,7 @@ import com.dianping.cat.report.service.ModelRequest;
 import com.dianping.cat.report.service.ModelResponse;
 import com.dianping.cat.report.service.ModelService;
 import jakarta.annotation.Resource;
+import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -29,12 +31,22 @@ public class SpringMvcLogviewController {
 	@Resource
 	private ServerConfigManager serverConfigManager;
 
+	@Resource
+	private JsonBuilder jsonBuilder;
+
 	@Resource(name = "logviewModelService")
 	private ModelService<String> logviewModelService;
 
 	@GetMapping("/mvc/r/m/{messageId}")
 	public void logview(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		String action = parameter(request, "op", "view");
+
+		if ("vueData".equals(action)) {
+			writeJson(response, jsonBuilder.toJson(vueLogviewReport(request)));
+			return;
+		}
+
 		String messageId = messageId(request);
 		boolean waterfall = booleanParameter(request, "waterfall", false);
 		boolean showHeader = !"no".equals(request.getParameter("header"));
@@ -154,5 +166,50 @@ public class SpringMvcLogviewController {
 
 	void setService(ModelService<String> service) {
 		logviewModelService = service;
+	}
+
+	private String rewriteVueLogViewLinks(HttpServletRequest request, String logView) {
+		if (logView == null || logView.length() == 0) {
+			return logView;
+		}
+		String contextPath = request.getContextPath();
+		String vuePrefix = contextPath + "/mvc/vue/r/m/";
+
+		return logView.replace(contextPath + "/mvc/r/m/", vuePrefix).replace(contextPath + "/r/m/", vuePrefix)
+				.replace("/cat/mvc/r/m/", vuePrefix).replace("/cat/r/m/", vuePrefix);
+	}
+
+	private VueLogviewReport vueLogviewReport(HttpServletRequest request) {
+		String messageId = messageId(request);
+		boolean waterfall = booleanParameter(request, "waterfall", false);
+		String domain = parameter(request, "domain", Constants.CAT);
+		String logView = rewriteVueLogViewLinks(request, logViewModel(request, domain, messageId, waterfall));
+		VueLogviewReport report = new VueLogviewReport();
+
+		report.setContextPath(request.getContextPath());
+		report.setDomain(domain);
+		report.setMessageId(messageId);
+		report.setWaterfall(waterfall);
+		report.setLogView(logView);
+		return report;
+	}
+
+	private void writeJson(HttpServletResponse response, String body) throws IOException {
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/json;charset=UTF-8");
+		response.getWriter().write(body);
+	}
+
+	@Data
+	public static class VueLogviewReport {
+		private String contextPath;
+
+		private String domain;
+
+		private String logView;
+
+		private String messageId;
+
+		private boolean waterfall;
 	}
 }

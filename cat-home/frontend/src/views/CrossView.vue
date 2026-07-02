@@ -350,7 +350,7 @@ const isHistoryMode = computed(() => Boolean(report.value?.historyMode))
 const historyModeText = computed(() => isHistoryMode.value ? '切到小时模式' : '切到历史模式')
 const historyModeUrl = computed(() => {
   if (isHistoryMode.value) {
-    return crossUrl({ op: 'view', date: undefined })
+    return hourlyNowUrl()
   }
   return crossUrl({ op: 'history' })
 })
@@ -390,7 +390,7 @@ const shortcuts = computed(() => {
       { active: currentReportType.value === 'month', label: 'month', href: crossUrl({ date, domain, ip, op: 'history', reportType: 'month' }) },
       { active: false, label: 'last', href: crossUrl({ date, domain, ip, op: 'history', step: '-1' }) },
       { active: false, label: 'next', href: crossUrl({ date, domain, ip, op: 'history', step: '1' }) },
-      { active: false, label: 'now', href: crossUrl({ domain, ip, op: 'history' }) }
+      { active: false, label: 'now', href: historyNowUrl() }
     ]
   }
   return [
@@ -400,7 +400,7 @@ const shortcuts = computed(() => {
     { active: false, label: '+1h', href: crossUrl({ date, domain, ip, step: '1' }) },
     { active: false, label: '+1d', href: crossUrl({ date, domain, ip, step: '24' }) },
     { active: false, label: '+7d', href: crossUrl({ date, domain, ip, step: '168' }) },
-    { active: false, label: 'now', href: crossUrl({ domain, ip }) }
+    { active: false, label: 'now', href: hourlyNowUrl() }
   ]
 })
 
@@ -514,6 +514,31 @@ function formatRate(value: number, digits: number) {
 
 function goDomain() {
   window.location.href = domainUrl(domainInput.value || currentDomain.value)
+}
+
+function historyNowUrl() {
+  const params = new URLSearchParams()
+
+  params.set('op', 'history')
+  params.set('domain', currentDomain.value)
+  params.set('ip', currentIp.value)
+  params.set('reportType', currentReportType.value)
+  return `${contextPath.value}/mvc/vue/r/cross?${params.toString()}`
+}
+
+function hourlyNowUrl() {
+  const params = new URLSearchParams()
+
+  params.set('op', 'view')
+  params.set('domain', currentDomain.value)
+  params.set('ip', currentIp.value)
+  if (report.value?.callSort) {
+    params.set('callSort', report.value.callSort)
+  }
+  if (report.value?.serviceSort) {
+    params.set('serviceSort', report.value.serviceSort)
+  }
+  return `${contextPath.value}/mvc/vue/r/cross?${params.toString()}`
 }
 
 function hostLabel(ip: string) {

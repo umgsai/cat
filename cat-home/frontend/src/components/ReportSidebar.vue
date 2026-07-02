@@ -48,7 +48,7 @@ const reportMenus = [
   { name: 'Heartbeat', href: () => vueReportUrl('/mvc/vue/r/h'), icon: HeartPulse },
   { name: 'Cross', href: () => vueReportUrl('/mvc/vue/r/cross'), icon: GitBranch },
   { name: 'Business', href: () => businessUrl(), icon: ListTree },
-  { name: 'State', href: () => legacyReportUrl('/mvc/r/state'), icon: RadioTower }
+  { name: 'State', href: () => vueReportUrl('/mvc/vue/r/state'), icon: RadioTower }
 ]
 
 function baseParams() {
@@ -73,7 +73,7 @@ function businessUrl() {
 
   params.set('name', currentDomain.value)
   params.set('type', 'domain')
-  return `${props.contextPath}/mvc/r/business?${params.toString()}`
+  return `${props.contextPath}/mvc/vue/r/business?${params.toString()}`
 }
 
 function legacyReportUrl(path: string) {

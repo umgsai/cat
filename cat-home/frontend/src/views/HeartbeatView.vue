@@ -251,7 +251,7 @@ const shortcuts = computed(() => {
     { label: '+1h', href: heartbeatUrl({ date, ip, step: '1', domain }) },
     { label: '+1d', href: heartbeatUrl({ date, ip, step: '24', domain }) },
     { label: '+7d', href: heartbeatUrl({ date, ip, step: '168', domain }) },
-    { label: 'now', href: heartbeatUrl({ domain, ip }) }
+    { label: 'now', href: hourlyNowUrl() }
   ]
 })
 
@@ -335,6 +335,15 @@ function formatPercent(value: number) {
 
 function goDomain() {
   window.location.href = domainUrl(domainInput.value || currentDomain.value)
+}
+
+function hourlyNowUrl() {
+  const params = new URLSearchParams()
+
+  params.set('op', 'view')
+  params.set('domain', currentDomain.value)
+  params.set('ip', currentIp.value)
+  return `${contextPath.value}/mvc/vue/r/h?${params.toString()}`
 }
 
 function heartbeatUrl(overrides: Record<string, string | undefined>) {

@@ -96,6 +96,10 @@ public class SpringMvcProblemController {
 	public void problem(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String action = parameter(request, "op", "view");
 
+		if ("vueGraphData".equals(action)) {
+			writeJson(response, jsonBuilder.toJson(vueProblemGraph(request)));
+			return;
+		}
 		if ("vueData".equals(action)) {
 			writeJson(response, jsonBuilder.toJson(vueProblemReport(request)));
 			return;
@@ -118,7 +122,7 @@ public class SpringMvcProblemController {
 		String contextPath = request.getContextPath();
 		String action = parameter(request, "op", "view");
 
-		if ("vueData".equals(action)) {
+		if ("vueData".equals(action) || "vueGraphData".equals(action)) {
 			action = parameter(request, "vueAction", "view");
 		}
 		String domain = parameter(request, "domain", Constants.CAT);
@@ -259,6 +263,16 @@ public class SpringMvcProblemController {
 		report.setCallThreshold((Integer) model.get("callThreshold"));
 		report.setRows(vueProblemRows((ProblemStatistics) model.get("allStatistics")));
 		return report;
+	}
+
+	private VueProblemGraph vueProblemGraph(HttpServletRequest request) {
+		Map<String, Object> model = problemModel(request);
+		VueProblemGraph graph = new VueProblemGraph();
+
+		graph.setDistributionChart((String) model.get("distributionChart"));
+		graph.setErrorsTrend((String) model.get("errorsTrend"));
+		graph.setHistoryMode((Boolean) model.get("historyMode"));
+		return graph;
 	}
 
 	private List<VueDomainDepartment> vueDomainGroups(Map<String, Department> domainGroups) {
@@ -838,6 +852,15 @@ public class SpringMvcProblemController {
 		private List<String> domains = new ArrayList<String>();
 
 		private String name;
+	}
+
+	@Data
+	public static class VueProblemGraph {
+		private String distributionChart;
+
+		private String errorsTrend;
+
+		private boolean historyMode;
 	}
 
 	@Data

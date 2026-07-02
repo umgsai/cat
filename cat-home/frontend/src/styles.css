@@ -793,6 +793,158 @@ input {
   color: #172033;
 }
 
+.business-ranges {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.business-query {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.business-query-label {
+  margin-left: 8px;
+  font-weight: 700;
+}
+
+.business-help {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e0f2fe;
+  color: #0369a1;
+  cursor: help;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.business-search {
+  width: min(360px, 100%);
+}
+
+.business-suggestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.business-suggestion small {
+  color: #667085;
+}
+
+.business-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+  gap: 10px;
+}
+
+.business-chart-card {
+  overflow: hidden;
+  border: 1px solid #d9e1ec;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.business-chart-card header {
+  min-height: 38px;
+  border-bottom: 1px solid #e4e9f0;
+  padding: 8px 10px;
+  color: #172033;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.business-chart-card svg {
+  display: block;
+  width: 100%;
+  height: 300px;
+  background: #ffffff;
+}
+
+.business-axis {
+  stroke: #98a2b3;
+  stroke-width: 1;
+}
+
+.business-axis-label {
+  fill: #667085;
+  font-size: 11px;
+}
+
+.business-grid-line {
+  stroke: #eef2f7;
+  stroke-width: 1;
+}
+
+.business-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.business-chart-card footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  border-top: 1px solid #eef2f7;
+  padding: 7px 10px;
+  color: #344054;
+  font-size: 12px;
+}
+
+.business-chart-card footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.business-chart-card footer i {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+}
+
+.state-status {
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #f0fdf4;
+  color: #15803d;
+  text-align: center;
+  font-size: 18px;
+}
+
+.state-status.has-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b42318;
+}
+
+.state-summary-table {
+  min-width: 760px;
+}
+
+.state-domain-table {
+  min-width: 1180px;
+}
+
+.transaction-table .warning {
+  color: #b42318;
+  font-weight: 700;
+}
+
+.state-total-row {
+  color: #ffffff;
+}
+
 .transaction-table-wrap {
   overflow-x: auto;
 }
@@ -851,6 +1003,119 @@ input {
 .transaction-table .long-text a,
 .transaction-table .long-text span {
   margin-right: 8px;
+}
+
+.transaction-graph-panel {
+  padding: 8px 0;
+}
+
+.transaction-svg-wrap {
+  overflow-x: auto;
+  text-align: center;
+}
+
+.transaction-svg-wrap svg {
+  display: block;
+  margin: 0 auto;
+}
+
+.report-graph-panel {
+  padding: 8px 0;
+}
+
+.line-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.vue-line-chart,
+.vue-pie-chart {
+  min-width: 320px;
+  border: 1px solid #d9e1ec;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #ffffff;
+}
+
+.vue-line-chart h3,
+.vue-pie-chart h3 {
+  margin: 0 0 8px;
+  color: #344054;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.vue-line-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.chart-axis {
+  stroke: #94a3b8;
+  stroke-width: 1;
+}
+
+.chart-grid {
+  stroke: #e4e9f0;
+  stroke-width: 1;
+}
+
+.chart-label {
+  fill: #667085;
+  font-size: 11px;
+}
+
+.chart-line {
+  fill: none;
+  stroke-width: 2;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  justify-content: center;
+  color: #475467;
+  font-size: 12px;
+}
+
+.chart-legend span,
+.mini-chart-table i {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chart-legend i,
+.mini-chart-table i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  border-radius: 2px;
+}
+
+.pie-summary {
+  display: flex;
+  overflow: hidden;
+  height: 12px;
+  border-radius: 999px;
+  background: #edf2f7;
+}
+
+.mini-chart-table {
+  min-width: 0;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.distribution-table {
+  min-width: 760px;
+  margin-top: 8px;
 }
 
 .sample-link {

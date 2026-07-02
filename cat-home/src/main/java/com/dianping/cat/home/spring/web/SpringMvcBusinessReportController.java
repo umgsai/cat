@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.dianping.cat.Constants;
+import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.helper.TimeHelper;
 import com.dianping.cat.mvc.UrlNav;
 import com.dianping.cat.report.graph.LineChart;
@@ -24,6 +26,7 @@ import com.dianping.cat.report.page.business.graph.BusinessGraphCreator;
 import com.dianping.cat.service.ProjectService;
 import com.dianping.cat.system.page.business.config.BusinessTagConfigManager;
 import jakarta.annotation.Resource;
+import lombok.Data;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -35,6 +38,9 @@ public class SpringMvcBusinessReportController {
 	private BusinessGraphCreator businessGraphCreator;
 
 	@Resource
+	private JsonBuilder jsonBuilder;
+
+	@Resource
 	private ProjectService projectService;
 
 	@Resource
@@ -42,6 +48,13 @@ public class SpringMvcBusinessReportController {
 
 	@GetMapping("/mvc/r/business")
 	public void business(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String action = parameter(request, "op", "view");
+
+		if ("vueData".equals(action)) {
+			writeJson(response, jsonBuilder.toJson(vueBusinessReport(request)));
+			return;
+		}
+
 		Map<String, Object> model = businessModel(request);
 
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
@@ -83,6 +96,66 @@ public class SpringMvcBusinessReportController {
 		model.put("navs", UrlNav.values());
 		model.put("baseUri", contextPath + "/mvc/r/business");
 		return model;
+	}
+
+	private VueBusinessChart vueChart(LineChart chart) {
+		VueBusinessChart result = new VueBusinessChart();
+
+		result.setDatas(chart.getDatas());
+		result.setHtmlTitle(chart.getHtmlTitle());
+		result.setId(chart.getId());
+		result.setStart(chart.getStart());
+		result.setStep(chart.getStep());
+		result.setSubTitles(chart.getSubTitles());
+		result.setTitle(chart.getTitle());
+		result.setUnit(chart.getUnit());
+		return result;
+	}
+
+	private VueBusinessReport vueBusinessReport(HttpServletRequest request) {
+		Map<String, Object> model = businessModel(request);
+		VueBusinessReport report = new VueBusinessReport();
+		@SuppressWarnings("unchecked")
+		List<LineChart> lineCharts = (List<LineChart>) model.get("lineCharts");
+		@SuppressWarnings("unchecked")
+		Collection<String> domains = (Collection<String>) model.get("domains");
+		@SuppressWarnings("unchecked")
+		Collection<String> tags = (Collection<String>) model.get("tags");
+		@SuppressWarnings("unchecked")
+		List<RangeOption> ranges = (List<RangeOption>) model.get("ranges");
+
+		report.setContextPath((String) model.get("contextPath"));
+		report.setDomain((String) model.get("domain"));
+		report.setDisplayDomain((String) model.get("displayDomain"));
+		report.setEndTime((String) model.get("endTime"));
+		report.setName((String) model.get("name"));
+		report.setStartTime((String) model.get("startTime"));
+		report.setTimeRange((Integer) model.get("timeRange"));
+		report.setType((String) model.get("type"));
+		report.setDomains(domains == null ? new ArrayList<String>() : new ArrayList<String>(domains));
+		report.setTags(tags == null ? new ArrayList<String>() : new ArrayList<String>(tags));
+		if (lineCharts != null) {
+			for (LineChart chart : lineCharts) {
+				report.getLineCharts().add(vueChart(chart));
+			}
+		}
+		if (ranges != null) {
+			for (RangeOption range : ranges) {
+				VueRangeOption option = new VueRangeOption();
+
+				option.setDuration(range.getDuration());
+				option.setTitle(range.getTitle());
+				report.getRanges().add(option);
+			}
+		}
+		for (UrlNav nav : UrlNav.values()) {
+			VueUrlNav vueNav = new VueUrlNav();
+
+			vueNav.setHours(nav.getHours());
+			vueNav.setTitle(nav.getTitle());
+			report.getNavs().add(vueNav);
+		}
+		return report;
 	}
 
 	private Date endDate(String value, int step) {
@@ -144,6 +217,74 @@ public class SpringMvcBusinessReportController {
 			return defaultValue;
 		}
 		return value;
+	}
+
+	private void writeJson(HttpServletResponse response, String body) throws IOException {
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/json;charset=utf-8");
+		response.getWriter().write(body == null ? "" : body);
+	}
+
+	@Data
+	public static class VueBusinessChart {
+		private List<Map<Long, Double>> datas = new ArrayList<Map<Long, Double>>();
+
+		private String htmlTitle;
+
+		private String id;
+
+		private String start;
+
+		private long step;
+
+		private List<String> subTitles = new ArrayList<String>();
+
+		private String title;
+
+		private String unit;
+	}
+
+	@Data
+	public static class VueBusinessReport {
+		private List<VueBusinessChart> lineCharts = new ArrayList<VueBusinessChart>();
+
+		private String contextPath;
+
+		private String displayDomain;
+
+		private String domain;
+
+		private List<String> domains = new ArrayList<String>();
+
+		private String endTime;
+
+		private String name;
+
+		private List<VueUrlNav> navs = new ArrayList<VueUrlNav>();
+
+		private List<VueRangeOption> ranges = new ArrayList<VueRangeOption>();
+
+		private String startTime;
+
+		private List<String> tags = new ArrayList<String>();
+
+		private int timeRange;
+
+		private String type;
+	}
+
+	@Data
+	public static class VueRangeOption {
+		private int duration;
+
+		private String title;
+	}
+
+	@Data
+	public static class VueUrlNav {
+		private int hours;
+
+		private String title;
 	}
 
 	public static class RangeOption {

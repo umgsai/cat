@@ -185,28 +185,49 @@
               </thead>
               <tbody>
                 <template v-for="row in report.rows" :key="row.type">
-                  <tr v-for="(status, index) in row.statuses" :key="`${row.type}-${status.status}`">
-                    <td v-if="index === 0" class="left top-cell" :rowspan="row.statuses.length">
-                      <span class="problem-type">{{ row.type }}</span>
-                      <br />
-                      <a class="show-link" :href="graphUrl(row)">[:: show ::]</a>
-                    </td>
-                    <td v-if="index === 0" class="right top-cell" :rowspan="row.statuses.length">
-                      {{ formatInteger(row.count) }}
-                    </td>
-                    <td class="left">
-                      <a class="show-link" :href="graphUrl(row, status)">[:: show ::]</a>
-                      <span>{{ status.status }}</span>
-                    </td>
-                    <td class="right">{{ formatInteger(status.count) }}</td>
-                    <td class="left sample-links">
-                      <a
-                        v-for="(link, linkIndex) in status.links"
-                        :key="`${row.type}-${status.status}-${linkIndex}`"
-                        :href="logViewUrl(link)"
-                      >
-                        {{ sampleLetter(linkIndex, status.links.length) }}
-                      </a>
+                  <template v-for="(status, index) in row.statuses" :key="`${row.type}-${status.status}`">
+                    <tr>
+                      <td v-if="index === 0" class="left top-cell" :rowspan="row.statuses.length">
+                        <span class="problem-type">{{ row.type }}</span>
+                        <br />
+                        <a class="show-link" :href="graphUrl(row)" @click="toggleGraph(typeGraphKey(row), graphUrl(row), $event)">
+                          {{ graphLinkText(typeGraphKey(row)) }}
+                        </a>
+                      </td>
+                      <td v-if="index === 0" class="right top-cell" :rowspan="row.statuses.length">
+                        {{ formatInteger(row.count) }}
+                      </td>
+                      <td class="left">
+                        <a
+                          class="show-link"
+                          :href="graphUrl(row, status)"
+                          @click="toggleGraph(statusGraphKey(row, status), graphUrl(row, status), $event)"
+                        >
+                          {{ graphLinkText(statusGraphKey(row, status)) }}
+                        </a>
+                        <span>{{ status.status }}</span>
+                      </td>
+                      <td class="right">{{ formatInteger(status.count) }}</td>
+                      <td class="left sample-links">
+                        <a
+                          v-for="(link, linkIndex) in status.links"
+                          :key="`${row.type}-${status.status}-${linkIndex}`"
+                          :href="logViewUrl(link)"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {{ sampleLetter(linkIndex, status.links.length) }}
+                        </a>
+                      </td>
+                    </tr>
+                  </template>
+                  <tr v-if="isActiveProblemGraph(row)">
+                    <td colspan="5">
+                      <ProblemGraphPanel
+                        :error="graphErrors[activeGraphKey]"
+                        :graph="graphCache[activeGraphKey]"
+                        :loading="graphLoadingKey === activeGraphKey"
+                      />
                     </td>
                   </tr>
                 </template>
@@ -226,6 +247,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 
+import ProblemGraphPanel from '../components/ProblemGraphPanel.vue'
 import ReportSidebar from '../components/ReportSidebar.vue'
 
 interface DomainLine {
@@ -280,12 +302,22 @@ interface ProblemReport {
   urlThreshold: number
 }
 
+interface ProblemGraph {
+  distributionChart: string
+  errorsTrend: string
+  historyMode: boolean
+}
+
 const report = ref<ProblemReport | null>(null)
 const loading = ref(false)
 const loadError = ref('')
 const domainInput = ref('')
 const showDomainPanel = ref(false)
 const showFrequentPanel = ref(false)
+const activeGraphKey = ref('')
+const graphCache = ref<Record<string, ProblemGraph>>({})
+const graphErrors = ref<Record<string, string>>({})
+const graphLoadingKey = ref('')
 const thresholds = reactive({
   cacheThreshold: 10,
   callThreshold: 50,
@@ -377,7 +409,7 @@ const shortcuts = computed(() => {
     { label: '+1h', href: problemUrl({ date, ip, step: '1', domain }) },
     { label: '+1d', href: problemUrl({ date, ip, step: '24', domain }) },
     { label: '+7d', href: problemUrl({ date, ip, step: '168', domain }) },
-    { label: 'now', href: problemUrl({ domain, ip }) }
+    { label: 'now', href: hourlyNowUrl() }
   ]
 })
 
@@ -490,10 +522,41 @@ function goDomain() {
 
 function graphUrl(row: ProblemTypeRow, status?: ProblemStatusRow) {
   return legacyProblemUrl({
-    op: 'hourlyGraph',
+    op: report.value?.historyMode ? 'historyGraph' : 'hourlyGraph',
     status: status?.status,
     type: row.type
   })
+}
+
+function graphDataUrl(link: string) {
+  const url = new URL(link, window.location.origin)
+  const action = url.searchParams.get('op') || 'hourlyGraph'
+
+  url.searchParams.set('op', 'vueGraphData')
+  url.searchParams.set('vueAction', action)
+  return `${url.pathname}?${url.searchParams.toString()}`
+}
+
+function graphLinkText(key: string) {
+  return activeGraphKey.value === key ? '[:: hide ::]' : '[:: show ::]'
+}
+
+function hourlyNowUrl() {
+  const params = new URLSearchParams()
+
+  params.set('op', 'view')
+  params.set('domain', currentDomain.value)
+  params.set('ip', currentIp.value)
+  params.set('urlThreshold', String(thresholds.urlThreshold))
+  params.set('sqlThreshold', String(thresholds.sqlThreshold))
+  params.set('serviceThreshold', String(thresholds.serviceThreshold))
+  params.set('cacheThreshold', String(thresholds.cacheThreshold))
+  params.set('callThreshold', String(thresholds.callThreshold))
+  return `${contextPath.value}/mvc/vue/r/p?${params.toString()}`
+}
+
+function isActiveProblemGraph(row: ProblemTypeRow) {
+  return activeGraphKey.value === typeGraphKey(row) || activeGraphKey.value.startsWith(`status-${row.type}-`)
 }
 
 function hostLabel(ip: string) {
@@ -522,7 +585,7 @@ function legacyUrl(path: string) {
 }
 
 function logViewUrl(messageUrl: string) {
-  return `${contextPath.value}/mvc/r/m/${messageUrl}?domain=${encodeURIComponent(currentDomain.value)}`
+  return `${contextPath.value}/mvc/vue/r/m/${messageUrl}?domain=${encodeURIComponent(currentDomain.value)}`
 }
 
 function problemUrl(overrides: Record<string, string | undefined>) {
@@ -591,5 +654,50 @@ function searchDomains(query: string, callback: (items: Array<{ label: string; v
 function selectDomain(item: { value: string }) {
   domainInput.value = item.value
   goDomain()
+}
+
+function statusGraphKey(row: ProblemTypeRow, status: ProblemStatusRow) {
+  return `status-${row.type}-${status.status}`
+}
+
+async function toggleGraph(key: string, link: string, event: MouseEvent) {
+  if (event.ctrlKey || event.metaKey) {
+    return
+  }
+  event.preventDefault()
+
+  if (activeGraphKey.value === key) {
+    activeGraphKey.value = ''
+    return
+  }
+  activeGraphKey.value = key
+  if (graphCache.value[key]) {
+    return
+  }
+
+  graphLoadingKey.value = key
+  graphErrors.value = { ...graphErrors.value, [key]: '' }
+
+  try {
+    const response = await fetch(graphDataUrl(link), { headers: { Accept: 'application/json' } })
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+    const graph = await response.json() as ProblemGraph
+
+    graphCache.value = { ...graphCache.value, [key]: graph }
+  } catch (error) {
+    graphErrors.value = {
+      ...graphErrors.value,
+      [key]: `图表数据加载失败: ${error instanceof Error ? error.message : String(error)}`
+    }
+  } finally {
+    graphLoadingKey.value = ''
+  }
+}
+
+function typeGraphKey(row: ProblemTypeRow) {
+  return `type-${row.type}`
 }
 </script>

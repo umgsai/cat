@@ -254,7 +254,7 @@ const shortcuts = computed(() => {
     { label: '+1h', href: vueTopUrl({ date, ip, step: '1', domain }) },
     { label: '+1d', href: vueTopUrl({ date, ip, step: '24', domain }) },
     { label: '+7d', href: vueTopUrl({ date, ip, step: '168', domain }) },
-    { label: 'now', href: vueTopUrl({ domain }) }
+    { label: 'now', href: topNowUrl() }
   ]
 })
 
@@ -292,6 +292,14 @@ function dataUrl() {
 
 function legacyUrl(path: string) {
   return `${contextPath.value}${path}`
+}
+
+function topNowUrl() {
+  const params = new URLSearchParams()
+
+  params.set('op', 'view')
+  params.set('domain', currentDomain.value)
+  return `${contextPath.value}/mvc/vue/r?${params.toString()}`
 }
 
 function reportUrl(path: string) {

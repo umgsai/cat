@@ -43,6 +43,7 @@ import com.dianping.cat.report.page.transaction.DisplayTypes;
 import com.dianping.cat.report.page.transaction.TransactionGraphBuilder;
 import com.dianping.cat.report.page.transaction.service.TransactionReportService;
 import com.dianping.cat.report.page.transaction.transform.DistributionDetailVisitor;
+import com.dianping.cat.report.page.transaction.transform.DistributionDetailVisitor.DistributionDetail;
 import com.dianping.cat.report.page.transaction.transform.PieGraphChartVisitor;
 import com.dianping.cat.report.page.transaction.transform.TransactionMergeHelper;
 import com.dianping.cat.report.service.ModelRequest;
@@ -99,6 +100,10 @@ public class SpringMvcTransactionController {
 	public void transaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String action = parameter(request, "op", "view");
 
+		if ("vueGraphData".equals(action)) {
+			writeJson(response, jsonBuilder.toJson(vueTransactionGraph(request)));
+			return;
+		}
 		if ("vueData".equals(action)) {
 			writeJson(response, jsonBuilder.toJson(vueTransactionReport(request)));
 			return;
@@ -250,6 +255,58 @@ public class SpringMvcTransactionController {
 		report.setSample((Double) model.get("sample"));
 		report.setRows(vueTransactionRows(model));
 		return report;
+	}
+
+	private VueTransactionDistributionDetail vueDistributionDetail(DistributionDetail detail) {
+		VueTransactionDistributionDetail row = new VueTransactionDistributionDetail();
+
+		row.setAvg(detail.getAvg());
+		row.setFailCount(detail.getFailCount());
+		row.setFailPercent(detail.getFailPercent() / 100.0);
+		row.setIp(detail.getIp());
+		row.setMax(detail.getMax());
+		row.setMin(detail.getMin());
+		row.setStd(detail.getStd());
+		row.setTotalCount(detail.getTotalCount());
+		return row;
+	}
+
+	private VueTransactionGraph vueTransactionGraph(HttpServletRequest request) {
+		String action = parameter(request, "vueAction", "graphs");
+		String domain = parameter(request, "domain", Constants.CAT);
+		String ipAddress = parameter(request, "ip", Constants.ALL);
+		String reportType = parameter(request, "reportType", "day");
+		String type = emptyToNull(request.getParameter("type"));
+		String name = emptyToNull(request.getParameter("name"));
+		String group = emptyToNull(request.getParameter("group"));
+		boolean historyMode = isHistoryAction(action);
+		HistoryDates historyDates = historyMode ? historyDates(request, reportType) : null;
+		long date = historyMode ? historyDates.getDate() : date(request.getParameter("date"), intParameter(request, "step", 0));
+		Map<String, Object> model = new LinkedHashMap<String, Object>();
+		VueTransactionGraph graph = new VueTransactionGraph();
+
+		if (historyMode) {
+			buildHistoryGraphs(model, domain, ipAddress, type, name, group, action, historyDates);
+		} else {
+			buildGraphs(model, domain, ipAddress, type, name, date);
+		}
+		graph.setHistoryMode(historyMode);
+		graph.setGraph1((String) model.get("graph1"));
+		graph.setGraph2((String) model.get("graph2"));
+		graph.setGraph3((String) model.get("graph3"));
+		graph.setGraph4((String) model.get("graph4"));
+		graph.setResponseTrend((String) model.get("responseTrend"));
+		graph.setHitTrend((String) model.get("hitTrend"));
+		graph.setErrorTrend((String) model.get("errorTrend"));
+		@SuppressWarnings("unchecked")
+		List<DistributionDetail> distributionDetails = (List<DistributionDetail>) model.get("distributionDetails");
+
+		if (distributionDetails != null) {
+			for (DistributionDetail detail : distributionDetails) {
+				graph.getDistributionDetails().add(vueDistributionDetail(detail));
+			}
+		}
+		return graph;
 	}
 
 	private List<VueDomainDepartment> vueDomainGroups(Map<String, Department> domainGroups) {
@@ -802,6 +859,46 @@ public class SpringMvcTransactionController {
 		private List<String> domains = new ArrayList<String>();
 
 		private String name;
+	}
+
+	@Data
+	public static class VueTransactionDistributionDetail {
+		private double avg;
+
+		private long failCount;
+
+		private double failPercent;
+
+		private String ip;
+
+		private double max;
+
+		private double min;
+
+		private double std;
+
+		private long totalCount;
+	}
+
+	@Data
+	public static class VueTransactionGraph {
+		private List<VueTransactionDistributionDetail> distributionDetails = new ArrayList<VueTransactionDistributionDetail>();
+
+		private String errorTrend;
+
+		private String graph1;
+
+		private String graph2;
+
+		private String graph3;
+
+		private String graph4;
+
+		private String hitTrend;
+
+		private boolean historyMode;
+
+		private String responseTrend;
 	}
 
 	@Data

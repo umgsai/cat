@@ -155,7 +155,9 @@
                 </tr>
                 <tr v-else>
                   <th class="left">
-                    <a :href="graphUrl()">[:: show ::]</a>
+                    <a :href="graphUrl()" @click="toggleGraph('type-total', graphUrl(), $event)">
+                      {{ graphLinkText('type-total') }}
+                    </a>
                     <a :href="sortUrl('type')">Name</a>
                   </th>
                   <th class="right"><a :href="sortUrl('total')">Total</a></th>
@@ -167,26 +169,60 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="row in report.rows" :key="`${row.index}-${row.id}`">
-                  <td class="left long-text">
-                    <template v-if="!isNameView">
-                      <a :href="graphUrl(row)">[:: show ::]</a>
-                      <a :href="eventUrl({ type: row.id, ip: currentIp })">{{ row.id }}</a>
-                    </template>
-                    <template v-else>
-                      <a v-if="!row.totalRow" :href="graphUrl(row)">[:: show ::]</a>
-                      <span>{{ row.id }}</span>
-                    </template>
+                <tr v-if="isNameView && activeGraphKey === 'type-total'">
+                  <td :colspan="isNameView ? 7 : 6">
+                    <EventGraphPanel
+                      :error="graphErrors['type-total']"
+                      :format-integer="formatInteger"
+                      :format-rate="formatRate"
+                      :graph="graphCache['type-total']"
+                      :loading="graphLoadingKey === 'type-total'"
+                    />
                   </td>
-                  <td class="right">{{ formatInteger(row.totalCount) }}</td>
-                  <td class="right">{{ formatInteger(row.failCount) }}</td>
-                  <td class="right">{{ formatRate(row.failPercent, 4) }}</td>
-                  <td class="center sample-link">
-                    <a v-if="row.messageUrl" :href="logViewUrl(row.messageUrl)">Log View</a>
-                  </td>
-                  <td class="right">{{ formatDecimal(row.tps, 1) }}</td>
-                  <td v-if="isNameView" class="right">{{ formatRate(row.totalPercent, 4) }}</td>
                 </tr>
+                <template v-for="row in report.rows" :key="`${row.index}-${row.id}`">
+                  <tr>
+                    <td class="left long-text">
+                      <template v-if="!isNameView">
+                        <a :href="graphUrl(row)" @click="toggleGraph(rowGraphKey(row), graphUrl(row), $event)">
+                          {{ graphLinkText(rowGraphKey(row)) }}
+                        </a>
+                        <a :href="eventUrl({ type: row.id, ip: currentIp })">{{ row.id }}</a>
+                      </template>
+                      <template v-else>
+                        <a
+                          v-if="!row.totalRow"
+                          :href="graphUrl(row)"
+                          @click="toggleGraph(rowGraphKey(row), graphUrl(row), $event)"
+                        >
+                          {{ graphLinkText(rowGraphKey(row)) }}
+                        </a>
+                        <span>{{ row.id }}</span>
+                      </template>
+                    </td>
+                    <td class="right">{{ formatInteger(row.totalCount) }}</td>
+                    <td class="right">{{ formatInteger(row.failCount) }}</td>
+                    <td class="right">{{ formatRate(row.failPercent, 4) }}</td>
+                    <td class="center sample-link">
+                      <a v-if="row.messageUrl" :href="logViewUrl(row.messageUrl)" target="_blank" rel="noreferrer">
+                        Log View
+                      </a>
+                    </td>
+                    <td class="right">{{ formatDecimal(row.tps, 1) }}</td>
+                    <td v-if="isNameView" class="right">{{ formatRate(row.totalPercent, 4) }}</td>
+                  </tr>
+                  <tr v-if="activeGraphKey === rowGraphKey(row)">
+                    <td :colspan="isNameView ? 7 : 6">
+                      <EventGraphPanel
+                        :error="graphErrors[rowGraphKey(row)]"
+                        :format-integer="formatInteger"
+                        :format-rate="formatRate"
+                        :graph="graphCache[rowGraphKey(row)]"
+                        :loading="graphLoadingKey === rowGraphKey(row)"
+                      />
+                    </td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
@@ -199,6 +235,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+import EventGraphPanel from '../components/EventGraphPanel.vue'
 import ReportSidebar from '../components/ReportSidebar.vue'
 
 interface DomainLine {
@@ -250,12 +287,33 @@ interface EventReport {
   type: string
 }
 
+interface EventDistributionDetail {
+  failCount: number
+  failPercent: number
+  ip: string
+  totalCount: number
+}
+
+interface EventGraph {
+  distributionChart: string
+  distributionDetails: EventDistributionDetail[]
+  failureTrend: string
+  graph1: string
+  graph2: string
+  historyMode: boolean
+  hitTrend: string
+}
+
 const report = ref<EventReport | null>(null)
 const loading = ref(false)
 const loadError = ref('')
 const domainInput = ref('')
 const showDomainPanel = ref(false)
 const showFrequentPanel = ref(false)
+const activeGraphKey = ref('')
+const graphCache = ref<Record<string, EventGraph>>({})
+const graphErrors = ref<Record<string, string>>({})
+const graphLoadingKey = ref('')
 
 const contextPath = computed(() => {
   const path = window.location.pathname
@@ -311,7 +369,7 @@ const shortcuts = computed(() => {
     { label: '+1h', href: eventUrl({ date, ip, step: '1', domain }) },
     { label: '+1d', href: eventUrl({ date, ip, step: '24', domain }) },
     { label: '+7d', href: eventUrl({ date, ip, step: '168', domain }) },
-    { label: 'now', href: eventUrl({ domain, ip }) }
+    { label: 'now', href: hourlyNowUrl() }
   ]
 })
 
@@ -447,7 +505,7 @@ function goDomain() {
 function graphUrl(row?: EventRow) {
   const params = baseEventParams()
 
-  params.set('op', 'graphs')
+  params.set('op', report.value?.historyMode ? 'historyGraph' : 'graphs')
   if (currentType.value) {
     params.set('type', currentType.value)
   } else if (row?.id) {
@@ -457,6 +515,31 @@ function graphUrl(row?: EventRow) {
     params.set('name', row.id)
   }
   return `${contextPath.value}/mvc/r/e?${params.toString()}`
+}
+
+function graphDataUrl(link: string) {
+  const url = new URL(link, window.location.origin)
+  const action = url.searchParams.get('op') || 'graphs'
+
+  url.searchParams.set('op', 'vueGraphData')
+  url.searchParams.set('vueAction', action)
+  return `${url.pathname}?${url.searchParams.toString()}`
+}
+
+function graphLinkText(key: string) {
+  return activeGraphKey.value === key ? '[:: hide ::]' : '[:: show ::]'
+}
+
+function hourlyNowUrl() {
+  const params = new URLSearchParams()
+
+  params.set('op', 'view')
+  params.set('domain', currentDomain.value)
+  params.set('ip', currentIp.value)
+  if (currentType.value) {
+    params.set('type', currentType.value)
+  }
+  return `${contextPath.value}/mvc/vue/r/e?${params.toString()}`
 }
 
 function hostLabel(ip: string) {
@@ -470,7 +553,7 @@ function legacyUrl(path: string) {
 }
 
 function logViewUrl(messageUrl: string) {
-  return `${contextPath.value}/mvc/r/m/${messageUrl}?domain=${encodeURIComponent(currentDomain.value)}`
+  return `${contextPath.value}/mvc/vue/r/m/${messageUrl}?domain=${encodeURIComponent(currentDomain.value)}`
 }
 
 function readCookie(name: string) {
@@ -495,7 +578,48 @@ function selectDomain(item: { value: string }) {
   goDomain()
 }
 
+function rowGraphKey(row: EventRow) {
+  return isNameView.value ? `name-${row.index}-${row.id}` : `type-${row.index}-${row.id}`
+}
+
 function sortUrl(sort: string) {
   return eventUrl({ sort })
+}
+
+async function toggleGraph(key: string, link: string, event: MouseEvent) {
+  if (event.ctrlKey || event.metaKey) {
+    return
+  }
+  event.preventDefault()
+
+  if (activeGraphKey.value === key) {
+    activeGraphKey.value = ''
+    return
+  }
+  activeGraphKey.value = key
+  if (graphCache.value[key]) {
+    return
+  }
+
+  graphLoadingKey.value = key
+  graphErrors.value = { ...graphErrors.value, [key]: '' }
+
+  try {
+    const response = await fetch(graphDataUrl(link), { headers: { Accept: 'application/json' } })
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+    const graph = await response.json() as EventGraph
+
+    graphCache.value = { ...graphCache.value, [key]: graph }
+  } catch (error) {
+    graphErrors.value = {
+      ...graphErrors.value,
+      [key]: `图表数据加载失败: ${error instanceof Error ? error.message : String(error)}`
+    }
+  } finally {
+    graphLoadingKey.value = ''
+  }
 }
 </script>

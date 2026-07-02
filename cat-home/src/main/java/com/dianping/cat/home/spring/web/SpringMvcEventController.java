@@ -43,6 +43,7 @@ import com.dianping.cat.report.page.event.DisplayTypes;
 import com.dianping.cat.report.page.event.EventGraphBuilder;
 import com.dianping.cat.report.page.event.service.EventReportService;
 import com.dianping.cat.report.page.event.transform.DistributionDetailVisitor;
+import com.dianping.cat.report.page.event.transform.DistributionDetailVisitor.DistributionDetail;
 import com.dianping.cat.report.page.event.transform.EventMergeHelper;
 import com.dianping.cat.report.page.event.transform.PieGraphChartVisitor;
 import com.dianping.cat.report.service.ModelRequest;
@@ -99,6 +100,10 @@ public class SpringMvcEventController {
 	public void event(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String action = parameter(request, "op", "view");
 
+		if ("vueGraphData".equals(action)) {
+			writeJson(response, jsonBuilder.toJson(vueEventGraph(request)));
+			return;
+		}
 		if ("vueData".equals(action)) {
 			writeJson(response, jsonBuilder.toJson(vueEventReport(request)));
 			return;
@@ -125,7 +130,7 @@ public class SpringMvcEventController {
 		String contextPath = request.getContextPath();
 		String action = parameter(request, "op", "view");
 
-		if ("vueData".equals(action)) {
+		if ("vueData".equals(action) || "vueGraphData".equals(action)) {
 			action = parameter(request, "vueAction", "view");
 		}
 		String domain = parameter(request, "domain", Constants.CAT);
@@ -243,6 +248,36 @@ public class SpringMvcEventController {
 		report.setSample((Double) model.get("sample"));
 		report.setRows(vueEventRows(model));
 		return report;
+	}
+
+	private VueEventDistributionDetail vueDistributionDetail(DistributionDetail detail) {
+		VueEventDistributionDetail row = new VueEventDistributionDetail();
+
+		row.setFailCount(detail.getFailCount());
+		row.setFailPercent(detail.getFailPercent());
+		row.setIp(detail.getIp());
+		row.setTotalCount(detail.getTotalCount());
+		return row;
+	}
+
+	private VueEventGraph vueEventGraph(HttpServletRequest request) {
+		Map<String, Object> model = eventModel(request);
+		VueEventGraph graph = new VueEventGraph();
+		@SuppressWarnings("unchecked")
+		List<DistributionDetail> distributionDetails = (List<DistributionDetail>) model.get("distributionDetails");
+
+		graph.setDistributionChart((String) model.get("distributionChart"));
+		graph.setFailureTrend((String) model.get("failureTrend"));
+		graph.setGraph1((String) model.get("graph1"));
+		graph.setGraph2((String) model.get("graph2"));
+		graph.setHistoryMode((Boolean) model.get("historyMode"));
+		graph.setHitTrend((String) model.get("hitTrend"));
+		if (distributionDetails != null) {
+			for (DistributionDetail detail : distributionDetails) {
+				graph.getDistributionDetails().add(vueDistributionDetail(detail));
+			}
+		}
+		return graph;
 	}
 
 	private List<VueDomainDepartment> vueDomainGroups(Map<String, Department> domainGroups) {
@@ -783,6 +818,34 @@ public class SpringMvcEventController {
 		private List<String> domains = new ArrayList<String>();
 
 		private String name;
+	}
+
+	@Data
+	public static class VueEventDistributionDetail {
+		private long failCount;
+
+		private double failPercent;
+
+		private String ip;
+
+		private long totalCount;
+	}
+
+	@Data
+	public static class VueEventGraph {
+		private String distributionChart;
+
+		private List<VueEventDistributionDetail> distributionDetails = new ArrayList<VueEventDistributionDetail>();
+
+		private String failureTrend;
+
+		private String graph1;
+
+		private String graph2;
+
+		private boolean historyMode;
+
+		private String hitTrend;
 	}
 
 	@Data
