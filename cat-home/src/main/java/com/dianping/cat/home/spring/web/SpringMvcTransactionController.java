@@ -252,6 +252,7 @@ public class SpringMvcTransactionController {
 		report.setGroupIps(groupIps == null ? new ArrayList<String>() : groupIps);
 		report.setDomainGroups(vueDomainGroups(domainGroups));
 		report.setHistoryMode((Boolean) model.get("historyMode"));
+		report.setPieChart((String) model.get("pieChart"));
 		report.setSample((Double) model.get("sample"));
 		report.setRows(vueTransactionRows(model));
 		return report;
@@ -295,6 +296,7 @@ public class SpringMvcTransactionController {
 		graph.setGraph2((String) model.get("graph2"));
 		graph.setGraph3((String) model.get("graph3"));
 		graph.setGraph4((String) model.get("graph4"));
+		graph.setDistributionChart((String) model.get("distributionChart"));
 		graph.setResponseTrend((String) model.get("responseTrend"));
 		graph.setHitTrend((String) model.get("hitTrend"));
 		graph.setErrorTrend((String) model.get("errorTrend"));
@@ -882,6 +884,8 @@ public class SpringMvcTransactionController {
 
 	@Data
 	public static class VueTransactionGraph {
+		private String distributionChart;
+
 		private List<VueTransactionDistributionDetail> distributionDetails = new ArrayList<VueTransactionDistributionDetail>();
 
 		private String errorTrend;
@@ -934,6 +938,8 @@ public class SpringMvcTransactionController {
 		private long longDate;
 
 		private String name;
+
+		private String pieChart;
 
 		private String queryName;
 

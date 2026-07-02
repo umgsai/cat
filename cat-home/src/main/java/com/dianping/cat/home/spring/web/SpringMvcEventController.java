@@ -245,6 +245,7 @@ public class SpringMvcEventController {
 		report.setGroupIps(groupIps == null ? new ArrayList<String>() : groupIps);
 		report.setDomainGroups(vueDomainGroups(domainGroups));
 		report.setHistoryMode((Boolean) model.get("historyMode"));
+		report.setPieChart((String) model.get("pieChart"));
 		report.setSample((Double) model.get("sample"));
 		report.setRows(vueEventRows(model));
 		return report;
@@ -879,6 +880,8 @@ public class SpringMvcEventController {
 		private long longDate;
 
 		private String name;
+
+		private String pieChart;
 
 		private String reportEnd;
 

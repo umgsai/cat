@@ -251,6 +251,9 @@
               </tbody>
             </table>
           </div>
+          <div v-if="isNameView && report.pieChart" class="transaction-pie-panel">
+            <PieChartPanel :chart="report.pieChart" />
+          </div>
         </section>
       </section>
     </div>
@@ -260,6 +263,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+import PieChartPanel from '../components/PieChartPanel.vue'
 import ReportSidebar from '../components/ReportSidebar.vue'
 import TransactionGraphPanel from '../components/TransactionGraphPanel.vue'
 
@@ -310,6 +314,7 @@ interface TransactionReport {
   ips: string[]
   longDate: number
   name: string
+  pieChart: string
   queryName: string
   reportEnd: string
   reportStart: string
@@ -332,6 +337,7 @@ interface TransactionDistributionDetail {
 }
 
 interface TransactionGraph {
+  distributionChart: string
   distributionDetails: TransactionDistributionDetail[]
   errorTrend: string
   graph1: string

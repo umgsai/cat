@@ -40,12 +40,15 @@
           </tbody>
         </table>
       </div>
+      <PieChartPanel :chart="graph.distributionChart" title="分布统计" />
     </template>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+
+import PieChartPanel from './PieChartPanel.vue'
 
 interface TransactionDistributionDetail {
   avg: number
@@ -59,6 +62,7 @@ interface TransactionDistributionDetail {
 }
 
 interface TransactionGraph {
+  distributionChart: string
   distributionDetails: TransactionDistributionDetail[]
   errorTrend: string
   graph1: string

@@ -226,6 +226,9 @@
               </tbody>
             </table>
           </div>
+          <div v-if="isNameView && report.pieChart" class="transaction-pie-panel">
+            <PieChartPanel :chart="report.pieChart" />
+          </div>
         </section>
       </section>
     </div>
@@ -236,6 +239,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import EventGraphPanel from '../components/EventGraphPanel.vue'
+import PieChartPanel from '../components/PieChartPanel.vue'
 import ReportSidebar from '../components/ReportSidebar.vue'
 
 interface DomainLine {
@@ -278,6 +282,7 @@ interface EventReport {
   ips: string[]
   longDate: number
   name: string
+  pieChart: string
   reportEnd: string
   reportStart: string
   reportType: string

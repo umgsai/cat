@@ -851,65 +851,26 @@ input {
   background: #ffffff;
 }
 
-.business-chart-card header {
+.business-chart-card .vue-line-chart {
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0 12px 10px;
+}
+
+.business-chart-card .vue-line-chart h3 {
   min-height: 38px;
+  margin: 0 -12px 8px;
   border-bottom: 1px solid #e4e9f0;
   padding: 8px 10px;
   color: #172033;
   font-size: 14px;
-  font-weight: 700;
+  line-height: 1.35;
+  text-align: left;
 }
 
-.business-chart-card svg {
-  display: block;
-  width: 100%;
-  height: 300px;
-  background: #ffffff;
-}
-
-.business-axis {
-  stroke: #98a2b3;
-  stroke-width: 1;
-}
-
-.business-axis-label {
-  fill: #667085;
-  font-size: 11px;
-}
-
-.business-grid-line {
-  stroke: #eef2f7;
-  stroke-width: 1;
-}
-
-.business-line {
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
-}
-
-.business-chart-card footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  border-top: 1px solid #eef2f7;
-  padding: 7px 10px;
-  color: #344054;
-  font-size: 12px;
-}
-
-.business-chart-card footer span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.business-chart-card footer i {
-  display: inline-block;
-  width: 18px;
-  height: 3px;
-  border-radius: 999px;
+.business-chart-card .echarts-line {
+  height: 320px;
 }
 
 .state-status {
@@ -1009,6 +970,18 @@ input {
   padding: 8px 0;
 }
 
+.transaction-pie-panel {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 4px;
+}
+
+.transaction-pie-panel .vue-pie-chart {
+  width: min(100%, 1120px);
+  border: 0;
+  background: transparent;
+}
+
 .transaction-svg-wrap {
   overflow-x: auto;
   text-align: center;
@@ -1030,6 +1003,19 @@ input {
   align-items: start;
 }
 
+.problem-graph-panel {
+  margin: -7px -9px;
+  border-top: 1px solid #d7d7d7;
+  border-bottom: 1px solid #d7d7d7;
+  padding: 22px 18px 16px;
+  background: #f3f3f3;
+}
+
+.problem-chart-grid {
+  grid-template-columns: repeat(2, minmax(360px, 1fr));
+  gap: 14px;
+}
+
 .vue-line-chart,
 .vue-pie-chart {
   min-width: 320px;
@@ -1039,6 +1025,13 @@ input {
   background: #ffffff;
 }
 
+.problem-graph-panel .vue-line-chart,
+.problem-graph-panel .vue-pie-chart {
+  border: 0;
+  border-radius: 0;
+  padding: 0 18px 12px;
+}
+
 .vue-line-chart h3,
 .vue-pie-chart h3 {
   margin: 0 0 8px;
@@ -1046,6 +1039,13 @@ input {
   font-size: 14px;
   font-weight: 700;
   text-align: center;
+}
+
+.problem-graph-panel .vue-line-chart h3,
+.problem-graph-panel .vue-pie-chart h3 {
+  margin-bottom: 4px;
+  color: #2f7f9f;
+  font-size: 17px;
 }
 
 .vue-line-chart svg {
@@ -1099,12 +1099,14 @@ input {
   border-radius: 2px;
 }
 
-.pie-summary {
-  display: flex;
-  overflow: hidden;
-  height: 12px;
-  border-radius: 999px;
-  background: #edf2f7;
+.echarts-pie {
+  width: 100%;
+  height: 480px;
+}
+
+.echarts-line {
+  width: 100%;
+  height: 480px;
 }
 
 .mini-chart-table {
@@ -1278,6 +1280,10 @@ input {
   }
 
   .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .problem-chart-grid {
     grid-template-columns: 1fr;
   }
 }

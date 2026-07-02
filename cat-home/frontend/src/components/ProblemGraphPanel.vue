@@ -1,8 +1,8 @@
 <template>
-  <section class="report-graph-panel">
+  <section class="report-graph-panel problem-graph-panel">
     <div v-if="loading" class="empty-state">正在加载图表数据...</div>
     <div v-else-if="error" class="empty-state">{{ error }}</div>
-    <div v-else-if="graph" class="line-chart-grid">
+    <div v-else-if="graph" class="line-chart-grid problem-chart-grid">
       <LineChartPanel :chart="graph.errorsTrend" title="错误量" />
       <PieChartPanel :chart="graph.distributionChart" title="错误分布" />
     </div>

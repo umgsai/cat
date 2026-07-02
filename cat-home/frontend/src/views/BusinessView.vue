@@ -109,44 +109,7 @@
 
         <section v-else class="business-chart-grid">
           <article v-for="chart in charts" :key="chart.id" class="business-chart-card">
-            <header v-html="chartTitle(chart)"></header>
-            <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" preserveAspectRatio="none" role="img">
-              <line :x1="padding.left" :y1="padding.top" :x2="padding.left" :y2="chartBottom" class="business-axis" />
-              <line :x1="padding.left" :y1="chartBottom" :x2="chartRight" :y2="chartBottom" class="business-axis" />
-              <line
-                v-for="tick in yTicks(chart)"
-                :key="`tick-${chart.id}-${tick.value}`"
-                :x1="padding.left"
-                :y1="tick.y"
-                :x2="chartRight"
-                :y2="tick.y"
-                class="business-grid-line"
-              />
-              <text
-                v-for="tick in yTicks(chart)"
-                :key="`label-${chart.id}-${tick.value}`"
-                x="8"
-                :y="tick.y + 4"
-                class="business-axis-label"
-              >
-                {{ formatTick(tick.value) }}
-              </text>
-              <text :x="padding.left" :y="chartHeight - 8" class="business-axis-label">{{ chart.start }}</text>
-              <text :x="chartRight - 116" :y="chartHeight - 8" class="business-axis-label">{{ chartEnd(chart) }}</text>
-              <polyline
-                v-for="series in chartSeries(chart)"
-                :key="`${chart.id}-${series.name}`"
-                :points="series.points"
-                :stroke="series.color"
-                class="business-line"
-              />
-            </svg>
-            <footer>
-              <span v-for="series in chartLegend(chart)" :key="series.name">
-                <i :style="{ backgroundColor: series.color }"></i>
-                {{ series.name }}
-              </span>
-            </footer>
+            <LineChartPanel allow-html-title :chart="chart" />
           </article>
         </section>
       </section>
@@ -157,6 +120,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+import LineChartPanel from '../components/LineChartPanel.vue'
 import ReportSidebar from '../components/ReportSidebar.vue'
 
 interface BusinessChart {
@@ -186,16 +150,6 @@ interface BusinessReport {
   type: string
 }
 
-interface ChartPoint {
-  time: number
-  value: number
-}
-
-const chartHeight = 300
-const chartWidth = 760
-const colors = ['#0f766e', '#f59e0b', '#2563eb', '#dc2626', '#7c3aed']
-const padding = { bottom: 34, left: 54, right: 18, top: 18 }
-
 const report = ref<BusinessReport | null>(null)
 const loading = ref(false)
 const loadError = ref('')
@@ -203,8 +157,6 @@ const queryInput = ref('')
 const startTimeInput = ref('')
 const endTimeInput = ref('')
 
-const chartBottom = computed(() => chartHeight - padding.bottom)
-const chartRight = computed(() => chartWidth - padding.right)
 const charts = computed(() => report.value?.lineCharts || [])
 const contextPath = computed(() => {
   const path = window.location.pathname
@@ -286,71 +238,11 @@ function businessUrl(overrides: Record<string, string | undefined>) {
   return `${contextPath.value}/mvc/vue/r/business?${params.toString()}`
 }
 
-function chartEnd(chart: BusinessChart) {
-  const points = chartPoints(chart).flat()
-  const last = points.length ? Math.max(...points.map((point) => point.time)) : 0
-
-  return last ? formatTime(last) : ''
-}
-
-function chartLegend(chart: BusinessChart) {
-  return chart.subTitles.map((name, index) => ({ color: colors[index % colors.length], name }))
-}
-
-function chartPoints(chart: BusinessChart) {
-  return chart.datas.map((data) => Object.entries(data)
-    .map(([time, value]) => ({ time: Number(time), value: Number(value || 0) }))
-    .sort((left, right) => left.time - right.time))
-}
-
-function chartSeries(chart: BusinessChart) {
-  const pointGroups = chartPoints(chart)
-  const allPoints = pointGroups.flat()
-  const times = allPoints.map((point) => point.time)
-  const values = allPoints.map((point) => point.value)
-  const minTime = times.length ? Math.min(...times) : 0
-  const maxTime = times.length ? Math.max(...times) : minTime + 1
-  const maxValue = values.length ? Math.max(...values, 1) : 1
-
-  return pointGroups.map((points, index) => ({
-    color: colors[index % colors.length],
-    name: chart.subTitles[index] || `Series ${index + 1}`,
-    points: points.map((point) => {
-      const x = padding.left + ((point.time - minTime) / Math.max(maxTime - minTime, 1)) * (chartRight.value - padding.left)
-      const y = chartBottom.value - (point.value / maxValue) * (chartBottom.value - padding.top)
-
-      return `${x.toFixed(1)},${y.toFixed(1)}`
-    }).join(' ')
-  }))
-}
-
-function chartTitle(chart: BusinessChart) {
-  return chart.htmlTitle || chart.title || chart.id
-}
-
 function dataUrl() {
   const params = new URLSearchParams(window.location.search)
 
   params.set('op', 'vueData')
   return `${contextPath.value}/mvc/r/business?${params.toString()}`
-}
-
-function formatTick(value: number) {
-  if (value >= 1000) {
-    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value / 1000) + 'k'
-  }
-  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)
-}
-
-function formatTime(value: number) {
-  const date = new Date(value)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hour = String(date.getHours()).padStart(2, '0')
-  const minute = String(date.getMinutes()).padStart(2, '0')
-
-  return `${year}/${month}/${day} ${hour}:${minute}`
 }
 
 function legacyUrl(path: string) {
@@ -399,13 +291,4 @@ function timeRangeTooLarge(start: string, end: string) {
   return endDate.getTime() - startDate.getTime() > 2 * 24 * 60 * 60 * 1000
 }
 
-function yTicks(chart: BusinessChart) {
-  const values = chartPoints(chart).flat().map((point) => point.value)
-  const maxValue = values.length ? Math.max(...values, 1) : 1
-
-  return [0, 0.25, 0.5, 0.75, 1].map((ratio) => ({
-    value: maxValue * ratio,
-    y: chartBottom.value - ratio * (chartBottom.value - padding.top)
-  }))
-}
 </script>
