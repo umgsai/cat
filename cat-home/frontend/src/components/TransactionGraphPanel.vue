@@ -3,10 +3,11 @@
     <div v-if="loading" class="empty-state">正在加载图表数据...</div>
     <div v-else-if="error" class="empty-state">{{ error }}</div>
     <template v-else-if="graph">
-      <div v-if="!graph.historyMode" class="transaction-svg-wrap">
-        <svg version="1.1" width="980" height="380" xmlns="http://www.w3.org/2000/svg">
-          <g v-for="(content, index) in hourlyGraphs" :key="index" v-html="content"></g>
-        </svg>
+      <div class="line-chart-grid transaction-chart-grid">
+        <BarChartPanel v-if="graph.durationDistribution" :chart="graph.durationDistribution" />
+        <LineChartPanel v-if="graph.hitTrend" :chart="graph.hitTrend" smooth />
+        <LineChartPanel v-if="graph.responseTrend" :chart="graph.responseTrend" smooth />
+        <LineChartPanel v-if="graph.errorTrend" :chart="graph.errorTrend" smooth />
       </div>
 
       <div v-if="graph.distributionDetails.length" class="transaction-table-wrap">
@@ -46,8 +47,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-
+import BarChartPanel from './BarChartPanel.vue'
+import LineChartPanel from './LineChartPanel.vue'
 import PieChartPanel from './PieChartPanel.vue'
 
 interface TransactionDistributionDetail {
@@ -62,6 +63,7 @@ interface TransactionDistributionDetail {
 }
 
 interface TransactionGraph {
+  durationDistribution: string
   distributionChart: string
   distributionDetails: TransactionDistributionDetail[]
   errorTrend: string
@@ -74,7 +76,7 @@ interface TransactionGraph {
   responseTrend: string
 }
 
-const props = defineProps<{
+defineProps<{
   error: string
   formatDecimal: (value: number, digits: number) => string
   formatInteger: (value: number) => string
@@ -82,13 +84,4 @@ const props = defineProps<{
   graph?: TransactionGraph
   loading: boolean
 }>()
-
-const hourlyGraphs = computed(() => {
-  const graph = props.graph
-
-  if (!graph) {
-    return []
-  }
-  return [graph.graph1, graph.graph2, graph.graph3, graph.graph4].filter(Boolean)
-})
 </script>

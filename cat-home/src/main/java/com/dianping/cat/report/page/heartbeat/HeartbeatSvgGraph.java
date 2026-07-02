@@ -120,6 +120,52 @@ public class HeartbeatSvgGraph {
 		}
 	}
 
+	private void buildExtensionChartGroup(Map<String, ChartGroup> graphs, Entry<String, Map<String, double[]>> entry) {
+		String title = entry.getKey();
+
+		if (title.equalsIgnoreCase(DAL)) {
+			for (Entry<String, double[]> subEntry : entry.getValue().entrySet()) {
+				String key = subEntry.getKey();
+				int pos = key.lastIndexOf('-');
+
+				if (pos > 0) {
+					String db = "Dal " + key.substring(0, pos);
+					String subTitle = key.substring(pos + 1);
+					ChartGroup chartGroup = graphs.get(db);
+
+					if (chartGroup == null) {
+						chartGroup = new ChartGroup();
+						graphs.put(db, chartGroup);
+					}
+					chartGroup.getCharts().add(new HeartbeatChart(key, subTitle, "Count", subEntry.getValue()));
+				}
+			}
+		} else {
+			ChartGroup chartGroup = graphs.get(title);
+
+			if (chartGroup == null) {
+				chartGroup = new ChartGroup();
+				graphs.put(title, chartGroup);
+			}
+			for (Entry<String, double[]> item : entry.getValue().entrySet()) {
+				String key = item.getKey();
+				Metric metricConfig = m_manager.queryMetric(title, key);
+				String chartTitle = key;
+				String label = "";
+
+				if (metricConfig != null) {
+					String configTitle = metricConfig.getTitle();
+
+					if (configTitle != null) {
+						chartTitle = configTitle;
+					}
+					label = metricConfig.getLable();
+				}
+				chartGroup.getCharts().add(new HeartbeatChart(key, chartTitle, label, item.getValue()));
+			}
+		}
+	}
+
 	private Map<String, Map<String, double[]>> dealWithExtensions() {
 		Map<String, Map<String, double[]>> result = new LinkedHashMap<String, Map<String, double[]>>();
 
@@ -219,6 +265,66 @@ public class HeartbeatSvgGraph {
 		}
 
 		return graphs;
+	}
+
+	public Map<String, ChartGroup> getExtensionChartGraph() {
+		Map<String, ChartGroup> graphs = new LinkedHashMap<String, ChartGroup>();
+
+		for (Entry<String, Map<String, double[]>> items : m_extensions.entrySet()) {
+			buildExtensionChartGroup(graphs, items);
+		}
+		return graphs;
+	}
+
+	public class ChartGroup {
+		private List<HeartbeatChart> m_charts = new java.util.ArrayList<HeartbeatChart>();
+
+		public List<HeartbeatChart> getCharts() {
+			return m_charts;
+		}
+
+		public int getHeight() {
+			int size = m_charts.size();
+
+			if (size % 3 == 0) {
+				return size / 3;
+			} else {
+				return size / 3 + 1;
+			}
+		}
+	}
+
+	public static class HeartbeatChart {
+		private String m_key;
+
+		private String m_label;
+
+		private String m_title;
+
+		private double[] m_values;
+
+		public HeartbeatChart(String key, String title, String label, double[] values) {
+			m_key = key;
+			m_title = title;
+			m_label = label == null ? "" : label;
+			m_values = values == null ? new double[0] : java.util.Arrays.copyOf(values, values.length);
+		}
+
+		public String getKey() {
+			return m_key;
+		}
+
+		public String getLabel() {
+			return m_label;
+		}
+
+		public String getTitle() {
+			return m_title;
+		}
+
+		public double[] getValues() {
+			return java.util.Arrays.copyOf(m_values, m_values.length);
+		}
 	}
 
 	public class ExtensionGroup {

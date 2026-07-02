@@ -23,8 +23,10 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.Constants;
 import com.dianping.cat.config.sample.SampleConfigManager;
 import com.dianping.cat.consumer.GraphTrendUtil;
+import com.dianping.cat.consumer.transaction.model.entity.Duration;
 import com.dianping.cat.consumer.transaction.model.entity.GraphTrend;
 import com.dianping.cat.consumer.transaction.model.entity.Machine;
+import com.dianping.cat.consumer.transaction.model.entity.Range;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionName;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionReport;
 import com.dianping.cat.consumer.transaction.model.entity.TransactionType;
@@ -296,6 +298,7 @@ public class SpringMvcTransactionController {
 		graph.setGraph2((String) model.get("graph2"));
 		graph.setGraph3((String) model.get("graph3"));
 		graph.setGraph4((String) model.get("graph4"));
+		graph.setDurationDistribution((String) model.get("durationDistribution"));
 		graph.setDistributionChart((String) model.get("distributionChart"));
 		graph.setResponseTrend((String) model.get("responseTrend"));
 		graph.setHitTrend((String) model.get("hitTrend"));
@@ -505,6 +508,64 @@ public class SpringMvcTransactionController {
 		TransactionName transactionName = transactionType.findOrCreateName(name);
 
 		model.putAll(transactionGraphBuilder.build(graphBuilder, transactionName));
+		model.put("durationDistribution", buildDurationDistributionChart(transactionName));
+		model.put("hitTrend", buildHourlyRangeLineChart(report.getStartTime(), "Hits Over Time", "Count",
+				rangeValues(transactionName, RangeValue.COUNT)).getJsonString());
+		model.put("responseTrend", buildHourlyRangeLineChart(report.getStartTime(), "Average Duration Over Time",
+				"Average Duration (ms)", rangeValues(transactionName, RangeValue.AVG)).getJsonString());
+		model.put("errorTrend", buildHourlyRangeLineChart(report.getStartTime(), "Failures Over Time", "Count",
+				rangeValues(transactionName, RangeValue.FAILS)).getJsonString());
+	}
+
+	private String buildDurationDistributionChart(TransactionName transactionName) {
+		Map<String, Object> chart = new LinkedHashMap<String, Object>();
+		List<String> categories = new ArrayList<String>();
+		List<Integer> values = new ArrayList<Integer>();
+		int bucket = 1;
+
+		categories.add("0");
+		values.add(durationCount(transactionName, 0));
+		for (int i = 0; i < 16; i++) {
+			categories.add(String.valueOf(bucket));
+			values.add(durationCount(transactionName, bucket));
+			bucket <<= 1;
+		}
+		chart.put("title", "Duration Distribution");
+		chart.put("categories", categories);
+		chart.put("seriesName", "Count");
+		chart.put("values", values);
+		return jsonBuilder.toJson(chart);
+	}
+
+	private LineChart buildHourlyRangeLineChart(Date start, String title, String subTitle, double[] values) {
+		LineChart chart = new LineChart();
+
+		chart.setStart(start);
+		chart.setSize(values.length);
+		chart.setStep(TimeHelper.ONE_MINUTE);
+		chart.setTitle(title);
+		chart.setSubTitles(Collections.singletonList(subTitle));
+		chart.addValue(values);
+		return chart;
+	}
+
+	private int durationCount(TransactionName transactionName, int value) {
+		Duration duration = transactionName.findDuration(value);
+
+		return duration == null ? 0 : duration.getCount();
+	}
+
+	private double[] rangeValues(TransactionName transactionName, RangeValue valueType) {
+		double[] values = new double[60];
+
+		for (Range range : transactionName.getRanges().values()) {
+			int minute = range.getValue();
+
+			if (minute >= 0 && minute < values.length) {
+				values[minute] = valueType.value(range);
+			}
+		}
+		return values;
 	}
 
 	private String buildTransactionNamePieChart(List<TransactionNameModel> names) {
@@ -884,6 +945,8 @@ public class SpringMvcTransactionController {
 
 	@Data
 	public static class VueTransactionGraph {
+		private String durationDistribution;
+
 		private String distributionChart;
 
 		private List<VueTransactionDistributionDetail> distributionDetails = new ArrayList<VueTransactionDistributionDetail>();
@@ -903,6 +966,29 @@ public class SpringMvcTransactionController {
 		private boolean historyMode;
 
 		private String responseTrend;
+	}
+
+	private enum RangeValue {
+		AVG {
+			@Override
+			double value(Range range) {
+				return range.getAvg();
+			}
+		},
+		COUNT {
+			@Override
+			double value(Range range) {
+				return range.getCount();
+			}
+		},
+		FAILS {
+			@Override
+			double value(Range range) {
+				return range.getFails();
+			}
+		};
+
+		abstract double value(Range range);
 	}
 
 	@Data

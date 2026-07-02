@@ -1016,6 +1016,7 @@ input {
   gap: 14px;
 }
 
+.vue-bar-chart,
 .vue-line-chart,
 .vue-pie-chart {
   min-width: 320px;
@@ -1025,6 +1026,7 @@ input {
   background: #ffffff;
 }
 
+.problem-graph-panel .vue-bar-chart,
 .problem-graph-panel .vue-line-chart,
 .problem-graph-panel .vue-pie-chart {
   border: 0;
@@ -1032,6 +1034,7 @@ input {
   padding: 0 18px 12px;
 }
 
+.vue-bar-chart h3,
 .vue-line-chart h3,
 .vue-pie-chart h3 {
   margin: 0 0 8px;
@@ -1041,6 +1044,7 @@ input {
   text-align: center;
 }
 
+.problem-graph-panel .vue-bar-chart h3,
 .problem-graph-panel .vue-line-chart h3,
 .problem-graph-panel .vue-pie-chart h3 {
   margin-bottom: 4px;
@@ -1107,6 +1111,32 @@ input {
 .echarts-line {
   width: 100%;
   height: 480px;
+}
+
+.echarts-bar {
+  width: 100%;
+  height: 480px;
+}
+
+.report-graph-panel .echarts-bar,
+.report-graph-panel .echarts-line,
+.report-graph-panel .echarts-pie {
+  height: 300px;
+}
+
+.transaction-chart-grid {
+  grid-template-columns: repeat(2, minmax(360px, 1fr));
+  margin-bottom: 10px;
+}
+
+.transaction-chart-grid .vue-bar-chart,
+.transaction-chart-grid .vue-line-chart {
+  padding: 8px 10px;
+}
+
+.transaction-chart-grid .echarts-bar,
+.transaction-chart-grid .echarts-line {
+  height: 300px;
 }
 
 .mini-chart-table {
@@ -1248,6 +1278,22 @@ input {
   display: block;
 }
 
+.heartbeat-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(280px, 1fr));
+  gap: 14px 22px;
+  padding: 18px 28px 28px;
+}
+
+.heartbeat-chart {
+  min-width: 0;
+}
+
+.heartbeat-echarts-bar {
+  width: 100%;
+  height: 190px;
+}
+
 @media (max-width: 900px) {
   .cat-topbar {
     flex-wrap: wrap;
@@ -1285,5 +1331,14 @@ input {
 
   .problem-chart-grid {
     grid-template-columns: 1fr;
+  }
+
+  .transaction-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .heartbeat-chart-grid {
+    grid-template-columns: 1fr;
+    padding: 14px 12px 18px;
   }
 }

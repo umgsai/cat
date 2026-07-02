@@ -28,6 +28,7 @@ import com.dianping.cat.consumer.event.model.entity.EventReport;
 import com.dianping.cat.consumer.event.model.entity.EventType;
 import com.dianping.cat.consumer.event.model.entity.GraphTrend;
 import com.dianping.cat.consumer.event.model.entity.Machine;
+import com.dianping.cat.consumer.event.model.entity.Range;
 import com.dianping.cat.helper.JsonBuilder;
 import com.dianping.cat.helper.SortHelper;
 import com.dianping.cat.helper.TimeHelper;
@@ -463,6 +464,35 @@ public class SpringMvcEventController {
 		EventName eventName = eventType.findOrCreateName(name);
 
 		model.putAll(eventGraphBuilder.build(graphBuilder, eventName));
+		model.put("hitTrend", buildHourlyRangeLineChart(report.getStartTime(), "Hits Over Time", "Count",
+				eventRangeValues(eventName, EventRangeValue.COUNT)).getJsonString());
+		model.put("failureTrend", buildHourlyRangeLineChart(report.getStartTime(), "Failures Over Time", "Count",
+				eventRangeValues(eventName, EventRangeValue.FAILS)).getJsonString());
+	}
+
+	private LineChart buildHourlyRangeLineChart(Date start, String title, String subTitle, double[] values) {
+		LineChart chart = new LineChart();
+
+		chart.setStart(start);
+		chart.setSize(values.length);
+		chart.setStep(TimeHelper.ONE_MINUTE);
+		chart.setTitle(title);
+		chart.setSubTitles(Collections.singletonList(subTitle));
+		chart.addValue(values);
+		return chart;
+	}
+
+	private double[] eventRangeValues(EventName eventName, EventRangeValue valueType) {
+		double[] values = new double[60];
+
+		for (Range range : eventName.getRanges().values()) {
+			Integer minute = range.getValue();
+
+			if (minute != null && minute >= 0 && minute < values.length) {
+				values[minute] = valueType.value(range);
+			}
+		}
+		return values;
 	}
 
 	private String buildEventNamePieChart(List<EventNameModel> names) {
@@ -847,6 +877,23 @@ public class SpringMvcEventController {
 		private boolean historyMode;
 
 		private String hitTrend;
+	}
+
+	private enum EventRangeValue {
+		COUNT {
+			@Override
+			double value(Range range) {
+				return range.getCount();
+			}
+		},
+		FAILS {
+			@Override
+			double value(Range range) {
+				return range.getFails();
+			}
+		};
+
+		abstract double value(Range range);
 	}
 
 	@Data

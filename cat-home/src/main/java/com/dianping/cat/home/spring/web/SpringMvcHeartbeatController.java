@@ -35,7 +35,9 @@ import com.dianping.cat.report.graph.LineChart;
 import com.dianping.cat.report.graph.svg.GraphBuilder;
 import com.dianping.cat.report.page.DomainGroupConfigManager;
 import com.dianping.cat.report.page.heartbeat.HeartbeatSvgGraph;
+import com.dianping.cat.report.page.heartbeat.HeartbeatSvgGraph.ChartGroup;
 import com.dianping.cat.report.page.heartbeat.HeartbeatSvgGraph.ExtensionGroup;
+import com.dianping.cat.report.page.heartbeat.HeartbeatSvgGraph.HeartbeatChart;
 import com.dianping.cat.report.page.heartbeat.config.HeartbeatDisplayPolicyManager;
 import com.dianping.cat.report.page.heartbeat.service.HeartbeatReportService;
 import com.dianping.cat.report.service.ModelRequest;
@@ -151,6 +153,7 @@ public class SpringMvcHeartbeatController {
 			HeartbeatSvgGraph heartbeat = new HeartbeatSvgGraph(graphBuilder, displayPolicyManager).display(report, realIp);
 
 			model.put("extensionGraph", heartbeat.getExtensionGraph());
+			model.put("extensionChartGraph", heartbeat.getExtensionChartGraph());
 		}
 
 		model.put("action", action);
@@ -194,6 +197,8 @@ public class SpringMvcHeartbeatController {
 		List<String> groups = (List<String>) model.get("groups");
 		@SuppressWarnings("unchecked")
 		Map<String, ExtensionGroup> extensionGraph = (Map<String, ExtensionGroup>) model.get("extensionGraph");
+		@SuppressWarnings("unchecked")
+		Map<String, ChartGroup> extensionChartGraph = (Map<String, ChartGroup>) model.get("extensionChartGraph");
 
 		report.setContextPath((String) model.get("contextPath"));
 		report.setDomain((String) model.get("domain"));
@@ -213,7 +218,7 @@ public class SpringMvcHeartbeatController {
 		report.setDomainGroups(vueDomainGroups(domainGroups));
 		report.setHistoryMode((Boolean) model.get("historyMode"));
 		report.setSample((Double) model.get("sample"));
-		report.setExtensionGroups(vueExtensionGroups(extensionGraph));
+		report.setExtensionGroups(vueExtensionGroups(extensionGraph, extensionChartGraph));
 		return report;
 	}
 
@@ -240,13 +245,49 @@ public class SpringMvcHeartbeatController {
 		return departments;
 	}
 
-	private List<VueHeartbeatExtensionGroup> vueExtensionGroups(Map<String, ExtensionGroup> extensionGraph) {
+	private List<VueHeartbeatExtensionGroup> vueExtensionGroups(Map<String, ExtensionGroup> extensionGraph,
+			Map<String, ChartGroup> extensionChartGraph) {
 		List<VueHeartbeatExtensionGroup> groups = new ArrayList<VueHeartbeatExtensionGroup>();
 
-		if (extensionGraph == null) {
+		if (extensionGraph == null && extensionChartGraph == null) {
 			return groups;
 		}
-		for (Map.Entry<String, ExtensionGroup> entry : extensionGraph.entrySet()) {
+		Map<String, ChartGroup> chartGraphs = extensionChartGraph == null ? new LinkedHashMap<String, ChartGroup>()
+				: extensionChartGraph;
+		Map<String, ExtensionGroup> svgGraphs = extensionGraph == null ? new LinkedHashMap<String, ExtensionGroup>()
+				: extensionGraph;
+
+		for (Map.Entry<String, ChartGroup> entry : chartGraphs.entrySet()) {
+			VueHeartbeatExtensionGroup group = new VueHeartbeatExtensionGroup();
+
+			group.setName(entry.getKey());
+			group.setHeight(entry.getValue().getHeight());
+			for (HeartbeatChart chart : entry.getValue().getCharts()) {
+				VueHeartbeatChart vueChart = new VueHeartbeatChart();
+
+				vueChart.setKey(chart.getKey());
+				vueChart.setLabel(chart.getLabel());
+				vueChart.setTitle(chart.getTitle());
+				vueChart.setValues(chart.getValues());
+				group.getCharts().add(vueChart);
+			}
+			ExtensionGroup svgGroup = svgGraphs.get(entry.getKey());
+
+			if (svgGroup != null) {
+				for (Map.Entry<String, String> svgEntry : svgGroup.getSvgs().entrySet()) {
+					VueHeartbeatSvg svg = new VueHeartbeatSvg();
+
+					svg.setName(svgEntry.getKey());
+					svg.setContent(svgEntry.getValue());
+					group.getSvgs().add(svg);
+				}
+			}
+			groups.add(group);
+		}
+		for (Map.Entry<String, ExtensionGroup> entry : svgGraphs.entrySet()) {
+			if (chartGraphs.containsKey(entry.getKey())) {
+				continue;
+			}
 			VueHeartbeatExtensionGroup group = new VueHeartbeatExtensionGroup();
 
 			group.setName(entry.getKey());
@@ -604,11 +645,24 @@ public class SpringMvcHeartbeatController {
 
 	@Data
 	public static class VueHeartbeatExtensionGroup {
+		private List<VueHeartbeatChart> charts = new ArrayList<VueHeartbeatChart>();
+
 		private int height;
 
 		private String name;
 
 		private List<VueHeartbeatSvg> svgs = new ArrayList<VueHeartbeatSvg>();
+	}
+
+	@Data
+	public static class VueHeartbeatChart {
+		private String key;
+
+		private String label;
+
+		private String title;
+
+		private double[] values = new double[0];
 	}
 
 	@Data

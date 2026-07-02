@@ -127,13 +127,17 @@
         <section v-else-if="report" class="heartbeat-graphs">
           <article v-for="group in report.extensionGroups" :key="group.name" class="heartbeat-group">
             <h2>{{ group.name }} Info</h2>
-            <div class="heartbeat-svg-wrap">
-              <svg
-                version="1.1"
-                width="1200"
-                :height="group.height * 190"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+            <div class="heartbeat-chart-grid">
+              <HeartbeatBarChartPanel
+                v-for="chart in group.charts"
+                :key="chart.key"
+                :label="chart.label"
+                :title="chart.title"
+                :values="chart.values"
+              />
+            </div>
+            <div v-if="!group.charts.length" class="heartbeat-svg-wrap">
+              <svg version="1.1" width="1200" :height="group.height * 190" xmlns="http://www.w3.org/2000/svg">
                 <g v-for="svg in group.svgs" :key="svg.name" v-html="svg.content"></g>
               </svg>
             </div>
@@ -147,6 +151,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+import HeartbeatBarChartPanel from '../components/HeartbeatBarChartPanel.vue'
 import ReportSidebar from '../components/ReportSidebar.vue'
 
 interface DomainLine {
@@ -164,7 +169,15 @@ interface HeartbeatSvg {
   name: string
 }
 
+interface HeartbeatChart {
+  key: string
+  label: string
+  title: string
+  values: number[]
+}
+
 interface HeartbeatExtensionGroup {
+  charts: HeartbeatChart[]
   height: number
   name: string
   svgs: HeartbeatSvg[]

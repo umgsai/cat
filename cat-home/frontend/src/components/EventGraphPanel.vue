@@ -3,14 +3,9 @@
     <div v-if="loading" class="empty-state">正在加载图表数据...</div>
     <div v-else-if="error" class="empty-state">{{ error }}</div>
     <template v-else-if="graph">
-      <div v-if="!graph.historyMode" class="transaction-svg-wrap">
-        <svg version="1.1" width="980" height="190" xmlns="http://www.w3.org/2000/svg">
-          <g v-for="(content, index) in hourlyGraphs" :key="index" v-html="content"></g>
-        </svg>
-      </div>
-      <div v-else class="line-chart-grid">
-        <LineChartPanel :chart="graph.hitTrend" />
-        <LineChartPanel :chart="graph.failureTrend" />
+      <div class="line-chart-grid">
+        <LineChartPanel v-if="graph.hitTrend" :chart="graph.hitTrend" smooth />
+        <LineChartPanel v-if="graph.failureTrend" :chart="graph.failureTrend" smooth />
       </div>
       <table v-if="graph.distributionDetails.length" class="transaction-table distribution-table">
         <thead>
@@ -39,8 +34,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-
 import LineChartPanel from './LineChartPanel.vue'
 import PieChartPanel from './PieChartPanel.vue'
 
@@ -61,20 +54,11 @@ interface EventGraph {
   hitTrend: string
 }
 
-const props = defineProps<{
+defineProps<{
   error: string
   formatInteger: (value: number) => string
   formatRate: (value: number, digits: number) => string
   graph?: EventGraph
   loading: boolean
 }>()
-
-const hourlyGraphs = computed(() => {
-  const graph = props.graph
-
-  if (!graph) {
-    return []
-  }
-  return [graph.graph1, graph.graph2].filter(Boolean)
-})
 </script>

@@ -40,6 +40,7 @@ interface TooltipParam {
 const props = defineProps<{
   allowHtmlTitle?: boolean
   chart?: LineChart | string
+  smooth?: boolean
   title?: string
 }>()
 
@@ -68,7 +69,7 @@ const chartSeries = computed(() => rawSeries.value.map((series) => ({
   data: series.values,
   name: series.name,
   showSymbol: false,
-  smooth: false,
+  smooth: props.smooth || false,
   type: 'line'
 })))
 const categories = computed(() => buildCategories(chart.value, maxSeriesLength.value))

@@ -337,6 +337,7 @@ interface TransactionDistributionDetail {
 }
 
 interface TransactionGraph {
+  durationDistribution: string
   distributionChart: string
   distributionDetails: TransactionDistributionDetail[]
   errorTrend: string
