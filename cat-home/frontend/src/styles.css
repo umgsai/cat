@@ -339,7 +339,7 @@ input {
 
 .cat-content {
   min-width: 0;
-  padding: 14px 18px 28px;
+  padding: 5px 0px 0px 5px;
 }
 
 .query-bar {
