@@ -3,8 +3,8 @@
     <div v-if="loading" class="empty-state">正在加载图表数据...</div>
     <div v-else-if="error" class="empty-state">{{ error }}</div>
     <div v-else-if="graph" class="line-chart-grid problem-chart-grid">
-      <LineChartPanel :chart="graph.errorsTrend" title="错误量" smooth />
-      <PieChartPanel :chart="graph.distributionChart" title="错误分布" />
+      <LineChartPanel :chart="graph.errorsTrend" title="数量" smooth />
+      <PieChartPanel :chart="graph.distributionChart" title="分布" />
     </div>
   </section>
 </template>

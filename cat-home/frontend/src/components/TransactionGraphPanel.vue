@@ -1,5 +1,5 @@
 <template>
-  <section class="transaction-graph-panel">
+  <section class="report-graph-panel transaction-graph-panel">
     <div v-if="loading" class="empty-state">正在加载图表数据...</div>
     <div v-else-if="error" class="empty-state">{{ error }}</div>
     <template v-else-if="graph">
@@ -10,8 +10,8 @@
         <LineChartPanel v-if="graph.errorTrend" :chart="graph.errorTrend" smooth />
       </div>
 
-      <div v-if="graph.distributionDetails.length" class="transaction-table-wrap">
-        <table class="transaction-table distribution-table">
+      <div v-if="graph.distributionDetails.length" class="report-table-wrap">
+        <table class="report-table distribution-table">
           <thead>
             <tr>
               <td class="center" colspan="8"><strong>分布统计</strong></td>

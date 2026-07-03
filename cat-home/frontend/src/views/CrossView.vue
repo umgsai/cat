@@ -27,75 +27,24 @@
       />
 
       <section class="cat-content">
-        <div class="query-bar">
-          <div class="time-range">
-            <span v-if="report">{{ report.reportStart }} to {{ report.reportEnd }}</span>
-            <span v-else>Loading...</span>
-          </div>
-          <div class="query-actions">
-            <button class="domain-toggle" type="button" @click="showDomainPanel = !showDomainPanel">
-              {{ showDomainPanel ? '收起' : '全部' }}
-            </button>
-            <button class="domain-toggle" type="button" @click="showFrequentPanel = !showFrequentPanel">
-              {{ showFrequentPanel ? '收起' : '常用' }}
-            </button>
-            <el-autocomplete
-              v-model="domainInput"
-              class="domain-input"
-              placeholder="input domain for search"
-              :fetch-suggestions="searchDomains"
-              value-key="value"
-              clearable
-              @select="selectDomain"
-              @keyup.enter="goDomain"
-            />
-            <button class="domain-go" type="button" @click="goDomain">Go</button>
-          </div>
-          <div class="time-shortcuts">
-            <span>
-              【<a class="mode-link" :href="historyModeUrl">{{ historyModeText }}</a>】
-            </span>
-            <span v-for="shortcut in shortcuts" :key="shortcut.label">
-              [
-              <a :class="{ current: shortcut.active }" :href="shortcut.href">{{ shortcut.label }}</a>
-              ]
-            </span>
-          </div>
-        </div>
-
-        <section v-if="showDomainPanel" class="domain-panel">
-          <table>
-            <tbody>
-              <template v-for="department in domainGroups" :key="department.name">
-                <tr v-for="(line, index) in department.lines" :key="`${department.name}-${line.name}`">
-                  <td v-if="index === 0" class="department-cell" :rowspan="department.lines.length">
-                    {{ department.name }}
-                  </td>
-                  <td class="department-cell">{{ line.name }}</td>
-                  <td class="domain-cell">
-                    <a v-for="item in line.domains" :key="item" :href="domainUrl(item)">
-                      [&nbsp;{{ item }}&nbsp;]
-                    </a>
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-        </section>
-
-        <section v-if="showFrequentPanel" class="domain-panel">
-          <table>
-            <tbody>
-              <tr>
-                <td class="domain-cell">
-                  <a v-for="item in frequentDomains" :key="item" :href="domainUrl(item)">
-                    [&nbsp;{{ item }}&nbsp;]
-                  </a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
+        <ReportQueryBar
+          v-model:domain-input="domainInput"
+          :domain-groups="domainGroups"
+          :domain-url="domainUrl"
+          :frequent-domains="frequentDomains"
+          :mode-switch-text="historyModeText"
+          :mode-switch-url="historyModeUrl"
+          :report-end="report?.reportEnd"
+          :report-start="report?.reportStart"
+          :search-domains="searchDomains"
+          :shortcuts="shortcuts"
+          :show-domain-panel="showDomainPanel"
+          :show-frequent-panel="showFrequentPanel"
+          @go-domain="goDomain"
+          @select-domain="selectDomain"
+          @toggle-domain-panel="showDomainPanel = !showDomainPanel"
+          @toggle-frequent-panel="showFrequentPanel = !showFrequentPanel"
+        />
 
         <section v-if="report && report.sample !== 1" class="sample-panel">
           <strong>采样</strong>
@@ -117,22 +66,7 @@
           </div>
         </section>
 
-        <section v-if="report" class="selector-panel">
-          <div class="selector-row">
-            <a :class="{ current: currentIp === 'All' }" :href="crossUrl({ ip: 'All' })">
-              [&nbsp;All&nbsp;]
-            </a>
-            <a
-              v-for="ip in report.ips"
-              :key="ip"
-              :class="{ current: currentIp === ip }"
-              :href="crossUrl({ ip })"
-              :title="report.ipToHostname[ip] || ip"
-            >
-              [&nbsp;{{ hostLabel(ip) }}&nbsp;]
-            </a>
-          </div>
-        </section>
+        <ReportSelectorPanel :rows="selectorRows" />
 
         <section v-if="loadError" class="empty-state">
           {{ loadError }}
@@ -143,8 +77,8 @@
         </section>
 
         <section v-else-if="report" class="transaction-card">
-          <div class="transaction-table-wrap">
-            <table v-if="isQueryView" class="transaction-table cross-table">
+          <div class="report-table-wrap">
+            <table v-if="isQueryView" class="report-table cross-table">
               <thead>
                 <tr>
                   <th class="left">类型</th>
@@ -171,7 +105,7 @@
               </tbody>
             </table>
 
-            <table v-else class="transaction-table cross-table">
+            <table v-else class="report-table cross-table">
               <tbody>
                 <template v-if="report.callProjects.length">
                   <tr>
@@ -264,6 +198,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+import ReportQueryBar from '../components/ReportQueryBar.vue'
+import ReportSelectorPanel from '../components/ReportSelectorPanel.vue'
 import ReportSidebar from '../components/ReportSidebar.vue'
 import { getFrequentDomains } from '../utils/domainCookies'
 
@@ -380,6 +316,21 @@ const domainSuggestions = computed(() => {
 
 const frequentDomains = computed(() => {
   return getFrequentDomains(currentDomain.value)
+})
+
+const selectorRows = computed(() => {
+  if (!report.value) {
+    return []
+  }
+  return [[
+    { current: currentIp.value === 'All', href: crossUrl({ ip: 'All' }), label: 'All' },
+    ...report.value.ips.map((ip) => ({
+      current: currentIp.value === ip,
+      href: crossUrl({ ip }),
+      label: hostLabel(ip),
+      title: report.value?.ipToHostname[ip] || ip
+    }))
+  ]]
 })
 
 const shortcuts = computed(() => {

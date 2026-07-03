@@ -34,9 +34,7 @@
           </div>
           <div class="time-shortcuts">
             <span>
-              [
-              <a class="mode-link" :href="modeSwitchUrl">{{ modeSwitchText }}</a>
-              ]
+              【<a class="mode-link" :href="modeSwitchUrl">{{ modeSwitchText }}</a>】
             </span>
             <template v-if="isHistoryMode">
               <span v-for="nav in report?.historyNavs || []" :key="nav.title">
@@ -77,21 +75,7 @@
           </div>
         </div>
 
-        <section v-if="report" class="selector-panel">
-          <div class="selector-row">
-            <a :class="{ current: currentIp === 'All' }" :href="stateUrl({ ip: 'All' })">
-              [&nbsp;All&nbsp;]
-            </a>
-            <a
-              v-for="ip in report.ips"
-              :key="ip"
-              :class="{ current: currentIp === ip }"
-              :href="stateUrl({ ip })"
-            >
-              [&nbsp;{{ ip }}&nbsp;]
-            </a>
-          </div>
-        </section>
+        <ReportSelectorPanel :rows="selectorRows" />
 
         <section v-if="report && !isHistoryMode" class="state-status" :class="{ 'has-error': Boolean(report.message) }">
           <strong v-if="report.message">出问题CAT的服务端: {{ report.message }}</strong>
@@ -107,8 +91,8 @@
         </section>
 
         <section v-else-if="report" class="transaction-card">
-          <div class="transaction-table-wrap">
-            <table class="transaction-table state-summary-table">
+          <div class="report-table-wrap">
+            <table class="report-table state-summary-table">
               <thead>
                 <tr>
                   <th colspan="2" class="left">指标</th>
@@ -144,8 +128,8 @@
         </section>
 
         <section v-if="report?.show" class="transaction-card">
-          <div class="transaction-table-wrap">
-            <table class="transaction-table state-domain-table">
+          <div class="report-table-wrap">
+            <table class="report-table state-domain-table">
               <thead>
                 <tr>
                   <th class="left"><a :href="sortUrl('domain')">处理项目列表</a></th>
@@ -226,6 +210,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+import ReportSelectorPanel from '../components/ReportSelectorPanel.vue'
 import ReportSidebar from '../components/ReportSidebar.vue'
 import StateGraphPanel from '../components/StateGraphPanel.vue'
 
@@ -305,6 +290,19 @@ const isHistoryMode = computed(() => Boolean(report.value?.historyMode))
 const currentHistoryNav = computed(() => (report.value?.historyNavs || []).find((item) => item.title === currentReportType.value))
 const modeSwitchText = computed(() => isHistoryMode.value ? '切到小时模式' : '切到历史模式')
 const modeSwitchUrl = computed(() => isHistoryMode.value ? hourlyNowUrl.value : stateUrl({ op: 'history' }))
+const selectorRows = computed(() => {
+  if (!report.value) {
+    return []
+  }
+  return [[
+    { current: currentIp.value === 'All', href: stateUrl({ ip: 'All' }), label: 'All' },
+    ...report.value.ips.map((ip) => ({
+      current: currentIp.value === ip,
+      href: stateUrl({ ip }),
+      label: ip
+    }))
+  ]]
+})
 const historyNowUrl = computed(() => {
   const params = new URLSearchParams()
 
