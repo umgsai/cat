@@ -322,6 +322,16 @@ public class SpringMvcConfigController {
 		List<GroupRow> groupRows = (List<GroupRow>) model.get("groupRows");
 		@SuppressWarnings("unchecked")
 		Collection<Rule> rules = (Collection<Rule>) model.get("rules");
+		@SuppressWarnings("unchecked")
+		List<ExceptionLimit> exceptionLimits = (List<ExceptionLimit>) model.get("exceptionLimits");
+		@SuppressWarnings("unchecked")
+		List<ExceptionExclude> exceptionExcludes = (List<ExceptionExclude>) model.get("exceptionExcludes");
+		@SuppressWarnings("unchecked")
+		List<String> domainList = (List<String>) model.get("domainList");
+		@SuppressWarnings("unchecked")
+		List<String> exceptionList = (List<String>) model.get("exceptionList");
+		@SuppressWarnings("unchecked")
+		List<HeartbeatRuleItem> heartbeatRuleItems = (List<HeartbeatRuleItem>) model.get("ruleItems");
 
 		json.put("contextPath", request.getContextPath());
 		json.put("actionName", vueAction);
@@ -331,10 +341,26 @@ public class SpringMvcConfigController {
 		json.put("projects", projectList(projects));
 		json.put("domainGroupRows", domainGroupRowList(domainGroupRows));
 		json.put("groupRows", groupRowList(groupRows));
+		json.put("eventRules", transactionRuleRows(rules));
 		json.put("transactionRules", transactionRuleRows(rules));
+		json.put("eventRuleId", model.get("ruleId"));
+		json.put("eventRuleAvailable", model.get("available"));
+		json.put("eventRuleConfigs", model.get("configs"));
+		json.put("heartbeatRules", heartbeatRuleRows(heartbeatRuleItems));
+		json.put("heartbeatRuleId", model.get("ruleId"));
+		json.put("heartbeatRuleAvailable", model.get("available"));
+		json.put("heartbeatRuleConfigs", model.get("configs"));
+		json.put("heartbeatRuleMetrics", model.get("metrics"));
+		json.put("heartbeatExtensionMetrics", model.get("heartbeatExtensionMetrics"));
 		json.put("transactionRuleId", model.get("ruleId"));
 		json.put("transactionRuleAvailable", model.get("available"));
 		json.put("transactionRuleConfigs", model.get("configs"));
+		json.put("exceptionLimits", exceptionLimitRows(exceptionLimits));
+		json.put("exceptionExcludes", exceptionExcludeRows(exceptionExcludes));
+		json.put("exceptionLimit", exceptionLimit((ExceptionLimit) model.get("exceptionLimit")));
+		json.put("exceptionExclude", exceptionExclude((ExceptionExclude) model.get("exceptionExclude")));
+		json.put("domainList", domainList == null ? Collections.emptyList() : domainList);
+		json.put("exceptionList", exceptionList == null ? Collections.emptyList() : exceptionList);
 		json.put("content", configContent(vueAction, model));
 		json.put("opState", model.get("opState") == null ? request.getParameter("opState") : model.get("opState"));
 		return json;
@@ -343,6 +369,24 @@ public class SpringMvcConfigController {
 	private String configContent(String action, Map<String, Object> model) {
 		if ("displayPolicy".equals(action)) {
 			return displayPolicyManager.getHeartbeatDisplayPolicy().toString();
+		}
+		if ("alertPolicy".equals(action)) {
+			return alertPolicyManager.getAlertPolicy().toString();
+		}
+		if ("alertDefaultReceivers".equals(action)) {
+			return alertConfigManager.getAlertConfig().toString();
+		}
+		if ("alertSenderConfigUpdate".equals(action)) {
+			return senderConfigManager.getConfig().toString();
+		}
+		if ("serverConfigUpdate".equals(action)) {
+			return serverConfigManager.getConfig().toString();
+		}
+		if ("sampleConfigUpdate".equals(action)) {
+			return sampleConfigManager.getConfig().toString();
+		}
+		if ("routerConfigUpdate".equals(action)) {
+			return routerConfigManager.getRouterConfig().toString();
 		}
 		Object content = model.get("content");
 
@@ -428,6 +472,75 @@ public class SpringMvcConfigController {
 
 	private String condition(String[] conditions, int index) {
 		return index < conditions.length ? conditions[index] : "";
+	}
+
+	private List<Map<String, Object>> exceptionLimitRows(List<ExceptionLimit> exceptionLimits) {
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+		if (exceptionLimits == null) {
+			return list;
+		}
+		for (ExceptionLimit exceptionLimit : exceptionLimits) {
+			list.add(exceptionLimit(exceptionLimit));
+		}
+		return list;
+	}
+
+	private Map<String, Object> exceptionLimit(ExceptionLimit exceptionLimit) {
+		Map<String, Object> item = new LinkedHashMap<String, Object>();
+
+		if (exceptionLimit == null) {
+			return item;
+		}
+		item.put("id", exceptionLimit.getId());
+		item.put("domain", exceptionLimit.getDomain());
+		item.put("name", exceptionLimit.getName());
+		item.put("warning", exceptionLimit.getWarning());
+		item.put("error", exceptionLimit.getError());
+		item.put("available", exceptionLimit.getAvailable() == null ? Boolean.TRUE : exceptionLimit.getAvailable());
+		return item;
+	}
+
+	private List<Map<String, Object>> exceptionExcludeRows(List<ExceptionExclude> exceptionExcludes) {
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+		if (exceptionExcludes == null) {
+			return list;
+		}
+		for (ExceptionExclude exceptionExclude : exceptionExcludes) {
+			list.add(exceptionExclude(exceptionExclude));
+		}
+		return list;
+	}
+
+	private Map<String, Object> exceptionExclude(ExceptionExclude exceptionExclude) {
+		Map<String, Object> item = new LinkedHashMap<String, Object>();
+
+		if (exceptionExclude == null) {
+			return item;
+		}
+		item.put("id", exceptionExclude.getId());
+		item.put("domain", exceptionExclude.getDomain());
+		item.put("name", exceptionExclude.getName());
+		return item;
+	}
+
+	private List<Map<String, Object>> heartbeatRuleRows(List<HeartbeatRuleItem> ruleItems) {
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+		if (ruleItems == null) {
+			return list;
+		}
+		for (HeartbeatRuleItem ruleItem : ruleItems) {
+			Map<String, Object> item = new LinkedHashMap<String, Object>();
+
+			item.put("id", ruleItem.getId());
+			item.put("productlineText", ruleItem.getProductlineText());
+			item.put("metricText", ruleItem.getMetricText());
+			item.put("available", ruleItem.getAvailable() == null ? Boolean.TRUE : ruleItem.getAvailable());
+			list.add(item);
+		}
+		return list;
 	}
 
 	private Map<String, Object> project(ProjectDO project) {
@@ -589,6 +702,17 @@ public class SpringMvcConfigController {
 			return false;
 		}
 		return "transactionRuleDelete".equals(action) || "transactionRuleSubmit".equals(action)
+				|| "eventRuleDelete".equals(action) || "eventRuleSubmit".equals(action)
+				|| "heartbeatRulDelete".equals(action) || "heartbeatRuleDelete".equals(action)
+				|| "heartbeatRuleSubmit".equals(action)
+				|| "exceptionThresholdDelete".equals(action) || "exceptionThresholdUpdateSubmit".equals(action)
+				|| "exceptionExcludeDelete".equals(action) || "exceptionExcludeUpdateSubmit".equals(action)
+				|| ("alertPolicy".equals(action) && request.getParameter("content") != null)
+				|| ("alertDefaultReceivers".equals(action) && request.getParameter("content") != null)
+				|| ("alertSenderConfigUpdate".equals(action) && request.getParameter("content") != null)
+				|| ("serverConfigUpdate".equals(action) && request.getParameter("content") != null)
+				|| ("sampleConfigUpdate".equals(action) && request.getParameter("content") != null)
+				|| ("routerConfigUpdate".equals(action) && request.getParameter("content") != null)
 				|| ("displayPolicy".equals(action) && request.getParameter("content") != null);
 	}
 
@@ -981,6 +1105,7 @@ public class SpringMvcConfigController {
 		}
 		model.put("ruleId", ruleId);
 		model.put("available", available);
+		model.put("configs", configs);
 		model.put("content", ruleDecorator.generateConfigsHtml(configs));
 	}
 
@@ -1023,6 +1148,8 @@ public class SpringMvcConfigController {
 		}
 		model.put("ruleId", ruleId);
 		model.put("available", available);
+		model.put("configs", configs);
+		model.put("metrics", metrics);
 		model.put("content", ruleDecorator.generateConfigsHtml(configs));
 		model.put("configHeader", metrics);
 		model.put("heartbeatExtensionMetrics", displayPolicyManager.queryAlertMetrics());
@@ -1502,6 +1629,11 @@ public class SpringMvcConfigController {
 				.append(URLEncoder.encode(action, StandardCharsets.UTF_8));
 
 		url.append("&domain=").append(URLEncoder.encode(domain, StandardCharsets.UTF_8));
+		String type = request.getParameter("type");
+
+		if (type != null && type.length() > 0) {
+			url.append("&type=").append(URLEncoder.encode(type, StandardCharsets.UTF_8));
+		}
 		if (opState != null && opState.length() > 0 && !"null".equals(opState)) {
 			url.append("&opState=").append(URLEncoder.encode(opState, StandardCharsets.UTF_8));
 		}
@@ -1511,6 +1643,17 @@ public class SpringMvcConfigController {
 	private String vueConfigAction(String action) {
 		if ("transactionRuleDelete".equals(action) || "transactionRuleSubmit".equals(action)) {
 			return "transactionRule";
+		}
+		if ("eventRuleDelete".equals(action) || "eventRuleSubmit".equals(action)) {
+			return "eventRule";
+		}
+		if ("heartbeatRulDelete".equals(action) || "heartbeatRuleDelete".equals(action)
+				|| "heartbeatRuleSubmit".equals(action)) {
+			return "heartbeatRuleConfigList";
+		}
+		if ("exceptionThresholdDelete".equals(action) || "exceptionThresholdUpdateSubmit".equals(action)
+				|| "exceptionExcludeDelete".equals(action) || "exceptionExcludeUpdateSubmit".equals(action)) {
+			return "exception";
 		}
 		return action;
 	}

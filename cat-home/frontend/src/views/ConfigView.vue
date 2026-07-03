@@ -17,89 +17,24 @@
     </header>
 
     <div class="cat-body">
-      <aside class="cat-sidebar config-sidebar" aria-label="配置导航">
-        <details class="sidebar-group" :open="isProjectConfig || isDomainGroupConfig">
-          <summary class="sidebar-item" :class="{ 'is-active': isProjectConfig || isDomainGroupConfig }">
-            <Settings class="sidebar-icon" />
-            <span>项目配置信息</span>
-            <ChevronDown class="sidebar-chevron" />
-          </summary>
-          <nav class="sidebar-submenu" aria-label="项目配置信息">
-            <a class="sidebar-subitem" :class="{ 'is-active': isProjectConfig }" :href="configUrl({ op: 'projects' })">
-              项目基本信息
-            </a>
-            <a
-              class="sidebar-subitem"
-              :class="{ 'is-active': isDomainGroupConfig }"
-              :href="configUrl({ op: 'domainGroupConfigs' })"
-            >
-              机器分组配置
-            </a>
-          </nav>
-        </details>
-
-        <details class="sidebar-group" :open="isBusinessConfig">
-          <summary class="sidebar-item" :class="{ 'is-active': isBusinessConfig }">
-            <Cloud class="sidebar-icon" />
-            <span>应用监控配置</span>
-            <ChevronDown class="sidebar-chevron" />
-          </summary>
-          <nav class="sidebar-submenu" aria-label="应用监控配置">
-            <a class="sidebar-subitem" :class="{ 'is-active': isBusinessList || isBusinessCustomAdd }" :href="configUrl({ op: 'businessList' })">
-              业务监控配置
-            </a>
-            <a class="sidebar-subitem" :class="{ 'is-active': isBusinessTagConfig }" :href="configUrl({ op: 'businessTagConfig' })">
-              业务标签配置
-            </a>
-            <a class="sidebar-subitem" :class="{ 'is-active': isHeartbeatDisplayPolicy }" :href="configUrl({ op: 'displayPolicy' })">
-              心跳报表展示
-            </a>
-          </nav>
-        </details>
-
-        <details class="sidebar-group" :open="isAlertConfig">
-          <summary class="sidebar-item" :class="{ 'is-active': isAlertConfig }">
-            <Zap class="sidebar-icon" />
-            <span>应用告警配置</span>
-            <ChevronDown class="sidebar-chevron" />
-          </summary>
-          <nav class="sidebar-submenu" aria-label="应用告警配置">
-            <a class="sidebar-subitem" :class="{ 'is-active': isTransactionRule || isTransactionRuleUpdate }" :href="configUrl({ op: 'transactionRule' })">
-              Transaction告警
-            </a>
-            <a class="sidebar-subitem" :href="legacyConfigUrl('eventRule')">Event告警</a>
-            <a class="sidebar-subitem" :href="legacyConfigUrl('exception')">异常告警配置</a>
-            <a class="sidebar-subitem" :href="legacyConfigUrl('heartbeatRuleConfigList')">心跳告警配置</a>
-          </nav>
-        </details>
-
-        <details class="sidebar-group">
-          <summary class="sidebar-item">
-            <Cog class="sidebar-icon" />
-            <span>全局系统配置</span>
-            <ChevronDown class="sidebar-chevron" />
-          </summary>
-          <nav class="sidebar-submenu" aria-label="全局系统配置">
-            <a class="sidebar-subitem" :href="legacyConfigUrl('alertPolicy')">告警策略</a>
-            <a class="sidebar-subitem" :href="legacyConfigUrl('alertDefaultReceivers')">默认告警人</a>
-            <a class="sidebar-subitem" :href="legacyConfigUrl('alertSenderConfigUpdate')">告警服务端</a>
-            <a class="sidebar-subitem" :href="legacyConfigUrl('serverConfigUpdate')">服务端配置</a>
-            <a class="sidebar-subitem" :href="legacyConfigUrl('sampleConfigUpdate')">消息采样配置</a>
-            <a class="sidebar-subitem" :href="legacyConfigUrl('routerConfigUpdate')">客户端路由</a>
-            <a class="sidebar-subitem" :href="permissionConfigUrl('resource')">资源权限配置</a>
-            <a class="sidebar-subitem" :href="permissionConfigUrl('user')">用户权限配置</a>
-          </nav>
-        </details>
-      </aside>
+      <ConfigSidebar
+        :active-item="activeSidebarItem"
+        :context-path="contextPath"
+        :current-domain="currentDomain"
+        :exception-tab="exceptionTab"
+      />
 
       <section class="cat-content">
         <section class="config-card">
-          <header class="config-heading">
-            <h1>{{ pageTitle }}</h1>
+          <header v-if="showConfigHeading || showConfigActions" class="config-heading">
+            <h1 v-if="showConfigHeading">{{ pageTitle }}</h1>
+            <span v-else></span>
             <a v-if="isProjectAdd" class="config-primary" :href="configUrl({ op: 'projects' })">返回</a>
             <a v-else-if="isDomainGroupEdit" class="config-primary" :href="configUrl({ op: 'domainGroupConfigs' })">返回</a>
             <a v-else-if="isBusinessCustomAdd" class="config-primary" :href="configUrl({ op: 'businessList', domain: currentDomain })">返回</a>
-            <a v-else-if="isTransactionRuleUpdate" class="config-primary" :href="configUrl({ op: 'transactionRule', domain: currentDomain })">返回</a>
+            <a v-else-if="isAlertRuleUpdate" class="config-primary" :href="configUrl({ op: alertRuleListAction, domain: currentDomain })">返回</a>
+            <a v-else-if="isHeartbeatRuleUpdate" class="config-primary" :href="configUrl({ op: 'heartbeatRuleConfigList', domain: currentDomain })">返回</a>
+            <a v-else-if="isExceptionEdit" class="config-primary" :href="configUrl({ op: 'exception', type: exceptionTab })">返回</a>
             <a v-else-if="isDomainGroupList" class="config-primary" :href="configUrl({ op: 'domainGroupConfigUpdate' })">
               <Plus class="button-icon" />
               添加
@@ -108,7 +43,11 @@
               <Plus class="button-icon" />
               新增
             </a>
-            <a v-else-if="isTransactionRule" class="config-primary" :href="configUrl({ op: 'transactionRuleUpdate', domain: currentDomain })">
+            <a v-else-if="isAlertRule" class="config-primary" :href="configUrl({ op: alertRuleUpdateAction, domain: currentDomain })">
+              <Plus class="button-icon" />
+              新增
+            </a>
+            <a v-else-if="isHeartbeatRuleList" class="config-primary" :href="configUrl({ op: 'heartbeatRuleUpdate', domain: currentDomain })">
               <Plus class="button-icon" />
               新增
             </a>
@@ -139,6 +78,11 @@
             <p v-else-if="report?.opState === false" class="config-state is-error">操作失败</p>
             <table class="config-form-table domain-group-table">
               <thead>
+                <tr>
+                  <th class="config-title-cell" colspan="3">
+                    <h2>机器分组配置</h2>
+                  </th>
+                </tr>
                 <tr>
                   <th>项目组</th>
                   <th>组</th>
@@ -235,6 +179,11 @@
             <div class="business-table-wrap">
               <table class="config-form-table business-config-table">
                 <thead>
+                  <tr>
+                    <th class="config-title-cell" colspan="11">
+                      <h2>业务监控配置</h2>
+                    </th>
+                  </tr>
                   <tr>
                     <th>项目</th>
                     <th>显示顺序</th>
@@ -370,7 +319,7 @@
               <tbody>
                 <tr>
                   <td>
-                    <h2>业务监控标签配置</h2>
+                    <h2>业务标签配置</h2>
                   </td>
                 </tr>
                 <tr>
@@ -400,7 +349,7 @@
               <tbody>
                 <tr>
                   <td>
-                    <h2>心跳报表配置</h2>
+                    <h2>心跳报表展示</h2>
                   </td>
                 </tr>
                 <tr>
@@ -417,11 +366,221 @@
               </tbody>
             </table>
           </form>
-          <section v-else-if="isTransactionRule" class="config-project-form">
+          <form
+            v-else-if="isAlertPolicy"
+            class="config-project-form config-xml-form"
+            method="post"
+            :action="configSubmitUrl('alertPolicy')"
+          >
+            <input type="hidden" name="vue" value="true">
+            <p v-if="isSuccessState(report?.opState)" class="config-state">操作成功</p>
+            <p v-else-if="isFailureState(report?.opState)" class="config-state is-error">操作失败</p>
+            <table class="config-form-table">
+              <tbody>
+                <tr>
+                  <td>
+                    <h2>告警策略配置</h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input type="hidden" name="content" :value="xmlEditorContent">
+                    <XmlEditor v-model="xmlEditorContent" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="center">
+                    <button class="config-primary" type="submit">提交</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </form>
+          <form
+            v-else-if="isAlertDefaultReceivers"
+            id="alertDefaultReceiversForm"
+            class="config-project-form config-xml-form"
+            method="post"
+            :action="configSubmitUrl('alertDefaultReceivers')"
+          >
+            <input type="hidden" name="vue" value="true">
+            <input type="hidden" name="allOnOrOff" :value="alertDefaultReceiversMode">
+            <p v-if="isSuccessState(report?.opState)" class="config-state">操作成功</p>
+            <p v-else-if="isFailureState(report?.opState)" class="config-state is-error">操作失败</p>
+            <table class="config-form-table">
+              <tbody>
+                <tr>
+                  <td>
+                    <h2>默认告警人配置</h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input type="hidden" name="content" :value="xmlEditorContent">
+                    <XmlEditor v-model="xmlEditorContent" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="center config-action-group">
+                    <button class="config-primary" type="submit" @click="alertDefaultReceiversMode = ''">提交</button>
+                    <button class="config-primary" type="button" @click="submitAlertDefaultReceivers('on')">全部告警</button>
+                    <button class="config-danger button-like" type="button" @click="submitAlertDefaultReceivers('off')">暂停告警</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </form>
+          <form
+            v-else-if="isAlertSenderConfig"
+            class="config-project-form config-xml-form"
+            method="post"
+            :action="configSubmitUrl('alertSenderConfigUpdate')"
+          >
+            <input type="hidden" name="vue" value="true">
+            <p v-if="isSuccessState(report?.opState)" class="config-state">操作成功</p>
+            <p v-else-if="isFailureState(report?.opState)" class="config-state is-error">操作失败</p>
+            <table class="config-form-table">
+              <tbody>
+                <tr>
+                  <td>
+                    <h2>告警发送服务配置</h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input type="hidden" name="content" :value="xmlEditorContent">
+                    <XmlEditor v-model="xmlEditorContent" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="center">
+                    <button class="config-primary" type="submit">提交</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </form>
+          <form
+            v-else-if="isServerConfig"
+            class="config-project-form config-xml-form"
+            method="post"
+            :action="configSubmitUrl('serverConfigUpdate')"
+          >
+            <input type="hidden" name="vue" value="true">
+            <p v-if="isSuccessState(report?.opState)" class="config-state">操作成功</p>
+            <p v-else-if="isFailureState(report?.opState)" class="config-state is-error">操作失败</p>
+            <table class="config-form-table">
+              <tbody>
+                <tr>
+                  <td>
+                    <h2>服务端配置</h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <section class="config-tip-box">
+                      <h3>配置说明：</h3>
+                      <p>* local-mode : 定义服务是否为本地模式（开发模式），在生产环境时，设置为false,启动远程监听模式。默认为 false;</p>
+                      <p>* hdfs-machine : 定义是否启用HDFS存储方式，默认为 false；</p>
+                      <p>* job-machine : 定义当前服务是否为报告工作机（开启生成汇总报告和统计报告的任务，只需要一台服务机开启此功能），默认为false；</p>
+                      <p>* alarm-machine : 定义当前服务是否为报警机（开启各类报警监听，只需要一台服务机开启此功能），默认为false；</p>
+                      <p>* storage : 定义数据存储配置信息</p>
+                      <p>* local-report-storage-time : 定义本地报告存放时长，单位为（天）</p>
+                      <p>* local-logivew-storage-time : 定义本地日志存放时长，单位为（天）</p>
+                      <p>* local-base-dir : 定义本地数据存储目录</p>
+                      <p>* hdfs : 定义HDFS配置信息，便于直接登录系统</p>
+                      <p>* server-uri : 定义HDFS服务地址</p>
+                      <p>* remote-servers : 定义HTTP服务列表，（远程监听端同步更新服务端信息即取此值）</p>
+                    </section>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input type="hidden" name="content" :value="xmlEditorContent">
+                    <XmlEditor v-model="xmlEditorContent" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="center">
+                    <button class="config-primary" type="submit">提交</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </form>
+          <form
+            v-else-if="isSampleConfig"
+            class="config-project-form config-xml-form"
+            method="post"
+            :action="configSubmitUrl('sampleConfigUpdate')"
+          >
+            <input type="hidden" name="vue" value="true">
+            <p v-if="isSuccessState(report?.opState)" class="config-state">操作成功</p>
+            <p v-else-if="isFailureState(report?.opState)" class="config-state is-error">操作失败</p>
+            <table class="config-form-table">
+              <tbody>
+                <tr>
+                  <td>
+                    <h2>消息采样配置</h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input type="hidden" name="content" :value="xmlEditorContent">
+                    <XmlEditor v-model="xmlEditorContent" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="center">
+                    <button class="config-primary" type="submit">提交</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </form>
+          <form
+            v-else-if="isRouterConfig"
+            class="config-project-form config-xml-form"
+            method="post"
+            :action="configSubmitUrl('routerConfigUpdate')"
+          >
+            <input type="hidden" name="vue" value="true">
+            <p v-if="isSuccessState(report?.opState)" class="config-state">操作成功</p>
+            <p v-else-if="isFailureState(report?.opState)" class="config-state is-error">操作失败</p>
+            <table class="config-form-table">
+              <tbody>
+                <tr>
+                  <td>
+                    <h2>客户端路由</h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input type="hidden" name="content" :value="xmlEditorContent">
+                    <XmlEditor v-model="xmlEditorContent" />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="center config-action-group">
+                    <button class="config-primary" type="submit">提交</button>
+                    <a class="config-primary" :href="routerBuildUrl()" target="_blank" @click="confirmRouterBuild">
+                      重算路由
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </form>
+          <section v-else-if="isAlertRule" class="config-project-form">
             <p v-if="isSuccessState(report?.opState)" class="config-state">操作成功</p>
             <p v-else-if="isFailureState(report?.opState)" class="config-state is-error">操作失败</p>
             <table class="config-form-table transaction-rule-table">
               <thead>
+                <tr>
+                  <th class="config-title-cell" colspan="6">
+                    <h2>{{ alertRuleTitle }}</h2>
+                  </th>
+                </tr>
                 <tr>
                   <th>项目组</th>
                   <th>Type</th>
@@ -432,7 +591,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in report?.transactionRules || []" :key="item.id">
+                <tr v-for="item in alertRules" :key="item.id">
                   <td>{{ item.domain }}</td>
                   <td>{{ item.type }}</td>
                   <td>{{ item.name }}</td>
@@ -441,13 +600,13 @@
                     <span :class="{ 'danger-text': item.available }">{{ item.available ? '是' : '否' }}</span>
                   </td>
                   <td class="action-cell">
-                    <a class="icon-action" title="编辑" :href="transactionRuleUpdateUrl(item.id)">
+                    <a class="icon-action" title="编辑" :href="alertRuleUpdateUrl(item.id)">
                       <Pencil />
                     </a>
                     <a
                       class="icon-action is-danger"
                       title="删除"
-                      :href="transactionRuleDeleteUrl(item.id)"
+                      :href="alertRuleDeleteUrl(item.id)"
                       @click="confirmDelete"
                     >
                       <Trash2 />
@@ -457,41 +616,45 @@
               </tbody>
             </table>
           </section>
-          <section v-else-if="isTransactionRuleUpdate" class="config-project-form transaction-rule-editor">
+          <section v-else-if="isAlertRuleUpdate" class="config-project-form transaction-rule-editor">
             <table class="config-form-table">
               <tbody>
+                <tr>
+                  <td class="config-title-cell" colspan="2">
+                    <h2>{{ alertRuleEditTitle }}</h2>
+                  </td>
+                </tr>
                 <tr>
                   <td colspan="2">
                     <div class="transaction-base-row">
                       <label>
                         项目
-                        <input v-model="transactionRuleForm.domain" :disabled="isEditingTransactionRule" required>
+                        <input v-model="alertRuleForm.domain" :disabled="isEditingAlertRule" required>
                       </label>
                       <label>
                         Type
-                        <input v-model="transactionRuleForm.type" :disabled="isEditingTransactionRule" required>
+                        <input v-model="alertRuleForm.type" :disabled="isEditingAlertRule" required>
                       </label>
                       <label>
                         Name
-                        <input v-model="transactionRuleForm.name" :disabled="isEditingTransactionRule" placeholder="All">
+                        <input v-model="alertRuleForm.name" :disabled="isEditingAlertRule" placeholder="All">
                       </label>
                       <label>
                         监控项
-                        <select v-model="transactionRuleForm.monitor" :disabled="isEditingTransactionRule">
-                          <option value="count">执行次数</option>
-                          <option value="avg">响应时间</option>
-                          <option value="failRatio">失败率</option>
-                          <option value="max">最大响应时间</option>
+                        <select v-model="alertRuleForm.monitor" :disabled="isEditingAlertRule">
+                          <option v-for="option in alertRuleMonitorOptions" :key="option.value" :value="option.value">
+                            {{ option.label }}
+                          </option>
                         </select>
                       </label>
                       <span class="transaction-radio-group">
                         是否告警
                         <label class="config-radio">
-                          <input v-model="transactionRuleForm.available" type="radio" :value="true">
+                          <input v-model="alertRuleForm.available" type="radio" :value="true">
                           是
                         </label>
                         <label class="config-radio">
-                          <input v-model="transactionRuleForm.available" type="radio" :value="false">
+                          <input v-model="alertRuleForm.available" type="radio" :value="false">
                           否
                         </label>
                       </span>
@@ -501,10 +664,10 @@
                 <tr>
                   <td colspan="2">
                     <div class="rule-config-list">
-                      <article v-for="(config, configIndex) in transactionRuleConfigs" :key="configIndex" class="rule-config-card">
+                      <article v-for="(config, configIndex) in alertRuleConfigs" :key="configIndex" class="rule-config-card">
                         <header class="rule-config-header">
                           <strong>监控规则配置</strong>
-                          <button class="config-primary" type="button" @click="addTransactionRuleConfig">
+                          <button class="config-primary" type="button" @click="addAlertRuleConfig">
                             <Plus class="button-icon" />
                             添加监控规则
                           </button>
@@ -555,7 +718,7 @@
                                   规则类型：
                                   <select v-model="subCondition.type">
                                     <option
-                                      v-for="option in transactionRuleTypeOptions"
+                                      v-for="option in alertRuleTypeOptions"
                                       :key="option.value"
                                       :value="option.value"
                                     >
@@ -571,7 +734,7 @@
                               <button
                                 class="config-danger button-like"
                                 type="button"
-                                @click="removeTransactionRuleSubCondition(configIndex, conditionIndex, subConditionIndex)"
+                                @click="removeAlertRuleSubCondition(configIndex, conditionIndex, subConditionIndex)"
                               >
                                 <Trash2 class="button-icon" />
                                 删除子条件
@@ -583,12 +746,12 @@
                               class="config-primary"
                               type="button"
                               :disabled="hasUserDefinedRule(condition)"
-                              @click="addTransactionRuleSubCondition(configIndex, conditionIndex)"
+                              @click="addAlertRuleSubCondition(configIndex, conditionIndex)"
                             >
                               <Plus class="button-icon" />
                               添加子条件
                             </button>
-                            <button class="config-danger button-like" type="button" @click="removeTransactionRuleCondition(configIndex, conditionIndex)">
+                            <button class="config-danger button-like" type="button" @click="removeAlertRuleCondition(configIndex, conditionIndex)">
                               <Trash2 class="button-icon" />
                               删除监控条件
                             </button>
@@ -603,11 +766,11 @@
                           </div>
                         </section>
                         <div class="rule-button-row">
-                          <button class="config-primary" type="button" @click="addTransactionRuleCondition(configIndex)">
+                          <button class="config-primary" type="button" @click="addAlertRuleCondition(configIndex)">
                             <Plus class="button-icon" />
                             添加监控条件
                           </button>
-                          <button class="config-danger button-like" type="button" @click="removeTransactionRuleConfig(configIndex)">
+                          <button class="config-danger button-like" type="button" @click="removeAlertRuleConfig(configIndex)">
                             <Trash2 class="button-icon" />
                             删除监控规则
                           </button>
@@ -618,12 +781,451 @@
                 </tr>
                 <tr>
                   <td colspan="2" class="center">
-                    <button class="config-primary" type="button" @click="submitTransactionRule">提交</button>
+                    <button class="config-primary" type="button" @click="submitAlertRule">提交</button>
                   </td>
                 </tr>
               </tbody>
             </table>
           </section>
+          <section v-else-if="isHeartbeatRuleList" class="config-project-form">
+            <p v-if="isSuccessState(report?.opState)" class="config-state">操作成功</p>
+            <p v-else-if="isFailureState(report?.opState)" class="config-state is-error">操作失败</p>
+            <table class="config-form-table heartbeat-rule-table">
+              <thead>
+                <tr>
+                  <th class="config-title-cell" colspan="5">
+                    <h2>心跳告警配置</h2>
+                  </th>
+                </tr>
+                <tr>
+                  <th>规则id</th>
+                  <th>项目配置</th>
+                  <th>指标配置</th>
+                  <th>是否告警</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in report?.heartbeatRules || []" :key="item.id">
+                  <td class="break-cell">{{ item.id }}</td>
+                  <td class="break-cell">{{ item.productlineText }}</td>
+                  <td>{{ item.metricText }}</td>
+                  <td><span :class="{ 'danger-text': item.available }">{{ item.available ? '是' : '否' }}</span></td>
+                  <td class="action-cell">
+                    <a class="icon-action" title="编辑" :href="configUrl({ op: 'heartbeatRuleUpdate', key: item.id, domain: currentDomain })">
+                      <Pencil />
+                    </a>
+                    <a class="icon-action is-danger" title="删除" :href="heartbeatRuleDeleteUrl(item.id)" @click="confirmDelete">
+                      <Trash2 />
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+          <section v-else-if="isHeartbeatRuleUpdate" class="config-project-form transaction-rule-editor heartbeat-rule-editor">
+            <table class="config-form-table">
+              <tbody>
+                <tr>
+                  <td class="config-title-cell" colspan="2">
+                    <h2>编辑心跳告警规则</h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    <div class="transaction-base-row">
+                      <label>
+                        项目
+                        <input v-model="heartbeatRuleForm.domain" :disabled="isEditingHeartbeatRule" required>
+                      </label>
+                      <label>
+                        指标
+                        <select v-model="heartbeatRuleForm.metric" :disabled="isEditingHeartbeatRule">
+                          <option v-for="metric in heartbeatExtensionMetrics" :key="metric" :value="metric">{{ metric }}</option>
+                        </select>
+                      </label>
+                      <span class="transaction-radio-group">
+                        是否告警
+                        <label class="config-radio">
+                          <input v-model="heartbeatRuleForm.available" type="radio" :value="true">
+                          是
+                        </label>
+                        <label class="config-radio">
+                          <input v-model="heartbeatRuleForm.available" type="radio" :value="false">
+                          否
+                        </label>
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    <section class="heartbeat-metric-card">
+                      <header class="rule-config-header">
+                        <strong>匹配对象</strong>
+                        <button class="config-primary" type="button" @click="addHeartbeatMetricItem">
+                          <Plus class="button-icon" />
+                          添加匹配对象
+                        </button>
+                      </header>
+                      <div class="heartbeat-metric-list">
+                        <div v-for="(item, index) in heartbeatMetricItems" :key="index" class="heartbeat-metric-row">
+                          <label>
+                            项目：
+                            <textarea v-model="item.productText" placeholder="支持正则,为空即为全局规则"></textarea>
+                          </label>
+                          <label>
+                            指标：
+                            <select v-model="item.metricItemText">
+                              <option v-for="metric in heartbeatExtensionMetrics" :key="metric" :value="metric">{{ metric }}</option>
+                            </select>
+                          </label>
+                          <button class="config-danger button-like" type="button" @click="removeHeartbeatMetricItem(index)">
+                            <Trash2 class="button-icon" />
+                            删除
+                          </button>
+                        </div>
+                      </div>
+                    </section>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2">
+                    <div class="rule-config-list">
+                      <article v-for="(config, configIndex) in alertRuleConfigs" :key="configIndex" class="rule-config-card">
+                        <header class="rule-config-header">
+                          <strong>监控规则配置</strong>
+                          <button class="config-primary" type="button" @click="addAlertRuleConfig">
+                            <Plus class="button-icon" />
+                            添加监控规则
+                          </button>
+                        </header>
+                        <div class="rule-config-time">
+                          <label>
+                            监控开始时间：
+                            <input v-model="config.starttime" placeholder="格式如 00:00">
+                          </label>
+                          <label>
+                            监控结束时间：
+                            <input v-model="config.endtime" placeholder="格式如 24:00">
+                          </label>
+                        </div>
+                        <section
+                          v-for="(condition, conditionIndex) in config.conditions"
+                          :key="conditionIndex"
+                          class="rule-condition-card"
+                        >
+                          <h3>监控条件</h3>
+                          <div class="rule-condition-row">
+                            <label>
+                              持续分钟：
+                              <input v-model="condition.minute" class="small-input">
+                            </label>
+                            <label>
+                              告警级别：
+                              <select v-model="condition.alertType">
+                                <option value="warning">warning</option>
+                                <option value="error">error</option>
+                              </select>
+                            </label>
+                          </div>
+                          <p class="subcondition-title">子条件<span>【必须全部满足才触发告警】</span></p>
+                          <div class="subcondition-list">
+                            <div
+                              v-for="(subCondition, subConditionIndex) in condition.subConditions"
+                              :key="subConditionIndex"
+                              class="subcondition-row"
+                              :class="{ 'is-user-defined': subCondition.type === 'UserDefine' }"
+                            >
+                              <template v-if="subCondition.type === 'UserDefine'">
+                                <input v-model="subCondition.type" type="hidden">
+                                <textarea v-model="subCondition.text" rows="8"></textarea>
+                              </template>
+                              <template v-else>
+                                <label>
+                                  规则类型：
+                                  <select v-model="subCondition.type">
+                                    <option
+                                      v-for="option in alertRuleTypeOptions"
+                                      :key="option.value"
+                                      :value="option.value"
+                                    >
+                                      {{ option.label }}
+                                    </option>
+                                  </select>
+                                </label>
+                                <label>
+                                  阈值：
+                                  <input v-model="subCondition.text" class="small-input">
+                                </label>
+                              </template>
+                              <button
+                                class="config-danger button-like"
+                                type="button"
+                                @click="removeAlertRuleSubCondition(configIndex, conditionIndex, subConditionIndex)"
+                              >
+                                <Trash2 class="button-icon" />
+                                删除子条件
+                              </button>
+                            </div>
+                          </div>
+                          <div class="rule-button-row">
+                            <button
+                              class="config-primary"
+                              type="button"
+                              :disabled="hasUserDefinedRule(condition)"
+                              @click="addAlertRuleSubCondition(configIndex, conditionIndex)"
+                            >
+                              <Plus class="button-icon" />
+                              添加子条件
+                            </button>
+                            <button class="config-danger button-like" type="button" @click="removeAlertRuleCondition(configIndex, conditionIndex)">
+                              <Trash2 class="button-icon" />
+                              删除监控条件
+                            </button>
+                            <button
+                              class="config-secondary"
+                              type="button"
+                              :disabled="hasUserDefinedRule(condition)"
+                              @click="useUserDefinedRule(configIndex, conditionIndex)"
+                            >
+                              自定义监控规则
+                            </button>
+                          </div>
+                        </section>
+                        <div class="rule-button-row">
+                          <button class="config-primary" type="button" @click="addAlertRuleCondition(configIndex)">
+                            <Plus class="button-icon" />
+                            添加监控条件
+                          </button>
+                          <button class="config-danger button-like" type="button" @click="removeAlertRuleConfig(configIndex)">
+                            <Trash2 class="button-icon" />
+                            删除监控规则
+                          </button>
+                        </div>
+                      </article>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="center">
+                    <button class="config-primary" type="button" @click="submitHeartbeatRule">提交</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+          <section v-else-if="isExceptionList" class="config-project-form exception-config-view">
+            <p v-if="isSuccessState(report?.opState)" class="config-state">操作成功</p>
+            <p v-else-if="isFailureState(report?.opState)" class="config-state is-error">操作失败</p>
+            <div class="exception-tabs">
+              <a :class="{ 'is-active': exceptionTab === 'threshold' }" :href="configUrl({ op: 'exception', type: 'threshold' })">异常阈值</a>
+              <a :class="{ 'is-active': exceptionTab === 'exclude' }" :href="configUrl({ op: 'exception', type: 'exclude' })">异常过滤</a>
+            </div>
+            <section v-if="exceptionTab === 'threshold'">
+              <table class="config-form-table exception-table">
+                <thead>
+                  <tr>
+                    <th class="config-title-cell" colspan="6">
+                      <h2>异常阈值配置</h2>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th>域名</th>
+                    <th>异常名称</th>
+                    <th>Warning阈值</th>
+                    <th>Error阈值</th>
+                    <th>是否告警</th>
+                    <th>
+                      操作
+                      <a class="mini-add-action" title="添加" :href="configUrl({ op: 'exceptionThresholdAdd', type: 'threshold' })">
+                        <Plus />
+                      </a>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in report?.exceptionLimits || []" :key="item.id || `${item.domain}:${item.name}`">
+                    <td>{{ item.domain }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.warning }}</td>
+                    <td>{{ item.error }}</td>
+                    <td><span :class="{ 'danger-text': item.available }">{{ item.available ? '是' : '否' }}</span></td>
+                    <td class="action-cell">
+                      <a
+                        class="icon-action"
+                        title="编辑"
+                        :href="configUrl({ op: 'exceptionThresholdUpdate', domain: item.domain, exception: item.name, type: 'threshold' })"
+                      >
+                        <Pencil />
+                      </a>
+                      <a
+                        class="icon-action is-danger"
+                        title="删除"
+                        :href="exceptionThresholdDeleteUrl(item)"
+                        @click="confirmDelete"
+                      >
+                        <Trash2 />
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+            <section v-else>
+              <table class="config-form-table exception-table exception-exclude-table">
+                <thead>
+                  <tr>
+                    <th class="config-title-cell" colspan="3">
+                      <h2>异常过滤配置</h2>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th>域名</th>
+                    <th>异常名称</th>
+                    <th>
+                      <a class="mini-add-action" title="添加" :href="configUrl({ op: 'exceptionExcludeAdd', type: 'exclude' })">
+                        <Plus />
+                      </a>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in report?.exceptionExcludes || []" :key="item.id || `${item.domain}:${item.name}`">
+                    <td>{{ item.domain }}</td>
+                    <td>{{ item.name }}</td>
+                    <td class="action-cell">
+                      <a
+                        class="icon-action is-danger"
+                        title="删除"
+                        :href="exceptionExcludeDeleteUrl(item)"
+                        @click="confirmDelete"
+                      >
+                        <Trash2 />
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+          </section>
+          <form
+            v-else-if="isExceptionThresholdEdit"
+            class="config-project-form exception-edit-form"
+            method="post"
+            :action="configSubmitUrl('exceptionThresholdUpdateSubmit', { type: 'threshold' })"
+          >
+            <input type="hidden" name="vue" value="true">
+            <input type="hidden" name="type" value="threshold">
+            <table class="config-form-table">
+              <tbody>
+                <tr>
+                  <td class="config-title-cell" colspan="2">
+                    <h2>修改异常阈值配置信息</h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td>项目名称</td>
+                  <td>
+                    <input
+                      name="exceptionLimit.domain"
+                      :value="exceptionLimitForm.domain"
+                      :readonly="Boolean(exceptionLimitForm.domain)"
+                      list="exception-domain-list"
+                      placeholder="input domain for search"
+                      required
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>异常名称</td>
+                  <td>
+                    <input
+                      name="exceptionLimit.name"
+                      :value="exceptionLimitForm.name"
+                      :readonly="Boolean(exceptionLimitForm.name)"
+                      list="exception-name-list"
+                      placeholder="input exception for search"
+                      required
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>warning阈值</td>
+                  <td><input name="exceptionLimit.warning" type="number" :value="exceptionLimitForm.warning" required></td>
+                </tr>
+                <tr>
+                  <td>error阈值</td>
+                  <td><input name="exceptionLimit.error" type="number" :value="exceptionLimitForm.error" required></td>
+                </tr>
+                <tr>
+                  <td>是否告警</td>
+                  <td>
+                    <label class="config-radio">
+                      <input type="radio" name="exceptionLimit.available" value="true" :checked="exceptionLimitForm.available">
+                      是
+                    </label>
+                    <label class="config-radio">
+                      <input type="radio" name="exceptionLimit.available" value="false" :checked="!exceptionLimitForm.available">
+                      否
+                    </label>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="center">
+                    <button class="config-primary" type="submit">提交</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <datalist id="exception-domain-list">
+              <option v-for="item in report?.domainList || []" :key="item" :value="item"></option>
+            </datalist>
+            <datalist id="exception-name-list">
+              <option v-for="item in report?.exceptionList || []" :key="item" :value="item"></option>
+            </datalist>
+          </form>
+          <form
+            v-else-if="isExceptionExcludeAdd"
+            class="config-project-form exception-edit-form"
+            method="post"
+            :action="configSubmitUrl('exceptionExcludeUpdateSubmit', { type: 'exclude' })"
+          >
+            <input type="hidden" name="vue" value="true">
+            <input type="hidden" name="type" value="exclude">
+            <table class="config-form-table">
+              <tbody>
+                <tr>
+                  <td class="config-title-cell" colspan="2">
+                    <h2>修改异常过滤配置信息</h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td>项目名称</td>
+                  <td>
+                    <input name="exceptionExclude.domain" list="exception-domain-list" placeholder="input domain for search" required>
+                  </td>
+                </tr>
+                <tr>
+                  <td>异常名称</td>
+                  <td>
+                    <input name="exceptionExclude.name" list="exception-name-list" placeholder="input exception for search" required>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2" class="center">
+                    <button class="config-primary" type="submit">提交</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <datalist id="exception-domain-list">
+              <option v-for="item in report?.domainList || []" :key="item" :value="item"></option>
+            </datalist>
+            <datalist id="exception-name-list">
+              <option v-for="item in report?.exceptionList || []" :key="item" :value="item"></option>
+            </datalist>
+          </form>
           <form v-else-if="isProjectAdd" class="config-project-form" method="get" :action="legacyConfigUrl()">
             <input type="hidden" name="op" value="updateSubmit">
             <input type="hidden" name="vue" value="true">
@@ -631,6 +1233,11 @@
             <input type="hidden" name="project.level" value="1">
             <table class="config-form-table">
               <tbody>
+                <tr>
+                  <td class="config-title-cell" colspan="3">
+                    <h2>添加项目</h2>
+                  </td>
+                </tr>
                 <tr>
                   <td>CAT上项目名称</td>
                   <td><input name="project.domain" autofocus></td>
@@ -679,6 +1286,11 @@
             <table class="config-form-table">
               <tbody>
                 <tr>
+                  <td class="config-title-cell" colspan="3">
+                    <h2>项目基本信息</h2>
+                  </td>
+                </tr>
+                <tr>
                   <td>CAT上项目名称</td>
                   <td>{{ project.domain }}</td>
                   <td class="warning">注意：建议使用半角英文和半角符号(. -)。</td>
@@ -726,7 +1338,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ChevronDown, Cloud, Cog, Pencil, Plus, Settings, Trash2, Zap } from 'lucide-vue-next'
+import { Pencil, Plus, Trash2 } from 'lucide-vue-next'
+import ConfigSidebar from '../components/ConfigSidebar.vue'
 import XmlEditor from '../components/XmlEditor.vue'
 
 interface Project {
@@ -751,6 +1364,22 @@ interface ConfigReport {
   domain: string
   domainGroupRows: DomainGroupRow[]
   domains: string[]
+  domainList: string[]
+  eventRuleAvailable: boolean | null
+  eventRuleConfigs: string
+  eventRuleId: string
+  eventRules: AlertRule[]
+  heartbeatExtensionMetrics: string[]
+  heartbeatRuleAvailable: boolean | null
+  heartbeatRuleConfigs: string
+  heartbeatRuleId: string
+  heartbeatRuleMetrics: string
+  heartbeatRules: HeartbeatRule[]
+  exceptionExclude: ExceptionExclude | null
+  exceptionExcludes: ExceptionExclude[]
+  exceptionLimit: ExceptionLimit | null
+  exceptionLimits: ExceptionLimit[]
+  exceptionList: string[]
   groupRows: GroupRow[]
   opState: boolean | string | null
   project: Project | null
@@ -759,7 +1388,7 @@ interface ConfigReport {
   transactionRuleAvailable: boolean | null
   transactionRuleConfigs: string
   transactionRuleId: string
-  transactionRules: TransactionRule[]
+  transactionRules: AlertRule[]
 }
 
 interface DomainGroupRow {
@@ -800,7 +1429,7 @@ interface BusinessCustomConfig {
   viewOrder: number
 }
 
-interface TransactionRule {
+interface AlertRule {
   available: boolean
   domain: string
   id: string
@@ -809,12 +1438,45 @@ interface TransactionRule {
   type: string
 }
 
-interface TransactionRuleForm {
+interface AlertRuleForm {
   available: boolean
   domain: string
   monitor: string
   name: string
   type: string
+}
+
+interface ExceptionLimit {
+  available: boolean
+  domain: string
+  error: number
+  id: string
+  name: string
+  warning: number
+}
+
+interface ExceptionExclude {
+  domain: string
+  id: string
+  name: string
+}
+
+interface HeartbeatRule {
+  available: boolean
+  id: string
+  metricText: string
+  productlineText: string
+}
+
+interface HeartbeatRuleForm {
+  available: boolean
+  domain: string
+  metric: string
+}
+
+interface HeartbeatMetricItem {
+  metricItemText: string
+  productText: string
 }
 
 interface RuleConfigData {
@@ -856,9 +1518,12 @@ const domainInput = ref('')
 const businessDomainInput = ref('')
 const groupDomainInput = ref('')
 const editableGroupRows = ref<EditableGroupRow[]>([])
-const transactionRuleForm = ref<TransactionRuleForm>(defaultTransactionRuleForm('cat'))
-const transactionRuleConfigs = ref<EditableRuleConfig[]>([defaultRuleConfig()])
+const alertRuleForm = ref<AlertRuleForm>(defaultAlertRuleForm('cat'))
+const alertRuleConfigs = ref<EditableRuleConfig[]>([defaultRuleConfig()])
+const heartbeatRuleForm = ref<HeartbeatRuleForm>(defaultHeartbeatRuleForm('cat', ''))
+const heartbeatMetricItems = ref<HeartbeatMetricItem[]>([defaultHeartbeatMetricItem('')])
 const xmlEditorContent = ref('')
+const alertDefaultReceiversMode = ref('')
 const loading = ref(false)
 const loadError = ref('')
 let groupRowKey = 1
@@ -883,14 +1548,74 @@ const isBusinessList = computed(() => currentAction.value === 'businessList')
 const isBusinessCustomAdd = computed(() => currentAction.value === 'businessCustomAdd')
 const isBusinessTagConfig = computed(() => currentAction.value === 'businessTagConfig')
 const isHeartbeatDisplayPolicy = computed(() => currentAction.value === 'displayPolicy')
-const isTransactionRule = computed(() => currentAction.value === 'transactionRule')
-const isTransactionRuleUpdate = computed(() => currentAction.value === 'transactionRuleUpdate')
+const isAlertPolicy = computed(() => currentAction.value === 'alertPolicy')
+const isAlertDefaultReceivers = computed(() => currentAction.value === 'alertDefaultReceivers')
+const isAlertSenderConfig = computed(() => currentAction.value === 'alertSenderConfigUpdate')
+const isServerConfig = computed(() => currentAction.value === 'serverConfigUpdate')
+const isSampleConfig = computed(() => currentAction.value === 'sampleConfigUpdate')
+const isRouterConfig = computed(() => currentAction.value === 'routerConfigUpdate')
+const isTransactionAlertRule = computed(() => currentAction.value === 'transactionRule')
+const isEventAlertRule = computed(() => currentAction.value === 'eventRule')
+const isAlertRule = computed(() => isTransactionAlertRule.value || isEventAlertRule.value)
+const isTransactionAlertRuleUpdate = computed(() => currentAction.value === 'transactionRuleUpdate')
+const isEventAlertRuleUpdate = computed(() => currentAction.value === 'eventRuleUpdate')
+const isAlertRuleUpdate = computed(() => isTransactionAlertRuleUpdate.value || isEventAlertRuleUpdate.value)
+const isExceptionList = computed(() => currentAction.value === 'exception')
+const isExceptionThresholdEdit = computed(() => currentAction.value === 'exceptionThresholdUpdate'
+  || currentAction.value === 'exceptionThresholdAdd')
+const isExceptionExcludeAdd = computed(() => currentAction.value === 'exceptionExcludeAdd')
+const isExceptionEdit = computed(() => isExceptionThresholdEdit.value || isExceptionExcludeAdd.value)
+const isExceptionConfig = computed(() => isExceptionList.value || isExceptionEdit.value)
+const isHeartbeatRuleList = computed(() => currentAction.value === 'heartbeatRuleConfigList')
+const isHeartbeatRuleUpdate = computed(() => currentAction.value === 'heartbeatRuleUpdate')
+const isHeartbeatRuleConfig = computed(() => isHeartbeatRuleList.value || isHeartbeatRuleUpdate.value)
 const isBusinessConfig = computed(() => isBusinessList.value || isBusinessCustomAdd.value || isBusinessTagConfig.value
   || isHeartbeatDisplayPolicy.value)
-const isAlertConfig = computed(() => isTransactionRule.value || isTransactionRuleUpdate.value)
-const isProjectConfig = computed(() => !isDomainGroupConfig.value && !isBusinessConfig.value && !isAlertConfig.value)
+const isAlertConfig = computed(() => isAlertRule.value || isAlertRuleUpdate.value || isExceptionConfig.value
+  || isHeartbeatRuleConfig.value)
+const isSystemConfig = computed(() => isAlertPolicy.value || isAlertDefaultReceivers.value
+  || isAlertSenderConfig.value || isServerConfig.value || isSampleConfig.value || isRouterConfig.value)
+const isProjectConfig = computed(() => !isDomainGroupConfig.value && !isBusinessConfig.value && !isAlertConfig.value
+  && !isSystemConfig.value)
+const activeSidebarItem = computed(() => {
+  if (isDomainGroupConfig.value) {
+    return 'domainGroupConfigs'
+  }
+  if (isBusinessList.value || isBusinessCustomAdd.value) {
+    return 'businessList'
+  }
+  if (isBusinessTagConfig.value) {
+    return 'businessTagConfig'
+  }
+  if (isHeartbeatDisplayPolicy.value) {
+    return 'displayPolicy'
+  }
+  if (isTransactionAlertRule.value || isTransactionAlertRuleUpdate.value) {
+    return 'transactionRule'
+  }
+  if (isEventAlertRule.value || isEventAlertRuleUpdate.value) {
+    return 'eventRule'
+  }
+  if (isExceptionConfig.value) {
+    return 'exception'
+  }
+  if (isHeartbeatRuleConfig.value) {
+    return 'heartbeatRuleConfigList'
+  }
+  if (isProjectConfig.value) {
+    return 'projects'
+  }
+  return currentAction.value
+})
+const showConfigHeading = computed(() => !isAlertPolicy.value && !isAlertDefaultReceivers.value
+  && !isAlertSenderConfig.value && !isServerConfig.value && !isSampleConfig.value && !isRouterConfig.value
+  && !isProjectConfig.value && !isDomainGroupList.value && !isBusinessList.value && !isBusinessTagConfig.value
+  && !isHeartbeatDisplayPolicy.value && !isAlertConfig.value)
+const showConfigActions = computed(() => isProjectAdd.value || isDomainGroupEdit.value || isBusinessCustomAdd.value
+  || isAlertRuleUpdate.value || isHeartbeatRuleUpdate.value || isExceptionEdit.value || isDomainGroupList.value
+  || isBusinessList.value || isAlertRule.value || isHeartbeatRuleList.value || isProjectConfig.value)
 const showProjectSearch = computed(() => !isProjectAdd.value && !isDomainGroupConfig.value && !isBusinessConfig.value
-  && !isAlertConfig.value)
+  && !isAlertConfig.value && !isSystemConfig.value)
 const businessRows = computed(() => [...(report.value?.configs || []), ...(report.value?.customConfigs || [])])
 const businessCustomConfig = computed<BusinessCustomConfig>(() => {
   return report.value?.customConfig || {
@@ -902,8 +1627,39 @@ const businessCustomConfig = computed<BusinessCustomConfig>(() => {
     viewOrder: 0
   }
 })
-const isEditingTransactionRule = computed(() => Boolean(report.value?.transactionRuleId || currentParams.value.get('ruleId')))
-const transactionRuleTypeOptions = [
+const alertRuleKind = computed(() => (isEventAlertRule.value || isEventAlertRuleUpdate.value) ? 'event' : 'transaction')
+const alertRuleListAction = computed(() => alertRuleKind.value === 'event' ? 'eventRule' : 'transactionRule')
+const alertRuleUpdateAction = computed(() => alertRuleKind.value === 'event' ? 'eventRuleUpdate' : 'transactionRuleUpdate')
+const alertRuleSubmitAction = computed(() => alertRuleKind.value === 'event' ? 'eventRuleSubmit' : 'transactionRuleSubmit')
+const alertRuleDeleteAction = computed(() => alertRuleKind.value === 'event' ? 'eventRuleDelete' : 'transactionRuleDelete')
+const alertRuleTitle = computed(() => alertRuleKind.value === 'event' ? 'Event告警' : 'Transaction告警')
+const alertRuleEditTitle = computed(() => alertRuleKind.value === 'event' ? '编辑Event监控规则' : '编辑Transaction监控规则')
+const alertRules = computed(() => alertRuleKind.value === 'event' ? (report.value?.eventRules || []) : (report.value?.transactionRules || []))
+const alertRuleId = computed(() => {
+  return alertRuleKind.value === 'event' ? report.value?.eventRuleId : report.value?.transactionRuleId
+})
+const alertRuleAvailable = computed(() => {
+  return alertRuleKind.value === 'event' ? report.value?.eventRuleAvailable : report.value?.transactionRuleAvailable
+})
+const alertRuleConfigText = computed(() => {
+  return alertRuleKind.value === 'event' ? report.value?.eventRuleConfigs : report.value?.transactionRuleConfigs
+})
+const isEditingAlertRule = computed(() => Boolean(alertRuleId.value || currentParams.value.get('ruleId')))
+const alertRuleMonitorOptions = computed(() => {
+  if (alertRuleKind.value === 'event') {
+    return [
+      { label: '执行次数', value: 'count' },
+      { label: '失败率', value: 'failRatio' }
+    ]
+  }
+  return [
+    { label: '执行次数', value: 'count' },
+    { label: '响应时间', value: 'avg' },
+    { label: '失败率', value: 'failRatio' },
+    { label: '最大响应时间', value: 'max' }
+  ]
+})
+const alertRuleTypeOptions = [
   { label: '最大值(当前值)', value: 'MaxVal' },
   { label: '最小值(当前值)', value: 'MinVal' },
   { label: '波动上升百分比(当前值)', value: 'FluAscPer' },
@@ -911,9 +1667,41 @@ const transactionRuleTypeOptions = [
   { label: '总和最大值(当前值)', value: 'SumMaxVal' },
   { label: '总和最小值(当前值)', value: 'SumMinVal' }
 ]
+const exceptionTab = computed(() => currentParams.value.get('type') === 'exclude' ? 'exclude' : 'threshold')
+const exceptionLimitForm = computed<ExceptionLimit>(() => {
+  return report.value?.exceptionLimit || {
+    available: true,
+    domain: '',
+    error: 0,
+    id: '',
+    name: '',
+    warning: 0
+  }
+})
+const heartbeatExtensionMetrics = computed(() => report.value?.heartbeatExtensionMetrics || [])
+const isEditingHeartbeatRule = computed(() => Boolean(report.value?.heartbeatRuleId || currentParams.value.get('key')
+  || currentParams.value.get('ruleId')))
 const pageTitle = computed(() => {
   if (isHeartbeatDisplayPolicy.value) {
     return '心跳报表展示'
+  }
+  if (isAlertPolicy.value) {
+    return '告警策略'
+  }
+  if (isAlertDefaultReceivers.value) {
+    return '默认告警人'
+  }
+  if (isAlertSenderConfig.value) {
+    return '告警服务端'
+  }
+  if (isServerConfig.value) {
+    return '服务端配置'
+  }
+  if (isSampleConfig.value) {
+    return '消息采样配置'
+  }
+  if (isRouterConfig.value) {
+    return '客户端路由'
   }
   if (isBusinessTagConfig.value) {
     return '业务标签配置'
@@ -924,11 +1712,26 @@ const pageTitle = computed(() => {
   if (isBusinessList.value) {
     return '业务监控配置'
   }
-  if (isTransactionRuleUpdate.value) {
-    return '编辑Transaction监控规则'
+  if (isAlertRuleUpdate.value) {
+    return alertRuleEditTitle.value
   }
-  if (isTransactionRule.value) {
-    return 'Transaction告警'
+  if (isAlertRule.value) {
+    return alertRuleTitle.value
+  }
+  if (isExceptionThresholdEdit.value) {
+    return '异常阈值配置'
+  }
+  if (isExceptionExcludeAdd.value) {
+    return '异常过滤配置'
+  }
+  if (isExceptionList.value) {
+    return '异常告警配置'
+  }
+  if (isHeartbeatRuleUpdate.value) {
+    return '编辑心跳告警规则'
+  }
+  if (isHeartbeatRuleList.value) {
+    return '心跳告警配置'
   }
   if (isDomainGroupEdit.value) {
     return '编辑机器分组配置'
@@ -987,7 +1790,8 @@ async function loadConfig() {
     groupDomainInput.value = currentParams.value.get('domain') || data.domain || ''
     xmlEditorContent.value = data.content || ''
     editableGroupRows.value = (data.groupRows || []).map((row) => toEditableGroupRow(row, true))
-    initTransactionRuleEditor(data)
+    initAlertRuleEditor(data)
+    initHeartbeatRuleEditor(data)
   } catch (error) {
     loadError.value = `项目配置加载失败: ${error instanceof Error ? error.message : String(error)}`
   } finally {
@@ -1005,23 +1809,49 @@ function toEditableGroupRow(row: GroupRow, readonly: boolean): EditableGroupRow 
   }
 }
 
-function initTransactionRuleEditor(data: ConfigReport) {
-  if (data.actionName !== 'transactionRuleUpdate') {
+function initAlertRuleEditor(data: ConfigReport) {
+  if (!isAlertRuleUpdate.value) {
     return
   }
-  const parsedRuleId = parseTransactionRuleId(data.transactionRuleId || currentParams.value.get('ruleId') || '')
+  const parsedRuleId = parseAlertRuleId(alertRuleId.value || currentParams.value.get('ruleId') || '')
 
-  transactionRuleForm.value = {
-    available: data.transactionRuleAvailable ?? true,
+  alertRuleForm.value = {
+    available: alertRuleAvailable.value ?? true,
     domain: parsedRuleId.domain || data.domain || currentParams.value.get('domain') || 'cat',
     monitor: parsedRuleId.monitor || 'count',
     name: parsedRuleId.name || 'All',
     type: parsedRuleId.type || ''
   }
-  transactionRuleConfigs.value = parseTransactionRuleConfigs(data.transactionRuleConfigs)
+  alertRuleConfigs.value = parseAlertRuleConfigs(alertRuleConfigText.value)
 }
 
-function parseTransactionRuleId(ruleId: string) {
+function initHeartbeatRuleEditor(data: ConfigReport) {
+  if (!isHeartbeatRuleUpdate.value) {
+    return
+  }
+  const ruleId = data.heartbeatRuleId || currentParams.value.get('key') || currentParams.value.get('ruleId') || ''
+  const parsedRuleId = parseHeartbeatRuleId(ruleId)
+  const firstMetric = data.heartbeatExtensionMetrics?.[0] || ''
+
+  heartbeatRuleForm.value = {
+    available: data.heartbeatRuleAvailable ?? true,
+    domain: parsedRuleId.domain || data.domain || currentParams.value.get('domain') || 'cat',
+    metric: parsedRuleId.metric || firstMetric
+  }
+  alertRuleConfigs.value = parseAlertRuleConfigs(data.heartbeatRuleConfigs)
+  heartbeatMetricItems.value = parseHeartbeatMetricItems(data.heartbeatRuleMetrics, firstMetric)
+}
+
+function parseHeartbeatRuleId(ruleId: string) {
+  const parts = ruleId.split(';')
+
+  return {
+    domain: parts[0] || '',
+    metric: parts[1] || ''
+  }
+}
+
+function parseAlertRuleId(ruleId: string) {
   const parts = ruleId.split(';')
 
   return {
@@ -1032,7 +1862,7 @@ function parseTransactionRuleId(ruleId: string) {
   }
 }
 
-function parseTransactionRuleConfigs(configText: string | undefined) {
+function parseAlertRuleConfigs(configText: string | undefined) {
   if (!configText) {
     return [defaultRuleConfig()]
   }
@@ -1075,13 +1905,46 @@ function toEditableSubCondition(subCondition: RuleSubConditionData): EditableSub
   }
 }
 
-function defaultTransactionRuleForm(domain: string): TransactionRuleForm {
+function defaultAlertRuleForm(domain: string): AlertRuleForm {
   return {
     available: true,
     domain,
     monitor: 'count',
     name: 'All',
     type: ''
+  }
+}
+
+function defaultHeartbeatRuleForm(domain: string, metric: string): HeartbeatRuleForm {
+  return {
+    available: true,
+    domain,
+    metric
+  }
+}
+
+function parseHeartbeatMetricItems(metricsText: string | undefined, defaultMetric: string) {
+  if (!metricsText) {
+    return [defaultHeartbeatMetricItem(defaultMetric)]
+  }
+  try {
+    const items = JSON.parse(metricsText) as HeartbeatMetricItem[]
+    const editableItems = items.map((item) => ({
+      metricItemText: item.metricItemText || defaultMetric,
+      productText: item.productText || ''
+    })).filter((item) => item.metricItemText || item.productText)
+
+    return editableItems.length > 0 ? editableItems : [defaultHeartbeatMetricItem(defaultMetric)]
+  } catch (error) {
+    console.error('Unable to parse heartbeat rule metrics.', error)
+    return [defaultHeartbeatMetricItem(defaultMetric)]
+  }
+}
+
+function defaultHeartbeatMetricItem(metric: string): HeartbeatMetricItem {
+  return {
+    metricItemText: metric,
+    productText: ''
   }
 }
 
@@ -1108,24 +1971,24 @@ function defaultSubCondition(): EditableSubCondition {
   }
 }
 
-function addTransactionRuleConfig() {
-  transactionRuleConfigs.value.push(defaultRuleConfig())
+function addAlertRuleConfig() {
+  alertRuleConfigs.value.push(defaultRuleConfig())
 }
 
-function removeTransactionRuleConfig(configIndex: number) {
-  if (transactionRuleConfigs.value.length === 1) {
-    transactionRuleConfigs.value = [defaultRuleConfig()]
+function removeAlertRuleConfig(configIndex: number) {
+  if (alertRuleConfigs.value.length === 1) {
+    alertRuleConfigs.value = [defaultRuleConfig()]
     return
   }
-  transactionRuleConfigs.value.splice(configIndex, 1)
+  alertRuleConfigs.value.splice(configIndex, 1)
 }
 
-function addTransactionRuleCondition(configIndex: number) {
-  transactionRuleConfigs.value[configIndex].conditions.push(defaultRuleCondition())
+function addAlertRuleCondition(configIndex: number) {
+  alertRuleConfigs.value[configIndex].conditions.push(defaultRuleCondition())
 }
 
-function removeTransactionRuleCondition(configIndex: number, conditionIndex: number) {
-  const conditions = transactionRuleConfigs.value[configIndex].conditions
+function removeAlertRuleCondition(configIndex: number, conditionIndex: number) {
+  const conditions = alertRuleConfigs.value[configIndex].conditions
 
   if (conditions.length === 1) {
     conditions.splice(0, 1, defaultRuleCondition())
@@ -1134,12 +1997,12 @@ function removeTransactionRuleCondition(configIndex: number, conditionIndex: num
   conditions.splice(conditionIndex, 1)
 }
 
-function addTransactionRuleSubCondition(configIndex: number, conditionIndex: number) {
-  transactionRuleConfigs.value[configIndex].conditions[conditionIndex].subConditions.push(defaultSubCondition())
+function addAlertRuleSubCondition(configIndex: number, conditionIndex: number) {
+  alertRuleConfigs.value[configIndex].conditions[conditionIndex].subConditions.push(defaultSubCondition())
 }
 
-function removeTransactionRuleSubCondition(configIndex: number, conditionIndex: number, subConditionIndex: number) {
-  const subConditions = transactionRuleConfigs.value[configIndex].conditions[conditionIndex].subConditions
+function removeAlertRuleSubCondition(configIndex: number, conditionIndex: number, subConditionIndex: number) {
+  const subConditions = alertRuleConfigs.value[configIndex].conditions[conditionIndex].subConditions
 
   if (subConditions.length === 1) {
     subConditions.splice(0, 1, defaultSubCondition())
@@ -1149,7 +2012,7 @@ function removeTransactionRuleSubCondition(configIndex: number, conditionIndex: 
 }
 
 function useUserDefinedRule(configIndex: number, conditionIndex: number) {
-  transactionRuleConfigs.value[configIndex].conditions[conditionIndex].subConditions = [{
+  alertRuleConfigs.value[configIndex].conditions[conditionIndex].subConditions = [{
     text: '',
     type: 'UserDefine'
   }]
@@ -1159,10 +2022,22 @@ function hasUserDefinedRule(condition: EditableRuleCondition) {
   return condition.subConditions.some((subCondition) => subCondition.type === 'UserDefine')
 }
 
-function submitTransactionRule() {
-  const domain = transactionRuleForm.value.domain.trim()
-  const type = transactionRuleForm.value.type.trim()
-  const name = transactionRuleForm.value.name.trim() || 'All'
+function addHeartbeatMetricItem() {
+  heartbeatMetricItems.value.push(defaultHeartbeatMetricItem(heartbeatRuleForm.value.metric || heartbeatExtensionMetrics.value[0] || ''))
+}
+
+function removeHeartbeatMetricItem(index: number) {
+  if (heartbeatMetricItems.value.length === 1) {
+    heartbeatMetricItems.value = [defaultHeartbeatMetricItem(heartbeatRuleForm.value.metric || heartbeatExtensionMetrics.value[0] || '')]
+    return
+  }
+  heartbeatMetricItems.value.splice(index, 1)
+}
+
+function submitAlertRule() {
+  const domain = alertRuleForm.value.domain.trim()
+  const type = alertRuleForm.value.type.trim()
+  const name = alertRuleForm.value.name.trim() || 'All'
 
   if (!domain) {
     window.alert('项目不能为空')
@@ -1175,26 +2050,73 @@ function submitTransactionRule() {
   let configs = ''
 
   try {
-    configs = transactionRuleConfigJson()
+    configs = alertRuleConfigJson()
   } catch (error) {
     window.alert(error instanceof Error ? error.message : String(error))
     return
   }
-  const ruleId = `${domain};${type};${name};${transactionRuleForm.value.monitor}`
+  const ruleId = `${domain};${type};${name};${alertRuleForm.value.monitor}`
   const params = new URLSearchParams()
 
-  transactionRuleForm.value.name = name
-  params.set('op', 'transactionRuleSubmit')
+  alertRuleForm.value.name = name
+  params.set('op', alertRuleSubmitAction.value)
   params.set('configs', configs)
   params.set('ruleId', ruleId)
-  params.set('available', String(transactionRuleForm.value.available))
+  params.set('available', String(alertRuleForm.value.available))
   params.set('domain', domain)
   params.set('vue', 'true')
   window.location.href = `${contextPath.value}/mvc/s/config?${params.toString()}`
 }
 
-function transactionRuleConfigJson() {
-  const configs = transactionRuleConfigs.value.map((config) => {
+function submitHeartbeatRule() {
+  const domain = heartbeatRuleForm.value.domain.trim()
+
+  if (!domain) {
+    window.alert('项目不能为空')
+    return
+  }
+  let configs = ''
+
+  try {
+    configs = alertRuleConfigJson()
+  } catch (error) {
+    window.alert(error instanceof Error ? error.message : String(error))
+    return
+  }
+  const currentRuleId = report.value?.heartbeatRuleId || currentParams.value.get('key') || currentParams.value.get('ruleId') || ''
+  const ruleId = currentRuleId || `${domain};${heartbeatRuleForm.value.metric}`
+  const params = new URLSearchParams()
+
+  params.set('op', 'heartbeatRuleSubmit')
+  params.set('configs', configs)
+  params.set('ruleId', ruleId)
+  params.set('metrics', heartbeatMetricJson())
+  params.set('available', String(heartbeatRuleForm.value.available))
+  params.set('domain', domain)
+  params.set('vue', 'true')
+  window.location.href = `${contextPath.value}/mvc/s/config?${params.toString()}`
+}
+
+function submitAlertDefaultReceivers(mode: string) {
+  alertDefaultReceiversMode.value = mode
+  requestAnimationFrame(() => {
+    const form = document.getElementById('alertDefaultReceiversForm') as HTMLFormElement | null
+
+    form?.requestSubmit()
+  })
+}
+
+function heartbeatMetricJson() {
+  const items = heartbeatMetricItems.value.map((item) => ({
+    metricItemText: item.metricItemText,
+    productText: item.productText.trim()
+  })).filter((item) => item.metricItemText || item.productText)
+
+  return items.length > 0 ? JSON.stringify(items) : ''
+}
+
+function alertRuleConfigJson() {
+  const configs = alertRuleConfigs.value.map((config) => {
     const conditions = config.conditions.map((condition) => {
       const subConditions = condition.subConditions
         .map((subCondition) => ({
@@ -1371,20 +2293,57 @@ function businessSubmitUrl(op: string) {
   return `${contextPath.value}/mvc/s/business?${params.toString()}`
 }
 
-function configSubmitUrl(op: string) {
+function configSubmitUrl(op: string, overrides: Record<string, string | undefined> = {}) {
   const params = new URLSearchParams()
 
   params.set('op', op)
   params.set('domain', currentDomain.value)
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value) {
+      params.set(key, value)
+    }
+  }
   return `${contextPath.value}/mvc/s/config?${params.toString()}`
 }
 
-function transactionRuleUpdateUrl(ruleId?: string) {
-  return configUrl({ op: 'transactionRuleUpdate', domain: currentDomain.value, ruleId })
+function routerBuildUrl() {
+  return `${contextPath.value}/mvc/s/router?op=build`
 }
 
-function transactionRuleDeleteUrl(ruleId: string) {
-  return legacyConfigUrl('transactionRuleDelete', { ruleId, vue: 'true' })
+function confirmRouterBuild(event: MouseEvent) {
+  if (!window.confirm('确认重算路由？')) {
+    event.preventDefault()
+  }
+}
+
+function alertRuleUpdateUrl(ruleId?: string) {
+  return configUrl({ op: alertRuleUpdateAction.value, domain: currentDomain.value, ruleId })
+}
+
+function alertRuleDeleteUrl(ruleId: string) {
+  return legacyConfigUrl(alertRuleDeleteAction.value, { ruleId, vue: 'true' })
+}
+
+function exceptionThresholdDeleteUrl(item: ExceptionLimit) {
+  return legacyConfigUrl('exceptionThresholdDelete', {
+    domain: item.domain,
+    exception: item.name,
+    type: 'threshold',
+    vue: 'true'
+  })
+}
+
+function exceptionExcludeDeleteUrl(item: ExceptionExclude) {
+  return legacyConfigUrl('exceptionExcludeDelete', {
+    domain: item.domain,
+    exception: item.name,
+    type: 'exclude',
+    vue: 'true'
+  })
+}
+
+function heartbeatRuleDeleteUrl(ruleId: string) {
+  return legacyConfigUrl('heartbeatRulDelete', { key: ruleId, vue: 'true' })
 }
 
 function monitorLabel(monitor: string) {
@@ -1396,10 +2355,6 @@ function monitorLabel(monitor: string) {
   }
 
   return labels[monitor] || monitor
-}
-
-function permissionConfigUrl(op: string) {
-  return `${contextPath.value}/mvc/s/permission?op=${encodeURIComponent(op)}&vue=true`
 }
 
 function isSuccessState(value: boolean | string | null | undefined) {

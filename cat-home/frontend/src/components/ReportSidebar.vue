@@ -1,20 +1,31 @@
 <template>
-  <aside class="cat-sidebar" aria-label="报表导航">
+  <aside class="cat-sidebar report-sidebar" :class="{ 'is-collapsed': collapsed }" aria-label="报表导航">
     <a
       v-for="item in reportMenus"
       :key="item.name"
       class="sidebar-item"
       :class="{ 'is-active': item.name === activeReport }"
       :href="item.href()"
+      :title="item.name"
     >
       <component :is="item.icon" class="sidebar-icon" />
       <span>{{ item.name }}</span>
     </a>
+    <button
+      class="report-sidebar-toggle"
+      type="button"
+      :title="collapsed ? '展开菜单' : '收起菜单'"
+      :aria-label="collapsed ? '展开菜单' : '收起菜单'"
+      @click="toggleCollapsed"
+    >
+      <PanelLeftOpen v-if="collapsed" />
+      <PanelLeftClose v-else />
+    </button>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   Activity,
   Clock3,
@@ -23,8 +34,12 @@ import {
   HeartPulse,
   LayoutDashboard,
   ListTree,
+  PanelLeftClose,
+  PanelLeftOpen,
   RadioTower
 } from 'lucide-vue-next'
+
+const sidebarCollapsedKey = 'catReportSidebarCollapsed'
 
 const props = defineProps<{
   activeReport: string
@@ -39,6 +54,7 @@ const currentDomain = computed(() => props.domain || 'cat')
 const currentIp = computed(() => props.ip || 'All')
 const currentDate = computed(() => props.date || '')
 const currentReportType = computed(() => props.reportType || 'day')
+const collapsed = ref(readCollapsedState())
 
 const reportMenus = [
   { name: 'Dashboard', href: () => vueReportUrl('/mvc/vue/r'), icon: LayoutDashboard },
@@ -82,5 +98,25 @@ function legacyReportUrl(path: string) {
 
 function vueReportUrl(path: string) {
   return `${props.contextPath}${path}?${baseParams().toString()}`
+}
+
+watch(collapsed, (value) => {
+  try {
+    window.localStorage.setItem(sidebarCollapsedKey, String(value))
+  } catch {
+    // Ignore storage failures; the toggle still works for the current page.
+  }
+})
+
+function readCollapsedState() {
+  try {
+    return window.localStorage.getItem(sidebarCollapsedKey) === 'true'
+  } catch {
+    return false
+  }
+}
+
+function toggleCollapsed() {
+  collapsed.value = !collapsed.value
 }
 </script>

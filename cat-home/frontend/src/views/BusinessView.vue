@@ -117,7 +117,7 @@
 
         <section v-else class="business-chart-grid">
           <article v-for="chart in charts" :key="chart.id" class="business-chart-card">
-            <LineChartPanel allow-html-title :chart="chart" />
+            <LineChartPanel allow-html-title :chart="chart" smooth />
           </article>
         </section>
       </section>

@@ -103,9 +103,18 @@
         </section>
 
         <section class="transaction-card cross-query">
-          <span>查询当前这个时间段内，一个方法被哪些应用调用</span>
-          <input v-model="methodInput" type="text" />
-          <button type="button" @click="queryCrossMethod">Submit</button>
+          <div class="cross-query-title">
+            <strong>查询当前这个时间段内，一个方法被哪些应用调用</strong>
+          </div>
+          <div class="cross-query-control">
+            <input
+              v-model="methodInput"
+              type="text"
+              placeholder="输入方法名"
+              @keyup.enter="queryCrossMethod"
+            />
+            <button type="button" @click="queryCrossMethod">Submit</button>
+          </div>
         </section>
 
         <section v-if="report" class="selector-panel">
