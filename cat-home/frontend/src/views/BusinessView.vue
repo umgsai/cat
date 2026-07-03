@@ -20,7 +20,10 @@
       <ReportSidebar
         active-report="Business"
         :context-path="contextPath"
+        :date="currentDate"
         :domain="currentDomain"
+        :ip="currentIp"
+        :report-type="currentReportType"
       />
 
       <section class="cat-content">
@@ -177,9 +180,13 @@ const contextPath = computed(() => {
   return report.value?.contextPath || '/cat'
 })
 const currentParams = computed(() => new URLSearchParams(window.location.search))
+const currentAction = computed(() => isHistoryAction(currentParams.value.get('op')) ? 'history' : 'view')
+const currentDate = computed(() => currentParams.value.get('date') || '')
 const currentDomain = computed(() => report.value?.domain || currentParams.value.get('name') || 'cat')
 const currentEndTime = computed(() => report.value?.endTime || currentParams.value.get('endDate') || '')
+const currentIp = computed(() => currentParams.value.get('ip') || 'All')
 const currentName = computed(() => report.value?.name || currentParams.value.get('name') || 'cat')
+const currentReportType = computed(() => currentParams.value.get('reportType') || 'day')
 const currentStartTime = computed(() => report.value?.startTime || currentParams.value.get('startDate') || '')
 const currentTimeRange = computed(() => report.value?.timeRange || Number(currentParams.value.get('timeRange') || 4))
 const currentType = computed(() => report.value?.type || currentParams.value.get('type') || 'domain')
@@ -229,9 +236,18 @@ function businessUrl(overrides: Record<string, string | undefined>) {
   const startDate = Object.prototype.hasOwnProperty.call(overrides, 'startDate') ? overrides.startDate : currentStartTime.value
   const timeRange = Object.prototype.hasOwnProperty.call(overrides, 'timeRange') ? overrides.timeRange : String(currentTimeRange.value)
 
-  params.set('op', 'view')
+  params.set('op', currentAction.value)
   params.set('name', overrides.name ?? currentName.value)
   params.set('type', overrides.type ?? currentType.value)
+  if (currentDate.value) {
+    params.set('date', currentDate.value)
+  }
+  if (currentIp.value) {
+    params.set('ip', currentIp.value)
+  }
+  if (currentReportType.value) {
+    params.set('reportType', currentReportType.value)
+  }
   if (startDate) {
     params.set('startDate', startDate)
   }
@@ -298,6 +314,10 @@ function timeRangeTooLarge(start: string, end: string) {
   const endDate = new Date(end.replace(/-/g, '/'))
 
   return endDate.getTime() - startDate.getTime() > 2 * 24 * 60 * 60 * 1000
+}
+
+function isHistoryAction(action: string | null) {
+  return Boolean(action?.startsWith('history'))
 }
 
 </script>

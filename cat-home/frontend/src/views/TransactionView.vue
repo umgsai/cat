@@ -287,7 +287,8 @@ const currentType = computed(() => report.value?.type || currentParams.value.get
 const currentQueryName = computed(() => report.value?.queryName || currentParams.value.get('queryname') || '')
 const domainGroups = computed(() => report.value?.domainGroups || [])
 const isNameView = computed(() => Boolean(currentType.value))
-const isHistoryMode = computed(() => Boolean(report.value?.historyMode))
+const isHistoryMode = computed(() => report.value?.historyMode ?? isHistoryAction(currentParams.value.get('op')))
+const defaultAction = computed(() => isHistoryMode.value ? 'history' : 'view')
 const currentHistoryNav = computed(() => historyNavs.find((item) => item.label === currentReportType.value) || historyNavs[2])
 const modeSwitchText = computed(() => isHistoryMode.value ? '切到小时模式' : '切到历史模式')
 const modeSwitchUrl = computed(() => {
@@ -432,7 +433,7 @@ function goDomain() {
 function domainUrl(domain: string) {
   const params = new URLSearchParams()
 
-  params.set('op', 'view')
+  params.set('op', defaultAction.value)
   params.set('domain', domain)
   params.set('ip', 'All')
   if (currentDate.value) {
@@ -547,7 +548,7 @@ function sortUrl(sort: string) {
 function transactionUrl(overrides: Record<string, string | undefined>) {
   const params = baseTransactionParams()
 
-  params.set('op', overrides.op ?? 'view')
+  params.set('op', overrides.op ?? defaultAction.value)
   if (overrides.domain !== undefined) {
     params.set('domain', overrides.domain)
   }
@@ -636,6 +637,10 @@ function baseTransactionParams() {
     params.set('queryname', currentQueryName.value)
   }
   return params
+}
+
+function isHistoryAction(action: string | null) {
+  return Boolean(action?.startsWith('history'))
 }
 
 </script>

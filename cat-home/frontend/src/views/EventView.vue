@@ -244,7 +244,8 @@ const currentReportType = computed(() => report.value?.reportType || currentPara
 const currentType = computed(() => report.value?.type || currentParams.value.get('type') || '')
 const domainGroups = computed(() => report.value?.domainGroups || [])
 const isNameView = computed(() => Boolean(currentType.value))
-const isHistoryMode = computed(() => report.value?.historyMode ?? currentParams.value.get('op') === 'history')
+const isHistoryMode = computed(() => report.value?.historyMode ?? isHistoryAction(currentParams.value.get('op')))
+const defaultAction = computed(() => isHistoryMode.value ? 'history' : 'view')
 const currentHistoryNav = computed(() => historyNavs.find((item) => item.label === currentReportType.value) || historyNavs[2])
 const modeSwitchText = computed(() => isHistoryMode.value ? '切到小时模式' : '切到历史模式')
 const modeSwitchUrl = computed(() => {
@@ -383,7 +384,7 @@ function dataUrl() {
 function domainUrl(domain: string) {
   const params = new URLSearchParams()
 
-  params.set('op', 'view')
+  params.set('op', defaultAction.value)
   params.set('domain', domain)
   params.set('ip', 'All')
   if (currentDate.value) {
@@ -398,7 +399,7 @@ function domainUrl(domain: string) {
 function eventUrl(overrides: Record<string, string | undefined>) {
   const params = baseEventParams()
 
-  params.set('op', overrides.op ?? 'view')
+  params.set('op', overrides.op ?? defaultAction.value)
   if (overrides.domain !== undefined) {
     params.set('domain', overrides.domain)
   }
@@ -542,6 +543,10 @@ function rowGraphKey(row: EventRow) {
 
 function sortUrl(sort: string) {
   return eventUrl({ sort })
+}
+
+function isHistoryAction(action: string | null) {
+  return Boolean(action?.startsWith('history'))
 }
 
 async function toggleGraph(key: string, link: string, event: MouseEvent) {

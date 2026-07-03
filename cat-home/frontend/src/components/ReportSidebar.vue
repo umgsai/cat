@@ -54,6 +54,11 @@ const currentDomain = computed(() => props.domain || 'cat')
 const currentIp = computed(() => props.ip || 'All')
 const currentDate = computed(() => props.date || '')
 const currentReportType = computed(() => props.reportType || 'day')
+const currentAction = computed(() => {
+  const params = new URLSearchParams(window.location.search)
+
+  return isHistoryAction(params.get('op')) ? 'history' : 'view'
+})
 const collapsed = ref(readCollapsedState())
 
 const reportMenus = [
@@ -70,7 +75,7 @@ const reportMenus = [
 function baseParams() {
   const params = new URLSearchParams()
 
-  params.set('op', 'view')
+  params.set('op', currentAction.value)
   params.set('domain', currentDomain.value)
   if (currentIp.value) {
     params.set('ip', currentIp.value)
@@ -87,8 +92,18 @@ function baseParams() {
 function businessUrl() {
   const params = new URLSearchParams()
 
+  params.set('op', currentAction.value)
   params.set('name', currentDomain.value)
   params.set('type', 'domain')
+  if (currentIp.value) {
+    params.set('ip', currentIp.value)
+  }
+  if (currentDate.value) {
+    params.set('date', currentDate.value)
+  }
+  if (currentReportType.value) {
+    params.set('reportType', currentReportType.value)
+  }
   return `${props.contextPath}/mvc/vue/r/business?${params.toString()}`
 }
 
@@ -98,6 +113,10 @@ function legacyReportUrl(path: string) {
 
 function vueReportUrl(path: string) {
   return `${props.contextPath}${path}?${baseParams().toString()}`
+}
+
+function isHistoryAction(action: string | null) {
+  return Boolean(action?.startsWith('history'))
 }
 
 watch(collapsed, (value) => {
