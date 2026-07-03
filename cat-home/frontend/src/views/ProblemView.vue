@@ -145,8 +145,91 @@
     </section>
 
     <section v-if="report && currentIp !== 'All'" class="threads-link">
-      <a :href="legacyProblemUrl({ op: 'group' })">Threads Details</a>
+      <a :href="problemUrl({ op: 'group' })" @click="loadThreadGroups">Threads Details</a>
     </section>
+
+    <section v-if="threadGroupLoading || threadGroupError || threadTableRows.length" class="transaction-card problem-thread-card">
+      <section v-if="threadGroupLoading" class="empty-state">
+        正在加载 Threads Details...
+      </section>
+      <section v-else-if="threadGroupError" class="empty-state">
+        {{ threadGroupError }}
+      </section>
+      <div v-else class="report-table-wrap">
+        <table v-if="activeThreadLevelInfo" class="report-table transaction-report-table problem-thread-table">
+          <tbody>
+            <tr>
+              <td title="time\group">Time Group</td>
+              <td
+                v-for="group in activeThreadLevelInfo.groups"
+                :key="group.name"
+                :colspan="group.number"
+                :title="group.name"
+              >
+                <a
+                  :href="threadDetailUrl(group.name)"
+                  @click="loadThreadDetail(group.name, $event)"
+                >
+                  {{ truncateThreadLabel(group.name) }}
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td title="time\thread">Time Thread</td>
+              <td v-for="thread in activeThreadLevelInfo.threads" :key="thread">{{ thread }}</td>
+            </tr>
+            <tr
+              v-for="(row, index) in activeThreadLevelInfo.datas"
+              :key="`thread-${index}`"
+              @click="handleProblemDetailClick"
+              v-html="threadRowHtml(row)"
+            ></tr>
+          </tbody>
+        </table>
+        <table v-else class="report-table transaction-report-table problem-thread-table">
+          <tbody>
+            <tr>
+              <td title="time\group">Time Group</td>
+              <td v-for="group in activeGroupLevelInfo?.groups || []" :key="group" :title="group">
+                <a
+                  :href="threadDetailUrl(group)"
+                  @click="loadThreadDetail(group, $event)"
+                >
+                  {{ truncateThreadLabel(group) }}
+                </a>
+              </td>
+            </tr>
+            <tr
+              v-for="(row, index) in activeGroupLevelInfo?.datas || []"
+              :key="`group-${index}`"
+              @click="handleProblemDetailClick"
+              v-html="threadRowHtml(row)"
+            ></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div v-if="problemDetailVisible" class="problem-detail-backdrop" @click.self="closeProblemDetail">
+      <section class="problem-detail-modal" role="dialog" aria-modal="true" aria-label="Problem Detail">
+        <header class="problem-detail-header">
+          <strong>Problem Detail</strong>
+          <button type="button" aria-label="关闭" @click="closeProblemDetail">×</button>
+        </header>
+        <section v-if="problemDetailLoading" class="empty-state">
+          正在加载 Problem Detail...
+        </section>
+        <section v-else-if="problemDetailError" class="empty-state">
+          {{ problemDetailError }}
+        </section>
+        <div
+          v-else
+          class="problem-detail-content"
+          @click="handleProblemDetailClick"
+          v-html="problemDetailHtml"
+        ></div>
+      </section>
+    </div>
   </ReportPageShell>
 </template>
 
@@ -183,7 +266,24 @@ interface ProblemTypeRow {
   type: string
 }
 
+interface ProblemGroupLevelInfo {
+  datas: string[]
+  groups: string[]
+}
+
+interface ProblemThreadGroup {
+  name: string
+  number: number
+}
+
+interface ProblemThreadLevelInfo {
+  datas: string[]
+  groups: ProblemThreadGroup[]
+  threads: string[]
+}
+
 interface ProblemReport {
+  action: string
   cacheThreshold: number
   callThreshold: number
   contextPath: string
@@ -192,6 +292,7 @@ interface ProblemReport {
   domain: string
   domainGroups: DomainDepartment[]
   group: string
+  groupLevelInfo: ProblemGroupLevelInfo | null
   groupIps: string[]
   groups: string[]
   historyMode: boolean
@@ -207,6 +308,7 @@ interface ProblemReport {
   serviceThreshold: number
   sqlThreshold: number
   status: string
+  threadLevelInfo: ProblemThreadLevelInfo | null
   type: string
   urlThreshold: number
 }
@@ -227,6 +329,14 @@ const activeGraphKey = ref('')
 const graphCache = ref<Record<string, ProblemGraph>>({})
 const graphErrors = ref<Record<string, string>>({})
 const graphLoadingKey = ref('')
+const problemDetailError = ref('')
+const problemDetailHtml = ref('')
+const problemDetailLoading = ref(false)
+const problemDetailVisible = ref(false)
+const threadGroupError = ref('')
+const threadGroupInfo = ref<ProblemGroupLevelInfo | null>(null)
+const threadGroupLoading = ref(false)
+const threadLevelInfo = ref<ProblemThreadLevelInfo | null>(null)
 const historyNavs = [
   { label: 'month', last: '-1m', next: '+1m' },
   { label: 'week', last: '-1w', next: '+1w' },
@@ -291,6 +401,9 @@ const isHistoryMode = computed(() => report.value?.historyMode ?? currentParams.
 const currentHistoryNav = computed(() => historyNavs.find((item) => item.label === currentReportType.value) || historyNavs[2])
 const modeSwitchText = computed(() => isHistoryMode.value ? '切到小时模式' : '切到历史模式')
 const modeSwitchUrl = computed(() => problemUrl({ op: isHistoryMode.value ? 'view' : 'history' }))
+const activeGroupLevelInfo = computed(() => threadGroupInfo.value || report.value?.groupLevelInfo || null)
+const activeThreadLevelInfo = computed(() => threadLevelInfo.value || report.value?.threadLevelInfo || null)
+const threadTableRows = computed(() => activeThreadLevelInfo.value?.datas || activeGroupLevelInfo.value?.datas || [])
 
 const domainSuggestions = computed(() => {
   const suggestions: Array<{ label: string; value: string; category: string }> = []
@@ -392,6 +505,8 @@ async function loadReport() {
     const data = await response.json() as ProblemReport
 
     report.value = data
+    threadGroupInfo.value = data.groupLevelInfo || null
+    threadLevelInfo.value = data.threadLevelInfo || null
     domainInput.value = data.domain || ''
     thresholds.cacheThreshold = data.cacheThreshold
     thresholds.callThreshold = data.callThreshold
@@ -413,6 +528,12 @@ function applyThresholds() {
     sqlThreshold: String(thresholds.sqlThreshold),
     urlThreshold: String(thresholds.urlThreshold)
   })
+}
+
+function closeProblemDetail() {
+  problemDetailVisible.value = false
+  problemDetailError.value = ''
+  problemDetailHtml.value = ''
 }
 
 function baseProblemParams() {
@@ -501,6 +622,22 @@ function graphLinkText(key: string) {
   return activeGraphKey.value === key ? '[:: hide ::]' : '[:: show ::]'
 }
 
+function handleProblemDetailClick(event: MouseEvent) {
+  const target = event.target as Element | null
+  const anchor = target?.closest('a')
+
+  if (!anchor) {
+    return
+  }
+  const href = anchor.getAttribute('href') || ''
+
+  if (!isProblemDetailUrl(href)) {
+    return
+  }
+  event.preventDefault()
+  void openProblemDetail(href)
+}
+
 function historyUrl(overrides: Record<string, string | undefined>) {
   const params = new URLSearchParams()
 
@@ -542,6 +679,16 @@ function isActiveProblemGraph(row: ProblemTypeRow) {
   return activeGraphKey.value === typeGraphKey(row) || activeGraphKey.value.startsWith(`status-${row.type}-`)
 }
 
+function isProblemDetailUrl(href: string) {
+  try {
+    const url = new URL(href, window.location.origin)
+
+    return url.pathname.endsWith('/mvc/r/p') && url.searchParams.get('op') === 'detail'
+  } catch {
+    return false
+  }
+}
+
 function hostLabel(ip: string) {
   const hostname = report.value?.ipToHostname[ip]
 
@@ -567,6 +714,76 @@ function logViewUrl(messageUrl: string) {
   return `${contextPath.value}/mvc/vue/r/m/${messageUrl}?domain=${encodeURIComponent(currentDomain.value)}`
 }
 
+async function loadThreadDetail(group: string, event: MouseEvent) {
+  event.preventDefault()
+  await loadThreadInfo({ groupName: group, vueAction: 'thread' })
+}
+
+async function loadThreadGroups(event: MouseEvent) {
+  event.preventDefault()
+  await loadThreadInfo({ vueAction: 'group' })
+}
+
+async function loadThreadInfo(options: { groupName?: string; vueAction: string }) {
+  threadGroupLoading.value = true
+  threadGroupError.value = ''
+
+  try {
+    const response = await fetch(threadDataUrl(options), { headers: { Accept: 'application/json' } })
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+    const data = await response.json() as ProblemReport
+
+    threadGroupInfo.value = data.groupLevelInfo || null
+    threadLevelInfo.value = data.threadLevelInfo || null
+  } catch (error) {
+    threadGroupError.value = `Threads Details 加载失败: ${error instanceof Error ? error.message : String(error)}`
+  } finally {
+    threadGroupLoading.value = false
+  }
+}
+
+function normalizeProblemDetailHtml(html: string) {
+  return normalizeProblemHtml(html)
+}
+
+function normalizeProblemHtml(html: string) {
+  return html
+    .replace(/\s+onclick="return show\(this\);"/g, '')
+    .replace(/href="\/cat\/mvc\/r\/p/g, `href="${contextPath.value}/mvc/r/p`)
+    .replace(/href="\/cat\/mvc\/r\/m\//g, `href="${contextPath.value}/mvc/vue/r/m/`)
+    .replace(/href="\/cat\/r\/m\//g, `href="${contextPath.value}/mvc/vue/r/m/`)
+    .replace(/href="\/mvc\/r\/m\//g, `href="${contextPath.value}/mvc/vue/r/m/`)
+    .replace(/<a href="([^"]*\/mvc\/vue\/r\/m\/[^"]*)"/g, '<a href="$1" target="_blank" rel="noreferrer"')
+}
+
+function normalizeProblemDetailUrl(href: string) {
+  const url = new URL(href, window.location.origin)
+
+  return `${url.pathname}${url.search}`
+}
+
+async function openProblemDetail(href: string) {
+  problemDetailVisible.value = true
+  problemDetailLoading.value = true
+  problemDetailError.value = ''
+
+  try {
+    const response = await fetch(normalizeProblemDetailUrl(href), { headers: { Accept: 'text/html' } })
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+    problemDetailHtml.value = normalizeProblemDetailHtml(await response.text())
+  } catch (error) {
+    problemDetailError.value = `Problem Detail 加载失败: ${error instanceof Error ? error.message : String(error)}`
+  } finally {
+    problemDetailLoading.value = false
+  }
+}
+
 function problemUrl(overrides: Record<string, string | undefined>) {
   const params = baseProblemParams()
 
@@ -588,6 +805,9 @@ function problemUrl(overrides: Record<string, string | undefined>) {
   if (overrides.group !== undefined) {
     params.set('group', overrides.group)
   }
+  if (overrides.groupName !== undefined) {
+    params.set('groupName', overrides.groupName)
+  }
   if (overrides.urlThreshold !== undefined) {
     params.set('urlThreshold', overrides.urlThreshold)
   }
@@ -604,6 +824,29 @@ function problemUrl(overrides: Record<string, string | undefined>) {
     params.set('callThreshold', overrides.callThreshold)
   }
   return `${contextPath.value}/mvc/vue/r/p?${params.toString()}`
+}
+
+function threadDataUrl(options: { groupName?: string; vueAction: string }) {
+  const params = baseProblemParams()
+
+  params.set('op', 'vueData')
+  params.set('vueAction', options.vueAction)
+  if (options.groupName) {
+    params.set('groupName', options.groupName)
+  }
+  return `${contextPath.value}/mvc/r/p?${params.toString()}`
+}
+
+function threadDetailUrl(group: string) {
+  return problemUrl({ groupName: group, op: 'thread' })
+}
+
+function threadRowHtml(row: string) {
+  return normalizeProblemHtml(row)
+}
+
+function truncateThreadLabel(value: string) {
+  return value && value.length > 20 ? value.substring(0, 20) : value
 }
 
 function problemTypeMarkerClass(type: string) {

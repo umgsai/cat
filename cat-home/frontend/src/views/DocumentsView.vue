@@ -12,7 +12,7 @@
       </nav>
       <div class="cat-actions">
         <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
-        <span class="user-greeting">欢迎，admin</span>
+        <TopbarUser />
       </div>
     </header>
 
@@ -45,19 +45,19 @@
         <article class="document-card">
           <section v-if="docName === 'release'" class="document-section">
             <h2>版本说明</h2>
-            <div class="document-table-wrap">
-              <table class="document-table">
+            <div class="report-table-wrap">
+              <table class="report-table transaction-report-table document-release-table">
                 <thead>
                   <tr>
-                    <th>版本</th>
-                    <th>说明</th>
-                    <th>发布时间</th>
+                    <th class="left">版本</th>
+                    <th class="left">说明</th>
+                    <th class="left">发布时间</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="item in releases" :key="item.version">
                     <td>{{ item.version }}</td>
-                    <td>{{ item.description }}</td>
+                    <td class="long-text">{{ item.description }}</td>
                     <td>{{ item.date }}</td>
                   </tr>
                 </tbody>
@@ -122,6 +122,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { BookOpen, Home, KeyRound, PanelLeftClose, PanelLeftOpen } from 'lucide-vue-next'
+import TopbarUser from '../components/TopbarUser.vue'
 
 const sidebarCollapsedKey = 'catDocumentSidebarCollapsed'
 

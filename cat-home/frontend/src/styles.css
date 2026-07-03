@@ -295,6 +295,7 @@ input {
 .cat-actions {
   display: flex;
   align-items: center;
+  gap: 8px;
   margin-left: auto;
 }
 
@@ -303,10 +304,18 @@ input {
 }
 
 .user-greeting {
-  display: none;
-  font-size: 16px;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
+}
+
+.user-greeting-name {
+  color: #344054;
+  font-weight: 600;
 }
 
 .cat-body {
@@ -2199,55 +2208,8 @@ input {
 }
 
 .business-table-wrap,
-.document-table-wrap,
 .report-table-wrap {
   overflow-x: auto;
-}
-
-.document-table {
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  border: 1px solid #d9e1ec;
-  background: #ffffff;
-  font-size: 14px;
-}
-
-.document-table th,
-.document-table td {
-  border: 1px solid #d9e1ec;
-  padding: 8px 10px;
-  text-align: left;
-  vertical-align: top;
-}
-
-.document-table th {
-  background: #f8fafc;
-  color: #0f766e;
-  font-weight: 800;
-}
-
-.document-table tbody tr:nth-child(even) {
-  background: #f8fafc;
-}
-
-.document-table th:nth-child(1),
-.document-table td:nth-child(1) {
-  width: 12%;
-  min-width: 90px;
-}
-
-.document-table th:nth-child(2),
-.document-table td:nth-child(2) {
-  width: 72%;
-  word-break: break-word;
-}
-
-.document-table th:nth-child(3),
-.document-table td:nth-child(3) {
-  width: 16%;
-  min-width: 120px;
-  white-space: nowrap;
 }
 
 .plugin-preview {
@@ -2362,6 +2324,18 @@ input {
 .report-table .long-text a,
 .report-table .long-text span {
   margin-right: 8px;
+}
+
+.document-release-table th:first-child,
+.document-release-table td:first-child {
+  width: 120px;
+  white-space: nowrap;
+}
+
+.document-release-table th:last-child,
+.document-release-table td:last-child {
+  width: 150px;
+  white-space: nowrap;
 }
 
 .report-pie-panel {
@@ -2700,6 +2674,195 @@ input {
   color: #0f766e;
   font-size: 14px;
   font-weight: 700;
+}
+
+.problem-thread-card {
+  background: transparent;
+}
+
+.problem-thread-card .empty-state {
+  margin: 0;
+}
+
+.problem-thread-table a.error,
+.problem-thread-table a.failure,
+.problem-thread-table a.heartbeat,
+.problem-thread-table a.long-url,
+.problem-thread-table a.long-sql,
+.problem-thread-table a.long-call,
+.problem-thread-table a.long-cache,
+.problem-thread-table a.long-service,
+.problem-thread-table a.url,
+.problem-thread-table a.sql,
+.problem-thread-table a.call,
+.problem-thread-table a.PigeonCall,
+.problem-thread-table a.cache,
+.problem-detail-content a.error,
+.problem-detail-content a.failure,
+.problem-detail-content a.heartbeat,
+.problem-detail-content a.long-url,
+.problem-detail-content a.long-sql,
+.problem-detail-content a.long-call,
+.problem-detail-content a.long-cache,
+.problem-detail-content a.long-service,
+.problem-detail-content a.url,
+.problem-detail-content a.sql,
+.problem-detail-content a.call,
+.problem-detail-content a.PigeonCall,
+.problem-detail-content a.cache {
+  display: inline-block;
+  width: 8px;
+  height: 22px;
+  overflow: hidden;
+  margin-right: 1px;
+  color: transparent;
+  line-height: 22px;
+  vertical-align: middle;
+}
+
+.problem-thread-table a.error,
+.problem-detail-content a.error {
+  background: red;
+}
+
+.problem-thread-table a.failure,
+.problem-detail-content a.failure {
+  background: #770000;
+}
+
+.problem-thread-table a.heartbeat,
+.problem-detail-content a.heartbeat {
+  background: #009933;
+}
+
+.problem-thread-table a.long-url,
+.problem-detail-content a.long-url {
+  background: #5599cc;
+}
+
+.problem-thread-table a.long-sql,
+.problem-detail-content a.long-sql {
+  background: #6699cc;
+}
+
+.problem-thread-table a.long-call,
+.problem-detail-content a.long-call {
+  background: #6688bb;
+}
+
+.problem-thread-table a.long-cache,
+.problem-detail-content a.long-cache {
+  background: #6677aa;
+}
+
+.problem-thread-table a.long-service,
+.problem-detail-content a.long-service {
+  background: #9966dd;
+}
+
+.problem-thread-table a.url,
+.problem-detail-content a.url {
+  background: #cc0000;
+}
+
+.problem-thread-table a.sql,
+.problem-detail-content a.sql {
+  background: purple;
+}
+
+.problem-thread-table a.call,
+.problem-thread-table a.PigeonCall,
+.problem-detail-content a.call,
+.problem-detail-content a.PigeonCall {
+  background: #9966ff;
+}
+
+.problem-thread-table a.cache,
+.problem-detail-content a.cache {
+  background: #aa3faa;
+}
+
+.problem-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: auto;
+  background: rgba(15, 23, 42, 0.34);
+  padding: 120px 24px 40px;
+}
+
+.problem-detail-modal {
+  width: min(960px, 100%);
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.2);
+}
+
+.problem-detail-header {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e4e9f0;
+  padding: 0 12px;
+  color: #172033;
+}
+
+.problem-detail-header button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #475467;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.problem-detail-header button:hover {
+  background: #eef6f6;
+  color: #0f766e;
+}
+
+.problem-detail-content {
+  overflow-x: auto;
+  padding: 10px 12px 12px;
+}
+
+.problem-detail-content table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #172033;
+  font-size: 13px;
+}
+
+.problem-detail-content th,
+.problem-detail-content td {
+  border-bottom: 1px solid #e4e9f0;
+  padding: 7px 8px;
+  text-align: left;
+}
+
+.problem-detail-content th {
+  background: #f8fafc;
+  font-weight: 700;
+}
+
+.problem-detail-content a:not(.error):not(.failure):not(.heartbeat):not(.long-url):not(.long-sql):not(.long-call):not(.long-cache):not(.long-service):not(.url):not(.sql):not(.call):not(.PigeonCall):not(.cache) {
+  color: #0f766e;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.problem-detail-content a:not(.error):not(.failure):not(.heartbeat):not(.long-url):not(.long-sql):not(.long-call):not(.long-cache):not(.long-service):not(.url):not(.sql):not(.call):not(.PigeonCall):not(.cache):hover {
+  border-radius: 3px;
+  background: #e6f4f1;
+  color: #0b5f59;
 }
 
 .heartbeat-graphs {

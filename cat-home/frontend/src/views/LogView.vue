@@ -12,7 +12,7 @@
       </nav>
       <div class="cat-actions">
         <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
-        <span class="user-greeting">欢迎，admin</span>
+        <TopbarUser />
       </div>
     </header>
 
@@ -67,6 +67,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import ReportSidebar from '../components/ReportSidebar.vue'
+import TopbarUser from '../components/TopbarUser.vue'
 
 interface LogviewReport {
   contextPath: string

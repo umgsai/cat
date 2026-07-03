@@ -12,7 +12,7 @@
       </nav>
       <div class="cat-actions">
         <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
-        <span class="user-greeting">欢迎，admin</span>
+        <TopbarUser />
       </div>
     </header>
 
@@ -130,6 +130,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import LineChartPanel from '../components/LineChartPanel.vue'
 import ReportSidebar from '../components/ReportSidebar.vue'
+import TopbarUser from '../components/TopbarUser.vue'
 
 interface BusinessChart {
   datas: Array<Record<string, number>>

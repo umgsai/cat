@@ -262,6 +262,9 @@ public class SpringMvcProblemController {
 		report.setCacheThreshold((Integer) model.get("cacheThreshold"));
 		report.setCallThreshold((Integer) model.get("callThreshold"));
 		report.setRows(vueProblemRows((ProblemStatistics) model.get("allStatistics")));
+		report.setAction((String) model.get("action"));
+		report.setGroupLevelInfo(vueGroupLevelInfo((GroupLevelInfo) model.get("groupLevelInfo")));
+		report.setThreadLevelInfo(vueThreadLevelInfo((ThreadLevelInfo) model.get("threadLevelInfo")));
 		return report;
 	}
 
@@ -326,6 +329,35 @@ public class SpringMvcProblemController {
 			index++;
 		}
 		return rows;
+	}
+
+	private VueProblemGroupLevelInfo vueGroupLevelInfo(GroupLevelInfo groupLevelInfo) {
+		if (groupLevelInfo == null) {
+			return null;
+		}
+		VueProblemGroupLevelInfo result = new VueProblemGroupLevelInfo();
+
+		result.setGroups(groupLevelInfo.getGroups());
+		result.setDatas(groupLevelInfo.getDatas());
+		return result;
+	}
+
+	private VueProblemThreadLevelInfo vueThreadLevelInfo(ThreadLevelInfo threadLevelInfo) {
+		if (threadLevelInfo == null) {
+			return null;
+		}
+		VueProblemThreadLevelInfo result = new VueProblemThreadLevelInfo();
+
+		for (ThreadLevelInfo.GroupDisplayInfo item : threadLevelInfo.getGroups()) {
+			VueProblemThreadGroup group = new VueProblemThreadGroup();
+
+			group.setName(item.getName());
+			group.setNumber(item.getNumber());
+			result.getGroups().add(group);
+		}
+		result.setThreads(threadLevelInfo.getThreads());
+		result.setDatas(threadLevelInfo.getDatas());
+		return result;
 	}
 
 	private void buildGroupDetail(Map<String, Object> model, String action, ProblemReport report, String ipAddress,
@@ -864,7 +896,16 @@ public class SpringMvcProblemController {
 	}
 
 	@Data
+	public static class VueProblemGroupLevelInfo {
+		private List<String> datas = new ArrayList<String>();
+
+		private List<String> groups = new ArrayList<String>();
+	}
+
+	@Data
 	public static class VueProblemReport {
+		private String action;
+
 		private int cacheThreshold;
 
 		private int callThreshold;
@@ -884,6 +925,8 @@ public class SpringMvcProblemController {
 		private List<String> groupIps = new ArrayList<String>();
 
 		private List<String> groups = new ArrayList<String>();
+
+		private VueProblemGroupLevelInfo groupLevelInfo;
 
 		private boolean historyMode;
 
@@ -913,6 +956,8 @@ public class SpringMvcProblemController {
 
 		private String type;
 
+		private VueProblemThreadLevelInfo threadLevelInfo;
+
 		private int urlThreshold;
 	}
 
@@ -936,6 +981,22 @@ public class SpringMvcProblemController {
 		private List<VueProblemStatusRow> statuses = new ArrayList<VueProblemStatusRow>();
 
 		private String type;
+	}
+
+	@Data
+	public static class VueProblemThreadGroup {
+		private String name;
+
+		private int number;
+	}
+
+	@Data
+	public static class VueProblemThreadLevelInfo {
+		private List<String> datas = new ArrayList<String>();
+
+		private List<VueProblemThreadGroup> groups = new ArrayList<VueProblemThreadGroup>();
+
+		private List<String> threads = new ArrayList<String>();
 	}
 
 	private class HistoryDates {

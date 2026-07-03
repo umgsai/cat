@@ -12,7 +12,7 @@
       </nav>
       <div class="cat-actions">
         <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
-        <span class="user-greeting">欢迎，admin</span>
+        <TopbarUser />
       </div>
     </header>
 
@@ -37,6 +37,7 @@
 import { computed } from 'vue'
 
 import ReportSidebar from './ReportSidebar.vue'
+import TopbarUser from './TopbarUser.vue'
 
 const props = defineProps<{
   activeReport: string
