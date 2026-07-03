@@ -166,6 +166,7 @@ import ReportQueryBar from '../components/ReportQueryBar.vue'
 import ReportSelectorPanel from '../components/ReportSelectorPanel.vue'
 import TransactionGraphPanel from '../components/TransactionGraphPanel.vue'
 import { getFrequentDomains } from '../utils/domainCookies'
+import { formatDecimal, formatInteger, formatPercent, formatRate, truncate } from '../utils/reportFormatters'
 
 interface DomainLine {
   name: string
@@ -637,30 +638,4 @@ function baseTransactionParams() {
   return params
 }
 
-function formatDecimal(value: number, digits: number) {
-  return new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: digits,
-    minimumFractionDigits: digits
-  }).format(value || 0)
-}
-
-function formatInteger(value: number) {
-  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value || 0)
-}
-
-function formatPercent(value: number) {
-  return `${formatDecimal(value * 100, 2)}%`
-}
-
-function formatRate(value: number, digits: number) {
-  return new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: digits,
-    minimumFractionDigits: digits,
-    style: 'percent'
-  }).format(value || 0)
-}
-
-function truncate(value: string) {
-  return value && value.length > 120 ? value.substring(0, 120) : value
-}
 </script>
