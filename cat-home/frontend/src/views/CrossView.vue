@@ -49,134 +49,129 @@
 
     <ReportSelectorPanel :rows="selectorRows" />
 
-    <section v-if="loadError" class="empty-state">
-      {{ loadError }}
-    </section>
-
-    <section v-else-if="loading" class="empty-state">
-      正在加载 Cross 数据...
-    </section>
-
-    <section v-else-if="report" class="transaction-card">
-      <div class="report-table-wrap">
-        <table v-if="isQueryView" class="report-table cross-table">
-          <thead>
-            <tr>
-              <th class="left">类型</th>
-              <th class="left">项目</th>
-              <th class="left">IP</th>
-              <th class="left">方法名</th>
-              <th class="right">Total</th>
-              <th class="right">Failure</th>
-              <th class="right">Failure%</th>
-              <th class="right">Avg(ms)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in report.queryItems" :key="`${item.type}-${item.domain}-${item.ip}-${item.method}`">
-              <td class="left">{{ item.type }}</td>
-              <td class="left">{{ item.domain }}</td>
-              <td class="left">{{ item.ip }}</td>
-              <td class="left long-text">{{ item.method }}</td>
-              <td class="right">{{ formatInteger(item.totalCount) }}</td>
-              <td class="right">{{ formatInteger(item.failureCount) }}</td>
-              <td class="right">{{ formatRate(item.failurePercent, 4) }}</td>
-              <td class="right">{{ formatDecimal(item.avg, 2) }}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <table v-else class="report-table cross-table">
-          <tbody>
-            <template v-if="report.callProjects.length">
+    <ReportLoadState :error="loadError" :loading="loading" loading-text="正在加载 Cross 数据...">
+      <section v-if="report" class="transaction-card">
+        <div class="report-table-wrap">
+          <table v-if="isQueryView" class="report-table cross-table">
+            <thead>
               <tr>
-                <td class="center section-title" colspan="7"><strong>调用其他 Pigeon 服务</strong></td>
+                <th class="left">类型</th>
+                <th class="left">项目</th>
+                <th class="left">IP</th>
+                <th class="left">方法名</th>
+                <th class="right">Total</th>
+                <th class="right">Failure</th>
+                <th class="right">Failure%</th>
+                <th class="right">Avg(ms)</th>
               </tr>
-              <tr>
-                <th class="left">Type</th>
-                <th class="left"><a :href="sortUrl('callSort', 'name')">RemoteProject</a></th>
-                <th class="right"><a :href="sortUrl('callSort', 'total')">Total</a></th>
-                <th class="right"><a :href="sortUrl('callSort', 'failure')">Failure</a></th>
-                <th class="right"><a :href="sortUrl('callSort', 'failurePercent')">Failure%</a></th>
-                <th class="right"><a :href="sortUrl('callSort', 'avg')">Avg(ms)</a></th>
-                <th class="right">QPS</th>
-              </tr>
-              <tr v-for="item in report.callProjects" :key="`call-${item.projectName}`">
+            </thead>
+            <tbody>
+              <tr v-for="item in report.queryItems" :key="`${item.type}-${item.domain}-${item.ip}-${item.method}`">
                 <td class="left">{{ item.type }}</td>
-                <td class="left">
-                  <a :href="legacyHostUrl(item.projectName)">{{ item.projectName }}</a>
-                </td>
+                <td class="left">{{ item.domain }}</td>
+                <td class="left">{{ item.ip }}</td>
+                <td class="left long-text">{{ item.method }}</td>
                 <td class="right">{{ formatInteger(item.totalCount) }}</td>
                 <td class="right">{{ formatInteger(item.failureCount) }}</td>
                 <td class="right">{{ formatRate(item.failurePercent, 4) }}</td>
                 <td class="right">{{ formatDecimal(item.avg, 2) }}</td>
-                <td class="right">{{ formatDecimal(item.tps, 2) }}</td>
               </tr>
-            </template>
+            </tbody>
+          </table>
 
-            <template v-if="report.serviceProjects.length">
-              <tr>
-                <td class="center section-title" colspan="7"><strong>提供 Pigeon 服务 [ 服务端数据 ]</strong></td>
-                <template v-if="hasCallerProjects">
-                  <td></td>
-                  <td class="center section-title" colspan="7"><strong>提供 Pigeon 服务 [ 客户端数据 ]</strong></td>
-                </template>
-              </tr>
-              <tr>
-                <th class="left">Type</th>
-                <th class="left"><a :href="sortUrl('serviceSort', 'name')">RemoteProject</a></th>
-                <th class="right"><a :href="sortUrl('serviceSort', 'total')">Total</a></th>
-                <th class="right"><a :href="sortUrl('serviceSort', 'failure')">Failure</a></th>
-                <th class="right"><a :href="sortUrl('serviceSort', 'failurePercent')">Failure%</a></th>
-                <th class="right"><a :href="sortUrl('serviceSort', 'avg')">Avg(ms)</a></th>
-                <th class="right">QPS</th>
-                <template v-if="hasCallerProjects">
-                  <th></th>
+          <table v-else class="report-table cross-table">
+            <tbody>
+              <template v-if="report.callProjects.length">
+                <tr>
+                  <td class="center section-title" colspan="7"><strong>调用其他 Pigeon 服务</strong></td>
+                </tr>
+                <tr>
                   <th class="left">Type</th>
-                  <th class="left">RemoteProject</th>
-                  <th class="right">Total</th>
-                  <th class="right">Failure</th>
-                  <th class="right">Failure%</th>
-                  <th class="right">Avg(ms)</th>
+                  <th class="left"><a :href="sortUrl('callSort', 'name')">RemoteProject</a></th>
+                  <th class="right"><a :href="sortUrl('callSort', 'total')">Total</a></th>
+                  <th class="right"><a :href="sortUrl('callSort', 'failure')">Failure</a></th>
+                  <th class="right"><a :href="sortUrl('callSort', 'failurePercent')">Failure%</a></th>
+                  <th class="right"><a :href="sortUrl('callSort', 'avg')">Avg(ms)</a></th>
                   <th class="right">QPS</th>
-                </template>
-              </tr>
-              <tr v-for="item in report.serviceProjects" :key="`service-${item.projectName}`">
-                <td class="left">{{ item.type }}</td>
-                <td class="left">
-                  <a :href="legacyHostUrl(item.projectName)">{{ item.projectName }}</a>
-                </td>
-                <td class="right">{{ formatInteger(item.totalCount) }}</td>
-                <td class="right">{{ formatInteger(item.failureCount) }}</td>
-                <td class="right">{{ formatRate(item.failurePercent, 4) }}</td>
-                <td class="right">{{ formatDecimal(item.avg, 2) }}</td>
-                <td class="right">{{ formatDecimal(item.tps, 2) }}</td>
-                <template v-if="hasCallerProjects">
-                  <td></td>
-                  <td class="left">{{ callerProject(item.projectName)?.type || '' }}</td>
+                </tr>
+                <tr v-for="item in report.callProjects" :key="`call-${item.projectName}`">
+                  <td class="left">{{ item.type }}</td>
                   <td class="left">
-                    <a v-if="callerProject(item.projectName)" :href="legacyHostUrl(callerProject(item.projectName)?.projectName || '')">
-                      {{ callerProject(item.projectName)?.projectName }}
-                    </a>
+                    <a :href="legacyHostUrl(item.projectName)">{{ item.projectName }}</a>
                   </td>
-                  <td class="right">{{ callerProject(item.projectName) ? formatInteger(callerProject(item.projectName)?.totalCount || 0) : '' }}</td>
-                  <td class="right">{{ callerProject(item.projectName) ? formatInteger(callerProject(item.projectName)?.failureCount || 0) : '' }}</td>
-                  <td class="right">{{ callerProject(item.projectName) ? formatRate(callerProject(item.projectName)?.failurePercent || 0, 4) : '' }}</td>
-                  <td class="right">{{ callerProject(item.projectName) ? formatDecimal(callerProject(item.projectName)?.avg || 0, 2) : '' }}</td>
-                  <td class="right">{{ callerProject(item.projectName) ? formatDecimal(callerProject(item.projectName)?.tps || 0, 2) : '' }}</td>
-                </template>
-              </tr>
-            </template>
-          </tbody>
-        </table>
-      </div>
-    </section>
+                  <td class="right">{{ formatInteger(item.totalCount) }}</td>
+                  <td class="right">{{ formatInteger(item.failureCount) }}</td>
+                  <td class="right">{{ formatRate(item.failurePercent, 4) }}</td>
+                  <td class="right">{{ formatDecimal(item.avg, 2) }}</td>
+                  <td class="right">{{ formatDecimal(item.tps, 2) }}</td>
+                </tr>
+              </template>
+
+              <template v-if="report.serviceProjects.length">
+                <tr>
+                  <td class="center section-title" colspan="7"><strong>提供 Pigeon 服务 [ 服务端数据 ]</strong></td>
+                  <template v-if="hasCallerProjects">
+                    <td></td>
+                    <td class="center section-title" colspan="7"><strong>提供 Pigeon 服务 [ 客户端数据 ]</strong></td>
+                  </template>
+                </tr>
+                <tr>
+                  <th class="left">Type</th>
+                  <th class="left"><a :href="sortUrl('serviceSort', 'name')">RemoteProject</a></th>
+                  <th class="right"><a :href="sortUrl('serviceSort', 'total')">Total</a></th>
+                  <th class="right"><a :href="sortUrl('serviceSort', 'failure')">Failure</a></th>
+                  <th class="right"><a :href="sortUrl('serviceSort', 'failurePercent')">Failure%</a></th>
+                  <th class="right"><a :href="sortUrl('serviceSort', 'avg')">Avg(ms)</a></th>
+                  <th class="right">QPS</th>
+                  <template v-if="hasCallerProjects">
+                    <th></th>
+                    <th class="left">Type</th>
+                    <th class="left">RemoteProject</th>
+                    <th class="right">Total</th>
+                    <th class="right">Failure</th>
+                    <th class="right">Failure%</th>
+                    <th class="right">Avg(ms)</th>
+                    <th class="right">QPS</th>
+                  </template>
+                </tr>
+                <tr v-for="item in report.serviceProjects" :key="`service-${item.projectName}`">
+                  <td class="left">{{ item.type }}</td>
+                  <td class="left">
+                    <a :href="legacyHostUrl(item.projectName)">{{ item.projectName }}</a>
+                  </td>
+                  <td class="right">{{ formatInteger(item.totalCount) }}</td>
+                  <td class="right">{{ formatInteger(item.failureCount) }}</td>
+                  <td class="right">{{ formatRate(item.failurePercent, 4) }}</td>
+                  <td class="right">{{ formatDecimal(item.avg, 2) }}</td>
+                  <td class="right">{{ formatDecimal(item.tps, 2) }}</td>
+                  <template v-if="hasCallerProjects">
+                    <td></td>
+                    <td class="left">{{ callerProject(item.projectName)?.type || '' }}</td>
+                    <td class="left">
+                      <a v-if="callerProject(item.projectName)" :href="legacyHostUrl(callerProject(item.projectName)?.projectName || '')">
+                        {{ callerProject(item.projectName)?.projectName }}
+                      </a>
+                    </td>
+                    <td class="right">{{ callerProject(item.projectName) ? formatInteger(callerProject(item.projectName)?.totalCount || 0) : '' }}</td>
+                    <td class="right">{{ callerProject(item.projectName) ? formatInteger(callerProject(item.projectName)?.failureCount || 0) : '' }}</td>
+                    <td class="right">{{ callerProject(item.projectName) ? formatRate(callerProject(item.projectName)?.failurePercent || 0, 4) : '' }}</td>
+                    <td class="right">{{ callerProject(item.projectName) ? formatDecimal(callerProject(item.projectName)?.avg || 0, 2) : '' }}</td>
+                    <td class="right">{{ callerProject(item.projectName) ? formatDecimal(callerProject(item.projectName)?.tps || 0, 2) : '' }}</td>
+                  </template>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </ReportLoadState>
   </ReportPageShell>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+import ReportLoadState from '../components/ReportLoadState.vue'
 import ReportPageShell from '../components/ReportPageShell.vue'
 import ReportQueryBar from '../components/ReportQueryBar.vue'
 import ReportSelectorPanel from '../components/ReportSelectorPanel.vue'

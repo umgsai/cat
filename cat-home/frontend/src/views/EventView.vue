@@ -37,103 +37,97 @@
 
     <ReportSelectorPanel :rows="groupSelectorRows" />
 
-    <section v-if="loadError" class="empty-state">
-      {{ loadError }}
-    </section>
-
-    <section v-else-if="loading" class="empty-state">
-      正在加载 Event 数据...
-    </section>
-
-    <section v-else-if="report" class="transaction-card">
-      <div class="report-table-wrap">
-        <table class="report-table event-table">
-          <thead>
-            <tr v-if="!isNameView">
-              <th class="left"><a :href="sortUrl('type')">Type</a></th>
-              <th class="right"><a :href="sortUrl('total')">Total</a></th>
-              <th class="right"><a :href="sortUrl('failure')">Failure</a></th>
-              <th class="right"><a :href="sortUrl('failurePercent')">Failure%</a></th>
-              <th class="right">Sample Link</th>
-              <th class="right">QPS</th>
-            </tr>
-            <tr v-else>
-              <th class="left">
-                <a :href="graphUrl()" @click="toggleGraph('type-total', graphUrl(), $event)">
-                  {{ graphLinkText('type-total') }}
-                </a>
-                <a :href="sortUrl('type')">Name</a>
-              </th>
-              <th class="right"><a :href="sortUrl('total')">Total</a></th>
-              <th class="right"><a :href="sortUrl('failure')">Failure</a></th>
-              <th class="right"><a :href="sortUrl('failurePercent')">Failure%</a></th>
-              <th class="center">Sample Link</th>
-              <th class="right"><a :href="sortUrl('total')">QPS</a></th>
-              <th class="right"><a :href="sortUrl('total')">Percent%</a></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="isNameView && activeGraphKey === 'type-total'">
-              <td :colspan="isNameView ? 7 : 6">
-                <EventGraphPanel
-                  :error="graphErrors['type-total']"
-                  :format-integer="formatInteger"
-                  :format-rate="formatRate"
-                  :graph="graphCache['type-total']"
-                  :loading="graphLoadingKey === 'type-total'"
-                />
-              </td>
-            </tr>
-            <template v-for="row in report.rows" :key="`${row.index}-${row.id}`">
-              <tr>
-                <td class="left long-text">
-                  <template v-if="!isNameView">
-                    <a :href="graphUrl(row)" @click="toggleGraph(rowGraphKey(row), graphUrl(row), $event)">
-                      {{ graphLinkText(rowGraphKey(row)) }}
-                    </a>
-                    <a :href="eventUrl({ type: row.id, ip: currentIp })">{{ row.id }}</a>
-                  </template>
-                  <template v-else>
-                    <a
-                      v-if="!row.totalRow"
-                      :href="graphUrl(row)"
-                      @click="toggleGraph(rowGraphKey(row), graphUrl(row), $event)"
-                    >
-                      {{ graphLinkText(rowGraphKey(row)) }}
-                    </a>
-                    <span>{{ row.id }}</span>
-                  </template>
-                </td>
-                <td class="right">{{ formatInteger(row.totalCount) }}</td>
-                <td class="right">{{ formatInteger(row.failCount) }}</td>
-                <td class="right">{{ formatRate(row.failPercent, 4) }}</td>
-                <td class="center sample-link">
-                  <a v-if="row.messageUrl" :href="logViewUrl(row.messageUrl)" target="_blank" rel="noreferrer">
-                    Log View
-                  </a>
-                </td>
-                <td class="right">{{ formatDecimal(row.tps, 1) }}</td>
-                <td v-if="isNameView" class="right">{{ formatRate(row.totalPercent, 4) }}</td>
+    <ReportLoadState :error="loadError" :loading="loading" loading-text="正在加载 Event 数据...">
+      <section v-if="report" class="transaction-card">
+        <div class="report-table-wrap">
+          <table class="report-table event-table">
+            <thead>
+              <tr v-if="!isNameView">
+                <th class="left"><a :href="sortUrl('type')">Type</a></th>
+                <th class="right"><a :href="sortUrl('total')">Total</a></th>
+                <th class="right"><a :href="sortUrl('failure')">Failure</a></th>
+                <th class="right"><a :href="sortUrl('failurePercent')">Failure%</a></th>
+                <th class="right">Sample Link</th>
+                <th class="right">QPS</th>
               </tr>
-              <tr v-if="activeGraphKey === rowGraphKey(row)">
+              <tr v-else>
+                <th class="left">
+                  <a :href="graphUrl()" @click="toggleGraph('type-total', graphUrl(), $event)">
+                    {{ graphLinkText('type-total') }}
+                  </a>
+                  <a :href="sortUrl('type')">Name</a>
+                </th>
+                <th class="right"><a :href="sortUrl('total')">Total</a></th>
+                <th class="right"><a :href="sortUrl('failure')">Failure</a></th>
+                <th class="right"><a :href="sortUrl('failurePercent')">Failure%</a></th>
+                <th class="center">Sample Link</th>
+                <th class="right"><a :href="sortUrl('total')">QPS</a></th>
+                <th class="right"><a :href="sortUrl('total')">Percent%</a></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="isNameView && activeGraphKey === 'type-total'">
                 <td :colspan="isNameView ? 7 : 6">
                   <EventGraphPanel
-                    :error="graphErrors[rowGraphKey(row)]"
+                    :error="graphErrors['type-total']"
                     :format-integer="formatInteger"
                     :format-rate="formatRate"
-                    :graph="graphCache[rowGraphKey(row)]"
-                    :loading="graphLoadingKey === rowGraphKey(row)"
+                    :graph="graphCache['type-total']"
+                    :loading="graphLoadingKey === 'type-total'"
                   />
                 </td>
               </tr>
-            </template>
-          </tbody>
-        </table>
-      </div>
-      <div v-if="isNameView && report.pieChart" class="report-pie-panel">
-        <PieChartPanel :chart="report.pieChart" />
-      </div>
-    </section>
+              <template v-for="row in report.rows" :key="`${row.index}-${row.id}`">
+                <tr>
+                  <td class="left long-text">
+                    <template v-if="!isNameView">
+                      <a :href="graphUrl(row)" @click="toggleGraph(rowGraphKey(row), graphUrl(row), $event)">
+                        {{ graphLinkText(rowGraphKey(row)) }}
+                      </a>
+                      <a :href="eventUrl({ type: row.id, ip: currentIp })">{{ row.id }}</a>
+                    </template>
+                    <template v-else>
+                      <a
+                        v-if="!row.totalRow"
+                        :href="graphUrl(row)"
+                        @click="toggleGraph(rowGraphKey(row), graphUrl(row), $event)"
+                      >
+                        {{ graphLinkText(rowGraphKey(row)) }}
+                      </a>
+                      <span>{{ row.id }}</span>
+                    </template>
+                  </td>
+                  <td class="right">{{ formatInteger(row.totalCount) }}</td>
+                  <td class="right">{{ formatInteger(row.failCount) }}</td>
+                  <td class="right">{{ formatRate(row.failPercent, 4) }}</td>
+                  <td class="center sample-link">
+                    <a v-if="row.messageUrl" :href="logViewUrl(row.messageUrl)" target="_blank" rel="noreferrer">
+                      Log View
+                    </a>
+                  </td>
+                  <td class="right">{{ formatDecimal(row.tps, 1) }}</td>
+                  <td v-if="isNameView" class="right">{{ formatRate(row.totalPercent, 4) }}</td>
+                </tr>
+                <tr v-if="activeGraphKey === rowGraphKey(row)">
+                  <td :colspan="isNameView ? 7 : 6">
+                    <EventGraphPanel
+                      :error="graphErrors[rowGraphKey(row)]"
+                      :format-integer="formatInteger"
+                      :format-rate="formatRate"
+                      :graph="graphCache[rowGraphKey(row)]"
+                      :loading="graphLoadingKey === rowGraphKey(row)"
+                    />
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <div v-if="isNameView && report.pieChart" class="report-pie-panel">
+          <PieChartPanel :chart="report.pieChart" />
+        </div>
+      </section>
+    </ReportLoadState>
   </ReportPageShell>
 </template>
 
@@ -142,6 +136,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import EventGraphPanel from '../components/EventGraphPanel.vue'
 import PieChartPanel from '../components/PieChartPanel.vue'
+import ReportLoadState from '../components/ReportLoadState.vue'
 import ReportPageShell from '../components/ReportPageShell.vue'
 import ReportQueryBar from '../components/ReportQueryBar.vue'
 import ReportSelectorPanel from '../components/ReportSelectorPanel.vue'
