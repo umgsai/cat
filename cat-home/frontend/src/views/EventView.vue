@@ -53,11 +53,11 @@
           </div>
           <div class="time-shortcuts">
             <span>
-              【<a class="mode-link" :href="historyModeUrl">切到历史模式</a>】
+              【<a class="mode-link" :href="modeSwitchUrl">{{ modeSwitchText }}</a>】
             </span>
             <span v-for="shortcut in shortcuts" :key="shortcut.label">
               [
-              <a :href="shortcut.href">{{ shortcut.label }}</a>
+              <a :class="{ current: shortcut.current }" :href="shortcut.href">{{ shortcut.label }}</a>
               ]
             </span>
           </div>
@@ -320,6 +320,11 @@ const activeGraphKey = ref('')
 const graphCache = ref<Record<string, EventGraph>>({})
 const graphErrors = ref<Record<string, string>>({})
 const graphLoadingKey = ref('')
+const historyNavs = [
+  { label: 'month', last: '-1m', next: '+1m' },
+  { label: 'week', last: '-1w', next: '+1w' },
+  { label: 'day', last: '-1d', next: '+1d' }
+]
 
 const contextPath = computed(() => {
   const path = window.location.pathname
@@ -339,6 +344,20 @@ const currentReportType = computed(() => report.value?.reportType || currentPara
 const currentType = computed(() => report.value?.type || currentParams.value.get('type') || '')
 const domainGroups = computed(() => report.value?.domainGroups || [])
 const isNameView = computed(() => Boolean(currentType.value))
+const isHistoryMode = computed(() => report.value?.historyMode ?? currentParams.value.get('op') === 'history')
+const currentHistoryNav = computed(() => historyNavs.find((item) => item.label === currentReportType.value) || historyNavs[2])
+const modeSwitchText = computed(() => isHistoryMode.value ? '切到小时模式' : '切到历史模式')
+const modeSwitchUrl = computed(() => {
+  const params = new URLSearchParams()
+
+  params.set('op', isHistoryMode.value ? 'view' : 'history')
+  params.set('domain', currentDomain.value)
+  params.set('ip', currentIp.value)
+  if (currentType.value) {
+    params.set('type', currentType.value)
+  }
+  return `${contextPath.value}/mvc/vue/r/e?${params.toString()}`
+})
 
 const domainSuggestions = computed(() => {
   const suggestions: Array<{ label: string; value: string; category: string }> = []
@@ -362,18 +381,42 @@ const shortcuts = computed(() => {
   const ip = currentIp.value
   const domain = currentDomain.value
 
+  if (isHistoryMode.value) {
+    const currentNav = currentHistoryNav.value
+
+    return [
+      ...historyNavs.map((nav) => ({
+        current: nav.label === currentReportType.value,
+        href: historyUrl({ date, domain, ip, reportType: nav.label, type: currentType.value }),
+        label: nav.label
+      })),
+      {
+        current: false,
+        href: historyUrl({ date, domain, ip, reportType: currentReportType.value, step: '-1', type: currentType.value }),
+        label: currentNav.last
+      },
+      {
+        current: false,
+        href: historyUrl({ date, domain, ip, reportType: currentReportType.value, step: '1', type: currentType.value }),
+        label: currentNav.next
+      },
+      {
+        current: false,
+        href: historyUrl({ domain, ip, reportType: currentReportType.value, type: currentType.value }),
+        label: 'now'
+      }
+    ]
+  }
   return [
-    { label: '-7d', href: eventUrl({ date, ip, step: '-168', domain }) },
-    { label: '-1d', href: eventUrl({ date, ip, step: '-24', domain }) },
-    { label: '-1h', href: eventUrl({ date, ip, step: '-1', domain }) },
-    { label: '+1h', href: eventUrl({ date, ip, step: '1', domain }) },
-    { label: '+1d', href: eventUrl({ date, ip, step: '24', domain }) },
-    { label: '+7d', href: eventUrl({ date, ip, step: '168', domain }) },
-    { label: 'now', href: hourlyNowUrl() }
+    { current: false, label: '-7d', href: eventUrl({ date, ip, step: '-168', domain }) },
+    { current: false, label: '-1d', href: eventUrl({ date, ip, step: '-24', domain }) },
+    { current: false, label: '-1h', href: eventUrl({ date, ip, step: '-1', domain }) },
+    { current: false, label: '+1h', href: eventUrl({ date, ip, step: '1', domain }) },
+    { current: false, label: '+1d', href: eventUrl({ date, ip, step: '24', domain }) },
+    { current: false, label: '+7d', href: eventUrl({ date, ip, step: '168', domain }) },
+    { current: false, label: 'now', href: hourlyNowUrl() }
   ]
 })
-
-const historyModeUrl = computed(() => eventUrl({ op: 'history', domain: currentDomain.value, ip: currentIp.value }))
 
 onMounted(() => {
   loadReport()
@@ -528,6 +571,27 @@ function graphDataUrl(link: string) {
 
 function graphLinkText(key: string) {
   return activeGraphKey.value === key ? '[:: hide ::]' : '[:: show ::]'
+}
+
+function historyUrl(overrides: Record<string, string | undefined>) {
+  const params = new URLSearchParams()
+
+  params.set('op', 'history')
+  params.set('domain', overrides.domain || currentDomain.value)
+  params.set('ip', overrides.ip || currentIp.value)
+  if (overrides.date) {
+    params.set('date', overrides.date)
+  }
+  if (overrides.reportType) {
+    params.set('reportType', overrides.reportType)
+  }
+  if (overrides.step) {
+    params.set('step', overrides.step)
+  }
+  if (overrides.type) {
+    params.set('type', overrides.type)
+  }
+  return `${contextPath.value}/mvc/vue/r/e?${params.toString()}`
 }
 
 function hourlyNowUrl() {

@@ -2402,6 +2402,21 @@ input {
   vertical-align: middle;
 }
 
+.transaction-report-table th,
+.transaction-report-table td,
+.event-table th,
+.event-table td,
+.problem-table th,
+.problem-table td,
+.cross-table th,
+.cross-table td,
+.state-summary-table th,
+.state-summary-table td,
+.state-domain-table th,
+.state-domain-table td {
+  border-width: 0 0 1px;
+}
+
 .transaction-table th {
   background: #f8fafc;
   color: #344054;
@@ -2444,7 +2459,11 @@ input {
 }
 
 .transaction-graph-panel {
-  padding: 8px 0;
+  margin: -7px -9px;
+  border-top: 1px solid #d7d7d7;
+  border-bottom: 1px solid #d7d7d7;
+  padding: 5px;
+  background: #f3f3f3;
 }
 
 .transaction-pie-panel {
@@ -2484,13 +2503,29 @@ input {
   margin: -7px -9px;
   border-top: 1px solid #d7d7d7;
   border-bottom: 1px solid #d7d7d7;
-  padding: 22px 18px 16px;
+  padding: 5px;
+  background: #f3f3f3;
+}
+
+.event-graph-panel,
+.state-graph-panel {
+  margin: -7px -9px;
+  border-top: 1px solid #d7d7d7;
+  border-bottom: 1px solid #d7d7d7;
+  padding: 5px;
   background: #f3f3f3;
 }
 
 .problem-chart-grid {
   grid-template-columns: repeat(2, minmax(360px, 1fr));
-  gap: 14px;
+  gap: 5px;
+}
+
+.event-chart-grid,
+.state-chart-grid {
+  grid-template-columns: repeat(2, minmax(360px, 1fr));
+  gap: 5px;
+  align-items: stretch;
 }
 
 .vue-bar-chart,
@@ -2508,7 +2543,19 @@ input {
 .problem-graph-panel .vue-pie-chart {
   border: 0;
   border-radius: 0;
-  padding: 0 18px 12px;
+  padding: 10px 18px 12px;
+}
+
+.event-graph-panel .vue-line-chart,
+.event-graph-panel .vue-pie-chart,
+.state-graph-panel .vue-line-chart,
+.state-graph-panel .vue-pie-chart {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
+  padding: 10px 18px 12px;
 }
 
 .vue-bar-chart h3,
@@ -2603,16 +2650,26 @@ input {
 
 .transaction-chart-grid {
   grid-template-columns: repeat(2, minmax(360px, 1fr));
-  margin-bottom: 10px;
+  gap: 5px;
+  margin-bottom: 5px;
 }
 
 .transaction-chart-grid .vue-bar-chart,
 .transaction-chart-grid .vue-line-chart {
-  padding: 8px 10px;
+  border: 0;
+  border-radius: 0;
+  padding: 10px 18px 12px;
 }
 
 .transaction-chart-grid .echarts-bar,
 .transaction-chart-grid .echarts-line {
+  height: 300px;
+}
+
+.event-chart-grid .echarts-line,
+.state-chart-grid .echarts-line,
+.state-chart-grid .echarts-pie,
+.event-graph-panel .echarts-pie {
   height: 300px;
 }
 
@@ -2625,6 +2682,10 @@ input {
 .distribution-table {
   min-width: 760px;
   margin-top: 8px;
+}
+
+.event-graph-panel .distribution-table {
+  margin: 5px 0;
 }
 
 .sample-link {
@@ -2692,10 +2753,69 @@ input {
 }
 
 .problem-type {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 4px;
   color: #172033;
   font-weight: 700;
+}
+
+.problem-type-marker {
+  display: inline-block;
+  width: 7px;
+  height: 18px;
+  flex: 0 0 auto;
+  background: #98a2b3;
+}
+
+.problem-type-marker.is-error {
+  background: red;
+}
+
+.problem-type-marker.is-failure {
+  background: #770000;
+}
+
+.problem-type-marker.is-heartbeat {
+  background: #009933;
+}
+
+.problem-type-marker.is-long-url {
+  background: #5599cc;
+}
+
+.problem-type-marker.is-long-sql {
+  background: #6699cc;
+}
+
+.problem-type-marker.is-long-call {
+  background: #6688bb;
+}
+
+.problem-type-marker.is-long-cache {
+  background: #6677aa;
+}
+
+.problem-type-marker.is-long-service {
+  background: #9966dd;
+}
+
+.problem-type-marker.is-url {
+  background: #cc0000;
+}
+
+.problem-type-marker.is-sql {
+  background: purple;
+}
+
+.problem-type-marker.is-call,
+.problem-type-marker.is-pigeoncall {
+  background: #9966ff;
+}
+
+.problem-type-marker.is-cache {
+  background: #aa3faa;
 }
 
 .problem-table td a + span {
@@ -2811,6 +2931,11 @@ input {
   }
 
   .transaction-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .event-chart-grid,
+  .state-chart-grid {
     grid-template-columns: 1fr;
   }
 

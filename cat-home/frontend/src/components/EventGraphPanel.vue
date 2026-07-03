@@ -1,9 +1,9 @@
 <template>
-  <section class="report-graph-panel">
+  <section class="report-graph-panel event-graph-panel">
     <div v-if="loading" class="empty-state">正在加载图表数据...</div>
     <div v-else-if="error" class="empty-state">{{ error }}</div>
     <template v-else-if="graph">
-      <div class="line-chart-grid">
+      <div class="line-chart-grid event-chart-grid">
         <LineChartPanel v-if="graph.hitTrend" :chart="graph.hitTrend" smooth />
         <LineChartPanel v-if="graph.failureTrend" :chart="graph.failureTrend" smooth />
       </div>

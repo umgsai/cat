@@ -23,6 +23,8 @@ interface TooltipParam {
   value?: unknown
 }
 
+const visibleLabelPercentThreshold = 0.75
+
 const props = defineProps<{
   chart?: PieChartData | string
   title?: string
@@ -43,6 +45,20 @@ const items = computed(() => (chart.value?.items || [])
     value: Number(item.number) || 0
   }))
   .filter((item) => item.value > 0))
+const chartItems = computed(() => items.value.map((item) => {
+  const percent = total.value ? (item.value / total.value) * 100 : 0
+  const showLabel = percent >= visibleLabelPercentThreshold
+
+  return {
+    ...item,
+    label: {
+      show: showLabel
+    },
+    labelLine: {
+      show: showLabel
+    }
+  }
+}))
 
 onMounted(() => {
   renderChart()
@@ -100,7 +116,7 @@ function option(): EChartsCoreOption {
       {
         avoidLabelOverlap: true,
         center: ['36%', '43%'],
-        data: items.value,
+        data: chartItems.value,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,

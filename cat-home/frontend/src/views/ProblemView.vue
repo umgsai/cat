@@ -53,11 +53,11 @@
           </div>
           <div class="time-shortcuts">
             <span>
-              【<a class="mode-link" :href="historyModeUrl">切到历史模式</a>】
+              【<a class="mode-link" :href="modeSwitchUrl">{{ modeSwitchText }}</a>】
             </span>
             <span v-for="shortcut in shortcuts" :key="shortcut.label">
               [
-              <a :href="shortcut.href">{{ shortcut.label }}</a>
+              <a :class="{ current: shortcut.current }" :href="shortcut.href">{{ shortcut.label }}</a>
               ]
             </span>
           </div>
@@ -188,7 +188,10 @@
                   <template v-for="(status, index) in row.statuses" :key="`${row.type}-${status.status}`">
                     <tr>
                       <td v-if="index === 0" class="left top-cell" :rowspan="row.statuses.length">
-                        <span class="problem-type">{{ row.type }}</span>
+                        <span class="problem-type">
+                          <span class="problem-type-marker" :class="problemTypeMarkerClass(row.type)"></span>
+                          <span>{{ row.type }}</span>
+                        </span>
                         <br />
                         <a class="show-link" :href="graphUrl(row)" @click="toggleGraph(typeGraphKey(row), graphUrl(row), $event)">
                           {{ graphLinkText(typeGraphKey(row)) }}
@@ -319,6 +322,11 @@ const activeGraphKey = ref('')
 const graphCache = ref<Record<string, ProblemGraph>>({})
 const graphErrors = ref<Record<string, string>>({})
 const graphLoadingKey = ref('')
+const historyNavs = [
+  { label: 'month', last: '-1m', next: '+1m' },
+  { label: 'week', last: '-1w', next: '+1w' },
+  { label: 'day', last: '-1d', next: '+1d' }
+]
 const thresholds = reactive({
   cacheThreshold: 10,
   callThreshold: 50,
@@ -374,6 +382,10 @@ const currentIp = computed(() => report.value?.ipAddress || currentParams.value.
 const currentDate = computed(() => report.value?.date || currentParams.value.get('date') || '')
 const currentReportType = computed(() => report.value?.reportType || currentParams.value.get('reportType') || 'day')
 const domainGroups = computed(() => report.value?.domainGroups || [])
+const isHistoryMode = computed(() => report.value?.historyMode ?? currentParams.value.get('op') === 'history')
+const currentHistoryNav = computed(() => historyNavs.find((item) => item.label === currentReportType.value) || historyNavs[2])
+const modeSwitchText = computed(() => isHistoryMode.value ? '切到小时模式' : '切到历史模式')
+const modeSwitchUrl = computed(() => problemUrl({ op: isHistoryMode.value ? 'view' : 'history' }))
 
 const domainSuggestions = computed(() => {
   const suggestions: Array<{ label: string; value: string; category: string }> = []
@@ -397,18 +409,42 @@ const shortcuts = computed(() => {
   const ip = currentIp.value
   const domain = currentDomain.value
 
+  if (isHistoryMode.value) {
+    const currentNav = currentHistoryNav.value
+
+    return [
+      ...historyNavs.map((nav) => ({
+        current: nav.label === currentReportType.value,
+        href: historyUrl({ date, domain, ip, reportType: nav.label }),
+        label: nav.label
+      })),
+      {
+        current: false,
+        href: historyUrl({ date, domain, ip, reportType: currentReportType.value, step: '-1' }),
+        label: currentNav.last
+      },
+      {
+        current: false,
+        href: historyUrl({ date, domain, ip, reportType: currentReportType.value, step: '1' }),
+        label: currentNav.next
+      },
+      {
+        current: false,
+        href: historyUrl({ domain, ip, reportType: currentReportType.value }),
+        label: 'now'
+      }
+    ]
+  }
   return [
-    { label: '-7d', href: problemUrl({ date, ip, step: '-168', domain }) },
-    { label: '-1d', href: problemUrl({ date, ip, step: '-24', domain }) },
-    { label: '-1h', href: problemUrl({ date, ip, step: '-1', domain }) },
-    { label: '+1h', href: problemUrl({ date, ip, step: '1', domain }) },
-    { label: '+1d', href: problemUrl({ date, ip, step: '24', domain }) },
-    { label: '+7d', href: problemUrl({ date, ip, step: '168', domain }) },
-    { label: 'now', href: hourlyNowUrl() }
+    { current: false, label: '-7d', href: problemUrl({ date, ip, step: '-168', domain }) },
+    { current: false, label: '-1d', href: problemUrl({ date, ip, step: '-24', domain }) },
+    { current: false, label: '-1h', href: problemUrl({ date, ip, step: '-1', domain }) },
+    { current: false, label: '+1h', href: problemUrl({ date, ip, step: '1', domain }) },
+    { current: false, label: '+1d', href: problemUrl({ date, ip, step: '24', domain }) },
+    { current: false, label: '+7d', href: problemUrl({ date, ip, step: '168', domain }) },
+    { current: false, label: 'now', href: hourlyNowUrl() }
   ]
 })
-
-const historyModeUrl = computed(() => legacyProblemUrl({ op: 'history' }))
 
 onMounted(() => {
   loadReport()
@@ -536,6 +572,29 @@ function graphLinkText(key: string) {
   return activeGraphKey.value === key ? '[:: hide ::]' : '[:: show ::]'
 }
 
+function historyUrl(overrides: Record<string, string | undefined>) {
+  const params = new URLSearchParams()
+
+  params.set('op', 'history')
+  params.set('domain', overrides.domain || currentDomain.value)
+  params.set('ip', overrides.ip || currentIp.value)
+  params.set('urlThreshold', String(thresholds.urlThreshold))
+  params.set('sqlThreshold', String(thresholds.sqlThreshold))
+  params.set('serviceThreshold', String(thresholds.serviceThreshold))
+  params.set('cacheThreshold', String(thresholds.cacheThreshold))
+  params.set('callThreshold', String(thresholds.callThreshold))
+  if (overrides.date) {
+    params.set('date', overrides.date)
+  }
+  if (overrides.reportType) {
+    params.set('reportType', overrides.reportType)
+  }
+  if (overrides.step) {
+    params.set('step', overrides.step)
+  }
+  return `${contextPath.value}/mvc/vue/r/p?${params.toString()}`
+}
+
 function hourlyNowUrl() {
   const params = new URLSearchParams()
 
@@ -620,6 +679,10 @@ function problemUrl(overrides: Record<string, string | undefined>) {
     params.set('callThreshold', overrides.callThreshold)
   }
   return `${contextPath.value}/mvc/vue/r/p?${params.toString()}`
+}
+
+function problemTypeMarkerClass(type: string) {
+  return `is-${type.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()}`
 }
 
 function sampleLetter(index: number, total: number) {

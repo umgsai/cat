@@ -149,7 +149,7 @@
           </div>
 
           <div class="transaction-table-wrap">
-            <table class="transaction-table">
+            <table class="transaction-table transaction-report-table">
               <thead>
                 <tr v-if="!isNameView">
                   <th class="left"><a :href="sortUrl('type')">Type</a></th>
