@@ -1,183 +1,162 @@
 <template>
-  <main class="cat-shell">
-    <header class="cat-topbar">
-      <div class="cat-brand">
-        <strong>CAT</strong>
-        <span>Central Application Tracking</span>
-      </div>
-      <nav class="cat-sections" aria-label="主导航">
-        <a class="is-active" :href="problemUrl({})">Application</a>
-        <a :href="legacyUrl('/mvc/vue/s/config?op=projects')">Configs</a>
-        <a :href="legacyUrl('/mvc/vue/r/home?op=view&docName=index')">Documents</a>
-      </nav>
-      <div class="cat-actions">
-        <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
-        <span class="user-greeting">欢迎，admin</span>
-      </div>
-    </header>
+  <ReportPageShell
+    active-report="Problem"
+    :application-url="problemUrl({})"
+    :context-path="contextPath"
+    :date="currentDate"
+    :domain="currentDomain"
+    :ip="currentIp"
+    :report-type="currentReportType"
+  >
+    <ReportQueryBar
+      v-model:domain-input="domainInput"
+      :domain-groups="domainGroups"
+      :domain-url="domainUrl"
+      :frequent-domains="frequentDomains"
+      :mode-switch-text="modeSwitchText"
+      :mode-switch-url="modeSwitchUrl"
+      :report-end="report?.reportEnd"
+      :report-start="report?.reportStart"
+      :search-domains="searchDomains"
+      :shortcuts="shortcuts"
+      :show-domain-panel="showDomainPanel"
+      :show-frequent-panel="showFrequentPanel"
+      @go-domain="goDomain"
+      @select-domain="selectDomain"
+      @toggle-domain-panel="showDomainPanel = !showDomainPanel"
+      @toggle-frequent-panel="showFrequentPanel = !showFrequentPanel"
+    />
 
-    <div class="cat-body">
-      <ReportSidebar
-        active-report="Problem"
-        :context-path="contextPath"
-        :date="currentDate"
-        :domain="currentDomain"
-        :ip="currentIp"
-        :report-type="currentReportType"
-      />
+    <section v-if="report && report.sample !== 1" class="sample-panel">
+      <strong>采样</strong>
+      <span>采样比例 {{ formatPercent(report.sample) }}</span>
+    </section>
 
-      <section class="cat-content">
-        <ReportQueryBar
-          v-model:domain-input="domainInput"
-          :domain-groups="domainGroups"
-          :domain-url="domainUrl"
-          :frequent-domains="frequentDomains"
-          :mode-switch-text="modeSwitchText"
-          :mode-switch-url="modeSwitchUrl"
-          :report-end="report?.reportEnd"
-          :report-start="report?.reportStart"
-          :search-domains="searchDomains"
-          :shortcuts="shortcuts"
-          :show-domain-panel="showDomainPanel"
-          :show-frequent-panel="showFrequentPanel"
-          @go-domain="goDomain"
-          @select-domain="selectDomain"
-          @toggle-domain-panel="showDomainPanel = !showDomainPanel"
-          @toggle-frequent-panel="showFrequentPanel = !showFrequentPanel"
-        />
+    <ReportSelectorPanel :rows="selectorRows" />
 
-        <section v-if="report && report.sample !== 1" class="sample-panel">
-          <strong>采样</strong>
-          <span>采样比例 {{ formatPercent(report.sample) }}</span>
-        </section>
+    <section v-if="report" class="threshold-panel">
+      <label>
+        Long-url
+        <select v-model="thresholds.urlThreshold">
+          <option v-for="item in urlOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+      </label>
+      <label>
+        Long-sql
+        <select v-model="thresholds.sqlThreshold">
+          <option v-for="item in sqlOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+      </label>
+      <label>
+        Long-service
+        <select v-model="thresholds.serviceThreshold">
+          <option v-for="item in serviceOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+      </label>
+      <label>
+        Long-cache
+        <select v-model="thresholds.cacheThreshold">
+          <option v-for="item in cacheOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+      </label>
+      <label>
+        Long-call
+        <select v-model="thresholds.callThreshold">
+          <option v-for="item in callOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+      </label>
+      <button type="button" @click="applyThresholds">查询</button>
+    </section>
 
-        <ReportSelectorPanel :rows="selectorRows" />
+    <section v-if="loadError" class="empty-state">
+      {{ loadError }}
+    </section>
 
-        <section v-if="report" class="threshold-panel">
-          <label>
-            Long-url
-            <select v-model="thresholds.urlThreshold">
-              <option v-for="item in urlOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-            </select>
-          </label>
-          <label>
-            Long-sql
-            <select v-model="thresholds.sqlThreshold">
-              <option v-for="item in sqlOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-            </select>
-          </label>
-          <label>
-            Long-service
-            <select v-model="thresholds.serviceThreshold">
-              <option v-for="item in serviceOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-            </select>
-          </label>
-          <label>
-            Long-cache
-            <select v-model="thresholds.cacheThreshold">
-              <option v-for="item in cacheOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-            </select>
-          </label>
-          <label>
-            Long-call
-            <select v-model="thresholds.callThreshold">
-              <option v-for="item in callOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-            </select>
-          </label>
-          <button type="button" @click="applyThresholds">查询</button>
-        </section>
+    <section v-else-if="loading" class="empty-state">
+      正在加载 Problem 数据...
+    </section>
 
-        <section v-if="loadError" class="empty-state">
-          {{ loadError }}
-        </section>
-
-        <section v-else-if="loading" class="empty-state">
-          正在加载 Problem 数据...
-        </section>
-
-        <section v-else-if="report" class="transaction-card">
-          <div class="report-table-wrap">
-            <table class="report-table problem-table">
-              <thead>
+    <section v-else-if="report" class="transaction-card">
+      <div class="report-table-wrap">
+        <table class="report-table problem-table">
+          <thead>
+            <tr>
+              <th class="left">Type</th>
+              <th class="right">Total</th>
+              <th class="left">Status</th>
+              <th class="right">Count</th>
+              <th class="left">SampleLinks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="row in report.rows" :key="row.type">
+              <template v-for="(status, index) in row.statuses" :key="`${row.type}-${status.status}`">
                 <tr>
-                  <th class="left">Type</th>
-                  <th class="right">Total</th>
-                  <th class="left">Status</th>
-                  <th class="right">Count</th>
-                  <th class="left">SampleLinks</th>
+                  <td v-if="index === 0" class="left top-cell" :rowspan="row.statuses.length">
+                    <span class="problem-type">
+                      <span class="problem-type-marker" :class="problemTypeMarkerClass(row.type)"></span>
+                      <span>{{ row.type }}</span>
+                    </span>
+                    <br />
+                    <a class="show-link" :href="graphUrl(row)" @click="toggleGraph(typeGraphKey(row), graphUrl(row), $event)">
+                      {{ graphLinkText(typeGraphKey(row)) }}
+                    </a>
+                  </td>
+                  <td v-if="index === 0" class="right top-cell" :rowspan="row.statuses.length">
+                    {{ formatInteger(row.count) }}
+                  </td>
+                  <td class="left">
+                    <a
+                      class="show-link"
+                      :href="graphUrl(row, status)"
+                      @click="toggleGraph(statusGraphKey(row, status), graphUrl(row, status), $event)"
+                    >
+                      {{ graphLinkText(statusGraphKey(row, status)) }}
+                    </a>
+                    <span>{{ status.status }}</span>
+                  </td>
+                  <td class="right">{{ formatInteger(status.count) }}</td>
+                  <td class="left sample-links">
+                    <a
+                      v-for="(link, linkIndex) in status.links"
+                      :key="`${row.type}-${status.status}-${linkIndex}`"
+                      :href="logViewUrl(link)"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {{ sampleLetter(linkIndex, status.links.length) }}
+                    </a>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                <template v-for="row in report.rows" :key="row.type">
-                  <template v-for="(status, index) in row.statuses" :key="`${row.type}-${status.status}`">
-                    <tr>
-                      <td v-if="index === 0" class="left top-cell" :rowspan="row.statuses.length">
-                        <span class="problem-type">
-                          <span class="problem-type-marker" :class="problemTypeMarkerClass(row.type)"></span>
-                          <span>{{ row.type }}</span>
-                        </span>
-                        <br />
-                        <a class="show-link" :href="graphUrl(row)" @click="toggleGraph(typeGraphKey(row), graphUrl(row), $event)">
-                          {{ graphLinkText(typeGraphKey(row)) }}
-                        </a>
-                      </td>
-                      <td v-if="index === 0" class="right top-cell" :rowspan="row.statuses.length">
-                        {{ formatInteger(row.count) }}
-                      </td>
-                      <td class="left">
-                        <a
-                          class="show-link"
-                          :href="graphUrl(row, status)"
-                          @click="toggleGraph(statusGraphKey(row, status), graphUrl(row, status), $event)"
-                        >
-                          {{ graphLinkText(statusGraphKey(row, status)) }}
-                        </a>
-                        <span>{{ status.status }}</span>
-                      </td>
-                      <td class="right">{{ formatInteger(status.count) }}</td>
-                      <td class="left sample-links">
-                        <a
-                          v-for="(link, linkIndex) in status.links"
-                          :key="`${row.type}-${status.status}-${linkIndex}`"
-                          :href="logViewUrl(link)"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {{ sampleLetter(linkIndex, status.links.length) }}
-                        </a>
-                      </td>
-                    </tr>
-                  </template>
-                  <tr v-if="isActiveProblemGraph(row)">
-                    <td colspan="5">
-                      <ProblemGraphPanel
-                        :error="graphErrors[activeGraphKey]"
-                        :graph="graphCache[activeGraphKey]"
-                        :loading="graphLoadingKey === activeGraphKey"
-                      />
-                    </td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-        </section>
+              </template>
+              <tr v-if="isActiveProblemGraph(row)">
+                <td colspan="5">
+                  <ProblemGraphPanel
+                    :error="graphErrors[activeGraphKey]"
+                    :graph="graphCache[activeGraphKey]"
+                    :loading="graphLoadingKey === activeGraphKey"
+                  />
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-        <section v-if="report && currentIp !== 'All'" class="threads-link">
-          <a :href="legacyProblemUrl({ op: 'group' })">Threads Details</a>
-        </section>
-      </section>
-    </div>
-  </main>
+    <section v-if="report && currentIp !== 'All'" class="threads-link">
+      <a :href="legacyProblemUrl({ op: 'group' })">Threads Details</a>
+    </section>
+  </ReportPageShell>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 
 import ProblemGraphPanel from '../components/ProblemGraphPanel.vue'
+import ReportPageShell from '../components/ReportPageShell.vue'
 import ReportQueryBar from '../components/ReportQueryBar.vue'
 import ReportSelectorPanel from '../components/ReportSelectorPanel.vue'
-import ReportSidebar from '../components/ReportSidebar.vue'
 import { getFrequentDomains } from '../utils/domainCookies'
 
 interface DomainLine {
@@ -582,10 +561,6 @@ function legacyProblemUrl(overrides: Record<string, string | undefined>) {
     params.set('status', overrides.status)
   }
   return `${contextPath.value}/mvc/r/p?${params.toString()}`
-}
-
-function legacyUrl(path: string) {
-  return `${contextPath.value}${path}`
 }
 
 function logViewUrl(messageUrl: string) {

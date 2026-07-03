@@ -1,217 +1,196 @@
 <template>
-  <main class="cat-shell">
-    <header class="cat-topbar">
-      <div class="cat-brand">
-        <strong>CAT</strong>
-        <span>Central Application Tracking</span>
+  <ReportPageShell
+    active-report="State"
+    :application-url="stateUrl({})"
+    :context-path="contextPath"
+    :date="currentDate"
+    :domain="currentDomain"
+    :ip="currentIp"
+    :report-type="currentReportType"
+  >
+    <div class="query-bar">
+      <div class="time-range">
+        <span v-if="report">{{ report.reportStart }} to {{ report.reportEnd }}</span>
+        <span v-else>Loading...</span>
       </div>
-      <nav class="cat-sections" aria-label="主导航">
-        <a class="is-active" :href="stateUrl({})">Application</a>
-        <a :href="legacyUrl('/mvc/vue/s/config?op=projects')">Configs</a>
-        <a :href="legacyUrl('/mvc/vue/r/home?op=view&docName=index')">Documents</a>
-      </nav>
-      <div class="cat-actions">
-        <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
-        <span class="user-greeting">欢迎，admin</span>
+      <div class="time-shortcuts">
+        <span>
+          【<a class="mode-link" :href="modeSwitchUrl">{{ modeSwitchText }}</a>】
+        </span>
+        <template v-if="isHistoryMode">
+          <span v-for="nav in report?.historyNavs || []" :key="nav.title">
+            [
+            <a :class="{ current: nav.title === currentReportType }" :href="stateUrl({ op: 'history', reportType: nav.title })">
+              {{ nav.title }}
+            </a>
+            ]
+          </span>
+          <span>
+            [
+            <a :href="stateUrl({ op: 'history', step: '-1' })">{{ currentHistoryNav?.last || '-1d' }}</a>
+            ]
+          </span>
+          <span>
+            [
+            <a :href="stateUrl({ op: 'history', step: '1' })">{{ currentHistoryNav?.next || '+1d' }}</a>
+            ]
+          </span>
+          <span>
+            [
+            <a :href="historyNowUrl">now</a>
+            ]
+          </span>
+        </template>
+        <template v-else>
+          <span v-for="nav in report?.navs || []" :key="nav.title">
+            [
+            <a :href="stateUrl({ step: String(nav.hours) })">{{ nav.title }}</a>
+            ]
+          </span>
+          <span>
+            [
+            <a :href="hourlyNowUrl">now</a>
+            ]
+          </span>
+        </template>
       </div>
-    </header>
-
-    <div class="cat-body">
-      <ReportSidebar
-        active-report="State"
-        :context-path="contextPath"
-        :date="currentDate"
-        :domain="currentDomain"
-        :ip="currentIp"
-        :report-type="currentReportType"
-      />
-
-      <section class="cat-content">
-        <div class="query-bar">
-          <div class="time-range">
-            <span v-if="report">{{ report.reportStart }} to {{ report.reportEnd }}</span>
-            <span v-else>Loading...</span>
-          </div>
-          <div class="time-shortcuts">
-            <span>
-              【<a class="mode-link" :href="modeSwitchUrl">{{ modeSwitchText }}</a>】
-            </span>
-            <template v-if="isHistoryMode">
-              <span v-for="nav in report?.historyNavs || []" :key="nav.title">
-                [
-                <a :class="{ current: nav.title === currentReportType }" :href="stateUrl({ op: 'history', reportType: nav.title })">
-                  {{ nav.title }}
-                </a>
-                ]
-              </span>
-              <span>
-                [
-                <a :href="stateUrl({ op: 'history', step: '-1' })">{{ currentHistoryNav?.last || '-1d' }}</a>
-                ]
-              </span>
-              <span>
-                [
-                <a :href="stateUrl({ op: 'history', step: '1' })">{{ currentHistoryNav?.next || '+1d' }}</a>
-                ]
-              </span>
-              <span>
-                [
-                <a :href="historyNowUrl">now</a>
-                ]
-              </span>
-            </template>
-            <template v-else>
-              <span v-for="nav in report?.navs || []" :key="nav.title">
-                [
-                <a :href="stateUrl({ step: String(nav.hours) })">{{ nav.title }}</a>
-                ]
-              </span>
-              <span>
-                [
-                <a :href="hourlyNowUrl">now</a>
-                ]
-              </span>
-            </template>
-          </div>
-        </div>
-
-        <ReportSelectorPanel :rows="selectorRows" />
-
-        <section v-if="report && !isHistoryMode" class="state-status" :class="{ 'has-error': Boolean(report.message) }">
-          <strong v-if="report.message">出问题CAT的服务端: {{ report.message }}</strong>
-          <strong v-else>CAT服务端正常</strong>
-        </section>
-
-        <section v-if="loadError" class="empty-state">
-          {{ loadError }}
-        </section>
-
-        <section v-else-if="loading" class="empty-state">
-          正在加载 State 数据...
-        </section>
-
-        <section v-else-if="report" class="transaction-card">
-          <div class="report-table-wrap">
-            <table class="report-table state-summary-table">
-              <thead>
-                <tr>
-                  <th colspan="2" class="left">指标</th>
-                  <th class="right">值</th>
-                  <th class="left">备注</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template v-for="metric in report.metrics" :key="metric.key">
-                  <tr>
-                    <td class="left">
-                      <a :href="graphUrl(metric.key)" @click="toggleGraph(metric.key, graphUrl(metric.key), $event)">
-                        {{ graphLinkText(metric.key) }}
-                      </a>
-                    </td>
-                    <td class="left">{{ metric.title }}</td>
-                    <td class="right" :class="{ warning: metric.warning }">{{ formatMetric(metric) }}</td>
-                    <td class="left">{{ metric.remark }}</td>
-                  </tr>
-                  <tr v-if="activeGraphKey === metric.key">
-                    <td colspan="4">
-                      <StateGraphPanel
-                        :error="graphErrors[metric.key]"
-                        :graph="graphCache[metric.key]"
-                        :loading="graphLoadingKey === metric.key"
-                      />
-                    </td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section v-if="report?.show" class="transaction-card">
-          <div class="report-table-wrap">
-            <table class="report-table state-domain-table">
-              <thead>
-                <tr>
-                  <th class="left"><a :href="sortUrl('domain')">处理项目列表</a></th>
-                  <th class="right"><a :href="sortUrl('total')">处理消息总量</a></th>
-                  <th class="right"><a :href="sortUrl('loss')">丢失消息总量</a></th>
-                  <th class="right"><a :href="sortUrl('size')">压缩前消息大小(GB)</a></th>
-                  <th class="right"><a :href="sortUrl('avg')">平均消息大小(KB)</a></th>
-                  <th class="right"><a :href="sortUrl('machine')">机器总数</a></th>
-                  <th class="left">项目对应机器列表</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template v-for="item in report.processDomains" :key="item.name">
-                  <tr>
-                    <td class="left">{{ item.name }}</td>
-                    <td class="right">
-                      {{ formatDecimal(item.total, 1) }}<br />
-                      <a
-                        v-if="!isHistoryMode"
-                        :href="graphUrl(`${item.name}:total`)"
-                        @click="toggleGraph(`${item.name}:total`, graphUrl(`${item.name}:total`), $event)"
-                      >
-                        {{ graphLinkText(`${item.name}:total`) }}
-                      </a>
-                    </td>
-                    <td class="right">
-                      {{ formatDecimal(item.totalLoss, 1) }}<br />
-                      <a
-                        v-if="!isHistoryMode"
-                        :href="graphUrl(`${item.name}:totalLoss`)"
-                        @click="toggleGraph(`${item.name}:totalLoss`, graphUrl(`${item.name}:totalLoss`), $event)"
-                      >
-                        {{ graphLinkText(`${item.name}:totalLoss`) }}
-                      </a>
-                    </td>
-                    <td class="right">
-                      {{ formatDecimal(item.sizeGb, 3) }}<br />
-                      <a
-                        v-if="!isHistoryMode"
-                        :href="graphUrl(`${item.name}:size`)"
-                        @click="toggleGraph(`${item.name}:size`, graphUrl(`${item.name}:size`), $event)"
-                      >
-                        {{ graphLinkText(`${item.name}:size`) }}
-                      </a>
-                    </td>
-                    <td class="right">{{ formatDecimal(item.avgKb, 3) }}</td>
-                    <td class="right">{{ item.machineCount }}</td>
-                    <td class="left long-text">{{ item.ips.join(', ') }}</td>
-                  </tr>
-                  <tr v-if="isActiveDomainGraph(item)">
-                    <td colspan="7">
-                      <StateGraphPanel
-                        :error="graphErrors[activeGraphKey]"
-                        :graph="graphCache[activeGraphKey]"
-                        :loading="graphLoadingKey === activeGraphKey"
-                      />
-                    </td>
-                  </tr>
-                </template>
-                <tr class="state-total-row">
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td>{{ report.totalSize }}</td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </section>
     </div>
-  </main>
+
+    <ReportSelectorPanel :rows="selectorRows" />
+
+    <section v-if="report && !isHistoryMode" class="state-status" :class="{ 'has-error': Boolean(report.message) }">
+      <strong v-if="report.message">出问题CAT的服务端: {{ report.message }}</strong>
+      <strong v-else>CAT服务端正常</strong>
+    </section>
+
+    <section v-if="loadError" class="empty-state">
+      {{ loadError }}
+    </section>
+
+    <section v-else-if="loading" class="empty-state">
+      正在加载 State 数据...
+    </section>
+
+    <section v-else-if="report" class="transaction-card">
+      <div class="report-table-wrap">
+        <table class="report-table state-summary-table">
+          <thead>
+            <tr>
+              <th colspan="2" class="left">指标</th>
+              <th class="right">值</th>
+              <th class="left">备注</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="metric in report.metrics" :key="metric.key">
+              <tr>
+                <td class="left">
+                  <a :href="graphUrl(metric.key)" @click="toggleGraph(metric.key, graphUrl(metric.key), $event)">
+                    {{ graphLinkText(metric.key) }}
+                  </a>
+                </td>
+                <td class="left">{{ metric.title }}</td>
+                <td class="right" :class="{ warning: metric.warning }">{{ formatMetric(metric) }}</td>
+                <td class="left">{{ metric.remark }}</td>
+              </tr>
+              <tr v-if="activeGraphKey === metric.key">
+                <td colspan="4">
+                  <StateGraphPanel
+                    :error="graphErrors[metric.key]"
+                    :graph="graphCache[metric.key]"
+                    :loading="graphLoadingKey === metric.key"
+                  />
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section v-if="report?.show" class="transaction-card">
+      <div class="report-table-wrap">
+        <table class="report-table state-domain-table">
+          <thead>
+            <tr>
+              <th class="left"><a :href="sortUrl('domain')">处理项目列表</a></th>
+              <th class="right"><a :href="sortUrl('total')">处理消息总量</a></th>
+              <th class="right"><a :href="sortUrl('loss')">丢失消息总量</a></th>
+              <th class="right"><a :href="sortUrl('size')">压缩前消息大小(GB)</a></th>
+              <th class="right"><a :href="sortUrl('avg')">平均消息大小(KB)</a></th>
+              <th class="right"><a :href="sortUrl('machine')">机器总数</a></th>
+              <th class="left">项目对应机器列表</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="item in report.processDomains" :key="item.name">
+              <tr>
+                <td class="left">{{ item.name }}</td>
+                <td class="right">
+                  {{ formatDecimal(item.total, 1) }}<br />
+                  <a
+                    v-if="!isHistoryMode"
+                    :href="graphUrl(`${item.name}:total`)"
+                    @click="toggleGraph(`${item.name}:total`, graphUrl(`${item.name}:total`), $event)"
+                  >
+                    {{ graphLinkText(`${item.name}:total`) }}
+                  </a>
+                </td>
+                <td class="right">
+                  {{ formatDecimal(item.totalLoss, 1) }}<br />
+                  <a
+                    v-if="!isHistoryMode"
+                    :href="graphUrl(`${item.name}:totalLoss`)"
+                    @click="toggleGraph(`${item.name}:totalLoss`, graphUrl(`${item.name}:totalLoss`), $event)"
+                  >
+                    {{ graphLinkText(`${item.name}:totalLoss`) }}
+                  </a>
+                </td>
+                <td class="right">
+                  {{ formatDecimal(item.sizeGb, 3) }}<br />
+                  <a
+                    v-if="!isHistoryMode"
+                    :href="graphUrl(`${item.name}:size`)"
+                    @click="toggleGraph(`${item.name}:size`, graphUrl(`${item.name}:size`), $event)"
+                  >
+                    {{ graphLinkText(`${item.name}:size`) }}
+                  </a>
+                </td>
+                <td class="right">{{ formatDecimal(item.avgKb, 3) }}</td>
+                <td class="right">{{ item.machineCount }}</td>
+                <td class="left long-text">{{ item.ips.join(', ') }}</td>
+              </tr>
+              <tr v-if="isActiveDomainGraph(item)">
+                <td colspan="7">
+                  <StateGraphPanel
+                    :error="graphErrors[activeGraphKey]"
+                    :graph="graphCache[activeGraphKey]"
+                    :loading="graphLoadingKey === activeGraphKey"
+                  />
+                </td>
+              </tr>
+            </template>
+            <tr class="state-total-row">
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>{{ report.totalSize }}</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ReportPageShell>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+import ReportPageShell from '../components/ReportPageShell.vue'
 import ReportSelectorPanel from '../components/ReportSelectorPanel.vue'
-import ReportSidebar from '../components/ReportSidebar.vue'
 import StateGraphPanel from '../components/StateGraphPanel.vue'
 
 interface StateMetric {
@@ -424,10 +403,6 @@ function graphLinkText(key: string) {
 
 function isActiveDomainGraph(item: StateProcessDomain) {
   return [`${item.name}:total`, `${item.name}:totalLoss`, `${item.name}:size`].includes(activeGraphKey.value)
-}
-
-function legacyUrl(path: string) {
-  return `${contextPath.value}${path}`
 }
 
 function sortUrl(sort: string) {

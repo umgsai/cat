@@ -1,97 +1,76 @@
 <template>
-  <main class="cat-shell">
-    <header class="cat-topbar">
-      <div class="cat-brand">
-        <strong>CAT</strong>
-        <span>Central Application Tracking</span>
-      </div>
-      <nav class="cat-sections" aria-label="主导航">
-        <a class="is-active" :href="heartbeatUrl({})">Application</a>
-        <a :href="legacyUrl('/mvc/vue/s/config?op=projects')">Configs</a>
-        <a :href="legacyUrl('/mvc/vue/r/home?op=view&docName=index')">Documents</a>
-      </nav>
-      <div class="cat-actions">
-        <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
-        <span class="user-greeting">欢迎，admin</span>
-      </div>
-    </header>
+  <ReportPageShell
+    active-report="Heartbeat"
+    :application-url="heartbeatUrl({})"
+    :context-path="contextPath"
+    :date="currentDate"
+    :domain="currentDomain"
+    :ip="currentIp"
+    :report-type="currentReportType"
+  >
+    <ReportQueryBar
+      v-model:domain-input="domainInput"
+      :domain-groups="domainGroups"
+      :domain-url="domainUrl"
+      :frequent-domains="frequentDomains"
+      :mode-switch-text="modeSwitchText"
+      :mode-switch-url="modeSwitchUrl"
+      :report-end="report?.reportEnd"
+      :report-start="report?.reportStart"
+      :search-domains="searchDomains"
+      :shortcuts="shortcuts"
+      :show-domain-panel="showDomainPanel"
+      :show-frequent-panel="showFrequentPanel"
+      @go-domain="goDomain"
+      @select-domain="selectDomain"
+      @toggle-domain-panel="showDomainPanel = !showDomainPanel"
+      @toggle-frequent-panel="showFrequentPanel = !showFrequentPanel"
+    />
 
-    <div class="cat-body">
-      <ReportSidebar
-        active-report="Heartbeat"
-        :context-path="contextPath"
-        :date="currentDate"
-        :domain="currentDomain"
-        :ip="currentIp"
-        :report-type="currentReportType"
-      />
+    <section v-if="report && report.sample !== 1" class="sample-panel">
+      <strong>采样</strong>
+      <span>采样比例 {{ formatPercent(report.sample) }}</span>
+    </section>
 
-      <section class="cat-content">
-        <ReportQueryBar
-          v-model:domain-input="domainInput"
-          :domain-groups="domainGroups"
-          :domain-url="domainUrl"
-          :frequent-domains="frequentDomains"
-          :mode-switch-text="modeSwitchText"
-          :mode-switch-url="modeSwitchUrl"
-          :report-end="report?.reportEnd"
-          :report-start="report?.reportStart"
-          :search-domains="searchDomains"
-          :shortcuts="shortcuts"
-          :show-domain-panel="showDomainPanel"
-          :show-frequent-panel="showFrequentPanel"
-          @go-domain="goDomain"
-          @select-domain="selectDomain"
-          @toggle-domain-panel="showDomainPanel = !showDomainPanel"
-          @toggle-frequent-panel="showFrequentPanel = !showFrequentPanel"
-        />
+    <ReportSelectorPanel :rows="selectorRows" />
 
-        <section v-if="report && report.sample !== 1" class="sample-panel">
-          <strong>采样</strong>
-          <span>采样比例 {{ formatPercent(report.sample) }}</span>
-        </section>
+    <section v-if="loadError" class="empty-state">
+      {{ loadError }}
+    </section>
 
-        <ReportSelectorPanel :rows="selectorRows" />
+    <section v-else-if="loading" class="empty-state">
+      正在加载 Heartbeat 数据...
+    </section>
 
-        <section v-if="loadError" class="empty-state">
-          {{ loadError }}
-        </section>
-
-        <section v-else-if="loading" class="empty-state">
-          正在加载 Heartbeat 数据...
-        </section>
-
-        <section v-else-if="report" class="heartbeat-graphs">
-          <article v-for="group in report.extensionGroups" :key="group.name" class="heartbeat-group">
-            <h2>{{ group.name }} Info</h2>
-            <div class="heartbeat-chart-grid">
-              <HeartbeatBarChartPanel
-                v-for="chart in group.charts"
-                :key="chart.key"
-                :label="chart.label"
-                :title="chart.title"
-                :values="chart.values"
-              />
-            </div>
-            <div v-if="!group.charts.length" class="heartbeat-svg-wrap">
-              <svg version="1.1" width="1200" :height="group.height * 190" xmlns="http://www.w3.org/2000/svg">
-                <g v-for="svg in group.svgs" :key="svg.name" v-html="svg.content"></g>
-              </svg>
-            </div>
-          </article>
-        </section>
-      </section>
-    </div>
-  </main>
+    <section v-else-if="report" class="heartbeat-graphs">
+      <article v-for="group in report.extensionGroups" :key="group.name" class="heartbeat-group">
+        <h2>{{ group.name }} Info</h2>
+        <div class="heartbeat-chart-grid">
+          <HeartbeatBarChartPanel
+            v-for="chart in group.charts"
+            :key="chart.key"
+            :label="chart.label"
+            :title="chart.title"
+            :values="chart.values"
+          />
+        </div>
+        <div v-if="!group.charts.length" class="heartbeat-svg-wrap">
+          <svg version="1.1" width="1200" :height="group.height * 190" xmlns="http://www.w3.org/2000/svg">
+            <g v-for="svg in group.svgs" :key="svg.name" v-html="svg.content"></g>
+          </svg>
+        </div>
+      </article>
+    </section>
+  </ReportPageShell>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
 import HeartbeatBarChartPanel from '../components/HeartbeatBarChartPanel.vue'
+import ReportPageShell from '../components/ReportPageShell.vue'
 import ReportQueryBar from '../components/ReportQueryBar.vue'
 import ReportSelectorPanel from '../components/ReportSelectorPanel.vue'
-import ReportSidebar from '../components/ReportSidebar.vue'
 import { getFrequentDomains } from '../utils/domainCookies'
 
 interface DomainLine {
@@ -392,10 +371,6 @@ function legacyHeartbeatUrl(overrides: Record<string, string | undefined>) {
     params.set('op', overrides.op)
   }
   return `${contextPath.value}/mvc/r/h?${params.toString()}`
-}
-
-function legacyUrl(path: string) {
-  return `${contextPath.value}${path}`
 }
 
 function searchDomains(query: string, callback: (items: Array<{ label: string; value: string; category: string }>) => void) {
