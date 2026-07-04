@@ -125,9 +125,7 @@ function option(): EChartsCoreOption {
           }
         },
         label: {
-          alignTo: 'edge',
           color: '#111827',
-          edgeDistance: 24,
           formatter: (params: { name?: string; percent?: number }) => {
             return `${wrapLabel(params.name || '')}: ${Number(params.percent || 0).toFixed(2)} %`
           },
@@ -136,8 +134,8 @@ function option(): EChartsCoreOption {
           lineHeight: 17
         },
         labelLine: {
-          length: 24,
-          length2: 28,
+          length: 16,
+          length2: 10,
           lineStyle: {
             color: '#2f2f2f',
             width: 1.2
