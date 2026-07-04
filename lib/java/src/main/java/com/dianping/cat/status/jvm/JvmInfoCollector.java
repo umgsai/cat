@@ -48,6 +48,8 @@ public class JvmInfoCollector {
             add("ParNew");
             add("PS Scavenge");
             add("G1 Young Generation");
+            add("ZGC Minor Cycles");
+            add("ZGC Minor Pauses");
         }
     };
 
@@ -59,6 +61,22 @@ public class JvmInfoCollector {
             add("PS MarkSweep");
             add("ConcurrentMarkSweep");
             add("G1 Old Generation");
+            add("G1 Concurrent GC");
+            add("ZGC Major Cycles");
+            add("ZGC Major Pauses");
+        }
+    };
+
+    private Set<String> knownOtherGcAlgorithm = new LinkedHashSet<String>() {
+        private static final long serialVersionUID = 5681181292171539094L;
+
+        {
+            add("ZGC");
+            add("ZGC Cycles");
+            add("ZGC Pauses");
+            add("Shenandoah Cycles");
+            add("Shenandoah Pauses");
+            add("Epsilon Heap");
         }
     };
 
@@ -98,7 +116,7 @@ public class JvmInfoCollector {
             } else if (oldGcAlgorithm.contains(gcAlgorithm)) {
                 oldGcTime += garbageCollector.getCollectionTime();
                 oldGCount += garbageCollector.getCollectionCount();
-            } else {
+            } else if (!knownOtherGcAlgorithm.contains(gcAlgorithm)) {
                 Cat.logEvent("UnknownGcAlgorithm", gcAlgorithm);
             }
         }

@@ -11,7 +11,6 @@ import jakarta.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.alibaba.fastjson2.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -63,7 +62,7 @@ public class SpringMvcRouterController {
 		String ip = request.getParameter("ip");
 
 		if ("json".equals(action)) {
-			writeText(response, JSON.toJSONString(buildKvs(report, domain, ip)));
+			writeText(response, buildKvs(report, domain, ip).toString());
 		} else if ("model".equals(action)) {
 			writeText(response, report == null ? "" : report.toString());
 		} else if ("view".equals(action)) {

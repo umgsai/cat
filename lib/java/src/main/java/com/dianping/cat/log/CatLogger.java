@@ -33,7 +33,7 @@ public class CatLogger {
     private String lastPath;
     private boolean devMode;
     private ReentrantLock lock = new ReentrantLock();
-    private static final String DEFAULT_BASE_DIR = "/data/applogs/cat";
+    private static final String DEFAULT_BASE_DIR = System.getProperty("user.home") + File.separator + ".cat";
     private static CatLogger LOGGER = new CatLogger();
 
     public static CatLogger getInstance() {
@@ -172,6 +172,18 @@ public class CatLogger {
 
     public void info(String message, Object... arguments) {
         out("INFO", formatMessage(message, arguments), getThrowable(arguments));
+    }
+
+    public void warn(String message) {
+        out("WARN", message, null);
+    }
+
+    public void warn(String message, Throwable throwable) {
+        out("WARN", message, throwable);
+    }
+
+    public void warn(String message, Object... arguments) {
+        out("WARN", formatMessage(message, arguments), getThrowable(arguments));
     }
 
     private Object[] getFormattingArguments(Object[] arguments) {

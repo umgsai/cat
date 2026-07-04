@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.dianping.cat.message.spi.BufReleaseHelper;
 import com.dianping.cat.message.spi.MessageTree;
 
 @Component("messageHandler")
@@ -37,6 +38,7 @@ public class DefaultMessageHandler implements MessageHandler {
 	public void handle(MessageTree tree) {
 		if (messageConsumer == null) {
 			LOGGER.warn("Message consumer is not configured, drop message tree={}.", tree);
+			BufReleaseHelper.release(tree.getBuffer());
 			return;
 		}
 

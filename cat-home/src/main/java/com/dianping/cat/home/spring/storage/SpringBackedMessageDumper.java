@@ -14,6 +14,7 @@ import org.unidal.cat.message.storage.MessageFinderManager;
 import org.unidal.cat.message.storage.MessageProcessor;
 
 import com.dianping.cat.config.server.ServerConfigManager;
+import com.dianping.cat.message.spi.BufReleaseHelper;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.statistic.ServerStatisticManager;
@@ -106,6 +107,7 @@ public class SpringBackedMessageDumper implements MessageDumper {
 		if (!success) {
 			m_statisticManager.addMessageDumpLoss(1);
 			LOGGER.warn("Message tree queue is full, index={}.", index);
+			BufReleaseHelper.release(tree.getBuffer());
 		} else {
 			m_statisticManager.addMessageSize(domain, tree.getBuffer().readableBytes());
 		}

@@ -1,7 +1,7 @@
 <template>
   <section v-if="items.length" class="vue-pie-chart">
     <h3 v-if="title">{{ title }}</h3>
-    <div ref="chartElement" class="echarts-pie"></div>
+    <div ref="chartElement" class="echarts-pie" :style="{ height: chartHeight }"></div>
   </section>
 </template>
 
@@ -23,7 +23,7 @@ interface TooltipParam {
   value?: unknown
 }
 
-const visibleLabelPercentThreshold = 0.75
+const visibleLabelPercentThreshold = 0.95
 
 const props = defineProps<{
   chart?: PieChartData | string
@@ -39,6 +39,15 @@ let resizeObserver: ResizeObserver | null = null
 const chart = computed(() => parseChart(props.chart))
 const title = computed(() => props.title || chart.value?.title || '')
 const total = computed(() => items.value.reduce((sum, item) => sum + item.value, 0))
+const chartHeight = computed(() => {
+  if (items.value.length >= 28) {
+    return '660px'
+  }
+  if (items.value.length >= 20) {
+    return '600px'
+  }
+  return '520px'
+})
 const items = computed(() => (chart.value?.items || [])
   .map((item) => ({
     name: item.title,
@@ -105,17 +114,22 @@ function option(): EChartsCoreOption {
     ],
     legend: {
       bottom: 0,
-      itemGap: 10,
-      itemHeight: 12,
-      itemWidth: 18,
-      left: 20,
-      right: 20,
+      itemGap: 12,
+      itemHeight: 13,
+      itemWidth: 20,
+      left: 32,
+      right: 32,
+      textStyle: {
+        color: '#333333',
+        fontSize: 14,
+        fontWeight: 600
+      },
       type: 'plain'
     },
     series: [
       {
         avoidLabelOverlap: true,
-        center: ['50%', '43%'],
+        center: ['50%', '34%'],
         data: chartItems.value,
         emphasis: {
           itemStyle: {
@@ -127,23 +141,23 @@ function option(): EChartsCoreOption {
         label: {
           color: '#111827',
           formatter: (params: { name?: string; percent?: number }) => {
-            return `${wrapLabel(params.name || '')}: ${Number(params.percent || 0).toFixed(2)} %`
+            return `${formatLabel(params.name || '')}: ${Number(params.percent || 0).toFixed(1)} %`
           },
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: 700,
-          lineHeight: 17
+          lineHeight: 18
         },
         labelLine: {
-          length: 16,
-          length2: 10,
+          length: 18,
+          length2: 8,
           lineStyle: {
-            color: '#2f2f2f',
-            width: 1.2
+            color: '#111111',
+            width: 1.5
           }
         },
         minAngle: 2,
         name: title.value || 'share',
-        radius: '36%',
+        radius: '24%',
         stillShowZeroSum: false,
         type: 'pie'
       }
@@ -165,25 +179,17 @@ function formatInteger(value: number) {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value || 0)
 }
 
-function wrapLabel(value: string) {
-  const maxLineLength = 42
-  const lines: string[] = []
-  let currentLine = ''
-
-  for (const segment of value.split('.')) {
-    const nextPart = currentLine ? `.${segment}` : segment
-
-    if (currentLine && currentLine.length + nextPart.length > maxLineLength) {
-      lines.push(currentLine)
-      currentLine = segment
-    } else {
-      currentLine += nextPart
-    }
+function formatLabel(value: string) {
+  if (value.length <= 80) {
+    return value
   }
-  if (currentLine) {
-    lines.push(currentLine)
+  const lastSlash = value.lastIndexOf('/')
+  const fileName = lastSlash >= 0 ? value.substring(lastSlash + 1) : ''
+
+  if (fileName && fileName.length < 36) {
+    return `${value.substring(0, 42)}.../${fileName}`
   }
-  return lines.length ? lines.join('\n') : value
+  return `${value.substring(0, 72)}...`
 }
 
 function parseChart(value?: PieChartData | string) {

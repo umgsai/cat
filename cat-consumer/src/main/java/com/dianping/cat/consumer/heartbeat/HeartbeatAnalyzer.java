@@ -33,6 +33,8 @@ import com.dianping.cat.report.ReportManager;
 import com.dianping.cat.status.model.StatusInfoHelper;
 import com.dianping.cat.status.model.entity.*;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +45,8 @@ import java.util.Map.Entry;
 @Component(ContainerMessageAnalyzerFactory.ANALYZER_BEAN_PREFIX + HeartbeatAnalyzer.ID)
 @Scope("prototype")
 public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatAnalyzer.class);
+
 	public static final String ID = "heartbeat";
 
 	@Resource(name = HeartbeatAnalyzer.ID + "ReportManager")
@@ -51,7 +55,7 @@ public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> 
 	@Resource(name = "serverFilterConfigManager")
 	private ServerFilterConfigManager serverFilterConfigManager;
 
-	private Period buildHeartBeatInfo(Machine machine, Heartbeat heartbeat, long timestamp) {
+	private Period buildHeartBeatInfo(Machine machine, Heartbeat heartbeat, MessageTree tree, long timestamp) {
 		String xml = (String) heartbeat.getData();
 		StatusInfo info;
 
@@ -67,6 +71,8 @@ public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> 
 
 			translateHeartbeat(info);
 		} catch (Exception e) {
+			LOGGER.warn("Unable to parse heartbeat status, domain={}, ip={}, heartbeatTime={}, xmlLength={}.",
+					tree.getDomain(), tree.getIpAddress(), heartbeat.getTimestamp(), xml == null ? 0 : xml.length(), e);
 			return null;
 		}
 
@@ -143,7 +149,7 @@ public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> 
 	private void processHeartbeat(HeartbeatReport report, Heartbeat heartbeat, MessageTree tree) {
 		String ip = tree.getIpAddress();
 		Machine machine = report.findOrCreateMachine(ip);
-		Period period = buildHeartBeatInfo(machine, heartbeat, heartbeat.getTimestamp());
+		Period period = buildHeartBeatInfo(machine, heartbeat, tree, heartbeat.getTimestamp());
 
 		if (period != null) {
 			List<Period> periods = machine.getPeriods();

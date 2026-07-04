@@ -183,37 +183,39 @@ public final class TcpSocketReceiver {
 			if (buffer.readableBytes() < length + 4) {
 				return;
 			}
-			
+			ByteBuf readBytes = null;
+
 			try {
 				if (length > 0) {
-					ByteBuf readBytes = buffer.readBytes(length + 4);
-
+					readBytes = buffer.readBytes(length + 4);
 					readBytes.markReaderIndex();
 					readBytes.readInt();
-
 					DefaultMessageTree tree = (DefaultMessageTree) CodecHandler.decode(readBytes);
 
-					// readBytes.retain();
 					readBytes.resetReaderIndex();
 					tree.setBuffer(readBytes);
 					messageHandler.handle(tree);
+					readBytes = null;
 					processCount++;
 
 					long flag = processCount % CatConstants.SUCCESS_COUNT;
-
 					if (flag == 0) {
 						serverStatisticManager.addMessageTotal(CatConstants.SUCCESS_COUNT);
 					}
 				} else {
 					// client message is error
-					buffer.readBytes(length);
-					BufReleaseHelper.release(buffer);
+					buffer.skipBytes(4);
 				}
 			} catch (Exception e) {
 				serverStatisticManager.addMessageTotalLoss(1);
 				error(e.getMessage(), e);
+			} finally {
+				if (readBytes != null) {
+					BufReleaseHelper.release(readBytes);
+				}
 			}
 		}
+
 	}
 
 }

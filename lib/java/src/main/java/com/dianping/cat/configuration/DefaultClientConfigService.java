@@ -18,7 +18,6 @@
  */
 package com.dianping.cat.configuration;
 
-import com.dianping.cat.configuration.property.transform.DefaultSaxParser;
 import com.dianping.cat.log.CatLogger;
 import com.dianping.cat.util.NetworkHelper;
 import com.dianping.cat.util.Properties;
@@ -145,7 +144,7 @@ public class DefaultClientConfigService implements ClientConfigService {
         } catch (UnsupportedEncodingException ignored) {
         }
 
-        return String.format("http://%s:%d/cat/s/router?domain=%s&ip=%s&op=xml&env=%s&hostname=%s", serverIp.trim(),
+        return String.format("http://%s:%d/cat/s/router?domain=%s&ip=%s&op=json&env=%s&hostname=%s", serverIp.trim(),
                 httpPort, getDomain(), ip, ApplicationEnvironment.ENVIRONMENT, hostname);
     }
 
@@ -217,7 +216,7 @@ public class DefaultClientConfigService implements ClientConfigService {
 
     private void refreshConfig(String url) throws Exception {
         String content = NetworkHelper.readFromUrlWithRetry(url);
-        PropertyConfig routerConfig = DefaultSaxParser.parse(content.trim());
+        PropertyConfig routerConfig = parseConfig(content.trim());
 
         //判断客户端routers是否有更新
         if (refreshRouters(routerConfig)) {
@@ -226,6 +225,31 @@ public class DefaultClientConfigService implements ClientConfigService {
         }
         //更新采样率等指标
         refreshInnerConfig(routerConfig);
+    }
+
+    private PropertyConfig parseConfig(String content) {
+        if (!content.startsWith("{") || !content.endsWith("}")) {
+            throw new IllegalArgumentException("Invalid CAT router config: " + content);
+        }
+
+        PropertyConfig config = new PropertyConfig();
+        String keyValuePairs = content.substring(1, content.length() - 1);
+        List<String> items = Splitters.by(',').trim().noEmptyItem().split(keyValuePairs);
+
+        for (String item : items) {
+            int index = item.indexOf('=');
+
+            if (index <= 0) {
+                throw new IllegalArgumentException("Invalid CAT router property: " + item);
+            }
+
+            String key = item.substring(0, index).trim();
+            String value = item.substring(index + 1).trim();
+
+            config.addProperty(new Property(key).setValue(value));
+        }
+
+        return config;
     }
 
     private void refreshInnerConfig(PropertyConfig routerConfig) {

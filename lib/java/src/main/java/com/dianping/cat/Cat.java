@@ -41,6 +41,7 @@ import com.dianping.cat.message.spi.MessageManager;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.status.StatusUpdateTask;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -57,6 +58,7 @@ public class Cat {
     private static volatile boolean DATASOURCE_MONITOR_ENABLED = true;
     public final static String CLIENT_CONFIG = "cat-client-config";
     public final static String UNKNOWN = "unknown";
+    private final static String DEFAULT_CAT_HOME = System.getProperty("user.home") + File.separator + ".cat";
 
     public static boolean isJstackEnabled() {
         String enable = Properties.forString().fromEnv().fromSystem().getProperty("jstack_enable", "true");
@@ -144,7 +146,12 @@ public class Cat {
     }
 
     public static String getCatHome() {
-        return Properties.forString().fromEnv().fromSystem().getProperty("CAT_HOME", "/data/appdatas/cat/");
+        String catHome = Properties.forString().fromEnv().fromSystem().getProperty("CAT_HOME", DEFAULT_CAT_HOME);
+
+        if (catHome.endsWith("/") || catHome.endsWith("\\")) {
+            return catHome;
+        }
+        return catHome + File.separator;
     }
 
     public static String getCurrentMessageId() {

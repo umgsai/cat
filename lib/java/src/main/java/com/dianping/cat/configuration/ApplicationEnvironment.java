@@ -43,7 +43,7 @@ public class ApplicationEnvironment {
     private static final String CLIENT_FILE = "client.xml";
     public static final String ENVIRONMENT;
     public static final String CELL;
-    public static final String VERSION = "2.0.1";
+    public static final String VERSION = "4.0.0";
 
     static {
         String env;
@@ -121,8 +121,8 @@ public class ApplicationEnvironment {
         String xml = null;
 
         try {
-            File cacheFile = new File(Cat.getCatHome() + CACHE_FILE);
-            File configFile = new File(Cat.getCatHome() + CLIENT_FILE);
+            File cacheFile = new File(Cat.getCatHome(), CACHE_FILE);
+            File configFile = new File(Cat.getCatHome(), CLIENT_FILE);
 
             if (cacheFile.exists() && !isDevMode()) {
                 xml = Files.forIO().readFrom(cacheFile, "utf-8");
@@ -140,7 +140,7 @@ public class ApplicationEnvironment {
         } catch (Exception e) {
             CatLogger.getInstance().info("load client config error: " + xml, e);
 
-            File cacheFile = new File(Cat.getCatHome() + CACHE_FILE);
+            File cacheFile = new File(Cat.getCatHome(), CACHE_FILE);
 
             if (cacheFile.exists()) {
                 cacheFile.delete();
@@ -181,7 +181,7 @@ public class ApplicationEnvironment {
 
             config.setDomain(null);
 
-            Files.forIO().writeTo(new File(Cat.getCatHome() + CACHE_FILE), config.toString());
+            Files.forIO().writeTo(new File(Cat.getCatHome(), CACHE_FILE), config.toString());
         } catch (Exception e) {
             // ignore
         }

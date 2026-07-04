@@ -19,7 +19,6 @@
 package com.dianping.cat.status;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.configuration.ApplicationEnvironment;
 import com.dianping.cat.configuration.ClientConfigService;
 import com.dianping.cat.configuration.DefaultClientConfigService;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
@@ -30,17 +29,14 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.internal.DefaultMessageProducer;
 import com.dianping.cat.message.internal.DefaultTransaction;
-import com.dianping.cat.message.io.ChannelManager;
 import com.dianping.cat.status.http.HttpStatsCollector;
 import com.dianping.cat.status.jvm.ClassLoadingInfoCollector;
 import com.dianping.cat.status.jvm.JvmInfoCollector;
 import com.dianping.cat.status.jvm.ThreadInfoCollector;
 import com.dianping.cat.status.jvm.ThreadInfoWriter;
-import com.dianping.cat.status.model.entity.CustomInfo;
 import com.dianping.cat.status.model.entity.Extension;
 import com.dianping.cat.status.model.entity.StatusInfo;
 import com.dianping.cat.util.Threads;
-import io.netty.channel.ChannelFuture;
 import com.dianping.cat.status.datasource.c3p0.C3P0InfoCollector;
 import com.dianping.cat.status.datasource.druid.DruidInfoCollector;
 import com.dianping.cat.status.system.ProcessorInfoCollector;
@@ -58,7 +54,6 @@ import java.util.Map.Entry;
 
 public class StatusUpdateTask implements Threads.Task {
     private ClientConfigService configService = DefaultClientConfigService.getInstance();
-    private ChannelManager channelManager = ChannelManager.getInstance();
     private boolean active = true;
     private static CatLogger LOGGER = CatLogger.getInstance();
 
@@ -103,7 +98,8 @@ public class StatusUpdateTask implements Threads.Task {
 
                             item.findOrCreateExtensionDetail(key).setValue(doubleValue);
                         } catch (Exception e) {
-                            status.getCustomInfos().put(key, new CustomInfo().setKey(key).setValue(value));
+                            LOGGER.warn("CAT status extension value is not numeric, extension={}, key={}, value={}.",
+                                    extension.getId(), key, value);
                         }
                     }
                 }
@@ -114,14 +110,6 @@ public class StatusUpdateTask implements Threads.Task {
             } finally {
                 t.complete();
             }
-        }
-
-        ChannelFuture future;
-        if (null != (future = channelManager.channel())) {
-            String localAddress = future.channel().localAddress().toString();
-
-            status.getCustomInfos().put("localAddress", new CustomInfo().setKey("localAddress").setValue(localAddress));
-            status.getCustomInfos().put("env", new CustomInfo().setKey("env").setValue(ApplicationEnvironment.ENVIRONMENT));
         }
     }
 
