@@ -2936,7 +2936,7 @@ input {
 
 .heartbeat-graphs {
   display: grid;
-  gap: 12px;
+  gap: 5px;
   margin-top: 8px;
 }
 
@@ -2962,7 +2962,7 @@ input {
   display: grid;
   grid-template-columns: repeat(3, minmax(280px, 1fr));
   gap: 14px 22px;
-  padding: 18px 28px 28px;
+  padding: 18px 28px 12px;
 }
 
 .heartbeat-chart {
