@@ -9,21 +9,21 @@ import com.dianping.cat.home.heavy.entity.Url;
 
 public interface ILinker {
 
-   public boolean onHeavyCache(HeavyReport parent, HeavyCache heavyCache);
+   boolean onHeavyCache(HeavyReport parent, HeavyCache heavyCache);
 
-   public boolean onHeavyCall(HeavyReport parent, HeavyCall heavyCall);
+   boolean onHeavyCall(HeavyReport parent, HeavyCall heavyCall);
 
-   public boolean onHeavySql(HeavyReport parent, HeavySql heavySql);
+   boolean onHeavySql(HeavyReport parent, HeavySql heavySql);
 
-   public boolean onService(HeavySql parent, Service service);
+   boolean onService(HeavySql parent, Service service);
 
-   public boolean onService(HeavyCall parent, Service service);
+   boolean onService(HeavyCall parent, Service service);
 
-   public boolean onService(HeavyCache parent, Service service);
+   boolean onService(HeavyCache parent, Service service);
 
-   public boolean onUrl(HeavySql parent, Url url);
+   boolean onUrl(HeavySql parent, Url url);
 
-   public boolean onUrl(HeavyCall parent, Url url);
+   boolean onUrl(HeavyCall parent, Url url);
 
-   public boolean onUrl(HeavyCache parent, Url url);
+   boolean onUrl(HeavyCache parent, Url url);
 }

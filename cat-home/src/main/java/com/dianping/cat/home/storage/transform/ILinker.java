@@ -7,9 +7,9 @@ import com.dianping.cat.home.storage.entity.StorageGroupConfig;
 
 public interface ILinker {
 
-   public boolean onLink(StorageGroup parent, Link link);
+   boolean onLink(StorageGroup parent, Link link);
 
-   public boolean onStorage(StorageGroup parent, Storage storage);
+   boolean onStorage(StorageGroup parent, Storage storage);
 
-   public boolean onStorageGroup(StorageGroupConfig parent, StorageGroup storageGroup);
+   boolean onStorageGroup(StorageGroupConfig parent, StorageGroup storageGroup);
 }

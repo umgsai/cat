@@ -11,25 +11,25 @@ import com.dianping.cat.consumer.problem.model.entity.Segment;
 
 public interface IMaker<T> {
 
-   public String buildDomain(T node);
+   String buildDomain(T node);
 
-   public Duration buildDuration(T node);
+   Duration buildDuration(T node);
 
-   public Entity buildEntity(T node);
+   Entity buildEntity(T node);
 
-   public Entry buildEntry(T node);
+   Entry buildEntry(T node);
 
-   public GraphTrend buildGraphTrend(T node);
+   GraphTrend buildGraphTrend(T node);
 
-   public String buildIp(T node);
+   String buildIp(T node);
 
-   public Machine buildMachine(T node);
+   Machine buildMachine(T node);
 
-   public String buildMessage(T node);
+   String buildMessage(T node);
 
-   public ProblemReport buildProblemReport(T node);
+   ProblemReport buildProblemReport(T node);
 
-   public Segment buildSegment(T node);
+   Segment buildSegment(T node);
 
-   public JavaThread buildThread(T node);
+   JavaThread buildThread(T node);
 }

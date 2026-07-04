@@ -12,19 +12,19 @@ import com.dianping.cat.home.router.entity.ServerGroup;
 
 public interface ILinker {
 
-   public boolean onDefaultServer(RouterConfig parent, DefaultServer defaultServer);
+   boolean onDefaultServer(RouterConfig parent, DefaultServer defaultServer);
 
-   public boolean onDomain(RouterConfig parent, Domain domain);
+   boolean onDomain(RouterConfig parent, Domain domain);
 
-   public boolean onGroup(Domain parent, Group group);
+   boolean onGroup(Domain parent, Group group);
 
-   public boolean onGroupServer(ServerGroup parent, GroupServer groupServer);
+   boolean onGroupServer(ServerGroup parent, GroupServer groupServer);
 
-   public boolean onNetwork(NetworkPolicy parent, Network network);
+   boolean onNetwork(NetworkPolicy parent, Network network);
 
-   public boolean onNetworkPolicy(RouterConfig parent, NetworkPolicy networkPolicy);
+   boolean onNetworkPolicy(RouterConfig parent, NetworkPolicy networkPolicy);
 
-   public boolean onServer(Group parent, Server server);
+   boolean onServer(Group parent, Server server);
 
-   public boolean onServerGroup(RouterConfig parent, ServerGroup serverGroup);
+   boolean onServerGroup(RouterConfig parent, ServerGroup serverGroup);
 }

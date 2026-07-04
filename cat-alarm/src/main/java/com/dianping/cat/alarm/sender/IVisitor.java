@@ -6,9 +6,9 @@ import com.dianping.cat.alarm.sender.entity.SenderConfig;
 
 public interface IVisitor {
 
-   public void visitPar(Par par);
+   void visitPar(Par par);
 
-   public void visitSender(Sender sender);
+   void visitSender(Sender sender);
 
-   public void visitSenderConfig(SenderConfig senderConfig);
+   void visitSenderConfig(SenderConfig senderConfig);
 }

@@ -128,11 +128,11 @@ public class CurrentWeeklyMonthlyReportTask implements Task {
 	}
 
 	public static interface CurrentWeeklyMonthlyTask {
-		public void buildCurrentMonthlyTask(String name, String domain, Date start);
+		void buildCurrentMonthlyTask(String name, String domain, Date start);
 
-		public void buildCurrentWeeklyTask(String name, String domain, Date start);
+		void buildCurrentWeeklyTask(String name, String domain, Date start);
 
-		public String getReportName();
+		String getReportName();
 	}
 
 }

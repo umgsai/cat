@@ -8,11 +8,11 @@ import com.dianping.cat.consumer.top.model.entity.TopReport;
 
 public interface ILinker {
 
-   public boolean onDomain(TopReport parent, Domain domain);
+   boolean onDomain(TopReport parent, Domain domain);
 
-   public boolean onError(Segment parent, Error error);
+   boolean onError(Segment parent, Error error);
 
-   public boolean onMachine(Segment parent, Machine machine);
+   boolean onMachine(Segment parent, Machine machine);
 
-   public boolean onSegment(Domain parent, Segment segment);
+   boolean onSegment(Domain parent, Segment segment);
 }

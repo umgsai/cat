@@ -6,9 +6,9 @@ import com.dianping.cat.home.heartbeat.entity.Metric;
 
 public interface IMaker<T> {
 
-   public Group buildGroup(T node);
+   Group buildGroup(T node);
 
-   public HeartbeatDisplayPolicy buildHeartbeatDisplayPolicy(T node);
+   HeartbeatDisplayPolicy buildHeartbeatDisplayPolicy(T node);
 
-   public Metric buildMetric(T node);
+   Metric buildMetric(T node);
 }

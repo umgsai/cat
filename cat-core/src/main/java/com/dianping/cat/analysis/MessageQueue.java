@@ -21,12 +21,12 @@ package com.dianping.cat.analysis;
 import com.dianping.cat.message.spi.MessageTree;
 
 public interface MessageQueue {
-	public boolean offer(MessageTree tree);
+	boolean offer(MessageTree tree);
 
-	public MessageTree peek();
+	MessageTree peek();
 
-	public MessageTree poll();
+	MessageTree poll();
 
 	// the current size of the queue
-	public int size();
+	int size();
 }

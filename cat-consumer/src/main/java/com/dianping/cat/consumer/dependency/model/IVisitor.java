@@ -7,11 +7,11 @@ import com.dianping.cat.consumer.dependency.model.entity.Segment;
 
 public interface IVisitor {
 
-   public void visitDependency(Dependency dependency);
+   void visitDependency(Dependency dependency);
 
-   public void visitDependencyReport(DependencyReport dependencyReport);
+   void visitDependencyReport(DependencyReport dependencyReport);
 
-   public void visitIndex(Index index);
+   void visitIndex(Index index);
 
-   public void visitSegment(Segment segment);
+   void visitSegment(Segment segment);
 }

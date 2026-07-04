@@ -4,5 +4,5 @@ import java.io.IOException;
 
 public interface TokenMappingFactory {
 
-	public TokenMapping createTokenMapping(int hour, String ip) throws IOException;
+	TokenMapping createTokenMapping(int hour, String ip) throws IOException;
 }

@@ -6,7 +6,7 @@ import com.dianping.cat.configuration.server.filter.entity.ServerFilterConfig;
 
 public interface ILinker {
 
-   public boolean onAtomicTreeConfig(ServerFilterConfig parent, AtomicTreeConfig atomicTreeConfig);
+   boolean onAtomicTreeConfig(ServerFilterConfig parent, AtomicTreeConfig atomicTreeConfig);
 
-   public boolean onCrashLogDomain(ServerFilterConfig parent, CrashLogDomain crashLogDomain);
+   boolean onCrashLogDomain(ServerFilterConfig parent, CrashLogDomain crashLogDomain);
 }

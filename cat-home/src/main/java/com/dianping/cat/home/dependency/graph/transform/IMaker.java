@@ -6,9 +6,9 @@ import com.dianping.cat.home.dependency.graph.entity.TopologyNode;
 
 public interface IMaker<T> {
 
-   public TopologyEdge buildTopologyEdge(T node);
+   TopologyEdge buildTopologyEdge(T node);
 
-   public TopologyGraph buildTopologyGraph(T node);
+   TopologyGraph buildTopologyGraph(T node);
 
-   public TopologyNode buildTopologyNode(T node);
+   TopologyNode buildTopologyNode(T node);
 }

@@ -7,13 +7,13 @@ import com.dianping.cat.consumer.dependency.model.entity.Segment;
 
 public interface IMaker<T> {
 
-   public Dependency buildDependency(T node);
+   Dependency buildDependency(T node);
 
-   public DependencyReport buildDependencyReport(T node);
+   DependencyReport buildDependencyReport(T node);
 
-   public String buildDomainName(T node);
+   String buildDomainName(T node);
 
-   public Index buildIndex(T node);
+   Index buildIndex(T node);
 
-   public Segment buildSegment(T node);
+   Segment buildSegment(T node);
 }

@@ -8,13 +8,13 @@ import com.dianping.cat.consumer.top.model.entity.TopReport;
 
 public interface IMaker<T> {
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public Error buildError(T node);
+   Error buildError(T node);
 
-   public Machine buildMachine(T node);
+   Machine buildMachine(T node);
 
-   public Segment buildSegment(T node);
+   Segment buildSegment(T node);
 
-   public TopReport buildTopReport(T node);
+   TopReport buildTopReport(T node);
 }

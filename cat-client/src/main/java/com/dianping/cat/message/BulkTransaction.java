@@ -6,5 +6,5 @@ package com.dianping.cat.message;
  * @author Frankie Wu(qmwu2000@gmail.com)
  */
 public interface BulkTransaction extends Transaction {
-   public BulkTransaction addDuration(int success, int failed, long sumOfDurationInMillis);
+   BulkTransaction addDuration(int success, int failed, long sumOfDurationInMillis);
 }

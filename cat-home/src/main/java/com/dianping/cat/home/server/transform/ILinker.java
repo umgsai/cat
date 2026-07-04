@@ -7,9 +7,9 @@ import com.dianping.cat.home.server.entity.ServerMetricConfig;
 
 public interface ILinker {
 
-   public boolean onGroup(ServerMetricConfig parent, Group group);
+   boolean onGroup(ServerMetricConfig parent, Group group);
 
-   public boolean onItem(Group parent, Item item);
+   boolean onItem(Group parent, Item item);
 
-   public boolean onSegment(Item parent, Segment segment);
+   boolean onSegment(Item parent, Segment segment);
 }

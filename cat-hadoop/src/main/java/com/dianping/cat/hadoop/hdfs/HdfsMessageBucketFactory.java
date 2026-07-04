@@ -7,5 +7,5 @@ import com.dianping.cat.message.storage.MessageBucket;
 
 public interface HdfsMessageBucketFactory {
 
-	public MessageBucket createBucket(String type, String dataFile, Date date) throws IOException;
+	MessageBucket createBucket(String type, String dataFile, Date date) throws IOException;
 }

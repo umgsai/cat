@@ -55,7 +55,7 @@ public interface Transaction extends Message {
 	 * @param message
 	 *           to be added
 	 */
-	public Transaction addChild(Message message);
+	Transaction addChild(Message message);
 
 	/**
 	 * Get all children message within current transaction.
@@ -67,35 +67,35 @@ public interface Transaction extends Message {
 	 *
 	 * @return all children messages, empty if there is no nested children.
 	 */
-	public List<Message> getChildren();
+	List<Message> getChildren();
 
 	/**
 	 * How long the transaction took from construction to complete. Time unit is microsecond.
 	 *
 	 * @return duration time in microsecond
 	 */
-	public long getDurationInMicros();
+	long getDurationInMicros();
 
 	/**
 	 * How long the transaction took from construction to complete. Time unit is millisecond.
 	 *
 	 * @return duration time in millisecond
 	 */
-	public long getDurationInMillis();
+	long getDurationInMillis();
 
 	/**
 	 * set duration in millisecond.
 	 *
 	 * @return duration time in millisecond
 	 */
-	public void setDurationInMillis(long durationInMills);
+	void setDurationInMillis(long durationInMills);
 
 	/**
 	 * Has children or not. An atomic transaction does not have any children message.
 	 *
 	 * @return true if child exists, else false.
 	 */
-	public boolean hasChildren();
+	boolean hasChildren();
 
 	// ---------
 	/**
@@ -106,7 +106,7 @@ public interface Transaction extends Message {
 	 * @param endInMillis
 	 *           transaction end time in millisecond
 	 */
-	public void complete(long startInMillis, long endInMillis);
+	void complete(long startInMillis, long endInMillis);
 
 	/**
 	 * Create a forkable transaction so that it could be passed to another thread to fork a new transaction, embedded or runaway
@@ -114,6 +114,6 @@ public interface Transaction extends Message {
 	 * 
 	 * @return forkable transaction, .fork() and .close() should be called in turn.
 	 */
-	public ForkableTransaction forFork();
+	ForkableTransaction forFork();
 
 }

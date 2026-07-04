@@ -7,11 +7,11 @@ import com.dianping.cat.home.storage.entity.StorageGroupConfig;
 
 public interface IVisitor {
 
-   public void visitLink(Link link);
+   void visitLink(Link link);
 
-   public void visitStorage(Storage storage);
+   void visitStorage(Storage storage);
 
-   public void visitStorageGroup(StorageGroup storageGroup);
+   void visitStorageGroup(StorageGroup storageGroup);
 
-   public void visitStorageGroupConfig(StorageGroupConfig storageGroupConfig);
+   void visitStorageGroupConfig(StorageGroupConfig storageGroupConfig);
 }

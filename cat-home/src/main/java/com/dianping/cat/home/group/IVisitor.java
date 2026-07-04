@@ -6,9 +6,9 @@ import com.dianping.cat.home.group.entity.Group;
 
 public interface IVisitor {
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitDomainGroup(DomainGroup domainGroup);
+   void visitDomainGroup(DomainGroup domainGroup);
 
-   public void visitGroup(Group group);
+   void visitGroup(Group group);
 }

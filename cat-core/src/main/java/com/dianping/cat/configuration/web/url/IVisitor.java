@@ -6,9 +6,9 @@ import com.dianping.cat.configuration.web.url.entity.UrlPattern;
 
 public interface IVisitor {
 
-   public void visitCode(Code code);
+   void visitCode(Code code);
 
-   public void visitPatternItem(PatternItem patternItem);
+   void visitPatternItem(PatternItem patternItem);
 
-   public void visitUrlPattern(UrlPattern urlPattern);
+   void visitUrlPattern(UrlPattern urlPattern);
 }

@@ -11,19 +11,19 @@ import com.dianping.cat.consumer.problem.model.entity.Segment;
 
 public interface IVisitor {
 
-   public void visitDuration(Duration duration);
+   void visitDuration(Duration duration);
 
-   public void visitEntity(Entity entity);
+   void visitEntity(Entity entity);
 
-   public void visitEntry(Entry entry);
+   void visitEntry(Entry entry);
 
-   public void visitGraphTrend(GraphTrend graphTrend);
+   void visitGraphTrend(GraphTrend graphTrend);
 
-   public void visitMachine(Machine machine);
+   void visitMachine(Machine machine);
 
-   public void visitProblemReport(ProblemReport problemReport);
+   void visitProblemReport(ProblemReport problemReport);
 
-   public void visitSegment(Segment segment);
+   void visitSegment(Segment segment);
 
-   public void visitThread(JavaThread thread);
+   void visitThread(JavaThread thread);
 }

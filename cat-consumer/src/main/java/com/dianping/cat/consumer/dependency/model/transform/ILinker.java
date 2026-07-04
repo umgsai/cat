@@ -7,9 +7,9 @@ import com.dianping.cat.consumer.dependency.model.entity.Segment;
 
 public interface ILinker {
 
-   public boolean onDependency(Segment parent, Dependency dependency);
+   boolean onDependency(Segment parent, Dependency dependency);
 
-   public boolean onIndex(Segment parent, Index index);
+   boolean onIndex(Segment parent, Index index);
 
-   public boolean onSegment(DependencyReport parent, Segment segment);
+   boolean onSegment(DependencyReport parent, Segment segment);
 }

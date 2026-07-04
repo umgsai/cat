@@ -116,11 +116,11 @@ public abstract class MockMessageBuilder {
 	}
 
 	protected static interface MessageHolder {
-		public Message build();
+		Message build();
 
-		public long getTimestampInMicros();
+		long getTimestampInMicros();
 
-		public void setTimestampInMicros(long timestampInMicros);
+		void setTimestampInMicros(long timestampInMicros);
 	}
 
 	protected static abstract class AbstractMessageHolder implements MessageHolder {

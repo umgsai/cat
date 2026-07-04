@@ -9,13 +9,13 @@ import com.dianping.cat.consumer.heartbeat.model.entity.Period;
 
 public interface ILinker {
 
-   public boolean onDetail(Extension parent, Detail detail);
+   boolean onDetail(Extension parent, Detail detail);
 
-   public boolean onDisk(Period parent, Disk disk);
+   boolean onDisk(Period parent, Disk disk);
 
-   public boolean onExtension(Period parent, Extension extension);
+   boolean onExtension(Period parent, Extension extension);
 
-   public boolean onMachine(HeartbeatReport parent, Machine machine);
+   boolean onMachine(HeartbeatReport parent, Machine machine);
 
-   public boolean onPeriod(Machine parent, Period period);
+   boolean onPeriod(Machine parent, Period period);
 }

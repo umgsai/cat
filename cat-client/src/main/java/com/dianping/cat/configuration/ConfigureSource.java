@@ -10,12 +10,12 @@ public interface ConfigureSource<T extends IEntity<T>> {
 	 * @throws Exception
 	 *            if any exception happens
 	 */
-	public T getConfig() throws Exception;
+	T getConfig() throws Exception;
 
 	/**
 	 * Order of configure source. lower value has higher priority.
 	 * 
 	 * @return order
 	 */
-	public int getOrder();
+	int getOrder();
 }

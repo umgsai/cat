@@ -5,5 +5,5 @@ import com.dianping.cat.message.MetricBag;
 import io.netty.buffer.ByteBuf;
 
 public interface MetricBagEncoder {
-	public void encode(MetricBag bag, ByteBuf buf);
+	void encode(MetricBag bag, ByteBuf buf);
 }

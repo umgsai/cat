@@ -6,9 +6,9 @@ import com.dianping.cat.configuration.message.entity.Property;
 
 public interface IVisitor {
 
-   public void visitAtomicMessageConfig(AtomicMessageConfig atomicMessageConfig);
+   void visitAtomicMessageConfig(AtomicMessageConfig atomicMessageConfig);
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitProperty(Property property);
+   void visitProperty(Property property);
 }

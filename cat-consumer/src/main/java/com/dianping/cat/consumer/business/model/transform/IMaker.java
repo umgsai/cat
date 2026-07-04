@@ -6,9 +6,9 @@ import com.dianping.cat.consumer.business.model.entity.Segment;
 
 public interface IMaker<T> {
 
-   public BusinessItem buildBusinessItem(T node);
+   BusinessItem buildBusinessItem(T node);
 
-   public BusinessReport buildBusinessReport(T node);
+   BusinessReport buildBusinessReport(T node);
 
-   public Segment buildSegment(T node);
+   Segment buildSegment(T node);
 }

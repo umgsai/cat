@@ -24,16 +24,16 @@ import com.dianping.cat.message.Transaction;
 
 public interface StorageBuilder {
 
-	public StorageItem build(Transaction t);
+	StorageItem build(Transaction t);
 
-	public List<String> getDefaultMethods();
+	List<String> getDefaultMethods();
 
-	public String getType();
+	String getType();
 
-	public boolean isEligible(Transaction t);
+	boolean isEligible(Transaction t);
 
 	@Deprecated
-	public default boolean isEligable(Transaction t) {
+	default boolean isEligable(Transaction t) {
 		return isEligible(t);
 	}
 

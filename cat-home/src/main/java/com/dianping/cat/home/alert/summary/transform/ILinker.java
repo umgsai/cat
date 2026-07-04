@@ -6,7 +6,7 @@ import com.dianping.cat.home.alert.summary.entity.Category;
 
 public interface ILinker {
 
-   public boolean onAlert(Category parent, Alert alert);
+   boolean onAlert(Category parent, Alert alert);
 
-   public boolean onCategory(AlertSummary parent, Category category);
+   boolean onCategory(AlertSummary parent, Category category);
 }

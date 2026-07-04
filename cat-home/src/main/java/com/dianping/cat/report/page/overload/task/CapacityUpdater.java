@@ -31,8 +31,8 @@ public interface CapacityUpdater {
 
 	public static final double CAPACITY = 15.0;
 
-	public void updateDBCapacity();
+	void updateDBCapacity();
 
-	public String getId();
+	String getId();
 
 }

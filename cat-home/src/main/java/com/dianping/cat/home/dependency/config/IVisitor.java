@@ -7,11 +7,11 @@ import com.dianping.cat.home.dependency.config.entity.TopologyGraphConfig;
 
 public interface IVisitor {
 
-   public void visitDomainConfig(DomainConfig domainConfig);
+   void visitDomainConfig(DomainConfig domainConfig);
 
-   public void visitEdgeConfig(EdgeConfig edgeConfig);
+   void visitEdgeConfig(EdgeConfig edgeConfig);
 
-   public void visitNodeConfig(NodeConfig nodeConfig);
+   void visitNodeConfig(NodeConfig nodeConfig);
 
-   public void visitTopologyGraphConfig(TopologyGraphConfig topologyGraphConfig);
+   void visitTopologyGraphConfig(TopologyGraphConfig topologyGraphConfig);
 }

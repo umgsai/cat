@@ -7,9 +7,9 @@ import com.dianping.cat.home.jar.entity.Machine;
 
 public interface ILinker {
 
-   public boolean onDomain(JarReport parent, Domain domain);
+   boolean onDomain(JarReport parent, Domain domain);
 
-   public boolean onJar(Machine parent, Jar jar);
+   boolean onJar(Machine parent, Jar jar);
 
-   public boolean onMachine(Domain parent, Machine machine);
+   boolean onMachine(Domain parent, Machine machine);
 }

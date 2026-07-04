@@ -7,11 +7,11 @@ import com.dianping.cat.home.jar.entity.Machine;
 
 public interface IVisitor {
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitJar(Jar jar);
+   void visitJar(Jar jar);
 
-   public void visitJarReport(JarReport jarReport);
+   void visitJarReport(JarReport jarReport);
 
-   public void visitMachine(Machine machine);
+   void visitMachine(Machine machine);
 }

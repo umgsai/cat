@@ -7,13 +7,13 @@ import com.dianping.cat.home.storage.entity.StorageGroupConfig;
 
 public interface IMaker<T> {
 
-   public Link buildLink(T node);
+   Link buildLink(T node);
 
-   public String buildPar(T node);
+   String buildPar(T node);
 
-   public Storage buildStorage(T node);
+   Storage buildStorage(T node);
 
-   public StorageGroup buildStorageGroup(T node);
+   StorageGroup buildStorageGroup(T node);
 
-   public StorageGroupConfig buildStorageGroupConfig(T node);
+   StorageGroupConfig buildStorageGroupConfig(T node);
 }

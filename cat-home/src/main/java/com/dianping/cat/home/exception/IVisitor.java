@@ -6,9 +6,9 @@ import com.dianping.cat.home.exception.entity.ExceptionRuleConfig;
 
 public interface IVisitor {
 
-   public void visitExceptionExclude(ExceptionExclude exceptionExclude);
+   void visitExceptionExclude(ExceptionExclude exceptionExclude);
 
-   public void visitExceptionLimit(ExceptionLimit exceptionLimit);
+   void visitExceptionLimit(ExceptionLimit exceptionLimit);
 
-   public void visitExceptionRuleConfig(ExceptionRuleConfig exceptionRuleConfig);
+   void visitExceptionRuleConfig(ExceptionRuleConfig exceptionRuleConfig);
 }

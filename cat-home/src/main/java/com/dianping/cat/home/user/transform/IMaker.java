@@ -5,7 +5,7 @@ import com.dianping.cat.home.user.entity.UserConfig;
 
 public interface IMaker<T> {
 
-   public User buildUser(T node);
+   User buildUser(T node);
 
-   public UserConfig buildUserConfig(T node);
+   UserConfig buildUserConfig(T node);
 }

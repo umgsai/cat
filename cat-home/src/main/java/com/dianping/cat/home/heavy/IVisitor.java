@@ -9,15 +9,15 @@ import com.dianping.cat.home.heavy.entity.Url;
 
 public interface IVisitor {
 
-   public void visitHeavyCache(HeavyCache heavyCache);
+   void visitHeavyCache(HeavyCache heavyCache);
 
-   public void visitHeavyCall(HeavyCall heavyCall);
+   void visitHeavyCall(HeavyCall heavyCall);
 
-   public void visitHeavyReport(HeavyReport heavyReport);
+   void visitHeavyReport(HeavyReport heavyReport);
 
-   public void visitHeavySql(HeavySql heavySql);
+   void visitHeavySql(HeavySql heavySql);
 
-   public void visitService(Service service);
+   void visitService(Service service);
 
-   public void visitUrl(Url url);
+   void visitUrl(Url url);
 }

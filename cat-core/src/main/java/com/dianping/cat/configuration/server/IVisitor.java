@@ -12,21 +12,21 @@ import com.dianping.cat.configuration.server.entity.StorageConfig;
 
 public interface IVisitor {
 
-   public void visitConsumer(ConsumerConfig consumer);
+   void visitConsumer(ConsumerConfig consumer);
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitHarfs(HarfsConfig harfs);
+   void visitHarfs(HarfsConfig harfs);
 
-   public void visitHdfs(HdfsConfig hdfs);
+   void visitHdfs(HdfsConfig hdfs);
 
-   public void visitLongConfig(LongConfig longConfig);
+   void visitLongConfig(LongConfig longConfig);
 
-   public void visitProperty(Property property);
+   void visitProperty(Property property);
 
-   public void visitServer(Server server);
+   void visitServer(Server server);
 
-   public void visitServerConfig(ServerConfig serverConfig);
+   void visitServerConfig(ServerConfig serverConfig);
 
-   public void visitStorage(StorageConfig storage);
+   void visitStorage(StorageConfig storage);
 }

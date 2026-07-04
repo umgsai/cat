@@ -5,5 +5,5 @@ import java.util.Date;
 
 public interface ReportBucketFactory {
 
-	public ReportBucket createReportBucket(String name, Date timestamp, int index) throws IOException;
+	ReportBucket createReportBucket(String name, Date timestamp, int index) throws IOException;
 }

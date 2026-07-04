@@ -9,19 +9,19 @@ import com.dianping.cat.consumer.heartbeat.model.entity.Period;
 
 public interface IMaker<T> {
 
-   public Detail buildDetail(T node);
+   Detail buildDetail(T node);
 
-   public Disk buildDisk(T node);
+   Disk buildDisk(T node);
 
-   public String buildDomain(T node);
+   String buildDomain(T node);
 
-   public Extension buildExtension(T node);
+   Extension buildExtension(T node);
 
-   public HeartbeatReport buildHeartbeatReport(T node);
+   HeartbeatReport buildHeartbeatReport(T node);
 
-   public String buildIp(T node);
+   String buildIp(T node);
 
-   public Machine buildMachine(T node);
+   Machine buildMachine(T node);
 
-   public Period buildPeriod(T node);
+   Period buildPeriod(T node);
 }

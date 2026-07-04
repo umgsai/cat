@@ -6,7 +6,7 @@ import com.dianping.cat.home.business.entity.Tag;
 
 public interface ILinker {
 
-   public boolean onBusinessItem(Tag parent, BusinessItem businessItem);
+   boolean onBusinessItem(Tag parent, BusinessItem businessItem);
 
-   public boolean onTag(BusinessTagConfig parent, Tag tag);
+   boolean onTag(BusinessTagConfig parent, Tag tag);
 }

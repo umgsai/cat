@@ -6,11 +6,11 @@ import com.dianping.cat.consumer.matrix.model.entity.Ratio;
 
 public interface IMaker<T> {
 
-   public String buildDomain(T node);
+   String buildDomain(T node);
 
-   public Matrix buildMatrix(T node);
+   Matrix buildMatrix(T node);
 
-   public MatrixReport buildMatrixReport(T node);
+   MatrixReport buildMatrixReport(T node);
 
-   public Ratio buildRatio(T node);
+   Ratio buildRatio(T node);
 }

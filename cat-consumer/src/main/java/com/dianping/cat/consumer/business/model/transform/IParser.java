@@ -5,9 +5,9 @@ import com.dianping.cat.consumer.business.model.entity.BusinessReport;
 import com.dianping.cat.consumer.business.model.entity.Segment;
 
 public interface IParser<T> {
-   public BusinessReport parse(IMaker<T> maker, ILinker linker, T node);
+   BusinessReport parse(IMaker<T> maker, ILinker linker, T node);
 
-   public void parseForBusinessItem(IMaker<T> maker, ILinker linker, BusinessItem parent, T node);
+   void parseForBusinessItem(IMaker<T> maker, ILinker linker, BusinessItem parent, T node);
 
-   public void parseForSegment(IMaker<T> maker, ILinker linker, Segment parent, T node);
+   void parseForSegment(IMaker<T> maker, ILinker linker, Segment parent, T node);
 }

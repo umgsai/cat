@@ -6,7 +6,7 @@ import com.dianping.cat.configuration.reload.entity.ReportType;
 
 public interface ILinker {
 
-   public boolean onReportPeriod(ReportType parent, ReportPeriod reportPeriod);
+   boolean onReportPeriod(ReportType parent, ReportPeriod reportPeriod);
 
-   public boolean onReportType(ReportReloadConfig parent, ReportType reportType);
+   boolean onReportType(ReportReloadConfig parent, ReportType reportType);
 }

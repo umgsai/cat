@@ -6,7 +6,7 @@ import com.dianping.cat.configuration.business.entity.CustomConfig;
 
 public interface ILinker {
 
-   public boolean onBusinessItemConfig(BusinessReportConfig parent, BusinessItemConfig businessItemConfig);
+   boolean onBusinessItemConfig(BusinessReportConfig parent, BusinessItemConfig businessItemConfig);
 
-   public boolean onCustomConfig(BusinessReportConfig parent, CustomConfig customConfig);
+   boolean onCustomConfig(BusinessReportConfig parent, CustomConfig customConfig);
 }

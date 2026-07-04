@@ -6,11 +6,11 @@ import com.dianping.cat.home.group.entity.Group;
 
 public interface IMaker<T> {
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public DomainGroup buildDomainGroup(T node);
+   DomainGroup buildDomainGroup(T node);
 
-   public Group buildGroup(T node);
+   Group buildGroup(T node);
 
-   public String buildIp(T node);
+   String buildIp(T node);
 }

@@ -8,13 +8,13 @@ import com.dianping.cat.consumer.top.model.entity.TopReport;
 
 public interface IVisitor {
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitError(Error error);
+   void visitError(Error error);
 
-   public void visitMachine(Machine machine);
+   void visitMachine(Machine machine);
 
-   public void visitSegment(Segment segment);
+   void visitSegment(Segment segment);
 
-   public void visitTopReport(TopReport topReport);
+   void visitTopReport(TopReport topReport);
 }

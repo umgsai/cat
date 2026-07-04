@@ -5,9 +5,9 @@ import com.dianping.cat.configuration.web.url.entity.PatternItem;
 import com.dianping.cat.configuration.web.url.entity.UrlPattern;
 
 public interface IParser<T> {
-   public UrlPattern parse(IMaker<T> maker, ILinker linker, T node);
+   UrlPattern parse(IMaker<T> maker, ILinker linker, T node);
 
-   public void parseForCode(IMaker<T> maker, ILinker linker, Code parent, T node);
+   void parseForCode(IMaker<T> maker, ILinker linker, Code parent, T node);
 
-   public void parseForPatternItem(IMaker<T> maker, ILinker linker, PatternItem parent, T node);
+   void parseForPatternItem(IMaker<T> maker, ILinker linker, PatternItem parent, T node);
 }

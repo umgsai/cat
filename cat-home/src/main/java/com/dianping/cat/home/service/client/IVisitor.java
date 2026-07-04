@@ -6,9 +6,9 @@ import com.dianping.cat.home.service.client.entity.Method;
 
 public interface IVisitor {
 
-   public void visitClientReport(ClientReport clientReport);
+   void visitClientReport(ClientReport clientReport);
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitMethod(Method method);
+   void visitMethod(Method method);
 }

@@ -345,7 +345,7 @@ public class CatFilter implements Filter {
 	}
 
 	protected static interface Handler {
-		public void handle(Context ctx) throws IOException, ServletException;
+		void handle(Context ctx) throws IOException, ServletException;
 	}
 
 }

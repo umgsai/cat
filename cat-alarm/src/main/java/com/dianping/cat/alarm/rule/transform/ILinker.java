@@ -9,13 +9,13 @@ import com.dianping.cat.alarm.rule.entity.SubCondition;
 
 public interface ILinker {
 
-   public boolean onCondition(Config parent, Condition condition);
+   boolean onCondition(Config parent, Condition condition);
 
-   public boolean onConfig(Rule parent, Config config);
+   boolean onConfig(Rule parent, Config config);
 
-   public boolean onMetricItem(Rule parent, MetricItem metricItem);
+   boolean onMetricItem(Rule parent, MetricItem metricItem);
 
-   public boolean onRule(MonitorRules parent, Rule rule);
+   boolean onRule(MonitorRules parent, Rule rule);
 
-   public boolean onSubCondition(Condition parent, SubCondition subCondition);
+   boolean onSubCondition(Condition parent, SubCondition subCondition);
 }

@@ -7,11 +7,11 @@ import com.dianping.cat.home.utilization.entity.UtilizationReport;
 
 public interface IVisitor {
 
-   public void visitApplicationState(ApplicationState applicationState);
+   void visitApplicationState(ApplicationState applicationState);
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitMachineState(MachineState machineState);
+   void visitMachineState(MachineState machineState);
 
-   public void visitUtilizationReport(UtilizationReport utilizationReport);
+   void visitUtilizationReport(UtilizationReport utilizationReport);
 }

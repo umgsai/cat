@@ -8,11 +8,11 @@ import com.dianping.cat.consumer.cross.model.entity.Type;
 
 public interface ILinker {
 
-   public boolean onLocal(CrossReport parent, Local local);
+   boolean onLocal(CrossReport parent, Local local);
 
-   public boolean onName(Type parent, Name name);
+   boolean onName(Type parent, Name name);
 
-   public boolean onRemote(Local parent, Remote remote);
+   boolean onRemote(Local parent, Remote remote);
 
-   public boolean onType(Remote parent, Type type);
+   boolean onType(Remote parent, Type type);
 }

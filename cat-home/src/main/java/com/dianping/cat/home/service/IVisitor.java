@@ -5,7 +5,7 @@ import com.dianping.cat.home.service.entity.ServiceReport;
 
 public interface IVisitor {
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitServiceReport(ServiceReport serviceReport);
+   void visitServiceReport(ServiceReport serviceReport);
 }

@@ -6,9 +6,9 @@ import com.dianping.cat.home.service.client.entity.Method;
 
 public interface IMaker<T> {
 
-   public ClientReport buildClientReport(T node);
+   ClientReport buildClientReport(T node);
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public Method buildMethod(T node);
+   Method buildMethod(T node);
 }

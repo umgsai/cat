@@ -7,11 +7,11 @@ import com.dianping.cat.home.server.entity.ServerMetricConfig;
 
 public interface IMaker<T> {
 
-   public Group buildGroup(T node);
+   Group buildGroup(T node);
 
-   public Item buildItem(T node);
+   Item buildItem(T node);
 
-   public Segment buildSegment(T node);
+   Segment buildSegment(T node);
 
-   public ServerMetricConfig buildServerMetricConfig(T node);
+   ServerMetricConfig buildServerMetricConfig(T node);
 }

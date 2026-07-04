@@ -6,9 +6,9 @@ import com.dianping.cat.configuration.reload.entity.ReportType;
 
 public interface IMaker<T> {
 
-   public ReportPeriod buildReportPeriod(T node);
+   ReportPeriod buildReportPeriod(T node);
 
-   public ReportReloadConfig buildReportReloadConfig(T node);
+   ReportReloadConfig buildReportReloadConfig(T node);
 
-   public ReportType buildReportType(T node);
+   ReportType buildReportType(T node);
 }

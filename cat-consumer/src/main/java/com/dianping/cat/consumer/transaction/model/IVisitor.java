@@ -15,27 +15,27 @@ import com.dianping.cat.consumer.transaction.model.entity.TransactionType;
 
 public interface IVisitor {
 
-   public void visitAllDuration(AllDuration allDuration);
+   void visitAllDuration(AllDuration allDuration);
 
-   public void visitDuration(Duration duration);
+   void visitDuration(Duration duration);
 
-   public void visitGraph(Graph graph);
+   void visitGraph(Graph graph);
 
-   public void visitGraph2(Graph2 graph2);
+   void visitGraph2(Graph2 graph2);
 
-   public void visitGraphTrend(GraphTrend graphTrend);
+   void visitGraphTrend(GraphTrend graphTrend);
 
-   public void visitMachine(Machine machine);
+   void visitMachine(Machine machine);
 
-   public void visitName(TransactionName name);
+   void visitName(TransactionName name);
 
-   public void visitRange(Range range);
+   void visitRange(Range range);
 
-   public void visitRange2(Range2 range2);
+   void visitRange2(Range2 range2);
 
-   public void visitStatusCode(StatusCode statusCode);
+   void visitStatusCode(StatusCode statusCode);
 
-   public void visitTransactionReport(TransactionReport transactionReport);
+   void visitTransactionReport(TransactionReport transactionReport);
 
-   public void visitType(TransactionType type);
+   void visitType(TransactionType type);
 }

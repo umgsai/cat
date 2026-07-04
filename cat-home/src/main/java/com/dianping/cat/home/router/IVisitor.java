@@ -12,21 +12,21 @@ import com.dianping.cat.home.router.entity.ServerGroup;
 
 public interface IVisitor {
 
-   public void visitDefaultServer(DefaultServer defaultServer);
+   void visitDefaultServer(DefaultServer defaultServer);
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitGroup(Group group);
+   void visitGroup(Group group);
 
-   public void visitGroupServer(GroupServer groupServer);
+   void visitGroupServer(GroupServer groupServer);
 
-   public void visitNetwork(Network network);
+   void visitNetwork(Network network);
 
-   public void visitNetworkPolicy(NetworkPolicy networkPolicy);
+   void visitNetworkPolicy(NetworkPolicy networkPolicy);
 
-   public void visitRouterConfig(RouterConfig routerConfig);
+   void visitRouterConfig(RouterConfig routerConfig);
 
-   public void visitServer(Server server);
+   void visitServer(Server server);
 
-   public void visitServerGroup(ServerGroup serverGroup);
+   void visitServerGroup(ServerGroup serverGroup);
 }

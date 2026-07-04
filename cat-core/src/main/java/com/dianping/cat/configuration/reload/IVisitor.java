@@ -6,9 +6,9 @@ import com.dianping.cat.configuration.reload.entity.ReportType;
 
 public interface IVisitor {
 
-   public void visitReportPeriod(ReportPeriod reportPeriod);
+   void visitReportPeriod(ReportPeriod reportPeriod);
 
-   public void visitReportReloadConfig(ReportReloadConfig reportReloadConfig);
+   void visitReportReloadConfig(ReportReloadConfig reportReloadConfig);
 
-   public void visitReportType(ReportType reportType);
+   void visitReportType(ReportType reportType);
 }

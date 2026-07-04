@@ -5,7 +5,7 @@ import com.dianping.cat.alarm.receiver.entity.Receiver;
 
 public interface IVisitor {
 
-   public void visitAlertConfig(AlertConfig alertConfig);
+   void visitAlertConfig(AlertConfig alertConfig);
 
-   public void visitReceiver(Receiver receiver);
+   void visitReceiver(Receiver receiver);
 }

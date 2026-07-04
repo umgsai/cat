@@ -7,11 +7,11 @@ import com.dianping.cat.alarm.policy.entity.Type;
 
 public interface IMaker<T> {
 
-   public AlertPolicy buildAlertPolicy(T node);
+   AlertPolicy buildAlertPolicy(T node);
 
-   public Group buildGroup(T node);
+   Group buildGroup(T node);
 
-   public Level buildLevel(T node);
+   Level buildLevel(T node);
 
-   public Type buildType(T node);
+   Type buildType(T node);
 }

@@ -5,7 +5,7 @@ import com.dianping.cat.home.resource.entity.ResourceConfig;
 
 public interface IMaker<T> {
 
-   public Resource buildResource(T node);
+   Resource buildResource(T node);
 
-   public ResourceConfig buildResourceConfig(T node);
+   ResourceConfig buildResourceConfig(T node);
 }

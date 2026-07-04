@@ -6,7 +6,7 @@ import com.dianping.cat.home.heartbeat.entity.Metric;
 
 public interface ILinker {
 
-   public boolean onGroup(HeartbeatDisplayPolicy parent, Group group);
+   boolean onGroup(HeartbeatDisplayPolicy parent, Group group);
 
-   public boolean onMetric(Group parent, Metric metric);
+   boolean onMetric(Group parent, Metric metric);
 }

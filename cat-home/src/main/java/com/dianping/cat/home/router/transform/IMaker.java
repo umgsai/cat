@@ -12,21 +12,21 @@ import com.dianping.cat.home.router.entity.ServerGroup;
 
 public interface IMaker<T> {
 
-   public DefaultServer buildDefaultServer(T node);
+   DefaultServer buildDefaultServer(T node);
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public Group buildGroup(T node);
+   Group buildGroup(T node);
 
-   public GroupServer buildGroupServer(T node);
+   GroupServer buildGroupServer(T node);
 
-   public Network buildNetwork(T node);
+   Network buildNetwork(T node);
 
-   public NetworkPolicy buildNetworkPolicy(T node);
+   NetworkPolicy buildNetworkPolicy(T node);
 
-   public RouterConfig buildRouterConfig(T node);
+   RouterConfig buildRouterConfig(T node);
 
-   public Server buildServer(T node);
+   Server buildServer(T node);
 
-   public ServerGroup buildServerGroup(T node);
+   ServerGroup buildServerGroup(T node);
 }

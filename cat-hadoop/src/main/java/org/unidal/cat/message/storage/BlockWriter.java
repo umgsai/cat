@@ -23,6 +23,6 @@ import java.util.concurrent.BlockingQueue;
 import com.dianping.cat.support.Threads.Task;
 
 public interface BlockWriter extends Task {
-	public void initialize(int hour, int index, BlockingQueue<Block> queue);
+	void initialize(int hour, int index, BlockingQueue<Block> queue);
 
 }

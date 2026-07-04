@@ -5,7 +5,7 @@ import com.dianping.cat.home.resource.entity.ResourceConfig;
 
 public interface IVisitor {
 
-   public void visitResource(Resource resource);
+   void visitResource(Resource resource);
 
-   public void visitResourceConfig(ResourceConfig resourceConfig);
+   void visitResourceConfig(ResourceConfig resourceConfig);
 }

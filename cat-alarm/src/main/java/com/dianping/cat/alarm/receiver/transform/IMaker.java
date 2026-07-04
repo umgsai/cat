@@ -5,15 +5,15 @@ import com.dianping.cat.alarm.receiver.entity.Receiver;
 
 public interface IMaker<T> {
 
-   public AlertConfig buildAlertConfig(T node);
+   AlertConfig buildAlertConfig(T node);
 
-   public String buildDx(T node);
+   String buildDx(T node);
 
-   public String buildEmail(T node);
+   String buildEmail(T node);
 
-   public String buildPhone(T node);
+   String buildPhone(T node);
 
-   public Receiver buildReceiver(T node);
+   Receiver buildReceiver(T node);
 
-   public String buildWeixin(T node);
+   String buildWeixin(T node);
 }

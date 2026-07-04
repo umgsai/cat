@@ -5,5 +5,5 @@ import com.dianping.cat.home.service.entity.ServiceReport;
 
 public interface ILinker {
 
-   public boolean onDomain(ServiceReport parent, Domain domain);
+   boolean onDomain(ServiceReport parent, Domain domain);
 }

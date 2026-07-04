@@ -10,17 +10,17 @@ import com.dianping.cat.consumer.event.model.entity.StatusCode;
 
 public interface IVisitor {
 
-   public void visitEventReport(EventReport eventReport);
+   void visitEventReport(EventReport eventReport);
 
-   public void visitGraphTrend(GraphTrend graphTrend);
+   void visitGraphTrend(GraphTrend graphTrend);
 
-   public void visitMachine(Machine machine);
+   void visitMachine(Machine machine);
 
-   public void visitName(EventName name);
+   void visitName(EventName name);
 
-   public void visitRange(Range range);
+   void visitRange(Range range);
 
-   public void visitStatusCode(StatusCode statusCode);
+   void visitStatusCode(StatusCode statusCode);
 
-   public void visitType(EventType type);
+   void visitType(EventType type);
 }

@@ -7,9 +7,9 @@ import com.dianping.cat.home.utilization.entity.UtilizationReport;
 
 public interface ILinker {
 
-   public boolean onApplicationState(Domain parent, ApplicationState applicationState);
+   boolean onApplicationState(Domain parent, ApplicationState applicationState);
 
-   public boolean onDomain(UtilizationReport parent, Domain domain);
+   boolean onDomain(UtilizationReport parent, Domain domain);
 
-   public boolean onMachineState(Domain parent, MachineState machineState);
+   boolean onMachineState(Domain parent, MachineState machineState);
 }

@@ -6,7 +6,7 @@ import com.dianping.cat.consumer.matrix.model.entity.Ratio;
 
 public interface ILinker {
 
-   public boolean onMatrix(MatrixReport parent, Matrix matrix);
+   boolean onMatrix(MatrixReport parent, Matrix matrix);
 
-   public boolean onRatio(Matrix parent, Ratio ratio);
+   boolean onRatio(Matrix parent, Ratio ratio);
 }

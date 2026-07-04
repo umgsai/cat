@@ -7,9 +7,9 @@ import com.dianping.cat.home.dependency.config.entity.TopologyGraphConfig;
 
 public interface ILinker {
 
-   public boolean onDomainConfig(NodeConfig parent, DomainConfig domainConfig);
+   boolean onDomainConfig(NodeConfig parent, DomainConfig domainConfig);
 
-   public boolean onEdgeConfig(TopologyGraphConfig parent, EdgeConfig edgeConfig);
+   boolean onEdgeConfig(TopologyGraphConfig parent, EdgeConfig edgeConfig);
 
-   public boolean onNodeConfig(TopologyGraphConfig parent, NodeConfig nodeConfig);
+   boolean onNodeConfig(TopologyGraphConfig parent, NodeConfig nodeConfig);
 }

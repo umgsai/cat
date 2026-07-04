@@ -5,5 +5,5 @@ import com.dianping.cat.alarm.receiver.entity.Receiver;
 
 public interface ILinker {
 
-   public boolean onReceiver(AlertConfig parent, Receiver receiver);
+   boolean onReceiver(AlertConfig parent, Receiver receiver);
 }

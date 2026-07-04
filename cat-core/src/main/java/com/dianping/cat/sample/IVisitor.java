@@ -5,7 +5,7 @@ import com.dianping.cat.sample.entity.SampleConfig;
 
 public interface IVisitor {
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitSampleConfig(SampleConfig sampleConfig);
+   void visitSampleConfig(SampleConfig sampleConfig);
 }

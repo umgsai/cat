@@ -5,5 +5,5 @@ import com.dianping.cat.home.resource.entity.ResourceConfig;
 
 public interface ILinker {
 
-   public boolean onResource(ResourceConfig parent, Resource resource);
+   boolean onResource(ResourceConfig parent, Resource resource);
 }

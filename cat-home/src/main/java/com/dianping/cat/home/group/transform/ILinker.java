@@ -6,7 +6,7 @@ import com.dianping.cat.home.group.entity.Group;
 
 public interface ILinker {
 
-   public boolean onDomain(DomainGroup parent, Domain domain);
+   boolean onDomain(DomainGroup parent, Domain domain);
 
-   public boolean onGroup(Domain parent, Group group);
+   boolean onGroup(Domain parent, Group group);
 }

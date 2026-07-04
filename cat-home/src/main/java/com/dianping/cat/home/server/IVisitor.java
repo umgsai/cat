@@ -7,11 +7,11 @@ import com.dianping.cat.home.server.entity.ServerMetricConfig;
 
 public interface IVisitor {
 
-   public void visitGroup(Group group);
+   void visitGroup(Group group);
 
-   public void visitItem(Item item);
+   void visitItem(Item item);
 
-   public void visitSegment(Segment segment);
+   void visitSegment(Segment segment);
 
-   public void visitServerMetricConfig(ServerMetricConfig serverMetricConfig);
+   void visitServerMetricConfig(ServerMetricConfig serverMetricConfig);
 }

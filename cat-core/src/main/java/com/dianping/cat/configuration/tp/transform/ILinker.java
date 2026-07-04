@@ -5,5 +5,5 @@ import com.dianping.cat.configuration.tp.entity.TpValueStatisticConfig;
 
 public interface ILinker {
 
-   public boolean onDomain(TpValueStatisticConfig parent, Domain domain);
+   boolean onDomain(TpValueStatisticConfig parent, Domain domain);
 }

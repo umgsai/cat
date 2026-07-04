@@ -25,5 +25,5 @@ package com.dianping.cat.system.page.login.service;
  * @author qxo
  */
 public interface CatPropertyProvider {
-	public String getProperty(String name, String defaultValue);
+	String getProperty(String name, String defaultValue);
 }

@@ -7,9 +7,9 @@ import com.dianping.cat.consumer.all.config.entity.Type;
 
 public interface ILinker {
 
-   public boolean onName(Type parent, Name name);
+   boolean onName(Type parent, Name name);
 
-   public boolean onReport(AllConfig parent, Report report);
+   boolean onReport(AllConfig parent, Report report);
 
-   public boolean onType(Report parent, Type type);
+   boolean onType(Report parent, Type type);
 }

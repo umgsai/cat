@@ -6,7 +6,7 @@ import com.dianping.cat.home.exception.entity.ExceptionRuleConfig;
 
 public interface ILinker {
 
-   public boolean onExceptionExclude(ExceptionRuleConfig parent, ExceptionExclude exceptionExclude);
+   boolean onExceptionExclude(ExceptionRuleConfig parent, ExceptionExclude exceptionExclude);
 
-   public boolean onExceptionLimit(ExceptionRuleConfig parent, ExceptionLimit exceptionLimit);
+   boolean onExceptionLimit(ExceptionRuleConfig parent, ExceptionLimit exceptionLimit);
 }

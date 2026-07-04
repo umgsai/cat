@@ -20,14 +20,14 @@ package com.dianping.cat.report.service;
 
 public interface ModelService<M> {
 
-	public String getName();
+	String getName();
 
-	public ModelResponse<M> invoke(ModelRequest request);
+	ModelResponse<M> invoke(ModelRequest request);
 
-	public boolean isEligible(ModelRequest request);
+	boolean isEligible(ModelRequest request);
 
 	@Deprecated
-	public default boolean isEligable(ModelRequest request) {
+	default boolean isEligable(ModelRequest request) {
 		return isEligible(request);
 	}
 }

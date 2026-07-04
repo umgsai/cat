@@ -8,15 +8,15 @@ import com.dianping.cat.home.heavy.entity.Service;
 import com.dianping.cat.home.heavy.entity.Url;
 
 public interface IParser<T> {
-   public HeavyReport parse(IMaker<T> maker, ILinker linker, T node);
+   HeavyReport parse(IMaker<T> maker, ILinker linker, T node);
 
-   public void parseForHeavyCache(IMaker<T> maker, ILinker linker, HeavyCache parent, T node);
+   void parseForHeavyCache(IMaker<T> maker, ILinker linker, HeavyCache parent, T node);
 
-   public void parseForHeavyCall(IMaker<T> maker, ILinker linker, HeavyCall parent, T node);
+   void parseForHeavyCall(IMaker<T> maker, ILinker linker, HeavyCall parent, T node);
 
-   public void parseForHeavySql(IMaker<T> maker, ILinker linker, HeavySql parent, T node);
+   void parseForHeavySql(IMaker<T> maker, ILinker linker, HeavySql parent, T node);
 
-   public void parseForService(IMaker<T> maker, ILinker linker, Service parent, T node);
+   void parseForService(IMaker<T> maker, ILinker linker, Service parent, T node);
 
-   public void parseForUrl(IMaker<T> maker, ILinker linker, Url parent, T node);
+   void parseForUrl(IMaker<T> maker, ILinker linker, Url parent, T node);
 }

@@ -6,9 +6,9 @@ import com.dianping.cat.configuration.web.url.entity.UrlPattern;
 
 public interface IMaker<T> {
 
-   public Code buildCode(T node);
+   Code buildCode(T node);
 
-   public PatternItem buildPatternItem(T node);
+   PatternItem buildPatternItem(T node);
 
-   public UrlPattern buildUrlPattern(T node);
+   UrlPattern buildUrlPattern(T node);
 }

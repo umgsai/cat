@@ -8,11 +8,11 @@ import com.dianping.cat.consumer.state.model.entity.StateReport;
 
 public interface ILinker {
 
-   public boolean onDetail(ProcessDomain parent, Detail detail);
+   boolean onDetail(ProcessDomain parent, Detail detail);
 
-   public boolean onMachine(StateReport parent, Machine machine);
+   boolean onMachine(StateReport parent, Machine machine);
 
-   public boolean onMessage(Machine parent, Message message);
+   boolean onMessage(Machine parent, Message message);
 
-   public boolean onProcessDomain(Machine parent, ProcessDomain processDomain);
+   boolean onProcessDomain(Machine parent, ProcessDomain processDomain);
 }

@@ -7,11 +7,11 @@ import com.dianping.cat.consumer.all.config.entity.Type;
 
 public interface IVisitor {
 
-   public void visitAllConfig(AllConfig allConfig);
+   void visitAllConfig(AllConfig allConfig);
 
-   public void visitName(Name name);
+   void visitName(Name name);
 
-   public void visitReport(Report report);
+   void visitReport(Report report);
 
-   public void visitType(Type type);
+   void visitType(Type type);
 }

@@ -6,9 +6,9 @@ import com.dianping.cat.home.graph.entity.Segment;
 
 public interface IVisitor {
 
-   public void visitGraph(Graph graph);
+   void visitGraph(Graph graph);
 
-   public void visitItem(Item item);
+   void visitItem(Item item);
 
-   public void visitSegment(Segment segment);
+   void visitSegment(Segment segment);
 }

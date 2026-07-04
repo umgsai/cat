@@ -6,9 +6,9 @@ import com.dianping.cat.home.business.entity.Tag;
 
 public interface IVisitor {
 
-   public void visitBusinessItem(BusinessItem businessItem);
+   void visitBusinessItem(BusinessItem businessItem);
 
-   public void visitBusinessTagConfig(BusinessTagConfig businessTagConfig);
+   void visitBusinessTagConfig(BusinessTagConfig businessTagConfig);
 
-   public void visitTag(Tag tag);
+   void visitTag(Tag tag);
 }

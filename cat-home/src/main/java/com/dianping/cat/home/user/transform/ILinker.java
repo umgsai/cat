@@ -5,5 +5,5 @@ import com.dianping.cat.home.user.entity.UserConfig;
 
 public interface ILinker {
 
-   public boolean onUser(UserConfig parent, User user);
+   boolean onUser(UserConfig parent, User user);
 }

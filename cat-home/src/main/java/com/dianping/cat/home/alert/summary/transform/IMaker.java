@@ -6,9 +6,9 @@ import com.dianping.cat.home.alert.summary.entity.Category;
 
 public interface IMaker<T> {
 
-   public Alert buildAlert(T node);
+   Alert buildAlert(T node);
 
-   public AlertSummary buildAlertSummary(T node);
+   AlertSummary buildAlertSummary(T node);
 
-   public Category buildCategory(T node);
+   Category buildCategory(T node);
 }

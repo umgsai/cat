@@ -6,9 +6,9 @@ import com.dianping.cat.home.dependency.format.entity.TopoGraphFormatConfig;
 
 public interface IMaker<T> {
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public ProductLine buildProductLine(T node);
+   ProductLine buildProductLine(T node);
 
-   public TopoGraphFormatConfig buildTopoGraphFormatConfig(T node);
+   TopoGraphFormatConfig buildTopoGraphFormatConfig(T node);
 }

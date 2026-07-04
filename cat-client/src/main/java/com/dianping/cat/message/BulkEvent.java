@@ -6,6 +6,6 @@ package com.dianping.cat.message;
  * @author Frankie Wu(qmwu2000@gmail.com)
  */
 public interface BulkEvent extends Event {
-   public BulkEvent addCount(int success, int failed);
+   BulkEvent addCount(int success, int failed);
 
 }

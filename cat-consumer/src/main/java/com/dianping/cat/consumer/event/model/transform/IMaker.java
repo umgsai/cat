@@ -10,21 +10,21 @@ import com.dianping.cat.consumer.event.model.entity.StatusCode;
 
 public interface IMaker<T> {
 
-   public String buildDomain(T node);
+   String buildDomain(T node);
 
-   public EventReport buildEventReport(T node);
+   EventReport buildEventReport(T node);
 
-   public GraphTrend buildGraphTrend(T node);
+   GraphTrend buildGraphTrend(T node);
 
-   public String buildIp(T node);
+   String buildIp(T node);
 
-   public Machine buildMachine(T node);
+   Machine buildMachine(T node);
 
-   public EventName buildName(T node);
+   EventName buildName(T node);
 
-   public Range buildRange(T node);
+   Range buildRange(T node);
 
-   public StatusCode buildStatusCode(T node);
+   StatusCode buildStatusCode(T node);
 
-   public EventType buildType(T node);
+   EventType buildType(T node);
 }

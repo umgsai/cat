@@ -4,25 +4,25 @@ import com.dianping.cat.apiguardian.api.API;
 
 @API(status = API.Status.INTERNAL, since = "3.1")
 public interface Logger {
-	public void debug(String format, Object... args);
+	void debug(String format, Object... args);
 
-	public void debug(Throwable cause, String format, Object... args);
+	void debug(Throwable cause, String format, Object... args);
 
-	public void error(String format, Object... args);
+	void error(String format, Object... args);
 
-	public void error(Throwable cause, String format, Object... args);
+	void error(Throwable cause, String format, Object... args);
 
-	public Level getLevel();
+	Level getLevel();
 
-	public void info(String format, Object... args);
+	void info(String format, Object... args);
 
-	public void info(Throwable cause, String format, Object... args);
+	void info(Throwable cause, String format, Object... args);
 
-	public void setLevel(Level level);
+	void setLevel(Level level);
 
-	public void warn(String format, Object... args);
+	void warn(String format, Object... args);
 
-	public void warn(Throwable cause, String format, Object... args);
+	void warn(Throwable cause, String format, Object... args);
 	
 	public enum Level {
 		DEBUG(0),

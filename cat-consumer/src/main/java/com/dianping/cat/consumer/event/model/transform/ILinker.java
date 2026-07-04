@@ -10,17 +10,17 @@ import com.dianping.cat.consumer.event.model.entity.StatusCode;
 
 public interface ILinker {
 
-   public boolean onGraphTrend(EventType parent, GraphTrend graphTrend);
+   boolean onGraphTrend(EventType parent, GraphTrend graphTrend);
 
-   public boolean onGraphTrend(EventName parent, GraphTrend graphTrend);
+   boolean onGraphTrend(EventName parent, GraphTrend graphTrend);
 
-   public boolean onMachine(EventReport parent, Machine machine);
+   boolean onMachine(EventReport parent, Machine machine);
 
-   public boolean onName(EventType parent, EventName name);
+   boolean onName(EventType parent, EventName name);
 
-   public boolean onRange(EventName parent, Range range);
+   boolean onRange(EventName parent, Range range);
 
-   public boolean onStatusCode(EventName parent, StatusCode statusCode);
+   boolean onStatusCode(EventName parent, StatusCode statusCode);
 
-   public boolean onType(Machine parent, EventType type);
+   boolean onType(Machine parent, EventType type);
 }

@@ -38,7 +38,7 @@ package com.dianping.cat.message;
  * @author Frankie Wu
  */
 public interface Metric {
-	public void add(Metric metric);
+	void add(Metric metric);
 
 	/**
 	 * Deliver the metric with <code>quantity</code>.
@@ -46,26 +46,26 @@ public interface Metric {
 	 * @param quantity
 	 *           quantity no less than zero
 	 */
-	public void count(int quantity);
+	void count(int quantity);
 
-	public void duration(int count, long durationInMillis);
+	void duration(int count, long durationInMillis);
 
-	public int getCount();
+	int getCount();
 
-	public long getDuration();
+	long getDuration();
 
-	public Kind getKind();
+	Kind getKind();
 
-	public String getName();
+	String getName();
 
-	public double getSum();
+	double getSum();
 
 	/**
 	 * The time stamp the message was created.
 	 * 
 	 * @return message creation time stamp in milliseconds
 	 */
-	public long getTimestamp();
+	long getTimestamp();
 
 	/**
 	 * Deliver the metric with aggregated <code>total</code. and <code>sum</code>.
@@ -76,7 +76,7 @@ public interface Metric {
 	 * @param total
 	 *           accumulated value of multiple value
 	 */
-	public void sum(int count, double total);
+	void sum(int count, double total);
 
 	public enum Kind {
 		COUNT,

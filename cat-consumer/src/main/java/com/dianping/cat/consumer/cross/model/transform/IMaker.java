@@ -8,17 +8,17 @@ import com.dianping.cat.consumer.cross.model.entity.Type;
 
 public interface IMaker<T> {
 
-   public CrossReport buildCrossReport(T node);
+   CrossReport buildCrossReport(T node);
 
-   public String buildDomain(T node);
+   String buildDomain(T node);
 
-   public String buildIp(T node);
+   String buildIp(T node);
 
-   public Local buildLocal(T node);
+   Local buildLocal(T node);
 
-   public Name buildName(T node);
+   Name buildName(T node);
 
-   public Remote buildRemote(T node);
+   Remote buildRemote(T node);
 
-   public Type buildType(T node);
+   Type buildType(T node);
 }

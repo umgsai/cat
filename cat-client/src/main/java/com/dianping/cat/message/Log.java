@@ -6,9 +6,9 @@ public interface Log {
 	 * 
 	 * @return message creation time stamp in milliseconds
 	 */
-	public long getTimestamp();
+	long getTimestamp();
 
-	public String getSeverity();
+	String getSeverity();
 
-	public String getMessage();
+	String getMessage();
 }

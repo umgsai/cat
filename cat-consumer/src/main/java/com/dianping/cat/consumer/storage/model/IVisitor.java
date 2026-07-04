@@ -9,15 +9,15 @@ import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 
 public interface IVisitor {
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitMachine(Machine machine);
+   void visitMachine(Machine machine);
 
-   public void visitOperation(Operation operation);
+   void visitOperation(Operation operation);
 
-   public void visitSegment(Segment segment);
+   void visitSegment(Segment segment);
 
-   public void visitSql(Sql sql);
+   void visitSql(Sql sql);
 
-   public void visitStorageReport(StorageReport storageReport);
+   void visitStorageReport(StorageReport storageReport);
 }

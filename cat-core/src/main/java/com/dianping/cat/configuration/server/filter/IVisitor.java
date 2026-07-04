@@ -6,9 +6,9 @@ import com.dianping.cat.configuration.server.filter.entity.ServerFilterConfig;
 
 public interface IVisitor {
 
-   public void visitAtomicTreeConfig(AtomicTreeConfig atomicTreeConfig);
+   void visitAtomicTreeConfig(AtomicTreeConfig atomicTreeConfig);
 
-   public void visitCrashLogDomain(CrashLogDomain crashLogDomain);
+   void visitCrashLogDomain(CrashLogDomain crashLogDomain);
 
-   public void visitServerFilterConfig(ServerFilterConfig serverFilterConfig);
+   void visitServerFilterConfig(ServerFilterConfig serverFilterConfig);
 }

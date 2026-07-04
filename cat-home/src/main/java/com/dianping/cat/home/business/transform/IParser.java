@@ -5,9 +5,9 @@ import com.dianping.cat.home.business.entity.BusinessTagConfig;
 import com.dianping.cat.home.business.entity.Tag;
 
 public interface IParser<T> {
-   public BusinessTagConfig parse(IMaker<T> maker, ILinker linker, T node);
+   BusinessTagConfig parse(IMaker<T> maker, ILinker linker, T node);
 
-   public void parseForBusinessItem(IMaker<T> maker, ILinker linker, BusinessItem parent, T node);
+   void parseForBusinessItem(IMaker<T> maker, ILinker linker, BusinessItem parent, T node);
 
-   public void parseForTag(IMaker<T> maker, ILinker linker, Tag parent, T node);
+   void parseForTag(IMaker<T> maker, ILinker linker, Tag parent, T node);
 }

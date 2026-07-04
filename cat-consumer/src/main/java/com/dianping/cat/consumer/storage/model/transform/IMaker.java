@@ -9,21 +9,21 @@ import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 
 public interface IMaker<T> {
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public String buildId(T node);
+   String buildId(T node);
 
-   public String buildIp(T node);
+   String buildIp(T node);
 
-   public Machine buildMachine(T node);
+   Machine buildMachine(T node);
 
-   public String buildOp(T node);
+   String buildOp(T node);
 
-   public Operation buildOperation(T node);
+   Operation buildOperation(T node);
 
-   public Segment buildSegment(T node);
+   Segment buildSegment(T node);
 
-   public Sql buildSql(T node);
+   Sql buildSql(T node);
 
-   public StorageReport buildStorageReport(T node);
+   StorageReport buildStorageReport(T node);
 }

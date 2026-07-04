@@ -6,9 +6,9 @@ import com.dianping.cat.consumer.business.model.entity.Segment;
 
 public interface IVisitor {
 
-   public void visitBusinessItem(BusinessItem businessItem);
+   void visitBusinessItem(BusinessItem businessItem);
 
-   public void visitBusinessReport(BusinessReport businessReport);
+   void visitBusinessReport(BusinessReport businessReport);
 
-   public void visitSegment(Segment segment);
+   void visitSegment(Segment segment);
 }

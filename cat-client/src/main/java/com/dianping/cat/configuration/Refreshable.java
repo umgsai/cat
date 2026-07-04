@@ -12,5 +12,5 @@ public interface Refreshable {
 	 * @throws Exception
 	 *            if any exception happens
 	 */
-	public ClientConfig refresh(ClientConfig config) throws Exception;
+	ClientConfig refresh(ClientConfig config) throws Exception;
 }

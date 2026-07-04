@@ -7,11 +7,11 @@ import com.dianping.cat.home.jar.entity.Machine;
 
 public interface IMaker<T> {
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public Jar buildJar(T node);
+   Jar buildJar(T node);
 
-   public JarReport buildJarReport(T node);
+   JarReport buildJarReport(T node);
 
-   public Machine buildMachine(T node);
+   Machine buildMachine(T node);
 }

@@ -5,9 +5,9 @@ import com.dianping.cat.configuration.tp.entity.TpValueStatisticConfig;
 
 public interface IMaker<T> {
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public TpValueStatisticConfig buildTpValueStatisticConfig(T node);
+   TpValueStatisticConfig buildTpValueStatisticConfig(T node);
 
-   public String buildTransactionType(T node);
+   String buildTransactionType(T node);
 }

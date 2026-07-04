@@ -8,13 +8,13 @@ import com.dianping.cat.consumer.cross.model.entity.Type;
 
 public interface IVisitor {
 
-   public void visitCrossReport(CrossReport crossReport);
+   void visitCrossReport(CrossReport crossReport);
 
-   public void visitLocal(Local local);
+   void visitLocal(Local local);
 
-   public void visitName(Name name);
+   void visitName(Name name);
 
-   public void visitRemote(Remote remote);
+   void visitRemote(Remote remote);
 
-   public void visitType(Type type);
+   void visitType(Type type);
 }

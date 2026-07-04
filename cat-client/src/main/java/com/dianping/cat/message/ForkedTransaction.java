@@ -9,15 +9,15 @@ public interface ForkedTransaction extends Transaction, Closeable {
 
 	public static String EMBEDDED = "Embedded";
 
-	public void close();
+	void close();
 
-	public String getMessageId();
+	String getMessageId();
 
-	public String getParentMessageId();
+	String getParentMessageId();
 
-	public String getRootMessageId();
+	String getRootMessageId();
 
-	public ForkedTransaction join();
+	ForkedTransaction join();
 
-	public void setMessageId(String messageId);
+	void setMessageId(String messageId);
 }

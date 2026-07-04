@@ -4,5 +4,5 @@ import java.util.concurrent.BlockingQueue;
 
 public interface BlockWriterFactory {
 
-	public BlockWriter createBlockWriter(int hour, int index, BlockingQueue<Block> queue);
+	BlockWriter createBlockWriter(int hour, int index, BlockingQueue<Block> queue);
 }

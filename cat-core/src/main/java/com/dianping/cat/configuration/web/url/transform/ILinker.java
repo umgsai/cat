@@ -6,7 +6,7 @@ import com.dianping.cat.configuration.web.url.entity.UrlPattern;
 
 public interface ILinker {
 
-   public boolean onCode(UrlPattern parent, Code code);
+   boolean onCode(UrlPattern parent, Code code);
 
-   public boolean onPatternItem(UrlPattern parent, PatternItem patternItem);
+   boolean onPatternItem(UrlPattern parent, PatternItem patternItem);
 }

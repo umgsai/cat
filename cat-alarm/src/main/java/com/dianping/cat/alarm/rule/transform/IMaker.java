@@ -9,15 +9,15 @@ import com.dianping.cat.alarm.rule.entity.SubCondition;
 
 public interface IMaker<T> {
 
-   public Condition buildCondition(T node);
+   Condition buildCondition(T node);
 
-   public Config buildConfig(T node);
+   Config buildConfig(T node);
 
-   public MetricItem buildMetricItem(T node);
+   MetricItem buildMetricItem(T node);
 
-   public MonitorRules buildMonitorRules(T node);
+   MonitorRules buildMonitorRules(T node);
 
-   public Rule buildRule(T node);
+   Rule buildRule(T node);
 
-   public SubCondition buildSubCondition(T node);
+   SubCondition buildSubCondition(T node);
 }

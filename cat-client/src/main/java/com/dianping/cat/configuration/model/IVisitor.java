@@ -8,13 +8,13 @@ import com.dianping.cat.configuration.model.entity.Server;
 
 public interface IVisitor {
 
-   public void visitConfig(ClientConfig config);
+   void visitConfig(ClientConfig config);
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitHost(Host host);
+   void visitHost(Host host);
 
-   public void visitProperty(Property property);
+   void visitProperty(Property property);
 
-   public void visitServer(Server server);
+   void visitServer(Server server);
 }

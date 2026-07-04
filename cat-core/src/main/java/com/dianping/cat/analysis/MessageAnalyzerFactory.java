@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface MessageAnalyzerFactory {
 
-	public MessageAnalyzer createAnalyzer(String name);
+	MessageAnalyzer createAnalyzer(String name);
 
-	public Map<String, MessageAnalyzer> getAnalyzerMap();
+	Map<String, MessageAnalyzer> getAnalyzerMap();
 }

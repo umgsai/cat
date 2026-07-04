@@ -136,6 +136,6 @@ public class DefaultLogger implements Logger {
 	}
 
 	public static interface Output {
-		public void write(Level level, String message, Throwable cause);
+		void write(Level level, String message, Throwable cause);
 	}
 }

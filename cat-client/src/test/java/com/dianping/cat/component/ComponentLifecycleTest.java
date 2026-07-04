@@ -90,11 +90,11 @@ public class ComponentLifecycleTest {
 	}
 
 	private static interface First {
-		public Logger getLogger();
+		Logger getLogger();
 	}
 
 	private static interface Third {
-		public boolean isDisposed();
+		boolean isDisposed();
 	}
 
 	private static class MyComponentFactory implements ComponentFactory {
@@ -122,6 +122,6 @@ public class ComponentLifecycleTest {
 	}
 
 	private static interface Second {
-		public boolean isInitialized();
+		boolean isInitialized();
 	}
 }

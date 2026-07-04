@@ -313,6 +313,6 @@ public class CatFilter implements Filter {
 	}
 
 	private static interface Handler {
-		public void handle(Context ctx) throws IOException, ServletException;
+		void handle(Context ctx) throws IOException, ServletException;
 	}
 }

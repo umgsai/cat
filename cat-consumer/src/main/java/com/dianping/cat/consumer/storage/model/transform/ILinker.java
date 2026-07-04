@@ -9,13 +9,13 @@ import com.dianping.cat.consumer.storage.model.entity.StorageReport;
 
 public interface ILinker {
 
-   public boolean onDomain(Machine parent, Domain domain);
+   boolean onDomain(Machine parent, Domain domain);
 
-   public boolean onMachine(StorageReport parent, Machine machine);
+   boolean onMachine(StorageReport parent, Machine machine);
 
-   public boolean onOperation(Domain parent, Operation operation);
+   boolean onOperation(Domain parent, Operation operation);
 
-   public boolean onSegment(Operation parent, Segment segment);
+   boolean onSegment(Operation parent, Segment segment);
 
-   public boolean onSql(Domain parent, Sql sql);
+   boolean onSql(Domain parent, Sql sql);
 }

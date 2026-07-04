@@ -6,9 +6,9 @@ import com.dianping.cat.configuration.message.entity.Property;
 
 public interface IMaker<T> {
 
-   public AtomicMessageConfig buildAtomicMessageConfig(T node);
+   AtomicMessageConfig buildAtomicMessageConfig(T node);
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public Property buildProperty(T node);
+   Property buildProperty(T node);
 }

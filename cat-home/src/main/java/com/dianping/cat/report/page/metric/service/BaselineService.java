@@ -24,14 +24,14 @@ import com.dianping.cat.mybatis.data.BaselineDO;
 
 public interface BaselineService {
 
-	public void insertBaseline(BaselineDO baseline);
+	void insertBaseline(BaselineDO baseline);
 
-	public double[] queryDailyBaseline(String reportName, String key, Date reportPeriod);
+	double[] queryDailyBaseline(String reportName, String key, Date reportPeriod);
 
-	public double[] queryHourlyBaseline(String reportName, String key, Date reportPeriod);
+	double[] queryHourlyBaseline(String reportName, String key, Date reportPeriod);
 
-	public boolean hasDailyBaseline(String reportName, String key, Date reportPeriod);
+	boolean hasDailyBaseline(String reportName, String key, Date reportPeriod);
 
-	public double[] queryBaseline(int currentMinute, int ruleMinute, String metricKey, String name);
+	double[] queryBaseline(int currentMinute, int ruleMinute, String metricKey, String name);
 
 }

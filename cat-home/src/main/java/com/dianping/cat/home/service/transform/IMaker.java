@@ -5,7 +5,7 @@ import com.dianping.cat.home.service.entity.ServiceReport;
 
 public interface IMaker<T> {
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public ServiceReport buildServiceReport(T node);
+   ServiceReport buildServiceReport(T node);
 }

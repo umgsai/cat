@@ -6,9 +6,9 @@ import com.dianping.cat.consumer.matrix.model.entity.Ratio;
 
 public interface IVisitor {
 
-   public void visitMatrix(Matrix matrix);
+   void visitMatrix(Matrix matrix);
 
-   public void visitMatrixReport(MatrixReport matrixReport);
+   void visitMatrixReport(MatrixReport matrixReport);
 
-   public void visitRatio(Ratio ratio);
+   void visitRatio(Ratio ratio);
 }

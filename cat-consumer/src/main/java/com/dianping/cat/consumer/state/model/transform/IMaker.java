@@ -8,15 +8,15 @@ import com.dianping.cat.consumer.state.model.entity.StateReport;
 
 public interface IMaker<T> {
 
-   public Detail buildDetail(T node);
+   Detail buildDetail(T node);
 
-   public String buildIp(T node);
+   String buildIp(T node);
 
-   public Machine buildMachine(T node);
+   Machine buildMachine(T node);
 
-   public Message buildMessage(T node);
+   Message buildMessage(T node);
 
-   public ProcessDomain buildProcessDomain(T node);
+   ProcessDomain buildProcessDomain(T node);
 
-   public StateReport buildStateReport(T node);
+   StateReport buildStateReport(T node);
 }

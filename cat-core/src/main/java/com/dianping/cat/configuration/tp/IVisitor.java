@@ -5,7 +5,7 @@ import com.dianping.cat.configuration.tp.entity.TpValueStatisticConfig;
 
 public interface IVisitor {
 
-   public void visitDomain(Domain domain);
+   void visitDomain(Domain domain);
 
-   public void visitTpValueStatisticConfig(TpValueStatisticConfig tpValueStatisticConfig);
+   void visitTpValueStatisticConfig(TpValueStatisticConfig tpValueStatisticConfig);
 }

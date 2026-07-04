@@ -5,7 +5,7 @@ import com.dianping.cat.sample.entity.SampleConfig;
 
 public interface IMaker<T> {
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public SampleConfig buildSampleConfig(T node);
+   SampleConfig buildSampleConfig(T node);
 }

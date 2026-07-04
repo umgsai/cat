@@ -6,9 +6,9 @@ import com.dianping.cat.configuration.business.entity.CustomConfig;
 
 public interface IMaker<T> {
 
-   public BusinessItemConfig buildBusinessItemConfig(T node);
+   BusinessItemConfig buildBusinessItemConfig(T node);
 
-   public BusinessReportConfig buildBusinessReportConfig(T node);
+   BusinessReportConfig buildBusinessReportConfig(T node);
 
-   public CustomConfig buildCustomConfig(T node);
+   CustomConfig buildCustomConfig(T node);
 }

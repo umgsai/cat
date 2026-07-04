@@ -27,24 +27,24 @@ import com.dianping.cat.mybatis.data.DailyReportDO;
 import com.dianping.cat.mybatis.data.HourlyReportDO;
 
 public interface ReportService<T> {
-	public boolean insertDailyReport(DailyReportDO report, byte[] content);
+	boolean insertDailyReport(DailyReportDO report, byte[] content);
 
-	public boolean insertHourlyReport(HourlyReportDO report, byte[] content);
+	boolean insertHourlyReport(HourlyReportDO report, byte[] content);
 
-	public boolean insertMonthlyReport(MonthReportDO report, byte[] content);
+	boolean insertMonthlyReport(MonthReportDO report, byte[] content);
 
-	public boolean insertWeeklyReport(WeeklyReportDO report, byte[] content);
+	boolean insertWeeklyReport(WeeklyReportDO report, byte[] content);
 
-	public Set<String> queryAllDomainNames(Date start, Date end, String name);
+	Set<String> queryAllDomainNames(Date start, Date end, String name);
 
-	public T queryDailyReport(String domain, Date start, Date end);
+	T queryDailyReport(String domain, Date start, Date end);
 
-	public T queryHourlyReport(String domain, Date start, Date end);
+	T queryHourlyReport(String domain, Date start, Date end);
 
-	public T queryMonthlyReport(String domain, Date start);
+	T queryMonthlyReport(String domain, Date start);
 
-	public T queryWeeklyReport(String domain, Date start);
+	T queryWeeklyReport(String domain, Date start);
 
-	public T queryReport(String domain, Date start, Date end);
+	T queryReport(String domain, Date start, Date end);
 
 }

@@ -6,7 +6,7 @@ import com.dianping.cat.consumer.business.model.entity.Segment;
 
 public interface ILinker {
 
-   public boolean onBusinessItem(BusinessReport parent, BusinessItem businessItem);
+   boolean onBusinessItem(BusinessReport parent, BusinessItem businessItem);
 
-   public boolean onSegment(BusinessItem parent, Segment segment);
+   boolean onSegment(BusinessItem parent, Segment segment);
 }

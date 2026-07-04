@@ -5,5 +5,5 @@ import java.io.IOException;
 
 public interface MessageBucketFactory {
 
-	public LocalMessageBucket createBucket(File baseDir, String dataFile) throws IOException;
+	LocalMessageBucket createBucket(File baseDir, String dataFile) throws IOException;
 }

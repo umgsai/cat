@@ -6,9 +6,9 @@ import com.dianping.cat.home.dependency.graph.entity.TopologyNode;
 
 public interface IVisitor {
 
-   public void visitTopologyEdge(TopologyEdge topologyEdge);
+   void visitTopologyEdge(TopologyEdge topologyEdge);
 
-   public void visitTopologyGraph(TopologyGraph topologyGraph);
+   void visitTopologyGraph(TopologyGraph topologyGraph);
 
-   public void visitTopologyNode(TopologyNode topologyNode);
+   void visitTopologyNode(TopologyNode topologyNode);
 }

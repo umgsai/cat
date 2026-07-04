@@ -44,7 +44,7 @@ public interface Message {
 	 * @param keyValuePairs
 	 *           key-value pairs like 'a=1&b=2&...'
 	 */
-	public void addData(String keyValuePairs);
+	void addData(String keyValuePairs);
 
 	/**
 	 * add one key-value pair to the message.
@@ -52,38 +52,38 @@ public interface Message {
 	 * @param key
 	 * @param value
 	 */
-	public void addData(String key, Object value);
+	void addData(String key, Object value);
 
 	/**
 	 * Complete the message construction.
 	 */
-	public void complete();
+	void complete();
 
 	/**
 	 * @return key value pairs data
 	 */
-	public Object getData();
+	Object getData();
 
 	/**
 	 * Message name.
 	 * 
 	 * @return message name
 	 */
-	public String getName();
+	String getName();
 
 	/**
 	 * Get the message status.
 	 * 
 	 * @return message status. "0" means success, otherwise error code.
 	 */
-	public String getStatus();
+	String getStatus();
 
 	/**
 	 * The time stamp the message was created.
 	 * 
 	 * @return message creation time stamp in milliseconds
 	 */
-	public long getTimestamp();
+	long getTimestamp();
 
 	/**
 	 * Message type.
@@ -102,19 +102,19 @@ public interface Message {
 	 * 
 	 * @return message type
 	 */
-	public String getType();
+	String getType();
 
 	/**
 	 * If the complete() method was called or not.
 	 * 
 	 * @return true means the complete() method was called, false otherwise.
 	 */
-	public boolean isCompleted();
+	boolean isCompleted();
 
 	/**
 	 * @return
 	 */
-	public boolean isSuccess();
+	boolean isSuccess();
 
 	/**
 	 * Set the message status.
@@ -122,7 +122,7 @@ public interface Message {
 	 * @param status
 	 *           message status. "0" means success, otherwise error code.
 	 */
-	public void setStatus(String status);
+	void setStatus(String status);
 
 	/**
 	 * Set the message status with exception class name.
@@ -130,11 +130,11 @@ public interface Message {
 	 * @param e
 	 *           exception.
 	 */
-	public void setStatus(Throwable e);
+	void setStatus(Throwable e);
 
 	/**
 	 * Set the message success status.
 	 * 
 	 */
-	public Message success();
+	Message success();
 }

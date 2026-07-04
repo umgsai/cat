@@ -9,15 +9,15 @@ import com.dianping.cat.alarm.rule.entity.SubCondition;
 
 public interface IVisitor {
 
-   public void visitCondition(Condition condition);
+   void visitCondition(Condition condition);
 
-   public void visitConfig(Config config);
+   void visitConfig(Config config);
 
-   public void visitMetricItem(MetricItem metricItem);
+   void visitMetricItem(MetricItem metricItem);
 
-   public void visitMonitorRules(MonitorRules monitorRules);
+   void visitMonitorRules(MonitorRules monitorRules);
 
-   public void visitRule(Rule rule);
+   void visitRule(Rule rule);
 
-   public void visitSubCondition(SubCondition subCondition);
+   void visitSubCondition(SubCondition subCondition);
 }

@@ -7,11 +7,11 @@ import com.dianping.cat.home.utilization.entity.UtilizationReport;
 
 public interface IMaker<T> {
 
-   public ApplicationState buildApplicationState(T node);
+   ApplicationState buildApplicationState(T node);
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public MachineState buildMachineState(T node);
+   MachineState buildMachineState(T node);
 
-   public UtilizationReport buildUtilizationReport(T node);
+   UtilizationReport buildUtilizationReport(T node);
 }

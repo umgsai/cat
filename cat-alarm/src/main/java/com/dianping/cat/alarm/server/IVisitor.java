@@ -7,11 +7,11 @@ import com.dianping.cat.alarm.server.entity.SubCondition;
 
 public interface IVisitor {
 
-   public void visitCondition(Condition condition);
+   void visitCondition(Condition condition);
 
-   public void visitRule(Rule rule);
+   void visitRule(Rule rule);
 
-   public void visitServerAlarmRuleConfig(ServerAlarmRuleConfig serverAlarmRuleConfig);
+   void visitServerAlarmRuleConfig(ServerAlarmRuleConfig serverAlarmRuleConfig);
 
-   public void visitSubCondition(SubCondition subCondition);
+   void visitSubCondition(SubCondition subCondition);
 }

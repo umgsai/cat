@@ -19,48 +19,48 @@
 package com.dianping.cat.message;
 
 public interface MessageTree extends Cloneable {
-	public String getDomain();
+	String getDomain();
 
-	public String getHostName();
+	String getHostName();
 
-	public String getIpAddress();
+	String getIpAddress();
 
-	public Message getMessage();
+	Message getMessage();
 
-	public String getMessageId();
+	String getMessageId();
 
-	public String getParentMessageId();
+	String getParentMessageId();
 
-	public String getRootMessageId();
+	String getRootMessageId();
 
-	public String getSessionToken();
+	String getSessionToken();
 
-	public String getThreadGroupName();
+	String getThreadGroupName();
 
-	public String getThreadId();
+	String getThreadId();
 
-	public String getThreadName();
+	String getThreadName();
 
-	public void setDomain(String domain);
+	void setDomain(String domain);
 
-	public void setHostName(String hostName);
+	void setHostName(String hostName);
 
-	public void setIpAddress(String ipAddress);
+	void setIpAddress(String ipAddress);
 
-	public void setMessage(Message message);
+	void setMessage(Message message);
 
-	public void setMessageId(String messageId);
+	void setMessageId(String messageId);
 
-	public void setParentMessageId(String parentMessageId);
+	void setParentMessageId(String parentMessageId);
 
-	public void setRootMessageId(String rootMessageId);
+	void setRootMessageId(String rootMessageId);
 
-	public void setSessionToken(String session);
+	void setSessionToken(String session);
 
-	public void setThreadGroupName(String name);
+	void setThreadGroupName(String name);
 
-	public void setThreadId(String threadId);
+	void setThreadId(String threadId);
 
-	public void setThreadName(String id);
+	void setThreadName(String id);
 
 }

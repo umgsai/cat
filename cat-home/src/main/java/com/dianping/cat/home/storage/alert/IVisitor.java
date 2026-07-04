@@ -9,15 +9,15 @@ import com.dianping.cat.home.storage.alert.entity.Target;
 
 public interface IVisitor {
 
-   public void visitDetail(Detail detail);
+   void visitDetail(Detail detail);
 
-   public void visitMachine(Machine machine);
+   void visitMachine(Machine machine);
 
-   public void visitOperation(Operation operation);
+   void visitOperation(Operation operation);
 
-   public void visitStorage(Storage storage);
+   void visitStorage(Storage storage);
 
-   public void visitStorageAlertInfo(StorageAlertInfo storageAlertInfo);
+   void visitStorageAlertInfo(StorageAlertInfo storageAlertInfo);
 
-   public void visitTarget(Target target);
+   void visitTarget(Target target);
 }

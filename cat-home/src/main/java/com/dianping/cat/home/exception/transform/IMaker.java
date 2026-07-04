@@ -6,9 +6,9 @@ import com.dianping.cat.home.exception.entity.ExceptionRuleConfig;
 
 public interface IMaker<T> {
 
-   public ExceptionExclude buildExceptionExclude(T node);
+   ExceptionExclude buildExceptionExclude(T node);
 
-   public ExceptionLimit buildExceptionLimit(T node);
+   ExceptionLimit buildExceptionLimit(T node);
 
-   public ExceptionRuleConfig buildExceptionRuleConfig(T node);
+   ExceptionRuleConfig buildExceptionRuleConfig(T node);
 }

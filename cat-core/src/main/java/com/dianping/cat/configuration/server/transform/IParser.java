@@ -11,21 +11,21 @@ import com.dianping.cat.configuration.server.entity.ServerConfig;
 import com.dianping.cat.configuration.server.entity.StorageConfig;
 
 public interface IParser<T> {
-   public ServerConfig parse(IMaker<T> maker, ILinker linker, T node);
+   ServerConfig parse(IMaker<T> maker, ILinker linker, T node);
 
-   public void parseForConsumerConfig(IMaker<T> maker, ILinker linker, ConsumerConfig parent, T node);
+   void parseForConsumerConfig(IMaker<T> maker, ILinker linker, ConsumerConfig parent, T node);
 
-   public void parseForDomain(IMaker<T> maker, ILinker linker, Domain parent, T node);
+   void parseForDomain(IMaker<T> maker, ILinker linker, Domain parent, T node);
 
-   public void parseForHarfsConfig(IMaker<T> maker, ILinker linker, HarfsConfig parent, T node);
+   void parseForHarfsConfig(IMaker<T> maker, ILinker linker, HarfsConfig parent, T node);
 
-   public void parseForHdfsConfig(IMaker<T> maker, ILinker linker, HdfsConfig parent, T node);
+   void parseForHdfsConfig(IMaker<T> maker, ILinker linker, HdfsConfig parent, T node);
 
-   public void parseForLongConfig(IMaker<T> maker, ILinker linker, LongConfig parent, T node);
+   void parseForLongConfig(IMaker<T> maker, ILinker linker, LongConfig parent, T node);
 
-   public void parseForProperty(IMaker<T> maker, ILinker linker, Property parent, T node);
+   void parseForProperty(IMaker<T> maker, ILinker linker, Property parent, T node);
 
-   public void parseForServer(IMaker<T> maker, ILinker linker, Server parent, T node);
+   void parseForServer(IMaker<T> maker, ILinker linker, Server parent, T node);
 
-   public void parseForStorageConfig(IMaker<T> maker, ILinker linker, StorageConfig parent, T node);
+   void parseForStorageConfig(IMaker<T> maker, ILinker linker, StorageConfig parent, T node);
 }

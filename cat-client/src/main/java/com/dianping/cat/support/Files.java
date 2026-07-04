@@ -271,6 +271,6 @@ public class Files {
    }
 
    public interface Policy {
-      public boolean apply(String path);
+      boolean apply(String path);
    }
 }

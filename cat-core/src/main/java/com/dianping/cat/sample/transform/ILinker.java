@@ -5,5 +5,5 @@ import com.dianping.cat.sample.entity.SampleConfig;
 
 public interface ILinker {
 
-   public boolean onDomain(SampleConfig parent, Domain domain);
+   boolean onDomain(SampleConfig parent, Domain domain);
 }

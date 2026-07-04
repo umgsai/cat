@@ -6,9 +6,9 @@ import com.dianping.cat.configuration.business.entity.CustomConfig;
 
 public interface IVisitor {
 
-   public void visitBusinessItemConfig(BusinessItemConfig businessItemConfig);
+   void visitBusinessItemConfig(BusinessItemConfig businessItemConfig);
 
-   public void visitBusinessReportConfig(BusinessReportConfig businessReportConfig);
+   void visitBusinessReportConfig(BusinessReportConfig businessReportConfig);
 
-   public void visitCustomConfig(CustomConfig customConfig);
+   void visitCustomConfig(CustomConfig customConfig);
 }

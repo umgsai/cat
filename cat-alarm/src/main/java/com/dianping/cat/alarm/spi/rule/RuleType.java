@@ -624,6 +624,6 @@ public enum RuleType {
 	}
 
 	public interface MonitorRule {
-		public Pair<Boolean, String> checkData(double[] values, double[] baselineValues);
+		Pair<Boolean, String> checkData(double[] values, double[] baselineValues);
 	}
 }

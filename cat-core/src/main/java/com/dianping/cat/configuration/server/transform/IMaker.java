@@ -12,21 +12,21 @@ import com.dianping.cat.configuration.server.entity.StorageConfig;
 
 public interface IMaker<T> {
 
-   public ConsumerConfig buildConsumer(T node);
+   ConsumerConfig buildConsumer(T node);
 
-   public Domain buildDomain(T node);
+   Domain buildDomain(T node);
 
-   public HarfsConfig buildHarfs(T node);
+   HarfsConfig buildHarfs(T node);
 
-   public HdfsConfig buildHdfs(T node);
+   HdfsConfig buildHdfs(T node);
 
-   public LongConfig buildLongConfig(T node);
+   LongConfig buildLongConfig(T node);
 
-   public Property buildProperty(T node);
+   Property buildProperty(T node);
 
-   public Server buildServer(T node);
+   Server buildServer(T node);
 
-   public ServerConfig buildServerConfig(T node);
+   ServerConfig buildServerConfig(T node);
 
-   public StorageConfig buildStorage(T node);
+   StorageConfig buildStorage(T node);
 }

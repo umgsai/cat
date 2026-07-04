@@ -11,21 +11,21 @@ import com.dianping.cat.consumer.problem.model.entity.Segment;
 
 public interface ILinker {
 
-   public boolean onDuration(Entry parent, Duration duration);
+   boolean onDuration(Entry parent, Duration duration);
 
-   public boolean onDuration(Entity parent, Duration duration);
+   boolean onDuration(Entity parent, Duration duration);
 
-   public boolean onEntity(Machine parent, Entity entity);
+   boolean onEntity(Machine parent, Entity entity);
 
-   public boolean onEntry(Machine parent, Entry entry);
+   boolean onEntry(Machine parent, Entry entry);
 
-   public boolean onGraphTrend(Entity parent, GraphTrend graphTrend);
+   boolean onGraphTrend(Entity parent, GraphTrend graphTrend);
 
-   public boolean onMachine(ProblemReport parent, Machine machine);
+   boolean onMachine(ProblemReport parent, Machine machine);
 
-   public boolean onSegment(JavaThread parent, Segment segment);
+   boolean onSegment(JavaThread parent, Segment segment);
 
-   public boolean onThread(Entry parent, JavaThread thread);
+   boolean onThread(Entry parent, JavaThread thread);
 
-   public boolean onThread(Entity parent, JavaThread thread);
+   boolean onThread(Entity parent, JavaThread thread);
 }

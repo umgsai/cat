@@ -20,6 +20,6 @@ package com.dianping.cat.server;
 
 public interface DataSourceService<T> {
 
-	public T getConnection(String category);
+	T getConnection(String category);
 
 }

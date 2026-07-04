@@ -23,5 +23,5 @@ import com.dianping.cat.message.tree.MessageId;
 import io.netty.buffer.ByteBuf;
 
 public interface MessageFinder {
-	public ByteBuf find(MessageId id);
+	ByteBuf find(MessageId id);
 }

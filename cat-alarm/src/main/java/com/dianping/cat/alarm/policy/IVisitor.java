@@ -7,11 +7,11 @@ import com.dianping.cat.alarm.policy.entity.Type;
 
 public interface IVisitor {
 
-   public void visitAlertPolicy(AlertPolicy alertPolicy);
+   void visitAlertPolicy(AlertPolicy alertPolicy);
 
-   public void visitGroup(Group group);
+   void visitGroup(Group group);
 
-   public void visitLevel(Level level);
+   void visitLevel(Level level);
 
-   public void visitType(Type type);
+   void visitType(Type type);
 }

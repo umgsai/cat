@@ -36,13 +36,13 @@ public interface Bucket {
 
 	public static final int ENTRY_PER_SEGMENT = (int) (SEGMENT_SIZE / BYTE_PER_ENTRY);
 
-	public void close();
+	void close();
 
-	public void flush();
+	void flush();
 
-	public ByteBuf get(MessageId id) throws IOException;
+	ByteBuf get(MessageId id) throws IOException;
 
-	public boolean initialize(String domain, String ip, int hour, boolean writeMode) throws IOException;
+	boolean initialize(String domain, String ip, int hour, boolean writeMode) throws IOException;
 
-	public void puts(ByteBuf buf, Map<MessageId, Integer> mappings) throws IOException;
+	void puts(ByteBuf buf, Map<MessageId, Integer> mappings) throws IOException;
 }

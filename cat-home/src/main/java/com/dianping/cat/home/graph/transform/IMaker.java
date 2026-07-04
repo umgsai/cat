@@ -6,9 +6,9 @@ import com.dianping.cat.home.graph.entity.Segment;
 
 public interface IMaker<T> {
 
-   public Graph buildGraph(T node);
+   Graph buildGraph(T node);
 
-   public Item buildItem(T node);
+   Item buildItem(T node);
 
-   public Segment buildSegment(T node);
+   Segment buildSegment(T node);
 }

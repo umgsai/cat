@@ -6,21 +6,21 @@ import com.dianping.cat.configuration.model.entity.Host;
 import com.dianping.cat.configuration.model.entity.Server;
 
 public interface ConfigureManager {
-	public boolean getBooleanProperty(String name, boolean defaultValue);
+	boolean getBooleanProperty(String name, boolean defaultValue);
 
-	public String getDomain();
+	String getDomain();
 
-	public double getDoubleProperty(String name, double defaultValue);
+	double getDoubleProperty(String name, double defaultValue);
 
-	public Host getHost();
+	Host getHost();
 
-	public int getIntProperty(String name, int defaultValue);
+	int getIntProperty(String name, int defaultValue);
 
-	public long getLongProperty(String name, long defaultValue);
+	long getLongProperty(String name, long defaultValue);
 
-	public String getProperty(String name, String defaultValue);
+	String getProperty(String name, String defaultValue);
 
-	public List<Server> getServers();
+	List<Server> getServers();
 
-	public boolean isEnabled();
+	boolean isEnabled();
 }

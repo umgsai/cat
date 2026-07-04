@@ -7,9 +7,9 @@ import com.dianping.cat.alarm.server.entity.SubCondition;
 
 public interface ILinker {
 
-   public boolean onCondition(Rule parent, Condition condition);
+   boolean onCondition(Rule parent, Condition condition);
 
-   public boolean onRule(ServerAlarmRuleConfig parent, Rule rule);
+   boolean onRule(ServerAlarmRuleConfig parent, Rule rule);
 
-   public boolean onSubCondition(Condition parent, SubCondition subCondition);
+   boolean onSubCondition(Condition parent, SubCondition subCondition);
 }

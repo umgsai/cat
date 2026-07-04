@@ -7,9 +7,9 @@ import com.dianping.cat.alarm.policy.entity.Type;
 
 public interface ILinker {
 
-   public boolean onGroup(Type parent, Group group);
+   boolean onGroup(Type parent, Group group);
 
-   public boolean onLevel(Group parent, Level level);
+   boolean onLevel(Group parent, Level level);
 
-   public boolean onType(AlertPolicy parent, Type type);
+   boolean onType(AlertPolicy parent, Type type);
 }

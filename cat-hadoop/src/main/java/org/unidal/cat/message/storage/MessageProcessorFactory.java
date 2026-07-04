@@ -6,5 +6,5 @@ import com.dianping.cat.message.spi.MessageTree;
 
 public interface MessageProcessorFactory {
 
-	public MessageProcessor createMessageProcessor(int hour, int index, BlockingQueue<MessageTree> queue);
+	MessageProcessor createMessageProcessor(int hour, int index, BlockingQueue<MessageTree> queue);
 }

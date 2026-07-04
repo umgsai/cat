@@ -7,11 +7,11 @@ import com.dianping.cat.home.dependency.config.entity.TopologyGraphConfig;
 
 public interface IMaker<T> {
 
-   public DomainConfig buildDomainConfig(T node);
+   DomainConfig buildDomainConfig(T node);
 
-   public EdgeConfig buildEdgeConfig(T node);
+   EdgeConfig buildEdgeConfig(T node);
 
-   public NodeConfig buildNodeConfig(T node);
+   NodeConfig buildNodeConfig(T node);
 
-   public TopologyGraphConfig buildTopologyGraphConfig(T node);
+   TopologyGraphConfig buildTopologyGraphConfig(T node);
 }

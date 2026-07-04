@@ -6,7 +6,7 @@ import com.dianping.cat.home.service.client.entity.Method;
 
 public interface ILinker {
 
-   public boolean onDomain(ClientReport parent, Domain domain);
+   boolean onDomain(ClientReport parent, Domain domain);
 
-   public boolean onMethod(Domain parent, Method method);
+   boolean onMethod(Domain parent, Method method);
 }

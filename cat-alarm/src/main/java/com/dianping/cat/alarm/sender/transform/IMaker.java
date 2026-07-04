@@ -6,9 +6,9 @@ import com.dianping.cat.alarm.sender.entity.SenderConfig;
 
 public interface IMaker<T> {
 
-   public Par buildPar(T node);
+   Par buildPar(T node);
 
-   public Sender buildSender(T node);
+   Sender buildSender(T node);
 
-   public SenderConfig buildSenderConfig(T node);
+   SenderConfig buildSenderConfig(T node);
 }

@@ -8,13 +8,13 @@ import com.dianping.cat.consumer.state.model.entity.StateReport;
 
 public interface IVisitor {
 
-   public void visitDetail(Detail detail);
+   void visitDetail(Detail detail);
 
-   public void visitMachine(Machine machine);
+   void visitMachine(Machine machine);
 
-   public void visitMessage(Message message);
+   void visitMessage(Message message);
 
-   public void visitProcessDomain(ProcessDomain processDomain);
+   void visitProcessDomain(ProcessDomain processDomain);
 
-   public void visitStateReport(StateReport stateReport);
+   void visitStateReport(StateReport stateReport);
 }

@@ -9,15 +9,15 @@ import com.dianping.cat.consumer.heartbeat.model.entity.Period;
 
 public interface IVisitor {
 
-   public void visitDetail(Detail detail);
+   void visitDetail(Detail detail);
 
-   public void visitDisk(Disk disk);
+   void visitDisk(Disk disk);
 
-   public void visitExtension(Extension extension);
+   void visitExtension(Extension extension);
 
-   public void visitHeartbeatReport(HeartbeatReport heartbeatReport);
+   void visitHeartbeatReport(HeartbeatReport heartbeatReport);
 
-   public void visitMachine(Machine machine);
+   void visitMachine(Machine machine);
 
-   public void visitPeriod(Period period);
+   void visitPeriod(Period period);
 }

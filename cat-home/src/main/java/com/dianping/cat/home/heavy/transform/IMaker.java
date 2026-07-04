@@ -9,15 +9,15 @@ import com.dianping.cat.home.heavy.entity.Url;
 
 public interface IMaker<T> {
 
-   public HeavyCache buildHeavyCache(T node);
+   HeavyCache buildHeavyCache(T node);
 
-   public HeavyCall buildHeavyCall(T node);
+   HeavyCall buildHeavyCall(T node);
 
-   public HeavyReport buildHeavyReport(T node);
+   HeavyReport buildHeavyReport(T node);
 
-   public HeavySql buildHeavySql(T node);
+   HeavySql buildHeavySql(T node);
 
-   public Service buildService(T node);
+   Service buildService(T node);
 
-   public Url buildUrl(T node);
+   Url buildUrl(T node);
 }

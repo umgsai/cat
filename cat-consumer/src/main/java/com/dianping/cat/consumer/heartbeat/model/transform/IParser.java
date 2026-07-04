@@ -8,15 +8,15 @@ import com.dianping.cat.consumer.heartbeat.model.entity.Machine;
 import com.dianping.cat.consumer.heartbeat.model.entity.Period;
 
 public interface IParser<T> {
-   public HeartbeatReport parse(IMaker<T> maker, ILinker linker, T node);
+   HeartbeatReport parse(IMaker<T> maker, ILinker linker, T node);
 
-   public void parseForDetail(IMaker<T> maker, ILinker linker, Detail parent, T node);
+   void parseForDetail(IMaker<T> maker, ILinker linker, Detail parent, T node);
 
-   public void parseForDisk(IMaker<T> maker, ILinker linker, Disk parent, T node);
+   void parseForDisk(IMaker<T> maker, ILinker linker, Disk parent, T node);
 
-   public void parseForExtension(IMaker<T> maker, ILinker linker, Extension parent, T node);
+   void parseForExtension(IMaker<T> maker, ILinker linker, Extension parent, T node);
 
-   public void parseForMachine(IMaker<T> maker, ILinker linker, Machine parent, T node);
+   void parseForMachine(IMaker<T> maker, ILinker linker, Machine parent, T node);
 
-   public void parseForPeriod(IMaker<T> maker, ILinker linker, Period parent, T node);
+   void parseForPeriod(IMaker<T> maker, ILinker linker, Period parent, T node);
 }
