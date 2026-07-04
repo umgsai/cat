@@ -6,7 +6,15 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "vite preview --host 0.0.0.0",
+    "test:backend:all": "npm run test:backend && npm run test:backend:navigation && npm run test:backend:write && npm run test:backend:xml && npm run test:backend:rule && npm run test:backend:permission && npm run test:backend:validation",
+    "test:backend": "playwright test tests/backend-smoke.spec.ts",
+    "test:backend:navigation": "playwright test tests/backend-navigation.spec.ts",
+    "test:backend:write": "playwright test tests/backend-write.spec.ts",
+    "test:backend:xml": "playwright test tests/backend-xml-write.spec.ts",
+    "test:backend:rule": "playwright test tests/backend-rule-write.spec.ts",
+    "test:backend:permission": "playwright test tests/backend-permission-write.spec.ts",
+    "test:backend:validation": "playwright test tests/backend-validation.spec.ts"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.4",
@@ -22,6 +30,7 @@
     "vue": "^3.5.25"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@vitejs/plugin-vue": "^6.0.1",
     "typescript": "^5.9.3",
     "vite": "^7.2.7",

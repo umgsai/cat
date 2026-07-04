@@ -1226,7 +1226,7 @@
               <option v-for="item in report?.exceptionList || []" :key="item" :value="item"></option>
             </datalist>
           </form>
-          <form v-else-if="isProjectAdd" class="config-project-form" method="get" :action="legacyConfigUrl()">
+          <form v-else-if="isProjectAdd" class="config-project-form" method="get" :action="legacyConfigUrl()" @submit="validateProjectAdd">
             <input type="hidden" name="op" value="updateSubmit">
             <input type="hidden" name="vue" value="true">
             <input type="hidden" name="project.cmdbDomain" value="default">
@@ -1240,7 +1240,7 @@
                 </tr>
                 <tr>
                   <td>CAT上项目名称</td>
-                  <td><input name="project.domain" autofocus></td>
+                  <td><input name="project.domain" pattern="[A-Za-z0-9][A-Za-z0-9.-]*" autofocus></td>
                   <td class="warning">注意：建议使用半角英文和半角符号(. -)。</td>
                 </tr>
                 <tr>
@@ -2124,7 +2124,8 @@ function alertRuleConfigJson() {
           text: subCondition.text.trim(),
           type: subCondition.type
         }))
-        .filter((subCondition) => subCondition.type && subCondition.text !== '')
+        .filter((subCondition) => subCondition.type)
+        .map(validateRuleSubCondition)
 
       if (subConditions.length === 0) {
         return null
@@ -2138,10 +2139,13 @@ function alertRuleConfigJson() {
       if (minute) {
         const minuteNumber = Number(minute)
 
-        if (Number.isFinite(minuteNumber) && minuteNumber > 10) {
+        if (!Number.isFinite(minuteNumber)) {
+          throw new Error('持续分钟必须是数字！')
+        }
+        if (minuteNumber > 10) {
           throw new Error('规则时间请限制在10分钟之内！')
         }
-        normalizedCondition.minute = Number.isFinite(minuteNumber) ? minuteNumber : minute
+        normalizedCondition.minute = minuteNumber
       }
       return normalizedCondition
     }).filter(Boolean)
@@ -2157,6 +2161,22 @@ function alertRuleConfigJson() {
   }).filter(Boolean)
 
   return configs.length > 0 ? JSON.stringify(configs) : ''
+}
+
+function validateRuleSubCondition(subCondition: { text: string, type: string }) {
+  if (subCondition.type === 'UserDefine') {
+    if (!subCondition.text) {
+      throw new Error('自定义监控规则不能为空！')
+    }
+    return subCondition
+  }
+  if (!subCondition.text) {
+    throw new Error('阈值不能为空！')
+  }
+  if (!Number.isFinite(Number(subCondition.text))) {
+    throw new Error('阈值必须是数字！')
+  }
+  return subCondition
 }
 
 function isJsonResponse(response: Response) {
@@ -2217,6 +2237,21 @@ function confirmDelete(event: MouseEvent) {
   }
 }
 
+function validateProjectAdd(event: SubmitEvent) {
+  const form = event.currentTarget as HTMLFormElement
+  const formData = new FormData(form)
+  const domain = String(formData.get('project.domain') || '').trim()
+
+  if (domain && !isValidProjectDomain(domain)) {
+    window.alert('项目名只能包含半角英文、数字、点和中划线。')
+    event.preventDefault()
+  }
+}
+
+function isValidProjectDomain(value: string) {
+  return /^[A-Za-z0-9][A-Za-z0-9.-]*$/.test(value)
+}
+
 function addDomainGroupRow() {
   editableGroupRows.value.push(toEditableGroupRow({ id: '', ips: [] }, false))
 }
@@ -2228,6 +2263,12 @@ function removeDomainGroupRow(index: number) {
 function addPendingIp(index: number) {
   const row = editableGroupRows.value[index]
   const ips = row.pendingIp.split(',').map((item) => item.trim()).filter(Boolean)
+  const invalidIp = ips.find((ip) => !isValidIpv4Address(ip))
+
+  if (invalidIp) {
+    window.alert(`IP格式不正确：${invalidIp}`)
+    return
+  }
 
   for (const ip of ips) {
     if (!row.ips.includes(ip)) {
@@ -2247,10 +2288,20 @@ function submitDomainGroup() {
   const domainId = groupDomainInput.value.trim()
   const groups: Record<string, { id: string; ips: string[] }> = {}
 
+  if (!domainId) {
+    window.alert('项目组不能为空')
+    return
+  }
   for (const row of editableGroupRows.value) {
     const id = row.id.trim()
 
     if (id) {
+      const invalidIp = row.ips.find((ip) => !isValidIpv4Address(ip))
+
+      if (invalidIp) {
+        window.alert(`IP格式不正确：${invalidIp}`)
+        return
+      }
       groups[id] = { id, ips: row.ips }
     }
   }
@@ -2263,6 +2314,25 @@ function submitDomainGroup() {
   params.set('content', content)
   params.set('vue', 'true')
   window.location.href = `${contextPath.value}/mvc/s/config?${params.toString()}`
+}
+
+function isValidIpv4Address(value: string) {
+  const parts = value.split('.')
+
+  if (parts.length !== 4) {
+    return false
+  }
+  return parts.every((part) => {
+    if (!/^\d+$/.test(part)) {
+      return false
+    }
+    if (part.length > 1 && part.startsWith('0')) {
+      return false
+    }
+    const number = Number(part)
+
+    return number >= 0 && number <= 255
+  })
 }
 
 function legacyConfigUrl(op?: string, overrides: Record<string, string> = {}) {

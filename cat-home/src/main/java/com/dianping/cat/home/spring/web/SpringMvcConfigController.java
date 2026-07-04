@@ -161,7 +161,7 @@ public class SpringMvcConfigController {
 		Map<String, Object> model = configModel(request, action);
 
 		if (isVueMutationRequest(request, action)) {
-			response.sendRedirect(vueConfigUrl(request, vueConfigAction(action), parameter(request, "domain", Constants.CAT),
+			response.sendRedirect(vueConfigUrl(request, vueConfigAction(action), vueRedirectDomain(request, model),
 					String.valueOf(model.get("opState"))));
 			return;
 		}
@@ -701,7 +701,9 @@ public class SpringMvcConfigController {
 		if (!"true".equals(request.getParameter("vue"))) {
 			return false;
 		}
-		return "transactionRuleDelete".equals(action) || "transactionRuleSubmit".equals(action)
+		return "updateSubmit".equals(action) || "projectDelete".equals(action)
+				|| "domainGroupConfigSubmit".equals(action) || "domainGroupConfigDelete".equals(action)
+				|| "transactionRuleDelete".equals(action) || "transactionRuleSubmit".equals(action)
 				|| "eventRuleDelete".equals(action) || "eventRuleSubmit".equals(action)
 				|| "heartbeatRulDelete".equals(action) || "heartbeatRuleDelete".equals(action)
 				|| "heartbeatRuleSubmit".equals(action)
@@ -1638,6 +1640,22 @@ public class SpringMvcConfigController {
 			url.append("&opState=").append(URLEncoder.encode(opState, StandardCharsets.UTF_8));
 		}
 		return url.toString();
+	}
+
+	private String vueRedirectDomain(HttpServletRequest request, Map<String, Object> model) {
+		String domain = parameter(request, "project.domain", "");
+
+		if (domain.length() == 0) {
+			domain = parameter(request, "domain", "");
+		}
+		if (domain.length() == 0) {
+			Object modelDomain = model.get("domain");
+
+			if (modelDomain != null) {
+				domain = String.valueOf(modelDomain);
+			}
+		}
+		return domain.length() == 0 ? Constants.CAT : domain;
 	}
 
 	private String vueConfigAction(String action) {

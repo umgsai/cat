@@ -12,6 +12,7 @@
       </nav>
       <div class="cat-actions">
         <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
+        <TopbarUser />
       </div>
     </header>
 
@@ -33,8 +34,8 @@
         </section>
 
         <section v-else class="config-card">
-          <div v-if="loading" class="config-empty">正在加载配置...</div>
-          <div v-else-if="loadError" class="config-empty is-error">{{ loadError }}</div>
+          <section v-if="loading" class="empty-state">正在加载配置...</section>
+          <section v-else-if="loadError" class="empty-state">{{ loadError }}</section>
           <form
             v-else
             class="config-project-form config-xml-form"
@@ -76,6 +77,7 @@ import { computed, onMounted, ref } from 'vue'
 import { ShieldAlert } from 'lucide-vue-next'
 
 import ConfigSidebar from '../components/ConfigSidebar.vue'
+import TopbarUser from '../components/TopbarUser.vue'
 import XmlEditor from '../components/XmlEditor.vue'
 
 interface PermissionReport {

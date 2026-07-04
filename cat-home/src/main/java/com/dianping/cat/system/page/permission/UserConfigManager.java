@@ -40,6 +40,8 @@ import com.dianping.cat.task.TimerSyncTask.SyncHandler;
 public class UserConfigManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserConfigManager.class);
 
+	private static final String ADMIN = "admin";
+
 	public static final int DEFAULT_ROLE = 1;
 
 	private static final String CONFIG_NAME = "user-config";
@@ -72,6 +74,10 @@ public class UserConfigManager {
 
 	public int getRole(String user) {
 		ensureInitialized();
+
+		if (ADMIN.equals(user)) {
+			return Integer.MAX_VALUE;
+		}
 
 		User usr = config.findUser(user);
 
