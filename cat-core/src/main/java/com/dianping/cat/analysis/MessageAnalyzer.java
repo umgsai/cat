@@ -23,31 +23,31 @@ import com.dianping.cat.report.ReportManager;
 
 public interface MessageAnalyzer {
 
-	public boolean isEligible(MessageTree tree);
+	boolean isEligible(MessageTree tree);
 
 	@Deprecated
-	public default boolean isEligable(MessageTree tree) {
+	default boolean isEligable(MessageTree tree) {
 		return isEligible(tree);
 	}
 
-	public void analyze(MessageQueue queue);
+	void analyze(MessageQueue queue);
 
-	public void destroy();
+	void destroy();
 
-	public void doCheckpoint(boolean atEnd);
+	void doCheckpoint(boolean atEnd);
 
-	public long getStartTime();
+	long getStartTime();
 
-	public void initialize(long startTime, long duration, long extraTime);
+	void initialize(long startTime, long duration, long extraTime);
 
-	public int getAnalyzerCount(String name);
+	int getAnalyzerCount(String name);
 
 	@Deprecated
-	public default int getAnanlyzerCount(String name) {
+	default int getAnanlyzerCount(String name) {
 		return getAnalyzerCount(name);
 	}
 
-	public void setIndex(int index);
+	void setIndex(int index);
 
-	public ReportManager<?> getReportManager();
+	ReportManager<?> getReportManager();
 }

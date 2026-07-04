@@ -28,7 +28,7 @@ public interface ReportBucket {
 		*
 		* @throws IOException
 		*/
-	public void close() throws IOException;
+	void close() throws IOException;
 
 	/**
 		* Find data by given id in the bucket. return null if not found.
@@ -37,21 +37,21 @@ public interface ReportBucket {
 		* @return data for given id, null if not found
 		* @throws IOException
 		*/
-	public String findById(String id) throws IOException;
+	String findById(String id) throws IOException;
 
 	/**
 		* Flush the buffered data in the bucket if have.
 		*
 		* @throws IOException
 		*/
-	public void flush() throws IOException;
+	void flush() throws IOException;
 
 	/**
 		* Return all ids in the bucket.
 		*
 		* @return
 		*/
-	public Collection<String> getIds();
+	Collection<String> getIds();
 
 	/**
 		* Initialize the bucket after its creation.
@@ -61,7 +61,7 @@ public interface ReportBucket {
 		* @param index
 		* @throws IOException
 		*/
-	public void initialize(String name, Date timestamp, int index) throws IOException;
+	void initialize(String name, Date timestamp, int index) throws IOException;
 
 	/**
 		* store the data by id into the bucket.
@@ -71,6 +71,6 @@ public interface ReportBucket {
 		* @return true means the data was stored in the bucket, otherwise false.
 		* @throws IOException
 		*/
-	public boolean storeById(String id, String data) throws IOException;
+	boolean storeById(String id, String data) throws IOException;
 
 }

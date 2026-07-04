@@ -28,7 +28,7 @@ public interface MessageCodec {
 		* @param buf
 		* @return message
 		*/
-	public MessageTree decode(ByteBuf buf);
+	MessageTree decode(ByteBuf buf);
 
 	/**
 		* encode message tree to buf
@@ -36,6 +36,6 @@ public interface MessageCodec {
 		* @param tree
 		* @return buf  first 4 bytes is the length of message tree
 		*/
-	public ByteBuf encode(MessageTree tree);
+	ByteBuf encode(MessageTree tree);
 
 }
