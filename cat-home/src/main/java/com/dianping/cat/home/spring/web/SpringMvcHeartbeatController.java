@@ -182,6 +182,7 @@ public class SpringMvcHeartbeatController {
 		model.put("customDate", historyMode ? historyDates.getCustomDate() : "");
 		model.put("baseUri", contextPath + "/mvc/r/h");
 		model.put("sample", sample(report.getDomain()));
+		model.put("staticInfo", staticInfo(report, realIp));
 		model.put("model", model);
 		return model;
 	}
@@ -199,6 +200,8 @@ public class SpringMvcHeartbeatController {
 		Map<String, ExtensionGroup> extensionGraph = (Map<String, ExtensionGroup>) model.get("extensionGraph");
 		@SuppressWarnings("unchecked")
 		Map<String, ChartGroup> extensionChartGraph = (Map<String, ChartGroup>) model.get("extensionChartGraph");
+		@SuppressWarnings("unchecked")
+		Map<String, String> staticInfo = (Map<String, String>) model.get("staticInfo");
 
 		report.setContextPath((String) model.get("contextPath"));
 		report.setDomain((String) model.get("domain"));
@@ -219,7 +222,24 @@ public class SpringMvcHeartbeatController {
 		report.setHistoryMode((Boolean) model.get("historyMode"));
 		report.setSample((Double) model.get("sample"));
 		report.setExtensionGroups(vueExtensionGroups(extensionGraph, extensionChartGraph));
+		report.setStaticInfo(vueStaticInfo(staticInfo));
 		return report;
+	}
+
+	private List<VueStaticInfo> vueStaticInfo(Map<String, String> staticInfo) {
+		List<VueStaticInfo> result = new ArrayList<VueStaticInfo>();
+
+		if (staticInfo == null) {
+			return result;
+		}
+		for (Map.Entry<String, String> entry : staticInfo.entrySet()) {
+			VueStaticInfo item = new VueStaticInfo();
+
+			item.setName(entry.getKey());
+			item.setValue(entry.getValue());
+			result.add(item);
+		}
+		return result;
 	}
 
 	private List<VueDomainDepartment> vueDomainGroups(Map<String, Department> domainGroups) {
@@ -603,6 +623,30 @@ public class SpringMvcHeartbeatController {
 		return ipAddress;
 	}
 
+	private Map<String, String> staticInfo(HeartbeatReport report, String ip) {
+		Map<String, String> result = new LinkedHashMap<String, String>();
+
+		if (report == null || ip == null || Constants.ALL.equals(ip)) {
+			return result;
+		}
+		Machine machine = report.findMachine(ip);
+
+		if (machine == null) {
+			return result;
+		}
+		putIfNotEmpty(result, "system.java.classpath", machine.getClasspath());
+		putIfNotEmpty(result, "system.java.version", machine.getJavaVersion());
+		putIfNotEmpty(result, "system.user.name", machine.getUserName());
+		putIfNotEmpty(result, "system.user.dir", machine.getUserDir());
+		return result;
+	}
+
+	private void putIfNotEmpty(Map<String, String> result, String key, String value) {
+		if (value != null && value.length() > 0) {
+			result.put(key, value);
+		}
+	}
+
 	private double sample(String domain) {
 		Domain sampleDomain = sampleConfigManager.getConfig().findDomain(domain);
 
@@ -666,6 +710,13 @@ public class SpringMvcHeartbeatController {
 	}
 
 	@Data
+	public static class VueStaticInfo {
+		private String name;
+
+		private String value;
+	}
+
+	@Data
 	public static class VueHeartbeatReport {
 		private String contextPath;
 
@@ -682,6 +733,8 @@ public class SpringMvcHeartbeatController {
 		private List<VueHeartbeatExtensionGroup> extensionGroups = new ArrayList<VueHeartbeatExtensionGroup>();
 
 		private List<String> groups = new ArrayList<String>();
+
+		private List<VueStaticInfo> staticInfo = new ArrayList<VueStaticInfo>();
 
 		private boolean historyMode;
 

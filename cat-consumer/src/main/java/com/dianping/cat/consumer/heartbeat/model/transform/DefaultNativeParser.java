@@ -202,6 +202,15 @@ public class DefaultNativeParser implements IVisitor {
          case 2:
             machine.setClasspath(readString());
             break;
+         case 3:
+            machine.setJavaVersion(readString());
+            break;
+         case 4:
+            machine.setUserDir(readString());
+            break;
+         case 5:
+            machine.setUserName(readString());
+            break;
          case 33:
             if (_type == 1) { 
               Period period = new Period();

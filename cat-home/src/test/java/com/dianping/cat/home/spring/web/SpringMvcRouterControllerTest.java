@@ -28,6 +28,7 @@ public class SpringMvcRouterControllerTest {
 
 		Assert.assertEquals("api", controller.action(request(Collections.<String, String>emptyMap())));
 		Assert.assertEquals("json", controller.action(request(Collections.singletonMap("op", "json"))));
+		Assert.assertEquals("properties", controller.action(request(Collections.singletonMap("op", "properties"))));
 	}
 
 	@Test
@@ -48,6 +49,14 @@ public class SpringMvcRouterControllerTest {
 
 		Assert.assertEquals("true", controller.buildRouterConfig());
 		Assert.assertNotNull(handler.getPeriod());
+	}
+
+	@Test
+	public void shouldBuildRouterProperties() {
+		SpringMvcRouterController controller = controller();
+		Map<String, String> properties = Collections.singletonMap("routers", "127.0.0.1:2280;");
+
+		Assert.assertEquals("{routers=127.0.0.1:2280;}", controller.formatProperties(properties));
 	}
 
 	@Test

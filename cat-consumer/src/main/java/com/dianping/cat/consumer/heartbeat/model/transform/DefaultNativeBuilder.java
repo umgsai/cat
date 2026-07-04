@@ -153,6 +153,21 @@ public class DefaultNativeBuilder implements IVisitor {
          writeString(machine.getClasspath());
       }
 
+      if (machine.getJavaVersion() != null) {
+         writeTag(3, 1);
+         writeString(machine.getJavaVersion());
+      }
+
+      if (machine.getUserDir() != null) {
+         writeTag(4, 1);
+         writeString(machine.getUserDir());
+      }
+
+      if (machine.getUserName() != null) {
+         writeTag(5, 1);
+         writeString(machine.getUserName());
+      }
+
       if (!machine.getPeriods().isEmpty()) {
          writeTag(33, 2);
          writeInt(machine.getPeriods().size());

@@ -29,6 +29,9 @@ public class HttpStatsCollector extends AbstractCollector {
         Map<String, Number> map = new LinkedHashMap<String, Number>();
         HttpStats stats = HttpStats.getAndReset();
 
+        if (stats.getHttpCount() == 0) {
+            return map;
+        }
         map.put("http.count", stats.getHttpCount());
         map.put("http.meantime", stats.getHttpMeantime());
         map.put("http.status400.count", stats.getHttpStatus400Count());

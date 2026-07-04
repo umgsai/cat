@@ -16,6 +16,12 @@ public class Machine extends BaseEntity<Machine> {
 
    private String m_classpath;
 
+   private String m_javaVersion;
+
+   private String m_userDir;
+
+   private String m_userName;
+
    public Machine() {
    }
 
@@ -68,8 +74,20 @@ public class Machine extends BaseEntity<Machine> {
       return m_ip;
    }
 
+   public String getJavaVersion() {
+      return m_javaVersion;
+   }
+
    public List<Period> getPeriods() {
       return m_periods;
+   }
+
+   public String getUserDir() {
+      return m_userDir;
+   }
+
+   public String getUserName() {
+      return m_userName;
    }
 
    @Override
@@ -87,6 +105,18 @@ public class Machine extends BaseEntity<Machine> {
 
       if (other.getClasspath() != null) {
          m_classpath = other.getClasspath();
+      }
+
+      if (other.getJavaVersion() != null) {
+         m_javaVersion = other.getJavaVersion();
+      }
+
+      if (other.getUserDir() != null) {
+         m_userDir = other.getUserDir();
+      }
+
+      if (other.getUserName() != null) {
+         m_userName = other.getUserName();
       }
    }
 
@@ -113,6 +143,21 @@ public class Machine extends BaseEntity<Machine> {
 
    public Machine setIp(String ip) {
       m_ip = ip;
+      return this;
+   }
+
+   public Machine setJavaVersion(String javaVersion) {
+      m_javaVersion = javaVersion;
+      return this;
+   }
+
+   public Machine setUserDir(String userDir) {
+      m_userDir = userDir;
+      return this;
+   }
+
+   public Machine setUserName(String userName) {
+      m_userName = userName;
       return this;
    }
 

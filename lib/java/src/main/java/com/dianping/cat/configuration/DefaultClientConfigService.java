@@ -144,7 +144,7 @@ public class DefaultClientConfigService implements ClientConfigService {
         } catch (UnsupportedEncodingException ignored) {
         }
 
-        return String.format("http://%s:%d/cat/s/router?domain=%s&ip=%s&op=json&env=%s&hostname=%s", serverIp.trim(),
+        return String.format("http://%s:%d/cat/s/router?domain=%s&ip=%s&op=properties&env=%s&hostname=%s", serverIp.trim(),
                 httpPort, getDomain(), ip, ApplicationEnvironment.ENVIRONMENT, hostname);
     }
 
@@ -227,7 +227,7 @@ public class DefaultClientConfigService implements ClientConfigService {
         refreshInnerConfig(routerConfig);
     }
 
-    private PropertyConfig parseConfig(String content) {
+    static PropertyConfig parseConfig(String content) {
         if (!content.startsWith("{") || !content.endsWith("}")) {
             throw new IllegalArgumentException("Invalid CAT router config: " + content);
         }

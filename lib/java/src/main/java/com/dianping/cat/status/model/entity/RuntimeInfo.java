@@ -34,6 +34,14 @@ public class RuntimeInfo extends BaseEntity<RuntimeInfo> {
             javaVersion = other.getJavaVersion();
         }
 
+        if (other.getJavaClasspath() != null) {
+            javaClasspath = other.getJavaClasspath();
+        }
+
+        if (other.getUserDir() != null) {
+            userDir = other.getUserDir();
+        }
+
         if (other.getUserName() != null) {
             userName = other.getUserName();
         }

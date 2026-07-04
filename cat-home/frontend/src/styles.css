@@ -2978,6 +2978,21 @@ input {
   font-weight: 700;
 }
 
+.heartbeat-static-table {
+  width: 100%;
+  margin: 0;
+  border: 0;
+}
+
+.heartbeat-static-table th {
+  width: 220px;
+  white-space: nowrap;
+}
+
+.heartbeat-static-table td {
+  word-break: break-all;
+}
+
 .heartbeat-svg-wrap {
   overflow-x: auto;
   padding: 10px 12px 14px;

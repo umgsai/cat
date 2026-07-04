@@ -65,6 +65,9 @@ public class HeartbeatAnalyzer extends AbstractMessageAnalyzer<HeartbeatReport> 
 
 			if (runtime != null) {
 				machine.setClasspath(runtime.getJavaClasspath());
+				machine.setJavaVersion(runtime.getJavaVersion());
+				machine.setUserDir(runtime.getUserDir());
+				machine.setUserName(runtime.getUserName());
 			} else {
 				machine.setClasspath("");
 			}

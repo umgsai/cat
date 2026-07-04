@@ -4,8 +4,6 @@ import com.dianping.cat.status.model.entity.*;
 
 public interface IVisitor {
 
-    void visitCustomInfo(CustomInfo customInfo);
-
     void visitDisk(DiskInfo disk);
 
     void visitDiskVolume(DiskVolumeInfo diskVolume);

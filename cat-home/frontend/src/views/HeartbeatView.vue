@@ -43,6 +43,18 @@
     </section>
 
     <section v-else-if="report" class="heartbeat-graphs">
+      <article v-if="report.staticInfo?.length" class="heartbeat-group heartbeat-static-group">
+        <h2>system.static Info</h2>
+        <table class="report-table heartbeat-static-table">
+          <tbody>
+            <tr v-for="item in report.staticInfo" :key="item.name">
+              <th>{{ item.name }}</th>
+              <td>{{ item.value }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
       <article v-for="group in report.extensionGroups" :key="group.name" class="heartbeat-group">
         <h2>{{ group.name }} Info</h2>
         <div class="heartbeat-chart-grid">
@@ -102,6 +114,11 @@ interface HeartbeatExtensionGroup {
   svgs: HeartbeatSvg[]
 }
 
+interface HeartbeatStaticInfo {
+  name: string
+  value: string
+}
+
 interface HeartbeatReport {
   contextPath: string
   date: string
@@ -121,6 +138,7 @@ interface HeartbeatReport {
   reportStart: string
   reportType: string
   sample: number
+  staticInfo: HeartbeatStaticInfo[]
   type: string
 }
 

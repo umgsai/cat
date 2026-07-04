@@ -13,6 +13,7 @@ import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_HEAP_USAG
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_HTTP_THREAD_COUNT;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_ID;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_IP;
+import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_JAVA_VERSION;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_MEMORY_FREE;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_MINUTE;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_NEW_GC_COUNT;
@@ -26,6 +27,8 @@ import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_THREAD_CO
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_TOTAL;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_TOTAL_STARTED_COUNT;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_USABLE;
+import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_USER_DIR;
+import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_USER_NAME;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_VALUE;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ELEMENT_DOMAIN;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ELEMENT_IP;
@@ -337,7 +340,7 @@ public class DefaultXmlBuilder implements IVisitor {
 
    @Override
    public void visitMachine(Machine machine) {
-      startTag(ENTITY_MACHINE, null, ATTR_IP, machine.getIp(), ATTR_CLASSPATH, machine.getClasspath());
+      startTag(ENTITY_MACHINE, null, ATTR_IP, machine.getIp(), ATTR_CLASSPATH, machine.getClasspath(), ATTR_JAVA_VERSION, machine.getJavaVersion(), ATTR_USER_DIR, machine.getUserDir(), ATTR_USER_NAME, machine.getUserName());
 
       if (!machine.getPeriods().isEmpty()) {
          for (Period period : machine.getPeriods()) {

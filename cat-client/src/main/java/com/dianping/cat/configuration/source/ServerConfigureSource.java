@@ -18,7 +18,7 @@ import com.dianping.cat.support.Splitters;
 import com.dianping.cat.support.Urls;
 
 public class ServerConfigureSource implements ConfigureSource<ClientConfig>, Refreshable, LogEnabled {
-	private static final String REFRESH_URL_PATTERN = "http://%s:%d/cat/s/router?op=json&domain=%s&ip=%s&token=%s";
+	private static final String REFRESH_URL_PATTERN = "http://%s:%d/cat/s/router?op=properties&domain=%s&ip=%s&token=%s";
 
 	private Logger m_logger;
 

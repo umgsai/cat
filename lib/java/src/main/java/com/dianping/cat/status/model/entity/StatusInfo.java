@@ -21,7 +21,6 @@ public class StatusInfo extends BaseEntity<StatusInfo> {
     private ThreadsInfo thread;
     private MessageInfo message;
     private final Map<String, Extension> extensions = new LinkedHashMap<String, Extension>();
-    private final Map<String, CustomInfo> customInfos = new LinkedHashMap<String, CustomInfo>();
 
     public StatusInfo() {
     }
@@ -31,39 +30,13 @@ public class StatusInfo extends BaseEntity<StatusInfo> {
         visitor.visitStatus(this);
     }
 
-    public StatusInfo addCustomInfo(CustomInfo customInfo) {
-        customInfos.put(customInfo.getKey(), customInfo);
-        return this;
-    }
-
     public StatusInfo addExtension(Extension extension) {
         extensions.put(extension.getId(), extension);
         return this;
     }
 
-    public CustomInfo findCustomInfo(String key) {
-        return customInfos.get(key);
-    }
-
     public Extension findExtension(String id) {
         return extensions.get(id);
-    }
-
-    public CustomInfo findOrCreateCustomInfo(String key) {
-        CustomInfo customInfo = customInfos.get(key);
-
-        if (customInfo == null) {
-            synchronized (customInfos) {
-                customInfo = customInfos.get(key);
-
-                if (customInfo == null) {
-                    customInfo = new CustomInfo(key);
-                    customInfos.put(key, customInfo);
-                }
-            }
-        }
-
-        return customInfo;
     }
 
     public Extension findOrCreateExtension(String id) {
@@ -88,15 +61,6 @@ public class StatusInfo extends BaseEntity<StatusInfo> {
         if (other.getTimestamp() != null) {
             timestamp = other.getTimestamp();
         }
-    }
-
-    public boolean removeCustomInfo(String key) {
-        if (customInfos.containsKey(key)) {
-            customInfos.remove(key);
-            return true;
-        }
-
-        return false;
     }
 
     public boolean removeExtension(String id) {

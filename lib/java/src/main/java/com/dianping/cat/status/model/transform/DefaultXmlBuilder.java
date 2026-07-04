@@ -190,11 +190,6 @@ public class DefaultXmlBuilder implements IVisitor {
     }
 
     @Override
-    public void visitCustomInfo(CustomInfo customInfo) {
-        startTag(Constants.ENTITY_CUSTOMINFO, true, null, Constants.ATTR_KEY, customInfo.getKey(), Constants.ATTR_VALUE, customInfo.getValue());
-    }
-
-    @Override
     public void visitDisk(DiskInfo disk) {
         startTag(Constants.ENTITY_DISK, null);
 
@@ -302,12 +297,6 @@ public class DefaultXmlBuilder implements IVisitor {
         if (!status.getExtensions().isEmpty()) {
             for (Extension extension : status.getExtensions().values().toArray(new Extension[0])) {
                 extension.accept(visitor);
-            }
-        }
-
-        if (!status.getCustomInfos().isEmpty()) {
-            for (CustomInfo customInfo : status.getCustomInfos().values().toArray(new CustomInfo[0])) {
-                customInfo.accept(visitor);
             }
         }
 

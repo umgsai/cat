@@ -38,6 +38,8 @@ public class HeartbeatSvgGraph {
 
 	private static final String DAL = "dal";
 
+	private static final String HTTP_STATUS = "http.status";
+
 	private static final Map<String, Integer> INDEX = new HashMap<String, Integer>();
 
 	private static final AtomicInteger INDEX_COUNTER = new AtomicInteger(0);
@@ -59,7 +61,9 @@ public class HeartbeatSvgGraph {
 		for (String groupName : orderedGroupNames) {
 			Map<String, double[]> extensionGroup = m_extensions.get(groupName);
 
-			tmpExtensions.put(groupName, extensionGroup);
+			if (extensionGroup != null && !extensionGroup.isEmpty() && !isEmptyHttpStatusGroup(groupName, extensionGroup)) {
+				tmpExtensions.put(groupName, extensionGroup);
+			}
 		}
 	}
 
@@ -214,6 +218,11 @@ public class HeartbeatSvgGraph {
 
 			for (Entry<String, Extension> entry : period.getExtensions().entrySet()) {
 				String group = entry.getKey();
+				Map<String, Detail> details = entry.getValue().getDetails();
+
+				if (details.isEmpty()) {
+					continue;
+				}
 				Map<String, double[]> groups = m_extensions.get(group);
 
 				if (groups == null) {
@@ -221,7 +230,7 @@ public class HeartbeatSvgGraph {
 
 					m_extensions.put(group, groups);
 				}
-				for (Entry<String, Detail> detail : entry.getValue().getDetails().entrySet()) {
+				for (Entry<String, Detail> detail : details.entrySet()) {
 					String key = detail.getKey();
 					double[] doubles = groups.get(key);
 
@@ -251,6 +260,20 @@ public class HeartbeatSvgGraph {
 			}
 		}
 		return result;
+	}
+
+	private boolean isEmptyHttpStatusGroup(String groupName, Map<String, double[]> extensionGroup) {
+		if (!HTTP_STATUS.equals(groupName)) {
+			return false;
+		}
+		for (double[] values : extensionGroup.values()) {
+			for (double value : values) {
+				if (value != 0) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	public GraphBuilder getBuilder() {

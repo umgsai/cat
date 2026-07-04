@@ -114,6 +114,21 @@
 						</tr>
 					</table>
 					<table>
+						<c:if test="${not empty staticInfo}">
+							<tr><th><h5 class="text-error" style="padding-left:20px;">system.static Info</h5></th></tr>
+							<tr>
+								<td>
+									<table class="table table-striped table-bordered table-condensed">
+										<c:forEach items="${staticInfo}" var="entry">
+											<tr>
+												<th style="width:220px;text-align:left;"><c:out value="${entry.key}" /></th>
+												<td style="word-break:break-all;"><c:out value="${entry.value}" /></td>
+											</tr>
+										</c:forEach>
+									</table>
+								</td>
+							</tr>
+						</c:if>
 						<c:forEach items="${extensionGraph}" var="entry">
 							<tr><th><h5 class="text-error" style="padding-left:20px;"><c:out value="${entry.key}" /> Info</h5></th></tr>
 							<tr>

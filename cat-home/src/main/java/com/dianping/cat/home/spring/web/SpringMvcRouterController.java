@@ -61,8 +61,8 @@ public class SpringMvcRouterController {
 		String domain = request.getParameter("domain");
 		String ip = request.getParameter("ip");
 
-		if ("json".equals(action)) {
-			writeText(response, buildKvs(report, domain, ip).toString());
+		if ("properties".equals(action) || "json".equals(action)) {
+			writeText(response, buildProperties(report, domain, ip));
 		} else if ("model".equals(action)) {
 			writeText(response, report == null ? "" : report.toString());
 		} else if ("view".equals(action)) {
@@ -91,6 +91,14 @@ public class SpringMvcRouterController {
 		kvs.put("matchTransactionTypes", serverFilterConfigManager.getAtomicMatchTypes());
 
 		return kvs;
+	}
+
+	String buildProperties(RouterConfig report, String domain, String ip) {
+		return formatProperties(buildKvs(report, domain, ip));
+	}
+
+	String formatProperties(Map<String, String> properties) {
+		return properties.toString();
 	}
 
 	double buildSampleInfo(String domain) {

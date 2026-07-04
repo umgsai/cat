@@ -28,6 +28,8 @@ public class Constants {
 
    public static final String ATTR_IP = "ip";
 
+   public static final String ATTR_JAVA_VERSION = "java-version";
+
    public static final String ATTR_MEMORY_FREE = "memory-free";
 
    public static final String ATTR_MINUTE = "minute";
@@ -53,6 +55,10 @@ public class Constants {
    public static final String ATTR_TOTAL_STARTED_COUNT = "total-started-count";
 
    public static final String ATTR_USABLE = "usable";
+
+   public static final String ATTR_USER_DIR = "user-dir";
+
+   public static final String ATTR_USER_NAME = "user-name";
 
    public static final String ATTR_VALUE = "value";
 

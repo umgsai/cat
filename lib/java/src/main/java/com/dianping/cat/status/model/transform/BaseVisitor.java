@@ -5,10 +5,6 @@ import com.dianping.cat.status.model.entity.*;
 
 public abstract class BaseVisitor implements IVisitor {
     @Override
-    public void visitCustomInfo(CustomInfo customInfo) {
-    }
-
-    @Override
     public void visitDisk(DiskInfo disk) {
         for (DiskVolumeInfo diskVolume : disk.getDiskVolumes()) {
             visitDiskVolume(diskVolume);
@@ -83,9 +79,6 @@ public abstract class BaseVisitor implements IVisitor {
             visitExtension(extension);
         }
 
-        for (CustomInfo customInfo : status.getCustomInfos().values()) {
-            visitCustomInfo(customInfo);
-        }
     }
 
     @Override

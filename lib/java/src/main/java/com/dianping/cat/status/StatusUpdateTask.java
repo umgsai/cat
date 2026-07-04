@@ -35,26 +35,32 @@ import com.dianping.cat.status.jvm.JvmInfoCollector;
 import com.dianping.cat.status.jvm.ThreadInfoCollector;
 import com.dianping.cat.status.jvm.ThreadInfoWriter;
 import com.dianping.cat.status.model.entity.Extension;
+import com.dianping.cat.status.model.entity.RuntimeInfo;
 import com.dianping.cat.status.model.entity.StatusInfo;
 import com.dianping.cat.util.Threads;
 import com.dianping.cat.status.datasource.c3p0.C3P0InfoCollector;
 import com.dianping.cat.status.datasource.druid.DruidInfoCollector;
 import com.dianping.cat.status.system.ProcessorInfoCollector;
-import com.dianping.cat.status.system.StaticInfoCollector;
 
 import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.Calendar;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class StatusUpdateTask implements Threads.Task {
     private ClientConfigService configService = DefaultClientConfigService.getInstance();
     private boolean active = true;
+    private String jars;
     private static CatLogger LOGGER = CatLogger.getInstance();
 
     public StatusUpdateTask() {
@@ -113,6 +119,52 @@ public class StatusUpdateTask implements Threads.Task {
         }
     }
 
+    void buildRuntime(StatusInfo status) {
+        RuntimeMXBean bean = ManagementFactory.getRuntimeMXBean();
+        RuntimeInfo runtime = new RuntimeInfo();
+
+        runtime.setStartTime(bean.getStartTime());
+        runtime.setUpTime(bean.getUptime());
+        runtime.setJavaClasspath(getJars());
+        runtime.setJavaVersion(System.getProperty("java.version"));
+        runtime.setUserDir(System.getProperty("user.dir"));
+        runtime.setUserName(System.getProperty("user.name"));
+        status.setRuntime(runtime);
+    }
+
+    private void buildClasspath(ClassLoader loader, Set<String> classpath) {
+        if (loader == null) {
+            return;
+        }
+        if (loader instanceof URLClassLoader) {
+            URL[] urls = ((URLClassLoader) loader).getURLs();
+
+            for (URL url : urls) {
+                String jar = parseJar(url.toExternalForm());
+
+                if (jar != null) {
+                    classpath.add(jar);
+                }
+            }
+        }
+        buildClasspath(loader.getParent(), classpath);
+    }
+
+    private void buildClasspath(String javaClasspath, Set<String> classpath) {
+        if (javaClasspath == null || javaClasspath.length() == 0) {
+            return;
+        }
+        String[] entries = javaClasspath.split(File.pathSeparator);
+
+        for (String entry : entries) {
+            String jar = parseJar(entry);
+
+            if (jar != null) {
+                classpath.add(jar);
+            }
+        }
+    }
+
     private void buildHeartbeat(final String localHostAddress) {
         Transaction t = Cat.newTransaction("System", "Status");
         Heartbeat h = Cat.getProducer().newHeartbeat("Heartbeat", localHostAddress);
@@ -120,6 +172,7 @@ public class StatusUpdateTask implements Threads.Task {
         Cat.getManager().getThreadLocalMessageTree().setDiscardPrivate(false);
 
         try {
+            buildRuntime(status);
             buildExtenstion(status);
             h.addData(status.toString());
             h.setStatus(Message.SUCCESS);
@@ -166,6 +219,17 @@ public class StatusUpdateTask implements Threads.Task {
         DefaultMessageProducer.clearCache();
     }
 
+    private String getJars() {
+        if (jars == null) {
+            Set<String> classpath = new LinkedHashSet<String>();
+
+            buildClasspath(ManagementFactory.getRuntimeMXBean().getClassPath(), classpath);
+            buildClasspath(StatusUpdateTask.class.getClassLoader(), classpath);
+            jars = String.join(",", classpath);
+        }
+        return jars;
+    }
+
     @Override
     public String getName() {
         return "heartbeat-task";
@@ -176,7 +240,6 @@ public class StatusUpdateTask implements Threads.Task {
             JvmInfoCollector.getInstance().registerJVMCollector();
             StatusExtensionRegister instance = StatusExtensionRegister.getInstance();
 
-            instance.register(new StaticInfoCollector());
             instance.register(new ClassLoadingInfoCollector());
             instance.register(new ThreadInfoCollector());
 
@@ -202,6 +265,33 @@ public class StatusUpdateTask implements Threads.Task {
         String hostname = NetworkInterfaceManager.INSTANCE.getLocalHostName();
 
         return hostname.startsWith("set-") || file.exists();
+    }
+
+    private String parseJar(String path) {
+        int index = path.indexOf('!');
+
+        if (index > -1) {
+            path = path.substring(0, index);
+        }
+        if (path.endsWith(".jar")) {
+            index = path.lastIndexOf('/');
+
+            if (index > -1) {
+                return path.substring(index + 1);
+            }
+            index = path.lastIndexOf(File.separatorChar);
+
+            if (index > -1) {
+                return path.substring(index + 1);
+            }
+            index = path.lastIndexOf('\\');
+
+            if (index > -1) {
+                return path.substring(index + 1);
+            }
+            return path;
+        }
+        return null;
     }
 
     private void logMemoryBean() {

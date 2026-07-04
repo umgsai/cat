@@ -30,8 +30,6 @@ public class Constants {
 
    public static final String ATTR_JAVA_VERSION = "java-version";
 
-   public static final String ATTR_KEY = "key";
-
    public static final String ATTR_MAX = "max";
 
    public static final String ATTR_NAME = "name";
@@ -81,10 +79,6 @@ public class Constants {
    public static final String ELEMENT_JAVA_CLASSPATH = "java-classpath";
 
    public static final String ELEMENT_USER_DIR = "user-dir";
-
-   public static final String ENTITY_CUSTOMINFO = "customInfo";
-
-   public static final String ENTITY_CUSTOMINFOS = "customInfos";
 
    public static final String ENTITY_DISK = "disk";
 

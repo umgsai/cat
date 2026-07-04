@@ -13,6 +13,7 @@ import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_HEAP_USAG
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_HTTP_THREAD_COUNT;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_ID;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_IP;
+import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_JAVA_VERSION;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_MEMORY_FREE;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_MINUTE;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_NEW_GC_COUNT;
@@ -26,6 +27,8 @@ import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_THREAD_CO
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_TOTAL;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_TOTAL_STARTED_COUNT;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_USABLE;
+import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_USER_DIR;
+import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_USER_NAME;
 import static com.dianping.cat.consumer.heartbeat.model.Constants.ATTR_VALUE;
 
 import java.util.Map;
@@ -116,10 +119,25 @@ public class DefaultSaxMaker implements IMaker<Attributes> {
    public Machine buildMachine(Attributes attributes) {
       String ip = attributes.getValue(ATTR_IP);
       String classpath = attributes.getValue(ATTR_CLASSPATH);
+      String javaVersion = attributes.getValue(ATTR_JAVA_VERSION);
+      String userDir = attributes.getValue(ATTR_USER_DIR);
+      String userName = attributes.getValue(ATTR_USER_NAME);
       Machine machine = new Machine(ip);
 
       if (classpath != null) {
          machine.setClasspath(classpath);
+      }
+
+      if (javaVersion != null) {
+         machine.setJavaVersion(javaVersion);
+      }
+
+      if (userDir != null) {
+         machine.setUserDir(userDir);
+      }
+
+      if (userName != null) {
+         machine.setUserName(userName);
       }
 
       return machine;
