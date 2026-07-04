@@ -1894,6 +1894,7 @@ input {
 
 .selector-row {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 8px;
@@ -1907,6 +1908,11 @@ input {
   color: #0f766e;
 }
 
+.selector-row a {
+  display: inline-flex;
+  align-items: center;
+}
+
 .selector-row a:hover,
 .report-table a:hover {
   color: #115e59;
@@ -1914,8 +1920,31 @@ input {
 }
 
 .selector-row .current {
-  color: #b42318;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #86c9bf;
+  border-radius: 999px;
+  background: #eef8f6;
+  color: #0b6f67;
   font-weight: 800;
+  padding: 3px 12px;
+  text-decoration: none;
+}
+
+.selector-row .current::before {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0f766e;
+  content: "";
+}
+
+.selector-row .current:hover {
+  background: #dff2ef;
+  color: #0b5f59;
+  text-decoration: none;
 }
 
 .transaction-card {
@@ -1980,7 +2009,7 @@ input {
   justify-content: space-between;
   gap: 12px 18px;
   border-color: #cfe2df;
-  padding: 12px 14px;
+  padding: 8px;
   background: #fbfefd;
   color: #b42318;
   font-weight: 700;

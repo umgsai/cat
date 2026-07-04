@@ -13,7 +13,8 @@
         :href="item.href"
         :title="item.title"
       >
-        [&nbsp;{{ item.label }}&nbsp;]
+        <template v-if="item.current">{{ item.label }}</template>
+        <template v-else>[&nbsp;{{ item.label }}&nbsp;]</template>
       </a>
     </div>
   </section>
