@@ -65,12 +65,15 @@
 
           <div class="form-options">
             <el-checkbox v-model="form.remember">保持登录</el-checkbox>
-            <button class="text-button" type="button">忘记密码</button>
+            <!-- <button class="text-button" type="button">忘记密码</button> -->
           </div>
 
           <el-button class="login-button" type="primary" :loading="loading" @click="submit">
             登录
           </el-button>
+          <div class="login-home-link">
+            <a :href="homeUrl">返回首页</a>
+          </div>
         </el-form>
       </div>
     </section>
@@ -113,6 +116,7 @@ const contextPath = computed(() => {
   return '/cat'
 })
 const loginError = computed(() => Boolean(currentParams.value.get('error')))
+const homeUrl = computed(() => `${contextPath.value}/mvc/vue/r`)
 const returnUrl = computed(() => {
   const rtnUrl = currentParams.value.get('rtnUrl')
 

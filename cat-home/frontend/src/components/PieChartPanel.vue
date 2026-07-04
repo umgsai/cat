@@ -115,7 +115,7 @@ function option(): EChartsCoreOption {
     series: [
       {
         avoidLabelOverlap: true,
-        center: ['36%', '43%'],
+        center: ['50%', '43%'],
         data: chartItems.value,
         emphasis: {
           itemStyle: {
@@ -125,14 +125,19 @@ function option(): EChartsCoreOption {
           }
         },
         label: {
+          alignTo: 'edge',
           color: '#111827',
-          formatter: '{b}: {d} %',
+          edgeDistance: 24,
+          formatter: (params: { name?: string; percent?: number }) => {
+            return `${wrapLabel(params.name || '')}: ${Number(params.percent || 0).toFixed(2)} %`
+          },
           fontSize: 13,
-          fontWeight: 700
+          fontWeight: 700,
+          lineHeight: 17
         },
         labelLine: {
-          length: 22,
-          length2: 18,
+          length: 24,
+          length2: 28,
           lineStyle: {
             color: '#2f2f2f',
             width: 1.2
@@ -140,7 +145,7 @@ function option(): EChartsCoreOption {
         },
         minAngle: 2,
         name: title.value || 'share',
-        radius: '43%',
+        radius: '36%',
         stillShowZeroSum: false,
         type: 'pie'
       }
@@ -160,6 +165,27 @@ function option(): EChartsCoreOption {
 
 function formatInteger(value: number) {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value || 0)
+}
+
+function wrapLabel(value: string) {
+  const maxLineLength = 42
+  const lines: string[] = []
+  let currentLine = ''
+
+  for (const segment of value.split('.')) {
+    const nextPart = currentLine ? `.${segment}` : segment
+
+    if (currentLine && currentLine.length + nextPart.length > maxLineLength) {
+      lines.push(currentLine)
+      currentLine = segment
+    } else {
+      currentLine += nextPart
+    }
+  }
+  if (currentLine) {
+    lines.push(currentLine)
+  }
+  return lines.length ? lines.join('\n') : value
 }
 
 function parseChart(value?: PieChartData | string) {

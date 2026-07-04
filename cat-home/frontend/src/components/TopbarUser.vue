@@ -1,15 +1,21 @@
 <template>
-  <span v-if="displayName" class="user-greeting">
-    <span class="user-greeting-label">欢迎</span>
-    <span class="user-greeting-name">{{ displayName }}</span>
+  <span v-if="displayName" class="user-menu">
+    <span class="user-greeting">
+      <span class="user-greeting-label">欢迎</span>
+      <span class="user-greeting-name">{{ displayName }}</span>
+    </span>
+    <span class="user-menu-panel">
+      <a class="user-menu-action" :href="logoutUrl">退出</a>
+    </span>
   </span>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const LOGIN_TOKEN_COOKIE = 'ct'
 const displayName = ref('')
+const logoutUrl = computed(() => `${contextPath()}/mvc/s/login?op=logout`)
 
 onMounted(() => {
   displayName.value = readLoginName()
@@ -56,5 +62,14 @@ function decodeCookieValue(value: string) {
   } catch {
     return value.trim()
   }
+}
+
+function contextPath() {
+  if (typeof window === 'undefined') {
+    return ''
+  }
+  const segments = window.location.pathname.split('/').filter(Boolean)
+
+  return segments.length ? `/${segments[0]}` : ''
 }
 </script>

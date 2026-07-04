@@ -134,6 +134,12 @@
 						<span class="menu-text">State</span>
 					</a>
 				</li>
+				<li id="Vue_report" >
+					<a href="/cat/mvc/vue/r">
+						<i class="menu-icon fa fa-external-link"></i>
+						<span class="menu-text">新页面</span>
+					</a>
+				</li>
 				<%-- <li id="Offline_report" class="hsub"><a href="#" class="dropdown-toggle"> <i class="menu-icon fa fa-film"></i> <span class="menu-text">Offline</span>
 						<b class="arrow fa fa-angle-down"></b>
 					</a> <b class="arrow"></b>
@@ -218,5 +224,4 @@
 		</div>
 	</div>
 </a:base>
-
 
