@@ -2324,6 +2324,7 @@ input {
   color: #15803d;
   text-align: center;
   font-size: 18px;
+  margin-top: 8px;
 }
 
 .state-status.has-error {
