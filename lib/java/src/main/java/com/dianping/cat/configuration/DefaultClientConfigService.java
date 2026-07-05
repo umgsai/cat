@@ -144,7 +144,7 @@ public class DefaultClientConfigService implements ClientConfigService {
         } catch (UnsupportedEncodingException ignored) {
         }
 
-        return String.format("http://%s:%d/cat/s/router?domain=%s&ip=%s&op=properties&env=%s&hostname=%s", serverIp.trim(),
+        return String.format("http://%s:%d/cat/mvc/s/router?domain=%s&ip=%s&op=properties&env=%s&hostname=%s", serverIp.trim(),
                 httpPort, getDomain(), ip, ApplicationEnvironment.ENVIRONMENT, hostname);
     }
 
