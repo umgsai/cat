@@ -12,6 +12,7 @@ import { LegendComponent, TooltipComponent } from 'echarts/components'
 import { init, use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { ECharts, EChartsCoreOption } from 'echarts/core'
+import { getChartColors, onThemeChange } from '../theme'
 
 interface PieChartData {
   items?: Array<{ number: number; title: string }>
@@ -86,6 +87,8 @@ onBeforeUnmount(() => {
 
 watch(items, () => renderChart(), { deep: true })
 
+onThemeChange(() => renderChart())
+
 async function renderChart() {
   await nextTick()
   if (!chartElement.value || !items.value.length) {
@@ -99,19 +102,9 @@ async function renderChart() {
 }
 
 function option(): EChartsCoreOption {
+  const chartColors = getChartColors()
   return {
-    color: [
-      '#7cb5ec',
-      '#434348',
-      '#90ed7d',
-      '#f7a35c',
-      '#8085e9',
-      '#f15c80',
-      '#e4d354',
-      '#2b908f',
-      '#f45b5b',
-      '#91e8e1'
-    ],
+    color: chartColors.palette,
     legend: {
       bottom: 0,
       itemGap: 12,

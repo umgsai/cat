@@ -12,6 +12,7 @@
       </nav>
       <div class="cat-actions">
         <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
+        <ThemeSwitcher />
         <TopbarUser />
       </div>
     </header>
@@ -123,6 +124,7 @@
 import { computed, ref, watch } from 'vue'
 import { BookOpen, Home, KeyRound, PanelLeftClose, PanelLeftOpen } from 'lucide-vue-next'
 import TopbarUser from '../components/TopbarUser.vue'
+import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 
 const sidebarCollapsedKey = 'catDocumentSidebarCollapsed'
 

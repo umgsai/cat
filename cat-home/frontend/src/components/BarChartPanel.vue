@@ -12,6 +12,7 @@ import { GridComponent, TooltipComponent } from 'echarts/components'
 import { init, use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { ECharts, EChartsCoreOption } from 'echarts/core'
+import { getChartColors, onThemeChange } from '../theme'
 
 interface BarChartData {
   categories?: string[]
@@ -60,6 +61,8 @@ onBeforeUnmount(() => {
 
 watch([categories, items], () => renderChart(), { deep: true })
 
+onThemeChange(() => renderChart())
+
 async function renderChart() {
   await nextTick()
   if (!chartElement.value || !items.value.length) {
@@ -73,8 +76,9 @@ async function renderChart() {
 }
 
 function option(): EChartsCoreOption {
+  const chartColors = getChartColors()
   return {
-    color: ['#7cb5ec'],
+    color: [chartColors.palette[0]],
     grid: {
       bottom: 54,
       containLabel: true,
@@ -96,14 +100,14 @@ function option(): EChartsCoreOption {
     },
     xAxis: {
       axisLabel: {
-        color: '#666',
+        color: chartColors.textColor,
         fontSize: 12,
         interval: 0,
         rotate: 45
       },
       axisLine: {
         lineStyle: {
-          color: '#ccd6e0'
+          color: chartColors.axisColor
         }
       },
       data: categories.value,
@@ -111,12 +115,12 @@ function option(): EChartsCoreOption {
     },
     yAxis: {
       axisLabel: {
-        color: '#666',
+        color: chartColors.textColor,
         fontSize: 12
       },
       splitLine: {
         lineStyle: {
-          color: '#d7d7d7',
+          color: chartColors.splitColor,
           width: 1
         }
       },

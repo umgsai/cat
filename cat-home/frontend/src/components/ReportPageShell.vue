@@ -12,6 +12,7 @@
       </nav>
       <div class="cat-actions">
         <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
+        <ThemeSwitcher />
         <TopbarUser />
       </div>
     </header>
@@ -37,6 +38,7 @@
 import { computed } from 'vue'
 
 import ReportSidebar from './ReportSidebar.vue'
+import ThemeSwitcher from './ThemeSwitcher.vue'
 import TopbarUser from './TopbarUser.vue'
 
 const props = defineProps<{

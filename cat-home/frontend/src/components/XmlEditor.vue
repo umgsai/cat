@@ -9,20 +9,25 @@ import { xml } from '@codemirror/lang-xml'
 import { foldGutter, indentOnInput, syntaxHighlighting, HighlightStyle } from '@codemirror/language'
 import { EditorView, keymap, lineNumbers } from '@codemirror/view'
 import { tags } from '@lezer/highlight'
+import { getEditorColors, onThemeChange } from '../theme'
 
 const model = defineModel<string>({ default: '' })
 const editorHost = ref<HTMLDivElement | null>(null)
 let editorView: EditorView | null = null
+let removeThemeListener: (() => void) | null = null
 
-const xmlHighlight = HighlightStyle.define([
-  { tag: tags.tagName, color: '#0f766e', fontWeight: '700' },
-  { tag: tags.attributeName, color: '#7c3aed' },
-  { tag: tags.attributeValue, color: '#b45309' },
-  { tag: tags.string, color: '#b45309' },
-  { tag: tags.angleBracket, color: '#667085' },
-  { tag: tags.comment, color: '#667085', fontStyle: 'italic' },
-  { tag: tags.meta, color: '#0369a1' }
-])
+function buildHighlight() {
+  const c = getEditorColors()
+  return HighlightStyle.define([
+    { tag: tags.tagName, color: c.tagName, fontWeight: '700' },
+    { tag: tags.attributeName, color: c.attributeName },
+    { tag: tags.attributeValue, color: c.attributeValue },
+    { tag: tags.string, color: c.attributeValue },
+    { tag: tags.angleBracket, color: '#667085' },
+    { tag: tags.comment, color: '#667085', fontStyle: 'italic' },
+    { tag: tags.meta, color: c.meta }
+  ])
+}
 
 onMounted(() => {
   if (!editorHost.value) {
@@ -37,7 +42,7 @@ onMounted(() => {
       history(),
       indentOnInput(),
       xml(),
-      syntaxHighlighting(xmlHighlight),
+      syntaxHighlighting(buildHighlight()),
       keymap.of([indentWithTab, ...defaultKeymap, ...historyKeymap]),
       EditorView.lineWrapping,
       EditorView.updateListener.of((update) => {
@@ -47,6 +52,15 @@ onMounted(() => {
       })
     ],
     parent: editorHost.value
+  })
+
+  removeThemeListener = onThemeChange(() => {
+    if (!editorView) {
+      return
+    }
+    editorView.dispatch({
+      effects: []
+    })
   })
 })
 
@@ -64,6 +78,7 @@ watch(model, (value) => {
 })
 
 onBeforeUnmount(() => {
+  removeThemeListener?.()
   editorView?.destroy()
   editorView = null
 })

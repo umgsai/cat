@@ -12,6 +12,7 @@
       </nav>
       <div class="cat-actions">
         <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
+        <ThemeSwitcher />
         <TopbarUser />
       </div>
     </header>
@@ -133,6 +134,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import LineChartPanel from '../components/LineChartPanel.vue'
 import ReportSidebar from '../components/ReportSidebar.vue'
+import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import TopbarUser from '../components/TopbarUser.vue'
 
 interface BusinessChart {

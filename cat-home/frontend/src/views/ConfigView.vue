@@ -12,6 +12,7 @@
       </nav>
       <div class="cat-actions">
         <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
+        <ThemeSwitcher />
         <TopbarUser />
       </div>
     </header>
@@ -1340,6 +1341,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { Pencil, Plus, Trash2 } from 'lucide-vue-next'
 import ConfigSidebar from '../components/ConfigSidebar.vue'
+import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import TopbarUser from '../components/TopbarUser.vue'
 import XmlEditor from '../components/XmlEditor.vue'
 

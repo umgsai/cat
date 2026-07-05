@@ -13,6 +13,7 @@ import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/compon
 import { init, use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { ECharts, EChartsCoreOption } from 'echarts/core'
+import { getChartColors, onThemeChange } from '../theme'
 
 interface LineChart {
   datas?: Array<Record<string, number>>
@@ -100,6 +101,8 @@ onBeforeUnmount(() => {
 
 watch([chartSeries, categories], () => renderChart(), { deep: true })
 
+onThemeChange(() => renderChart())
+
 async function renderChart() {
   await nextTick()
   if (!chartElement.value || !chartSeries.value.length) {
@@ -113,8 +116,9 @@ async function renderChart() {
 }
 
 function option(): EChartsCoreOption {
+  const chartColors = getChartColors()
   return {
-    color: ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9', '#f15c80'],
+    color: chartColors.palette,
     grid: {
       bottom: 78,
       containLabel: true,
@@ -127,7 +131,7 @@ function option(): EChartsCoreOption {
       itemHeight: 3,
       itemWidth: 28,
       textStyle: {
-        color: '#444',
+        color: chartColors.textColorDark,
         fontSize: 13,
         fontWeight: 700
       }
@@ -139,13 +143,13 @@ function option(): EChartsCoreOption {
     },
     xAxis: {
       axisLabel: {
-        color: '#666',
+        color: chartColors.textColor,
         fontSize: 12,
         interval: xLabelInterval.value
       },
       axisLine: {
         lineStyle: {
-          color: '#ccd6e0'
+          color: chartColors.axisColor
         }
       },
       axisTick: {
@@ -157,7 +161,7 @@ function option(): EChartsCoreOption {
     },
     yAxis: {
       axisLabel: {
-        color: '#666',
+        color: chartColors.textColor,
         fontSize: 12
       },
       axisLine: {
@@ -169,12 +173,12 @@ function option(): EChartsCoreOption {
       nameLocation: 'middle',
       nameGap: 42,
       nameTextStyle: {
-        color: '#666',
+        color: chartColors.textColor,
         fontSize: 12
       },
       splitLine: {
         lineStyle: {
-          color: '#d7d7d7',
+          color: chartColors.splitColor,
           width: 1
         }
       },

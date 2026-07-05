@@ -11,6 +11,7 @@ import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/compone
 import { init, use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { ECharts, EChartsCoreOption } from 'echarts/core'
+import { getChartColors, onThemeChange } from '../theme'
 
 interface TooltipParam {
   axisValueLabel?: string
@@ -55,6 +56,8 @@ onBeforeUnmount(() => {
 
 watch(seriesValues, () => renderChart(), { deep: true })
 
+onThemeChange(() => renderChart())
+
 async function renderChart() {
   await nextTick()
   if (!chartElement.value) {
@@ -68,9 +71,10 @@ async function renderChart() {
 }
 
 function option(): EChartsCoreOption {
+  const chartColors = getChartColors()
   return {
     animation: false,
-    color: ['#ff0000'],
+    color: [chartColors.palette[0]],
     grid: {
       bottom: 34,
       containLabel: true,
@@ -110,7 +114,7 @@ function option(): EChartsCoreOption {
       },
       axisLine: {
         lineStyle: {
-          color: '#2f66b3'
+          color: chartColors.axisColor
         }
       },
       axisTick: {
@@ -118,7 +122,7 @@ function option(): EChartsCoreOption {
         interval: showEveryMinuteTick,
         length: 5,
         lineStyle: {
-          color: '#2f66b3'
+          color: chartColors.axisColor
         },
         show: true
       },
@@ -139,7 +143,7 @@ function option(): EChartsCoreOption {
       },
       axisLine: {
         lineStyle: {
-          color: '#2f66b3'
+          color: chartColors.axisColor
         },
         show: true
       },
@@ -152,7 +156,7 @@ function option(): EChartsCoreOption {
       },
       splitLine: {
         lineStyle: {
-          color: '#7db7f0',
+          color: chartColors.splitColor,
           type: 'dotted'
         }
       },

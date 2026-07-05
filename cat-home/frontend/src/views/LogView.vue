@@ -12,6 +12,7 @@
       </nav>
       <div class="cat-actions">
         <a class="star-link" href="https://github.com/dianping/cat/" target="_blank" rel="noreferrer">Star</a>
+        <ThemeSwitcher />
         <TopbarUser />
       </div>
     </header>
@@ -67,6 +68,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import ReportSidebar from '../components/ReportSidebar.vue'
+import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 import TopbarUser from '../components/TopbarUser.vue'
 
 interface LogviewReport {
@@ -258,7 +260,7 @@ function rewriteLogViewHtml(html: string) {
   gap: 8px;
   border-bottom: 1px solid #e4e9f0;
   padding: 10px 12px;
-  color: #0f766e;
+  color: var(--color-primary);
   font-size: 15px;
   font-weight: 700;
 }
@@ -273,7 +275,7 @@ function rewriteLogViewHtml(html: string) {
   display: flex;
   gap: 18px;
   padding: 8px 12px;
-  color: #0f766e;
+  color: var(--color-primary);
   font-size: 14px;
 }
 
