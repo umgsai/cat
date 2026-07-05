@@ -1,7 +1,10 @@
 <template>
   <main class="login-page">
     <section class="brand-panel" aria-label="CAT">
-      <div class="brand-mark">CAT</div>
+      <div class="brand-header">
+        <img class="brand-logo" src="/dianping-logo.webp" alt="大众点评" />
+        <div class="brand-mark">CAT</div>
+      </div>
       <div class="brand-copy">
         <p class="eyebrow">Central Application Tracking</p>
         <h1>CAT 运维监控平台</h1>

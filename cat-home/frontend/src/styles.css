@@ -45,16 +45,33 @@ input {
   color: #f8fafc;
 }
 
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.brand-logo {
+  height: 72px;
+  width: auto;
+  border-radius: 12px;
+  padding: 6px 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+  object-fit: contain;
+}
+
 .brand-mark {
   display: grid;
   width: 72px;
   height: 72px;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.16);
   font-size: 23px;
   font-weight: 800;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
 }
 
 .brand-copy {
