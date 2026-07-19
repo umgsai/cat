@@ -101,6 +101,7 @@ public class SpringBackedMessageDumper implements MessageDumper {
 		MessageId id = tree.getFormatMessageId();
 		String domain = id.getDomain();
 		int index = getIndex(id.getIpAddressInHex());
+		int size = tree.getBuffer().readableBytes();
 		BlockingQueue<MessageTree> queue = m_queues.get(index);
 		boolean success = queue.offer(tree);
 
@@ -109,7 +110,7 @@ public class SpringBackedMessageDumper implements MessageDumper {
 			LOGGER.warn("Message tree queue is full, index={}.", index);
 			BufReleaseHelper.release(tree.getBuffer());
 		} else {
-			m_statisticManager.addMessageSize(domain, tree.getBuffer().readableBytes());
+			m_statisticManager.addMessageSize(domain, size);
 		}
 	}
 

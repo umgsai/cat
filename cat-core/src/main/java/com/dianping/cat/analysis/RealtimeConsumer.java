@@ -32,6 +32,7 @@ import com.dianping.cat.support.Threads;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
+import com.dianping.cat.message.spi.BufReleaseHelper;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.statistic.ServerStatisticManager;
 
@@ -65,6 +66,7 @@ public class RealtimeConsumer implements MessageConsumer {
 		} else {
 			LOGGER.warn("No realtime period found for message tree, timestamp={}, tree={}.", timestamp, tree);
 			serverStatisticManager.addNetworkTimeError(1);
+			BufReleaseHelper.release(tree.getBuffer());
 		}
 	}
 

@@ -23,6 +23,7 @@ import com.dianping.cat.analysis.AbstractMessageAnalyzer;
 import com.dianping.cat.analysis.ContainerMessageAnalyzerFactory;
 import com.dianping.cat.config.server.ServerConfigManager;
 import com.dianping.cat.message.Transaction;
+import com.dianping.cat.message.spi.BufReleaseHelper;
 import com.dianping.cat.message.spi.MessageTree;
 import com.dianping.cat.message.tree.MessageId;
 import com.dianping.cat.report.ReportManager;
@@ -118,25 +119,34 @@ public class DumpAnalyzer extends AbstractMessageAnalyzer<Object> {
 
 	@Override
 	public void process(MessageTree tree) {
+		boolean handledByDumper = false;
+
 		try {
 			MessageId messageId = MessageId.parse(tree.getMessageId());
 
 			if (!shouldDiscard(messageId)) {
-				processWithStorage(tree, messageId, messageId.getHour());
+				handledByDumper = processWithStorage(tree, messageId, messageId.getHour());
 			}
-		} catch (Exception ignored) {
+		} catch (Exception e) {
+			LOGGER.warn("Unable to dump message tree, domain={}, messageId={}.", tree.getDomain(), tree.getMessageId(), e);
+		} finally {
+			if (!handledByDumper) {
+				BufReleaseHelper.release(tree.getBuffer());
+			}
 		}
 	}
 
-	private void processWithStorage(MessageTree tree, MessageId messageId, int hour) {
+	private boolean processWithStorage(MessageTree tree, MessageId messageId, int hour) {
 		MessageDumper dumper = dumperManager.find(hour);
 
 		tree.setFormatMessageId(messageId);
 
 		if (dumper != null) {
 			dumper.process(tree);
+			return true;
 		} else {
 			serverStatisticManager.addPigeonTimeError(1);
+			return false;
 		}
 	}
 
